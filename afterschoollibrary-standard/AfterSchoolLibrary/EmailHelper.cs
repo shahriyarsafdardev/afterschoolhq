@@ -8,11 +8,6 @@ namespace AfterSchoolLibrary
 {
     public class EmailHelper
     {
-        private static string WelcomeTrialTemplate { get { return "AfterSchoolLibrary.EmailTemplates.Welcome-Trial.template"; } }
-        private static string WelcomePurchaseTemplate { get { return "AfterSchoolLibrary.EmailTemplates.Welcome-Purchase.template"; } }
-        private static string PasswordResetTemplate { get { return "AfterSchoolLibrary.EmailTemplates.Password-Reset.template"; } }
-        private static string EmailVerificationTemplate { get { return "AfterSchoolLibrary.EmailTemplates.Email-Verification.template"; } }
-
         public static SystemMessages SendPasswordReset(WebUser user, PasswordResetToken token, bool isAfterSchool)
         {
             var msgs = new SystemMessages();
@@ -27,7 +22,7 @@ namespace AfterSchoolLibrary
             };
 
             var body = ProcessTemplate(
-                PasswordResetTemplate,
+                EmailTemplates.Password_Reset,
                 model,
                 "passwordreset-1.0.1",
                 msgs
@@ -60,7 +55,7 @@ namespace AfterSchoolLibrary
             };
 
             var body = ProcessTemplate(
-                EmailVerificationTemplate,
+                EmailTemplates.Email_Verification,
                 model,
                 "emailverification-1.0.1",
                 msgs
@@ -91,7 +86,7 @@ namespace AfterSchoolLibrary
             };
 
             var body = ProcessTemplate(
-                WelcomeTrialTemplate,
+                EmailTemplates.Welcome_Trial,
                 model,
                 "welcometrial-1.0.1",
                 msgs
@@ -132,7 +127,7 @@ namespace AfterSchoolLibrary
             };
 
             var body = ProcessTemplate(
-                WelcomePurchaseTemplate,
+                EmailTemplates.Welcome_Purchase,
                 model,
                 "welcomepurchase",
                 msgs
@@ -161,24 +156,21 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        private static string ProcessTemplate(string templateName, NameValueCollection model, string cacheId, SystemMessages msgs = null)
+        private static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             try
-            {
-                var assembly = Assembly.GetExecutingAssembly();
-                using (Stream stream = assembly.GetManifestResourceStream(templateName))
+            {                   
+                using (Stream stream = new MemoryStream(emailTemplate))
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    string template = reader.ReadToEnd();
+                    string template = reader.ReadToEnd(); 
+                    
+                    foreach (string key in model.Keys)
+                        template = template.Replace($"@Model.{key}", model[key]);
 
-                    var body = "";
-                    foreach(string key in model.Keys)
-                    {
-                        body = body.Replace($"@Model.{key}", model[key]);
-                    }
-                    return body;
+                    return template;
                 }
             }
             catch(Exception ex)
