@@ -15,6 +15,7 @@ RestSharp.dll
 BasicLibrary.*
 AfterSchoolLibrary.*
 AfterSchool.*
+.vs
 
 # Packages #
 ############
