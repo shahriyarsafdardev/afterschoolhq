@@ -1,0 +1,32 @@
+﻿@model AfterSchoolLibrary.ActivityGroup
+@{
+    ViewBag.Title = Model.AccountName;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_ActivityGroupHeader", Model);}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("_ActivityGroupTitle", Model.Name + " - Messages"); }
+        </div>
+        <div class="panel-body">
+            @{Html.RenderPartial(
+                "~/Views/Shared/_Messages.cshtml",
+                Model.GetMessages().ToList(),
+                new ViewDataDictionary()
+                {
+                    { "SendNewMessageLink", Url.Action("messageadd", "group", new { id = Model.Uid }) },
+                    { "Account", SessionVariables.CurrentAccount },
+                    { "ViewLinkController", "group" }
+                }
+                );}
+        </div>
+    </div>
+</div>

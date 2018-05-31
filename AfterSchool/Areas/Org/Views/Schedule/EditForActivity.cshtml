@@ -1,0 +1,27 @@
+﻿@model AfterSchoolLibrary.ActivitySchedule
+@{
+    this.Layout = "~/Views/Shared/_LayoutIFrame.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var activityId = (string)ViewBag.ActivityId;
+}
+
+<div>
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <form id="form1" method="post" action="@Url.Action("edit", "schedule", new { id = Model.ID.ToString(), activity = activityId })" class="form-horizontal">
+                    
+        @{ Html.RenderPartial("_EditButtons", activityId); }
+
+        @{
+            Html.RenderPartial
+            (
+                "~/Views/Shared/_ActivityFormSchedule.cshtml",
+                Model
+            );
+        }
+
+        @{ Html.RenderPartial("_EditButtons", activityId); }
+
+    </form>
+</div>

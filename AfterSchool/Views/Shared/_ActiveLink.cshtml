@@ -1,0 +1,15 @@
+﻿@{ 
+    var url = ViewData["Url"];
+    var text = ViewData["Text"];
+    var isActive = (bool)ViewData["IsActive"];
+}
+
+@if (isActive)
+{
+    <a href="@url">@text</a>
+}
+else
+{
+    <span class="inactive-text">@text</span>
+}
+

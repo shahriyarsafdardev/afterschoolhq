@@ -1,0 +1,25 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    List<Package> packages = (List<Package>)ViewBag.Packages;
+    AccountPackage accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("AdminAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+    
+    @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-box2"></i> Packages
+        </div>
+        <div class="panel-body">
+
+            @{Html.RenderPartial("~/Views/Shared/_Packages.cshtml", Model);}
+
+        </div>
+    </div>
+</div>

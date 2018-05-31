@@ -1,0 +1,118 @@
+﻿@model Activity
+@{ 
+    var isActive = Model.ID.HasValue && Model.ID.Value > 0 && !Model.IsChildActivity;
+    var isScheduleActive = Model.ID.HasValue && Model.ID.Value > 0;
+    var activeMenu = ViewBag.ActiveMenu.ToString().ToLower();
+
+    var editsetupactive = activeMenu == "editsetup" ? "active" : "";
+    var editrestrictionsactive = activeMenu == "editrestrictions" ? "active" : "";
+    var editdetailsactive = activeMenu == "editdetails" ? "active" : "";
+    var editcontactactive = activeMenu == "editcontact" ? "active" : "";
+    var editscheduleactive = activeMenu == "editschedule" ? "active" : "";
+    var editlocationactive = activeMenu == "editlocation" ? "active" : "";
+    var editcostactive = activeMenu == "editcost" ? "active" : "";
+    var editconfirmationactive = activeMenu == "editconfirmation" ? "active" : "";
+}
+<div id="list1" class="dd">
+    <ol class="dd-list">
+        <li data-id="1" class="dd-item">
+            <div class="dd-handle @editsetupactive">
+                <a href="@Url.Action("editsetup", "activity", new { id = Model.ID.ToString() })">Settings</a>
+            </div>
+        </li>
+        <li data-id="4" class="dd-item">
+            <div class="dd-handle @editrestrictionsactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("editrestrictions", "activity", new { id = Model.ID.ToString() }) },
+                            { "Text", "Restrictions" },
+                            { "IsActive", isScheduleActive },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        <li data-id="4" class="dd-item">
+            <div class="dd-handle @editscheduleactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("editschedule", "activity", new { id = Model.ID.ToString() }) },
+                            { "Text", "Schedule" },
+                            { "IsActive", isScheduleActive },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        <li data-id="2" class="dd-item">
+            <div class="dd-handle @editdetailsactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("editdetails", "activity", new { id = Model.ID.ToString() }) },
+                            { "Text", "About Your " + UILabel.ActivityLabel() },
+                            { "IsActive", isActive },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        <li data-id="3" class="dd-item">
+            <div class="dd-handle @editcontactactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("editcontact", "activity", new { id = Model.ID.ToString() }) },
+                            { "Text", "Contact Information" },
+                            { "IsActive", isActive },
+                        }
+                    ); 
+                }
+            </div>
+        </li>
+        <li data-id="4" class="dd-item">
+            <div class="dd-handle @editlocationactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("editlocation", "activity", new { id = Model.ID.ToString() }) },
+                            { "Text", "Location" },
+                            { "IsActive", isActive },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        <li data-id="5" class="dd-item">
+            <div class="dd-handle @editcostactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("editcost", "activity", new { id = Model.ID.ToString() }) },
+                            { "Text", "Payment" },
+                            { "IsActive", isActive && Model.CanAcceptPayments },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        @if(!Model.ActivityGroupId.HasValue)
+        { 
+            <li data-id="6" class="dd-item">
+                <div class="dd-handle @editconfirmationactive">
+                    @{Html.RenderPartial(
+                            "~/Views/Shared/_ActiveLink.cshtml",
+                            new ViewDataDictionary {
+                                { "Url", Url.Action("editconfirmation", "activity", new { id = Model.ID.ToString() }) },
+                                { "Text", "Email Content" },
+                                { "IsActive", isActive },
+                            }
+                        );
+                    }
+                </div>
+            </li>
+        }
+    </ol>
+</div>   

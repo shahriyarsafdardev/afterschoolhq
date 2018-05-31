@@ -1,0 +1,27 @@
+﻿@model AfterSchoolLibrary.Account
+
+@{
+    var refunds = (List<Stripe.StripeRefund>)ViewBag.RefundHistory;
+}
+@if (refunds.Count > 0)
+{
+    <h4>Refund History</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Card</th>
+            </tr>        
+            @foreach (var refund in refunds)
+            {
+                <tr>
+                    <td>@refund.Created.ToShortDateTimeString()</td>
+                    <td>@((refund.Amount.ToDecimal() / 100).ToCurrency())</td>
+                    <td><span class="badge badge-success">@refund.Charge.Source.Brand</span> **** **** **** @refund.Charge.Source.Last4</td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+

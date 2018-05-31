@@ -1,0 +1,127 @@
+﻿@{ 
+    var adminMode = (bool)ViewData["adminMode"];
+    var logoutAction = "";
+    var postAction = "";
+    var useAction = "";
+    var copyCreateAction = "";
+    var activity = Request["activity"] ?? ViewContext.RouteData.Values["activity"];
+
+    if (activity.IsNotEmpty())
+    {
+        logoutAction = Url.Action("logout", "reg", new { activity = activity });
+        postAction = Url.Action("loadprofile", "reg", new { activity = activity });
+        useAction = Url.Action("org", "reg", new { id = ViewContext.RouteData.Values["id"], activity = activity });
+        copyCreateAction = Url.Action("org", "reg", new { id = ViewContext.RouteData.Values["id"], activity = activity });
+    }
+    else
+    {
+        logoutAction = Url.Action("logout", "reg", new { id = ViewContext.RouteData.Values["id"].ToString(), group = Request["group"] });
+        postAction = Url.Action("loadprofile", "reg", new { id = ViewContext.RouteData.Values["id"].ToString(), group = Request["group"] });
+        useAction = Url.Action("new", "reg", new { id = ViewContext.RouteData.Values["id"].ToString(), group = Request["group"] });
+        copyCreateAction = Url.Action("new", "reg", new { id = ViewContext.RouteData.Values["id"].ToString(), group = Request["group"] });
+    }
+
+}
+@if (!adminMode)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+
+            @if (SessionVariables.LoggedInUser.IsNotEmpty() && !adminMode)
+            {
+                <span>Register with your login</span>
+                <div class="btn-group pull-right">
+                    <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-default" target="_blank">View Account</a>
+                    <a href="@logoutAction" class="btn btn-default">Logout</a>
+                </div>
+
+            }
+            else
+            {
+                <a href="javascript:expandRegister()"><i class="s7-users"></i> Register with your login &raquo;</a>
+            }
+            <script>
+                PageEvent.add(PageEvent.AFTER_INIT, function () {
+                    // check for login error
+                    if ('@Request["login"]'.length > 0) {
+                        expandRegister();
+                    }
+                });
+
+                function expandRegister(){
+                    if($('#register-body').hasClass('hide')){
+                        $('#register-body').removeClass("hide");
+                    } else {
+                        $('#register-body').addClass("hide");
+                    }
+                }
+            </script>
+        </div>
+        <div class="panel-body @(SessionVariables.LoggedInUser.IsNotEmpty() && !adminMode ? "" : "hide")" id="register-body">
+            @if (SessionVariables.LoggedInUser.IsNotEmpty() && !adminMode)
+            {
+                var registrants = SessionVariables.LoggedInUser.GetRegistrants();
+                <form method="post" action="@postAction" id="formprofile" class="form-horizontal">
+                    <div class="form-group">
+                        <div class="col-md-6 col-md-offset-3">
+                            Select a profile to <strong>Register with</strong> or <strong>Copy from in order to create a new profile</strong>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label" for="profile">
+                            Select a profile
+                        </label>
+                        <div class="col-md-6">
+                            <select name="profile" id="profile" class="form-control">
+                                <option value="">New Profile</option>
+                                @foreach (var registrant in registrants)
+                                {
+                                    <option value="@registrant.Uid" @(Request["profile"] == registrant.Uid.ToString() && Request["copy"].IsBlank() ? "selected=\"selected\"" : "")>
+                                        @registrant.Name
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-9 col-md-offset-3">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-alt5 btn-space" id="btn-copy-create-new" disabled="disabled">Copy &amp; Create New Profile</button>
+                                <button type="button" class="btn btn-default btn-space" id="btn-use">Re-Register Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <script>
+                    function checkProfile() {
+                        if($('#profile').val().length == 0) {
+                            $('#btn-use').prop('disabled', true);
+                            $('#btn-copy-create-new').prop('disabled', true);
+                        } else {
+                            $('#btn-use').prop('disabled', false);
+                            $('#btn-copy-create-new').prop('disabled', false);
+                        }
+                    }
+                    PageEvent.add(PageEvent.AFTER_INIT, function(){
+                        $('#profile').change(function(){
+                            checkProfile();
+                        });
+                        $('#btn-use').click(function(){
+                            location.href = '@useAction&profile=' + $('#profile').val();
+                        });
+                        $('#btn-copy-create-new').click(function(){
+                            location.href = '@copyCreateAction&profile=' + $('#profile').val() + '&copy=1';
+                        });
+                        checkProfile();
+
+                    });
+                </script>
+            }
+            else
+            {
+                Html.RenderPartial("_LoginReg");
+            }
+        </div>
+    </div>
+}
+

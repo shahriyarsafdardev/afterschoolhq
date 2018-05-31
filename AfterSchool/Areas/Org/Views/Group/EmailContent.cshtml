@@ -1,0 +1,63 @@
+﻿@model AfterSchoolLibrary.ActivityGroup
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var properties = (List<AccountProperty>)ViewBag.Properties;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_ActivityGroupHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("_ActivityGroupTitle", Model.Name + " - Email Content"); }
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-12 col-lg-12">
+
+                <form id="form1" method="post" action="@Url.Action("emailcontent", "group", new { id = Model.Uid })" class="form-horizontal">
+
+                    @foreach (var item in properties.Select(x => x.AccountPropertyTypeId))
+                    {
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
+                                @item.ToString().SplitByUpperCase()                                
+                            </label>
+                            <div class="col-md-9">
+                                <div class="text-editor-container">
+                                    @{ Html.RenderPartial(
+                                         "~/Views/Shared/_TextEditor.cshtml",
+                                         properties.Find(x => x.AccountPropertyTypeId == item).Value,
+                                         new ViewDataDictionary()
+                                         {
+                                            { "id",  @item.ToString().ToLower() },
+                                            { "name",  @item.ToString().ToLower() },
+                                            { "required",  true }
+                                         }
+                                         ); }                                    
+                                </div>
+                            </div>
+                        </div>
+                    }                    
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="reset" class="btn btn-default">Discard Changes</button>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>

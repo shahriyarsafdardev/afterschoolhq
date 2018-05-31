@@ -1,0 +1,99 @@
+﻿@model PagingModel
+
+@if (Model.IsNotEmpty())
+{
+    var id = ViewData["id"];
+    var action = (string)ViewData["action"];
+    var controller = (string)ViewData["controller"];
+    var queryString = ViewData["querystring"];
+
+    var pageUrl = Url.Action(action, controller, new { id = id, rpp = Request["rpp"] });
+
+    var previousLink = "#";
+    var nextLink = "#";
+
+    if (Model.PageNumber > 1)
+    {
+        previousLink = Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber - 1 });
+    }
+    if (Model.PageNumber > 1)
+    {
+        nextLink = Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber + 1 });
+    }
+
+    var iStart = 2;
+    var iEnd = Model.TotalPages - 1;
+    var before = 4;
+    var after = 4;
+
+    var calcStartNumber = Model.PageNumber >= iStart ? Model.PageNumber : iStart;
+    var calcEndNumber = Model.PageNumber <= iEnd ? Model.PageNumber : iEnd;
+
+    if (iEnd - iStart > before + after)
+    {
+        // give me 10 surrounding numbers
+        var potentialIStart = calcStartNumber - before;
+        if (potentialIStart < iStart)
+        {
+            before += potentialIStart - iStart;
+            after += (potentialIStart - iStart) * -1;
+        }
+
+        var potentialIEnd = calcEndNumber + after;
+        if (potentialIEnd > iEnd)
+        {
+            after += iEnd - potentialIEnd;
+            before += (iEnd - potentialIEnd) * -1;
+        }
+
+        potentialIStart = Model.PageNumber - before;
+        potentialIEnd = Model.PageNumber + after;
+
+        iStart = potentialIStart > iStart ? potentialIStart : iStart;
+        iEnd = potentialIEnd < iEnd ? potentialIEnd : iEnd;
+    }
+
+    if (Model.TotalCount > 1)
+    {
+        var fullUrl = pageUrl + (!pageUrl.Contains("?") ? "?" : "&") + "pn={0}";
+
+        <div class="row">
+            <div class="col-md-4">
+                Showing @Model.StartingRecord - @Model.EndingRecord of @Model.TotalCount
+            </div>
+        
+            @if (Model.TotalPages > 1)
+            {
+                <div class="col-md-8">
+                    <div class="btn-group pull-right">
+                        <a class="btn btn-default" href="@previousLink">Previous</a>
+                    
+                        <a class="btn @("1" == Request["pn"] ? "btn-primary" : "btn-default")" href="@string.Format(fullUrl, 1)">1</a>  
+                                  
+                        @if (Model.TotalPages > 2)
+                        {
+                            if (iStart - 1 > 1)
+                            {
+                                <a class="btn btn-default" href="@string.Format(fullUrl, iStart - 1)">...</a>
+                            }
+
+                            for (var i = iStart; i <= iEnd; i++)
+                            {
+                                <a class="btn @(i.ToString() == Request["pn"] ? "btn-primary" : "btn-default")" href="@string.Format(fullUrl, i)">@i</a>
+                            }
+
+                            if (Model.TotalPages - iEnd > 1)
+                            {
+                                <a class="btn btn-default" href="@string.Format(fullUrl, iEnd + 1)">...</a>
+                            }
+                        }
+
+                        <a class="btn @(Model.TotalPages.ToString() == Request["pn"] ? "btn-primary" : "btn-default")" href="@string.Format(fullUrl, Model.TotalPages)">@Model.TotalPages</a>  
+
+                        <a class="btn btn-default" href="@nextLink">Next</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    }

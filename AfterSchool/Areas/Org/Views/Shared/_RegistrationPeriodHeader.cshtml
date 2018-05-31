@@ -1,0 +1,18 @@
+﻿@model RegistrationPeriod 
+
+@if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0)
+{
+    <div class="btn-toolbar pull-right">
+        <div class="btn-group">
+            <a href="@Url.Action("summary", "period", new { id = Model.ID })" class="btn btn-alt6"><i class="s7-graph2"></i> Summary</a>
+            <a href="@Url.Action("edit", "period", new {id = Model.ID})" class="btn btn-alt6"><i class="s7-edit"></i> Edit</a>
+            <a href="@Url.Action("activities", "period", new {id = Model.ID})" class="btn btn-alt6"><i class="s7-gleam"></i> @UILabel.ActivityLabel(true)</a>
+            <a href="@Url.Action("registrations", "period", new {id = Model.ID})" class="btn btn-alt6"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
+            @if (Model.RegistrationModeId == RegistrationMode.Apply)
+            {
+                <a href="@Url.Action("placement", "period", new { id = Model.ID })" class="btn btn-alt6">Placement</a>
+            }
+            <a href="@Url.Action("index", "period")" class="btn btn-alt6">&laquo; All @UILabel.RegistrationPeriodLabel(true)</a>
+        </div>
+    </div>    
+}

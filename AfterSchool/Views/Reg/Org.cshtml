@@ -1,0 +1,711 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    if (Model.IsEmpty())
+    {
+        ViewBag.Title = "Missing Organization";
+    }
+    else
+    {
+        ViewBag.Title = Model.Name;
+    }
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+    var activities = (List<Activity>)ViewBag.Activities;
+    var groups = (List<ActivityGroup>)ViewBag.Groups;
+    var grades = GradeLevel.Load();
+    var registration = (Registration)ViewBag.Registration;
+    var adminMode = (bool)ViewBag.AdminMode;
+    var activityGroup = (ActivityGroup)ViewBag.Group;
+    var addOnly = SessionVariables.LoggedInUser.IsEmpty() && registration.IsNotEmpty();
+
+    var haveGenderRestrictions = activities.Where(x => x.GenderRestriction != GenderRestrictionType.None).Any();
+    var haveGradeRestrictions = activities.Where(x => x.GetGradeLevels().Any()).Any();
+    var haveAgeRestrictions = activities.Where(x => x.AgeEnd.HasValue && x.AgeStart.HasValue).Any();
+    var haveAnyRestrictions = haveGenderRestrictions || haveGradeRestrictions || haveAgeRestrictions;
+    var haveGenderInSession = SessionVariables.Cart?.Gender.HasValue ?? false;
+    var haveGradeInSession = SessionVariables.Cart?.GradeLevel.HasValue ?? false;
+    var haveAgeInSession = SessionVariables.Cart?.Age.HasValue ?? false;
+    var haveAnyInSession = haveGenderInSession || haveGradeInSession || haveAgeInSession;
+    var showPreRegPopUp = haveAnyRestrictions && !haveAnyInSession && activityGroup.IsNotEmpty() && !activityGroup.IsClosedNow();
+
+    var landingPageText = "";
+    if (activityGroup.IsNotEmpty() && activityGroup.GetGroupProperty(AccountPropertyType.LandingPageText).IsNotEmpty())
+    {
+        landingPageText = activityGroup.GetGroupProperty(AccountPropertyType.LandingPageText).Value;
+    }
+    else if (Model.GetAccountProperty(AccountPropertyType.LandingPageText).IsNotEmpty())
+    {
+        landingPageText = Model.GetAccountProperty(AccountPropertyType.LandingPageText).Value;
+    }
+}
+
+<div id="org-page">
+    
+    <div class="page-head registration-titlebar">
+        @if (Model.IsNotEmpty())
+        {
+            Html.RenderPartial("_OrgTitle", Model, new ViewDataDictionary() { { "LandingPageText", landingPageText } });
+
+            if (groups.Count == 0)
+            {
+                Html.RenderPartial("_RegActivityFilters");
+            }
+        }
+     </div>
+
+    <div class="main-content">
+        
+        @if (activities.Count == 0 && groups.Count == 0)
+        {
+            Html.RenderPartial("_RegNoActivities", Model);
+        }
+        else if(groups.Count > 0)
+        {
+            Html.RenderPartial("_RegGroupGrid", Model);
+        }
+        else
+        {
+            Html.RenderPartial("_RegActivityGrid", Model);
+        }
+    </div>
+</div>
+
+@if (Model.HasFeature(FeatureType.ManageActivityGroups) && ViewBag.UseCart)
+{
+    Html.RenderPartial("_RegCart");
+}
+
+<div id="modal-days" class="md-modal colored-header custom-width md-effect-9">
+        
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Select a Day</h3>
+        </div>
+        <div class="modal-body form">
+
+            <div id="select-daysofweek">
+            </div>
+               
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" data-dismiss="modal" onclick="addToCart()" class="btn btn-primary md-close" id="btn-addtocart">Add To Cart &raquo;</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-moreinfo" class="md-modal colored-header custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title" id="moreinfo-activity-name"></h3>
+        </div>
+        <div class="modal-body form">
+
+            <div class="activity-more-info">
+
+                <div class="panel panel-default" id="moreinfo-activity-details">
+                    <div class="panel-heading">
+                        @UILabel.ActivityLabel() Description
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default" id="moreinfo-activity-cost">
+                    <div class="panel-heading">
+                        Cost
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default" id="moreinfo-activity-restrictions">
+                    <div class="panel-heading">
+                        Restrictions
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default" id="moreinfo-schedule-details">
+                    <div class="panel-heading">
+                        Schedule Details
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default" id="moreinfo-location-details">
+                    <div class="panel-heading">
+                        Location Details
+                    </div>
+                    <div class="panel-body">
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-primary md-close">Done</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-prereg" class="md-modal colored-header custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close hide"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Enter the following information to Begin Registration</h3>
+        </div>
+        <div class="modal-body form">
+            
+            @if (haveGenderRestrictions)
+            {
+                <div class="form-group">
+                    <label for="profile-grade">Gender</label>
+                    <select class="form-control" id="profile-gender" name="profile-gender">
+                        <option value="">Select...</option>
+                        @foreach (var item in Enum.GetValues(typeof(GenderType)).Cast<GenderType>().Where(x => x != GenderType.NotSet))
+                        {
+                            <option value="@((int)item)">@item.ToString().SplitByUpperCase()</option>
+                        }
+                    </select>
+                </div>
+            }
+            @if (haveGradeRestrictions)
+            {
+                <div class="form-group">
+                    <label for="profile-grade">Grade</label>
+                    <select class="form-control" id="profile-grade" name="profile-grade">
+                        <option value="">Select...</option>
+                        @foreach (var grade in grades)
+                        {
+                            <option value="@grade.ID">@grade.Name</option>
+                        }
+                    </select>
+                </div>
+            }
+            @if (haveAgeRestrictions)
+            {
+                <div class="form-group">
+                    <label for="profile-age">Age</label>
+                    <select class="form-control" id="profile-age" name="profile-age">
+                        <option value="">Select...</option>
+                        @for (var i = 0; i <= 115; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                </div>
+            }
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close hide">Cancel</button>
+            <button type="button" data-dismiss="modal" onclick="preregDone()" class="btn btn-primary md-close" id="btn-prereg-done" disabled="disabled">Start Registration &raquo;</button>
+        </div>
+    </div>
+</div>
+
+@section fbadevents
+{
+    @if (Model.GetAccountProperty(AccountPropertyType.FacebookAdPixel).IsNotEmpty())
+    {
+        <script>
+            $(document).ready(function () {
+                fbq('track', 'ViewContent');
+            });
+        </script>
+    }
+}
+
+@section scripts{
+    <script>
+
+        $(document).ready(function () {
+
+            $('.close-cart').click(function () {
+                hideCart();
+            });
+
+            loadFromSession(@(addOnly ? "true" : "false"));
+
+            timers();
+
+            $('#search-name').keyup(function () {
+                search();
+            });
+            $('#search-seatsfilled, #search-grade, #search-gender, #search-dayofweek, #search-age').change(function () {
+                search();
+            });
+
+            @if(showPreRegPopUp)
+            {
+                @:$("#modal-prereg").addClass("md-show");
+                @:$('.btn-activity-addtocart').prop('disabled', true);
+            }
+
+            $('#profile-gender, #profile-grade, #profile-age').change(function () {
+                checkStartReg();
+            });
+
+            search();
+
+        });
+
+        function checkStartReg() {           
+            if (($('#profile-gender').length == 0 || $('#profile-gender').val().length > 0) && ($('#profile-grade').length == 0 || $('#profile-grade').val().length > 0)) {
+                $('#btn-prereg-done').prop('disabled', false);
+                $('#btn-prereg-done').prop('disabled', false);
+            }
+        }
+
+        function preregDone() {
+            if ($('#profile-gender').length > 0) {
+                if ($('#profile-gender').val().length == 0) {
+                    return;
+                } else {
+                    $('#search-gender').val($('#profile-gender').val());
+                    $('#search-gender').prop('disabled', true);
+                    $.get(
+                        '/services/setgender/' + $('#profile-gender').val(),
+                        function (data) {}
+                    );
+                }
+            }
+            if ($('#profile-grade').length > 0) {
+                if ($('#profile-grade').val().length == 0) {
+                    return;
+                } else {
+                    $('#search-grade').val($('#profile-grade').val());
+                    $('#search-grade').prop('disabled', true);
+                    $.get(
+                        '/services/setgrade/' + $('#profile-grade').val(),
+                        function (data) { }
+                    );
+                }
+            }
+            if ($('#profile-age').length > 0) {
+                if ($('#profile-age').val().length == 0) {
+                    return;
+                } else {
+                    $('#search-age').val($('#profile-age').val());
+                    $('#search-age').prop('disabled', true);
+                    $.get(
+                        '/services/setage/' + $('#profile-age').val(),
+                        function (data) { }
+                    );
+                }
+            }
+            $("#modal-prereg").removeClass("md-show");
+            $('.btn-activity-addtocart').prop('disabled', false);
+            search();
+        }
+
+        var selectedObj = null;
+        var dayOfWeek = null;
+
+        function setActivityInfo(id, name) {
+
+            $('#moreinfo-activity-name').html(name);
+
+            if ($('#activity-details-' + id).length > 0 && $('#activity-details-' + id).html().length > 0) {
+                $('#moreinfo-activity-details').removeClass('hide');
+                $('#moreinfo-activity-details').children().first().next().html($('#activity-details-' + id).html());
+            } else {
+                $('#moreinfo-activity-details').addClass('hide');
+            }
+
+            if ($('#activity-cost-' + id).length && $('#activity-cost-' + id).html().length > 0) {
+                $('#moreinfo-activity-cost').removeClass('hide');
+                $('#moreinfo-activity-cost').children().first().next().html('');
+                $('#moreinfo-activity-cost').children().first().next().append($('#activity-cost-' + id).html());
+                $('#moreinfo-activity-cost').children().first().next().append($('#activity-costdescription-' + id).html());
+            } else {
+                $('#moreinfo-activity-cost').addClass('hide');
+            }
+
+            if ($('#activity-restrictions-' + id).length && $('#activity-restrictions-' + id).html().length > 0) {
+                $('#moreinfo-activity-restrictions').removeClass('hide');
+                $('#moreinfo-activity-restrictions').children().first().next().html($('#activity-restrictions-' + id).html());
+            } else {
+                $('#moreinfo-activity-restrictions').addClass('hide');
+            }
+
+            if ($('#activity-schedule-' + id).length && $('#activity-schedule-' + id).html().length > 0) {
+                $('#moreinfo-schedule-details').removeClass('hide');
+                $('#moreinfo-schedule-details').children().first().next().html($('#activity-schedule-' + id).html());
+            } else {
+                $('#moreinfo-schedule-details').addClass('hide');
+            }
+
+            if ($('#activity-location-' + id).length && $('#activity-location-' + id).html().length > 0) {
+                $('#moreinfo-location-details').removeClass('hide');
+                $('#moreinfo-location-details').children().first().next().html($('#activity-location-' + id).html());
+            } else {
+                $('#moreinfo-location-details').addClass('hide');
+            }
+        }
+
+        function register() {
+            @if (Model.GetAccountProperty(AccountPropertyType.FacebookAdPixel).IsNotEmpty())
+            {
+                @:fbq('track', 'InitiateCheckout');
+            }
+            if ('@Request["reg"]'.length > 0) {
+                location.href = '/reg/edit/@Request["reg"]';
+            } else {
+                location.href = '/reg/new/a;@Model.Uid.ToString()?group=@Request["group"]&invite=@Request["invite"]';
+            }
+        }
+
+        function selectDayOfWeek(day) {
+            dayOfWeek = day;
+            $('#btn-addtocart').prop('disabled', false);
+        }
+
+        function showCart() {
+            $('#cart').removeClass('hide');
+            $('#cart').css('height', $(window).height());
+            $('#show-cart').addClass('hide');
+        }
+
+        function hideCart() {
+            $('#cart').addClass('hide');
+            $('#show-cart').removeClass('hide');
+        }
+
+        function addToCart(obj, isFromSession, isLocked) {
+
+            if (!obj) {
+                obj = selectedObj;
+            } else {
+                selectedObj = null;
+            }
+
+            updateCartNumber(1);
+
+            if(!isFromSession){
+                removeItem(obj.Uid, function () {
+                    continueAdd(obj, isFromSession, isLocked);
+                });
+            }
+            else {
+                continueAdd(obj, isFromSession, isLocked);
+            }
+        }
+
+        var cartNumber = 0;
+        function updateCartNumber(increment) {
+            cartNumber = cartNumber + increment;
+            $('.cart-number').html(cartNumber);
+            if (cartNumber > 0) {
+                $('.cart-number').removeClass('hide');
+            } else {
+                $('.cart-number').addClass('hide');
+            }
+        }
+
+        function continueAdd(obj, isFromSession, isLocked) {
+
+            var html = '<div class="' + obj.Uid + '">';
+            if (isLocked) {
+                html += '<i class="s7-lock pull-right"></i>';
+            } else {
+                html += '<i class="s7-close-circle pull-right pointer" onclick="removeItem(\'' + obj.Uid + '\')"></i>';
+            }
+            html += '$<span class="item-cost">' + obj.Cost + '</span> - ';
+            html += obj.Name;
+            html += '</div>';
+
+            for (var i = 0; i < obj.Days.length; i++) {
+                $('#dow-' + obj.Days[i].Day).removeClass('hide');
+                $('#dow-' + obj.Days[i].Day + ' .dow-activities').append(html);
+            }
+
+            $('#btn-addtocart-text-' + obj.Uid).html('In Cart');
+            $('#btn-addtocart-text-' + obj.Uid).parent().prop('disabled', true);
+
+            $('#cost-' + obj.Uid).remove();
+            $('.ca-costs').append('<span id="cost-' + obj.Uid + '">' + obj.Cost + '</span>');
+
+            updateTotalCost();
+
+            if (!isFromSession) {
+                addToSession(obj.Uid);
+            }
+
+            @if (Model.GetAccountProperty(AccountPropertyType.FacebookAdPixel).IsNotEmpty())
+            {
+                @:fbq('track', 'AddToCart');
+            }
+
+            showCheckoutButton();
+        }
+
+        function addToSession(uid, day) {
+            console.log('addToSession');
+            var url = '/services/cartitemadd/?uid=' + uid;
+            $.get(
+                url,
+                function(data){
+                    if(data.status != 'ok'){
+                        alert('Error occurred');
+                    }
+                }
+            );
+        }
+
+        function removeFromSession(uid, callback) {
+            console.log('removeFromSession');
+            $.get(
+                '/services/cartitemremove/?uid=' + uid,
+                function(data){
+                    if(data.status != 'ok'){
+                        alert('Error occurred');
+                    } else {
+                        if (callback) {
+                            callback();
+                        }
+                    }
+                }
+            );
+        }
+
+        function loadFromSession(isLocked){
+            $.get(
+                '/services/cartitemsget/',
+                function(data){
+                    if(data.status != 'ok'){
+                        alert('Error loading cart');
+                    } else {
+                        for (var i = 0; i < data.cartItems.length; i++) {
+                            addToCart(data.cartItems[i], true, isLocked && data.cartItems[i].IsRegistered);
+                        }
+                    }
+                }
+            );
+        }
+
+        function updateTotalCost() {
+            var totalCost = 0;
+            $('.ca-costs').children().each(function () {
+                totalCost += parseFloat($(this).html());
+            });
+            $('#cart-total').html('$' + totalCost.toFixed(2));
+        }
+
+        function removeItem(uid, callback) {
+            var els = $('.' + uid);
+
+            if(els.length > 0){
+                els.each(function () {
+                    if ($(this).parent().children().length == 1) {
+                        $(this).parent().parent().addClass('hide');
+                    }
+
+                    $(this).remove();
+                });
+
+                updateCartNumber(-1);
+            }
+
+            $('#btn-addtocart-text-' + uid).html('Add To Cart');
+            $('#btn-addtocart-text-' + uid).parent().prop('disabled', false);
+
+            updateTotalCost();
+            removeFromSession(uid, callback);
+            showCheckoutButton();
+        }
+
+        function showCheckoutButton() {
+            if ($('.dow-activities').children().length > 0 || $('.ca-list').children().length > 0) {
+                $('#registerandcheckout').prop('disabled', false);
+            } else {
+                $('#registerandcheckout').prop('disabled', true);
+            }
+        }
+
+        function search() {
+
+            var name = $('#search-name').val();
+            var seatsfilled = $('#search-seatsfilled').val();
+            var grade = $('#search-grade').val();
+            var gender = $('#search-gender').val();
+            var dayofweek = $('#search-dayofweek').val();
+            var age = $('#search-age').val();
+
+            var totalDivs = 0;
+            var hiddenDivs = 0;
+
+            $('.search-name-value').each(function () {
+                $(this).parent().removeClass('hide');
+                totalDivs++;
+            });
+
+            if (name != null && name.length > 0) {
+                $('.search-name-value').each(function () {
+                    if ($(this).html().toLowerCase().indexOf(name.toLowerCase()) == -1 && !$(this).parent().hasClass('hide')) {
+                        $(this).parent().addClass('hide');
+                        hiddenDivs++;
+                    }
+                });
+            }
+
+            if (grade != null && grade.length > 0) {
+                $('.search-grade-value').each(function () {
+                    if ($(this).html().toLowerCase().indexOf('[' + grade.toLowerCase() + ']') == -1 && !$(this).parent().hasClass('hide')) {
+                        $(this).parent().addClass('hide');
+                        hiddenDivs++;
+                    }
+                });
+            }
+
+            if (gender != null && gender.length > 0) {
+                $('.search-gender-value').each(function () {
+                    if ($(this).html().indexOf('[' + gender + ']') == -1 && !$(this).parent().hasClass('hide')) {
+                        $(this).parent().addClass('hide');
+                        hiddenDivs++;
+                    }
+                });
+            }
+
+            if (dayofweek != null && dayofweek.length > 0) {
+                $('.search-dayofweek-value').each(function () {
+                    if ($(this).html().toLowerCase().indexOf('[' + dayofweek.toLowerCase() + ']') == -1 && !$(this).parent().hasClass('hide')) {
+                        $(this).parent().addClass('hide');
+                        hiddenDivs++;
+                    }
+                });
+            }
+
+            if (age != null && age.length > 0) {
+                $('.search-age-value').each(function () {
+                    var start = parseInt($(this).children('.search-age-start-value').html());
+                    var end = parseInt($(this).children('.search-age-end-value').html());
+                    if ((age < start || age > end) && !$(this).parent().hasClass('hide')) {
+                        $(this).parent().addClass('hide');
+                        hiddenDivs++;
+                    }
+                });
+            }
+
+            if (seatsfilled != null && seatsfilled.length > 0) {
+                $('.search-seatsfilled-value').each(function () {
+                    var seats = $(this).html().split(',');
+                    switch (seatsfilled) {
+                        case '1':
+                            if (parseInt(seats[0]) == 0 && !$(this).parent().hasClass('hide')) {
+                                $(this).parent().addClass('hide');
+                                hiddenDivs++;
+                            }
+                            break;
+                        case '2':
+                            if (parseInt(seats[1]) == 0 && !$(this).parent().hasClass('hide')) {
+                                $(this).parent().addClass('hide');
+                                hiddenDivs++;
+                            }
+                            break;
+                    }
+                });
+            }
+
+            if (hiddenDivs == totalDivs) {
+                $('#search-noresults').removeClass('hide');
+            } else {
+                $('#search-noresults').addClass('hide');
+            }
+
+        }
+
+        function timers(){
+            var minInterval = setInterval(
+               function () {
+
+                   $('.time-secs').each(function () {
+
+                       var id = $(this).attr('data-id');
+                       var status = '';
+
+                       if($(this).parent().attr('id').indexOf('-open-') > -1){
+                           status = 'open';
+                       } else if($(this).parent().attr('id').indexOf('-willopen-') > -1){
+                           status = 'willopen';
+                       } else if($(this).parent().attr('id').indexOf('-closed-') > -1){
+                           status = 'closed';
+                       }
+
+                       if(status != 'closed'){
+
+                           var minsobj = $('span[id="activity-mins-' + status + '-' + id + '"]');
+                           var hrsobj = $('span[id="activity-hrs-' + status + '-' + id + '"]');
+                           var daysobj = $('span[id="activity-days-' + status + '-' + id + '"]');
+
+                           var secs = parseInt($(this).html()) - 1;
+                           var mins = parseInt(minsobj.html());
+                           var hrs = parseInt(hrsobj.html());
+                           var days = parseInt(daysobj.html());
+
+                           if (secs < 0) {
+                               secs = 59;
+
+                               mins = parseInt(minsobj.html()) - 1;
+
+                               if (mins < 0) {
+                                   mins = 59;
+
+                                   //get hours and update
+                                   hrs = parseInt(hrsobj.html()) - 1;
+
+                                   if (hrs < 0) {
+                                       hrs = 23;
+
+                                       //get days and update
+                                       days = parseInt(daysobj.html()) - 1;
+                                       daysobj.html(days);
+                                   }
+
+                                   hrsobj.html(hrs);
+                               }
+
+                               minsobj.html(mins);
+                           }
+
+                           $(this).html(secs);
+
+                           if (secs == 0 && mins == 0 && hrs == 0 && days == 0) {
+                               switch(status){
+                                   case 'open':
+                                       $('#timer-closed-' + id).removeClass('hide');
+                                       $('#activity-closed-' + id).removeClass('hide');
+                                       $('#timer-open-' + id).addClass('hide');
+                                       $('#activity-open-' + id).addClass('hide');
+                                       break;
+                                   case 'willopen':
+                                       $('#timer-open-' + id).removeClass('hide');
+                                       $('#activity-open-' + id).removeClass('hide');
+                                       $('#timer-willopen-' + id).addClass('hide');
+                                       $('#activity-willopen-' + id).addClass('hide');
+                                       break;
+                               }
+                           }
+                       }
+                   });
+
+               },
+               1000
+           );
+        }
+
+    </script>
+}

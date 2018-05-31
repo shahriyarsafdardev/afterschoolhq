@@ -1,0 +1,1157 @@
+[namespace:AfterSchoolLibrary]
+
+[begin]
+type: Database
+livename: AfterSchool
+liveserver: enrollhq.cbf5h6cofkb3.us-east-2.rds.amazonaws.com
+liveusername: AfterSchoolUser
+livepassword: Nj8Ed$wpLfJ
+
+testname: AfterSchoolTest
+testserver: enrollhq.cbf5h6cofkb3.us-east-2.rds.amazonaws.com
+testusername: AfterSchoolUser
+testpassword: Nj8Ed$wpLfJ
+
+devname: AfterSchoolDev
+devserver: enrollhq.cbf5h6cofkb3.us-east-2.rds.amazonaws.com
+devusername: AfterSchoolUser
+devpassword: Nj8Ed$wpLfJ
+
+localname: AfterSchool
+localserver: localhost
+localusername: AfterSchoolUser
+localpassword: Nj8Ed$wpLfJ
+
+local1name: AfterSchool
+local1server: RSS7\SQLEXPRESS2014
+local1username: AfterSchoolUser
+local1password: Nj8Ed$wpLfJ
+[end]
+
+[begin]
+type: Class
+name: WebUser
+serializable: true
+inherits: BaseWebUser
+property: FacebookId, string, NVarChar(100)
+property: Uid, Guid, UniqueIdentifier
+property: IsActive, bool, Bit
+property: LastActivity, DateTime?, DateTime
+property: VerifiedAccount, bool, Bit
+property: IsRegistered, bool, Bit
+property: DefaultAccountId, int?, Int
+loadmethod: Uid
+loadmethod: Uid|IsActive
+loadmethod: IsActive, List<>
+loadmethod: FacebookId
+[end]
+
+[begin]
+type: Class
+name: Activity
+inherits: BaseEventWithAddress
+property: SeatsAvailable, int?, Int
+property: AccountId, int?, Int
+property: ArchiveId, int?, Int
+property: AgeStart, int?, Int
+property: AgeEnd, int?, Int
+property: GradeLevelStart, int?, Int
+property: GradeLevelEnd, int?, Int
+property: CostPerRegistrant, decimal?, Money
+property: CostDescription, string, NVarChar(1000)
+property: AllowPreRegistration, bool, Bit
+property: Uid, Guid, UniqueIdentifier
+property: Details, string, NVarChar(4000)
+property: LocationDetails, string, NVarChar(4000)
+property: ScheduleDetails, string, NVarChar(4000)
+property: RegistrationTimeZone, string, NVarChar(30)
+property: ContactName, string, NVarChar(50)
+property: ContactPhone, string, NVarChar(50)
+property: ContactEmail, string, NVarChar(100)
+property: WaitingListSeats, int?, Int
+property: AcceptPayPal, bool, Bit
+property: AcceptCreditCard, bool, Bit
+property: ParentActivityId, int?, Int
+property: AllowToPayLater, bool, Bit
+property: AllowOrganizationRegistration, bool, Bit
+property: GenderRestriction, GenderRestrictionType, Int
+property: RegistrationModeId, RegistrationMode, Int
+property: LocationId, int?, Int
+property: IsDeleted, bool, Bit
+property: IsPublished, bool, Bit
+property: IsArchived, bool, Bit
+property: ActivityGroupId, int?, Int
+property: ActivityScheduleId, int?, Int
+property: ScheduleRequiresAllDays, bool, Bit
+property: UniqueName, string, NVarChar(100)
+join: Account.ID, AccountId, InnerJoin
+join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
+joinproperty: Account.Name, string, NVarChar
+joinproperty: Account.PayPalEmailAddress, string, NVarChar
+joinproperty: Account.StripePublishableKey, string, NVarChar
+joinproperty: Account.TimeZone, string, NVarChar
+joinproperty: ActivityGroup.IsArchived, bool?, Bit
+joinproperty: ActivityGroup.Name, string, NVarChar
+loadmethod: AccountId, List<>
+loadmethod: AccountId|IsPublished, List<>
+loadmethod: ArchiveId, List<>
+loadmethod: Uid
+loadmethod: AccountId|ArchiveId
+loadmethod: ParentActivityId, List<>
+loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityScheduleId, List<>
+loadmethod: UniqueName|AccountId
+[end]
+
+[begin]
+type: Class
+name: Location
+inherits: BaseLocation
+property: AccountId, int?, Int
+property: IsDefault, bool, Bit
+property: Details, string, NVarChar(4000)
+loadmethod: AccountId, List<>
+loadmethod: AccountId|IsDefault
+[end]
+
+[begin]
+type: Class
+name: ActivityRecurrence
+inherits: BasicObjectWithModified
+property: RecurrenceTypeId, int?, Int
+property: ActivityId, int?, Int
+property: WeekNumbersInMonth, string, NVarChar(50)
+loadmethod: ActivityId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityDay
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int
+property: ActivityRecurrenceId, int?, Int
+property: Day, DayOfWeekASL, Int
+property: StartTime, DateTime?, DateTime
+property: EndTime, DateTime?, DateTime
+loadmethod: ActivityId, List<>
+loadmethod: ActivityRecurrenceId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivitySchedule
+inherits: BasicObjectWithModified
+property: Name, string, NVarChar(100)
+property: AccountId, int?, Int
+property: ActivityGroupId, int?, Int
+property: ScheduleDetails, string, NVarChar(4000)
+property: RepeatsWeekly, bool, Bit
+property: StartDate, DateTime?, DateTime
+property: EndDate, DateTime?, DateTime
+property: DailyStartTime, DateTime?, DateTime
+property: DailyEndTime, DateTime?, DateTime
+loadmethod: AccountId, List<>
+loadmethod: ActivityGroupId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityInstance
+inherits: BasicObjectWithModified
+property: ActivityScheduleId, int?, Int
+property: ActivityId, int?, Int
+property: Day, DayOfWeekASL, Int
+property: StartDateTime, DateTime?, DateTime
+property: EndDateTime, DateTime?, DateTime
+loadmethod: ActivityId, List<>
+loadmethod: ActivityScheduleId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityGradeLevel
+inherits: BasicObject
+property: ActivityId, int?, Int
+property: GradeLevelId, int?, Int
+join: GradeLevel.ID, GradeLevelId, InnerJoin
+joinproperty: GradeLevel.Name, string, NVarChar
+joinproperty: GradeLevel.Abbreviation, string, NVarChar
+loadmethod: ActivityId, List<>
+loadmethod: ActivityId|GradeLevelId
+loadmethod: GradeLevelId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityMessage
+inherits: BasicObject
+property: ActivityId, int?, Int
+property: ActivityGroupId, int?, Int
+property: AccountId, int?, Int
+property: DateSent, DateTime?, DateTime
+property: Subject, string, NVarChar(150)
+property: Body, string, Text
+join: Activity.ID, ActivityId, LeftOuterJoin
+join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
+join: Account.ID, AccountId, InnerJoin
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: ActivityGroup.Name, string, NVarChar
+joinproperty: Account.Name, string, NVarChar
+loadmethod: ActivityId, List<>
+loadmethod: ActivityGroupId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityMessageRegistrant
+inherits: BasicObject
+property: ActivityMessageId, int?, Int
+property: RegistrantId, int?, Int
+property: DateSent, DateTime?, DateTime
+property: SendErrors, string, NVarChar(1000)
+loadmethod: ActivityMessageId, List<>
+loadmethod: RegistrantId, List<>
+loadmethod: ActivityMessageId|RegistrantId
+join: Registrant.ID, RegistrantId, InnerJoin
+joinproperty: Registrant.Email, string, NVarChar
+joinproperty: Registrant.FirstName, string, NVarChar
+joinproperty: Registrant.LastName, string, NVarChar
+joinproperty: Registrant.Company, string, NVarChar
+joinproperty: Registrant.Uid, Guid, UniqueIdentifier
+joinproperty: Registrant.Phone, string, NVarChar
+[end]
+
+[begin]
+type: Class
+name: Archive
+inherits: BasicLookUpObject
+property: AccountId, int?, Int
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: Account
+serializable: true
+inherits: BaseCompany
+property: StripeAccessToken, string, NVarChar(100)
+property: StripePublishableKey, string, NVarChar(100)
+property: StripeSecretKey, string, NVarChar(100)
+property: Uid, Guid, UniqueIdentifier
+property: UniqueName, string, NVarChar(50)
+property: OwnerId, int?, Int
+property: IsAdminAccount, bool, Bit
+property: IsActive, bool, Bit
+property: IsAfterSchool, bool, Bit
+property: StripeCustomerId, string, NVarChar(50)
+property: StripeDefaultCardId, string, NVarChar(50)
+property: DefaultFormId, int?, Int
+property: PayPalEmailAddress, string, NVarChar(100)
+property: StripeRefreshToken, string, NVarChar(100)
+property: StripeUserId, string, NVarChar(100)
+property: TimeZone, string, NVarChar(30)
+property: LogoUrl, string, NVarChar(400)
+property: LandingPageText, string, NVarChar(4000)
+loadmethod: OwnerId, List<>
+loadmethod: UniqueName
+loadmethod: IsAdminAccount
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: AccountProperty
+inherits: BasicObjectWithModified
+property: AccountId, int?, Int
+property: ActivityGroupId, int?, Int
+property: ActivityId, int?, Int
+property: AccountPropertyTypeId, AccountPropertyType, Int
+property: Value, string, NVarChar(4000)
+loadmethod: AccountId, List<>
+loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityId, List<>
+loadmethod: AccountId|AccountPropertyTypeId
+loadmethod: ActivityGroupId|AccountPropertyTypeId
+loadmethod: ActivityId|AccountPropertyTypeId
+[end]
+
+[begin]
+type: Class
+name: AccountWebUser
+inherits: BasicObjectWithModified
+property: AccountId, int?, Int
+property: WebUserId, int?, Int
+property: IsActive, bool, Bit
+property: IsDefault, bool, Bit
+property: UserTypeId, UserType, Int
+join: WebUser.ID, WebUserId, InnerJoin
+join: Account.ID, AccountId, InnerJoin
+joinproperty: WebUser.Username, string, NVarChar
+joinproperty: WebUser.Email, string, NVarChar
+joinproperty: WebUser.FirstName, string, NVarChar
+joinproperty: WebUser.LastName, string, NVarChar
+joinproperty: WebUser.IsActive, bool, Bit
+joinproperty: WebUser.IsRegistered, bool, Bit
+joinproperty: WebUser.Uid, Guid, UniqueIdentifier
+joinproperty: WebUser.Phone, string, NVarChar
+joinproperty: WebUser.CreateDate, DateTime?, DateTime
+joinproperty: Account.Name, string, NVarChar
+joinproperty: Account.OwnerId, int?, Int
+joinproperty: Account.IsAdminAccount, bool, Bit
+joinproperty: Account.CreateDate, DateTime?, DateTime
+joinproperty: Account.IsActive, bool, Bit
+loadmethod: AccountId, List<>
+loadmethod: WebUserId, List<>
+loadmethod: AccountId|WebUserId
+loadmethod: WebUserId|IsDefault
+loadmethod: WebUserId|IsActive, List<>
+loadmethod: AccountId|IsActive, List<>
+[end]
+
+[begin]
+type: Class
+name: GradeLevel
+inherits: BasicLookUpObject
+property: Abbreviation, string, NVarChar(50)
+[end]
+
+[begin]
+type: Class
+name: RegistrationPeriod
+inherits: BaseEvent
+property: AccountId, int?, Int
+property: RegistrationModeId, RegistrationMode, Int
+property: Uid, Guid, UniqueIdentifier
+property: ActivityGroupId, int?, Int
+loadmethod: AccountId, List<>
+loadmethod: Uid
+loadmethod: ActivityGroupId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityRegistrationPeriod
+inherits: BasicObjectWithModified
+property: RegistrationPeriodId, int?, Int
+property: ActivityId, int?, Int
+property: IsActive, bool, Bit
+join: RegistrationPeriod.ID, RegistrationPeriodId, InnerJoin
+join: Activity.ID, ActivityId, InnerJoin
+joinproperty: RegistrationPeriod.Name, string, NVarChar
+joinproperty: RegistrationPeriod.StartDateTime, DateTime?, DateTime
+joinproperty: RegistrationPeriod.EndDateTime, DateTime?, DateTime
+joinproperty: RegistrationPeriod.Description, string, NVarChar
+joinproperty: RegistrationPeriod.RegistrationModeId, RegistrationMode, Int
+joinproperty: Activity.IsDeleted, int?, Int
+loadmethod: RegistrationPeriodId, List<>
+loadmethod: ActivityId, List<>
+loadmethod: ActivityId|IsActive
+loadmethod: RegistrationPeriodId|ActivityId
+[end]
+
+[begin]
+type: Class
+name: ActivityGroup
+inherits: BasicLookUpObject
+property: AccountId, int?, Int
+property: RegistrationModeId, RegistrationMode, Int
+property: UniqueName, string, NVarChar(100)
+property: Uid, Guid, UniqueIdentifier
+property: FormId, int?, Int
+property: IsPublished, bool, Bit
+property: IsArchived, bool, Bit
+property: IsInviteOnly, bool, Bit
+property: HasLotteryRun, bool, Bit
+loadmethod: AccountId, List<>
+loadmethod: AccountId|IsPublished, List<>
+loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
+loadmethod: AccountId|UniqueName
+loadmethod: Uid
+loadmethod: Uid|IsPublished
+loadmethod: Uid|IsPublished|IsInviteOnly
+join: Account.ID, ActivityGroup.AccountId, InnerJoin
+joinproperty: Account.Name, string, NVarChar
+[end]
+
+[begin]
+type: Class
+name: Registrant
+inherits: BaseContact
+property: AccountId, int?, Int
+property: WebUserId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+property: RegistrantTypeId, RegistrantType, Int
+property: ParentRegistrantId, int?, Int
+property: IsMaster, bool, Bit
+property: IsContactOnly, bool, Bit
+property: FirstRegistrantId, int?, Int
+loadmethod: AccountId, List<>
+loadmethod: ParentRegistrantId, List<>
+loadmethod: AccountId|RegistrantTypeId, List<>
+loadmethod: AccountId|IsContactOnly, List<>
+loadmethod: Uid
+loadmethod: WebUserId, List<>
+loadmethod: WebUserId|IsMaster, List<>
+loadmethod: FirstRegistrantId, List<>
+[end]
+
+[begin]
+type: Class
+name: ContactList
+inherits: BasicLookUpObject
+property: AccountId, int?, Int
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: ContactListRegistrant
+inherits: BasicObject
+property: ContactListId, int?, Int
+property: RegistrantId, int?, Int
+loadmethod: ContactListId|RegistrantId
+loadmethod: ContactListId, List<>
+loadmethod: RegistrantId, List<>
+join: Registrant.ID, RegistrantId, InnerJoin
+joinproperty: Registrant.Email, string, NVarChar
+joinproperty: Registrant.FirstName, string, NVarChar
+joinproperty: Registrant.LastName, string, NVarChar
+joinproperty: Registrant.Uid, Guid, UniqueIdentifier
+[end]
+
+[begin]
+type: Class
+name: ActivityPayment
+inherits: BasicObjectWithModified
+property: RegistrantId, int?, Int
+property: Amount, decimal?, Decimal
+property: ActivityId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+loadmethod: ActivityId, List<>
+loadmethod: RegistrantId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: RegistrantActivityGroup
+inherits: BasicObjectWithModified
+property: ActivityGroupId, int?, Int
+property: RegistrantId, int?, Int
+property: RegistrationPeriodId, int?, Int
+property: NumberOfInvitationSeats, int?, Int
+property: NumberOfSeatsDeclined, int?, Int
+property: Uid, Guid, UniqueIdentifier
+join: Registrant.ID, RegistrantId, InnerJoin
+join: ActivityGroup.ID, ActivityGroupId, InnerJoin
+joinproperty: Registrant.Email, string, NVarChar
+joinproperty: Registrant.FirstName, string, NVarChar
+joinproperty: Registrant.LastName, string, NVarChar
+joinproperty: Registrant.Uid, Guid, UniqueIdentifier
+joinproperty: Registrant.Phone, string, NVarChar
+joinproperty: Registrant.Company, string, NVarChar
+joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
+joinproperty: ActivityGroup.Name, string, NVarChar
+joinproperty: ActivityGroup.IsArchived, bool, Bit
+loadmethod: ActivityGroupId|RegistrantId
+loadmethod: RegistrantId, List<>
+loadmethod: ActivityGroupId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: RegistrantActivity
+inherits: BasicObjectWithModified
+property: RegistrantId, int?, Int
+property: ActivityId, int?, Int
+property: RegistrationId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+property: OnWaitingList, bool, Bit
+property: DatePaid, DateTime?, DateTime
+property: StripeChargeId, string, NVarChar(100)
+property: PayPalTransactionId, string, NVarChar(50)
+property: AmountPaid, decimal?, Decimal
+property: PaymentTypeId, PaymentType, Int
+property: NumberOfSeats, int?, Int
+property: NumberOfWaitingListSeats, int?, Int
+property: NumberOfApplicationSeats, int?, Int
+property: NumberOfInvitationSeats, int?, Int
+property: NumberOfSeatsDeclined, int?, Int
+property: SeatIndex, int?, Int
+property: WaitingListSeatIndex, int?, Int
+property: ApplicationSeatIndex, int?, Int
+property: Day, DayOfWeekASL, Int
+property: PreferenceNumber, int?, Int
+property: RegistrationPeriodId, int?, Int
+property: ActivityGroupId, int?, Int
+property: Rating, int?, Int
+join: Activity.ID, ActivityId, InnerJoin
+join: Registrant.ID, RegistrantId, InnerJoin
+join: Account.ID, Activity.AccountId, InnerJoin
+join: ActivityGroup.ID, Activity.ActivityGroupId, LeftOuterJoin
+joinproperty: Registrant.Email, string, NVarChar
+joinproperty: Registrant.FirstName, string, NVarChar
+joinproperty: Registrant.LastName, string, NVarChar
+joinproperty: Registrant.Uid, Guid, UniqueIdentifier
+joinproperty: Registrant.Phone, string, NVarChar
+joinproperty: Registrant.Company, string, NVarChar
+joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
+joinproperty: Registrant.FirstRegistrantId, int?, Int
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: Activity.Uid, Guid, UniqueIdentifier
+joinproperty: Activity.AccountId, int?, Int
+joinproperty: Activity.CostPerRegistrant, decimal?, Decimal
+joinproperty: Activity.IsDeleted, bool, Bit
+joinproperty: Activity.ScheduleRequiresAllDays, bool, Bit
+joinproperty: Account.Name, string, NVarChar
+joinproperty: Activity.IsArchived, bool, Bit
+joinproperty: Activity.ActivityGroupId, int?, Int
+joinproperty: Activity.ActivityScheduleId, int?, Int
+joinproperty: ActivityGroup.IsArchived, bool, Bit
+loadmethod: ActivityId, List<>
+loadmethod: RegistrantId, List<>
+loadmethod: RegistrationId, List<>
+loadmethod: Uid
+loadmethod: ActivityId|RegistrantId
+loadmethod: ActivityId|Day, List<>
+loadmethod: ActivityId|OnWaitingList, List<>
+loadmethod: ActivityGroupId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityForm
+inherits: BasicLookUpObject
+property: FormId, int?, Int
+property: ActivityId, int?, Int
+property: IsActive, bool, Bit
+property: IsPublished, bool, Bit
+property: AccountId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+join: Form.ID, FormId, InnerJoin
+join: Activity.ID, ActivityId, InnerJoin
+join: Account.ID, AccountId, InnerJoin
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: Activity.Details, string, NVarChar
+joinproperty: Activity.LocationDetails, string, NVarChar
+joinproperty: Activity.ScheduleDetails, string, NVarChar
+joinproperty: Activity.RegistrationTimeZone, string, NVarChar
+joinproperty: Activity.SeatsAvailable, int?, Int
+joinproperty: Activity.ContactName, string, NVarChar
+joinproperty: Activity.ContactPhone, string, NVarChar
+joinproperty: Activity.ContactEmail, string, NVarChar
+joinproperty: Activity.WaitingListSeats, int?, Int
+joinproperty: Activity.Address1, string, NVarChar
+joinproperty: Activity.Address2, string, NVarChar
+joinproperty: Activity.City, string, NVarChar
+joinproperty: Activity.State, string, NVarChar
+joinproperty: Activity.PostalCode, string, NVarChar
+joinproperty: Activity.CostPerRegistrant, decimal?, Decimal
+joinproperty: Activity.CostDescription, string, NVarChar
+joinproperty: Activity.AcceptPayPal, bool, Bit
+joinproperty: Activity.AcceptCreditCard, bool, Bit
+joinproperty: Form.Name, string, NVarChar
+joinproperty: Form.Description, string, NVarChar
+joinproperty: Form.IsActive, bool, Bit
+joinproperty: Form.Uid, Guid, UniqueIdentifier
+joinproperty: Account.Name, string, NVarChar
+joinproperty: Account.Uid, Guid, UniqueIdentifier
+loadmethod: FormId, List<>
+loadmethod: ActivityId, List<>
+loadmethod: ActivityId|FormId
+loadmethod: ActivityId|IsActive
+loadmethod: AccountId,List<>
+loadmethod: Uid
+loadmethod: Uid|IsPublished
+[end]
+
+[begin]
+type: Class
+name: Form
+inherits: BasicLookUpObject
+property: AccountId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+property: IsActive, bool, Bit
+join: Account.ID, AccountId, InnerJoin
+joinproperty: Account.Name, string, NVarChar
+loadmethod: AccountId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: FormQuestion
+inherits: BasicObjectWithModified
+property: IsTemplate, bool, Bit
+property: FormQuestionGroupId, int?, Int
+property: FormId, int?, Int
+property: Text, string, NVarChar(400)
+property: Description, string, NVarChar(4000)
+property: QuestionTypeId, QuestionType, Int
+property: QuestionDataTypeId, QuestionDataType, Int
+property: IsActive, bool, Bit
+property: IsRequired, bool, Bit
+property: IsLocked, bool, Bit
+property: Options, string, NVarChar(1000)
+property: Link, string, NVarChar(1000)
+property: DependsOnQuestionId, int?, Int
+property: DependsOnValues, string, NVarChar(400)
+property: DisplayOrder, int?, Int
+join: FormQuestionGroup.ID, FormQuestionGroupId, InnerJoin
+joinproperty: FormQuestionGroup.Name, string, NVarChar
+joinproperty: FormQuestionGroup.DisplayOrder, int?, Int
+joinproperty: FormQuestionGroup.RegistrantTypeId, RegistrantType, Int
+loadmethod: FormId, List<>
+loadmethod: FormId|IsActive, List<>
+loadmethod: FormQuestionGroupId, List<>
+loadmethod: FormQuestionGroupId|IsActive, List<>
+loadmethod: DependsOnQuestionId, List<>
+loadmethod: FormId|QuestionDataTypeId
+loadmethod: FormQuestionGroupId|QuestionDataTypeId
+[end]
+
+[begin]
+type: Class
+name: FormQuestionGroup
+inherits: BasicLookUpObject
+property: FormId, int?, Int
+property: DisplayOrder, int?, Int
+property: RegistrantTypeId, RegistrantType, Int
+property: QuestionGroupDataTypeId, QuestionGroupDataType, Int
+loadmethod: FormId, List<>
+loadmethod: FormId|RegistrantTypeId, List<>
+[end]
+
+[begin]
+type: Class
+name: FormQuestionAnswer
+inherits: BasicObjectWithModified
+property: FormQuestionId, int?, Int
+property: Text, string, NVarChar(400)
+property: RegistrantId, int?, Int
+property: ActivityId, int?, Int
+property: RegistrationId, int?, Int
+property: QuestionDataTypeId, QuestionDataType, Int
+join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
+join: Registration.ID, RegistrationId, LeftOuterJoin
+join: FormQuestionGroup.ID, FormQuestion.FormQuestionGroupId, LeftOuterJoin
+joinproperty: FormQuestion.QuestionDataTypeId, QuestionDataType, Int
+joinproperty: FormQuestion.QuestionTypeId, QuestionType, Int
+joinproperty: FormQuestion.FormId, int?, Int
+joinproperty: FormQuestion.FormQuestionGroupId, int?, Int
+joinproperty: FormQuestion.DisplayOrder, int?, Int
+joinproperty: FormQuestion.Text, string, NVarChar
+joinproperty: FormQuestionGroup.Name, string, NVarChar
+joinproperty: FormQuestionGroup.DisplayOrder, int?, Int
+joinproperty: Registration.AccountId, int?, Int
+loadmethod: RegistrantId, List<>
+loadmethod: RegistrantId|ActivityId, List<>
+loadmethod: FormQuestionId, List<>
+loadmethod: FormQuestionId|RegistrantId
+loadmethod: RegistrationId, List<>
+[end]
+
+[begin]
+type: Class
+name: Registration
+inherits: BasicObjectWithModified
+property: Uid, Guid, UniqueIdentifier
+property: RegistrantId, int?, Int
+property: AccountId, int?, Int
+property: DatePaid, DateTime?, DateTime
+property: StripeChargeId, string, NVarChar(100)
+property: PayPalTransactionId, string, NVarChar(50)
+property: AmountPaid, decimal?, Decimal
+property: PaymentTypeId, PaymentType, Int
+property: RegistrationPeriodId, int?, Int
+property: LastUpdated, DateTime?, DateTime
+property: ActivityGroupId, int?, Int
+property: FirstRegistrationId, int?, Int
+loadmethod: Uid
+loadmethod: RegistrantId, List<>
+loadmethod: AccountId, List<>
+loadmethod: RegistrationPeriodId, List<>
+loadmethod: AccountId|RegistrantId, List<>
+loadmethod: ActivityGroupId, List<>
+loadmethod: FirstRegistrationId, List<>
+join: Registrant.ID, RegistrantId, InnerJoin
+joinproperty: Registrant.Email, string, NVarChar
+joinproperty: Registrant.FirstName, string, NVarChar
+joinproperty: Registrant.LastName, string, NVarChar
+joinproperty: Registrant.Uid, Guid, UniqueIdentifier
+joinproperty: Registrant.Phone, string, NVarChar
+joinproperty: Registrant.Company, string, NVarChar
+joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
+[end]
+
+[begin]
+type: Class
+name: RegistrationActivity
+inherits: BasicObject
+property: RegistrationId, int?, Int
+property: ActivityId, int?, Int
+loadmethod: ActivityId|RegistrationId
+loadmethod: ActivityId, List<>
+loadmethod: RegistrationId, List<>
+join: Activity.ID, ActivityId, InnerJoin  
+join: ActivityGroup.ID, Activity.ID, LeftOuterJoin  
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: Activity.Uid, Guid, UniqueIdentifier
+joinproperty: Activity.AccountId, int?, Int
+joinproperty: Activity.CostPerRegistrant, decimal?, Decimal
+joinproperty: Activity.ConfirmationMessage, string, NVarChar
+joinproperty: Activity.IsArchived, bool, Bit
+joinproperty: ActivityGroup.IsArchived, bool, Bit
+[end]
+
+[begin]
+type: Class
+name: Leader
+inherits: BaseContact
+property: WebUserId, int?, Int
+property: AccountId, int?, Int
+property: ArchiveId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+loadmethod: AccountId, List<>
+loadmethod: ArchiveId, List<>
+loadmethod: WebUserId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: ActivityLeader
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int
+property: LeaderId, int?, Int
+join: Activity.ID, ActivityId, InnerJoin
+join: Leader.ID, LeaderId, InnerJoin
+joinproperty: Leader.Email, string, NVarChar
+joinproperty: Leader.FirstName, string, NVarChar
+joinproperty: Leader.LastName, string, NVarChar
+joinproperty: Leader.Phone, string, NVarChar
+joinproperty: Leader.Uid, Guid, UniqueIdentifier
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: Activity.Uid, Guid, UniqueIdentifier
+loadmethod: ActivityId, List<>
+loadmethod: LeaderId, List<>
+loadmethod: ActivityId|LeaderId
+[end]
+
+[begin]
+type: Class
+name: ActivityWebUser
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int
+property: WebUserId, int?, Int
+property: IsLeader, bool, Bit
+join: Activity.ID, ActivityId, InnerJoin
+join: WebUser.ID, WebUserId, InnerJoin
+joinproperty: WebUser.Email, string, NVarChar
+joinproperty: WebUser.FirstName, string, NVarChar
+joinproperty: WebUser.LastName, string, NVarChar
+joinproperty: WebUser.Phone, string, NVarChar
+joinproperty: WebUser.Uid, Guid, UniqueIdentifier
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: Activity.Uid, Guid, UniqueIdentifier
+loadmethod: ActivityId, List<>
+loadmethod: WebUserId, List<>
+loadmethod: WebUserId|IsLeader, List<>
+loadmethod: ActivityId|IsLeader, List<>
+loadmethod: ActivityId|WebUserId
+[end]
+
+[begin]
+type: Class
+name: Attendance
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int
+property: ActivityInstanceId, int?, Int
+property: Date, DateTime?, DateTime
+property: IsCompleted, bool, Bit
+join: Activity.ID, ActivityId, InnerJoin
+join: Account.ID, Activity.AccountId, InnerJoin
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: Activity.Uid, Guid, UniqueIdentifier
+joinproperty: Activity.AccountId, int?, Int
+joinproperty: Account.Name, string, NVarChar
+loadmethod: ActivityId, List<>
+loadmethod: ActivityId|Date, List<>
+loadmethod: ActivityId|IsCompleted, List<>
+loadmethod: ActivityInstanceId, List<>
+[end]
+
+[begin]
+type: Class
+name: AttendanceRegistrant
+inherits: BasicObjectWithModified
+property: RegistrantId, int?, Int
+property: AttendanceId, int?, Int
+property: IsPresent, bool, Bit
+property: IsLate, bool, Bit
+property: NumberPresent, int?, Int
+property: NumberLate, int?, Int
+property: NumberPossible, int?, Int
+join: Registrant.ID, RegistrantId, InnerJoin
+join: Attendance.ID, AttendanceId, InnerJoin
+joinproperty: Registrant.Email, string, NVarChar
+joinproperty: Registrant.FirstName, string, NVarChar
+joinproperty: Registrant.LastName, string, NVarChar
+joinproperty: Registrant.Phone, string, NVarChar
+joinproperty: Registrant.Company, string, NVarChar
+joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
+joinproperty: Registrant.AccountId, int?, Int
+joinproperty: Attendance.ActivityId, int?, Int
+joinproperty: Attendance.IsCompleted, int?, Int
+loadmethod: RegistrantId, List<>
+loadmethod: AttendanceId, List<>
+loadmethod: AttendanceId|RegistrantId, List<>
+[end]
+
+[begin]
+type: Class
+name: Package
+inherits: BasicLookUpObject
+property: Price, decimal?, Money
+property: PricePerYear, decimal?, Money
+property: IsActive, bool, Bit
+property: IsPopular, bool, Bit
+property: IsAfterSchool, bool, Bit
+property: Uid, Guid, UniqueIdentifier
+loadmethod: IsActive, List<>
+loadmethod: IsActive|IsAfterSchool, List<>
+loadmethod: IsPopular, List<>
+loadmethod: IsPopular|IsAfterSchool, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: AccountPackage
+serializable: true
+inherits: BasicObjectWithModified
+property: StartDate, DateTime?, DateTime
+property: EndDate, DateTime?, DateTime
+property: Price, decimal?, Money
+property: BillingPeriodTypeId, BillingPeriodType, Int
+property: PackageId, int?, Int
+property: AccountId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+property: TrialStartDate, DateTime?, DateTime
+property: TrialEndDate, DateTime?, DateTime
+property: IsActive, bool, Bit
+property: StripeSubscriptionId, string, NVarChar(50)
+join: Package.ID, PackageId, InnerJoin
+joinproperty: Package.Name, string, NVarChar
+joinproperty: Package.Uid, Guid, UniqueIdentifier
+joinproperty: Package.Price, decimal?, Decimal
+joinproperty: Package.PricePerYear, decimal?, Decimal
+loadmethod: PackageId, List<>
+loadmethod: AccountId, List<>
+loadmethod: AccountId|IsActive
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: PackageFeature
+serializable: true
+inherits: BasicObjectWithModified
+property: PackageId, int?, Int
+property: FeatureTypeId, FeatureType, Int
+property: Max, int?, Int
+loadmethod: PackageId, List<>
+loadmethod: PackageId|FeatureTypeId
+[end]
+
+[begin]
+type: Class
+name: AccountPackageFeature
+serializable: true
+inherits: BasicObjectWithModified
+property: AccountPackageId, int?, Int
+property: FeatureTypeId, FeatureType, Int
+property: Max, int?, Int
+loadmethod: AccountPackageId, List<>
+loadmethod: AccountPackageId|FeatureTypeId
+[end]
+
+[begin]
+type: Class
+name: AccountInvoice
+inherits: BasicObjectWithModified
+property: AccountPackageId, int?, Int
+property: AccountId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+join: AccountPackage.PackageId, PackageId, InnerJoin
+join: Package.ID, AccountPackage.PackageId, InnerJoin
+joinproperty: AccountPackage.PackageId, int?, Int
+joinproperty: AccountPackage.StartDate, DateTime?, DateTime
+joinproperty: AccountPackage.EndDate, DateTime?, DateTime
+joinproperty: AccountPackage.TrialStartDate, DateTime?, DateTime
+joinproperty: AccountPackage.TrialEndDate, DateTime?, DateTime
+joinproperty: Package.Name, string, NVarChar
+joinproperty: Package.MaxActivities, string, NVarChar
+joinproperty: Package.MaxRegistrants, string, NVarChar
+joinproperty: Package.MaxUploadSpace, string, NVarChar
+loadmethod: AccountPackageId, List<>
+loadmethod: AccountId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: AccountPayment
+inherits: BasicObjectWithModified
+property: Amount, decimal?, Decimal
+property: InvoiceId, int?, Int
+property: AccountId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+loadmethod: InvoiceId, List<>
+loadmethod: AccountId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: File
+inherits: BaseFile
+property: Label, string, NVarChar(50)
+property: Description, string, NVarChar(400)
+property: FileTypeId, FileType, Int
+property: AccountId, int?, Int
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: ActivityFile
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int
+property: FileId, int?, Int
+join: File.ID, FileId, InnerJoin
+joinproperty: File.Filename, string, NVarChar
+joinproperty: File.FileLocation, string, NVarChar
+joinproperty: File.FileSizeInBytes, int?, Int
+joinproperty: File.Label, string, NVarChar
+joinproperty: File.Description, string, NVarChar
+joinproperty: File.FileTypeId, FileType, Int
+loadmethod: ActivityId, List<>
+loadmethod: FileId, List<>
+loadmethod: ActivityId|FileId
+[end]
+
+[begin]
+type: Class
+name: Session
+serializable: true
+inherits: BasicObjectWithModified
+property: IPAddress, string, NVarChar(50)
+property: UserAgent, string, NVarChar(400)
+property: UrlReferrer, string, NVarChar(400)
+property: LastActivity, DateTime?, DateTime
+property: RegistrantId, int?, Int
+loadmethod: RegistrantId, List<>
+[end]
+
+[begin]
+type: Class
+name: SessionAction
+inherits: BasicObject
+property: SessionId, int?, Int
+property: SessionActionTypeId, SessionActionType, Int
+property: WebUserId, int?, Int
+property: ActivityId, int?, Int
+property: AccountId, int?, Int
+property: RegistrantId, int?, Int
+property: RegistrationId, int?, Int
+property: RegistrationPeriodId, int?, Int
+property: ActivityGroupId, int?, Int
+join: Registrant.ID, RegistrantId, LeftOuterJoin
+join: Activity.ID, ActivityId, LeftOuterJoin
+join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
+join: WebUser.ID, WebUserId, LeftOuterJoin
+join: WebUser.ID, CreatedBy, LeftOuterJoin, CreatedBy
+joinproperty: Registrant.FirstName, string, NVarChar
+joinproperty: Registrant.LastName, string, NVarChar
+joinproperty: Registrant.Email, string, NVarChar
+joinproperty: Registrant.Phone, string, NVarChar
+joinproperty: Registrant.Company, string, NVarChar
+joinproperty: Registrant.Uid, Guid, UniqueIdentifier
+joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: WebUser.Username, string, NVarChar
+joinproperty: WebUser.Email, string, NVarChar
+joinproperty: WebUser.FirstName, string, NVarChar
+joinproperty: WebUser.LastName, string, NVarChar
+joinproperty: CreatedBy.Username, string, NVarChar
+joinproperty: CreatedBy.Email, string, NVarChar
+joinproperty: CreatedBy.FirstName, string, NVarChar
+joinproperty: CreatedBy.LastName, string, NVarChar
+joinproperty: ActivityGroup.Name, string, NVarChar
+loadmethod: SessionId, List<>
+loadmethod: WebUserId, List<>
+loadmethod: SessionActionTypeId, List<>
+loadmethod: ActivityId, List<>
+loadmethod: AccountId, List<>
+loadmethod: RegistrantId, List<>
+loadmethod: RegistrationId, List<>
+loadmethod: RegistrationPeriodId, List<>
+loadmethod: ActivityGroupId, List<>
+loadmethod: ActivityGroupId|SessionActionTypeId, List<>
+loadmethod: ActivityId|SessionActionTypeId, List<>
+loadmethod: RegistrantId|SessionActionTypeId, List<>
+loadmethod: RegistrationId|SessionActionTypeId, List<>
+loadmethod: RegistrationPeriodId|SessionActionTypeId, List<>
+[end]
+
+[begin]
+type: Class
+name: Cart
+serializable: true
+inherits: BasicObjectWithModified
+property: Uid, Guid, UniqueIdentifier
+property: RegistrationId, int?, Int
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: CartItem
+serializable: true
+inherits: BasicObjectWithModified
+property: Uid, Guid, UniqueIdentifier
+property: ActivityId, int?, Int
+property: Day, DayOfWeekASL, Int
+property: CartId, int?, Int
+property: RegistrantActivityId, int?, Int
+loadmethod: Uid
+loadmethod: CartId, List<>
+[end]
+
+[begin]
+type: Class
+name: PasswordResetToken
+serializable: true
+inherits: BasicObjectWithModified
+property: Uid, Guid, UniqueIdentifier
+property: ExpireDate, DateTime?, DateTime
+property: WebUserId, int?, Int
+property: Used, bool, Bit
+loadmethod: Uid
+[end]
+
+[begin]
+type: Enum
+name: SessionActionType
+values: NotSet, OrganizationHomeView, RegistrationFormView, RegistrationCompletedView, ActivityCreate, ActivityPublish, ActivityUnpublish, ActivityRegistrationCompleted, ActivityRegistrationUpdated, RegistrationUpdated, RegistrationAddActivity, RegistrationRemoveActivity, ActivityMoveToReserved, ActivityMoveToApplication, ActivityMoveToWaitingList, ActivityGroupCreate, ActivityGroupPublish, ActivityGroupUnpublish
+[end]
+
+[begin]
+type: Enum
+name: QuestionType
+values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownList, Email, Date, Number, RadioMatrix, TextBlock
+[end]
+
+[begin]
+type: Enum
+name: QuestionGroupDataType
+values: NotSet, Custom, PersonalInformation, ContactInformation, HomeAddress, Parent1Information, Parent1Address, Parent2Information, Parent2Address, EmergencyContact1, EmergencyContact2, HealthInformation, OrganizationInformation, OrganizationContact
+[end]
+
+[begin]
+type: Enum
+name: QuestionDataType
+values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyFirstName1, EmergencyLastName1, EmergencyPhone1, EmergencyFirstName2, EmergencyLastName2, EmergencyPhone2, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType
+[end]
+
+[begin]
+type: Enum
+name: UserType
+values: NotSet, SuperAdmin, Owner, Administrator, Student, Teacher, Staff, Parent, ActivityLeader
+[end]
+
+[begin]
+type: Enum
+name: FileType
+values: NotSet, Document, Image, Video, Audio, Text, Html
+[end]
+
+[begin]
+type: Enum
+name: RecurrenceType
+values: NotSet, Once, Daily, Weekly, Monthly, Annually
+[end]
+
+[begin]
+type: Enum
+name: PermissionObjectType
+values: NotSet, Account
+[end]
+
+[begin]
+type: Enum
+name: PaymentType
+values: NotSet, CreditCard, PayPal, Check, Cash
+[end]
+
+[begin]
+type: Enum
+name: RegistrantType
+values: NotSet, Individual, Organization
+[end]
+
+[begin]
+type: Enum
+name: FeatureType
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights
+[end]
+
+[begin]
+type: Enum
+name: GenderRestrictionType
+values: None, MaleOnly, FemaleOnly 
+[end]
+
+[begin]
+type: Enum
+name: AccountPropertyType
+values: NotSet, LandingPageText, RegistrationThankYouEmail, ApplicationThankYouEmail, NoActivitiesText, FacebookAdPixel
+[end]
+
+[begin]
+type: Enum
+name: DayOfWeekASL
+values: NotSet, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
+[end]
+
+[begin]
+type: Enum
+name: RegistrationMode
+values: NotSet, Register, Apply
+[end]
+
+[begin]
+type: Enum
+name: RegistrationAssignmentType
+values: NotSet, Reserved, WaitingList, Application, Invited, Declined
+[end]
+
+[begin]
+type: Enum
+name: RegistrationReportType
+values: NotSet, Basic, Detailed, SingleActivity
+[end]
+
+[begin]
+type: Enum
+name: BillingPeriodType
+values: NotSet, Month, Year
+[end]
+
+[begin]
+type: Enum
+name: RegistrationStatus
+values: NotSet, Past, Current, Future
+[end]

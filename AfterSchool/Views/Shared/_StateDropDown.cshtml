@@ -1,0 +1,9 @@
+﻿@model string
+<select id="state" name="state" class="form-control">
+    <option value="">Select...</option>
+    @foreach (var state in BasicLibrary.Utilities.GetStateList().Split(','))
+    {
+        <option value="@state" @(state == Model ? " selected=\"selected\" " : "")>@state</option>
+    }
+</select>
+

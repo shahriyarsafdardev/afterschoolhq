@@ -1,0 +1,189 @@
+﻿@model AfterSchoolLibrary.RegistrantActivity
+@{
+    var answers = Model.GetAnswers(); 
+    var isActivityLeader = false;
+    var account = SessionVariables.CurrentAccount;
+    var backtolistAction = ViewData["BackToListAction"].ToString();
+    var backtolistController = ViewData["BackToListController"].ToString();
+    var showPaymentForm = (bool)ViewData["ShowPaymentForm"];
+
+    if (showPaymentForm)
+    {
+        isActivityLeader = (bool)ViewData["IsActivityLeader"];
+    }
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="div-group pull-right">
+            <a href="@Url.Action("edit", "registration", new { id = Model.GetRegistration().Uid.ToString() })" class="btn btn-primary">View Full Registration</a>
+            <a href="@Url.Action(backtolistAction, backtolistController, new { id = Model.ActivityId })" class="btn btn-default">&laquo; Back to List</a>
+        </div>
+        @Model.RegistrantName
+    </div>
+    <div class="panel-body">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Registration Data
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tr>
+                            <td width="33%" class="text-right">Registration Date/Time</td>
+                            <td>@account.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString()</td>
+                        </tr>
+                        @if (Model.Day != DayOfWeekASL.NotSet)
+                        {
+                            <tr>
+                                <td width="33%" class="text-right">Day of the Week</td>
+                                <td>@Model.Day.ToString()</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td width="33%" class="text-right">Reserved Seats </td>
+                            <td>@Model.NumberOfSeats</td>
+                        </tr>
+                        <tr>
+                            <td width="33%" class="text-right">Waiting List Seats </td>
+                            <td>@Model.NumberOfWaitingListSeats</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                @foreach (var group in answers.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID).OrderBy(x => x.DisplayOrder))
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">@group.Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var answer in answers.Where(x => x.FormQuestionFormQuestionGroupId == group.ID))
+                                {
+                                    <tr>
+                                        <td width="33%" class="text-right">@answer.FormQuestionText</td>
+                                        <td>@answer.Text.IfBlank("-")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        @if (Model.ActivityCostPerRegistrant > 0)
+        {
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Payment Information
+                </div>
+                <div class="panel-body">
+                    <form action="@Url.Action("RegistrantDetail", "activity", new { id = Model.ID })" method="post">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <td width="33%" class="text-right">
+                                        Amount Owed
+                                    </td>
+                                    <td>
+                                        <div class="col-md-6">
+                                            @((Model.ActivityCostPerRegistrant * Model.TotalSeats).ToCurrency()) (@Model.ActivityCostPerRegistrant.ToCurrency() x @Model.TotalSeats Seats)
+                                        </div>
+                                    </td>
+                                </tr>
+                                @if (isActivityLeader && !Model.DatePaid.HasValue)
+                                {
+                                    <tr>
+                                        <td width="33%" class="text-right">Date Paid</td>
+                                        <td>
+                                            <div class="col-md-6">
+                                                <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                                    <input size="16" type="text" class="form-control" id="datepaid" name="datepaid" onfocus="this.select()" value="" data-type="date" />
+                                                    <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Amount Paid</td>
+                                        <td>
+                                            <div class="col-md-6">
+                                                <div class="input-group input-group-lg xs-mb-15">
+                                                    <span class="input-group-addon">$</span>
+                                                    <input type="number" class="form-control" id="amountpaid" name="amountpaid" onfocus="this.select()" value="" min="0.00" step=".01" />
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Payment Method</td>
+                                        <td>
+                                            <div class="col-md-6">
+                                                <select name="paymenttype" id="paymenttype" class="form-control">
+                                                    <option value="">Select...</option>
+                                                    @foreach (PaymentType type in System.Enum.GetValues(typeof(PaymentType)))
+                                                    {
+                                                        if (type != PaymentType.NotSet)
+                                                        {
+                                                            <option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!--
+                                    <tr>
+                                        <td class="text-right">Accept as full payment</td>
+                                        <td>
+                                            @{Html.RenderPartial
+                                                (
+                                                  "~/Views/Shared/_SwitchButton.cshtml",
+                                                  true,
+                                                  new ViewDataDictionary()
+                                                  {
+                                                      { "checkboxname", "acceptasfullpayment" },
+                                                      { "checkboxid", "acceptasfullpayment" },
+                                                      { "disabled", false }
+                                                  }
+                                                );
+                                            }
+                                        </td>
+                                    </tr>
+                                    -->
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <button type="submit" class="btn btn-primary btn-lg">Update Payment Info</button>
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td width="33%" class="text-right">Date Paid</td>
+                                        <td>@Model.DatePaid.ToShortDateString("N/A")</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Amount Paid</td>
+                                        <td>@Model.AmountPaid.ToCurrency()</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Payment Method</td>
+                                        <td>@Model.PaymentTypeId.ToString().SplitByUpperCase()</td>
+                                    </tr>
+                                }
+                            
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>

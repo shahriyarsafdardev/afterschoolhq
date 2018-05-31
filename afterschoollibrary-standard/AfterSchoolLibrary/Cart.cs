@@ -1,0 +1,204 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using System.Data;
+using System.Collections;
+
+namespace AfterSchoolLibrary
+{
+	[Serializable]
+    public class Cart : BasicObjectWithModified
+    {
+		#region "ClassGenerator"
+
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public int? RegistrationId { get { return (int?)MDV["RegistrationId"].Value; } set { MDV["RegistrationId"].Value = value; } }
+		
+
+        public Cart()
+        {
+            this.Config(ObjectMap, DatabaseQuery, typeof(Cart).Name, "ID");
+            this.LoadObjectValues(ObjectMap);
+			this.Uid = Guid.NewGuid();
+			
+        }
+
+        public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
+        {
+            get
+            {
+                BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
+                string className = typeof(Cart).Name;
+                _dp = BasicObjectWithModified.get_BaseObjectMap(className);
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
+				
+                return _dp;
+            }
+        }
+
+        protected static Cart LoadObject(System.Data.DataRow row)
+        {
+            Cart obj = new Cart();
+            obj.LoadObjectValues(ObjectMap, row);
+            return obj;
+        }
+
+        protected static BasicLibrary.DataAccess.DatabaseQuery DatabaseQuery
+        {
+            get
+            {
+                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(Cart).Name);
+				
+                return dq;
+            }
+        }
+
+        public static Cart Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], id);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static List<Cart> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+            return Cart.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            return Cart.BaseGetCount(criterias, ObjectMap, dq);
+        }
+
+		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Cart).Name);
+        }
+
+        public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(Cart).Name);
+        }
+
+        public static SystemMessages Create(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return BaseObject._Create(DatabaseQuery, dc, ObjectMap);
+        }
+
+        public static SystemMessages Alter(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            SystemMessages msgs = new SystemMessages();
+            BasicLibrary.DataAccess.DatabaseParameters dps;
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RegistrationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			
+
+            return msgs;
+        }
+
+		public Cart Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			return Cart.Load(this.ID.Value, dc);
+		}
+		
+		public static Cart LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		
+
+        #endregion
+
+		#region "UserDefined"
+
+        public int? GradeLevel { get; set; }
+        public GenderType? Gender { get; set; }
+        public int? Age { get; set; }
+        public Dictionary<int, string> QuestionAnswers { get; set; }
+
+        public void ResetCartItems()
+        {
+            this._CartItems = null;
+        }
+
+        public static Cart GetNewCart(int? registrationId = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var cart = new Cart();
+            cart.RegistrationId = registrationId;
+            cart.CreateDate = cart.LastModifiedDate = DateTime.UtcNow;
+            cart.CreatedBy = cart.LastModifiedBy = 0;
+            msgs.AddRange(cart.Save());
+
+            return cart;
+        }
+
+        public CartItem AddCartItem(RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AddCartItem(ra.ActivityId.Value, ra.Day, ra.ID.Value, msgs, dc);
+        }
+
+        public CartItem AddCartItem(int activityId, DayOfWeekASL day, int? registrantActivityId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if(msgs.IsEmpty()) msgs = new SystemMessages();
+
+            if (this.GetCartItems(dc).Where(x => x.ActivityId == activityId && x.Day == day).Count() == 0)
+            {
+                var item = new CartItem();
+                item.CartId = this.ID;
+                item.ActivityId = activityId;
+                item.Day = day;
+                item.RegistrantActivityId = registrantActivityId;
+                item.CreateDate = item.LastModifiedDate = DateTime.UtcNow;
+                item.CreatedBy = item.LastModifiedBy = 0;
+                msgs.AddRange(item.Save(dc));
+
+                //force reload
+                this.ResetCartItems();
+                return item;
+            }
+            else
+            {
+                return this.GetCartItems(dc).Where(x => x.ActivityId == activityId && x.Day == day).First();
+            }
+
+        }
+
+        private List<CartItem> _CartItems = null;
+        public List<CartItem> GetCartItems(DatabaseConnection dc = null)
+        {
+            if (_CartItems.IsEmpty())
+            {
+                _CartItems = CartItem.LoadByCartId(this.ID.Value, dc);
+            }
+            return _CartItems;
+        }
+
+        #endregion
+    }
+}

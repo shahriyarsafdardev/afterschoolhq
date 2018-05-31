@@ -1,0 +1,240 @@
+﻿@model List<AfterSchoolLibrary.ActivityGroup>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+    var paging = (PagingModel)ViewData["PagingModel"];
+    var hasArchivedGroups = (bool)ViewBag.HasArchivedGroups;
+
+    var addUrl = Url.Action("edit", "group");
+
+    var previousLink = "#";
+    var nextLink = "#";
+    if (paging.IsNotEmpty())
+    {
+        if (paging.PageNumber > 1)
+        {
+            previousLink = Url.Action("index", "group", new { pn = paging.PageNumber - 1, rpp = Request["rpp"], archive = Request["archive"] });
+        }
+        if (paging.PageNumber < paging.TotalPages)
+        {
+            nextLink = Url.Action("index", "group", new { pn = paging.PageNumber + 1, rpp = Request["rpp"], archive = Request["archive"] });
+        }
+    }
+
+    var currentClass = "";
+    var archiveClass = "";
+    var isArchive = false;
+    if (Request["archive"] == "1")
+    {
+        archiveClass = "text-bold";
+        isArchive = true;
+    }
+    else
+    {
+        currentClass = "text-bold";
+    }
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a class="btn btn-primary btn-space" href="@addUrl">
+                    <i class="icon icon-left s7-plus"></i>
+                    Add @UILabel.ActivityGroupLabel()
+                </a>
+            </div>
+            <i class="s7-note2"></i> @UILabel.ActivityGroupLabel(true)
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+            
+            @if (Model.Count == 0 && !hasArchivedGroups)
+            {
+                <div class="widget">
+                    <div class="widget-head">
+                        <h1>Welcome to @UILabel.ActivityGroupLabel(true)</h1>
+                    </div>
+                    <div class="widget-tile">
+                        <hr />
+                        <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
+                        <p>You haven't created any @UILabel.ActivityGroupLabel(true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityGroupLabel().ToLower()</a>.</p>
+                        <p>&nbsp;</p>
+                        <p>
+                            <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityGroupLabel() &raquo;</a>
+                        </p>
+                    </div>
+                </div>
+            }
+            else
+            { 
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="pull-right">
+                            <a href="@Url.Action("index", "group", new { archive = 0 })" class="@currentClass">Current</a> |
+                            <a href="@Url.Action("index", "group", new { archive = 1 })" class="@archiveClass">Archived</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th class="text-center">Activities</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Count > 0)
+                            {
+                                foreach (var group in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a href="@Url.Action("summary", "group", new {id = group.Uid})" class="btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
+                                        </td>
+                                        <td><a href="@Url.Action("summary", "group", new {id = group.Uid})">@group.Name</a></td>
+                                        <td class="text-center">@group.GetActivityCount(isArchive, false)</td>
+                                        <td>
+                                            <div class="btn-group pull-right">
+
+                                                <button class="btn btn-default btn-sm md-trigger"
+                                                        data-modal="modal-copy"
+                                                        onclick="setCopyGroup('@group.Name', '@Url.Action("copy", "group", new { id = group.Uid.ToString() })')">
+                                                    <i class="s7-copy-file"></i> Repeat
+                                                </button>
+
+                                                @if (!group.IsArchived)
+                                                {
+                                                    <button class="btn btn-default btn-sm md-trigger" 
+                                                            data-modal="modal-archive" 
+                                                            onclick="archiveGroup('@group.Name', '@Url.Action("archive", "group", new { id = group.Uid.ToString() })')">
+                                                        <i class="s7-albums"></i> Archive
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-default btn-sm md-trigger" 
+                                                            data-modal="modal-restore" 
+                                                            onclick="restoreGroup('@group.Name', '@Url.Action("restore", "group", new { id = group.Uid.ToString() })')">
+                                                        <i class="s7-albums"></i> Restore
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4">There are no @UILabel.ActivityGroupLabel(true).ToLower(). Please <a href="@Url.Action("edit", "group")">add a new @UILabel.ActivityGroupLabel().ToLower()</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                
+                Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    paging,
+                    new ViewDataDictionary()
+                    {
+                    { "id", "" },
+                    { "querystring", string.Format("archive={0}", Request["archive"]) },
+                    { "action", "index" },
+                    { "controller", "group" }
+                    }
+                );
+                    
+            }
+        </div>
+    </div>
+</div>
+
+
+<div id="modal-copy" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-copy" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Repeat @UILabel.ActivityGroupLabel()</h3>
+            </div>
+            <div class="modal-body form">
+
+                <p>This is used to create an copy of the existing @UILabel.ActivityGroupLabel().ToLower(). Once copied you can make any modifications as needed.</p>
+
+                <div class="form-group">
+                    <label>@UILabel.ActivityGroupLabel() Name</label>
+                    <input type="text" placeholder="Your @UILabel.ActivityGroupLabel() Name" class="form-control" id="groupnamecopy" name="groupnamecopy" onfocus="this.select()">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Repeat @UILabel.ActivityGroupLabel() &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-archive" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Archive @UILabel.ActivityGroupLabel()</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to archive <strong><span id="archive-group-name"></span></strong>? </p><p>Archived @UILabel.ActivityGroupLabel(true).ToLower() are automatically unpublished and all related @UILabel.ActivityLabel(true).ToLower() are also archived and unpublished.</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="archive-group-button">Archive &raquo;</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-restore" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Restore @UILabel.ActivityGroupLabel()</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to restore <strong><span id="restore-group-name"></span></strong>? </p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="restore-group-button">Restore &raquo;</a>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function setCopyGroup(name, url) {
+        $('#groupnamecopy').val(name + ' [copy]');
+        $('#form-copy').attr('action', url);
+    }
+    function archiveGroup(name, url) {
+        $('#archive-group-name').html(name);
+        $('#archive-group-button').attr('href', url);
+    }
+    function restoreGroup(name, url) {
+        $('#restore-group-name').html(name);
+        $('#restore-group-button').attr('href', url);
+    }
+</script>

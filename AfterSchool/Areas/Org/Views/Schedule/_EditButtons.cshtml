@@ -1,0 +1,25 @@
+﻿@{ 
+    var activity = (string)ViewBag.ActivityId;
+    var group = (string)ViewBag.ActivityGroupUid;
+}
+
+<div class="form-group">
+    <label class="col-sm-3 control-label"></label>
+    <div class="col-sm-6">
+        <div class="pull-right">
+            <button type="submit" class="btn btn-primary">Save</button>
+            @if (activity.IsNotEmpty())
+            {
+                <a href="@Url.Action("editschedule", "activity", new { id = activity })" class="btn btn-default">Cancel</a>
+            }
+            else if (group.IsNotEmpty())
+            {
+                <a href="@Url.Action("schedules", "group", new { id = group })" class="btn btn-default">Cancel</a>
+            }
+            else
+            {
+                <button type="reset" class="btn btn-default">Cancel</button>
+            }
+        </div>
+    </div>
+</div>

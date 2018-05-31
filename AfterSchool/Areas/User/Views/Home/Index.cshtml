@@ -1,0 +1,85 @@
+﻿@model List<Registrant>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+<div class="main-content">
+
+    <div class="panel panel-default">
+        <div class="panel-body bg-info">
+            <p class="text-center text-medium">
+                Missing a registration? Contact us at <a href="mailto:support@enrollhq.zendesk.com">support@enrollhq.zendesk.com</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Welcome @SessionVariables.LoggedInUser.FirstName.Trim().ToProperCase()!
+        </div>
+        <div class="panel-body">
+            <p>Here is some info about your account</p>
+        </div>
+    </div>
+
+    @foreach (var registrant in Model)
+    {
+        var answers = registrant.GetAnswers().Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).ToList();
+        var children = registrant.GetChildren();
+        var ras = new List<RegistrantActivity>();
+
+        foreach(var child in children)
+        {
+            ras.AddRange(child.GetRegistrantActivities());
+        }
+       
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @registrant.Name.ToProperCase()
+            </div>
+            <div class="panel-body"> 
+                <div class="col-md-6">
+                    <h3>Registration Information</h3>
+                    <table class="table-condensed">
+                        @foreach (var answer in answers)
+                        {
+                            <tr>
+                                <td>@answer.QuestionDataTypeId.ToString().SplitByUpperCase().Remove("Registrant")</td>
+                                <td>@answer.Text</td>
+                            </tr>
+                        }
+                    </table>
+                </div>       
+                <div class="col-md-6">
+
+                    @if (ras.Any())
+                    {
+                        Html.RenderPartial(
+                             "_ScheduledActivities",
+                             ras.Where(x => x.ToActivity().IsInSession()).ToList(),
+                             new ViewDataDictionary()
+                             {
+                                 { "registrant", registrant },
+                                 { "title", string.Format("Current {0}", UILabel.ActivityLabel(true)) }
+                             }
+                        );
+
+                        Html.RenderPartial(
+                             "_ScheduledActivities",
+                             ras.Where(x => x.ToActivity().WillBeInSession()).ToList(),
+                             new ViewDataDictionary()
+                             {
+                                 { "registrant", registrant },
+                                 { "title", string.Format("Upcoming {0}", UILabel.ActivityLabel(true)) }
+                             }
+                        );
+                    }
+                    else
+                    {
+                        <p>@registrant.FirstName.ToProperCase() is not registered for any @UILabel.ActivityLabel(true).ToLower()</p>
+                    }
+                </div> 
+            </div>
+        </div>
+    }
+</div>

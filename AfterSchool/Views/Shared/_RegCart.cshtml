@@ -1,0 +1,56 @@
+﻿@{ 
+    var registration = (Registration)ViewBag.Registration;
+    var groups = (List<ActivityGroup>)ViewBag.Groups;
+
+    var checkout = "Checkout";
+    if (registration.IsNotEmpty())
+    {
+        checkout = "Next";
+    }
+
+    var hideCartClass = "";
+    if (groups.Count > 0)
+    {
+        hideCartClass = "hide";
+    }
+}
+<div id="show-cart" class="show-cart-top-right @hideCartClass">
+    <span class="cart-number hide">0</span>
+    <button class="btn btn-primary btn-lg" onclick="showCart()"><i class="s7-cart"></i> Show Cart</button>
+</div>
+
+<div id="cart" class="checkout-cart hide">
+    <div class="close-cart"><i class="s7-close-circle icon-large"></i></div>
+    <h1 class="text-center"><i class="s7-cart"></i> Cart</h1>
+
+    <h2>
+        <span class="pull-right" id="cart-total">$0.00</span>
+        Total
+    </h2>
+
+    <button type="button" onclick="register()" class="btn btn-primary btn-block btn-lg" disabled="disabled" id="registerandcheckout">@checkout &raquo;</button>
+
+    <div>
+        <div id="cart-activities" class="hide">
+            <div class="ca-title">
+                <h3>Activities</h3>
+            </div>
+            <div class="ca-list">
+            </div>
+            <div class="ca-costs hide">
+            </div>
+        </div>
+
+        @foreach (var day in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
+        {
+            <div class="dow hide" id="dow-@(day.ToString())">
+                <div class="dow-title">
+                    <h3>@day.ToString()</h3>
+                </div>
+                <div class="dow-activities">
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

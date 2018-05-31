@@ -1,0 +1,53 @@
+﻿@model List<RegistrantActivity>
+@{ 
+    var registrant = (Registrant)ViewData["registrant"];
+    var title = ViewData["title"];
+}
+
+@if (Model.Any())
+{
+    if (Model.Where(x => x.NumberOfSeats > 0).Any())
+    {
+        <div class="panel panel-alt4">
+            <div class="panel-heading">
+                @title
+            </div>
+            <div class="panel-body">
+                @foreach (var ra in Model.Where(x => x.NumberOfSeats > 0))
+                {
+                    <p class="text-medium">@ra.ActivityName</p>
+                    Html.RenderPartial("~/Views/Shared/_ActivityScheduleHtml.cshtml", ra.ToActivity().GetSchedule());
+                    <hr />
+                }
+            </div>
+        </div>
+    }
+    if (Model.Where(x => x.NumberOfWaitingListSeats > 0).Any())
+    {
+        <div class="panel panel-alt4">
+            <div class="panel-heading">
+                @registrant.FirstName.ToProperCase() is on the waiting list for the following @UILabel.ActivityLabel(true).ToLower()
+            </div>
+            <div class="panel-body">
+                @foreach (var ra in Model.Where(x => x.NumberOfWaitingListSeats > 0))
+                {
+                    @: @ra.ActivityName - @ra.ToActivity().GetSchedule().GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")<br />
+                }
+            </div>
+        </div>
+    }
+    if (Model.Where(x => x.NumberOfApplicationSeats > 0).Any())
+    {
+        <div class="panel panel-alt4">
+            <div class="panel-heading">
+                @registrant.FirstName.ToProperCase() applied for the following @UILabel.ActivityLabel(true).ToLower()
+            </div>
+            <div class="panel-body">
+                @foreach (var ra in Model.Where(x => x.NumberOfApplicationSeats > 0))
+                {
+                    @: @ra.ActivityName - @ra.ToActivity().GetSchedule().GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")<br />
+                }
+            </div>
+        </div>
+    }
+}

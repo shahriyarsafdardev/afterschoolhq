@@ -1,0 +1,36 @@
+﻿@model AfterSchoolLibrary.Account
+
+@{    
+    List<Stripe.StripeCard> cards = (List<Stripe.StripeCard>)ViewBag.Cards;
+}
+
+@if (cards.Count > 0)
+{
+    <h4>Payment Cards</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>Name</th>
+                <th>Expiration</th>
+                <th>Card</th>
+                <th></th>
+            </tr>
+            @foreach (Stripe.StripeCard card in cards)
+            {
+                <tr>
+
+                    <td>@card.Name</td>
+                    <td>@card.ExpirationMonth / @card.ExpirationYear</td>
+                    <td><span class="badge badge-success">@card.Brand</span> **** **** **** @card.Last4</td>
+                    <td>
+                        @if (Model.StripeDefaultCardId != card.Id)
+                        {
+                            <a href="@Url.Action("setprimarycard", "account", new { id = card.Id })" class="btn btn-primary btn-xs">Set as Primary</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+

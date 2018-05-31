@@ -1,0 +1,40 @@
+﻿@model List<AfterSchoolLibrary.Registrant>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var returnUrl = ViewBag.ReturnUrl;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a class="btn btn-primary btn-space" href="@returnUrl">
+                    &laquo; Return
+                </a>
+            </div>
+            <i class="s7-note2"></i> Invite Contacts
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">            
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="s7-check-circle icon-large text-success"></i> 
+                            You've successfully invited your list of contacts.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

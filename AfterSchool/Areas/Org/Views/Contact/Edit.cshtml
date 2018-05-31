@@ -1,0 +1,51 @@
+﻿@model AfterSchoolLibrary.Registrant
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", SessionVariables.CurrentAccount.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a href="@Url.Action("index", "contact")" class="btn btn-default">&laquo; Back to List</a>
+            </div>
+            <i class="s7-user"></i> @Model.DisplayName
+        </div>
+        <div class="panel-body">
+            <form method="post" action="@Url.Action("edit", "contact", new { id = Model.Uid.ToString() })" class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">First Name</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="firstname" name="firstname" value="@Model.FirstName" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Last Name</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="lastname" name="lastname" value="@Model.LastName" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Email</label>
+                    <div class="col-sm-6">
+                        <input type="email" class="form-control" id="email" name="email" value="@Model.Email" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button type="reset" class="btn btn-default">Discard Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,93 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    var groups = (List<ActivityGroup>)ViewBag.Groups;
+    var activities = (List<Activity>)ViewBag.Activities;
+    var adminMode = (bool)ViewBag.AdminMode;
+
+    foreach (var group in groups)
+    {
+        var isOpen = group.IsOpenNow() || adminMode;
+        var willOpen = group.WillOpen();
+        var willCloseIn = group.WillCloseIn();
+        var willOpenIn = group.WillOpenIn();
+        var seatsRemaining = group.GetTotalSeatsLeft();
+        var registerButtonText = string.Format("Register for {0} &raquo;", UILabel.ActivityLabel(true));
+        var registerButtonClass = "btn-primary";
+
+        var labelDanger = "warning";
+        if (seatsRemaining <= 0)
+        {
+            seatsRemaining = 0;
+            labelDanger = "danger";
+        }
+
+        if (!isOpen)
+        {
+            registerButtonClass = "btn-alt5";
+            registerButtonText = string.Format("Preview {0} &raquo;", UILabel.ActivityLabel(true));
+        }
+
+        <div class="col-md-12">
+            <span class="badge badge-@labelDanger activity-seats-left padding-10">
+                @seatsRemaining seats
+                @if (isOpen)
+                {
+                    @:left
+                }
+            </span>
+            <div class="panel panel-alt5 panel-borders panel-shadow rounded-corners">
+                <div class="panel-heading">
+                    <a href="@group.HomePageUrl" class="text-white"><i class="s7-info"></i> @group.Name</a>
+                </div>
+                <div class="panel-body">
+                    <div class="col-md-4">
+                        <p>
+                            <strong>About</strong>
+                        </p>
+                        @Html.Raw(group.Description)
+                    </div>
+                    <div class="col-md-4">
+                        <p>
+                            <strong>Registration Schedule</strong>
+                        </p>
+                        <p>
+                            @if (group.IsOpenNow())
+                            {
+                                @:Closes: @group.GetCurrentRegistrationPeriod().EndDateTime.Value.ToLongDateTimeString()
+                            }
+                            else if (group.WillOpen())
+                            {
+                                @:Opens: @group.GetNextRegistrationPeriod().StartDateTime.ToLongDateTimeString()
+                            }
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="@group.HomePageUrl" class="btn @registerButtonClass btn-lg btn-block">@Html.Raw(registerButtonText)</a>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div id="timer-open-@group.ID" class="@(!group.IsOpenNow() ? "hide" : "")">
+                        Closes in
+                        <span class="time-days group-days-@group.ID" id="group-days-open-@group.ID" data-id="@group.ID">@willCloseIn.Days</span> days
+                        <span class="time-hours group-hrs-@group.ID" id="group-hrs-open-@group.ID" data-id="@group.ID">@willCloseIn.Hours</span> hrs
+                        <span class="time-mins group-mins-@group.ID" id="group-mins-open-@group.ID" data-id="@group.ID">@willCloseIn.Minutes</span> mins
+                        <span class="time-secs group-secs-@group.ID" id="group-secs-open-@group.ID" data-id="@group.ID">@willCloseIn.Seconds</span> secs
+                    </div>
+
+                    <div id="timer-willopen-@group.ID" class="@(!willOpen ? "hide" : "")">
+                        Opens in
+                        <span class="time-days group-days-@group.ID" id="group-days-willopen-@group.ID" data-id="@group.ID">@willOpenIn.Days</span> days
+                        <span class="time-days group-hrs-@group.ID" id="group-hrs-willopen-@group.ID" data-id="@group.ID">@willOpenIn.Hours</span> hrs
+                        <span class="time-mins group-mins-@group.ID" id="group-mins-willopen-@group.ID" data-id="@group.ID">@willOpenIn.Minutes</span> mins
+                        <span class="time-secs group-secs-@group.ID" id="group-secs-willopen-@group.ID" data-id="@group.ID">@willCloseIn.Seconds</span> secs
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    if(activities.Count > 0)
+    { 
+        Html.RenderPartial("_RegActivityGrid", Model);
+    }
+}

@@ -1,0 +1,31 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    ViewBag.Title = "Verify Your Email";
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+<<div class="am-wrapper am-login am-signup">
+    <div class="am-content">
+        <div class="main-content">
+            <div class="login-container sign-up">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" height="80px" class="logo-img"></a>
+                    </div>
+                    <div class="panel-body">
+                        <p class="text-white">
+                            @if (msgs.HasNoErrors())
+                            {
+                                @:Thank you! Your email has been verified. <a href="@Url.Action("index", "home", new { area = "org" })">Continue to your account</a>.
+                            }
+                            else
+                            {
+                                @:There was an error verifying your account. Please <a href="mailto:@AfterSchoolLibrary.Email.AppSupportEmailAddress(SessionVariables.IsAfterSchool.Value)">contact support</a> to resolve the issue.
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+</div>

@@ -1,0 +1,74 @@
+﻿@model AfterSchoolLibrary.Account
+
+@{
+    List<Stripe.StripeCard> cards = (List<Stripe.StripeCard>)ViewBag.Cards;
+}
+
+<h4>Add Payment Card</h4>
+<form method="post" action="@Url.Action("addcard", "account", new { id = Model.ID })" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Name on Card</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="name" name="name" value="" onfocus="this.select()" required />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Card Number</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="number" name="number" value="" onfocus="this.select()" required />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">CVC</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="cvc" name="cvc" value="" onfocus="this.select()" required />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Expiration Month</label>
+        <div class="col-sm-6">
+            <select class="form-control" id="expmonth" name="expmonth" required>
+                @foreach (Month month in Enum.GetValues(typeof(Month)))
+                {
+                    <option value="@((int)month)">@((int)month) - @month.ToString()</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Expiration Month</label>
+        <div class="col-sm-6">
+            <select class="form-control" id="expyear" name="expyear" required>
+                @for (var i = DateTime.UtcNow.Year; i < DateTime.UtcNow.Year + 10; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
+        </div>
+    </div>
+    @if (cards.Count > 0) 
+    { 
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Make primary</label>
+            <div class="col-sm-6">
+                <div class="switch-button switch-button-yesno">
+                    <input type="checkbox" checked="checked" name="makeprimary" id="makeprimary">
+                    <span>
+                        <label for="makeprimary"></label>
+                    </span>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <input type="hidden" name="makeprimary" id="makeprimary" value="1" />
+    }
+    <div class="form-group">
+        <label class="col-sm-3 control-label"></label>
+        <div class="col-sm-6">
+            <button type="submit" class="btn btn-primary">Add Card</button>
+        </div>
+    </div>
+</form>
+

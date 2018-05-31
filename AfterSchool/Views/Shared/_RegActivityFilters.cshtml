@@ -1,0 +1,97 @@
+﻿@model AfterSchoolLibrary.Account
+
+@{ 
+    var activities = (List<Activity>)ViewBag.Activities;
+    var grades = GradeLevel.Load();
+    var showAge = activities.Where(x => x.AgeStart.HasValue && x.AgeEnd.HasValue).Any().ToInteger();
+    var showGrade = activities.Where(x => x.GetGradeLevels().Any()).Any().ToInteger();
+    var showGender = activities.Where(x => x.GenderRestriction != GenderRestrictionType.None).Any().ToInteger();
+    var resetUrl = Request.Url.PathAndQuery + (Request.Url.PathAndQuery.Contains("?") ? "&" : "?") + "reset=1";
+
+    var filterCols = 6;
+    if (Model.HasFeature(FeatureType.ManageActivityGroups))
+    {
+        filterCols = 2;
+    }
+
+    if (showAge + showGrade + showGender == 0)
+    {
+        filterCols = 3;
+    }
+
+    if (showAge + showGrade + showGender == 1)
+    {
+        filterCols = 2;
+    }
+}
+
+<div class="orghome-filters rounded-corners">
+    <form>
+        <div class="row">
+            <div class="col-md-@filterCols">
+                <input type="text" placeholder="Search @UILabel.ActivityLabel() Name" id="search-name" class="form-control" />
+            </div>
+
+            <div class="col-md-@filterCols">
+                <select class="form-control" id="search-seatsfilled" name="search-seatsfilled">
+                    <option value="">All Activities</option>
+                    <option value="1">Has Seats Available</option>
+                    <option value="2">Has Waiting List Available</option>
+                </select>
+            </div>
+
+            <div class="col-md-@filterCols">
+                <select class="form-control" id="search-dayofweek" name="search-dayofweek">
+                    <option value="">Any Day</option>
+                    @foreach (var item in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
+                    {
+                        <option value="@((int)item)">@item.ToString().SplitByUpperCase()</option>
+                    }
+                </select>
+            </div>           
+
+            @if (showGender.ToBoolean())
+            {
+                <div class="col-md-@filterCols">
+                    <select class="form-control" id="search-gender" name="search-gender" @(SessionVariables.Cart?.Gender != null ? "disabled=\"disabled\"" : "")>
+                        <option value="">Any Gender</option>
+                        @foreach (var item in Enum.GetValues(typeof(GenderType)).Cast<GenderType>().Where(x => x != GenderType.NotSet))
+                        {
+                            <option value="@((int)item)" @(SessionVariables.Cart?.Gender == item ? "selected=\"selected\"" : "")>@item.ToString().SplitByUpperCase()</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            @if (showGrade.ToBoolean())
+            {
+                <div class="col-md-@filterCols">
+                    <select class="form-control" id="search-grade" name="search-grade" @(SessionVariables.Cart?.GradeLevel != null ? "disabled=\"disabled\"" : "")>
+                        <option value="">Any Grade</option>
+                        @foreach (var grade in grades)
+                        {
+                            <option value="@grade.ID" @(SessionVariables.Cart?.GradeLevel == grade.ID ? "selected=\"selected\"" : "")>@grade.Name</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            @if (showAge.ToBoolean())
+            { 
+                <div class="col-md-@filterCols">
+                    <select class="form-control" id="search-age" name="search-age" @(SessionVariables.Cart?.Age != null ? "disabled=\"disabled\"" : "")>
+                        <option value="">Any Age</option>
+                        @for (var i = 0; i <= 115; i++)
+                        {
+                            <option value="@i" @(SessionVariables.Cart?.Age == i ? "selected=\"selected\"" : "")>@i</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            <div class="col-md-2">
+                <button type="button" onclick="location.href='@resetUrl'" class="btn btn-alt8 btn-lg btn-block">Reset Filters</button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,226 @@
+﻿@model AfterSchoolLibrary.Package
+@{
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    string disableAttr = "";
+    string readonlyAttr = "";
+    var features = (List<PackageFeature>)ViewBag.Features;
+    //disableAttr = Model.IsAnyAccountUsing() && AfterSchoolLibrary.Utilities.IsLiveServer ? " disabled=\"disabled\" " : "";
+    //readonlyAttr = Model.IsAnyAccountUsing() && AfterSchoolLibrary.Utilities.IsLiveServer ? " readonly=\"readonly\" " : "";
+    var featureTypes = System.Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>().OrderBy(x => x.ToString());
+}
+
+<div class="page-head">
+    <h2>Package: @Model.Name</h2>
+</div>
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form method="post" action="@Url.Action("edit", "package", new { id = @Model.ID })" class="form-horizontal">
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Package Name</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Price / Month</label>
+                    <div class="col-sm-6">
+                        <input type="number" class="form-control" id="price" name="price" value="@Model.Price.IfEmpty(0).ToString("####.00")" onfocus="this.select()" step="any" required @readonlyAttr />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Price / Year</label>
+                    <div class="col-sm-6">
+                        <input type="number" class="form-control" id="priceperyear" name="priceperyear" value="@Model.PricePerYear.IfEmpty(0).ToString("####.00")" onfocus="this.select()" step="any" required @readonlyAttr />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Is Active</label>
+                    <div class="col-sm-6">
+                        @{Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.IsActive,
+                          new ViewDataDictionary()
+                          {
+                                { "checkboxname", "isactive" },
+                                { "checkboxid", "isactive" }
+                          });}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Is Popular</label>
+                    <div class="col-sm-6">
+                        @{Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.IsPopular,
+                          new ViewDataDictionary()
+                          {
+                            { "checkboxname", "ispopular" },
+                            { "checkboxid", "ispopular" }
+                          });}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">For AfterSchoolHQ.com?</label>
+                    <div class="col-sm-6">
+                        @{Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.IsAfterSchool,
+                          new ViewDataDictionary()
+                          {
+                            { "checkboxname", "isafterschool" },
+                            { "checkboxid", "isafterschool" }
+                          });}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Description</label>
+                    <div class="col-sm-6">
+                        <textarea class="form-control" id="description" name="description" onfocus="this.select()">@Model.Description</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <div>
+                            <h3>Features</h3>
+                            <p>Enter 0 to turn off feature, a number greater than 0 to activate feature and one denote the max number of the feature the package has</p>
+                        </div>
+                    </div>
+                </div>
+
+                @foreach (FeatureType type in featureTypes)
+                {
+                    if (type == FeatureType.NotSet)
+                    {
+                        continue;
+                    }
+
+                    var feature = features.Where(x => x.FeatureTypeId == type).FirstOrDefault();
+                    var value = feature.IsNotEmpty() ? feature.Max.ToString() : "";
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">@type.ToString().SplitByUpperCase()</label>
+                        <div class="col-sm-6">
+                            <input type="number" class="form-control" id="@type" name="@type" value="@value" onfocus="this.select()" step="1" required @readonlyAttr />
+                        </div>
+                    </div>
+                }
+
+                @*
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"># of @UILabel.ActivityLabel(true)</label>
+                    <div class="col-sm-6">
+                        <input type="number" class="form-control" id="maxactivities" name="maxactivities" value="@Model.MaxActivities" onfocus="this.select()" step="1" required @readonlyAttr />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"># of @UILabel.RegistrantLabel(true) / @UILabel.ActivityLabel()</label>
+                    <div class="col-sm-6">
+                        <input type="number" class="form-control" id="maxregistrants" name="maxregistrants" value="@Model.MaxRegistrants" onfocus="this.select()" step="1" @readonlyAttr />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"># of User Accounts</label>
+                    <div class="col-sm-6">
+                        <input type="number" class="form-control" id="maxusers" name="maxusers" value="@Model.MaxUsers" onfocus="this.select()" step="1" @readonlyAttr />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Has Messaging</label>
+                    <div class="col-sm-6">
+                        @{Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.HasMessaging,
+                          new ViewDataDictionary()
+                          {
+                              { "checkboxname", "hasmessaging" },
+                              { "checkboxid", "hasmessaging" },
+                              { "disabled", Model.IsAnyAccountUsing() && false }
+                          });}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Waiting List Management</label>
+                    <div class="col-sm-6">
+                        @{Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.HasWaitingList,
+                          new ViewDataDictionary()
+                          {
+                              { "checkboxname", "haswaitinglist" },
+                              { "checkboxid", "haswaitinglist" },
+                              { "disabled", Model.IsAnyAccountUsing() && false }
+                          });}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Has Custom Url</label>
+                    <div class="col-sm-6">
+                        @{Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.HasCNameUrl,
+                          new ViewDataDictionary()
+                          {
+                              { "checkboxname", "hascnameurl" },
+                              { "checkboxid", "hascnameurl" },
+                              { "disabled", Model.IsAnyAccountUsing() && false }
+                          });}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Take Attendance</label>
+                    <div class="col-sm-6">
+                        @{Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.HasAttendance,
+                          new ViewDataDictionary()
+                          {
+                              { "checkboxname", "hasattendance" },
+                              { "checkboxid", "hasattendance" },
+                              { "disabled", Model.IsAnyAccountUsing() && false }
+                          });}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Accept Payments</label>
+                    <div class="col-sm-6">
+                        @{Html.RenderPartial(
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.HasPayments,
+                          new ViewDataDictionary()
+                          {
+                              { "checkboxname", "haspayments" },
+                              { "checkboxid", "haspayments" },
+                              { "disabled", Model.IsAnyAccountUsing() && false }
+                          });}
+                    </div>
+                </div>
+                    *@
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="reset" class="btn btn-default">Discard Changes</button>
+                        <a href="@Url.Action("index", "package")" class="btn btn-default pull-right"><i class="icon icon-left s7-left-arrow"></i> Back to List</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,124 @@
+﻿@model AfterSchoolLibrary.ActivityMessage
+@{
+    ViewBag.Title = Model.AccountName;
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+    var amrs = (List<ActivityMessageRegistrant>)ViewBag.Registrants;
+    var registrantsPerColumn = 0;
+    var account = SessionVariables.CurrentAccount;
+    var group = Model.GetActivityGroup();
+    
+    if(amrs.IsNotEmpty())
+    {
+        registrantsPerColumn = Math.Ceiling(amrs.Count / 3.0).ToInteger();
+    }
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_ActivityGroupHeader", group);}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("_ActivityGroupTitle", Model.ActivityGroupName + " - Message"); }
+        </div>
+        <div class="panel-body">
+            <div class="col-md-10 col-md-offset-1">
+
+                <div class="row">
+                    <div class="btn-group pull-right">
+                        @if (Model.GetUnsentCount() > 0)
+                        {
+                            <button class="btn btn-default md-trigger" data-modal="resend-confirm" onclick="setResendLink()">
+                                <i class="s7-paper-plane"></i>
+                                Resend Message to Unreached Recipients
+                            </button>
+                        }
+                        <a href="@Url.Action("messages", "group", new { id = group.Uid})" class="btn btn-default">&laquo; Back to List</a>
+                    </div>
+                </div>
+
+                <form method="post" action="@Url.Action("messageadd", "group", new { id = group.Uid })" class="form-horizontal">
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Subject</label>
+                        <div class="col-sm-6 padding-10">
+                            @Model.Subject
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Body</label>
+                        <div class="col-sm-6 padding-10">
+                            @Html.Raw(Model.Body)
+                        </div>
+                    </div>
+                    @if (Model.DateSent.HasValue)
+                    {
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Date Sent</label>
+                            <div class="col-sm-6 padding-10">
+                                @account.ConvertToAccountTimeZone(Model.DateSent.Value).ToLongDateTimeString()
+                            </div>
+                        </div>
+                    }
+                    @if (amrs.IsNotEmpty())
+                    {
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Recipients
+                            </label>
+                            <div class="col-sm-6">
+                                @for (int i = 0; i < 3; i++)
+                                {
+                                    <div class="col-md-4">
+                                        @foreach (var amr in amrs.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                                        {
+                                            <div class="padding-10">
+                                                @if (amr.DateSent.HasValue)
+                                                {
+                                                    <i class="s7-check-circle text-success text-bold"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="s7-close-circle text-danger text-bold"></i>
+                                                }
+                                                @amr.RegistrantDisplayName
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function setResendLink() {
+        $('#btn-confirm').attr('href', '@Url.Action("messagesresend", "group", new { id = Model.ID })');
+    }
+</script>
+
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/_Modal.cshtml",
+        new ModalViewModel()
+        {
+            ID = "resend-confirm",
+            Title = "Confirm",
+            HtmlBody = "Are you sure? This will sent an email to all recipients who did not receive an email previously.",
+            ActionButtonHtml = "Send Message &raquo;",
+            ActionButtonId = "btn-confirm"
+        }
+    ); 
+}

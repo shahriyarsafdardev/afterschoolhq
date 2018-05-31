@@ -1,0 +1,30 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var members = (List<WebUser>)ViewBag.Members;
+}
+
+@{Html.RenderPartial("AdminAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-users"></i> Team
+        </div>
+        <div class="panel-body">
+            @{ Html.RenderPartial(
+                   "~/Views/Shared/_Users.cshtml", 
+                   members,
+                   new ViewDataDictionary() { 
+                        {"AccountId", Model.ID},
+                        {"ReturnUrl", Request.Url.PathAndQuery} ,
+                        {"AccountPackage", accountPackage} 
+                   }); }
+        </div>
+    </div>
+</div>

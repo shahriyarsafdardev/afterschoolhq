@@ -1,0 +1,57 @@
+﻿@model List<AfterSchoolLibrary.Package>
+
+@{
+    ViewBag.Title = "Packages";
+}
+
+<div class="page-head">
+    <h2>Packages</h2>
+</div>
+<div class="main-content">
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <a href="@Url.Action("edit", "package")" class="btn btn-primary btn-space">
+                <i class="icon icon-left s7-plus"></i>
+                Add Package
+            </a>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <tr>
+                        <th></th>
+                        <th>Package Name</th>
+                        <th>Domain</th>
+                        <th class="text-center">Active</th>
+                        <th class="text-center">$ / Month</th>
+                        <th class="text-center">$ / Year</th>
+                    </tr>
+                    @if (Model.Any())
+                    {
+                        foreach (Package item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("edit", "package", new { id = item.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                </td>
+                                <td>@item.Name</td>
+                                <td>@(item.IsAfterSchool ? "AfterSchoolHQ.com" : "EnrollHQ.com")</td>
+                                <td class="text-center">@{Html.RenderPartial("_BooleanToHtml", item.IsActive);}</td>
+                                <td class="text-center">@item.Price.ToCurrency()</td>
+                                <td class="text-center">@item.PricePerYear.ToCurrency()</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10">There are no packages. Please <a href="@Url.Action("edit", "package")">add a new package</a></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,28 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    List<Stripe.StripeCard> cards = (List<Stripe.StripeCard>)ViewBag.Cards;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Billing Details
+        </div>
+        <div class="panel-body">
+            <div class="col-md-8 col-lg-9">
+                @{Html.RenderPartial("~/Views/Shared/_PaymentDetails.cshtml", Model);}
+            </div>
+            <div class="col-md-4 col-lg-3">
+                @{Html.RenderPartial("~/Views/Shared/_AccountEditNav.cshtml", Model); }
+            </div>
+        </div>
+    </div>
+</div>
+

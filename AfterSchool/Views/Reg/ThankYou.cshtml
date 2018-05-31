@@ -1,0 +1,94 @@
+﻿@model AfterSchoolLibrary.Registration
+
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+
+    var account = (Account)ViewBag.Account;
+    var activities = (List<RegistrantActivity>)ViewBag.Activities;
+    var registrant = (Registrant)ViewBag.Registrant;
+
+    ViewBag.Title = "Thank You - " + account.Name;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+
+    var registering = "registering";
+    var registered = "registered";
+    var registration = "registration";
+
+    if(activities.Where(x => x.ActivityGroupId.HasValue).Count() > 0)
+    {
+        var group = ActivityGroup.Load(activities.First().ActivityGroupId.Value);
+        if(group.RegistrationModeId == RegistrationMode.Apply)
+        {
+            registering = "applying";
+            registered = "applied";
+            registration = "application";
+        }
+    }
+}
+
+<div class="page-head registration-titlebar">
+    <h2><i class="icon icon-left s7-note2"></i> @account.Name Registration</h2>
+    <p></p>
+</div>
+
+<div class="main-content">
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+
+            <div class="bg-success text-white padding-20">
+                <h1><i class="s7-check-circle"></i> Thanks for @registering, @registrant.FirstName! </h1>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p>
+                        You will receive an email confirming your @registration.
+                    </p>
+                    <p>
+                        You have @registered for the following activities:
+                        <ul>
+                            @foreach (var activity in activities)
+                            {
+                                var showChoice = activities.Where(x => x.Day == activity.Day && x.Day != DayOfWeekASL.NotSet).Count() > 1;
+                                var showDay = activity.Day != DayOfWeekASL.NotSet;
+                                <li>
+                                    @(showDay ? activity.Day.ToString() + ":" : "")
+                                    @activity.ActivityName
+                                    @(showChoice ? "(" + activity.PreferenceNumber.Value.ToOrdinal() + " Choice)" : "")
+                                </li>
+                            }
+                        </ul>
+
+                    </p>
+                    @if (account.Email.IsNotBlank())
+                    {
+                        <p>
+                            If you have any questions please contact us at <a href="mailto:@account.Email">@account.Email</a>
+                        </p>
+                    }
+                    <div class="row">
+                        <div class="margin-t-10 text-center">
+                            @{/* show registrant account, don't show account if is in admin mode */}
+                            @if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsEmpty())
+                            {
+                                <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-default btn-lg">View Account</a>
+                            }
+                            <a href="@account.HomePageUrl" class="btn btn-primary btn-lg">Start New Registration &raquo;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section fbadevents
+{
+    @if (account.GetAccountProperty(AccountPropertyType.FacebookAdPixel).IsNotEmpty())
+    {
+        <script>
+          fbq('track', 'CompleteRegistration');
+        </script>
+    }
+}

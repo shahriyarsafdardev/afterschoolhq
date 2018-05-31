@@ -1,0 +1,32 @@
+﻿@model Form
+
+@{
+    var questionGroups = (List<FormQuestionGroup>)ViewData["QuestionGroups"];
+    var questionGroupId = (int?)ViewData["QuestionGroupId"];
+    var registrantType = (RegistrantType)ViewData["RegistrantType"];
+}
+
+@if (questionGroups.Count > 0)
+{
+    <li data-id="1" class="dd-item">
+        <div class="dd-handle title">@registrantType.ToString()</div>
+    </li>
+    for (var i = 0; i < questionGroups.Count; i++)
+    {
+        if (questionGroups[i].GetQuestionCount() == 0)
+        {
+            continue;
+        }
+        var active = "";
+        if (questionGroupId == questionGroups[i].ID)
+        {
+            active = "active";
+        }
+
+        <li data-id="@(i + 1)" class="dd-item">
+            <div class="dd-handle @active">
+                &nbsp;&nbsp;&nbsp;&nbsp;<a href="@Url.Action("edit", "form", new { id = Model.ID.ToString(), qg = questionGroups[i].ID.ToString() })">@questionGroups[i].Name</a>
+            </div>
+        </li>
+    }
+}

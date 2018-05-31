@@ -1,0 +1,50 @@
+﻿@model AfterSchoolLibrary.ActivitySchedule
+@{
+    // this.Layout = "~/Views/Shared/_LayoutIFrame.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var activity = (string)ViewBag.ActivityId;
+    var group = (string)ViewBag.ActivityGroupUid;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("_ActivityScheduleTitle", Model.Name.IfBlank("New Activity Schedule")); }
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-12 col-lg-12">
+
+                <form id="form1" method="post" action="@Url.Action("edit", "schedule", new { id = Model.ID.ToString(), activity = activity, group = group })" class="form-horizontal">
+                    
+                    @{ Html.RenderPartial("_EditButtons"); }
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Label <span class="text-danger">*</span></label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required />
+                        </div>
+                    </div>
+
+                    @{
+                        Html.RenderPartial
+                        (
+                            "~/Views/Shared/_ActivityFormSchedule.cshtml",
+                            Model
+                        );
+                    }
+
+                    @{ Html.RenderPartial("_EditButtons"); }
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>

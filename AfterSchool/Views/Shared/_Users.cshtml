@@ -1,0 +1,128 @@
+﻿@model List<AfterSchoolLibrary.WebUser>
+@{
+    string accountId = "";
+    string returnUrl = "";
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    
+    if (!ViewData["AccountId"].IsEmpty())
+    {
+        accountId = ViewData["AccountId"].ToString();
+    }
+    if (!ViewData["ReturnUrl"].IsEmpty())
+    {
+        returnUrl = ViewData["ReturnUrl"].ToString();
+    }
+
+    string inviteUrl = Url.Action("invite", "user");
+
+    if (accountId.Length > 0)
+    {
+        inviteUrl = Url.Action("teaminvite", "account", new { id = accountId });
+    }
+
+    if (accountPackage.IsNotEmpty() && Model.Count >= accountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value)
+    {
+        inviteUrl = "javascript:alert('Please upgrade your account or delete existing user accounts in order to invite additional users')";
+    }
+    
+}
+@if (accountPackage.IsNotEmpty())
+{
+    <p class="pull-right text-bold">
+        @Model.Count of @accountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value User Accounts
+    </p>
+    <div class="clearfix"></div>
+}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                @if (SessionVariables.CurrentAccount.IsAdminAccount)
+                {
+                    <th></th>
+                }
+                <th>Name</th>
+                <th>Email</th>
+                <th>Registered?</th>
+                <th>Is Active?</th>
+                @if (!SessionVariables.CurrentAccount.IsAdminAccount)
+                {
+                    <th>Type</th>
+                }
+                <th>Member Since</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count() > 0)
+            {
+                foreach (WebUser user in Model)
+                {
+                    <tr>
+                        @if (SessionVariables.CurrentAccount.IsAdminAccount)
+                        {
+                            <td>
+                                <a href="@Url.Action("edit", "user", new { id = @user.Uid, returnUrl = returnUrl })" class="btn btn-default btn-xs"><i class="icon icon-left s7-edit"></i> Edit</a>
+                            </td>
+                        }
+                        <td>@user.DisplayName</td>
+                        <td><a href="mailto:@user.Email">@user.Email</a></td>
+                        <td>@user.IsRegistered.ToYesNo()</td>
+                        <td>@user.IsActive.ToYesNo()</td>
+                        @if (!SessionVariables.CurrentAccount.IsAdminAccount)
+                        {
+                            <td>@user.GetUserType(SessionVariables.CurrentAccount).ToString().SplitByUpperCase()</td>
+                        }
+                        <td>@user.CreateDate.Value.ToLongDateString()</td>
+                        <td>
+                            <div class="btn-group">
+                                @if (SessionVariables.CurrentAccount.IsAdminAccount)
+                                {
+                                    <a href="@Url.Action("impersonate", "user", new { id = accountId, uid = @user.Uid })" class="btn btn-default btn-sm">
+                                        <i class="icon icon-left s7-power"></i> Impersonate
+                                    </a>
+                                }
+                                else if (!user.IsRegistered)
+                                {
+                                    <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="modal-invite" onclick="showInviteLink('@user.GetInviteUrl(SessionVariables.CurrentAccount)')">
+                                        Get Invite Link
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7">There are no users. Please <a href="@Url.Action("invite", "user", new { id = accountId, returnUrl = returnUrl })">invite new user</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<div id="modal-invite" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Invite Link</h3>
+        </div>
+        <div class="modal-body form">
+
+            <input type="text" readonly="readonly" id="invite-link" value="" class="form-control"  onclick="this.select()"/>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Done</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showInviteLink(link) {
+        $('#invite-link').val(link);
+    }
+</script>

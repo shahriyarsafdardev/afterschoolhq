@@ -1,0 +1,46 @@
+﻿@model List<SessionAction>
+@{ 
+    var account = (Account)ViewData["account"];
+}
+<div class="panel">
+    <div class="panel-heading">
+        Latest Activity
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-condensed">
+                @if (Model.Count > 0)
+                {
+                    var day = "";
+
+                    foreach (var action in Model)
+                    {
+                        if (day != account.ConvertToAccountTimeZone(action.CreateDate.Value).ToLongDateString())
+                        {
+                            day = account.ConvertToAccountTimeZone(action.CreateDate.Value).ToLongDateString();
+
+                            <tr>
+                                <td colspan="2" class="text-nowrap bg-gray-darker">
+                                    <strong>@day</strong>
+                                </td>
+                            </tr>
+                        }
+
+                        <tr>
+                            <td class="text-nowrap">@account.ConvertToAccountTimeZone(action.CreateDate.Value).ToShortTimeString()</td>
+                            <td>@action.ToString()</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="2">There is no recent activity</td>
+                    </tr>
+                }
+
+            </table>
+        </div>
+    </div>
+</div>
+

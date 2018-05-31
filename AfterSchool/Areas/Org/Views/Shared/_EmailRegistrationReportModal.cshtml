@@ -1,0 +1,68 @@
+﻿@model Account
+@{ 
+    var action = ViewData["PostAction"].ToString();
+    var controller = ViewData["PostController"].ToString();
+    var id = ViewData["PostId"].ToString();
+}
+<div id="modal-emails" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-emails" action="@Url.Action(action, controller, new { id = id, q = Request["q"], question = Request["question"], regstatus = Request["regstatus"], activity = Request["activity"], group = Request["group"], at = Request["at"] })" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-attention"></i> Send Emails</h3>
+            </div>
+            <div class="modal-body form">
+
+                <div>
+                    <div class="form-group">
+                        <label for="filename">Filename</label>
+                        <input type="text" name="filename" id="filename" class="form-control" value="Registrations" onfocus="this.select()" />
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <label for="">Report Type</label>
+                        </div>
+                        <div class="am-radio inline">
+                            <input type="radio" name="reporttype" id="reporttype-basic" class="form-control" value="@((int)RegistrationReportType.Basic)" checked />
+                            <label for="reporttype-basic">Basic</label>
+                        </div>
+                        <div class="am-radio inline">
+                            <input type="radio" name="reporttype" id="reporttype-detailed" class="form-control" value="@((int)RegistrationReportType.Detailed)" />
+                            <label for="reporttype-detailed">Detailed</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 hide">
+                        <div>
+                            <label for="">Include Non-Active @UILabel.RegistrantLabel(true)</label>
+                        </div>
+                        <div class="am-radio inline">
+                            <input type="radio" name="includenonactive" id="includenonactive-no" class="form-control" value="0" checked />
+                            <label for="includenonactive-no">No</label>
+                        </div>
+                        <div class="am-radio inline">
+                            <input type="radio" name="includenonactive" id="includenonactive-yes" class="form-control" value="1" />
+                            <label for="includenonactive-yes">Yes</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <p>&nbsp;</p>
+
+                    @if (Model.Email.IsNotBlank())
+                    {
+                        <p>An email report will be sent to <strong>@Model.Email</strong></p>
+                    }
+                    <div class="form-group">
+                        <label for="emails">If you want to send this report to additional emails, enter it here. Emails must be separated by a comma:</label>
+                        <input type="text" name="emails" id="emails" value="" class="form-control" placeholder="ex: name1@domain.com, name2@domain.com, ..." />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Send Report</button>
+            </div>
+        </div>
+    </form>
+</div>

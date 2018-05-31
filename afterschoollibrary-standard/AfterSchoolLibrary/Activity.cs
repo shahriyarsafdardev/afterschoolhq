@@ -1,0 +1,2122 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using System.Data;
+using System.Collections;
+
+namespace AfterSchoolLibrary
+{
+	
+    public class Activity : BaseEventWithAddress
+    {
+		#region "ClassGenerator"
+
+		public int? SeatsAvailable { get { return (int?)MDV["SeatsAvailable"].Value; } set { MDV["SeatsAvailable"].Value = value; } }
+		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		public int? ArchiveId { get { return (int?)MDV["ArchiveId"].Value; } set { MDV["ArchiveId"].Value = value; } }
+		public int? AgeStart { get { return (int?)MDV["AgeStart"].Value; } set { MDV["AgeStart"].Value = value; } }
+		public int? AgeEnd { get { return (int?)MDV["AgeEnd"].Value; } set { MDV["AgeEnd"].Value = value; } }
+		public int? GradeLevelStart { get { return (int?)MDV["GradeLevelStart"].Value; } set { MDV["GradeLevelStart"].Value = value; } }
+		public int? GradeLevelEnd { get { return (int?)MDV["GradeLevelEnd"].Value; } set { MDV["GradeLevelEnd"].Value = value; } }
+		public decimal? CostPerRegistrant { get { return (decimal?)MDV["CostPerRegistrant"].Value; } set { MDV["CostPerRegistrant"].Value = value; } }
+		public string CostDescription { get { return (string)MDV["CostDescription"].Value; } set { MDV["CostDescription"].Value = value; } }
+		public bool AllowPreRegistration { get { return (bool)MDV["AllowPreRegistration"].Value; } set { MDV["AllowPreRegistration"].Value = value; } }
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
+		public string LocationDetails { get { return (string)MDV["LocationDetails"].Value; } set { MDV["LocationDetails"].Value = value; } }
+		public string ScheduleDetails { get { return (string)MDV["ScheduleDetails"].Value; } set { MDV["ScheduleDetails"].Value = value; } }
+		public string RegistrationTimeZone { get { return (string)MDV["RegistrationTimeZone"].Value; } set { MDV["RegistrationTimeZone"].Value = value; } }
+		public string ContactName { get { return (string)MDV["ContactName"].Value; } set { MDV["ContactName"].Value = value; } }
+		public string ContactPhone { get { return (string)MDV["ContactPhone"].Value; } set { MDV["ContactPhone"].Value = value; } }
+		public string ContactEmail { get { return (string)MDV["ContactEmail"].Value; } set { MDV["ContactEmail"].Value = value; } }
+		public int? WaitingListSeats { get { return (int?)MDV["WaitingListSeats"].Value; } set { MDV["WaitingListSeats"].Value = value; } }
+		public bool AcceptPayPal { get { return (bool)MDV["AcceptPayPal"].Value; } set { MDV["AcceptPayPal"].Value = value; } }
+		public bool AcceptCreditCard { get { return (bool)MDV["AcceptCreditCard"].Value; } set { MDV["AcceptCreditCard"].Value = value; } }
+		public int? ParentActivityId { get { return (int?)MDV["ParentActivityId"].Value; } set { MDV["ParentActivityId"].Value = value; } }
+		public bool AllowToPayLater { get { return (bool)MDV["AllowToPayLater"].Value; } set { MDV["AllowToPayLater"].Value = value; } }
+		public bool AllowOrganizationRegistration { get { return (bool)MDV["AllowOrganizationRegistration"].Value; } set { MDV["AllowOrganizationRegistration"].Value = value; } }
+		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
+		public RegistrationMode RegistrationModeId { get { return (RegistrationMode)MDV["RegistrationModeId"].Value; } set { MDV["RegistrationModeId"].Value = value; } }
+		public int? LocationId { get { return (int?)MDV["LocationId"].Value; } set { MDV["LocationId"].Value = value; } }
+		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
+		public bool IsPublished { get { return (bool)MDV["IsPublished"].Value; } set { MDV["IsPublished"].Value = value; } }
+		public bool IsArchived { get { return (bool)MDV["IsArchived"].Value; } set { MDV["IsArchived"].Value = value; } }
+		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
+		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
+		public bool ScheduleRequiresAllDays { get { return (bool)MDV["ScheduleRequiresAllDays"].Value; } set { MDV["ScheduleRequiresAllDays"].Value = value; } }
+		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
+		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
+		public string AccountPayPalEmailAddress { get { return (string)MDV["AccountPayPalEmailAddress"].Value; } }
+		public string AccountStripePublishableKey { get { return (string)MDV["AccountStripePublishableKey"].Value; } }
+		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
+		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
+		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
+		
+
+        public Activity()
+        {
+            this.Config(ObjectMap, DatabaseQuery, typeof(Activity).Name, "ID");
+            this.LoadObjectValues(ObjectMap);
+			this.AllowPreRegistration = false;
+			this.Uid = Guid.NewGuid();
+			this.AcceptPayPal = false;
+			this.AcceptCreditCard = false;
+			this.AllowToPayLater = false;
+			this.AllowOrganizationRegistration = false;
+			this.GenderRestriction = GenderRestrictionType.None;
+			this.RegistrationModeId = RegistrationMode.NotSet;
+			this.IsDeleted = false;
+			this.IsPublished = false;
+			this.IsArchived = false;
+			this.ScheduleRequiresAllDays = false;
+			
+        }
+
+        public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
+        {
+            get
+            {
+                BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
+                string className = typeof(Activity).Name;
+                _dp = BaseEventWithAddress.get_BaseObjectMap(className);
+				_dp.Add(className, "SeatsAvailable", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ArchiveId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AgeStart", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AgeEnd", System.Data.SqlDbType.Int);
+				_dp.Add(className, "GradeLevelStart", System.Data.SqlDbType.Int);
+				_dp.Add(className, "GradeLevelEnd", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CostPerRegistrant", System.Data.SqlDbType.Money);
+				_dp.Add(className, "CostDescription", System.Data.SqlDbType.NVarChar, 1000);
+				_dp.Add(className, "AllowPreRegistration", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "LocationDetails", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "ScheduleDetails", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "RegistrationTimeZone", System.Data.SqlDbType.NVarChar, 30);
+				_dp.Add(className, "ContactName", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "ContactPhone", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "WaitingListSeats", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AcceptPayPal", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AcceptCreditCard", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "ParentActivityId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AllowToPayLater", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AllowOrganizationRegistration", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RegistrationModeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "LocationId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsPublished", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsArchived", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ScheduleRequiresAllDays", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
+				_dp.Add(className, "AccountPayPalEmailAddress", typeof(Account).Name, "PayPalEmailAddress", System.Data.SqlDbType.NVarChar, "Account");
+				_dp.Add(className, "AccountStripePublishableKey", typeof(Account).Name, "StripePublishableKey", System.Data.SqlDbType.NVarChar, "Account");
+				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
+				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
+				
+                return _dp;
+            }
+        }
+
+        protected static Activity LoadObject(System.Data.DataRow row)
+        {
+            Activity obj = new Activity();
+            obj.LoadObjectValues(ObjectMap, row);
+            return obj;
+        }
+
+        protected static BasicLibrary.DataAccess.DatabaseQuery DatabaseQuery
+        {
+            get
+            {
+                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(Activity).Name);
+				dq.Joins.Add(Account.ObjectMap["ID"], Activity.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
+				dq.Joins.Add(ActivityGroup.ObjectMap["ID"], Activity.ObjectMap["ActivityGroupId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.LeftOuterJoin, "ActivityGroup");
+				
+                return dq;
+            }
+        }
+
+        public static Activity Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], id);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static List<Activity> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+            return Activity.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            return Activity.BaseGetCount(criterias, ObjectMap, dq);
+        }
+
+		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Activity).Name);
+        }
+
+        public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(Activity).Name);
+        }
+
+        public static SystemMessages Create(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return BaseObject._Create(DatabaseQuery, dc, ObjectMap);
+        }
+
+        public static SystemMessages Alter(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            SystemMessages msgs = new SystemMessages();
+            BasicLibrary.DataAccess.DatabaseParameters dps;
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SeatsAvailable"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ArchiveId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AgeStart"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AgeEnd"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["GradeLevelStart"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["GradeLevelEnd"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CostPerRegistrant"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CostDescription"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowPreRegistration"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Details"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["LocationDetails"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ScheduleDetails"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RegistrationTimeZone"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactName"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactPhone"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactEmail"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["WaitingListSeats"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AcceptPayPal"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AcceptCreditCard"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ParentActivityId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowToPayLater"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowOrganizationRegistration"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["GenderRestriction"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RegistrationModeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["LocationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsDeleted"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsPublished"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsArchived"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityGroupId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityScheduleId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ScheduleRequiresAllDays"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["UniqueName"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			
+
+            return msgs;
+        }
+
+		public Activity Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			return Activity.Load(this.ID.Value, dc);
+		}
+		
+		public static List<Activity> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadByAccountIdByIsPublished(int AccountId, bool IsPublished, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadByArchiveId(int ArchiveId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ArchiveId"], ArchiveId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static Activity LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static Activity LoadByAccountIdByArchiveId(int AccountId, int ArchiveId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["ArchiveId"], ArchiveId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<Activity> LoadByParentActivityId(int ParentActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ParentActivityId"], ParentActivityId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadByActivityGroupId(int ActivityGroupId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadByActivityScheduleId(int ActivityScheduleId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityScheduleId"], ActivityScheduleId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static Activity LoadByUniqueNameByAccountId(string UniqueName, int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["UniqueName"], UniqueName);
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		
+
+        #endregion
+
+		#region "UserDefined"
+
+        public string HomePageUrl
+        {
+            get
+            {
+                return string.Format("{0}/{1}", this.GetAccount().HomePageUrl, this.Uid.ToString());
+            }
+        }
+
+        public string PreviewUrl
+        {
+            get
+            {
+                return string.Format("{0}{1}", HomePageUrl, "?preview=true");
+            }
+        }
+
+        public bool CanAcceptPayments
+        {
+            get
+            {
+                return this.GetAccount().GetActiveAccountPackage().HasFeature(FeatureType.AcceptPayments);
+            }
+        }
+
+        public static List<Activity> LoadList(List<int> ids, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], ids, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static string GenerateUniqueName(string name, int? activityId, int? accountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            //unique name
+            var reg = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+
+            string origUniqueName = reg.Replace(name, "").MaxChars(25);
+            string uniqueName = origUniqueName;
+            var duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc);
+            int count = 1;
+            while (duplicate?.ID != activityId)
+            {
+                uniqueName = origUniqueName + count.ToString();
+                count++;
+                duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc);
+            }
+            return uniqueName;
+        }
+
+        private static DatabaseQuery LoadByAccountIdQuery(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.UseParameterizedQuery = false;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            if (activityGroupId.HasValue)
+            {
+                dq.Criterias.Add(ObjectMap["activityGroupId"], activityGroupId.Value);
+            }
+            if (isArchived.HasValue)
+            {
+                if (!isArchived.Value)
+                {
+                    var dcs = new DatabaseCriterias(LogicalOperatorType.And);
+                    var dcs2 = new DatabaseCriterias(LogicalOperatorType.Or);
+                    dcs.Add(ObjectMap["isArchived"], isArchived.Value);
+
+                    dcs2.Add(ObjectMap["ActivityGroupId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+                    dcs2.Add(ObjectMap["ActivityGroupIsArchived"], isArchived.Value);
+                    dcs.AddGroup(dcs2);
+
+                    dq.Criterias.Add(dcs);
+                }
+                else
+                {
+                    var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                    var dcs2 = new DatabaseCriterias(LogicalOperatorType.And);
+                    dcs.Add(ObjectMap["isArchived"], isArchived.Value);
+
+                    dcs2.Add(ObjectMap["ActivityGroupId"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
+                    dcs2.Add(ObjectMap["ActivityGroupIsArchived"], isArchived.Value);
+                    dcs.AddGroup(dcs2);
+
+                    dq.Criterias.Add(dcs);
+                }
+
+
+            }
+            if (isDeleted.HasValue)
+            {
+                dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted.Value);
+            }
+            return dq;
+        }
+
+        public static int GetCountByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        {
+            return LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc).GetCount();
+        }
+
+        public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, int? start, int? length, DatabaseConnection dc = null)
+        {
+            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add("Name", OrderByDirectionEnum.Ascending);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Activity> LoadByAccountIdByDate(int AccountId, DateTime? startDate = null, DateTime? endDate = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["RegistrationCloseDate"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["RegistrationCloseDate"], endDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public int GetSeatsTaken(DatabaseConnection dc = null)
+        {
+            return this.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc);
+        }
+
+        public int GetWaitingListSeatsTaken(DatabaseConnection dc = null)
+        {
+            return this.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc);
+        }
+
+        public int GetSeatsRemaining(DatabaseConnection dc = null)
+        {
+            var rtn = 0;
+            if (SeatsAvailable.HasValue)
+                rtn = SeatsAvailable.Value - this.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc);
+
+            return Math.Max(0, rtn);
+        }
+
+        public int GetWaitingListSeatsRemaining(DatabaseConnection dc = null)
+        {
+            var rtn = 0;
+            if (WaitingListSeats.HasValue)
+                rtn = WaitingListSeats.Value - this.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc);
+
+            return Math.Max(0, rtn);
+        }
+
+        public string RegistrationTimeZoneAbbr
+        {
+            get
+            {
+                if (RegistrationTimeZone.IsNotBlank())
+                    return RegistrationTimeZone.Split('-')[1].Trim();
+                else
+                    return "";
+            }
+        }
+
+        public double GetPercentPublishable(DatabaseConnection dc = null)
+        {
+            int totalFields = 0;
+            int totalErrors = 0;
+
+            totalFields++;
+            if (Name.IsEmpty())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (SeatsAvailable.HasValue == false)
+            {
+                totalErrors++;
+            }
+
+            if (!this.ActivityGroupId.HasValue)
+            {
+                totalFields++;
+                if (this.GetActiveRegistrationPeriod(dc).IsEmpty())
+                {
+                    totalErrors++;
+                }
+                totalFields++;
+                if (this.GetActiveActivityForm(dc).IsEmpty())
+                {
+                    totalErrors++;
+                }
+            }
+
+            totalFields++;
+            if (ContactName.IsBlank())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (ContactEmail.IsBlank())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (ContactPhone.IsBlank())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(Details).IsBlank())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (!HasSchedule)
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(LocationDetails).IsBlank())
+            {
+                totalErrors++;
+            }
+            //totalFields++;
+            //if (Address1.IsBlank())
+            //{
+            //    totalErrors++;
+            //}
+            //totalFields++;
+            //if (City.IsBlank())
+            //{
+            //    totalErrors++;
+            //}
+            //totalFields++;
+            //if (State.IsBlank())
+            //{
+            //    totalErrors++;
+            //}
+            //totalFields++;
+            //if (PostalCode.IsBlank())
+            //{
+            //    totalErrors++;
+            //}
+            totalFields++;
+            if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard && !AcceptPayPal)
+            {
+                totalErrors++;
+            }
+            if (!this.ActivityGroupId.HasValue)
+            {
+                totalFields++;
+                if (this.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail).IsEmpty() ||
+                    this.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail).Value.IsEmpty())
+                {
+                    totalErrors++;
+                }
+                totalFields++;
+                if (this.GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail).IsEmpty() ||
+                    this.GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail).Value.IsEmpty())
+                {
+                    totalErrors++;
+                }
+            }
+
+            return ((totalFields - totalErrors) / totalFields) * 100;
+
+        }
+
+        public bool IsPublishable
+        {
+            get
+            {
+                return (GetPercentPublishable() == 100.ToDouble() ? true : false) && !IsArchived && (this.GetActivityGroup().IsEmpty() || !this.GetActivityGroup().IsArchived);
+            }
+        }
+
+        public bool IsPubliclyViewable
+        {
+            get
+            {
+                return IsPublished && !IsArchived && (this.GetActivityGroup().IsEmpty() || !this.GetActivityGroup().IsArchived) && !IsDeleted;
+            }
+        }
+
+        public bool IsGroupArchived
+        {
+            get
+            {
+                return this.GetActivityGroup().IsNotEmpty() && this.GetActivityGroup().IsArchived;
+            }
+        }
+
+        public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            this.IsPublished = isPublished;
+            this.LastModifiedBy = loggedInUserId;
+            this.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(this.Save(dc));
+            
+            // DEPRECATED
+            if (!this.IsChildActivity)
+            {
+                var childActivities = this.GetChildActivities(dc);
+                foreach (var a in childActivities)
+                {
+                    msgs.AddRange(a.SetIsPublished(isPublished, loggedInUserId, dc));
+                }
+            }
+
+            return msgs;
+        }
+
+        public bool IsChildActivity { get { return this.ParentActivityId.HasValue; } }
+
+        public Activity GetParentActivity(DatabaseConnection dc = null)
+        {
+            if (this.ParentActivityId.HasValue)
+                return Activity.Load(this.ParentActivityId.Value, dc);
+
+            return null;
+        }
+
+        private List<ActivityDay> _Days = null;
+        public List<ActivityDay> GetDays(DatabaseConnection dc = null)
+        {
+            if (_Days.IsEmpty())
+                _Days = ActivityDay.LoadByActivityId(this.ID.Value, dc);
+
+            return _Days;
+        }
+
+        public List<DayOfWeekASL> GetDaysOfTheWeek(DatabaseConnection dc = null)
+        {
+            if (this.GetSchedule(dc: dc)?.GetDaysOfTheWeek(dc).Any() ?? false)
+                return this.GetSchedule(dc: dc)?.GetDaysOfTheWeek();
+
+            return new List<DayOfWeekASL>();
+        }
+
+        public List<Registrant> GetRegistrants(DatabaseConnection dc = null)
+        {
+            return GetRegistrantActivities(dc).Select(x => x.ToRegistrant()).ToList();
+        }
+
+        public List<RegistrantActivity> GetRegistrantActivities(DatabaseConnection dc = null)
+        {
+            return GetRegistrantActivities(false, dc);
+        }
+
+        public List<RegistrantActivity> GetRegistrantActivities(bool includeInvited, DatabaseConnection dc = null)
+        {
+            var ras = new List<RegistrantActivity>();
+
+            if (includeInvited)
+                ras = RegistrantActivity.LoadByActivityId(this.ID.Value, dc).ToList();
+            else
+                ras = RegistrantActivity.LoadByActivityId(this.ID.Value, dc).Where(x =>
+                    x.NumberOfApplicationSeats.HasValue ||
+                    x.NumberOfSeats.HasValue ||
+                    x.NumberOfWaitingListSeats.HasValue
+                ).ToList();
+                
+            return ras;
+        }
+
+        public int GetRegistrantCount(DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByActivityId(this.ID.Value, dc);
+        }
+
+        public int GetRegistrantCountByApplicationType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, activityId: this.ID, dc: dc);
+        }
+
+        public bool IsFull(DatabaseConnection dc = null)
+        {
+            return this.GetSeatsRemaining(dc) == 0;
+        }
+
+        public bool IsWaitingListFull(DatabaseConnection dc = null)
+        {
+            return this.GetWaitingListSeatsRemaining(dc) == 0;
+        }
+
+        public bool HasGradeLevel(GradeLevel grade, DatabaseConnection dc = null)
+        {
+            return GetGradeLevels(dc).Where(x => x.ID.Value == grade.ID.Value).Count() > 0;
+        }
+
+        private List<GradeLevel> _GradeLevels = null;
+        public List<GradeLevel> GetGradeLevels(DatabaseConnection dc = null)
+        {
+            if (_GradeLevels.IsEmpty())
+                _GradeLevels = ActivityGradeLevel.LoadByActivityId(this.ID.Value, dc).Select(x => x.ToGradeLevel()).ToList();
+
+            return _GradeLevels;
+        }
+
+        public List<ActivityWebUser> GetTeamMembers(DatabaseConnection dc = null)
+        {
+            return ActivityWebUser.LoadByActivityId(this.ID.Value, dc);
+        }
+
+        public List<Form> GetForms(DatabaseConnection dc = null)
+        {
+            return ActivityForm.LoadByActivityId(this.ID.Value, dc).Select(x => x.ToForm()).ToList();
+        }
+
+        public Form GetActiveForm(DatabaseConnection dc = null)
+        {
+            var af = GetActiveActivityForm(dc);
+            if (af.IsEmpty())
+                return null;
+
+            return af.ToForm();
+        }
+
+        public ActivityForm GetActiveActivityForm(DatabaseConnection dc = null)
+        {
+            if (this.ID.HasValue)
+                return ActivityForm.LoadByActivityIdByIsActive(this.ID.Value, true, dc);
+
+            return null;
+        }
+
+        public List<ActivityForm> GetActivityForms(DatabaseConnection dc = null)
+        {
+            if (this.ID.HasValue)
+                return ActivityForm.LoadByActivityId(this.ID.Value, dc);
+
+            return new List<ActivityForm>();
+        }
+
+        public List<Attendance> GetAttendance(DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityId(this.ID.Value, dc);
+        }
+
+        public List<Attendance> GetCompletedAttendance(DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityIdByIsCompleted(this.ID.Value, true, dc);
+        }
+
+        public int GetAttendancePresentCount(DatabaseConnection dc = null)
+        {
+            return AttendanceRegistrant.GetPresentCountByActivityId(this.ID.Value, dc);
+        }
+
+        public int GetAttendancePossibleCount(DatabaseConnection dc = null)
+        {
+            return AttendanceRegistrant.GetPossibleCountByActivityId(this.ID.Value, dc);
+        }
+
+        public List<Attendance> GetAttendanceByDate(DateTime date, DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityIdByDate(this.ID.Value, date, dc);
+        }
+
+        public List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(DatabaseConnection dc = null)
+        {
+            return ActivityRegistrationPeriod.LoadByActivityId(this.ID.Value, dc);
+        }
+
+        public List<RegistrationPeriod> GetRegistrationPeriods(DatabaseConnection dc = null)
+        {
+            return GetActivityRegistrationPeriods(dc).Select(x => x.ToRegistrationPeriod()).ToList();
+        }
+
+        public List<RegistrationPeriod> GetUpcomingRegistrationPeriods(DatabaseConnection dc = null)
+        {
+            return GetRegistrationPeriods().Where(x => x.StartDateTime.Value > DateTime.UtcNow).OrderBy(x => x.StartDateTime.Value).ToList();
+        }
+
+        public RegistrationPeriod GetCurrentRegistrationPeriod(DatabaseConnection dc = null)
+        {
+            return GetRegistrationPeriods().Where(x => x.StartDateTime.Value <= DateTime.UtcNow && x.EndDateTime.Value >= DateTime.UtcNow).FirstOrDefault();
+        }
+
+        public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(DatabaseConnection dc = null)
+        {
+            var period = this.GetCurrentRegistrationPeriod(dc);
+            if (period.IsEmpty())
+                return GetUpcomingRegistrationPeriods(dc).FirstOrDefault();
+
+            return period;
+        }
+
+        public RegistrationPeriod GetActiveRegistrationPeriod(DatabaseConnection dc = null)
+        {
+            if (this.ID.HasValue)
+            {
+                var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(this.ID.Value, true, dc);
+                if (item.IsNotEmpty())
+                    return item.ToRegistrationPeriod(true, dc);
+            }
+            return null;
+        }
+
+        public Account GetAccount(DatabaseConnection dc = null)
+        {
+            return Account.Load(this.AccountId.Value, dc);
+        }
+
+        private List<ActivityMessage> _ActivityMessages = null;
+        public List<ActivityMessage> GetMessages(DatabaseConnection dc = null)
+        {
+            if (_ActivityMessages.IsEmpty())
+                _ActivityMessages = ActivityMessage.LoadByActivityId(this.ID.Value, dc);
+
+            return _ActivityMessages;
+        }
+
+        private Activity CopyFields()
+        {
+            return new Activity()
+            {
+                AccountId = this.AccountId,
+                Address1 = this.Address1,
+                Address2 = this.Address2,
+                City = this.City,
+                ContactEmail = this.ContactEmail,
+                ContactPhone = this.ContactPhone,
+                ContactName = this.ContactName,
+                Country = this.Country,
+                Description = this.Description,
+                Details = this.Details,
+                Email = this.Email,
+                LocationDetails = this.LocationDetails,
+                Phone = this.Phone,
+                PostalCode = this.PostalCode,
+                RegistrationTimeZone = this.RegistrationTimeZone,
+                SeatsAvailable = this.SeatsAvailable,
+                State = this.State,
+                Uid = Guid.NewGuid(),
+                WaitingListSeats = this.WaitingListSeats,
+                AcceptPayPal = this.AcceptPayPal,
+                AcceptCreditCard = this.AcceptCreditCard,
+                CostPerRegistrant = this.CostPerRegistrant,
+                CostDescription = this.CostDescription,
+                GenderRestriction = this.GenderRestriction,
+                GradeLevelStart = this.GradeLevelStart,
+                GradeLevelEnd = this.GradeLevelEnd,
+                AgeStart = this.AgeStart,
+                AgeEnd = this.AgeEnd,
+                AllowOrganizationRegistration = this.AllowOrganizationRegistration,
+                AllowPreRegistration = this.AllowPreRegistration,
+                AllowToPayLater = this.AllowToPayLater,
+                Website = this.Website,
+                RegistrationModeId = this.RegistrationModeId,
+                ActivityGroupId = this.ActivityGroupId
+            };
+        }
+
+        public List<Activity> GetChildActivities(DatabaseConnection dc = null)
+        {
+            return Activity.LoadByParentActivityId(this.ID.Value, dc);
+        }
+
+        // DEPRECATED
+        public Activity CreateChild(string newName, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var activity = this.CopyFields();
+            activity.Name = newName;
+            activity.ParentActivityId = this.ID;
+            activity.CreateDate = DateTime.UtcNow;
+            activity.CreatedBy = loggedInUserId;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(activity.Save(dc));
+
+            //link activity with form for the parent activity
+            var parentActivityForm = this.GetActiveActivityForm(dc);
+            activity.AddFormAndActivitate(parentActivityForm.ToForm(true, dc), loggedInUserId, parentActivityForm.IsPublished, msgs, dc);
+
+            //will use same team permissions as parent
+
+            return activity;
+        }
+
+        public Activity Copy(string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Activity activity = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var account = this.GetAccount(adc);
+
+                    activity = this.CopyFields();
+                    activity.Name = newName;
+                    activity.CreateDate = DateTime.UtcNow;
+                    activity.CreatedBy = loggedInUserId;
+                    activity.LastModifiedDate = DateTime.UtcNow;
+                    activity.LastModifiedBy = loggedInUserId;
+                    amsgs.AddRange(activity.Save(adc));
+
+                    //don't copy the whole form is the account can manage forms
+                    if (account.HasFeature(FeatureType.ManageForms, adc))
+                    {
+                        //get form and use the same form
+                        var formToUse = this.GetActiveForm(adc);
+                        if (formToUse.IsEmpty())
+                            formToUse = account.GetDefaultForm(adc);
+
+                        activity.AddFormAndActivitate(formToUse, loggedInUserId, false, amsgs, adc);
+                    }
+                    //copy form completely
+                    else
+                    {
+                        Form formToCopy = null;
+                        if (useSameForm)
+                            formToCopy = this.GetActiveForm(adc);
+                        else
+                            formToCopy = account.GetDefaultForm(adc);
+
+                        var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, amsgs, adc);
+                        activity.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, adc);
+                    }
+
+                    // copy team and permissions
+                    this.GetTeamMembers(adc).ForEach(member => member.Copy(activity.ID.Value, loggedInUserId, amsgs, adc));
+
+                    var activePeriod = this.GetActiveRegistrationPeriod(adc);
+                    if (activePeriod.IsNotEmpty())
+                    {
+                        //copy registration period if doesn't have activity groups
+                        if (!account.HasFeature(FeatureType.ManageActivityGroups, adc))
+                        {
+                            var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, string.Format("{0} - Reg Window", activity.Name), adc);
+                            RegistrationPeriod newPeriod = activePeriod.Copy(periodName, loggedInUserId, amsgs, adc);
+                            amsgs.AddRange(newPeriod.AddActivity(activity, true, loggedInUserId, adc));
+                        }
+                        else
+                            amsgs.AddRange(activePeriod.AddActivity(activity, true, loggedInUserId, adc));
+                    }
+
+                    // copy Activity Properties
+                    this.GetActivityProperties(adc).ForEach(property => {
+                        var newProperty = new AccountProperty();
+                        newProperty.ActivityId = activity.ID;
+                        newProperty.Value = property.Value;
+                        newProperty.AccountPropertyTypeId = property.AccountPropertyTypeId;
+                        newProperty.LastModifiedDate = newProperty.CreateDate = DateTime.UtcNow;
+                        newProperty.LastModifiedBy = newProperty.CreatedBy = loggedInUserId;
+                        amsgs.AddRange(newProperty.Save(adc));
+                    });
+
+                    // copy days
+                    this.GetDays(adc).ForEach(day => {
+                        var newDay = new ActivityDay();
+                        newDay.ActivityId = activity.ID;
+                        newDay.ActivityRecurrenceId = day.ActivityRecurrenceId;
+                        newDay.Day = day.Day;
+                        newDay.EndTime = day.EndTime;
+                        newDay.StartTime = day.StartTime;
+                        newDay.CreateDate = newDay.LastModifiedDate = DateTime.UtcNow;
+                        newDay.CreatedBy = newDay.LastModifiedBy = loggedInUserId;
+                        amsgs.AddRange(newDay.Save(adc));
+                    });
+
+                    // copy grades
+                    this.GetGradeLevels(adc).ForEach(grade => {
+                        activity.AddGrade(grade.ID.Value, loggedInUserId, amsgs, adc);
+                    });
+
+                    // NOTE: copy schedule?
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                dc: dc
+            );
+
+            return activity;
+        }
+
+        public SystemMessages CopyDefaultForm(int loggedInUserId, DatabaseConnection dc = null)
+        {
+            SystemMessages msgs = new SystemMessages();
+            if(this.GetActiveForm(dc).IsEmpty())
+            {
+                var account = this.GetAccount(dc);
+                var formToCopy = account.GetDefaultForm(dc);
+                var newForm = formToCopy.Copy(loggedInUserId, this.AccountId.Value, msgs, dc);
+                var af = this.AddFormAndActivitate(newForm, loggedInUserId, false, msgs, dc);
+
+                account.DefaultFormId = af.FormId;
+                msgs.AddRange(account.Save(dc));
+            }
+
+            return msgs;
+        }
+
+        public ActivityForm AddFormAndActivitate(Form form, int loggedInUserId, bool isPublished = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            //deactivate all other ones
+            var afs = this.GetActivityForms(dc);
+            foreach(var item in afs)
+            {
+                item.IsActive = false;
+                msgs.AddRange(item.Save(dc));
+            }
+
+            var af = ActivityForm.LoadByActivityIdByFormId(this.ID.Value, form.ID.Value, dc);
+            if (af.IsEmpty())
+            {
+                af = new ActivityForm();
+                af.ActivityId = this.ID;
+                af.AccountId = this.AccountId;
+                af.Name = this.Name + " Registration Form";
+                af.Description = "Please fill in the registration form below";
+                af.FormId = form.ID;
+                af.IsPublished = isPublished;
+                af.CreateDate = DateTime.UtcNow;
+                af.CreatedBy = loggedInUserId;
+            }
+
+            af.LastModifiedDate = DateTime.UtcNow;
+            af.LastModifiedBy = loggedInUserId;
+            af.IsActive = true;
+            msgs.AddRange(af.Save(dc));
+
+            return af;
+        }
+
+        public bool HasAddress
+        {
+            get
+            {
+                return (!Address1.IsEmpty() && ((!City.IsEmpty() && !State.IsEmpty()) || !PostalCode.IsEmpty()));                
+            }
+        }
+
+        public static Activity EditExisting(int loggedInUserId, Account account, string activityId, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs = null)
+        {
+            return SaveActivity(loggedInUserId, account, activityId, values, msgs);
+        }
+
+        public static Activity CreateNew(int loggedInUserId, Account account, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SaveActivity(loggedInUserId, account, null, values, msgs, dc);
+        }
+
+        private static Activity SaveActivity(int loggedInUserId, Account account, string activityId, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();            
+
+            var name = values["name"];
+            var seatsavailable = values["seatsavailable"];
+            var waitinglistseats = values["waitinglistseats"];
+            var registrationperiod = values["registrationperiod"];
+            var registrationopendate = values["registrationopendate"];
+            var registrationopentime = values["registrationopentime"];
+            var registrationclosedate = values["registrationclosedate"];
+            var registrationclosetime = values["registrationclosetime"];
+            var timezone = values["timezone"];
+            var contactname = values["contactname"];
+            var contactphone = values["contactphone"];
+            var contactemail = values["contactemail"];
+            var details = values["details"];
+            var locationdetails = values["locationdetails"];
+            var scheduledetails = values["scheduledetails"];
+            var address1 = values["address1"];
+            var address2 = values["address2"];
+            var city = values["city"];
+            var state = values["state"];
+            var postalcode = values["postalcode"];
+            var cost = values["cost"];
+            var costdescription = values["costdescription"];
+            var acceptpaypal = values["acceptpaypal"];
+            var acceptcreditcard = values["acceptcreditcard"];
+            var allowtopaylater = values["allowtopaylater"];
+            var form = values["form"];
+            var alloworganization = values["alloworganization"];
+            var agestart = values["agestart"];
+            var ageend = values["ageend"];
+            var gradestart = values["gradestart"];
+            var gradeend = values["gradeend"];
+            var genderrestrictions = values["genderrestrictions"];
+            var regmode = values["regmode"];
+            var days = values["days"];
+            var gradeIds = values["gradeIds"];
+            var group = values["group"];
+            var registrationthankyouemail = values["registrationthankyouemail"];
+            var applicationthankyouemail = values["applicationthankyouemail"];
+            var daysoftheweek = values["daysoftheweek"];
+            var repeatsweekly = values["repeatsweekly"];
+            var startdate = values["startdate"];
+            var enddate = values["enddate"];
+            var dailystarttime = values["dailystarttime"];
+            var dailyendtime = values["dailyendtime"];
+            var scheduledates = values["scheduledates"];
+            var schedule = values["schedule"];
+
+            if (activityId.IsNumber() == false || activityId.ToInteger() == 0)
+            {
+                if (name.IsEmpty())
+                {
+                    msgs.Add("Activity Name is required", MessageType.UserError);
+                }
+                if (!seatsavailable.IsNumber())
+                {
+                    msgs.Add("Total Available Seats is required and must be greater than 0", MessageType.UserError);
+                }
+                else
+                {
+                    AccountPackage ap = account.GetActiveAccountPackage();
+                    var maxParticipants = ap.GetFeature(FeatureType.Participants).Max.Value;
+                    if (maxParticipants < seatsavailable.ToInteger())
+                    {
+                        msgs.Add(string.Format("Total Available Seats is required and must be less than or equal to {0}", maxParticipants), MessageType.UserError);
+                    }
+                }
+                if (registrationperiod.ToInteger() > 0 && group.IsEmpty())
+                {
+                    if (!string.Format("{0} {1}", registrationopendate, registrationopentime).IsDateTime())
+                    {
+                        msgs.Add("Registration Open Date & Time is required", MessageType.UserError);
+                    }
+                    if (!string.Format("{0} {1}", registrationclosedate, registrationclosetime).IsDateTime())
+                    {
+                        msgs.Add("Registration Close Date & Time is required", MessageType.UserError);
+                    }
+                }   
+
+                if (!waitinglistseats.IsNumber())
+                {
+                    waitinglistseats = "0";
+                }
+
+                //pre-load account info
+                if (contactphone.IsBlank())
+                {
+                    contactphone = account.Phone;
+                }
+                if (address1.IsBlank())
+                {
+                    address1 = account.Address1;
+                }
+                if (address2.IsBlank())
+                {
+                    address2 = account.Address2;
+                }
+                if (city.IsBlank())
+                {
+                    city = account.City;
+                }
+                if (state.IsBlank())
+                {
+                    state = account.State;
+                }
+                if (postalcode.IsBlank())
+                {
+                    postalcode = account.PostalCode;
+                }
+                if (cost.IsBlank())
+                {
+                    cost = "0";
+                }
+
+            }            
+
+            Activity activity = null;
+
+            if (activityId.IsNotEmpty())
+            {
+                activity = Activity.Load(activityId.ToInteger());
+                if (seatsavailable.IsNumber() && activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc) <= seatsavailable.ToInteger())
+                {
+                    activity.SeatsAvailable = seatsavailable.ToInteger();
+                }
+                if (waitinglistseats.IsNumber() && activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc) <= waitinglistseats.ToInteger())
+                {
+                    activity.WaitingListSeats = waitinglistseats.ToInteger();
+                }
+            }
+            else
+            {
+                activity = new Activity();
+                activity.CreateDate = DateTime.UtcNow;
+                activity.CreatedBy = loggedInUserId;
+                activity.SeatsAvailable = seatsavailable.ToInteger();
+                activity.WaitingListSeats = waitinglistseats.ToInteger();
+                activity.AccountId = account.ID;
+
+                if (!form.IsNumber() && group.IsEmpty())
+                {
+                    msgs.Add("Registration Form is required", MessageType.UserError);
+                }
+            }
+
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUserId;
+
+            if (name.IsNotBlank()) activity.Name = name;
+
+            if (agestart.IsNumber())
+            {
+                if (agestart.ToInteger() >= 0)
+                {
+                    activity.AgeStart = agestart.ToInteger();
+                }
+                else
+                {
+                    activity.AgeStart = null;
+                }
+            }
+            if (ageend.IsNumber())
+            {
+                if (ageend.ToInteger() >= 0)
+                {
+                    activity.AgeEnd = ageend.ToInteger();
+                }
+                else
+                {
+                    activity.AgeEnd = null;
+                }
+            }
+
+            if (genderrestrictions.IsNumber())
+            {
+                activity.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToInteger();
+            }
+            
+            if (contactname.IsNotBlank()) activity.ContactName = contactname.IfBlank("").MaxChars(50);
+            if (contactphone.IsNotBlank()) activity.ContactPhone = contactphone.IfBlank("").MaxChars(50);
+            if (contactemail.IsNotBlank()) activity.ContactEmail = contactemail.IfBlank("").MaxChars(100);
+            if (details.IsNotBlank()) activity.Details = details.IfBlank("").MaxChars(4000);
+            if (locationdetails.IsNotBlank()) activity.LocationDetails = locationdetails.IfBlank("").MaxChars(4000);
+            if (address1.IsNotBlank()) activity.Address1 = address1.IfBlank("").MaxChars(100);
+            if (address2.IsNotBlank()) activity.Address2 = address2.IfBlank("").MaxChars(100);
+            if (city.IsNotBlank()) activity.City = city.IfBlank("").MaxChars(100);
+            if (state.IsNotBlank()) activity.State = state.IfBlank("").MaxChars(100);
+            if (postalcode.IsNotBlank()) activity.PostalCode = postalcode.IfBlank("").MaxChars(100);
+
+            if (cost.IsNumber())
+            {
+                activity.CostPerRegistrant = cost.ToDecimal();
+            }
+            if (costdescription.IsNotBlank()) activity.CostDescription = costdescription.IfBlank("").MaxChars(1000);
+            
+            if (acceptcreditcard.IsBoolean())
+            {
+                activity.AcceptCreditCard = acceptcreditcard.ToBoolean();
+            }
+            if (acceptpaypal.IsBoolean())
+            {
+                activity.AcceptPayPal = acceptpaypal.ToBoolean();
+            }
+            if (allowtopaylater.IsBoolean())
+            {
+                activity.AllowToPayLater = allowtopaylater.ToBoolean();
+            }
+            if (alloworganization.IsBoolean())
+            {
+                activity.AllowOrganizationRegistration = alloworganization.ToBoolean();
+            }
+            if (regmode.IsNumber())
+            {
+                activity.RegistrationModeId = (RegistrationMode)regmode.ToInteger();
+            }
+            else
+            {
+                activity.RegistrationModeId = RegistrationMode.Register;
+            }
+
+            if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard && !activity.AcceptPayPal && !activity.AllowToPayLater)
+            {
+                msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
+                    {
+                        if (!activity.ID.HasValue)
+                        {
+                            activity.RegistrationTimeZone = account.TimeZone;
+
+                            if (contactname.IsEmpty())
+                            {
+                                activity.ContactName = account.GetAccountOwner(adc).DisplayName;
+                            }
+                            if (contactemail.IsEmpty())
+                            {
+                                activity.ContactEmail = account.Email;
+                            }
+                            if (contactphone.IsEmpty())
+                            {
+                                activity.ContactPhone = account.Phone;
+                            }
+                        }
+                        if (group.IsGuid())
+                        {
+                            activity.ActivityGroupId = ActivityGroup.LoadByUid(group.ToGuid(), adc).ID.Value;
+                        }
+                        amsgs.AddRange(activity.Save(adc));
+
+                        //skip if it is attached to a activity group
+                        if (!activity.ActivityGroupId.HasValue)
+                        {
+                            //copy form
+                            if (amsgs.HasNoErrors() && !activity.IsChildActivity && form.IsNumber())
+                            {
+                                amsgs.AddRange(activity.SetupNewForm(form.ToInteger(), account, loggedInUserId, adc));
+                            }
+
+                            //create registration period if not created yet and there is no activitygroup (activity groups have their own registration period)
+                            if (amsgs.HasNoErrors() && registrationperiod.IsNumber())
+                            {
+                                amsgs.AddRange(activity.SetupRegistrationPeriods(registrationperiod, registrationopendate, registrationopentime, registrationclosedate, registrationclosetime, account, loggedInUserId, adc));
+                            }
+                        }
+
+                        //add creator to activity team if new activity
+                        if (amsgs.HasNoErrors() && activityId.IsEmpty())
+                        {
+                            amsgs.AddRange(activity.SetupTeam(account, loggedInUserId, adc));
+                        }
+
+                        //days
+                        if (amsgs.HasNoErrors() && days.IsNotEmpty())
+                        {
+                            amsgs.AddRange(activity.SetupActivityDays(days, account, loggedInUserId, adc));
+                        }
+
+                        //instances
+                        if (amsgs.HasNoErrors())
+                        {
+                            activity.ScheduleRequiresAllDays = true;
+
+                            if (account.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0 && scheduledates.IsEmpty())
+                            {
+                                activity.ActivityScheduleId = schedule.ToInteger();
+                            }
+                            else if (scheduledates.IsNotEmpty())
+                            {
+                                amsgs.AddRange(activity.SetupSchedule(schedule, scheduledetails, repeatsweekly, startdate, enddate, dailystarttime, dailyendtime, scheduledates, account, loggedInUserId, adc));
+                            }
+
+                            amsgs.AddRange(activity.Save(adc));
+                        }
+
+                        //grades
+                        if (amsgs.HasNoErrors() && gradeIds != null)
+                        {
+                            amsgs.AddRange(activity.SetupGrades(gradeIds, account, loggedInUserId, adc));
+                        }
+
+                        //setup initial activityProperties
+                        if (amsgs.HasNoErrors())
+                        {
+                            amsgs.AddRange(activity.SetupActivityProperties(registrationthankyouemail, applicationthankyouemail, loggedInUserId, adc));
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    },
+                    dc: dc
+                );
+            }
+
+            return activity;
+        }
+
+        private SystemMessages SetupActivityProperties(string registrationthankyouemail, string applicationthankyouemail, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            if (registrationthankyouemail.IsEmpty())
+            {
+                registrationthankyouemail = "Thank you for registering";
+            }
+            if (applicationthankyouemail.IsEmpty())
+            {
+                applicationthankyouemail = "Thank you for applying";
+            }
+
+            this.AddOrUpdateActivityProperty(AccountPropertyType.ApplicationThankYouEmail, applicationthankyouemail, loggedInUserId, msgs, dc);
+            this.AddOrUpdateActivityProperty(AccountPropertyType.RegistrationThankYouEmail, registrationthankyouemail, loggedInUserId, msgs, dc);
+
+            return msgs;
+        }
+
+        private SystemMessages SetupGrades(string gradeIds, Account account, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var gradeIdsList = gradeIds.IsEmpty() ? new List<int>() : gradeIds.Split(',').Select(x => x.ToInteger()).ToList();
+            var currentGrades = this.GetGradeLevels(dc);
+
+            currentGrades
+                .Where(x => !gradeIdsList.Contains(x.ID.Value))
+                .ToList()
+                .ForEach(grade => msgs.AddRange(this.RemoveGrade(grade, dc)));
+
+            gradeIdsList
+                .Where(gradeId => !currentGrades.Select(grade => grade.ID.Value).Contains(gradeId))
+                .ToList()
+                .ForEach(gradeId => this.AddGrade(gradeId, loggedInUserId, msgs, dc));
+
+            //forces reload of grade levels
+            this._GradeLevels = null;
+            return msgs;
+        }
+
+        private SystemMessages SetupSchedule(string schedule, string details, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string scheduledates, Account account, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            if (schedule.ToInteger() == 0)
+            {
+                var scheduleName = ActivitySchedule.GenerateUniqueName(this.AccountId.Value, string.Format("{0} - Schedule", this.Name), dc);
+
+                ActivitySchedule newSchedule = this.AddNewSchedule(
+                    scheduleName,
+                    details,
+                    repeatsweekly.ToBoolean(),
+                    startdate.ToDateTime(),
+                    enddate.ToDateTime(),
+                    dailystarttime.ToDateTime(),
+                    dailyendtime.ToDateTime(),
+                    scheduledates,
+                    account.ID.Value,
+                    loggedInUserId,
+                    msgs,
+                    dc);
+            }
+            else
+            {
+                var sched = ActivitySchedule.Load(schedule.ToInteger(), dc);
+
+                // if user doesn't have feature then we're updaing in the background
+                // otherwise user may have multiple activities with the same schedule so we cannot update directly on the activity
+                if (account.HasFeature(FeatureType.ManageActivityGroups, dc) == false)
+                {
+                    msgs.AddRange(sched.UpdateScheduleAndInstances(
+                        repeatsweekly.ToBoolean(),
+                        startdate.ToDateTime(),
+                        enddate.ToDateTime(),
+                        dailystarttime.ToDateTime(),
+                        dailyendtime.ToDateTime(),
+                        scheduledates, 
+                        loggedInUserId, 
+                        dc));
+                }
+
+                // always be sure to associate the schedule id with the current activity
+                this.ActivityScheduleId = sched.ID.Value;
+                msgs.AddRange(this.Save(dc));
+            }
+
+            return msgs;
+        }
+
+        private ActivityDay AddActivityDay(DayOfWeekASL day, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var newDay = new ActivityDay();
+            newDay.Day = day;
+            newDay.ActivityId = this.ID;
+            newDay.CreateDate = newDay.LastModifiedDate = DateTime.UtcNow;
+            newDay.CreatedBy = newDay.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(newDay.Save(dc));
+            return newDay;
+        }
+
+        private SystemMessages SetupActivityDays(string days, Account account, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var daysList = days.Split(',').Select(x => (DayOfWeekASL)x.ToInteger()).ToList();
+            var currentDaysOfWeek = this.GetDaysOfTheWeek(dc);
+            var currentDays = this.GetDays(dc);
+
+            // delete days
+            currentDaysOfWeek
+                .Where(x => !daysList.Contains(x))
+                .ToList()
+                .ForEach(day => msgs.AddRange(currentDays.Where(x => x.Day == day).First().Delete(dc)));
+
+            // add days
+            daysList
+                .Where(x => !currentDaysOfWeek.Contains(x))
+                .ToList()
+                .ForEach(day => this.AddActivityDay(day, loggedInUserId, msgs, dc));  
+            
+            //forces reload of days
+            this._Days = null;
+            return msgs;
+        }
+
+        private SystemMessages SetupRegistrationPeriods(string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, Account account, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            if (registrationperiod.ToInteger() == 0)
+            {
+                var periodname = RegistrationPeriod.GenerateUniqueName(account.ID.Value, string.Format("{0} - Reg Window", this.Name), dc);
+
+                this.AddNewRegistrationPeriod(
+                    periodname,
+                    string.Format("{0} {1}", registrationopendate, registrationopentime).ToDateTime(),
+                    string.Format("{0} {1}", registrationclosedate, registrationclosetime).ToDateTime(),
+                    account.ID.Value,
+                    loggedInUserId,
+                    msgs,
+                    dc);
+            }
+            else
+            {
+                var period = RegistrationPeriod.Load(registrationperiod.ToInteger(), dc);
+
+                //if user doesn't have feature then we're updaing the period in the background
+                if (!account.HasFeature(FeatureType.ManageActivityGroups, dc))
+                {
+                    period.StartDateTime = string.Format("{0} {1}", registrationopendate, registrationopentime).ToDateTime();
+                    period.EndDateTime = string.Format("{0} {1}", registrationclosedate, registrationclosetime).ToDateTime();
+                    period.LastModifiedDate = DateTime.UtcNow;
+                    period.LastModifiedBy = loggedInUserId;
+                    msgs.AddRange(period.Save(dc));
+                }
+                msgs.AddRange(period.AddActivity(this, true, loggedInUserId, dc));
+            }
+            return msgs;
+        }
+
+        private SystemMessages SetupTeam(Account account, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            //validate the user is part of this account (not a global admin)
+            var awu = AccountWebUser.LoadByAccountIdByWebUserId(this.AccountId.Value, loggedInUserId, dc);
+
+            if (awu.IsNotEmpty())
+            {
+                this.AddTeamMember(loggedInUserId, true, loggedInUserId, msgs, dc);
+            }
+
+            //add account admins to activity
+            account.GetAccountOwnersAndAdmins(dc)
+                .ForEach(user => this.AddTeamMember(user.ID.Value, true, loggedInUserId, msgs, dc));
+
+            return msgs;
+        }
+
+        private SystemMessages SetupNewForm(int formId, Account account, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var activeForm = this.GetActiveActivityForm(dc);
+
+            //already has created a form, no need to copy it again
+            if (activeForm.IsEmpty() || activeForm.FormId != formId)
+            {
+                var isPublished = false;
+
+                // deactivating existing form
+                if (activeForm.IsNotEmpty())
+                {
+                    //deactivate old form
+                    isPublished = activeForm.IsPublished;
+                    activeForm.IsActive = false;
+                    msgs.AddRange(activeForm.Save(dc));
+                }
+
+                Form newForm = null;
+                if (formId == 0)
+                {
+                    //if creating a new form, copy from the default form
+                    var defaultForm = account.GetDefaultForm(dc);
+                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, dc);
+                    newForm.Name = (this.Name + " Form").MaxChars(100, "...");
+                    msgs.AddRange(newForm.Save(dc));
+                }
+                else
+                {
+                    //get the already existing form
+                    newForm = Form.Load(formId, dc);
+                }
+
+                if (newForm.IsNotEmpty())
+                {
+                    //link form to activity
+                    this.AddFormAndActivitate(newForm, loggedInUserId, isPublished, msgs, dc);
+
+                    //add to children
+                    var children = this.GetChildActivities(dc);
+                    foreach (var child in children)
+                    {
+                        //deactivate old form
+                        var childActiveForm = child.GetActiveActivityForm(dc);
+                        if (childActiveForm.IsNotEmpty())
+                        {
+                            childActiveForm.IsActive = false;
+                            msgs.AddRange(childActiveForm.Save(dc));
+                        }
+                        child.AddFormAndActivitate(newForm, loggedInUserId, isPublished, msgs, dc);
+                    }
+                }
+            }
+
+            return msgs;
+        }
+
+        public ActivitySchedule AddNewSchedule(string scheduleName, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, string scheduleDates, int accountId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var schedule = ActivitySchedule.CreateNew(scheduleName, details, repeatsWeekly, startDate, endDate, dailyStartTime, dailyEndTime, scheduleDates, accountId, loggedInUserId, this.ActivityGroupId, msgs, dc);
+
+            this.ActivityScheduleId = schedule.ID;
+            msgs.AddRange(this.Save(dc));
+
+            return schedule;
+        }
+
+        public RegistrationPeriod AddNewRegistrationPeriod(string name, DateTime startDateTime, DateTime endDateTime, int accountId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var period = new RegistrationPeriod();
+            period.StartDateTime = startDateTime;
+            period.EndDateTime = endDateTime;
+            period.Name = name;
+            period.AccountId = accountId;
+            period.CreateDate = period.LastModifiedDate = DateTime.UtcNow;
+            period.CreatedBy = period.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(period.Save(dc));
+
+            msgs.AddRange(period.AddActivity(this, true, loggedInUserId, dc));
+
+            return period;
+        }
+
+        public ActivityWebUser AddTeamMember(int webUserId, bool isLeader, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var teammember = new ActivityWebUser();
+            teammember.WebUserId = webUserId;
+            teammember.ActivityId = this.ID;
+            teammember.IsLeader = isLeader;
+            teammember.CreateDate = DateTime.UtcNow;
+            teammember.CreatedBy = loggedInUserId;
+            teammember.LastModifiedDate = DateTime.UtcNow;
+            teammember.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(teammember.Save(dc));
+
+            return teammember;
+        }
+
+        public SystemMessages RemoveGrade(GradeLevel grade, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var activityGrade = ActivityGradeLevel.LoadByActivityIdByGradeLevelId(this.ID.Value, grade.ID.Value, dc);
+            if (activityGrade.IsNotEmpty())
+            {
+                msgs.AddRange(activityGrade.Delete(dc));
+            }
+            return msgs;
+        }
+
+        public ActivityGradeLevel AddGrade(int gradeId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc= null)
+        {
+            ActivityGradeLevel activityGrade = ActivityGradeLevel.LoadByActivityIdByGradeLevelId(this.ID.Value, gradeId, dc);
+
+            if (activityGrade.IsEmpty())
+            {
+                activityGrade = new ActivityGradeLevel();
+                activityGrade.ActivityId = this.ID;
+                activityGrade.GradeLevelId = gradeId;
+                activityGrade.CreateDate = DateTime.UtcNow;
+                activityGrade.CreatedBy = loggedInUserId;
+                msgs.AddRange(activityGrade.Save(dc));
+            }
+
+            return activityGrade;
+        }
+
+        public SystemMessages MarkAsDeleted(int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            this.IsDeleted = true;
+            this.LastModifiedDate = DateTime.UtcNow;
+            this.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(this.Save(dc));
+            return msgs;
+        }
+
+        public SystemMessages MoveToArchive(int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            this.IsArchived = true;
+            this.LastModifiedDate = DateTime.UtcNow;
+            this.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(this.Save(dc));
+            return msgs;
+        }
+
+        public SystemMessages MoveFromArchive(int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            this.IsArchived = false;
+            this.LastModifiedDate = DateTime.UtcNow;
+            this.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(this.Save(dc));
+            return msgs;
+        }
+
+        [NonSerialized()]
+        private ActivityGroup _ActivityGroup = null;
+        public ActivityGroup GetActivityGroup(DatabaseConnection dc = null)
+        {
+            if (_ActivityGroup.IsEmpty() && this.ActivityGroupId.HasValue)
+            {
+                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, dc);
+            }
+            return _ActivityGroup;
+        }
+
+        public AccountProperty AddOrUpdateActivityProperty(AccountPropertyType type, string value, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var ap = this.GetActivityProperty(type, dc);
+
+            if (ap.IsEmpty())
+            {
+                ap = new AccountProperty();
+                ap.ActivityId = this.ID.Value;
+                ap.AccountPropertyTypeId = type;
+                ap.CreateDate = DateTime.UtcNow;
+                ap.CreatedBy = loggedInUserId;
+            }
+
+            ap.Value = value;
+            ap.LastModifiedDate = DateTime.UtcNow;
+            ap.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(ap.Save(dc));
+
+            return ap;
+        }
+
+        public bool HasSchedule
+        {
+            get
+            {
+                return this.ActivityScheduleId.HasValue;
+            }
+        }
+
+        private ActivitySchedule _Schedule = null;
+        public ActivitySchedule GetSchedule(bool reload = false, DatabaseConnection dc = null)
+        {
+            if (this.ActivityScheduleId.HasValue && (reload || _Schedule.IsEmpty()))
+            {
+                _Schedule = ActivitySchedule.LoadWithInstances(this.ActivityScheduleId.Value, dc);
+            }
+            return _Schedule;
+        }
+
+        public AccountProperty GetActivityProperty(AccountPropertyType propertyType, DatabaseConnection dc = null)
+        {
+            return GetActivityProperties(dc)?.Find(x => x.AccountPropertyTypeId == propertyType); 
+        }
+
+        private List<AccountProperty> _Properties = null;
+        public List<AccountProperty> GetActivityProperties(DatabaseConnection dc = null)
+        {
+            if (_Properties.IsEmpty() && this.ID.HasValue)
+            {
+                _Properties = AccountProperty.LoadByActivityId(this.ID.Value, dc);
+            }
+            return _Properties;
+        }
+
+        public ActivityMessage AddMessage(string subject, string body, List<int> registrantIds, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            ActivityMessage am = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
+                {
+                    am = new ActivityMessage();
+                    am.ActivityId = this.ID;
+                    am.AccountId = this.AccountId;
+                    am.Subject = subject.MaxChars(150);
+                    am.Body = body;
+                    am.CreateDate = DateTime.UtcNow;
+                    am.CreatedBy = loggedInUserId;
+                    amsgs.AddRange(am.Save(adc));
+
+                    registrantIds.ForEach(registrantId => am.AddRegistrant(registrantId, loggedInUserId, amsgs, dc));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                dc: dc
+            );
+
+            return am;
+        }
+
+        public static List<Activity> GetActivitiesByRegistrantByDay(int registrantId, DayOfWeekASL day, DateTime startDate, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            dq.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
+            dq.Joins.Add(RegistrantActivity.ObjectMap["ActivityId"], ObjectMap["ID"]);
+
+            dq.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], registrantId);
+            dq.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 1, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            dq.Criterias.Add(ActivityInstance.ObjectMap["Day"], (int)day);
+            dq.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Activity> GetByActivitiesByRegistrants(List<int> activityIds, List<int> registrantIds, DayOfWeekASL? day = DayOfWeekASL.NotSet, RegistrationStatus regStatus = RegistrationStatus.NotSet, List<int> groupIds = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            dq.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
+            dq.Joins.Add(RegistrantActivity.ObjectMap["ActivityId"], ObjectMap["ID"]);
+
+            dq.Criterias.Add(ObjectMap["Id"], activityIds, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
+
+            if (groupIds.IsNotEmpty() && groupIds.Any())
+            {
+                dq.Criterias.Add(ObjectMap["ActivityGroupId"], groupIds, DatabaseCriteriaOperatorEnum.In);
+            }
+
+            if (day != DayOfWeekASL.NotSet)
+            {
+                dq.Criterias.Add(ActivityInstance.ObjectMap["Day"], (int)day);
+            }
+            // dq.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (regStatus == RegistrationStatus.Current)
+            {
+                var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
+                aQuery.UseParameterizedQuery = false;
+                aQuery.SelectParameters.Clear();
+                aQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
+                aQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
+                aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+                dq.Criterias.Add(ObjectMap["ActivityScheduleId"], aQuery, DatabaseCriteriaOperatorEnum.In);
+
+                var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
+                bQuery.UseParameterizedQuery = false;
+                bQuery.SelectParameters.Clear();
+                bQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
+                bQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
+                bQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+                dq.Criterias.Add(ObjectMap["ActivityScheduleId"], bQuery, DatabaseCriteriaOperatorEnum.In);
+            }
+            else if (regStatus == RegistrationStatus.Future)
+            {
+                // has no end dates in the past
+                var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
+                aQuery.UseParameterizedQuery = false;
+                aQuery.SelectParameters.Clear();
+                aQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
+                aQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
+                aQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+                dq.Criterias.Add(ObjectMap["ActivityScheduleId"], aQuery, DatabaseCriteriaOperatorEnum.NotIn);
+
+                // has some records in the activity instance table though
+                var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
+                bQuery.UseParameterizedQuery = false;
+                bQuery.SelectParameters.Clear();
+                bQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
+                bQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
+                dq.Criterias.Add(ObjectMap["ActivityScheduleId"], bQuery, DatabaseCriteriaOperatorEnum.In);
+            }
+            else if (regStatus == RegistrationStatus.Past)
+            {
+                // has no start dates in the future
+                var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
+                aQuery.UseParameterizedQuery = false;
+                aQuery.SelectParameters.Clear();
+                aQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
+                aQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
+                aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+                dq.Criterias.Add(ObjectMap["ActivityScheduleId"], aQuery, DatabaseCriteriaOperatorEnum.NotIn);
+
+                // has some records in the activity instance table though
+                var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
+                bQuery.UseParameterizedQuery = false;
+                bQuery.SelectParameters.Clear();
+                bQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
+                bQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
+                dq.Criterias.Add(ObjectMap["ActivityScheduleId"], bQuery, DatabaseCriteriaOperatorEnum.In);
+            }
+
+
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public List<GenderType> GetAllowedGenders()
+        {
+            switch (this.GenderRestriction)
+            {
+                case GenderRestrictionType.None:
+                    return new List<GenderType>() { GenderType.Female, GenderType.Male };
+                case GenderRestrictionType.MaleOnly:
+                    return new List<GenderType>() { GenderType.Male };
+                case GenderRestrictionType.FemaleOnly:
+                    return new List<GenderType>() { GenderType.Female };
+            }
+            return new List<GenderType>();
+        }
+
+        public bool IsInSession(DatabaseConnection dc = null)
+        {
+            var account = this.GetAccount(dc);
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var instances = this.GetSchedule(dc: dc).GetInstances(dc: dc);
+            return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+        }
+
+        public bool WillBeInSession(DatabaseConnection dc = null)
+        {
+            var account = this.GetAccount(dc);
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var instances = this.GetSchedule(dc: dc).GetInstances(dc: dc);
+            return now < instances.First().StartDateTime;
+        }
+
+        public bool IsOutOfSession(DatabaseConnection dc = null)
+        {
+            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var instances = this.GetSchedule(dc: dc).GetInstances(dc: dc);
+            return now > instances.Last().StartDateTime;
+        }
+
+        public DateTime? GetFirstDate(DatabaseConnection dc = null)
+        {
+            return this.GetSchedule(dc: dc).GetInstances(dc: dc).FirstOrDefault()?.StartDateTime;
+        }
+
+        public DateTime? GetLastDate(DatabaseConnection dc = null)
+        {
+            return this.GetSchedule(dc: dc).GetInstances(dc: dc).LastOrDefault()?.StartDateTime;
+        }
+
+        public static SystemMessages SendRegistrationSummaryReport(int activityId, string uiActivityLabel, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.Load(activityId, dc);
+            var registrants = activity.GetRegistrants(dc);
+
+            string subject = $"{activity.Name} Registration Summary Report";
+            string body = $"<p>{activity.ContactName},</p><p>Here's your registration summary report for <strong>{activity.Name}</strong>. You have <strong>{registrants.Count.ToString()}</strong> registrations.</p>";
+
+            msgs.AddRange(Registration.EmailCSVReport(
+                activity.GetAccount(dc).ID.Value, 
+                null,
+                null,
+                activity.ActivityGroupId.HasValue ? activity.ActivityGroupId.Value.AsList() : null, 
+                activityId.AsList(), 
+                "registrations",
+                RegistrationReportType.SingleActivity,
+                RegistrationAssignmentType.NotSet,
+                uiActivityLabel, 
+                activity.ContactEmail,
+                subject,
+                body));
+
+            return msgs;
+        }
+
+        #endregion
+    }
+}

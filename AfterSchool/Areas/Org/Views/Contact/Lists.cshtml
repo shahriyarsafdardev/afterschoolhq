@@ -1,0 +1,187 @@
+﻿@model List<AfterSchoolLibrary.ContactList>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var groups = (List<ActivityGroup>)ViewBag.Groups;
+    var paging = (PagingModel)ViewData["PagingModel"];
+
+    var previousLink = "#";
+    var nextLink = "#";
+    if (paging.IsNotEmpty())
+    {
+        if (paging.PageNumber > 1)
+        {
+            previousLink = Url.Action("lists", "contact", new { pn = paging.PageNumber - 1, rpp = Request["rpp"] });
+        }
+        if (paging.PageNumber < paging.TotalPages)
+        {
+            nextLink = Url.Action("lists", "contact", new { pn = paging.PageNumber + 1, rpp = Request["rpp"] });
+        }
+    }
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_ContactHeader");}
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a class="btn btn-primary btn-space" href="@Url.Action("add", "contact")">
+                    <i class="icon icon-left s7-plus"></i>
+                    Add Contacts
+                </a>
+                <button class="btn btn-primary btn-space margin-r-10 md-trigger" data-modal="modal-add">
+                    <i class="icon icon-left s7-plus"></i>
+                    Add List
+                </button>
+            </div>
+            <i class="s7-note2"></i> Contact Lists
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th class="text-center"># of Contacts</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var list in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <button type="button"
+                                                class="btn btn-default btn-sm md-trigger"
+                                                data-modal="modal-add"
+                                                onclick="editList('@list.ID', '@list.Name')">
+                                            <i class="s7-edit"></i>
+                                            Edit
+                                        </button>
+                                    </td>
+                                    <td>@list.Name</td>
+                                    <td class="text-center">@list.GetContactCount()</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="@Url.Action("index", "contact", new {list = list.ID})" class="btn btn-default btn-sm">
+                                                <i class="icon icon-left s7-notebook"></i> View Contacts
+                                            </a>
+                                            <button 
+                                                    class="btn btn-default btn-sm md-trigger" 
+                                                    data-modal="modal-delete" 
+                                                    onclick="deleteList('@list.Name', '@Url.Action("deletelist", "contact", new { id = list.ID.ToString() })')">
+                                                <span class="text-danger"><i class="s7-trash"></i> Delete</span>
+                                            </button>
+                                        </div>
+                                        <div class="btn-group">
+                                            <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">
+                                                Invite To @UILabel.ActivityGroupLabel() <span class="caret"></span>
+                                            </button>
+                                            <ul role="menu" class="dropdown-menu" id="list-add-menu">
+                                                @foreach (var group in groups)
+                                                {
+                                                    <li>
+                                                        <a href="@Url.Action("inviteto", "contact", new { type = "groupfromlists", id = group.Uid, list = list.ID })">@group.Name</a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4">There are no contact lists. Please <a href="@Url.Action("addlist", "contact")">add a new contact list</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (paging.IsNotEmpty() && paging.TotalCount > 0)
+            {
+                <div class="row">
+                    <div class="col-md-6">
+                        Showing @paging.StartingRecord - @paging.EndingRecord of @paging.TotalCount
+                    </div>
+                    <div class="col-md-6">
+                        <div class="btn-group pull-right">
+                            <a class="btn btn-default" href="@previousLink">Previous</a>
+                            @for (var i = 1; i <= paging.TotalPages; i++)
+                            {
+                                <a class="btn btn-default" href="@Url.Action("lists", "contact", new { pn = i, rpp = Request["rpp"] })">@i</a>
+                            }
+                            <a class="btn btn-default" href="@nextLink">Next</a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+@{ Html.RenderPartial(
+         "~/Views/Shared/_Modal.cshtml",
+         new ModalViewModel() {
+              ID = "modal-delete",
+              Title = "Delete Contact List",
+              ActionButtonId = "delete-list-button",
+              ActionButtonHtml = "Delete Contact List &raquo;",
+              HtmlBody = "<p>Are you sure you want to delete <strong><span id=\"delete-list-name\"></span></strong>? Contacts on the list will not be deleted.</p><p>This action cannot be undone.</p>"
+         }); }
+
+
+<script>
+    function deleteList(name, url) {
+        $('#delete-list-name').html(name);
+        $('#delete-list-button').attr('href', url);
+    }
+</script>
+
+
+<div id="modal-add" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-add" action="@Url.Action("listedit", "contact")" method="post" class="form-horizontal">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-edit"></i> Contact List</h3>
+            </div>
+            <div class="modal-body form">
+
+                <div class="form-group reg-period">
+                    <label class="col-sm-3 control-label">Name <span class="text-danger">*</span></label>
+                    <div class="col-sm-5">
+                        <input size="16" type="text" class="form-control" id="listname" name="listname" onfocus="this.select()" required value="" />
+                    </div>
+                </div>
+                <input type="hidden" name="list" id="list-add" value="" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Contact List &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function editList(id, name) {
+        $('#listname').val(name);
+        $('#list-add').val(id);
+    }
+</script>

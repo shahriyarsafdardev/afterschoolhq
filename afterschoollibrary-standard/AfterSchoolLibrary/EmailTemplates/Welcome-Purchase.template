@@ -1,0 +1,18 @@
+﻿<div>
+  <p>Hey @Model.FirstName,</p>
+
+  <p>
+      We're glad to have you as a customer of @Model.ProductName! We want to make this experience the best you've had ever when enrolling students for your programs and activities. 
+  </p>
+
+  <p>
+      Don't worry about anything, we'll be here to help you along the way. If you have any questions please <a href="mailto:@Model.SupportEmail">contact our support team</a>.
+  </p>
+  <p>
+      We're excited to help you succeed and watch your students grow!
+  </p>
+  <p>
+      Darye Henry<br />
+      Founder &amp; CEO
+  </p>
+</div>

@@ -1,0 +1,212 @@
+﻿@using System.Collections.Specialized;
+@model FormQuestion
+
+@{ 
+    var question = Model;
+    var id = ViewData["id"].ToString();
+    var fieldValues = (NameValueCollection)ViewData["fieldValues"];
+    var name = id;
+    var required = "";
+    var toolTip = "";
+    var toolTipId = "";
+
+    if (question.IsRequired)
+    {
+        required = " data-required ";
+        toolTip = " data-toggle='popover' data-trigger='hover' data-content='required' data-placement='right' ";
+        toolTipId = " data-tooltip-id='{0}' ";
+    }
+
+    <div class="form-group">
+        @if (question.QuestionTypeId == QuestionType.Checkbox)
+        {
+            var check = fieldValues[id].IsNotBlank() ? " checked=\"checked\" " : "";
+
+            <div class="col-md-1 col-md-offset-2" @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, id))>
+                <div class="switch-button switch-button-yesno">
+                    <input type="checkbox" id="@id" name="@name" class="form-control" value="1" @required @check />
+                    <span><label for="@id"></label></span>
+                </div>
+            </div>
+
+            Html.RenderPartial("_RegFormQuestionLabel", question, new ViewDataDictionary() { { "id", id }, { "class", "col-md-6" } });
+        }
+        else
+        {
+            Html.RenderPartial("_RegFormQuestionLabel", question, new ViewDataDictionary() { { "id", id }, { "class", "col-md-3 control-label" } });
+        
+            <div class="col-md-6">
+                @switch (question.QuestionTypeId)
+                {
+                    case QuestionType.TextBlock:
+
+                        <div>@Html.Raw(question.Description.IfEmpty("").Replace("\n", "<br />"))</div>
+
+                        break;
+                    case QuestionType.TextBox:
+                    case QuestionType.Email:
+                    case QuestionType.Number:
+
+                        <input type="@question.QuestionTypeId.ToString().ToLower()" id="@id" name="@name" class="form-control" onfocus="this.select()" @required @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, id)) value="@fieldValues[id]" />
+
+                        break;
+
+                    case QuestionType.Date:
+
+                        <div @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, id))>
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input type="text" class="form-control" id="@id" name="@name" onfocus="this.select()" @required data-type="date" value="@fieldValues[id]" />
+                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                            </div>
+                        </div>
+                    
+                    break;
+
+                case QuestionType.DropDownList:
+
+                    <div @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, id))>
+                        <select id="@id" name="@name" class="form-control" @required>
+                            <option value="">Select...</option>
+                            @foreach (var option in question.Options.Split(','))
+                            {
+                                var selected = fieldValues[id].IfBlank("").Trim() == option.Trim() ? " selected=\"selected\" " : "";
+                                <option value="@option.Trim()" @selected>@option.Trim()</option>
+                            }
+                        </select>
+                    </div>
+
+                        break;
+
+                    case QuestionType.RadioList:
+
+                        <div @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, id))>
+                            @foreach (var option in question.Options.Split(','))
+                            {
+                                var optionNoSpaces = option.ToLower().Replace(" ", "");
+                                var selected = fieldValues[id].IfBlank("").Trim() == option.Trim() ? " checked=\"checked\" " : "";
+                                <div class="am-radio inline">
+                                    <input type="radio" id="@id-@optionNoSpaces" name="@name" class="form-control" @required value="@option.Trim()" @selected />
+                                    <label for="@id-@optionNoSpaces">@option.Trim()</label>
+                                </div>
+                            }
+                        </div>
+
+                        break;
+
+                    case QuestionType.Checkbox:
+
+                        var check = fieldValues[id].IsNotBlank() ? " checked=\"checked\" " : "";
+
+                        <div @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, id))>
+                            <div class="switch-button switch-button-yesno">
+                                <input type="checkbox" id="@id" name="@name" class="form-control" value="1" @required @check />
+                                <span>
+                                    <label for="@id"></label>
+                                </span>
+                            </div>
+                        </div>
+
+                        break;
+
+                    case QuestionType.TextArea:
+
+                        <textarea id="@id" name="@name" class="form-control" onfocus="this.select()" @required @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, id))>@fieldValues[id]</textarea>
+
+                        break;
+
+                    case QuestionType.RadioMatrix:
+
+                        var cols = question.Options.Split(';')[0].Split(',');
+                        var rows = question.Options.Split(';')[1].Split(',');
+
+                        var radioAnswer = fieldValues[id];
+
+                        if (radioAnswer.IsBlank())
+                        {
+                            foreach (var col in cols)
+                            {
+                                if (radioAnswer.IsNotEmpty())
+                                {
+                                    radioAnswer += ";";
+                                }
+                                radioAnswer += col.Trim() + "=";
+                            }
+                        }
+
+                        <div @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, id))>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        @foreach (var col in cols.Select(x => x.Trim()))
+                                        {
+                                            <th class="text-center">@col</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var row in rows.Select(x => x.Trim()))
+                                    {
+                                        <tr>
+                                            <td>@row</td>
+                                            @foreach (var col in cols.Select(x => x.Trim()))
+                                            {
+                                                var radioid = id + "-" + col + "-" + row;
+                                                var radioname = name + "-" + col;
+                                                var selected = fieldValues[radioname] == row ? " checked=\"checked\" " : "";
+
+                                                <td class="text-center">
+                                                    <div class="am-radio inline" @Html.Raw(toolTip) @Html.Raw(string.Format(toolTipId, radioid))>
+                                                        <input type="radio" id="@radioid" name="@radioname" value="@row.Trim()" class="form-control radio-matrix-@id" @required @selected />
+                                                        <label for="@radioid">&nbsp;</label>
+                                                    </div>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" id="@id" name="@name" value="@radioAnswer" />
+
+                        <script>
+                            PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+                                $('.radio-matrix-@id').click(function () {
+                                    console.log('checking radio matrix');
+
+                                    var radiocol = $(this).attr('name').split('-')[2];
+                                    var questionid = $(this).attr('id').split('-')[0] + '-' + $(this).attr('id').split('-')[1];
+                                    var questionvalue = $('#' + questionid).val();
+
+                                    //remove value
+                                    var qvArr = questionvalue.split(';');
+                                    var toReplace = '';
+                                    for (var i = 0; i < qvArr.length; i++) {
+                                        var col = qvArr[i].split('=')[0];
+                                        console.log(col);
+                                        console.log(radiocol);
+                                        if (col == radiocol) {
+                                            toReplace = qvArr[i];
+                                            break;
+                                        }
+                                    }
+
+                                    questionvalue = questionvalue.replace(toReplace, radiocol + '=' + $(this).val());
+                                    $('#' + questionid).val(questionvalue);
+
+                                });
+
+                            });
+                        </script>
+
+                        break;
+
+                    default:
+                        break;
+                }
+            </div>
+    
+        }
+    </div>
+}

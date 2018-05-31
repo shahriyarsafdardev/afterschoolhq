@@ -1,0 +1,32 @@
+﻿@model string
+
+@{
+    var required = "";
+    if (ViewData["required"].IsNotEmpty() && ViewData["required"].ToString().IsBoolean() && ViewData["required"].ToString().ToBoolean())
+    {
+        required = " required=\"required\" ";
+    }
+}
+<div class="padding-10 border-light-gray rounded-corners">
+    <div class="editable" id="@ViewData["id"]-div">@Html.Raw(Model)</div>
+    <textarea name="@ViewData["name"]" id="@ViewData["id"]" class="hide" @required></textarea>
+</div>
+
+<script>
+    var editor@(ViewData["id"]) = new MediumEditor('.editable', {
+        targetBlank: true,
+        autoLink: true,
+    });
+
+    editor@(ViewData["id"]).subscribe('blur', function (event, editable) {
+        setTextAreaValue@(ViewData["id"])();
+    });
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        setTextAreaValue@(ViewData["id"])();
+    });
+
+    function setTextAreaValue@(ViewData["id"])() {
+        $('#@ViewData["id"]').val($('#@ViewData["id"]-div:first-child').html());
+    }
+</script>

@@ -1,0 +1,30 @@
+﻿@model AfterSchoolLibrary.RegistrantActivity
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-id"></i> @UILabel.RegistrantLabel() Detail - @Model.RegistrantName
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-10 col-md-offset-1">
+
+                @{Html.RenderPartial("~/Views/Shared/_RegistrantDetail.cshtml", Model,
+                              new ViewDataDictionary() {
+                                  { "BackToListAction", "Index" },
+                                  { "BackToListController", "Registrant" },
+                                  { "ShowPaymentForm", false },
+                              });}
+
+            </div>
+        </div>
+    </div>
+</div>

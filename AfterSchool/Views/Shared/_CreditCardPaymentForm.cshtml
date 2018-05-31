@@ -1,0 +1,48 @@
+﻿@{
+    var prefix = ViewData["prefix"];
+    var required = "";
+    if (ViewData["required"].IsNotEmpty() && ViewData["required"].ToString().IsBoolean() && ViewData["required"].ToString().ToBoolean())
+    {
+        required = " required=\"required\" data-required ";
+    }
+}
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="@prefix@Html.Raw("name")">Name on Card</label>
+    <div class="col-sm-6">
+        <input type="text" class="form-control" id="@prefix@Html.Raw("name")" name="@prefix@Html.Raw("name")" value="" onfocus="this.select()" @required data-tooltip-id="@prefix@Html.Raw("name")" data-toggle='popover' data-trigger='hover' data-content='Name on Card' data-placement='right' />
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="@prefix@Html.Raw("number")">Card Number</label>
+    <div class="col-sm-6">
+        <input type="text" class="form-control" id="@prefix@Html.Raw("number")" name="@prefix@Html.Raw("number")" value="" onfocus="this.select()" @required data-tooltip-id="@prefix@Html.Raw("number")" data-toggle='popover' data-trigger='hover' data-content='Card Number' data-placement='right' />
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="@prefix@Html.Raw("cvc")">CVC</label>
+    <div class="col-sm-6">
+        <input type="text" class="form-control" id="@prefix@Html.Raw("cvc")" name="@prefix@Html.Raw("cvc")" value="" onfocus="this.select()" @required data-tooltip-id="@prefix@Html.Raw("cvc")" data-toggle='popover' data-trigger='hover' data-content='CVC' data-placement='right' />
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="@prefix@Html.Raw("expmonth")">Expiration Month</label>
+    <div class="col-sm-6">
+        <select class="form-control" id="@prefix@Html.Raw("expmonth")" name="@prefix@Html.Raw("expmonth")" @required data-tooltip-id="@prefix@Html.Raw("expmonth")" data-toggle='popover' data-trigger='hover' data-content='Expiration Month' data-placement='right'>
+            @foreach (Month month in Enum.GetValues(typeof(Month)))
+            {
+                <option value="@((int)month)">@((int)month) - @month.ToString()</option>
+            }
+        </select>
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="@prefix@Html.Raw("expyear")">Expiration Year</label>
+    <div class="col-sm-6">
+        <select class="form-control" id="@prefix@Html.Raw("expyear")" name="@prefix@Html.Raw("expyear")" @required data-toggle='popover' data-trigger='hover' data-content='Expiration Year' data-placement='right'>
+            @for (var i = DateTime.UtcNow.Year; i < DateTime.UtcNow.Year + 10; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    </div>
+</div>

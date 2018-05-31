@@ -1,0 +1,345 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using System.Data;
+using System.Collections;
+
+namespace AfterSchoolLibrary
+{
+	
+    public class RegistrantActivityGroup : BasicObjectWithModified
+    {
+		#region "ClassGenerator"
+
+		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
+		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
+		public int? RegistrationPeriodId { get { return (int?)MDV["RegistrationPeriodId"].Value; } set { MDV["RegistrationPeriodId"].Value = value; } }
+		public int? NumberOfInvitationSeats { get { return (int?)MDV["NumberOfInvitationSeats"].Value; } set { MDV["NumberOfInvitationSeats"].Value = value; } }
+		public int? NumberOfSeatsDeclined { get { return (int?)MDV["NumberOfSeatsDeclined"].Value; } set { MDV["NumberOfSeatsDeclined"].Value = value; } }
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public string RegistrantEmail { get { return (string)MDV["RegistrantEmail"].Value; } }
+		public string RegistrantFirstName { get { return (string)MDV["RegistrantFirstName"].Value; } }
+		public string RegistrantLastName { get { return (string)MDV["RegistrantLastName"].Value; } }
+		public Guid RegistrantUid { get { return (Guid)MDV["RegistrantUid"].Value; } }
+		public string RegistrantPhone { get { return (string)MDV["RegistrantPhone"].Value; } }
+		public string RegistrantCompany { get { return (string)MDV["RegistrantCompany"].Value; } }
+		public RegistrantType RegistrantRegistrantTypeId { get { return (RegistrantType)MDV["RegistrantRegistrantTypeId"].Value; } }
+		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
+		public bool ActivityGroupIsArchived { get { return (bool)MDV["ActivityGroupIsArchived"].Value; } }
+		
+
+        public RegistrantActivityGroup()
+        {
+            this.Config(ObjectMap, DatabaseQuery, typeof(RegistrantActivityGroup).Name, "ID");
+            this.LoadObjectValues(ObjectMap);
+			this.Uid = Guid.NewGuid();
+			
+        }
+
+        public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
+        {
+            get
+            {
+                BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
+                string className = typeof(RegistrantActivityGroup).Name;
+                _dp = BasicObjectWithModified.get_BaseObjectMap(className);
+				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RegistrationPeriodId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "NumberOfInvitationSeats", System.Data.SqlDbType.Int);
+				_dp.Add(className, "NumberOfSeatsDeclined", System.Data.SqlDbType.Int);
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantUid", typeof(Registrant).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "Registrant");
+				_dp.Add(className, "RegistrantPhone", typeof(Registrant).Name, "Phone", System.Data.SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantCompany", typeof(Registrant).Name, "Company", System.Data.SqlDbType.NVarChar, "Registrant");
+				_dp.Add(className, "RegistrantRegistrantTypeId", typeof(Registrant).Name, "RegistrantTypeId", System.Data.SqlDbType.Int, "Registrant");
+				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
+				
+                return _dp;
+            }
+        }
+
+        protected static RegistrantActivityGroup LoadObject(System.Data.DataRow row)
+        {
+            RegistrantActivityGroup obj = new RegistrantActivityGroup();
+            obj.LoadObjectValues(ObjectMap, row);
+            return obj;
+        }
+
+        protected static BasicLibrary.DataAccess.DatabaseQuery DatabaseQuery
+        {
+            get
+            {
+                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivityGroup).Name);
+				dq.Joins.Add(Registrant.ObjectMap["ID"], RegistrantActivityGroup.ObjectMap["RegistrantId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Registrant");
+				dq.Joins.Add(ActivityGroup.ObjectMap["ID"], RegistrantActivityGroup.ObjectMap["ActivityGroupId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "ActivityGroup");
+				
+                return dq;
+            }
+        }
+
+        public static RegistrantActivityGroup Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], id);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static List<RegistrantActivityGroup> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+			dq.UseParameterizedQuery = false;
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
+            return RegistrantActivityGroup.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            return RegistrantActivityGroup.BaseGetCount(criterias, ObjectMap, dq);
+        }
+
+		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return base._Save2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantActivityGroup).Name);
+        }
+
+        public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantActivityGroup).Name);
+        }
+
+        public static SystemMessages Create(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return BaseObject._Create(DatabaseQuery, dc, ObjectMap);
+        }
+
+        public static SystemMessages Alter(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            SystemMessages msgs = new SystemMessages();
+            BasicLibrary.DataAccess.DatabaseParameters dps;
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityGroupId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RegistrantId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RegistrationPeriodId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["NumberOfInvitationSeats"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["NumberOfSeatsDeclined"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			
+
+            return msgs;
+        }
+
+		public RegistrantActivityGroup Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			return RegistrantActivityGroup.Load(this.ID.Value, dc);
+		}
+		
+		public static RegistrantActivityGroup LoadByActivityGroupIdByRegistrantId(int ActivityGroupId, int RegistrantId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<RegistrantActivityGroup> LoadByRegistrantId(int RegistrantId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<RegistrantActivityGroup> LoadByActivityGroupId(int ActivityGroupId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static RegistrantActivityGroup LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		
+
+        #endregion
+
+		#region "UserDefined"
+
+        public string Status
+        {
+            get
+            {
+                if(this.NumberOfInvitationSeats > 0)
+                {
+                    return "Invited";
+                }
+                else if(this.NumberOfSeatsDeclined > 0)
+                {
+                    return "Declined";
+                }
+                return "N/A";
+            }
+        }
+
+        public string GetInviteUrl(DatabaseConnection dc = null)
+        {
+            var url = this.GetGroup(dc).HomePageUrl;
+            url += (url.Contains("?") ? "&" : "?") + "invite=" + this.Uid.ToString();
+            return url;
+        }
+
+        public string GetDeclineUrl(DatabaseConnection dc= null)
+        {
+            return GetInviteUrl(dc) + "&decline=1";
+        }
+
+        private ActivityGroup _Group = null;
+        public ActivityGroup GetGroup(DatabaseConnection dc = null)
+        {
+            if (_Group.IsEmpty())
+            {
+                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, dc);
+            }
+            return _Group;
+        }
+        public string RegistrantName
+        {
+            get
+            {
+                string rtn = "";
+                if (this.RegistrantRegistrantTypeId == RegistrantType.Individual)
+                {
+                    rtn = BaseWebUser.BuildDisplayName(this.RegistrantFirstName, this.RegistrantLastName);
+                }
+                else if (this.RegistrantRegistrantTypeId == RegistrantType.Organization)
+                {
+                    rtn = this.RegistrantCompany.ToProperCase();
+                }
+
+                return rtn;
+            }
+        }
+
+        public List<Activity> GetActivities(DatabaseConnection dc = null)
+        {
+            var ras = RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, dc).Where(x => x.ActivityGroupId == this.ActivityGroupId).ToList();
+            if(ras.Count == 0)
+            {
+                return Activity.LoadByActivityGroupId(this.ActivityGroupId.Value, dc);
+            }
+            else
+            {
+                var activityIds = ras.Select(x => x.ActivityId.Value).ToList();
+                return Activity.LoadList(activityIds, dc);
+            }
+        }
+
+        public SystemMessages DeclineInvite(Account account, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var groupName = this.ActivityGroupName;
+            var registrantName = this.RegistrantName;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    this.NumberOfSeatsDeclined = this.NumberOfInvitationSeats;
+                    this.NumberOfInvitationSeats = 0;
+                    this.LastModifiedBy = loggedInUserId;
+                    this.LastModifiedDate = DateTime.UtcNow;
+                    amsgs.AddRange(this.Save(adc));
+
+                    var ras = RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, adc);
+                    foreach (var ra in ras)
+                    {
+                        ra.NumberOfSeatsDeclined = ra.NumberOfInvitationSeats;
+                        ra.NumberOfInvitationSeats = 0;
+                        ra.LastModifiedBy = loggedInUserId;
+                        ra.LastModifiedDate = DateTime.UtcNow;
+                        amsgs.AddRange(ra.Save(adc));
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    if (smsgs.HasNoErrors())
+                    {
+                        var body = "<p>Hello,</p><p>{0} has opted to decline the invitation to register for {1}</p>{2}";
+
+                        SendGridHelper.SendMail(
+                            fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                                Email.AppEmailAddress, 
+                                string.Format("{0} via {1}", account.Name, Utilities.AppName(account.IsAfterSchool))
+                            ),
+                            toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
+                            subject: string.Format("An invitation was declined for {0}", groupName),
+                            body: string.Format(body, registrantName, groupName, Email.GetAppSignature(account.IsAfterSchool, "declined_invite_notice")),        
+                            emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                        );
+                    }
+
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                dc: dc
+            );
+
+            return msgs;
+        }
+
+        public static List<RegistrantActivityGroup> LoadByActivityGroupId(int ActivityGroupId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        #endregion
+    }
+}

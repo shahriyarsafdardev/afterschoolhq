@@ -1,0 +1,37 @@
+﻿@model DateTime
+
+@{
+    var disabled = "";
+    if (ViewData["disabled"].IsNotEmpty() && ViewData["disabled"].ToString().IsBoolean() && ViewData["disabled"].ToString().ToBoolean())
+    {
+        disabled = " disabled=\"disabled\" ";
+    }
+    var required = "";
+    if (ViewData["required"].IsNotEmpty() && ViewData["required"].ToString().IsBoolean() && ViewData["required"].ToString().ToBoolean())
+    {
+        required = " required=\"required\" ";
+    }
+}
+
+<select name="@ViewData["name"]" id="@ViewData["id"]" class="form-control" @required @disabled>
+    @foreach (var ampm in new string[] { "am", "pm" })
+    {
+        for (var h = 0; h < 12; h++)
+        {
+            foreach (var m in new int[] { 0, 15, 30, 45 })
+            {
+                if (h == 0) { h = 12; }
+                string selected = "";
+                string time = string.Format("{0}:{1} {2}", h.ToString(), m.ToString().PadLeft(2, '0'), ampm);
+
+                if (Model.ToShortTimeString().ToLower() == time.ToLower())
+                {
+                    selected = " selected=\"selected\" ";
+                }
+
+                <option value="@time" @selected>@time</option>
+                if (h == 12) { h = 0; }
+            }
+        }
+    }
+</select>

@@ -1,0 +1,110 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    Package package = (Package)ViewBag.Package;
+    var currentPackage = SessionVariables.AccountPackage;
+    var packages = (List<Package>)ViewBag.Packages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Purchase
+        </div>
+        <div class="panel-body">
+
+            <form method="post" id="new-billing-form" action="@Url.Action("newpayment", "account")" class="form-horizontal">
+                
+                <div class="row">
+                    <div class="col-md-7 col-md-offset-2">
+                        <h3>Select Your Plan</h3>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-7 col-md-offset-2">
+                        <table class="table table-striped">
+                            <tr>
+                                <th>Package</th>
+                                <th class="text-center">Monthly Plan</th>
+                                <th class="text-center">Annual Plan (2 months free)</th>
+                            </tr>
+                            @foreach (var p in packages)
+                            {
+                                var monthlySelected = "";
+                                var yearlySelected = "";
+                                if(p.ID == currentPackage.PackageId)
+                                {
+                                    if(currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
+                                    {
+                                        monthlySelected = " checked=\"checked\" ";
+                                    }
+                                    else if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Year)
+                                    {
+                                        yearlySelected = " checked=\"checked\" ";
+                                    }
+                                }
+
+                                <tr>
+                                    <td>@p.Name</td>
+                                    <td class="text-center">
+                                        <div class="am-radio inline">
+                                            <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-monthly" @monthlySelected value="@((int)BillingPeriodType.Month)_@p.Uid.ToString()" />
+                                            <label for="selectedpackage-@p.ID-monthly">@p.Price.ToCurrency()</label>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="am-radio">
+                                            <input type="radio" name="selectedpackage" id="selectedpackage-@p.ID-yearly" @yearlySelected value="@((int)BillingPeriodType.Year)_@p.Uid.ToString()" />
+                                            <label for="selectedpackage-@p.ID-yearly">@p.PricePerYear.ToCurrency()</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-7 col-md-offset-2">
+                        <h3>Add Payment Details</h3>
+                    </div>
+                </div>
+
+                @{Html.RenderPartial(
+                    "~/Views/Shared/_CreditCardPaymentForm.cshtml",
+                    null,
+                    new ViewDataDictionary()
+                    {
+                        { "required", true },
+                        { "prefix", "" }
+                    }
+                    );}               
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <button type="submit" id="newbilling-button" class="btn btn-primary btn-block btn-lg">Purchase &raquo;</button>
+                        <div id="form-validation-settings" data-form-validation-submit-button="newbilling-button" data-form-validation-submit-text="Purchase &raquo;" data-form-validation-submitting-text="Purchasing..."></div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#new-billing-form').submit(function () {
+            $('#newbilling-button').html('Purchasing...');
+            $('#newbilling-button').prop('disabled', true);
+        });
+    });
+</script>

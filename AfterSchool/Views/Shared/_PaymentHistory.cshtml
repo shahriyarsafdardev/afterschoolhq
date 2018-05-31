@@ -1,0 +1,28 @@
+﻿@model AfterSchoolLibrary.Account
+
+@{
+    var charges = (List<Stripe.StripeCharge>)ViewBag.BillingHistory;
+}
+
+@if (charges.Count > 0)
+{
+    <h4>Payment History</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Card</th>
+            </tr>
+            @foreach (var charge in charges)
+            {
+                <tr>
+                    <td>@Model.ConvertToAccountTimeZone(charge.Created).ToShortDateTimeString()</td>
+                    <td>@((charge.Amount.ToDecimal() / 100).ToCurrency())</td>
+                    <td><span class="badge badge-success">@charge.Source.Brand</span> **** **** **** @charge.Source.Last4</td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+

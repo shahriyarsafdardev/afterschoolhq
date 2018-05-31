@@ -1,0 +1,83 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var landingPage = (AccountProperty)ViewBag.LandingPage;
+    var regthankyou = (AccountProperty)ViewBag.RegThankYou;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-edit"></i> Account - Design &amp; Style
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-8 col-lg-9">
+
+                <form method="post" action="@Url.Action("style", "account")" class="form-horizontal">
+
+                    <div class="form-group hide">
+                        <label class="col-sm-3 control-label">Logo Url</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="logourl" name="logourl" value="@Model.LogoUrl" onfocus="this.select()" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Landing Page Text</label>
+                        <div class="col-sm-9">
+                            @{Html.RenderPartial
+                                (
+                                    "~/Views/Shared/_TextEditor.cshtml",
+                                    landingPage.IsNotEmpty() ? landingPage.Value : "",
+                                    new ViewDataDictionary()
+                                    {
+                                                    { "name", "landingpagetext" },
+                                                    { "id", "landingpagetext" }
+                                    }
+                                );
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group hide">
+                        <label class="col-sm-3 control-label">Registration Thank You Email</label>
+                        <div class="col-sm-9">
+                            @{Html.RenderPartial
+                                (
+                                    "~/Views/Shared/_TextEditor.cshtml",
+                                    regthankyou.IsNotEmpty() ? regthankyou.Value : "",
+                                    new ViewDataDictionary()
+                                    {
+                                        { "name", "regthankyoutext" },
+                                        { "id", "regthankyoutext" }
+                                    }
+                                );
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="reset" class="btn btn-default">Discard Changes</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                @{Html.RenderPartial("~/Views/Shared/_AccountEditNav.cshtml", Model); }
+            </div>
+
+        </div>
+    </div>
+</div>

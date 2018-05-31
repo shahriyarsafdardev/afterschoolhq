@@ -1,0 +1,29 @@
+﻿@model AfterSchoolLibrary.Activity
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Contact Information
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Contact Name <span class="text-danger">*</span></label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control" id="contactname" name="contactname" onfocus="this.select()" value="@Model.ContactName.IfBlank(SessionVariables.LoggedInUser.DisplayName)" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Contact Phone <span class="text-danger">*</span></label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control" id="contactphone" name="contactphone" onfocus="this.select()" value="@Model.ContactPhone.IfBlank(SessionVariables.LoggedInUser.Phone)" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">Contact Email <span class="text-danger">*</span></label>
+            <div class="col-sm-9">
+                <input type="email" class="form-control" id="contactemail" name="contactemail" onfocus="this.select()" value="@Model.ContactEmail.IfBlank(SessionVariables.LoggedInUser.Email)" required />
+            </div>
+        </div>
+    </div>
+</div>

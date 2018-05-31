@@ -1,0 +1,26 @@
+﻿@model AfterSchoolLibrary.ActivityForm
+@{
+    ViewBag.Title = Model.AccountName;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("AdminAccountHeader", Model.AccountId.ToString());}
+
+<div class="main-content">
+
+    @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.ActivityId.ToString());}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-gleam"></i> @Model.ActivityName
+        </div>
+        <div class="panel-body">
+
+            @{Html.RenderPartial("~/Views/Shared/_RegistrationFormBuilder.cshtml", Model);}
+
+        </div>
+    </div>
+
+</div>

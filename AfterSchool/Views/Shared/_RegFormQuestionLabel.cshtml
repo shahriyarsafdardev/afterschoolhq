@@ -1,0 +1,23 @@
+﻿@model FormQuestion
+
+@{ 
+    var id = ViewData["id"].ToString();
+    var requiredStar = "";
+    if (Model.IsRequired)
+    {
+        requiredStar = "<span class='text-danger'>*</span>";
+    }
+}
+
+<label for="@id" class="@ViewData["class"]">
+    @if (Model.Link.IsNotBlank())
+    {
+        <a href="@Model.Link" target="_blank">@Model.Text.Trim()</a>
+    }
+    else
+    {
+        @:@Model.Text.IfBlank("").Trim()
+    }
+    @Html.Raw(requiredStar)
+</label>
+

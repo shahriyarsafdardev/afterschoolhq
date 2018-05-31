@@ -1,0 +1,151 @@
+﻿@model AfterSchoolLibrary.RegistrationPeriod
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @*
+    @{Html.RenderPartial("_RegistrationPeriodHeader");}
+    *@
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("_RegistrationPeriodTitle", Model.Name.IfBlank(string.Format("New {0}", UILabel.RegistrationPeriodLabel()))); }
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-12 col-lg-12">
+
+                <form id="form1" method="post" action="@Url.Action("edit", "period", new { id = Model.ID.ToString() })" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Label <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required />
+                        </div>
+                    </div>
+
+                    @*
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">
+                            Description / Instructions
+                            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Registration Description / Instructions" data-placement="top"></i>
+                        </label>
+                        <div class="col-md-9">
+                            <div class="text-editor-container">
+                                <div class="text-editor" id="description-div">
+                                    @Html.Raw(Model.Description)
+                                </div>
+                                <textarea name="description" id="description" class="hide"></textarea>
+                            </div>
+                            <!--
+                            <textarea name="details" id="details" class="form-control" rows="10" required placeholder="(ex. This @UILabel.ActivityLabel().ToLower() is for ages 10-14. We will go through the entire path to becoming an expert in...)">@Model.Description</textarea>
+                            -->
+                        </div>
+                    </div>
+                    *@
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Open Date &amp; Time <span class="text-danger">*</span></label>
+                        <div class="col-sm-5">
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input size="16" type="text" class="form-control" id="opendate" name="opendate" onfocus="this.select()" required value="@Model.StartDateTime.ToShortDateString()" data-type="date" />
+                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            @{Html.RenderPartial(
+                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                    Model.StartDateTime.Value,
+                                    new ViewDataDictionary()
+                                    {
+                                        { "name", "opentime" },
+                                        { "id", "opentime" },
+                                        { "required", true }
+                                    }
+                                );
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Close Date &amp; Time <span class="text-danger">*</span></label>
+                        <div class="col-sm-5">
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input size="16" type="text" class="form-control" id="closedate" name="closedate" onfocus="this.select()" required value="@Model.EndDateTime.ToShortDateString()" data-type="date" />
+                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            @{Html.RenderPartial(
+                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                    Model.EndDateTime.Value,
+                                    new ViewDataDictionary()
+                                    {
+                                        { "name", "closetime" },
+                                        { "id", "closetime" },
+                                        { "required", true }
+                                    }
+                                );
+                            }
+                        </div>
+                    </div>
+
+                    @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications) && false)
+                    {
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Registration Mode <span class="text-danger">*</span>
+                                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Set whether you want the @UILabel.RegistrantLabel() to automatically register or to apply for a seat for all @UILabel.ActivityLabel(true) in this @UILabel.RegistrationPeriodLabel(). If 'Not Set' it will use the activity setting." data-placement="top"></i>
+                            </label>
+                            <div class="col-sm-9">
+                                <div class="am-radio inline">
+                                    @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>())
+                                    {
+                                        <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "") />
+                                        <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString().SplitByUpperCase()</label>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)" />
+                    }
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="reset" class="btn btn-default">Discard Changes</button>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('.text-editor').wysihtml5({
+            toolbar: {
+                'image': false,
+                'color': false,
+            }
+        });
+
+        $('.text-editor').on('blur', function () {
+            $('#description').val($('#description-div').html());
+        });
+        $('#description').val($('#description-div').html());
+    });
+</script>

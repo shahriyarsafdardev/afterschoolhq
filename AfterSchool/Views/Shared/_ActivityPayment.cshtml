@@ -1,0 +1,99 @@
+﻿@using System.Collections.Specialized;
+@model Registration
+
+@{ 
+    var costPerRegistrant = (decimal?)ViewData["costperregistrant"];
+    var acceptPayments = (bool)ViewData["acceptpayments"];
+    var acceptCreditCard = (bool)ViewData["acceptcreditcard"];
+    var acceptPayPal = (bool)ViewData["acceptpaypal"];
+    var fieldValues = (NameValueCollection)ViewData["fieldvalues"];
+    var allowToPayLater = (bool)ViewData["allowtopaylater"];
+}
+
+@if (costPerRegistrant > 0)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Payment
+        </div>
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div class="value" id="total-cost">@costPerRegistrant.ToCurrency() x 1 Seat = @((costPerRegistrant.Value * 1).ToCurrency())</div>
+                        </div>
+                        <div class="icon"><span class="s7-credit"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            @if (acceptPayments)
+            {
+                <div class="row">
+                    <label class="col-sm-3 control-label">
+                        Payment Type
+                    </label>
+                    <div class="col-sm-6">
+                        @if (acceptCreditCard)
+                        {
+                            <div class="am-radio inline">
+                                <input type="radio" name="paymenttype" id="paymenttype-@((int)PaymentType.CreditCard)" required value="@PaymentType.CreditCard.ToString()" onclick="showcreditcard()" checked="checked">
+                                <label for="paymenttype-@((int)PaymentType.CreditCard)">Credit Card</label>
+                            </div>
+                        }
+                        @if (acceptPayPal)
+                        {
+                            var checkedString = !acceptCreditCard || fieldValues["paymenttype"] == PaymentType.PayPal.ToString() ? " checked=\"checked\" " : "";
+
+                            <div class="am-radio inline">
+                                <input type="radio" name="paymenttype" id="paymenttype-@((int)PaymentType.PayPal)" required value="@PaymentType.PayPal.ToString()" onclick="showpaypal()" @checkedString>
+                                <label for="paymenttype-@((int)PaymentType.PayPal)">PayPal</label>
+                            </div>
+                        }
+                        @if (allowToPayLater)
+                        {
+                            var check = fieldValues["paymenttype"] == "InPerson" ? " checked=\"checked\" " : "";
+                            <div class="am-radio inline">
+                                <input type="radio" name="paymenttype" id="paymenttype-0" required value="InPerson" onclick="showinperson()" @check>
+                                <label for="paymenttype-0">Pay Later</label>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            }
+
+            @if (acceptCreditCard)
+            {
+                <div id="creditcard" class="padding-10">
+                    @{Html.RenderPartial(
+                        "~/Views/Shared/_CreditCardPaymentForm.cshtml",
+                        null,
+                        new ViewDataDictionary()
+                        {
+                                    { "required", true },
+                                    { "prefix", "cc" }
+                        }
+                        );}
+                </div>
+            }
+            @if (acceptPayPal)
+            {
+                var hide = !acceptCreditCard ? "" : "hide";
+
+                <div id="paypal" class="@hide">
+                    @{Html.RenderPartial("~/Views/Shared/_PayPalPaymentForm.cshtml");}
+                </div>
+            }
+
+            <div id="inperson" class="hide">
+                <div class="col-md-6 col-md-offset-3 padding-10">
+                    You can pay by check or cash in person. You will be placed on the waiting list until your payment is received.
+                </div>
+            </div>
+
+        </div>
+    </div>
+}

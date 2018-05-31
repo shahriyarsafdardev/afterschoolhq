@@ -1,0 +1,29 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    ViewBag.Title = "Login";
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+<div class="am-wrapper am-login">
+    <div class="am-content">
+        <div class="main-content">
+            <div class="login-container">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" height="80px" class="logo-img"></a>
+                        <span>Please enter your information.</span>
+                    </div>
+                    <div class="panel-body">
+                        
+                        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+                        @{ Html.RenderPartial("_Login"); }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

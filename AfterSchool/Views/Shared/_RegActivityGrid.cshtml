@@ -1,0 +1,359 @@
+﻿@model AfterSchoolLibrary.Account
+
+@{
+    var activityGroup = (ActivityGroup)ViewBag.Group;
+    var activities = (List<Activity>)ViewBag.Activities;
+    var registration = (Registration)ViewBag.Registration;
+    var adminMode = (bool)ViewBag.AdminMode;
+    var grades = GradeLevel.Load();
+    var useCart = ViewBag.UseCart != null && (bool)ViewBag.UseCart;
+
+    var activityDetailsCols = 12;
+    if (Model.HasFeature(FeatureType.ManageActivityGroups))
+    {
+        activityDetailsCols = 6;
+    }
+
+    RegistrationPeriod period = null;
+
+    if (activityGroup.IsNotEmpty())
+    {
+        period = activityGroup.GetCurrentRegistrationPeriod();
+    }
+
+    <div id="search-noresults" class="hide padding-h-30 text-white bg-danger rounded-corners">
+        <h4>There are no results matching your search criteria</h4>
+    </div>
+
+    foreach (var activity in activities)
+    {
+        var seatsRemaining = activity.GetSeatsRemaining();
+        var waitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining();
+        var hasRoom = seatsRemaining > 0 || waitingListSeatsRemaining > 0;
+        var isAlreadyRegistered = registration.IsEmpty() ? false : registration.IsRegisteredFor(activity);
+
+        var isOpen = false;
+        var willOpen = false;
+        var willOpenIn = new TimeSpan();
+        var willCloseIn = new TimeSpan();
+
+        if (activityGroup.IsEmpty())
+        {
+            period = activity.GetCurrentOrNextRegistrationPeriod();
+        }
+
+        if (period.IsNotEmpty())
+        {
+            isOpen = period.IsOpen() || registration.IsNotEmpty(); // || adminMode;
+            willOpen = period.WillOpen();
+            willOpenIn = period.WillOpenIn();
+            willCloseIn = period.WillCloseIn();
+        }
+        else
+        {
+            isOpen = adminMode;
+        }
+
+        var cartActivity = new
+        {
+            Name = activity.Name,
+            Uid = activity.Uid,
+            Days = activity.GetDaysOfTheWeek()
+                .Select(x => new { Day = x.ToString(), SeatsRemaining = activity.GetSeatsRemaining(), WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining() }),
+            Cost = activity.CostPerRegistrant.ToCurrency().Replace("$", ""),
+            SelectedDay = ""
+        };
+
+        var labelDanger = "warning";
+        if (seatsRemaining <= 0)
+        {
+            seatsRemaining = 0;
+            labelDanger = "danger";
+        }
+
+        <div class="col-lg-4 col-md-6 col-sm-12">
+
+            <div id="activity-details-@activity.ID" class="hide">@Html.Raw(activity.Details)</div>
+            <div id="activity-schedule-@activity.ID" class="hide">@{ Html.RenderPartial("_ActivityScheduleHtml", activity.GetSchedule()); }</div>
+            <div id="activity-location-@activity.ID" class="hide">@Html.Raw(activity.LocationDetails)</div>
+            @if (activity.CostPerRegistrant > 0)
+            {
+                <div id="activity-cost-@activity.ID" class="hide"><p>@activity.CostPerRegistrant.ToCurrency() / @UILabel.RegistrantLabel()</p></div>
+                <div id="activity-costdescription-@activity.ID" class="hide">@Html.Raw(activity.CostDescription.IfEmpty("").Replace("\n", "<br />"))</div>
+            }
+
+            <div id="activity-restrictions-@activity.ID" class="hide">
+                <p>
+                    @if (activity.GenderRestriction == GenderRestrictionType.None)
+                    {
+                        @: Co-Ed
+                    }
+                    else
+                    {
+                        @: @activity.GenderRestriction.ToString().SplitByUpperCase()
+                    }
+                </p>
+                @if (activity.GetGradeLevels().Count > 0)
+                {
+                    <p>
+                        @activity.GetGradeLevels().ToShortString()
+                    </p>
+                }
+                @if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
+                {
+                    <p>
+                        Ages: @activity.AgeStart - @activity.AgeEnd
+                    </p>
+                }
+            </div>
+
+            <div class="search-name-value hide">@activity.Name</div>
+            <div class="search-seatsfilled-value hide">@seatsRemaining,@waitingListSeatsRemaining</div>
+            <div class="search-grade-value hide">
+                @if (activity.GetGradeLevels().Count > 0)
+                {
+                    @:@activity.GetGradeLevels().Select(x => "[" + x.ID + "]").ToArray().ToStringList(",")
+                }
+                else if (!activity.AgeStart.HasValue || !activity.AgeEnd.HasValue)
+                {
+                    @:@grades.Select(x => "[" + x.ID + "]").ToArray().ToStringList(",")
+                }
+
+            </div>
+            <div class="search-gender-value hide">@activity.GetAllowedGenders().Select(x => "[" + ((int)x).ToString() + "]").ToStringList(",")</div>
+            <div class="search-dayofweek-value hide">@activity.GetDaysOfTheWeek().Select(x => "[" + ((int)x).ToString() + "]").ToStringList(",")</div>
+
+            <div class="search-age-value hide">
+                @if (activity.GetGradeLevels().Count == 0)
+                {
+                    <span class="search-age-start-value">@(activity.AgeStart.HasValue ? activity.AgeStart.Value : 0)</span>
+                    <span class="search-age-end-value">@(activity.AgeEnd.HasValue ? activity.AgeEnd.Value : 115)</span>
+                }
+                else
+                {
+                    <span class="search-age-start-value">-1</span>
+                    <span class="search-age-end-value">-1</span>
+                }
+            </div>
+
+            <span class="badge badge-@labelDanger activity-seats-left padding-10">
+                @seatsRemaining seats
+                @if (isOpen)
+                {
+                    @:left
+                }
+            </span>
+
+            <div class="panel panel-alt6 panel-borders panel-shadow rounded-corners">
+                <div class="panel-heading">
+                    <a href="javascript:openActivityDetailView(@activity.ID, '@UI.JavascriptSafeString(activity.Name)')"
+                       class="md-trigger"
+                       data-modal="modal-moreinfo">
+                        @activity.Name.MaxChars(50, "...")
+                    </a>
+                </div>
+
+                <div class="activity-grid-filter-data">
+                    <div class="row">
+                        <div class="col-sm-4 text-center">
+                            <div class="filter filter-light-gray filter-full-width text-medium-small text-bold">
+                                <span>
+                                    @if (activity.GetSchedule().RepeatsWeekly)
+                                    {
+                                        if (activity.GetDaysOfTheWeek().Any())
+                                        {
+                                            if (activity.GetDaysOfTheWeek().Count == 7)
+                                            {
+                                                @:Every Day
+                                            }
+                                            else
+                                            {
+                                                if (activity.GetDaysOfTheWeek().Count > 2)
+                                                {
+                                                    @: @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(",")
+                                                }
+                                                else if (activity.GetDaysOfTheWeek().Count > 1)
+                                                {
+                                                    @: @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(3)).ToStringList(", ")
+                                                }
+                                                else if (activity.GetDaysOfTheWeek().Any())
+                                                {
+                                                    @: @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(10)).ToStringList(", ")
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if (activity.GetSchedule().GetInstances().Any())
+                                    {
+                                        @: @activity.GetFirstDate().Value.ToString("M/d/yy") - @activity.GetLastDate().Value.ToString("M/d/yy")
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 text-center">
+                            <div class="filter filter-light-gray filter-full-width text-medium-small text-bold">
+                                <span>
+                                    @if (activity.GenderRestriction != GenderRestrictionType.None)
+                                    {
+                                        if (activity.GenderRestriction == GenderRestrictionType.MaleOnly)
+                                        {
+                                            @:<i class="s7-male"></i>
+                                        }
+                                        else if (activity.GenderRestriction == GenderRestrictionType.FemaleOnly)
+                                        {
+                                            @:<i class="s7-female"></i>
+                                        }
+                                        @: @activity.GenderRestriction.ToString().SplitByUpperCase()
+                                    }
+                                    else
+                                    {
+                                        @:Co-Ed
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 text-center">
+                            <div class="filter filter-light-gray filter-full-width text-medium-small text-bold">
+                                <span>
+                                    @if (activity.GetGradeLevels().Count > 0)
+                                    {                               
+                                        @: @activity.GetGradeLevels().ToShortString()
+                                    }
+                                    else if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
+                                    {
+                                        @: @activity.AgeStart.Value - @activity.AgeEnd.Value yrs old
+                                    }
+                                    else
+                                    {
+                                        @: All Ages/Grades
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-body panel-body-fixed-height">
+
+                    <div class="activity-schedule-gridbox pointer md-trigger"
+                         onclick="openActivityDetailView(@activity.ID, '@UI.JavascriptSafeString(activity.Name)')"
+                         data-modal="modal-moreinfo">
+                            @Html.Raw(activity.Details)
+                        <div class="bottom-gradient"></div>
+                    </div>
+
+                    @if (isAlreadyRegistered)
+                    {
+                        <div class="col-md-12 col-sm-12 button-white-shadow" id="activity-registered-@activity.ID">
+                            <button disabled="disabled" class="btn btn-lg btn-danger btn-block">Registered</button>
+                        </div>
+                    }
+                    else if (hasRoom)
+                    {
+                        var oneday = "";
+                        var costLabel = "{0} &mdash;";
+
+                        if (activity.GetDaysOfTheWeek().Count == 1)
+                        {
+                            oneday = activity.GetDaysOfTheWeek().First().ToString();
+                        }
+
+                        if (activity.CostPerRegistrant > 0)
+                        {
+                            costLabel = string.Format(costLabel, activity.CostPerRegistrant.ToCurrency());
+                        }
+                        else
+                        {
+                            costLabel = string.Format(costLabel, "Free");
+                        }
+
+                        <div class="col-md-12 col-sm-12 button-white-shadow @(!isOpen ? "hide": "")" id="activity-open-@activity.ID">
+                            @* NO CART UNLESS THEY CAN DO ACTIVITY GROUPS *@
+                            @if (isOpen)
+                            {
+                                if (Model.HasFeature(FeatureType.ManageActivityGroups) && useCart)
+                                {
+                                    <button onclick="addToCart(@cartActivity.ToJSON())" class="btn btn-lg btn-block btn-primary btn-activity-addtocart">
+                                        @Html.Raw(costLabel)
+                                        <i class="s7-cart"></i>
+                                        <span id="btn-addtocart-text-@activity.Uid">Add To Cart</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a href="@activity.HomePageUrl" class="btn btn-lg btn-block btn-primary">
+                                        @Html.Raw(costLabel)
+                                        Register &raquo;
+                                    </a>
+                                }
+                            }
+                        </div>
+
+                        <div class="col-md-12 col-sm-12 button-white-shadow @(!willOpen ? "hide": "")" id="activity-willopen-@activity.ID">
+                            <button disabled="disabled" class="btn btn-lg btn-alt5 btn-block">Opens Soon</button>
+                        </div>
+
+                        <div class="col-md-12 col-sm-12 button-white-shadow @(isOpen || willOpen ? "hide": "")" id="activity-closed-@activity.ID">
+                            <button disabled="disabled" class="btn btn-lg btn-default btn-block">Closed</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-md-12 col-sm-12 button-white-shadow" id="activity-full-@activity.ID">
+                            <button disabled="disabled" class="btn btn-lg btn-danger btn-block">Full</button>
+                        </div>
+                    }
+
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-6 col-sm-8">
+
+                            @if (period.IsNotEmpty())
+                            {
+                                <div id="timer-open-@activity.ID" class="@(!isOpen ? "hide" : "")">
+                                    Closes in
+                                    <span class="time-days activity-days-@activity.ID" id="activity-days-open-@activity.ID" data-id="@activity.ID">@willCloseIn.Days</span> days
+                                    <span class="time-hours activity-hrs-@activity.ID" id="activity-hrs-open-@activity.ID" data-id="@activity.ID">@willCloseIn.Hours</span> hrs
+                                    <span class="time-mins activity-mins-@activity.ID" id="activity-mins-open-@activity.ID" data-id="@activity.ID">@willCloseIn.Minutes</span> mins
+                                    <span class="time-secs activity-secs-@activity.ID" id="activity-secs-open-@activity.ID" data-id="@activity.ID">@willCloseIn.Seconds</span> secs
+                                </div>
+
+                                <div id="timer-willopen-@activity.ID" class="@(!willOpen ? "hide" : "")">
+                                    Opens in
+                                    <span class="time-days activity-days-@activity.ID" id="activity-days-willopen-@activity.ID" data-id="@activity.ID">@willOpenIn.Days</span> days
+                                    <span class="time-days activity-hrs-@activity.ID" id="activity-hrs-willopen-@activity.ID" data-id="@activity.ID">@willOpenIn.Hours</span> hrs
+                                    <span class="time-mins activity-mins-@activity.ID" id="activity-mins-willopen-@activity.ID" data-id="@activity.ID">@willOpenIn.Minutes</span> mins
+                                    <span class="time-secs activity-secs-@activity.ID" id="activity-secs-willopen-@activity.ID" data-id="@activity.ID">@willCloseIn.Seconds</span> secs
+                                </div>
+
+                                <div id="timer-closed-@activity.ID" class="@(isOpen || willOpen ? "hide" : "")">
+                                    Closed on @period.EndDateTime.Value.ToLongDateString()
+                                </div>
+                            }
+
+                        </div>
+                        <div class="col-lg-4 col-md-6 col-sm-4">
+                            @if (activity.WaitingListSeats > 0)
+                            {
+                                <span class="label label-warning pull-right">Waiting List Available</span>
+                            }
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+        </div>
+    }
+}
+
+
+<script>
+    function openActivityDetailView(id, name) {
+        setActivityInfo(id, name);
+        $("#modal-moreinfo").addClass("md-show");
+    }
+</script>

@@ -1,0 +1,234 @@
+﻿@using System.Collections.Specialized;
+@model Activity
+
+@{ 
+    var preview = (bool)ViewData["Preview"];
+    var questionGroups = (List<FormQuestionGroup>)ViewData["QuestionGroups"];
+    var defaultOrgSeatCount = (int)ViewData["DefaultOrgSeatCount"];
+    var totalSeatsRemaining = (int)ViewData["TotalSeatsRemaining"];
+    var fieldValues = (NameValueCollection)ViewData["FieldValues"];
+    var adminMode = (bool)ViewData["AdminMode"];
+
+    var previewParam = "";
+    var disabledBtn = "";
+    if (preview)
+    {
+        previewParam = "&preview=" + Request.Params["preview"];
+        disabledBtn = "disabled=\"disabled\"";
+    }
+}
+
+<form action="/reg/savemultiple/?activity=@Model.Uid.ToString()&profile=@Request["profile"]&copy=@Request["copy"]@previewParam" method="post" class="form-horizontal" id="registration-form">
+
+    <div class="tab-container">
+        <ul id="registrant-type-tabs" class="nav nav-tabs">
+            @foreach (var registrantType in new RegistrantType[] { RegistrantType.Individual, RegistrantType.Organization })
+            {
+                if (!Model.AllowOrganizationRegistration && registrantType == RegistrantType.Organization)
+                {
+                    continue;
+                }
+
+                var activeTab = "";
+                if (registrantType == RegistrantType.Individual)
+                {
+                    activeTab = "active";
+                }
+
+                <li class="@activeTab"><a href="#@registrantType.ToString()" data-toggle="tab" onclick="toggleTabRequired('@registrantType.ToString()', true)">Register as an @registrantType.ToString()</a></li>
+            }
+        </ul>
+    </div>
+    <div class="tab-content">
+
+        @foreach (var registrantType in new RegistrantType[] { RegistrantType.Individual, RegistrantType.Organization })
+        {
+            if (!Model.AllowOrganizationRegistration && registrantType == RegistrantType.Organization)
+            {
+                continue;
+            }
+
+            var activeTab = "";
+            if (registrantType == RegistrantType.Individual)
+            {
+                activeTab = "active";
+            }
+
+            var groups = questionGroups.Where(x => x.RegistrantTypeId == registrantType && x.GetActiveQuestionCount() > 0).ToList();
+
+            <div id="@registrantType.ToString()" class="tab-pane @activeTab">
+
+                @foreach (var group in groups)
+                {
+                    <div class="panel panel-default question-group">
+                        <div class="panel-heading">
+                            @group.Name
+                        </div>
+                        <div class="panel-body">
+                            @foreach (var question in group.GetActiveQuestions())
+                            {
+                                Html.RenderPartial(
+                                    "_RegFormQuestions",
+                                    question,
+                                    new ViewDataDictionary() {
+                                        { "id", "question-" + ((int)question.ID).ToString() },
+                                        { "FieldValues", fieldValues }
+                                    }
+                                    );
+                            }
+                        </div>
+                        @*
+                        @if (groups.Count > 1)
+                        {
+                            <div class="panel-footer">
+                                <button type="button" class="btn btn-primary btn-lg btn-block" disabled="disabled" id="btnNext">Next &raquo;</button>
+                            </div>
+                        }
+                        *@
+                    </div>
+                }
+
+                @if (registrantType == RegistrantType.Organization)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Reservations
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="numberofseatsrequested">
+                                    Number of Seats <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="form-control" id="numberofseatsrequested" name="numberofseatsrequested" value="@defaultOrgSeatCount" min="1" max="@totalSeatsRemaining" step="1" data-required data-toggle='popover' data-trigger='hover' data-content='required' data-placement='right' data-tooltip-id="numberofseatsrequested" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" id="numberofseats" name="numberofseats" value="1" />
+                }
+
+            </div>
+        }
+    </div>
+
+    @if (Model.CostPerRegistrant > 0)
+    {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Payment
+            </div>
+            <div class="panel-body">
+
+                <div class="row">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <div class="widget widget-tile widget-bordered">
+                            <div class="data-info">
+                                <div class="value" id="total-cost">@Model.CostPerRegistrant.ToCurrency() x 1 Seat = @((Model.CostPerRegistrant.Value * 1).ToCurrency())</div>
+                                <div class="desc">@Html.Raw(Model.CostDescription.IfEmpty("").Replace("\n", "<br />"))</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.CanAcceptPayments)
+                {
+                    <div class="row">
+                        <label class="col-sm-3 control-label">
+                            Payment Type
+                        </label>
+                        <div class="col-sm-6">
+                            @if (Model.AcceptCreditCard)
+                            {
+                                <div class="am-radio inline">
+                                    <input type="radio" name="paymenttype" id="paymenttype-@((int)PaymentType.CreditCard)" required value="@PaymentType.CreditCard.ToString()" onclick="showcreditcard()" checked="checked">
+                                    <label for="paymenttype-@((int)PaymentType.CreditCard)">Credit Card</label>
+                                </div>
+                            }
+                            @if (Model.AcceptPayPal)
+                            {
+                                var checkedString = !Model.AcceptCreditCard || Request.Params["paymenttype"] == PaymentType.PayPal.ToString() ? " checked=\"checked\" " : "";
+
+                                <div class="am-radio inline">
+                                    <input type="radio" name="paymenttype" id="paymenttype-@((int)PaymentType.PayPal)" required value="@PaymentType.PayPal.ToString()" onclick="showpaypal()" @checkedString>
+                                    <label for="paymenttype-@((int)PaymentType.PayPal)">PayPal</label>
+                                </div>
+                            }
+                            @if (Model.AllowToPayLater)
+                            {
+                                var check = Request.Params["paymenttype"] == "InPerson" || (!Model.AcceptCreditCard && !Model.AcceptPayPal) ? " checked=\"checked\" " : "";
+                                <div class="am-radio inline">
+                                    <input type="radio" name="paymenttype" id="paymenttype-0" required value="InPerson" onclick="showinperson()" @check>
+                                    <label for="paymenttype-0">Pay Later</label>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                }
+
+                @if (Model.AcceptCreditCard)
+                {
+                    <div id="creditcard" class="padding-10">
+                        @{Html.RenderPartial(
+                            "~/Views/Shared/_CreditCardPaymentForm.cshtml",
+                            null,
+                            new ViewDataDictionary()
+                            {
+                                { "required", true },
+                                { "prefix", "cc" }
+                            }
+                            );}
+                    </div>
+                }
+                @if (Model.AcceptPayPal)
+                {
+                    var hide = !Model.AcceptCreditCard ? "" : "hide";
+
+                    <div id="paypal" class="@hide">
+                        @{Html.RenderPartial("~/Views/Shared/_PayPalPaymentForm.cshtml");}
+                    </div>
+                }
+
+                <div id="inperson" class="hide">
+                    <div class="col-md-6 col-md-offset-3 padding-10">
+                        You can pay by check or cash in person. You will be placed on the waiting list until your payment is received.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    @if (SessionVariables.LoggedInUser.IsEmpty())
+    {
+        Html.RenderPartial("_RegCreateAccount");
+    }
+
+    <input type="hidden" name="registranttype" id="registranttype" value="@RegistrantType.Individual.ToString()" />
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <button class="btn btn-primary btn-block btn-lg" type="submit" id="submit" @disabledBtn>Submit Registration &raquo;</button>
+            <button class="btn btn-primary btn-block btn-lg hide" type="submit" id="submitpaypal" @disabledBtn>Continue &amp; Pay via  PayPal &raquo;</button>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        /*
+        $('.question-group').first().removeClass('hide');
+
+        $('[required]').blur(function () {
+            if (!formHasErrors()) {
+                $('#btnNext').prop('disabled', false);
+            }
+        });
+        */
+    });
+</script>
+

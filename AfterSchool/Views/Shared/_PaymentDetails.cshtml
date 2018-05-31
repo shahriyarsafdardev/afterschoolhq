@@ -1,0 +1,25 @@
+﻿@model AfterSchoolLibrary.Account
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        @{Html.RenderPartial("~/Views/Shared/_PaymentHistory.cshtml", Model);}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        @{Html.RenderPartial("~/Views/Shared/_PaymentRefundHistory.cshtml", Model);}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        @{Html.RenderPartial("~/Views/Shared/_PaymentCards.cshtml", Model);}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        @{Html.RenderPartial("~/Views/Shared/_PaymentCardAdd.cshtml", Model);}
+    </div>
+</div>

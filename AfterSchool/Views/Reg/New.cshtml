@@ -1,0 +1,307 @@
+﻿@using System.Collections.Specialized;
+@model AfterSchoolLibrary.Activity
+
+@{
+    var account = (Account)ViewBag.Account;
+    var preview = (bool)ViewBag.Preview;
+    var registrationPeriod = (RegistrationPeriod)ViewBag.RegistrationPeriod;
+    var fieldValues = (NameValueCollection)ViewBag.FieldValues;
+    var activityForm = Model.GetActiveActivityForm();
+    var adminMode = (bool)ViewBag.AdminMode;
+
+    if (Model.IsEmpty())
+    {
+        ViewBag.Title = "Missing Registration";
+    }
+    else
+    {
+        ViewBag.Title = Model.Name;
+    }
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@if (!Model.IsEmpty())
+{
+    Html.RenderPartial("~/Views/Shared/_RegistrationTitle.cshtml");
+}
+
+<div class="main-content">
+
+    @if (Model.IsEmpty())
+    {
+        <div class="widget">
+            <h1>Sorry but there is no registration form here :(</h1>
+        </div>
+    }
+    else
+    {
+        var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+        var questionGroups = activityForm.GetQuestionGroups();
+        var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
+        var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
+        var totalSeatsRemaining = Model.GetSeatsRemaining() + Model.GetWaitingListSeatsRemaining();
+        var defaultOrgSeatCount = Math.Min(10, Model.SeatsAvailable.Value);
+        if (Request.Params["numberofseatsrequested"].IsNumber())
+        {
+            defaultOrgSeatCount = Request.Params["numberofseatsrequested"].ToInteger();
+        }
+
+        if (!preview && registrationPeriod.IsClosed())
+        {
+            <div class="widget">
+                <h1>We are sorry but registration is closed</h1>
+            </div>
+        }
+        else if (Model.GetSeatsRemaining() == 0 && Model.GetWaitingListSeatsRemaining() == 0)
+        {
+            <div class="widget">
+                <h1>We are sorry, but all available seats and waiting list seats for this activity have been filled.</h1>
+            </div>
+        }
+        else
+        {
+            if (Model.GetSeatsRemaining() == 0)
+            {
+                <div class="widget">
+                    <h1>All available seats for this @UILabel.ActivityLabel().ToLower() have been filled. Once you complete the registration form you will be added to the waiting list.</h1>
+                </div>
+            }
+
+            <div class="col-md-3">
+            
+                <div class="bg-warning text-white text-medium padding-10 margin-b-20">
+                    @Model.GetSeatsRemaining() seats remaining
+                </div>
+
+                @if (Model.Details.IsNotBlank())
+                {
+                    <div class="panel panel-alt4">
+                        <div class="panel-heading">
+                            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", string.Format("{0} Details", UILabel.ActivityLabel())); }
+                        </div>
+                        <div class="panel-body">
+                            @Html.Raw(Model.Details)
+                        </div>
+                    </div>
+                }
+
+                @if (Model.ActivityScheduleId.HasValue)
+                {
+                    Html.RenderPartial("_RegActivitySchedule", Model);
+                }
+            
+                @if (Model.LocationDetails.IsNotBlank() || Model.HasAddress)
+                {
+                    <div class="panel panel-alt4">
+                        <div class="panel-heading">
+                            <i class="s7-map"></i> Location Details
+                        </div>
+                        <div class="panel-body">
+                            @if (Model.LocationDetails.IsNotBlank())
+                            {
+                                @Html.Raw(Model.LocationDetails)
+                            }
+                            @if (Model.HasAddress)
+                            {
+                                <hr />
+                                <p>
+                                    <a href="@Model.GetGoogleMapsLink()" target="_blank" class="pull-right"><h1><i class="s7-map-marker"></i></h1></a>
+                                    <a href="@Model.GetGoogleMapsLink()" target="_blank">@Html.Raw(Model.FormatAddressWithoutName().Replace("\n", "<br />"))</a>
+                                </p>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="panel panel-alt4">
+                    <div class="panel-heading">
+                        <i class="s7-id"></i> Contact Information
+                    </div>
+                    <div class="panel-body">
+                        <table class="table">
+                            <tr>
+                                <th class="text-right">Name</th>
+                                <td>@Model.ContactName</td>
+                            </tr>
+                            <tr>
+                                <th class="text-right">Email</th>
+                                <td><a href="mailto:@Model.ContactEmail">@Model.ContactEmail</a></td>
+                            </tr>
+                            @if (!Model.ContactPhone.IsBlank())
+                            {
+                                <tr>
+                                    <th class="text-right">Phone</th>
+                                    <td>@Model.ContactPhone</td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+           
+                @{ Html.RenderPartial("_RegLoginBlock", null, new ViewDataDictionary() { { "adminMode", adminMode } });}
+
+                @{Html.RenderPartial(
+                        "_RegForm",
+                        Model,
+                        new ViewDataDictionary(){
+                          {"Preview", preview},
+                          {"ActivityForm", activityForm },
+                          {"QuestionGroups", questionGroups },
+                          {"DefaultOrgSeatCount", defaultOrgSeatCount},
+                          {"TotalSeatsRemaining", totalSeatsRemaining},
+                          {"FieldValues", fieldValues},
+                          {"AdminMode", adminMode}
+                        }
+                        );}
+
+            </div>
+        }
+    }
+
+</div>
+
+@section fbadevents
+{
+    @if (account.GetAccountProperty(AccountPropertyType.FacebookAdPixel).IsNotEmpty())
+    {
+        <script>
+          fbq('track', 'ViewContent');
+        </script>
+    }
+}
+
+@section scripts
+{
+    @if(Model.IsNotEmpty())
+    { 
+        <script>
+
+            $(document).ready(function(){
+                $('#numberofseatsrequested').change(function(){
+                    console.log('change: ' + parseInt($(this).val()));
+                    updateTotalCost(parseInt($(this).val()));
+                });
+
+                console.log(WebPage.getHash());
+                if(WebPage.getHash().length > 0){
+                    var id = WebPage.getHash();
+                    console.log(id);
+                    $('#registrant-type-tabs a[href="#' + id + '"]').tab('show');
+                    toggleTabRequired(id, true);
+                }
+                else
+                {
+                    toggleTabRequired('@RegistrantType.Individual', false);
+                }
+
+                if($('#paymenttype-@((int)PaymentType.PayPal)').is(':checked')){
+                    showpaypal();
+                }
+
+            });
+
+            function showcreditcard() {
+                $('#creditcard').removeClass("hide");
+                $('#payment-instructions').addClass('hide');
+                $('#paypal').addClass("hide");
+                $('#submitpaypal').addClass("hide");
+                $('#submit').removeClass("hide");
+                $('#inperson').addClass("hide");
+
+                $('#ccname').prop('required', true);
+                $('#ccnumber').prop('required', true);
+                $('#cccvc').prop('required', true);
+                $('#ccexpmonth').prop('required', true);
+                $('#ccexpyear').prop('required', true);
+            }
+
+            function showpaypal() {
+                $('#paypal').removeClass("hide");
+                $('#payment-instructions').addClass('hide');
+                $('#creditcard').addClass("hide");
+                $('#submitpaypal').removeClass("hide");
+                $('#submit').addClass("hide");
+                $('#inperson').addClass("hide");
+
+                $('#ccname').prop('required', false);
+                $('#ccnumber').prop('required', false);
+                $('#cccvc').prop('required', false);
+                $('#ccexpmonth').prop('required', false);
+                $('#ccexpyear').prop('required', false);
+            }
+
+            function showinperson(){
+                $('#payment-instructions').addClass('hide');
+                $('#creditcard').addClass("hide");
+                $('#paypal').addClass("hide");
+                $('#submitpaypal').addClass("hide");
+                $('#submit').removeClass("hide");
+                $('#inperson').removeClass("hide");
+
+                $('#ccname').prop('required', false);
+                $('#ccnumber').prop('required', false);
+                $('#cccvc').prop('required', false);
+                $('#ccexpmonth').prop('required', false);
+                $('#ccexpyear').prop('required', false);
+            }
+
+            function updateTotalCost(multiplier){
+
+                if(!isNaN(multiplier)){
+                    var total = numbro(multiplier * @Model.CostPerRegistrant.Value).formatCurrency('0.00'); //numbro(1000.234).formatCurrency();
+                    var totalCostVal = '@Model.CostPerRegistrant.ToCurrency() x ' + multiplier.toString() + ' Seat(s) = ' + total;
+                    console.log(totalCostVal);
+                    $('#numberofseats').val(multiplier);
+                    $('#total-cost').html(totalCostVal);
+                }
+            }
+
+            function toggleTabRequired(id, setHash) {
+            
+                var multiplier = 1;
+                if (id == '@RegistrantType.Organization.ToString()') {
+                    console.log('toggle: ' + parseInt($('#numberofseatsrequested').val()));
+                    multiplier = parseInt($('#numberofseatsrequested').val());
+                }
+
+                updateTotalCost(multiplier);
+
+                $('#registranttype').val(id);
+
+                $('#registration-form').find('[data-required]').each(function () {
+                    $(this).removeAttr('required');
+                });
+
+                $('#' + id).find('[data-required]').each(function () {
+                    $(this).attr('required', 'required');
+                });
+
+                if(setHash){
+                    WebPage.addHash(id);
+                }
+
+                var action = $('#registration-form').attr('action');
+                var arr = action.split('#');
+                action = arr[0] + "#" + id;
+                $('#registration-form').attr('action', action);
+            }
+
+        </script>
+    }
+}
+
+
+
+
+
+
+
+
+

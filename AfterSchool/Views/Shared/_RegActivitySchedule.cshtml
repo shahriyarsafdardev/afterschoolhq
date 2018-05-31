@@ -1,0 +1,11 @@
+﻿@model AfterSchoolLibrary.Activity
+
+<div class="panel panel-alt4">
+    <div class="panel-heading">
+        <i class="s7-date"></i> Schedule Details
+    </div>
+    <div class="panel-body">
+        <p>@{ Html.RenderPartial("_ActivityScheduleHtml", Model.GetSchedule()); }</p>
+    </div>
+</div>
+

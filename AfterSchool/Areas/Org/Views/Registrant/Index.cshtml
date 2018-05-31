@@ -1,0 +1,57 @@
+﻿@model List<AfterSchoolLibrary.RegistrantActivity>
+@{
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var activities = (List<Activity>)ViewBag.Activities;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-id"></i> @UILabel.RegistrantLabel(true)
+        </div>
+        <div class="panel-body">
+
+            <div class="form-group">
+                <select id="activities" class="form-control">
+                    <option value="">All Activities</option>
+                    @foreach (var activity in activities)
+                    {
+                        <option value="@activity.ID" @(Request["activity"] == activity.ID.ToString() ? " selected=\"selected\" " : "")>&bull; @activity.Name - (@activity.GetRegistrantCount() seats)</option>
+                    }
+                </select>
+            </div>
+
+            @{Html.RenderPartial(
+                      "~/Views/Shared/_ActivityRegistrants.cshtml",
+                      Model,
+                      new ViewDataDictionary()
+                      {
+                        { "Activity", null },
+                        { "Account", SessionVariables.CurrentAccount },
+                        { "EditAction", "edit" },
+                        { "EditController", "registrant" },
+                        { "PagingModel", ViewBag.PagingModel }
+                      }
+                 );}
+
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+
+            $('#activities').change(function () {
+                document.location.href = '@Url.Action("index", "registrant")?activity=' + $(this).val();
+            });
+
+        });
+    </script>
+}

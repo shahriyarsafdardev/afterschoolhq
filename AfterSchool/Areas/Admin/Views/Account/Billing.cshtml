@@ -1,0 +1,22 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("AdminAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+    
+    @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Billing Details
+        </div>
+        <div class="panel-body">
+            @{Html.RenderPartial("~/Views/Shared/_PaymentDetails.cshtml", Model);}
+        </div>
+    </div>
+</div>
+

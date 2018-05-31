@@ -1,0 +1,74 @@
+﻿@model AddressViewModel
+
+@{ 
+    var address1Required = ViewData["address1required"].IsNotEmpty() && ViewData["address1required"].ToString().ToBoolean();
+    var address2Required = ViewData["address2Required"].IsNotEmpty() && ViewData["address2Required"].ToString().ToBoolean();
+    var cityRequired = ViewData["cityRequired"].IsNotEmpty() && ViewData["cityRequired"].ToString().ToBoolean();
+    var stateRequired = ViewData["stateRequired"].IsNotEmpty() && ViewData["stateRequired"].ToString().ToBoolean();
+    var postalCodeRequired = ViewData["postalCodeRequired"].IsNotEmpty() && ViewData["postalCodeRequired"].ToString().ToBoolean();
+}
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+        Street Address
+        @if (address1Required)
+        {
+            <span class="text-danger">*</span>
+        }
+    </label>
+    <div class="col-sm-9">
+        <input type="text" id="address1" name="address1" value="@Model.Address1" class="form-control" onfocus="this.select()" @(address1Required ? "required" : "") />
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+        Suite
+        @if (address2Required)
+        {
+            <span class="text-danger">*</span>
+        }
+    </label>
+    <div class="col-sm-9">
+        <input type="text" id="address2" name="address2" value="@Model.Address2" class="form-control" onfocus="this.select()" @(address2Required ? "required" : "") />
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+        City
+        @if (cityRequired)
+        {
+            <span class="text-danger">*</span>
+        }
+    </label>
+    <div class="col-sm-9">
+        <input type="text" id="city" name="city" value="@Model.City" class="form-control" onfocus="this.select()" @(cityRequired ? "required" : "") />
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+        State
+        @if (stateRequired)
+        {
+            <span class="text-danger">*</span>
+        }
+    </label>
+    <div class="col-sm-9">
+        @{ Html.RenderPartial("~/views/shared/_statedropdown.cshtml", Model.State, new ViewDataDictionary() { { "required", stateRequired } }); }
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+        Zip Code
+        @if (postalCodeRequired)
+        {
+            <span class="text-danger">*</span>
+        }
+    </label>
+    <div class="col-sm-9">
+        <input type="text" id="postalcode" name="postalcode" value="@Model.PostalCode" class="form-control" onfocus="this.select()" @(postalCodeRequired ? "required" : "") />
+    </div>
+</div>

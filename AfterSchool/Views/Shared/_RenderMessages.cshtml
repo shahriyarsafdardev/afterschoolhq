@@ -1,0 +1,67 @@
+﻿@model SystemMessages
+
+@if (Model.Count > 0)
+{
+    var errorMsgs = "";
+    foreach (SystemMessage msg in Model.GetByMessageType(SystemMessages.ErrorTypes))
+    {
+        errorMsgs += msg.Text + "<br />";
+    }
+    var noticeMsgs = "";
+    foreach (SystemMessage msg in Model.GetByMessageType(MessageType.Notice))
+    {
+        noticeMsgs += msg.Text + "<br />";
+    }
+    var warningMsgs = "";
+    foreach (SystemMessage msg in Model.GetByMessageType(MessageType.Warning))
+    {
+        warningMsgs += msg.Text + "<br />";
+    }
+    var successMsgs = "";
+    foreach (SystemMessage msg in Model.GetByMessageType(MessageType.Success))
+    {
+        successMsgs += msg.Text + "<br />";
+    }
+
+    if (errorMsgs.IsNotBlank())
+    {
+        var alerticon = "s7-close-circle";
+        var classname = "danger";
+
+        <div class="hidden gritter-msgs"
+             alert-title="Error"
+             alert-msg="@errorMsgs"
+             alert-icon="@alerticon"
+             alert-class="@classname">
+        </div>
+    }
+    else if (successMsgs.IsNotBlank())
+    {
+        var alerticon = "s7-check-circle";
+        var classname = "success";
+
+        <div class="hidden gritter-msgs"
+             alert-title="Success"
+             alert-msg="@successMsgs"
+             alert-icon="@alerticon"
+             alert-class="@classname">
+        </div>
+    }
+}
+
+<script>
+
+    PageEvent.add(
+        PageEvent.AFTER_INIT,
+        function () {
+            $('.gritter-msgs').each(function () {
+                $.gritter.add({
+                    title: '<i class="' + $(this).attr('alert-icon') + '"></i> ' + $(this).attr('alert-title'),
+                    class_name: "color " + $(this).attr('alert-class'),
+                    text: $(this).attr('alert-msg')
+                });
+            });
+        }
+    );
+
+</script>

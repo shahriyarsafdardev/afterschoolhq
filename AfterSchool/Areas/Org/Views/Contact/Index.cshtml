@@ -1,0 +1,312 @@
+﻿@model List<AfterSchoolLibrary.Registrant>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var lists = (List<ContactList>)ViewBag.Lists;
+    var selectedList = (int?)ViewBag.SelectedList;
+    var query = ViewBag.Query;
+    var paging = (PagingModel)ViewData["PagingModel"];
+
+    var previousLink = "#";
+    var nextLink = "#";
+    if (paging.IsNotEmpty())
+    {
+        if (paging.PageNumber > 1)
+        {
+            previousLink = Url.Action("index", "contact", new { pn = paging.PageNumber - 1, rpp = Request["rpp"], list = Request["list"], query = Request["query"] });
+        }
+        if (paging.PageNumber < paging.TotalPages)
+        {
+            nextLink = Url.Action("index", "contact", new { pn = paging.PageNumber + 1, rpp = Request["rpp"], list = Request["list"], query = Request["query"] });
+        }
+    }
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_ContactHeader");}
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a class="btn btn-primary btn-space" href="@Url.Action("add", "contact")">
+                    <i class="icon icon-left s7-plus"></i>
+                    Add Contacts
+                </a>
+            </div>
+            <i class="s7-note2"></i> Contacts
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="form-group col-md-3">
+                    <input class="form-control" placeholder="Enter search text" id="search" name="search" value="@query" />
+                </div>
+                <div class="form-group col-md-3">
+                    <select class="form-control col-md-3" id="list" name="list">
+                        <option value="">All Contact Lists</option>
+                        @foreach (var list in lists)
+                        {
+                            <option value="@list.ID" @(list.ID == selectedList ? "selected=\"\"" : "")>@list.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group col-md-1">
+                    <button class="btn btn-primary" type="button" id="search" onclick="search()">Search</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th class="text-center">Is Enrollee?</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var registrant in Model)
+                            {
+                                <tr id="registrant-@registrant.Uid">                                    
+                                    <td>
+                                        <a href="@Url.Action("edit", "contact", new {id = registrant.Uid})" class="btn btn-default btn-sm">
+                                            <i class="icon icon-left s7-edit"></i> Edit
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("edit", "contact", new {id = registrant.Uid})" id="registrant-name-@registrant.Uid">
+                                            @registrant.Name
+                                        </a>
+                                    </td>
+                                    <td><a href="mailto:@registrant.Email" id="registrant-email-@registrant.Uid">@registrant.Email</a></td>
+                                    <td class="text-center">@((!registrant.IsContactOnly).ToYesNo())</td>
+                                    <td>
+                                        <div class="btn-group btn-hspace">
+                                            <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">Add To List <span class="caret"></span></button>
+                                            <ul role="menu" class="dropdown-menu" id="list-add-menu">
+                                                @foreach (var list in lists)
+                                                {
+                                                    if (!list.HasContact(registrant))
+                                                    {
+                                                        <li id="add-list-@list.ID-@registrant.Uid">
+                                                            <a href="javascript:addToList(@list.ID, '@registrant.Uid')">@list.Name</a>
+                                                        </li>
+                                                    }
+                                                }
+                                            </ul>
+                                        </div>
+                                        <div class="btn-group btn-hspace">
+                                            <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">Remove From List <span class="caret"></span></button>
+                                            <ul role="menu" class="dropdown-menu" id="list-remove-menu">
+                                                @foreach (var list in lists)
+                                                {
+                                                    if (list.HasContact(registrant))
+                                                    {
+                                                        <li id="rm-list-@list.ID-@registrant.Uid">
+                                                            <a href="javascript:removeFromList(@list.ID, '@registrant.Uid')">@list.Name</a>
+                                                        </li>
+                                                    }
+                                                }
+                                            </ul>
+                                        </div>
+                                        <div class="btn-group">
+                                            @if (registrant.IsContactOnly)
+                                            {
+                                                <button class="btn btn-default btn-sm md-trigger"
+                                                        data-modal="modal-delete"
+                                                        onclick="deleteContactOK('@registrant.DisplayName', 'javascript:deleteContact(\'@registrant.Uid\')')">
+                                                    <span class="text-danger"><i class="s7-trash"></i> Delete</span>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4">There are no contacts. Please <a href="@Url.Action("add", "contact")">add new contacts</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    paging,
+                    new ViewDataDictionary()
+                    {
+                        { "id", "" },
+                        { "querystring", string.Format("list={0}&query={1}", Request["list"], Request["query"]) },
+                        { "action", "index" },
+                        { "controller", "contact" }
+                    }
+                );
+            }
+
+        </div>
+    </div>
+</div>
+
+
+@{ Html.RenderPartial(
+    "~/Views/Shared/_Modal.cshtml",
+    new ModalViewModel()
+    {
+        ID = "modal-delete",
+        Title = "Delete Contact",
+        ActionButtonId = "delete-contact-button",
+        ActionButtonHtml = "Delete Contact &raquo;",
+        HtmlBody = "<p>Are you sure you want to delete <strong><span id=\"delete-contact-name\"></span></strong>? This will also delete all existing invitations.</p><p>This action cannot be undone.</p>"
+    }); }
+
+
+<div id="modal-archive" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Archive @UILabel.ActivityGroupLabel()</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to archive <strong><span id="archive-group-name"></span></strong>? </p><p>Archived @UILabel.ActivityGroupLabel(true).ToLower() are automatically unpublished and all related @UILabel.ActivityLabel(true).ToLower() are also archived and unpublished.</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="archive-group-button">Archive &raquo;</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-restore" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Restore @UILabel.ActivityGroupLabel()</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to restore <strong><span id="restore-group-name"></span></strong>? </p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="restore-group-button">Restore &raquo;</a>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function deleteContactOK(name, url) {
+        $('#delete-contact-name').html(name);
+        $('#delete-contact-button').attr('href', url);
+        $('#delete-contact-button').addClass('md-close');
+    }
+    function deleteContact(uid) {
+        $.get(
+            '@Url.Action("deletecontact", "services")/' + uid,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    $('#registrant-name-' + uid).css('text-decoration', 'line-through');
+                    $('#registrant-email-' + uid).css('text-decoration', 'line-through');
+
+                    $('#registrant-' + uid).find('.btn').addClass('hide');
+
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: 'The contact, <strong>' + data.contactName + '</strong>, has been deleted',
+                        success: true
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'An error has occurred. The contact has not been deleted',
+                        success: false
+                    });
+                }
+            }
+        );
+    }
+</script>
+
+<script>
+    function archiveGroup(name, url) {
+        $('#archive-group-name').html(name);
+        $('#archive-group-button').attr('href', url);
+    }
+    function restoreGroup(name, url) {
+        $('#restore-group-name').html(name);
+        $('#restore-group-button').attr('href', url);
+    }
+    function search() {
+        location.href = '@Url.Action("index", "contact")?q=' + $('#search').val() + '&list=' + $('#list').val();
+    }
+    function addToList(listId, contactUid) {
+        $.get(
+            '@Url.Action("addcontacttolist", "services")?list=' + listId + '&contact=' + contactUid,
+            function (data) {
+                if (data && data.status == 'ok') {
+
+                    var id = 'add-list-' + listId + '-' + contactUid
+                    $('#' + id).remove();
+                    $('#list-remove-menu').append('<li id="rm-list-' + listId + '-' + contactUid + '"><a href="javascript:removeFromList(' + listId + ', \'' + contactUid + '\')">' + data.listName + '</a></li>');
+
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: '<strong>' + data.contactName + '</strong> has been added to <strong>' + data.listName + '</strong>',
+                        success: true
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'An error has occurred. The contact has not been added',
+                        success: false
+                    });
+                }
+            }
+        );
+    }
+    function removeFromList(listId, contactUid) {
+        $.get(
+            '@Url.Action("removefromcontactlist", "services")?list=' + listId + '&contact=' + contactUid,
+            function (data) {
+                if (data && data.status == 'ok') {
+
+                    var id = 'rm-list-' + listId + '-' + contactUid
+                    $('#' + id).remove();
+                    $('#list-add-menu').append('<li id="add-list-' + listId + '-' + contactUid + '"><a href="javascript:addToList(' + listId + ', \'' + contactUid + '\')">' + data.listName + '</a></li>');
+
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: '<strong>' + data.contactName + '</strong> has been removed from <strong>' + data.listName + '</strong>',
+                        success: true
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'An error has occurred. The contact has not been removed',
+                        success: false
+                    });
+                }
+            }
+        );
+    }
+</script>

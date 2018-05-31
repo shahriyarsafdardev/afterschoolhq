@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "Invite Users";
+}
+
+<div class="page-head">
+    <h2>Invite Users</h2>
+</div>
+<div class="main-content">
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            @Html.Raw(UI.RenderMessagesToHtml((SystemMessages)ViewBag.Messages))
+            <form method="post" action="@Url.Action("invite", "user", new { id = ViewBag.AccountId, returnurl = ViewBag.ReturnUrl })" class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Emails</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="emails" name="emails" value="@ViewBag.Emails" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Message</label>
+                    <div class="col-sm-6">
+                        <textarea class="form-control" id="message" name="message" onfocus="this.select()">@ViewBag.InviteMessage</textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-primary">Invite</button>
+                        @if(ViewBag.ReturnUrl != null)
+                        {
+                            <a href="@ViewBag.ReturnUrl" class="btn btn-default pull-right">Return <i class="icon icon-right s7-right-arrow"></i></a>
+                        }
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+

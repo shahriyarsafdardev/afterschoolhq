@@ -1,0 +1,74 @@
+﻿@model AfterSchoolLibrary.Activity
+@{
+    var list = Model.GetCompletedAttendance();
+    var totalPresent = Model.GetAttendancePresentCount();
+    var totalSeats = Model.GetAttendancePossibleCount();
+    var totalAbsent = totalSeats - totalPresent;
+    var attendanceRate = "0";
+    var account = SessionVariables.CurrentAccount;
+
+    if (totalPresent > 0)
+    {
+        attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
+    }
+}
+<div class="row">
+    <div class="col-md-3">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-toggle="counter" data-end="@list.Count" data-decimals="0" data-suffix="" class="value">@list.Count</div>
+                <div class="desc">Meetings</div>
+            </div>
+            <div class="icon"><span class="s7-users"></span></div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="widget widget-tile widget-bordered">
+            <div class="data-info">
+                <div data-end="@attendanceRate.IfBlank("0")" data-decimals="0" data-suffix="" class="value">@attendanceRate.IfBlank("0")%</div>
+                <div class="desc">Attendance Rate</div>
+            </div>
+            <div class="icon"><span class="s7-check-circle"></span></div>
+        </div>
+    </div>
+</div>
+
+<a href="@Url.Action("trackattendance", "activity", new { id = Model.ID.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Date</th>
+                <th>Total</th>
+                <th># Present</th>
+                <th># Absent</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (list.Count > 0)
+            {
+                foreach (var attendance in list)
+                {
+                    var seatsPossible = attendance.GetAttendanceRegistrantCount();
+                    var presentCount = attendance.GetPresentCount();
+                    <tr>
+                        <td><a href="@Url.Action("trackattendance", "activity", new { id = Model.ID, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a></td>
+                        <td>@account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString()</td>
+                        <td>@seatsPossible</td>
+                        <td>@presentCount</td>
+                        <td>@Math.Max(0, seatsPossible - presentCount)</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5">You have not taken attendance yet</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

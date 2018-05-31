@@ -1,0 +1,26 @@
+﻿@model AfterSchoolLibrary.ActivityForm
+
+@{
+    ViewBag.Title = Model.Name;
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    RegistrantActivity ra = (RegistrantActivity)ViewBag.RegistrantActivity;
+}
+
+@{Html.RenderPartial("~/Views/Shared/_RegistrationTitle.cshtml");}
+
+<div class="main-content">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Thanks for registering @ra.RegistrantFirstName!
+        </div>
+        <div class="panel-body">
+            <p>
+                Thanks for registering for @Model.ActivityName. You will receive an email confirming your registration.
+            </p>
+            <p>
+                If you have any questions please contact us at <a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>
+            </p>
+        </div>
+    </div>
+</div>

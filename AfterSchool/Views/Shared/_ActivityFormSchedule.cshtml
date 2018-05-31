@@ -1,0 +1,338 @@
+﻿@model ActivitySchedule
+
+@{ 
+    var schedules = (List<ActivitySchedule>)ViewBag.Schedules;
+    var showScheduleList = (bool)ViewBag.ShowScheduleList;
+    var activityId = (string)ViewBag.ActivityId;
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Schedule Information
+    </div>
+    <div class="panel-body">
+        <div>
+
+            @if (showScheduleList)
+            {
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        Select Schedule
+                    </label>
+                    <div class="col-md-7">
+                        <select name="schedule" id="schedule" class="form-control" required>
+                            <option value="">Select Schedule...</option>
+                            <option value="0"> + New Schedule</option>
+                            @foreach (var item in schedules)
+                            {
+                                <option value="@item.ID" @(Model?.ID == item.ID ? " selected=\"selected\" " : "")>@item.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div id="copy-edit">
+                            <a class="btn btn-link" href="@Url.Action("edit", "schedule", new { id = Model?.ID })" id="editSchedule">
+                                Edit
+                            </a>
+                            |
+                            <a class="btn btn-link" href="@Url.Action("copy", "schedule", new { id = Model?.ID })" id="copySchedule">
+                                Copy
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <input type="hidden" name="schedule" id="schedule" value="@Model.ID.IfEmpty(0)" />
+            }
+
+            <div id="schedule-edit" class="hide">
+                @*
+                <div class="form-group hide">
+                    <label class="col-md-3 control-label">
+                        Additional Instructions
+                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Should @UILabel.RegistrantLabel(true).ToLower() arrive 15 mins early? Are there issues if the @UILabel.RegistrantLabel().ToLower() is late?" data-placement="top"></i>
+                    </label>
+                    <div class="col-md-7">
+                        @{ Html.RenderPartial(
+                            "~/Views/Shared/_TextEditor.cshtml",
+                            Model.ScheduleDetails,
+                            new ViewDataDictionary() {
+                                { "required", true },
+                                { "name", "scheduledetails" },
+                                { "id", "scheduledetails" }
+                            }
+                            ); }
+                    </div>
+                </div>
+                *@
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        Repeats Weekly?
+                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Select the days of the week your @UILabel.ActivityLabel().ToLower() will occur" data-placement="top"></i>
+                    </label>
+                    <div class="col-md-1">
+                        @{Html.RenderPartial
+                            (
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                Model.RepeatsWeekly,
+                                new ViewDataDictionary()
+                                {
+                                    { "checkboxname", "repeatsweekly" },
+                                    { "checkboxid", "repeatsweekly" },
+                                    { "disabled", false }
+                                }
+                            );
+                        }
+                    </div>
+                </div>
+                <div class="hide" id="dailyrepeat">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">
+                            Day of the week
+                        </label>
+                        <div class="col-md-7">
+                            <div class="am-checkbox inline">
+                                @foreach (DayOfWeekASL day in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
+                                {
+                                    <input type="checkbox" name="schedulerepeat-@((int)day)" id="schedulerepeat-@((int)day)" value="1" @(Model.GetDaysOfTheWeek().Contains(day) ? " checked=\"checked\" " : "") class="schedulerepeat-checkbox" />
+                                    <label for="schedulerepeat-@((int)day)" class="margin-h-10">@day.ToString().MaxChars(3)</label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">
+                            Start Date
+                        </label>
+                        <div class="col-md-7">
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input size="16" type="text" class="form-control" id="startdate" name="startdate" onfocus="this.select()" required value="@Model.StartDate.ToShortDateString()" data-type="date" />
+                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">
+                            End Date
+                        </label>
+                        <div class="col-md-7">
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input size="16" type="text" class="form-control" id="enddate" name="enddate" onfocus="this.select()" required value="@Model.EndDate.ToShortDateString()" data-type="date" />
+                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">
+                            Meeting Start Time
+                        </label>
+                        <div class="col-md-7">
+                            @{Html.RenderPartial(
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                Model.DailyStartTime,
+                                new ViewDataDictionary()
+                                {
+                                    { "name", "dailystarttime" },
+                                    { "id", "dailystarttime" },
+                                    { "required", true }
+                                }
+                            );
+                            }
+                        </div>
+                    </div>
+                
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">
+                            Meeting End Time
+                        </label>
+                        <div class="col-md-7">
+                            @{Html.RenderPartial(
+                                "~/Views/Shared/_TimeSelect.cshtml",
+                                Model.DailyEndTime,
+                                new ViewDataDictionary()
+                                {
+                                    { "name", "dailyendtime" },
+                                    { "id", "dailyendtime" },
+                                    { "required", true }
+                                }
+                            );
+                            }
+                        </div>
+                    </div>
+                </div>
+            
+                <div id="schedule-dates" class="hide">
+                    @for (var i = 1; i <= 50; i++)
+                    {
+                        var startDate = DateTime.UtcNow;
+                        var startTime = startDate.Date.AddHours(15);
+                        var endTime = startDate.Date.AddHours(17);
+
+                        ActivityInstance instance = null;
+                        if (Model.GetInstances()?.Count >= i)
+                        {
+                            instance = Model.GetInstances()[i - 1];
+                            startDate = instance.StartDateTime.Value;
+                            startTime = instance.StartDateTime.Value;
+                            endTime = instance.EndDateTime.Value;
+                        }
+
+                        <div class="form-group hide schedule-date" id="schedule-date-@i">
+                            <label class="col-md-3 control-label">
+                                Meeting @i
+                            </label>
+                            <div class="col-md-7">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                                <input size="16" type="text" class="form-control" id="meeting-date-@i" name="meeting-date-@i" onfocus="this.select()" required value="@startDate.ToShortDateString()" data-type="date" />
+                                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @{Html.RenderPartial(
+                                                "~/Views/Shared/_TimeSelect.cshtml",
+                                                startTime,
+                                                new ViewDataDictionary()
+                                                {
+                                                    { "name", string.Format("meeting-starttime-{0}", i) },
+                                                    { "id", string.Format("meeting-starttime-{0}", i) },
+                                                    { "required", true }
+                                                }
+                                            );
+                                            }
+                                        </td>
+                                        <td>
+                                            &nbsp;To&nbsp;
+                                        </td>
+                                        <td>                                   
+                                            @{Html.RenderPartial(
+                                                "~/Views/Shared/_TimeSelect.cshtml",
+                                                endTime,
+                                                new ViewDataDictionary()
+                                                {
+                                                { "name", string.Format("meeting-endtime-{0}", i) },
+                                                { "id", string.Format("meeting-endtime-{0}", i) },
+                                                { "required", true }
+                                                }
+                                            );
+                                            }
+                                        </td>
+                                        <td>
+                                            &nbsp;
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-default" onclick="removeDate(@i)">Delete</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                        
+                            </div>
+                        </div>
+                        <input type="hidden" name="meeting-inuse-@i" id="meeting-inuse-@i" value="0" />
+                    }
+                    <div class="col-md-7 col-md-offset-3">
+                        <button type="button" class="btn btn-alt4" onclick="showNextDate()">Add New Date</button>
+                    </div>
+                </div>
+            </div>
+        </div>        
+
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#repeatsweekly').click(function () {
+            checkRepeatsWeekly();
+        });
+        $('#schedule').change(function () {
+            checkScheduleVal();
+        });
+        checkRepeatsWeekly();
+        checkScheduleVal();
+
+        $('#schedule').change(function(){
+            if($(this).val() == '0') {
+                $('select[id^="meeting-starttime-"]').val('3:00 pm');
+                $('select[id^="meeting-endtime-"]').val('5:00 pm');
+                $('#dailystarttime').val('3:00 pm');
+                $('#dailyendtime').val('5:00 pm');
+                $('#startdate').val('@DateTime.UtcNow.ToShortDateString()');
+                $('#enddate').val('@DateTime.UtcNow.AddWeeks(1).ToShortDateString()');
+                $('.schedulerepeat-checkbox').prop('checked', false);
+                $('#scheduledetails-div').html('');
+                $('.schedule-date').addClass('hide');
+                showNextDate();
+            }
+        });
+    });
+
+    function checkScheduleVal() {
+        if ($('#schedule').val().length > 0) {
+            if ($('#schedule').val() != "0") {
+                $('#schedule-edit').addClass('hide');
+                $('#copy-edit').removeClass('hide');
+                $('#editSchedule').attr('href', '@Url.Action("edit", "schedule")/' + $('#schedule').val() + '?activity=@activityId');
+                $('#copySchedule').attr('href', '@Url.Action("copy", "schedule")/' + $('#schedule').val() + '?activity=@activityId');
+            } else {
+                $('#schedule-edit').removeClass('hide');
+                $('#copy-edit').addClass('hide');
+            }
+
+        } else {
+            $('#schedule-edit').addClass('hide');
+            $('#copy-edit').addClass('hide');
+        }
+
+        if ('@showScheduleList'.toLowerCase() == 'false') {
+            $('#schedule-edit').removeClass('hide');
+        }
+    }
+
+
+
+    function removeDate(i){
+        $('#schedule-date-' + i).addClass('hide');
+        $('#meeting-inuse-' + i).val(0);
+    }
+
+    function showNextDate() {
+        var obj = $('.schedule-date.hide').first();
+        obj.removeClass('hide');
+        obj.next().val(1);
+    }
+
+    function showDates() {
+        @if(Model.GetInstances()?.Count > 0)
+        {
+            @: for(var i = 0; i < @Model.GetInstances().Count; i++){
+            @:  showNextDate();
+            @: }
+        }
+        else
+        {
+            @: showNextDate();
+        }
+    }
+
+    function checkRepeatsWeekly() {
+        if ($('#repeatsweekly').is(':checked')) {
+            $('#dailyrepeat').removeClass('hide');
+            $('#requiresalldays-group').removeClass('hide');
+            $('#schedule-dates').addClass('hide');
+        } else {
+            $('#dailyrepeat').addClass('hide');
+            $('#requiresalldays-group').addClass('hide');
+            $('#schedule-dates').removeClass('hide');
+
+            if ($('.schedule-date').length == $('.schedule-date.hide').length) {
+                showDates();
+            }
+        }
+    }
+
+</script>

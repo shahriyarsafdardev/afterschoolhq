@@ -1,0 +1,140 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using AfterSchoolLibrary;
+using AfterSchool.Models;
+
+namespace AfterSchool.Areas.Admin.Controllers
+{
+    public class PackageController : BaseLoggedInController
+    {
+        // GET: Admin/Package
+        [HttpGet]
+        public ActionResult Index(int? start = null, int? length = null)
+        {
+            return View(Package.Load(
+                start: start,
+                length: length));
+        }
+
+        [HttpGet]
+        public ActionResult Edit(string id)
+        {
+            ViewBag.Messages = new SystemMessages();
+            if (id.IsEmpty())
+            {
+                ViewBag.Features = new List<PackageFeature>();
+                return View(new Package() { Name = "New Package" });
+            }
+            else
+            {
+                var package = Package.Load(id.ToInteger());
+                ViewBag.Features = package.GetFeatures();
+                return View(package);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult Edit(string id, string name, string price, string priceperyear, string isactive, string ispopular, string isafterschool, string description)
+        {
+            SystemMessages msgs = new SystemMessages();
+            var package = new Package();
+            var features = new List<PackageFeature>();
+
+            if (name.IsEmpty())
+            {
+                msgs.Add("Package name is required", MessageType.UserError);
+            }
+            if (price.IsEmpty() || !price.IsNumber())
+            {
+                msgs.Add("Price / Month is required", MessageType.UserError);
+            }
+            else if (price.ToDecimal() < 0)
+            {
+                msgs.Add("Price / Month must be greater than or equal to 0", MessageType.UserError);
+            }
+            if (priceperyear.IsEmpty() || !priceperyear.IsNumber())
+            {
+                msgs.Add("Price / Year is required", MessageType.UserError);
+            }
+            else if (price.ToDecimal() < 0)
+            {
+                msgs.Add("Price / Year must be greater than or equal to 0", MessageType.UserError);
+            }            
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
+
+                        if (id.IsEmpty())
+                        {
+                            package = new Package();
+                            package.CreateDate = DateTime.UtcNow;
+                            package.CreatedBy = SessionVariables.LoggedInUser.ID;
+                        }
+                        else
+                        {
+                            package = Package.Load(id.ToInteger(), adc);
+                            features = package.GetFeatures(adc);
+                        }
+
+                        package.Price = price.ToDecimal();
+                        package.PricePerYear = priceperyear.ToDecimal();
+
+                        package.LastModifiedDate = DateTime.UtcNow;
+                        package.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+
+                        package.Name = name;
+                        package.IsActive = isactive.IsNotEmpty();
+                        package.IsPopular = ispopular.IsNotEmpty();
+                        package.IsAfterSchool = isafterschool.IsNotEmpty();
+                        package.Description = description;
+                        amsgs.AddRange(package.SaveWithStripe(adc));
+
+                        if (amsgs.HasNoErrors())
+                        {
+                            foreach (var type in Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>().Where(x => x != FeatureType.NotSet))
+                            {
+                                if (Request[type.ToString()].IsNotEmpty())
+                                {
+                                    var feature = PackageFeature.LoadByPackageIdByFeatureTypeId(package.ID.Value, type, adc);
+                                    if (feature.IsEmpty())
+                                    {
+                                        feature = new PackageFeature();
+                                        feature.PackageId = package.ID;
+                                        feature.CreateDate = DateTime.UtcNow;
+                                        feature.CreatedBy = SessionVariables.LoggedInUser.ID;
+                                        feature.FeatureTypeId = type;
+                                    }
+
+                                    feature.Max = Request[type.ToString()].ToInteger();
+                                    feature.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                    feature.LastModifiedDate = DateTime.UtcNow;
+                                    amsgs.AddRange(feature.Save(adc));
+                                }
+                            }
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) => {
+                        msgs.AddRange(smsgs);
+
+                        features = package.GetFeatures();
+                        msgs.Add("Package Saved", MessageType.Success);
+                    },
+                    onFailure: (SystemMessages fmsgs) => {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            ViewBag.Features = features;
+            ViewBag.Messages = msgs;
+            return View(package);
+        }
+    }
+}

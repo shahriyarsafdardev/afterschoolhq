@@ -1,0 +1,54 @@
+﻿@model AfterSchoolLibrary.ActivityForm
+
+@{
+    ViewBag.Title = Model.Name;
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    RegistrantActivity ra = (RegistrantActivity)ViewBag.RegistrantActivity;
+    Account a = (Account)ViewBag.Account;
+    var totalCost = Model.ActivityCostPerRegistrant * ra.TotalSeats;
+}
+
+@{Html.RenderPartial("~/Views/Shared/_RegistrationTitle.cshtml");}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+<div class="main-content">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            PayPal - Complete Your Registration
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div class="value">@totalCost.ToCurrency()</div>
+                        </div>
+                        <div class="icon"><span class="s7-credit"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="col-sm-6 col-sm-offset-3">
+                    <p>
+                        Pay for your registration using PayPal. <strong>Your seat is not reserved until you complete your payment.</strong>
+                    </p>
+                    <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                        <input type="hidden" name="amount" value="@totalCost" />
+                        <input type="hidden" name="cmd" value="_xclick" />
+                        <input type="hidden" name="business" value="@a.PayPalEmailAddress" />
+                        <input type="hidden" name="item_name" value="@Model.ActivityName">
+                        <input type="hidden" name="currency_code" value="USD">
+                        <input type="hidden" name="return" value="@AfterSchoolLibrary.Utilities.BaseUrl/reg/paypalthanks/@ra.Uid.ToString()" />
+                        <input type="hidden" name="notify_url" value="@AfterSchoolLibrary.Utilities.BaseUrl/reg/paypalipn/@ra.Uid.ToString()" />
+                        <input type="hidden" name="cancel_return" value="@AfterSchoolLibrary.Utilities.BaseUrl/reg/paypalcancel/@ra.Uid.ToString()" />
+                        <button type="submit" class="btn btn-primary btn-lg">Pay via PayPal &raquo;</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

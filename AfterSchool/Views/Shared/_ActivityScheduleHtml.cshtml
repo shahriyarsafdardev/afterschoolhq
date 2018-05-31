@@ -1,0 +1,32 @@
+﻿@model ActivitySchedule
+
+@if (Model.RepeatsWeekly)
+{
+    <span>
+        Meets from <strong>@Model.DailyStartTime.ToShortTimeString()</strong> to <strong>@Model.DailyEndTime.ToShortTimeString()</strong> every <strong>@Model.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(3)).ToStringList(", ", " & ")</strong> starting <strong>@Model.StartDate.ToShortDateString()</strong> and ending on <strong>@Model.EndDate.ToShortDateString()</strong>
+    </span>
+}
+else
+{
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>From</th>
+                <th>To</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var instance in Model.GetInstances())
+            {
+                <tr>
+                    <td>@instance.StartDateTime.Value.ToString("M/d/yy")</td>
+                    <td>@instance.StartDateTime.Value.DayOfWeek.ToString().MaxChars(2)</td>
+                    <td>@instance.StartDateTime.ToShortTimeString()</td>
+                    <td>@instance.EndDateTime.ToShortTimeString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

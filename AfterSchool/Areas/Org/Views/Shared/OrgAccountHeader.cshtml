@@ -1,0 +1,55 @@
+﻿@if (SessionVariables.AccountPackage.IsDuringTrial)
+{
+    <div class="trial-header text-center text-white bg-warning">
+        You have @SessionVariables.AccountPackage.TrialDaysRemaining day(s) remaining in your trial <a href="@Url.Action("newbilling", "account", new { id = SessionVariables.AccountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+    </div>
+}
+else if (SessionVariables.AccountPackage.IsTrialExpired(SessionVariables.CurrentAccount))
+{
+    <div class="trial-header text-center text-white bg-danger">
+        It looks like your trial has expired. <a href="@Url.Action("newbilling", "account", new { id = SessionVariables.AccountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+    </div>
+}
+@if (!SessionVariables.LoggedInUser.VerifiedAccount)
+{
+    <div class="trial-header text-center text-white bg-danger">
+        Please verify your email address in order to publish activities. <a href="javascript:sendVerificationEmail()" class="white">Resend Email Verification Email &raquo;</a>
+    </div>
+}
+
+<div class="page-head">
+    <div class="pull-right">
+        <p>
+            @SessionVariables.AccountPackage.PackageName Package<br />
+            Logged in as: @SessionVariables.LoggedInUser.DisplayName
+        </p>
+    </div>
+    <h2>
+        @SessionVariables.CurrentAccount.Name
+        @if (SessionVariables.CurrentAccount.UniqueName.IsNotBlank())
+        {
+            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank"><i class="s7-link" data-toggle="popover" data-trigger="hover" data-content="Go to your public @UILabel.ProductName() home page"></i></a>
+        }
+    </h2>
+</div>
+
+<script>
+    function sendVerificationEmail() {
+        $.get(
+            '@Url.Action("SendVerificationEmail", "Services")',
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: 'A verification email has been sent. Please check your email.'
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Error sending verification email. Please <a href="mailto:@AfterSchoolLibrary.Email.AppSupportEmailAddress(SessionVariables.IsAfterSchool.Value)" class="white">contact support</a>.'
+                    });
+                }
+            }
+            );
+    }
+</script>

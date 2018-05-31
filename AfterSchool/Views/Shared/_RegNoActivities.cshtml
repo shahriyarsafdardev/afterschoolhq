@@ -1,0 +1,36 @@
+﻿@model AfterSchoolLibrary.Account
+
+@{ 
+    var noActivitiesText = "";
+    var activityGroup = (ActivityGroup)ViewBag.Group;
+
+    if (activityGroup.IsNotEmpty() && activityGroup.GetGroupProperty(AccountPropertyType.NoActivitiesText).IsNotEmpty())
+    {
+        noActivitiesText = activityGroup.GetGroupProperty(AccountPropertyType.NoActivitiesText).Value;
+    }
+    else if (Model.GetAccountProperty(AccountPropertyType.NoActivitiesText).IsNotEmpty())
+    {
+        noActivitiesText = Model.GetAccountProperty(AccountPropertyType.NoActivitiesText).Value;
+    }
+}
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+
+        <div class="panel panel-alt3 panel-borders panel-shadow">
+            <div class="panel-body panel-body-fixed-height">
+                <p class="text-center">
+                    @if (noActivitiesText.IsNotEmpty())
+                    {
+                        <span>@Html.Raw(noActivitiesText)</span>
+                    }
+                    else
+                    {
+                        @:There are no @UILabel.ActivityLabel(true).ToLower() available at the moment. Please check back later.
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,221 @@
+﻿@using System.Collections.Specialized;
+@model List<CartItem>
+
+@{
+    var fieldValues = (NameValueCollection)ViewData["fieldValues"];
+    var registration = (Registration)ViewData["registration"];
+    var addOnly = (bool)ViewData["addonly"];
+}
+@if (Model.Count > 1)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @UILabel.ActivityLabel() Preference
+        </div>
+        <div class="panel-body">
+
+            @for (var i = 1; i <= Model.Count; i++)
+            {
+                var preferenceId = string.Format("preference-{0}", i);
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="@preferenceId">
+                        Choice #@i
+                    </label>
+                    <div class="col-md-6">
+                        <select name="@preferenceId" id="@preferenceId" class="form-control activity-preference" required>
+                            <option value="">Select Choice...</option>
+                            @foreach (var item in Model)
+                            {
+                                var readonlystr = "";
+                                var selected = "";
+
+                                if (fieldValues[preferenceId].IsNotBlank() && addOnly)
+                                {
+                                    readonlystr = "readonly=\"readonly\"";
+                                }
+                                if (item.ActivityId.ToString() == fieldValues[preferenceId])
+                                {
+                                    selected = "selected=\"selected\" ";
+                                }
+                                <option value="@item.ActivityId" @readonlystr @selected>
+                                    @item.GetActivity().Name - @item.GetActivity().GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            }
+
+@*
+    <table class="table">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                @for (var i = 1; i <= maxCount; i++)
+                {
+                    <th>@i.ToOrdinal() Choice</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var day in days)
+            {
+                if (Model.Where(x => x.Day == day).Count() > 1)
+                {
+                    <tr>
+                        <td>@day.ToString() <span class="text-danger">*</span></td>
+                        @for (var i = 1; i <= maxCount; i++)
+                        {
+                            var dayChoiceCount = Model.Where(x => x.Day == day).Count();
+
+                            <td>
+                                @if (i <= dayChoiceCount)
+                                {
+                                    var preferenceId = "preference-" + ((int)day).ToString() + "-" + i.ToString();
+                                    var readonlystr = "";
+
+                                    if (fieldValues[preferenceId].IsNotBlank() && addOnly)
+                                    {
+                                        readonlystr = "readonly=\"readonly\"";
+                                    }
+
+                                    <select class="form-control activity-preference" id="@preferenceId" name="@preferenceId" required @readonlystr>
+                                        <option value="">Select Choice...</option>
+                                        @foreach (var item in Model.Where(x => x.Day == day))
+                                        {
+                                            if (addOnly)
+                                            {
+                                                if (registration.IsRegisteredFor(item.GetActivity(), day))
+                                                {
+                                                    if (registration.GetRegistrantActivities().Where(x => x.ActivityId == item.ActivityId && x.Day == day && x.PreferenceNumber.Value != i).Count() > 0)
+                                                    {
+                                                        continue;
+                                                    }
+                                                }
+                                                else if (registration.GetRegistrantActivities().Where(x => x.PreferenceNumber == i && x.Day == day).Count() > 0)
+                                                {
+                                                    continue;
+                                                }
+                                            }
+
+                                            var selected = "";
+                                            if (item.ActivityId.ToString() == fieldValues[preferenceId])
+                                            {
+                                                selected = "selected=\"selected\" ";
+                                            }
+                                            <option value="@item.ActivityId" @selected>@item.GetActivity().Name</option>
+                                        }
+                                    </select>
+                                }
+                            </td>
+                        }
+
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    @foreach (var day in days)
+    {
+        if (Model.Where(x => x.Day == day).Count() > 1)
+        {
+            var list = Model
+                .Where(x => x.Day == day)
+                .Select(x => x.ActivityId + "=" + x.GetActivity().Name)
+                .ToArray()
+                .ToStringList(";");
+
+            if (registration.IsNotEmpty())
+            {
+                list = Model.Where(
+                x => x.Day == day &&
+                !registration.IsRegisteredFor(x.GetActivity(), day))
+                .Select(x => x.ActivityId + "=" + x.GetActivity().Name)
+                .ToArray()
+                .ToStringList(";");
+            }
+
+            <div id="preferencevalues-@((int)day)" class="hide">@list</div>
+        }
+    }
+*@
+        </div>
+    </div>
+}
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('.activity-preference').change(function () {
+            if (!$(this).is('[readonly]')) {
+                
+                var currentId = $(this).attr('id');
+                var currentValue = $(this).val();
+
+                if (currentValue.length > 0) {
+
+                    $('.activity-preference').each(function () {
+                        var otherId = $(this).attr('id');
+
+                        if (currentId != otherId) {
+                            $(this).children('option[value="' + currentValue + '"]').remove();
+                        } else {
+                            $(this).children().first().html('Reset Choice List...');
+                        }
+                    });
+
+                } else {
+
+                    $('.activity-preference').each(function () {
+                        if (!$(this).is('[readonly]')) {
+                            $(this).html('');
+                            $(this).append('<option value="">Select Choice...</option>');
+
+                            @foreach(var item in Model)
+                            {
+                                @: $(this).append('<option value="@item.ActivityId">@item.GetActivity().Name</option>');
+                            }
+                        }
+                    });
+
+                }
+            }
+        });
+
+        /*
+        $('.activity-preference').change(function () {
+            if (!$(this).is('[readonly]')) {
+
+                var id = $(this).attr('id');
+                var selectedValue = $(this).val();
+                var sameDays = id.split('-')[0] + '-' + id.split('-')[1];
+                var day = id.split('-')[1];
+                var optionValues = $('#preferencevalues-' + day).html().split(';');
+
+                if (selectedValue.length > 0) {
+                    $('select[id^="' + sameDays + '"]').each(function () {
+                        if ($(this).attr('id') != id) {
+                            $(this).children('option[value="' + selectedValue + '"]').remove();
+                        } else {
+                            $(this).children().first().html('Reset Choice List...');
+                        }
+                    });
+                } else {
+                    $('select[id^="' + sameDays + '"]').each(function () {
+                        if (!$(this).is('[readonly]')) {
+                            $(this).html('');
+                            $(this).append('<option value="">Select Choice...</option>');
+
+                            for (var i = 0; i < optionValues.length; i++) {
+                                var value = optionValues[i].split('=')[0];
+                                var text = optionValues[i].split('=')[1];
+                                $(this).append('<option value="' + value + '">' + text + '</option>');
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        */
+    });
+</script>

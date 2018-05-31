@@ -1,0 +1,27 @@
+﻿@model bool
+
+@{
+    var disabled = "";
+    if (ViewData["disabled"].IsNotEmpty() && ViewData["disabled"].ToString().IsBoolean() && ViewData["disabled"].ToString().ToBoolean())
+    {
+        disabled = " disabled=\"disabled\" ";
+    }
+    var required = "";
+    if (ViewData["required"].IsNotEmpty() && ViewData["required"].ToString().IsBoolean() && ViewData["required"].ToString().ToBoolean())
+    {
+        required = " required=\"required\" ";
+    }
+
+    var className = "";
+    if(ViewData["classname"].IsNotEmpty())
+    {
+        className = ViewData["classname"].ToString();
+    }
+}
+
+<div class="switch-button switch-button-yesno">
+    <input type="checkbox" name="@ViewData["checkboxname"]" id="@ViewData["checkboxid"]" value="1" @(Model ? " checked=\"checked\" " : "") @disabled @required class="@className" />
+    <span>
+        <label for="@ViewData["checkboxid"]"></label>
+    </span>
+</div>

@@ -1,0 +1,188 @@
+﻿@model List<AfterSchoolLibrary.Registrant>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var step = (int)ViewBag.Step;
+    var importText = ViewBag.ImportText;
+    var contactList = (ContactList)ViewBag.ContactList;
+    var contactLists = (List<ContactList>)ViewBag.ContactLists;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <div class="pull-right">
+                @if (Request["returnUrl"].IsNotEmpty())
+                {
+                    <a class="btn btn-primary btn-space" href="@Request["returnUrl"]">
+                        &laquo; Return
+                    </a>
+                }
+                else
+                {
+                    <a class="btn btn-primary btn-space" href="@Url.Action("index", "contact")">
+                        &laquo; Return to List
+                    </a>
+                }
+            </div>
+            <i class="s7-note2"></i> Add Contacts - Step @step
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+            <form action="@Url.Action("add", "contact", new { step = step + 1, returnUrl = Request["returnUrl"] })" method="post" enctype="multipart/form-data" class="form-horizontal">
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3">
+                        @if (step == 1)
+                        {
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    How do you want to add your contacts?
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <div class="am-radio inline">
+                                            <input type="radio" name="importtype" id="importtype-csv" value="1" onclick="showCSVFile()" @(Request["importtype"] == "1" ? "checked=\"checked\"" : "") />
+                                            <label for="importtype-csv">
+                                                Import CSV
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group hide" id="csvfile-container">
+                                        <input type="file" class="form-control" name="csvfile" id="csvfile" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="am-radio inline">
+                                            <input type="radio" name="importtype" id="importtype-list" value="2" onclick="showEmailList()" @(Request["importtype"] == "2" ? "checked=\"checked\"" : "") />
+                                            <label for="importtype-list">
+                                                Enter list of email addresses
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group hide" id="emaillist-container">
+                                        <textarea id="email-list" name="emaillist" class="form-control" placeholder="Please enter a list of emails separated by commas">@Request["emaillist"]</textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block">Next &raquo;</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (step == 2)
+                        {
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Do you want to add your new contacts to a list? (optional)
+                                </div>
+                                <div class="panel-body">
+                                    @if (Request["returnUrl"].IsNotEmpty())
+                                    {
+                                        <div class="form-group">
+                                            <label>List Name</label>
+                                            <input type="text" name="listname" id="listname" class="form-control" placeholder="Enter your list name" />
+                                            <input type="hidden" name="createlist" value="1" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="form-group">
+                                            <div class="am-radio inline">
+                                                <input type="radio" name="createlist" id="createlist-yes" value="1" onclick="showListName()" @(Request["createlist"] == "1" ? "checked=\"checked\"" : "") />
+                                                <label for="createlist-yes">
+                                                    Yes
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group hide" id="contactlist-container">
+                                            <select name="contactlist" id="contactlist" onchange="listchange()" class="form-control">
+                                                <option value="">Select Contact List...</option>
+                                                <option value="-">New Contact List</option>
+                                                @foreach (var list in contactLists)
+                                                {
+                                                    <option value="@list.ID">@list.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="form-group hide" id="listname-container">
+                                            <label>List Name</label>
+                                            <input type="text" name="listname" id="listname" class="form-control" placeholder="Enter your list name" />
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="am-radio inline">
+                                                <input type="radio" name="createlist" id="createlist-no" value="0" onclick="showListName()" @(Request["createlist"] == "0" ? "checked=\"checked\"" : "") />
+                                                <label for="createlist-no">
+                                                    No
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                    <div class="form-group">
+                                        <input type="hidden" name="importtype" value="@Request["importtype"]" />
+                                        <textarea name="importtext" class="hide">@importText</textarea>
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block">Save Contacts &raquo;</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (step == 3)
+                        {
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <i class="s7-check-circle icon-large text-success"></i> 
+                                    Your contacts have been imported @(contactList.IsNotEmpty() ? "into '" + contactList.Name + "'" : "")
+                                </div>
+                                <div class="panel-body">
+                                    @if (Request["returnUrl"].IsNotEmpty())
+                                    {
+                                        <a href="@Request["returnUrl"]&list=@contactList.ID" class="btn btn-primary btn-lg">Continue to Invite &raquo;</a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </form> 
+        </div>
+    </div>
+</div>
+
+<script>
+    function showListName() {
+        if ($('#createlist-yes').is(':checked')) {
+            $('#contactlist-container').removeClass('hide');
+        } else {
+            $('#contactlist-container').addClass('hide');
+        }
+    }
+    function listchange() {
+        if ($('#contactlist').val() == '-') {
+            $('#listname-container').removeClass('hide');
+        } else {
+            $('#listname-container').addClass('hide');
+        }
+    }
+    function showCSVFile() {
+        if ($('#importtype-csv').is(':checked')) {
+            $('#csvfile-container').removeClass('hide');
+            $('#emaillist-container').addClass('hide');
+        }
+    }
+    function showEmailList() {
+        if ($('#importtype-list').is(':checked')) {
+            $('#emaillist-container').removeClass('hide');
+            $('#csvfile-container').addClass('hide');
+        }
+    }
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        showCSVFile();
+        showEmailList();
+        showListName();
+    });
+</script>

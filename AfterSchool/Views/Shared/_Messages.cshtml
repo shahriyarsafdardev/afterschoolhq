@@ -1,0 +1,56 @@
+﻿@model List<ActivityMessage>
+
+@{
+    var sendNewLink = (string)ViewData["SendNewMessageLink"];
+    var viewController = (string)ViewData["ViewLinkController"];
+    var account = (Account)ViewData["Account"];
+}
+<div class="row">
+    <div class="col-md-12">
+        <a href="@sendNewLink" class="btn btn-primary btn-space"><i class="icon icon-left s7-paper-plane"></i> Send New Message</a>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Date Sent</th>
+                <th>Subject</th>
+                <th># Sent</th>
+                <th># Unsent</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count() > 0)
+            {
+                for (var i = 0; i <= 1; i++)
+                {
+                    var messages = Model.Where(x => x.DateSent.HasValue == i.ToBoolean());
+
+                    if (i.ToBoolean())
+                    {
+                        messages = messages.OrderBy(x => x.DateSent.Value);
+                    }
+
+                    foreach (var message in messages)
+                    {
+                        <tr>
+                            <td><a href="@Url.Action("messagedetail", viewController, new { id = message.ID })" class="btn btn-primary btn-sm">View</a></td>
+                            <td>@(message.DateSent.HasValue ? account.ConvertToAccountTimeZone(message.DateSent.Value).ToLongDateTimeString() : "N/A")</td>
+                            <td>@message.Subject</td>
+                            <td>@message.GetSentCount()</td>
+                            <td>@message.GetUnsentCount()</td>
+                        </tr>
+                    }
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5">You haven't sent any messages to your @UILabel.RegistrantLabel(true).ToLower()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

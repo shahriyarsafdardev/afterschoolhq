@@ -1,0 +1,105 @@
+﻿@model List<AfterSchoolLibrary.RegistrationPeriod>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+    var paging = (PagingModel)ViewData["PagingModel"];
+
+    var previousLink = "#";
+    var nextLink = "#";
+    if (paging.IsNotEmpty())
+    {
+        if (paging.PageNumber > 1)
+        {
+            previousLink = Url.Action("index", "period", new { pn = paging.PageNumber - 1, rpp = Request["rpp"] });
+        }
+        if (paging.PageNumber < paging.TotalPages)
+        {
+            nextLink = Url.Action("index", "period", new { pn = paging.PageNumber + 1, rpp = Request["rpp"] });
+        }
+    }
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a class="btn btn-primary btn-space" href="@Url.Action("edit", "period", new { id = 0 })">
+                    <i class="icon icon-left s7-plus"></i>
+                    Add @UILabel.RegistrationPeriodLabel()
+                </a>
+            </div>
+            <i class="s7-note2"></i> @UILabel.RegistrationPeriodLabel(true)
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th class="text-center">Activities</th>
+                            <th>Open Date</th>
+                            <th>Close Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var period in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <a href="@Url.Action("summary", "period", new {id = period.ID})" class="btn btn-primary btn-sm"><i class="icon icon-left s7-date"></i> View</a>
+                                        <!--
+                                        <a href="@Url.Action("edit", "period", new {id = period.ID})" class="btn btn-primary btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                        -->
+                                    </td>
+                                    <td><a href="@Url.Action("summary", "period", new {id = period.ID})">@period.Name</a></td>
+                                    <td class="text-center">@period.GetActivityCount()</td>
+                                    <td>@period.StartDateTime.ToShortDateTimeString() @SessionVariables.CurrentAccount.TimeZoneAbbr</td>
+                                    <td>@period.EndDateTime.ToShortDateTimeString() @SessionVariables.CurrentAccount.TimeZoneAbbr</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5">There are no @UILabel.RegistrationPeriodLabel(true).ToLower(). Please <a href="@Url.Action("edit", "period", new { id = 0 })">add a new @UILabel.RegistrationPeriodLabel().ToLower()</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+
+            @if (paging.IsNotEmpty() && paging.TotalCount > 0)
+            {
+                <div class="row">
+                    <div class="col-md-6">
+                        Showing @paging.StartingRecord - @paging.EndingRecord of @paging.TotalCount
+                    </div>
+                    <div class="col-md-6">
+                        <div class="btn-group pull-right">
+                            <a class="btn btn-default" href="@previousLink">Previous</a>
+                            @for (var i = 1; i <= paging.TotalPages; i++)
+                            {
+                                <a class="btn btn-default" href="@Url.Action("index", "period", new { pn = i, rpp = Request["rpp"] })">@i</a>
+                            }
+                            <a class="btn btn-default" href="@nextLink">Next</a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

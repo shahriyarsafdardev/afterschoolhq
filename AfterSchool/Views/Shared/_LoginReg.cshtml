@@ -1,0 +1,47 @@
+﻿@{ 
+    var action = "";
+
+    if (ViewContext.RouteData.Values["activity"].IsNotEmpty())
+    {
+        action = Url.Action("login", "reg", new { activity = ViewContext.RouteData.Values["activity"].ToString() });
+    }
+    else
+    {
+        action = Url.Action("login", "reg", new { id = ViewContext.RouteData.Values["id"].ToString(), group = Request["group"] });
+    }
+}
+
+<form action="@action" method="post" class="form-horizontal" id="form-login">
+    <div class="login-form">
+        <div class="form-group">
+            <label class="col-md-3 control-label">Email</label>
+            <div class="input-group col-md-6">
+                <span class="input-group-addon"><i class="icon s7-user"></i></span>
+                <input id="username" name="username" type="text" placeholder="Email Address or Username" autocomplete="off" class="form-control" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-3 control-label">Password</label>
+            <div class="input-group col-md-6">
+                <span class="input-group-addon"><i class="icon s7-lock"></i></span>
+                <input id="password" name="password" type="password" placeholder="Password" class="form-control" required>
+            </div>
+        </div>
+        <div class="form-group login-submit">
+            <div class="col-md-6 col-md-offset-3">
+                <button data-dismiss="modal" type="submit" class="btn btn-primary btn-lg">Log me in</button>
+            </div>
+        </div>
+        <div class="form-group footer row hide">
+            <div class="col-xs-3 col-xs-offset-3 remember">
+                <div class="am-checkbox">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Remember Me</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group footer row hide">
+            <div class="col-xs-3 col-xs-offset-3"><a href="@Url.Action("resetpassword", "login")">Forgot Password?</a></div>
+        </div>
+    </div>
+</form>

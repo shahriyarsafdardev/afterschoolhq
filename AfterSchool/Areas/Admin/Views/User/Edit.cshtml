@@ -1,0 +1,77 @@
+﻿@model AfterSchoolLibrary.WebUser
+@{
+    ViewBag.Title = @Model.DisplayName;
+    var returnUrl = ViewBag.ReturnUrl;
+}
+
+<div class="page-head">
+    <h2>@Model.DisplayName</h2>
+</div>
+<div class="main-content">
+    
+    @Html.Raw(UI.RenderMessagesToHtml((SystemMessages)ViewBag.Messages))
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form method="post" action="@Url.Action("edit", "user", new { id = @Model.ID})" class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">First Name</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="firstname" name="firstname" value="@Model.FirstName" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Last Name</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="lastname" name="lastname" value="@Model.LastName" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Email</label>
+                    <div class="col-sm-6">
+                        <input type="email" class="form-control" id="email" name="email" value="@Model.Email" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Username</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="username" name="username" value="@Model.Username" onfocus="this.select()" required readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Password</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control" id="password1" name="password1" value="" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Verify Password</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control" id="password2" name="password2" value="" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Is Active</label>
+                    <div class="col-sm-6">
+                        <div class="switch-button switch-button-yesno">
+                            <input type="checkbox" @(Model.IsActive ? " checked=\"checked\" " : "") name="isactive" id="isactive">
+                            <span>
+                                <label for="isactive"></label>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="reset" class="btn btn-default">Discard Changes</button>
+                        <a href="@returnUrl" class="btn btn-default pull-right"><i class="icon icon-left s7-left-arrow"></i> Back to List</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

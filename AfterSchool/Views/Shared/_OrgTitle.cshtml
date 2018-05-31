@@ -1,0 +1,26 @@
+﻿@model Account
+@{ 
+    var landingPageText = ViewData["LandingPageText"].IfEmpty("");
+}
+
+@*
+@if (Model.LogoUrl.IsNotBlank())
+{
+    <div class="org-logo-container">
+        <img src="@Model.LogoUrl" class="org-logo" />
+    </div>
+}
+else
+{
+    <div class="org-logo-icon-container">
+        <i class="s7-culture icon-xxlarge"></i>
+    </div>
+    <h2 class="text-center">@Model.Name</h2>
+}
+*@
+
+<div class="org-title-area">
+    <h2 class="org-title">@Model.Name</h2>
+    <div class="org-description">@Html.Raw(landingPageText)</div>
+</div>
+

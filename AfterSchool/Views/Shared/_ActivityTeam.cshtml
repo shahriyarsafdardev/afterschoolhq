@@ -1,0 +1,89 @@
+﻿@model AfterSchoolLibrary.Activity
+@{
+    var members = (List<WebUser>)ViewBag.Users;
+}
+
+<form action="@Url.Action("teamsave", "activity", new { id = Model.ID.ToString() })" method="post">
+
+    <div class="row">
+        <button type="submit" class="btn btn-primary btn-space pull-right">Update Team Settings</button>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Has Access?</th>
+                    <th>Team Lead?</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var member in members)
+                {
+                    var awu = member.GetActivityWebUser(Model);
+                    var isonteam = awu.IsNotEmpty();
+                    var isleader = awu.IsNotEmpty() && awu.IsLeader;
+                    var isteamdisabled = Model.CreatedBy.Value == member.ID.Value || (SessionVariables.LoggedInUser.ID == member.ID);
+                    var isleaderdisabled = isteamdisabled;
+                
+                    var onteamid = string.Format("onteam-{0}", member.ID.Value);
+                    var isleaderid = string.Format("isleader-{0}", member.ID.Value);
+                
+                    <tr>
+                        <td>@member.DisplayName
+                            @if (isteamdisabled)
+                            {
+                                <i class="s7-lock icon-medium"></i>
+                            }
+                        </td>
+                        <td>
+                            @{Html.RenderPartial(
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                isonteam,
+                                new ViewDataDictionary()
+                                {
+                                  { "checkboxname", onteamid },
+                                  { "checkboxid", onteamid },
+                                  { "disabled", isteamdisabled },
+                                  { "classname", "onteam" }
+                                });}
+                        </td>
+                        <td>
+                            @{Html.RenderPartial(
+                              "~/Views/Shared/_SwitchButton.cshtml",
+                              isleader,
+                              new ViewDataDictionary()
+                              {
+                                  { "checkboxname", isleaderid },
+                                  { "checkboxid", isleaderid },
+                                  { "disabled", isleaderdisabled },
+                                  { "classname", "isleader" }
+                              });}
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <button type="submit" class="btn btn-primary btn-block btn-space">Update Team Settings</button>
+    </div>
+
+</form>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('.onteam').click(function () {
+            if (!$(this).is(':checked')) {
+                var id = $(this).attr('id').split('-')[1];
+                $('#isleader-' + id).prop('checked', false);
+            }
+        });
+        $('.isleader').click(function () {
+            if ($(this).is(':checked')) {
+                var id = $(this).attr('id').split('-')[1];
+                $('#onteam-' + id).prop('checked', true);
+            }
+        });
+    });
+</script>

@@ -1,0 +1,159 @@
+﻿@model AfterSchoolLibrary.ActivityGroup
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var forms = (List<Form>)ViewBag.Forms;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_ActivityGroupHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("_ActivityGroupTitle", Model.Name.IfBlank("New " + UILabel.ActivityGroupLabel())); }
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-12 col-lg-12">
+
+                <form id="form1" method="post" action="@Url.Action("edit", "group", new { id = Model.Uid })" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Label <span class="text-danger">*</span></label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">
+                            About / Description
+                            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Registration Description / Instructions" data-placement="top"></i>
+                        </label>
+                        <div class="col-md-9">
+                            <div class="text-editor-container">
+                                <div class="text-editor" id="description-div">
+                                    @Html.Raw(Model.Description)
+                                </div>
+                                <textarea name="description" id="description" class="hide"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (accountPackage.HasFeature(FeatureType.ManageForms))
+                    {
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">
+                                Registration Form <span class="text-danger">*</span>
+                            </label>
+                            <div class="col-md-6">
+                                <select name="form" id="form" class="form-control" required>
+                                    <option value="">Select Form...</option>
+                                    <option value="0"> + New Form</option>
+                                    @foreach (var form in forms)
+                                    {
+                                        <option value="@form.ID" @(Model.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = Model.FormId })" id="editForm" target="_blank">Edit Form</a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Invite Only</label>
+                        <div class="col-sm-9">
+                            @{ 
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.IsInviteOnly,
+                                    new ViewDataDictionary()
+                                    {
+                                        { "checkboxname", "isinviteonly" },
+                                        { "checkboxid", "isinviteonly" }
+                                    }
+                                );
+                            }
+                        </div>
+                    </div>
+
+                    @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
+                    {
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Registration Mode <span class="text-danger">*</span>                                
+                            </label>
+                            <div class="col-sm-9">
+                                <div class="am-radio inline">
+                                    @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
+                                    {
+                                        <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "") />
+                                        <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString().SplitByUpperCase()</label>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)" />
+                    }
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="reset" class="btn btn-default">Discard Changes</button>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('.text-editor').wysihtml5({
+            toolbar: {
+                'image': false,
+                'color': false,
+            }
+        });
+
+        $('.text-editor').on('blur', function () {
+            $('#description').val($('#description-div').html());
+        });
+        $('#description').val($('#description-div').html());
+    });
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $('#form').change(function () {
+            checkFormVal();
+        });
+
+        checkFormVal();
+
+    });
+
+    function checkFormVal() {
+        if ($('#form').val().length > 0 && $('#form').val() != "0") {
+            $('#editForm').removeClass('hide');
+            $('#editForm').attr('href', '@Url.Action("edit", "form")/' + $('#form').val());
+        } else {
+            $('#editForm').addClass('hide');
+        }
+    }
+
+</script>

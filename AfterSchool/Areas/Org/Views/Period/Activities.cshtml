@@ -1,0 +1,44 @@
+﻿@model RegistrationPeriod
+@{
+    ViewBag.Title = "Activities";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var activities = (List<Activity>)ViewBag.Activities;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{ Html.RenderPartial("_RegistrationPeriodHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("_RegistrationPeriodTitle", Model.Name); }
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="pull-right">
+                    <a href="@Url.Action("editsetup", "activity", new { period =  Model.ID})" class="btn btn-primary btn-space margin-r-10">
+                        <i class="icon icon-left s7-plus"></i>
+                        Add @UILabel.ActivityLabel()
+                    </a>
+                </div>
+            </div>
+
+            @{ Html.RenderPartial(
+                       "~/Views/Shared/_Activities.cshtml",
+                       activities,
+                       new ViewDataDictionary() {
+                            { "Account", SessionVariables.CurrentAccount },
+                            { "AccountPackage", SessionVariables.AccountPackage },
+                            { "PagingModel", ViewBag.PagingModel },
+                            { "ShowRegistrationPeriodFilter", false },
+                            { "RegistrationPeriod", Model }
+                           }
+                       ); }
+        </div>
+    </div>
+</div>

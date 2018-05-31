@@ -1,0 +1,24 @@
+﻿@model Activity
+@{ 
+    var regPeriod = Model.GetCurrentOrNextRegistrationPeriod();
+}
+
+@if (regPeriod.IsNotEmpty())
+{
+    <div class="page-head registration-titlebar">
+        <div class="pull-right">
+            <h4><i class="icon icon-left s7-date"></i> Registration Dates</h4>
+            <p>
+                Open - @regPeriod.StartDateTime.Value.ToLongDateString() @regPeriod.StartDateTime.ToShortTimeString() @Model.GetAccount().TimeZoneAbbr<br />
+                Close - @regPeriod.EndDateTime.Value.ToLongDateString() @regPeriod.EndDateTime.ToShortTimeString() @Model.GetAccount().TimeZoneAbbr
+            </p>
+        </div>
+
+        <p><a href="@Model.GetAccount().HomePageUrl?group=@Request["group"]&invite=@Request["invite"]" class="text-white">&laquo; View more @UILabel.ActivityLabel(true).ToLower()</a></p>
+        <h2><i class="icon icon-left s7-note2"></i> @Model.Name</h2>
+        <!--
+        <p>@Model.Description</p>
+        -->
+        <p></p>
+    </div>
+}

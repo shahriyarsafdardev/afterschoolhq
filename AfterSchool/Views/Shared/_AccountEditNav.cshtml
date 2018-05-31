@@ -1,0 +1,123 @@
+﻿@model Account
+@{
+    var activeMenu = Url.RequestContext.RouteData.Values["action"].ToString();
+
+    var editactive = activeMenu == "edit" ? "active" : "";
+    var editlocation = activeMenu == "location" ? "active" : "";
+    var editstyleactive = activeMenu == "style" ? "active" : "";
+    var editintegrationsactive = activeMenu == "integrations" ? "active" : "";
+    var paymentactive = activeMenu == "payments" ? "active" : "";
+    var packageactive = activeMenu == "packages" ? "active" : "";
+    var billingactive = activeMenu == "billing" ? "active" : "";
+    var featuresactive = activeMenu == "features" ? "active" : "";
+}
+<div id="list1" class="dd">
+    <ol class="dd-list">
+        <li data-id="1" class="dd-item">
+            <div class="dd-handle @editactive">
+                <a href="@Url.Action("edit", "account")">Details</a>
+            </div>
+        </li>
+        <li data-id="2" class="dd-item">
+            <div class="dd-handle @editlocation">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("location", "account") },
+                            { "Text", "Default Location" },
+                            { "IsActive", true },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        <li data-id="3" class="dd-item">
+            <div class="dd-handle @editstyleactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("style", "account") },
+                            { "Text", "Content" },
+                            { "IsActive", true },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        <li data-id="3" class="dd-item">
+            <div class="dd-handle @editintegrationsactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("integrations", "account") },
+                            { "Text", "Integrations" },
+                            { "IsActive", true },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        @if (SessionVariables.AccountPackage.HasFeature(FeatureType.AcceptPayments))
+        {
+            <li data-id="4" class="dd-item">
+                <div class="dd-handle @paymentactive">
+                    @{Html.RenderPartial(
+                            "~/Views/Shared/_ActiveLink.cshtml",
+                            new ViewDataDictionary {
+                                { "Url", Url.Action("payments", "account") },
+                                { "Text", "Accept Payments" },
+                                { "IsActive", true },
+                            }
+                        );
+                    }
+                </div>
+            </li>
+        }
+        @if (!SessionVariables.AccountPackage.IsDuringTrial)
+        { 
+            <li data-id="5" class="dd-item">
+                <div class="dd-handle @packageactive">
+                    @{Html.RenderPartial(
+                            "~/Views/Shared/_ActiveLink.cshtml",
+                            new ViewDataDictionary {
+                                { "Url", Url.Action("newbilling", "account") },
+                                { "Text", "Packages" },
+                                { "IsActive", true },
+                            }
+                        );
+                    }
+                </div>
+            </li>
+            <li data-id="6" class="dd-item">
+                <div class="dd-handle @billingactive">
+                    @{Html.RenderPartial(
+                            "~/Views/Shared/_ActiveLink.cshtml",
+                            new ViewDataDictionary {
+                                { "Url", Url.Action("billing", "account") },
+                                { "Text", "Billing" },
+                                { "IsActive", true },
+                            }
+                        );
+                    }
+                </div>
+            </li>
+        }
+        @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
+        {
+            <li data-id="4" class="dd-item">
+                <div class="dd-handle @featuresactive">
+                    @{Html.RenderPartial(
+                            "~/Views/Shared/_ActiveLink.cshtml",
+                            new ViewDataDictionary {
+                                { "Url", Url.Action("features", "account") },
+                                { "Text", "Features" },
+                                { "IsActive", true },
+                            }
+                        );
+                    }
+                    <i class="s7-lock icon-medium"></i>
+                </div>
+            </li>
+        }
+    </ol>
+</div>   
