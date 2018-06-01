@@ -229,16 +229,17 @@ namespace AfterSchoolLibraryTests
 
             var currentUser = new WebUser() { Username = testUsername };
             currentUser.Save(dc);
+            var id = currentUser.ID.Value;
 
             var testAccount = new Account() { };
             currentUser.Save(dc);
-
-            Assert.NotNull(currentUser.GetAccounts(dc));
+            testAccount.AddUser(currentUser, UserType.Parent, id , dc);
+            Assert.True(currentUser.GetAccounts(dc).Contains(testAccount));
         }
 
         //TODO: is there a way to remove an account from a User? and finish below
         [Fact]
-        public void GetUserTypeWithoutTypeTest()
+        public void GetUserTypeNotSetTest()
         {
             var currentUser = new WebUser() { };
             currentUser.Save(dc);
@@ -268,44 +269,33 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void UpdateLastActivityTest()
         {
-            var testUsername = "test";
             var testdate = new DateTime() { };
 
 
             var currentUser = new WebUser() { LastActivity = testdate};
             currentUser.Save(dc);
-            //SystemMessages.alter()
 
-            var testAccount = new Account() { };
-            //testAccount.IsAdminAccount{ }
-            testAccount.Save(dc);
+            var pre = currentUser.LastActivity;
+            currentUser.UpdateLastActivity(dc);
+            var post = currentUser.LastActivity;
 
-            Assert.NotNull(currentUser.UpdateLastActivity(dc));
 
-            Assert.Null(currentUser.UpdateLastActivity(dc));
+            Assert.NotEqual(pre,post);
         }
         [Fact]
         public void UpdateLastLoginTest()
         {
-            var testUsername = "test";
-            var emailAddress1 = "test1@test.com";
-
-
-            var currentUser = new WebUser() { Username = testUsername };
+            var currentUser = new WebUser() {};
             currentUser.Save(dc);
-            //SystemMessages.alter()
+            var prev = currentUser.LastLogin;
 
-            var testAccount = new Account() { };
-            //testAccount.IsAdminAccount{ }
-            testAccount.Save(dc);
+            currentUser.UpdateLastLogin(dc);
+            var post = currentUser.LastLogin;
 
-            Assert.NotNull(currentUser.UpdateLastLogin(dc));
-
-            Assert.Null(currentUser.UpdateLastLogin(dc));
+            Assert.NotEqual(prev, post );
         }
-        //^^TODO theese 3 above cant be right^^
 
-
+        //cannot test beacuse Feature is not fully implemeted always returns true currently
         [Fact]
         public void HasAcessToFeatureFalseTest()
         {
@@ -339,13 +329,13 @@ namespace AfterSchoolLibraryTests
 
             var currentUser = new WebUser() { };
             currentUser.Save(dc);
+            var a = new Activity();
+            currentUser.HasAccessToActivity(a, dc);
 
             var testAccount = new Account() { };
             testAccount.Save(dc);
 
-            var testActivity = new Activity() { };
-
-            Assert.True(currentUser.HasAccessToActivity(testActivity,dc));
+            Assert.True(currentUser.HasAccessToActivity(a,dc));
         }
 
     }
