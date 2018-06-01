@@ -7,8 +7,8 @@ release
 Backup
 Uploads
 *.orig
-*.dll
-*.dll.config
+# *.dll
+# *.dll.config
 # BasicLibrary.*
 # AfterSchoolLibrary.*
 # AfterSchool.*
