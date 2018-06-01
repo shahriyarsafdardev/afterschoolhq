@@ -194,37 +194,41 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            Form form = new Form();
-            form.Name = this.Name;
-            form.Description = this.Description;
-            form.LastModifiedDate = form.CreateDate = DateTime.UtcNow;
-            form.LastModifiedBy = form.CreatedBy = loggedInUserId;
-            form.AccountId = newAccountId;
-            form.IsActive = true;
-            form.Uid = Guid.NewGuid();
+            var form = new Form
+            {
+                Name = this.Name,
+                Description = this.Description,
+                LastModifiedDate = DateTime.UtcNow,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUserId,
+                CreatedBy = loggedInUserId,
+                AccountId = newAccountId,
+                IsActive = true,
+                Uid = Guid.NewGuid()
+            };
             msgs.AddRange(form.Save(dc));
 
-            List<FormQuestionGroup> groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc);
+            var groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc);
             foreach (var group in groups)
             {
-                List<FormQuestion> questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc);
+                var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc);
 
-                FormQuestionGroup newGroup = group.Copy();
-                newGroup.LastModifiedDate = newGroup.CreateDate = DateTime.UtcNow;
+                var newGroup = group.Copy();
+                newGroup.LastModifiedDate = DateTime.UtcNow;
+                newGroup.CreateDate = DateTime.UtcNow;
                 newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
                 newGroup.FormId = form.ID;
                 msgs.AddRange(newGroup.Save(dc));
 
-                foreach (var question in questions)
-                {
-                    FormQuestion newQuestion = question.Copy();
+                questions.ForEach(question => {
+                    var newQuestion = question.Copy();
                     newQuestion.LastModifiedDate = newQuestion.CreateDate = DateTime.UtcNow;
                     newQuestion.LastModifiedBy = newQuestion.CreatedBy = loggedInUserId;
                     newQuestion.FormQuestionGroupId = newGroup.ID;
                     newQuestion.FormId = form.ID;
                     newQuestion.IsTemplate = false;
                     msgs.AddRange(newQuestion.Save(dc));
-                }
+                });
             }
 
             //check for default form existence
