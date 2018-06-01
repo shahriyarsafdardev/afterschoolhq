@@ -167,17 +167,12 @@ namespace AfterSchoolLibrary
         public string GetStatus(DatabaseConnection dc = null)
         {
             if (WillOpen(dc))
-            {
                 return "Not Open";
-            }
             else if (IsOpen(dc))
-            {
                 return "Open";
-            }
             else if (IsClosed(dc))
-            {
                 return "Closed";
-            }
+
             return "N/A";
         }
 
@@ -216,13 +211,11 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             if (startDate.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["EndDateTime"], startDate, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-            }
+
             if (endDate.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["EndDateTime"], endDate, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-            }
+
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -279,7 +272,12 @@ namespace AfterSchoolLibrary
 
         public List<Activity> GetActivities(DatabaseConnection dc = null)
         {
-            return Activity.LoadList(GetActivityRegistrationPeriods(dc).Select(x => x.ActivityId.Value).ToList(), dc).Where(x => x.IsDeleted == false).ToList();
+            return Activity.LoadList(
+                GetActivityRegistrationPeriods(dc)
+                    .Select(x => x.ActivityId.Value)
+                    .ToList(), dc)
+                .Where(x => x.IsDeleted == false)
+                .ToList();
         }
 
         public int GetActivityCount(DatabaseConnection dc = null)
@@ -302,25 +300,27 @@ namespace AfterSchoolLibrary
 
             if ((item.IsEmpty() || (item.IsNotEmpty() && !item.IsActive)) && isActive)
             {
-                var periods = activity.GetActivityRegistrationPeriods(dc);
-                foreach (var period in periods)
-                {
+                activity.GetActivityRegistrationPeriods(dc).ForEach(period => {
                     period.IsActive = false;
                     period.LastModifiedDate = DateTime.UtcNow;
                     period.LastModifiedBy = loggedInUserId;
                     msgs.AddRange(period.Save(dc));
-                }
+                });
             }
 
             //if record doesn't already exist
             if (item.IsEmpty())
             {
-                var activityperiod = new ActivityRegistrationPeriod();
-                activityperiod.RegistrationPeriodId = this.ID;
-                activityperiod.ActivityId = activity.ID;
-                activityperiod.IsActive = isActive;
-                activityperiod.CreateDate = activityperiod.LastModifiedDate = DateTime.UtcNow;
-                activityperiod.CreatedBy = activityperiod.LastModifiedBy = loggedInUserId;
+                var activityperiod = new ActivityRegistrationPeriod
+                {
+                    RegistrationPeriodId = this.ID,
+                    ActivityId = activity.ID,
+                    IsActive = isActive,
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId,
+                    LastModifiedBy = loggedInUserId
+                };
                 msgs.AddRange(activityperiod.Save(dc));
             }
             else
@@ -334,15 +334,19 @@ namespace AfterSchoolLibrary
 
         public RegistrationPeriod Copy(string newName, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc)
         {
-            var period = new RegistrationPeriod();
-            period.AccountId = this.AccountId;
-            period.CreateDate = period.LastModifiedDate = DateTime.UtcNow;
-            period.CreatedBy = period.LastModifiedBy = loggedInUserId;
-            period.Description = this.Description;
-            period.EndDateTime = this.EndDateTime;
-            period.Location = this.Location;
-            period.Name = newName.IfEmpty(this.Name + " Copy");
-            period.StartDateTime = this.StartDateTime;
+            var period = new RegistrationPeriod
+            {
+                AccountId = this.AccountId,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedBy = loggedInUserId,
+                Description = this.Description,
+                EndDateTime = this.EndDateTime,
+                Location = this.Location,
+                Name = newName.IfEmpty(this.Name + " Copy"),
+                StartDateTime = this.StartDateTime
+            };
             msgs.AddRange(period.Save(dc));
 
             return period;
@@ -361,17 +365,14 @@ namespace AfterSchoolLibrary
         public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, DatabaseConnection dc = null)
         {
             if (registrations.IsEmpty())
-            {
                 registrations = Registration.LoadByRegistrationPeriodId(this.ID.Value, dc);
-            }
+
             if(registrations.Any())
-            {
-                return RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc).Where(x => x.ActivityIsDeleted == false).ToList();
-            }
+                return RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc)
+                    .Where(x => !x.ActivityIsDeleted)
+                    .ToList();
             else
-            {
                 return new List<RegistrantActivity>();
-            }
         }
 
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
@@ -397,33 +398,24 @@ namespace AfterSchoolLibrary
         public SystemMessages RandomizePlacementReset(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var doCommit = false;
 
-            if (dc.IsEmpty())
-            {
-                dc = Database.StartTransaction();
-                doCommit = true;
-            }
-
-            try
-            {
-                var ras = this.GetRegistrantActivities();
-                foreach (var ra in ras)
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) => 
                 {
-                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Application, dc));
-                }
-            }
-            catch(Exception ex)
-            {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-            }
-            finally
-            {
-                if (doCommit)
+                    this.GetRegistrantActivities(dc: adc)
+                        .ForEach(ra => 
+                            msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Application, adc))
+                        );
+                },
+                onSuccess: (SystemMessages smsgs) =>
                 {
-                    Database.EndTransaction(dc, msgs);
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
                 }
-            }
+            );
             
             return msgs;
         }
@@ -432,9 +424,8 @@ namespace AfterSchoolLibrary
         public ActivityGroup GetGroup(DatabaseConnection dc = null)
         {
             if (_Group.IsEmpty())
-            {
                 _Group = ActivityGroup.Load(this.ActivityGroupId.Value, dc);
-            }
+
             return _Group;
         }
 
@@ -451,9 +442,7 @@ namespace AfterSchoolLibrary
                 {
                     var arps = this.GetActivityRegistrationPeriods(dc).Where(x => x.IsActive).ToList();
                     if (arps.Any())
-                    {
                         _Account = arps.First().GetActivity(dc).GetAccount(dc);
-                    }
                 }
             }
             return _Account;
@@ -478,12 +467,12 @@ namespace AfterSchoolLibrary
 
                 if (regPeriod.IsOpen())
                 {
-                    subject = string.Format("Registration for {0} is open again", account.Name);
+                    subject = $"Registration for {account.Name} is open again";
                     body = "<p>{0},</p>{3}<p>Please click the following link to add to your registration: {1}</p>{2}";
                 }
                 else if (regPeriod.WillOpen())
                 {
-                    subject = string.Format("Registration for {0} will open again soon", account.Name);
+                    subject = $"Registration for {account.Name} will open again soon";
                     body = "<p>{0},</p>{3}<p>Registration will open " + regPeriod.StartDateTime.ToShortDateString() + ". Please click the following link to add to your registration: {1}</p>{2}";
                 }
 
@@ -492,7 +481,7 @@ namespace AfterSchoolLibrary
                     SendGridHelper.SendMail(
                         fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                             Email.AppEmailAddress, 
-                            string.Format("{0} via {1}", account.Name, Utilities.AppName(account.IsAfterSchool))),
+                            $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.RegistrantEmail, reg.Name),
                         subject: subject,
                         body: string.Format(
