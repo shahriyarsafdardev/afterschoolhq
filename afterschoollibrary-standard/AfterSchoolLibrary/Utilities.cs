@@ -304,7 +304,7 @@ namespace AfterSchoolLibrary
                 a.IsActive = true;
                 msgs.AddRange(a.Save(dc));
 
-                a.AddUser(wu, UserType.Owner, 0, msgs, dc);
+                msgs.AddRange(a.AddUser(wu, UserType.Owner, 0, dc));
 
             }
             catch (Exception ex)

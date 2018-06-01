@@ -234,61 +234,27 @@ namespace AfterSchoolLibrary
             return AccountPayment.LoadByAccountId(account.ID.Value, dc);
         }
 
-        public static WebUser AddUser(this Account account, WebUser wu, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static SystemMessages AddUser(this Account account, WebUser user, UserType ut, int loggedInUserId, DatabaseConnection dc = null)
         {
-            return account.AddUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUserId, msgs, dc);
-        }
-
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return account.AddUser(firstName, lastName, email, null, false, true, false, ut, loggedInUserId, msgs, dc);
-        }
-
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            WebUser wu = null;
+            var msgs = new SystemMessages();
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    wu = WebUser.LoadByEmail(email.Trim(), adc);
-
-                    if (wu.IsEmpty())
-                    {
-                        wu = new WebUser();
-                        wu.FirstName = firstName;
-                        wu.LastName = lastName;
-                        wu.Email = email.Trim();
-                        wu.Username = WebUser.GenerateUsername(firstName, lastName, adc);
-                        if (!password.IsEmpty())
-                        {
-                            wu.Password = WebUser.EncryptPassword(password);
-                        }
-                        wu.CreateDate = wu.LastModifiedDate = DateTime.Now;
-                        wu.CreatedBy = wu.LastModifiedBy = loggedInUserId;
-                        wu.IsActive = isActive;
-                        wu.IsRegistered = isRegistered;
-                        wu.VerifiedAccount = isVerified;
-                        wu.Uid = Guid.NewGuid();
-                        amsgs.AddRange(wu.Save(adc));
-                    }
-
-                    var gwu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, wu.ID.Value, adc);
+                    var gwu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, adc);
                     if (gwu.IsEmpty())
                     {
                         gwu = new AccountWebUser();
                         gwu.CreateDate = DateTime.UtcNow;
                         gwu.CreatedBy = loggedInUserId;
-                        gwu.WebUserId = wu.ID.Value;
+                        gwu.WebUserId = user.ID.Value;
                         gwu.AccountId = account.ID.Value;
                         gwu.IsDefault = false;
-                        gwu.IsActive = isActive;
+                        gwu.IsActive = user.IsActive;
                     }
                     else
-                    {
                         gwu.IsActive = true;
-                    }
+
                     gwu.LastModifiedDate = DateTime.UtcNow;
                     gwu.LastModifiedBy = loggedInUserId;
                     gwu.UserTypeId = ut;
@@ -297,7 +263,7 @@ namespace AfterSchoolLibrary
 
                     if (ut == UserType.Owner)
                     {
-                        account.OwnerId = wu.ID.Value;
+                        account.OwnerId = user.ID.Value;
                         amsgs.AddRange(account.Save(adc));
                     }
                 },
@@ -312,10 +278,62 @@ namespace AfterSchoolLibrary
                 dc: dc
             );
 
-            return wu;
+            return msgs;
         }
 
-        public static SystemMessages SendlWelcomeEmailTrial(this Account account, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.AddUser(firstName, lastName, email, null, false, true, false, ut, loggedInUserId, msgs, dc);
+        }
+
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            WebUser user = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    if (!WebUser.ExistsByEmail(email.Trim(), adc))
+                    {
+                        user = new WebUser();
+                        user.FirstName = firstName;
+                        user.LastName = lastName;
+                        user.Email = email.Trim();
+                        user.Username = WebUser.GenerateUsername(firstName, lastName, adc);
+                        if (!password.IsEmpty())
+                            user.Password = WebUser.EncryptPassword(password);
+
+                        user.CreateDate = user.LastModifiedDate = DateTime.Now;
+                        user.CreatedBy = user.LastModifiedBy = loggedInUserId;
+                        user.IsActive = isActive;
+                        user.IsRegistered = isRegistered;
+                        user.VerifiedAccount = isVerified;
+                        user.Uid = Guid.NewGuid();
+                        amsgs.AddRange(user.Save(adc));
+                    }
+                    else
+                        amsgs.Add("Email already exists", MessageType.UserError);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                dc: dc
+            );
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(AddUser(account, user, ut, loggedInUserId, dc));
+
+            return user;
+
+        }
+
+        public static SystemMessages SendWelcomeEmailTrial(this Account account, DatabaseConnection dc = null)
         {
             return EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc), account);
         }

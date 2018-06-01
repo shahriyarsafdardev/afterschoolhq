@@ -144,7 +144,7 @@ namespace AfterSchool.Controllers
 
                         if (isTrial)
                         {
-                            SessionVariables.CurrentAccount.SendlWelcomeEmailTrial();
+                            SessionVariables.CurrentAccount.SendWelcomeEmailTrial();
                         }
                         else
                         {

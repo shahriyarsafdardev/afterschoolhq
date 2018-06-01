@@ -239,13 +239,9 @@ namespace AfterSchoolLibrary
             {
                 string rtn = "";
                 if (this.RegistrantTypeId == RegistrantType.Individual)
-                {
                     rtn = BaseWebUser.BuildDisplayName(this.FirstName, this.LastName);
-                }
                 else if(this.RegistrantTypeId == RegistrantType.Organization)
-                {
                     rtn = this.Company.ToProperCase();
-                }
 
                 return rtn;
             }
@@ -253,7 +249,9 @@ namespace AfterSchoolLibrary
 
         public List<FormQuestionAnswer> GetAnswers(int activityId, DatabaseConnection dc = null)
         {
-            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(this.ID.Value, activityId, dc).OrderBy(x => x.FormQuestionDisplayOrder).ToList();
+            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(this.ID.Value, activityId, dc)
+                .OrderBy(x => x.FormQuestionDisplayOrder)
+                .ToList();
         }
 
         public FormQuestionAnswer GetAnswer(QuestionDataType questionDataType, DatabaseConnection dc = null)
@@ -362,15 +360,16 @@ namespace AfterSchoolLibrary
             var reg = Registrant.Load(id);
             var isAfterSchool = af.ToActivity().GetAccount().IsAfterSchool;
 
-            var body = string.Format("<p>{0},</p><p>Our records from PayPal show you have not paid the full amount of {1} required to register for {2}.</p><p>If you believe this is incorrect, please get in contact with {3} via email (<a href=\"mailto:{4}\">{4}</a>) to resolve the issue. Until this issue is resolved your registration will be placed on the waiting list.</p>", reg.DisplayName.IfBlank(reg.Company), af.ActivityCostPerRegistrant.ToCurrency(), af.ActivityName, af.ActivityContactName, af.ActivityContactEmail);
+            var body = $"<p>{reg.DisplayName.IfBlank(reg.Company)},</p><p>Our records from PayPal show you have not paid the full amount of {af.ActivityCostPerRegistrant.ToCurrency()} required to register for {af.ActivityName}.</p><p>If you believe this is incorrect, please get in contact with {af.ActivityContactName} via email (<a href=\"mailto:{af.ActivityContactEmail}\">{af.ActivityContactEmail}</a>) to resolve the issue. Until this issue is resolved your registration will be placed on the waiting list.</p>";
 
             SendGridHelper.SendMail(
                 fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                     AfterSchoolLibrary.Email.AppEmailAddress, 
-                    string.Format("{0} via {1}", af.ActivityContactName, Utilities.AppName(isAfterSchool))),
+                    $"{af.ActivityContactName} via {Utilities.AppName(isAfterSchool)}"
+                    ),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.Email, reg.DisplayName.IfBlank(reg.Company)),
-                subject: string.Format("Error processing your registration for {0}", af.Name),
-                body: string.Format("{0}{1}", body, AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification")),
+                subject: $"Error processing your registration for {af.Name}",
+                body: $"{body}{(AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification"))}",
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(
                     af.ActivityContactEmail, 
                     af.ActivityContactName),
@@ -386,16 +385,16 @@ namespace AfterSchoolLibrary
             var reg = Registrant.Load(id);
             var isAfterSchool = af.ToActivity().GetAccount().IsAfterSchool;
 
-            var body = string.Format("<p>Hey {0},</p><p>Our records from PayPal show your PayPal account or credit card has not been processed for the amount of {1} required to register for {2}.</p><p>If you believe this is incorrect, please get in contact with {3} via email (<a href=\"mailto:{4}\">{4}</a>) to resolve the issue. Until this issue is resolved your registration will be placed on the waiting list.</p>", reg.DisplayName.IfBlank(reg.Company), af.ActivityCostPerRegistrant.ToCurrency(), af.ActivityName, af.ActivityContactName, af.ActivityContactEmail);
+            var body = $"<p>Hey {reg.DisplayName.IfBlank(reg.Company)},</p><p>Our records from PayPal show your PayPal account or credit card has not been processed for the amount of {af.ActivityCostPerRegistrant.ToCurrency()} required to register for {af.ActivityName}.</p><p>If you believe this is incorrect, please get in contact with {af.ActivityContactName} via email (<a href=\"mailto:{af.ActivityContactEmail}\">{af.ActivityContactEmail}</a>) to resolve the issue. Until this issue is resolved your registration will be placed on the waiting list.</p>";
 
-            AfterSchoolLibrary.SendGridHelper.SendMail(
+            SendGridHelper.SendMail(
                 fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                     AfterSchoolLibrary.Email.AppEmailAddress, 
-                    string.Format("{0} via {1}", af.ActivityContactName, Utilities.AppName(isAfterSchool))
+                    $"{af.ActivityContactName} via {Utilities.AppName(isAfterSchool)}"
                 ),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.Email, reg.DisplayName.IfBlank(reg.Company)),
-                subject: string.Format("Error processing your registration for {0}", af.Name),
-                body: string.Format("{0}{1}", body, AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification")),
+                subject: $"Error processing your registration for {af.Name}",
+                body: $"{body}{(AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification"))}",
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(
                     af.ActivityContactEmail, 
                     af.ActivityContactName),
@@ -407,10 +406,7 @@ namespace AfterSchoolLibrary
 
         public Registration AddRegistration(int loggedInUserId, int? accountId, int? groupId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty())
-            {
-                msgs = new SystemMessages();
-            }
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var reg = new Registration();
             reg.AccountId = accountId;
@@ -444,6 +440,7 @@ namespace AfterSchoolLibrary
             var changingDays = false;
 
             var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, dc);
+
             if (ra.IsEmpty())
             {
                 ra = new RegistrantActivity();
@@ -459,9 +456,7 @@ namespace AfterSchoolLibrary
             else
             {
                 if (day != ra.Day)
-                {
                     changingDays = true;
-                }
             }
 
             ra.Day = day;
@@ -480,22 +475,16 @@ namespace AfterSchoolLibrary
 
                 var days = new List<DayOfWeekASL>();
                 if (day != DayOfWeekASL.NotSet)
-                {
                     days.Add(day);
-                }
 
                 if (seats > 0)
-                {
                     ra.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: RegistrationAssignmentType.Reserved, activityId: activityId, dc: dc) + 1;
-                }
+
                 if (waitingListSeats > 0)
-                {
                     ra.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: RegistrationAssignmentType.WaitingList, activityId: activityId, dc: dc) + 1;
-                }
+
                 if (applicationSeats > 0)
-                {
                     ra.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: RegistrationAssignmentType.Application, activityId: activityId, dc: dc) + 1;
-                }
             }
 
             msgs.AddRange(ra.Save(dc));
@@ -564,10 +553,9 @@ namespace AfterSchoolLibrary
         public SystemMessages AddInviteToActivities(List<int> activityIds, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            foreach (var activityId in activityIds)
-            {
-                msgs.AddRange(this.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, dc));
-            }
+            activityIds.ForEach(activityId => 
+                msgs.AddRange(this.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, dc))
+            );
             return msgs;
         }
 
@@ -700,7 +688,9 @@ namespace AfterSchoolLibrary
             copy.ResetID();
             msgs.AddRange(copy.Save(dc));
 
-            questions.ForEach(question => copy.AddAnswer(question.GetAnswer(this.ID.Value, dc).Text, question.QuestionDataTypeId, loggedInUserId, msgs, dc));
+            questions.ForEach(question => 
+                copy.AddAnswer(question.GetAnswer(this.ID.Value, dc).Text, question.QuestionDataTypeId, loggedInUserId, msgs, dc)
+            );
 
             return copy;
         }
@@ -776,6 +766,7 @@ namespace AfterSchoolLibrary
             dq.OrderBys.Add(ObjectMap["Id"], OrderByDirectionEnum.Ascending);
 
             var firstRegistrant = dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+
             if (firstRegistrant.IsNotEmpty())
             {
                 this.FirstRegistrantId = firstRegistrant.ID;
@@ -826,9 +817,8 @@ namespace AfterSchoolLibrary
                 registrants.AddRange(Registrant.LoadByFirstRegistrantId(this.FirstRegistrantId.Value, dc));
             }
             else
-            {
                 registrants.AddRange(Registrant.LoadByFirstRegistrantId(this.ID.Value, dc));
-            }
+
             return registrants.Where(x => x.ID != this.ID).OrderByDescending(x => x.CreateDate).ToList();
         }
 
