@@ -244,7 +244,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return this.GetAccount().HomePageUrl + "?group=" + this.Uid.ToString();
+                return $"{this.GetAccount().HomePageUrl}?group={this.Uid.ToString()}";
             }
         }
 
@@ -318,7 +318,10 @@ namespace AfterSchoolLibrary
 
         public static string GenerateUniqueName(int accountId, string name, DatabaseConnection dc = null)
         {
-            var reg = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+            var reg = new System.Text.RegularExpressions.Regex(
+                BasicLibrary.Utilities.UrlFriendlyRegEx, 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline
+                );
 
             string origUniqueName = reg.Replace(name, "").MaxChars(25);
             string uniqueName = origUniqueName;
@@ -337,9 +340,8 @@ namespace AfterSchoolLibrary
         public List<RegistrationPeriod> GetRegistrationPeriods(DatabaseConnection dc = null)
         {
             if (_RegistrationPeriods.IsEmpty())
-            {
                 _RegistrationPeriods = RegistrationPeriod.LoadByActivityGroupId(this.ID.Value, dc);
-            }
+
             return _RegistrationPeriods;
         }
 
@@ -361,9 +363,8 @@ namespace AfterSchoolLibrary
         public List<Activity> GetActivities(bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, DatabaseConnection dc = null)
         {
             if (_Activities.IsEmpty() || forceReload)
-            {
                 _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, IsArchived, isDeleted, start, length, dc);
-            }
+
             return _Activities;
         }
 
@@ -371,9 +372,8 @@ namespace AfterSchoolLibrary
         public Form GetForm(DatabaseConnection dc = null)
         {
             if (_Form.IsEmpty())
-            {
                 _Form = Form.Load(this.FormId.Value, dc);
-            }
+
             return _Form;
         }
 
@@ -381,20 +381,18 @@ namespace AfterSchoolLibrary
         public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, DatabaseConnection dc = null)
         {
             if (registrations.IsEmpty())
-            {
                 registrations = Registration.LoadByActivityGroupId(this.ID.Value, dc);
-            }
+
             if (_RegistrantActivities.IsEmpty())
             {
                 if (registrations.Any())
-                {
-                    _RegistrantActivities = RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc).Where(x => x.ActivityIsDeleted == false).ToList();
-                }
+                    _RegistrantActivities = RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc)
+                        .Where(x => !x.ActivityIsDeleted)
+                        .ToList();
                 else
-                {
                     _RegistrantActivities = new List<RegistrantActivity>();
-                }
             }
+
             return _RegistrantActivities;
         }
 
@@ -437,11 +435,9 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
-                    var ras = this.GetRegistrantActivities(dc: adc);
-                    foreach (var ra in ras)
-                    {
-                        amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Application, adc));
-                    }
+                    this.GetRegistrantActivities(dc: adc).ForEach(
+                        ra => amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Application, adc))
+                    );
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -460,9 +456,8 @@ namespace AfterSchoolLibrary
         public int GetActivityCount(bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-            {
                 return Activity.GetCountByAccountId(this.AccountId.Value, this.ID, isArchived, isDeleted, dc);
-            }
+
             return 0;
         }
 
@@ -470,9 +465,8 @@ namespace AfterSchoolLibrary
         public Account GetAccount(DatabaseConnection dc = null)
         {
             if (_Account.IsEmpty())
-            {
                 _Account = Account.Load(this.AccountId.Value, dc);
-            }
+
             return _Account;
         }
 
@@ -480,28 +474,37 @@ namespace AfterSchoolLibrary
         {
             var period = this.GetCurrentRegistrationPeriod(dc);
             if (period.IsEmpty())
-            {
                 return GetNextRegistrationPeriod(dc);
-            }
+
             return period;
         }
 
         public RegistrationPeriod GetNextRegistrationPeriod(DatabaseConnection dc = null)
         {
             var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return this.GetRegistrationPeriods(dc).Where(x => now < x.StartDateTime.Value).OrderBy(x => x.StartDateTime.Value).FirstOrDefault();
+
+            return this.GetRegistrationPeriods(dc)
+                .Where(x => now < x.StartDateTime.Value)
+                .OrderBy(x => x.StartDateTime.Value)
+                .FirstOrDefault();
         }
 
         public RegistrationPeriod GetCurrentRegistrationPeriod(DatabaseConnection dc = null)
         {
             var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return this.GetRegistrationPeriods(dc).Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value).FirstOrDefault();
+
+            return this.GetRegistrationPeriods(dc)
+                .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
+                .FirstOrDefault();
         }
 
         public bool IsOpenNow(DatabaseConnection dc = null)
         {
             var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return this.GetRegistrationPeriods(dc).Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value).Count() > 0;
+
+            return this.GetRegistrationPeriods(dc)
+                .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
+                .Any();
         }
 
         public bool IsClosedNow(DatabaseConnection dc = null)
@@ -515,7 +518,7 @@ namespace AfterSchoolLibrary
             {
                 var periods = this.GetRegistrationPeriods(dc);
                 var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-                return periods.Where(x => now < x.StartDateTime.Value).Count() > 0;
+                return periods.Where(x => now < x.StartDateTime.Value).Any();
             }
             return false;
         }
@@ -526,13 +529,13 @@ namespace AfterSchoolLibrary
             {
                 var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
                 var periods = this.GetRegistrationPeriods(dc);
-                var period = periods.Where(x => x.StartDateTime.Value >= now && now <= x.EndDateTime.Value).OrderBy(x => x.StartDateTime.Value).FirstOrDefault();
+                var period = periods.Where(x => x.StartDateTime.Value >= now && now <= x.EndDateTime.Value)
+                    .OrderBy(x => x.StartDateTime.Value)
+                    .FirstOrDefault();
                 return period.StartDateTime.Value - now;
             }
-            else
-            {
-                return new TimeSpan();
-            }
+
+            return new TimeSpan();
         }
 
         public RegistrantActivityGroup InviteContact(Registrant contact, int? periodId, int invitationSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
@@ -564,10 +567,8 @@ namespace AfterSchoolLibrary
                 var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
                 return this.GetCurrentRegistrationPeriod(dc).EndDateTime.Value - now;
             }
-            else
-            {
-                return new TimeSpan();
-            }
+
+            return new TimeSpan();
         }
 
         public static ActivityGroup SaveActivityGroup(int loggedInUserId, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs)
@@ -699,9 +700,8 @@ namespace AfterSchoolLibrary
         public List<AccountProperty> GetGroupProperties(DatabaseConnection dc = null)
         {
             if (_Properties.IsEmpty())
-            {
                 _Properties = AccountProperty.LoadByActivityGroupId(this.ID.Value, dc);
-            }
+
             return _Properties;
         }
 
@@ -709,9 +709,8 @@ namespace AfterSchoolLibrary
         public List<ActivityMessage> GetMessages(DatabaseConnection dc = null)
         {
             if (_ActivityMessages.IsEmpty())
-            {
                 _ActivityMessages = ActivityMessage.LoadByActivityGroupId(this.ID.Value, dc);
-            }
+
             return _ActivityMessages;
         }
 
@@ -735,15 +734,14 @@ namespace AfterSchoolLibrary
 
                     if (msgs.HasNoErrors())
                     {
-                        foreach (var registrantId in registrantIds)
-                        {
+                        registrantIds.ForEach(registrantId => {
                             var amr = new ActivityMessageRegistrant();
                             amr.RegistrantId = registrantId;
                             amr.ActivityMessageId = am.ID;
                             amr.CreateDate = DateTime.UtcNow;
                             amr.CreatedBy = loggedInUserId;
                             msgs.AddRange(amr.Save(dc));
-                        }
+                        });
                     }
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -791,15 +789,11 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            // add contacts
-            foreach (var contact in contacts)
-            {
-                var rag = this.InviteContact(contact, period?.ID, 1, loggedInUserId, msgs, dc);
+            contacts.ForEach(contact => {
+                this.InviteContact(contact, period?.ID, 1, loggedInUserId, msgs, dc);
                 if (activityIds.Any())
-                {
                     msgs.AddRange(contact.AddInviteToActivities(activityIds, loggedInUserId, this.ID, period?.ID, dc));
-                }
-            }
+            });
 
             return msgs;
         }
@@ -824,13 +818,9 @@ namespace AfterSchoolLibrary
                 if (period.IsNotEmpty())
                 {
                     if (period.IsOpen(dc))
-                    {
                         regOpenText = "Registration is open now.";
-                    }
                     else if (group.WillOpen(dc))
-                    {
                         regOpenText = "Registration will open " + period.StartDateTime.ToShortDateString() + ".";
-                    }
                 }
 
                 var acceptInviteText = "To accept this invite and register, please click the following link: <a href=\"{0}\">{0}</a>";
@@ -840,8 +830,7 @@ namespace AfterSchoolLibrary
 
                 body = "{0}{1}<p>{2} {3}</p>{4}{5}{6}";
 
-                foreach (var contact in contacts)
-                {
+                contacts.ForEach(contact => {
                     var finalInviteUrl = inviteUrl;
                     var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(group.ID.Value, contact.ID.Value, dc);
 
@@ -857,8 +846,8 @@ namespace AfterSchoolLibrary
 
                     SendGridHelper.SendMail(
                         fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                            Email.AppEmailAddress, 
-                            string.Format("{0} via {1}", account.Name, 
+                            Email.AppEmailAddress,
+                            string.Format("{0} via {1}", account.Name,
                             Utilities.AppName(account.IsAfterSchool))),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(contact.Email, contact.Name),
                         subject: subject,
@@ -874,7 +863,7 @@ namespace AfterSchoolLibrary
                         replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                     );
-                }
+                });
             }
 
             return msgs;
@@ -933,9 +922,7 @@ namespace AfterSchoolLibrary
                     msgs.AddRange(group.Save(adc));
 
                     // copy AccountProperties / Content
-                    var properties = this.GetGroupProperties(adc);
-                    foreach(var item in properties)
-                    {
+                    this.GetGroupProperties(adc).ForEach(item => {
                         var newprop = new AccountProperty();
                         newprop.AccountPropertyTypeId = item.AccountPropertyTypeId;
                         newprop.ActivityGroupId = group.ID;
@@ -943,18 +930,16 @@ namespace AfterSchoolLibrary
                         newprop.CreatedBy = newprop.LastModifiedBy = loggedInUserId;
                         newprop.Value = item.Value;
                         msgs.AddRange(newprop.Save(adc));
-                    }
+                    });
 
                     // activities
-                    var activities = this.GetActivities(adc);
-                    foreach(var activity in activities)
-                    {
+                    this.GetActivities(adc).ForEach(activity => {
                         var newact = activity.Copy(activity.Name, true, loggedInUserId, amsgs, adc);
                         newact.ActivityGroupId = group.ID;
                         newact.ActivityScheduleId = null;
                         newact.IsPublished = true;
                         msgs.AddRange(newact.Save(adc));
-                    }
+                    });
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
