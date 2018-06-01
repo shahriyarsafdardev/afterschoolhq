@@ -175,9 +175,7 @@ namespace AfterSchoolLibrary
 
             var clr = ContactListRegistrant.LoadByContactListIdByRegistrantId(this.ID.Value, registrantId, dc);
             if (clr.IsNotEmpty())
-            {
                 msgs.AddRange(clr.Delete(dc));
-            }
 
             return msgs;
         }

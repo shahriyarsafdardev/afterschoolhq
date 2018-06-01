@@ -416,17 +416,12 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                string rtn = "";
                 if (this.RegistrantRegistrantTypeId == RegistrantType.Individual)
-                {
-                    rtn = BaseWebUser.BuildDisplayName(this.RegistrantFirstName, this.RegistrantLastName);
-                }
+                    return BaseWebUser.BuildDisplayName(this.RegistrantFirstName, this.RegistrantLastName);
                 else if (this.RegistrantRegistrantTypeId == RegistrantType.Organization)
-                {
-                    rtn = this.RegistrantCompany.ToProperCase();
-                }
+                    return this.RegistrantCompany.ToProperCase();
 
-                return rtn;
+                return "";
             }
         }
 
@@ -437,19 +432,13 @@ namespace AfterSchoolLibrary
                 var value = 0;
 
                 if (NumberOfSeats.HasValue)
-                {
                     value += NumberOfSeats.Value;
-                }
 
                 if (NumberOfWaitingListSeats.HasValue)
-                {
                     value += NumberOfWaitingListSeats.Value;
-                }
 
                 if (NumberOfApplicationSeats.HasValue)
-                {
                     value += NumberOfApplicationSeats.Value;
-                }
 
                 return value;
             }
@@ -473,11 +462,8 @@ namespace AfterSchoolLibrary
         public Activity ToActivity(bool loadFromDb = false, DatabaseConnection dc = null)
         {
             if (loadFromDb)
-            {
                 return Activity.Load(this.ActivityId.Value, dc);
-            }
             else
-            {
                 return new Activity()
                 {
                     ID = this.ActivityId,
@@ -490,7 +476,6 @@ namespace AfterSchoolLibrary
                     CostPerRegistrant = this.ActivityCostPerRegistrant,
                     IsDeleted = this.ActivityIsDeleted
                 };
-            }
         }
 
         public static List<RegistrantActivity> LoadByActivityId(int ActivityId, int? start = null, int? length = null, DatabaseConnection dc = null)
@@ -516,9 +501,8 @@ namespace AfterSchoolLibrary
         public Registration GetRegistration(DatabaseConnection dc = null)
         {
             if (_Registration.IsEmpty() && this.RegistrationId.HasValue)
-            {
                 _Registration = Registration.Load(this.RegistrationId.Value, dc);
-            }
+
             return _Registration;
         }
 
@@ -539,7 +523,7 @@ namespace AfterSchoolLibrary
 
         public static int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, int? accountId = null, int? activityGroupId = null, int? activityId = null, int? registrationPeriodId = null, DatabaseConnection dc = null)
         {
-            DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.SelectParameters.Clear();
@@ -563,31 +547,24 @@ namespace AfterSchoolLibrary
 
             sp.Function = "ISNULL(SUM(" + DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
+
             if (activityId.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["activityId"], activityId.Value);
-            }
+
             if (accountId.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId.Value);
-            }
+
             if (activityGroupId.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["ActivityGroupId"], activityGroupId.Value);
-            }
+
             if (registrationPeriodId.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], registrationPeriodId.Value);
-            }
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return dq.Select().Rows[0][0].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetSeatCountByActivityId(int activityId, DatabaseConnection dc = null)
@@ -610,15 +587,12 @@ namespace AfterSchoolLibrary
             dq.SelectParameters.Add(sp3);
 
             dq.Criterias.Add(ObjectMap["activityId"], activityId);
+
             var results = dq.Select();
             if(results.Rows.Any())
-            {
                 return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger() + results.Rows[0][2].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetSeatCountByAccountId(int accountId, DatabaseConnection dc = null)
@@ -641,15 +615,12 @@ namespace AfterSchoolLibrary
             dq.SelectParameters.Add(sp3);
 
             dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetSeatCountByRegistrationPeriodId(int RegistrationPeriodId, DatabaseConnection dc = null)
@@ -672,15 +643,12 @@ namespace AfterSchoolLibrary
             dq.SelectParameters.Add(sp3);
 
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetSeatCountByActivityGroupId(int ActivityGroupId, DatabaseConnection dc = null)
@@ -703,15 +671,12 @@ namespace AfterSchoolLibrary
             dq.SelectParameters.Add(sp3);
 
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static List<RegistrantActivity> LoadByRegistrationIds(List<int> RegistrationIds, DatabaseConnection dc = null)
@@ -754,10 +719,10 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var ra = this.GetRegistrationActivity(dc);
+
             if (ra.IsNotEmpty())
-            {
                 msgs.AddRange(ra.Delete(dc));
-            }
+
             return msgs;
         }
 
@@ -793,9 +758,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             if(this.RegistrationAssignmentTypeId == to)
-            {
                 return msgs;
-            }
 
             //if you move it before the change is made it will adjust everyone correctly. Has to be done before the change is saved.
             //need a better function that can allow setting which seat index parameter needs to be handled
@@ -1059,21 +1022,9 @@ namespace AfterSchoolLibrary
             if (account.Email.IsSameAs(activity.ContactEmail))
                 return new SystemMessages();
 
-            var details = string.Format(
-                "<p><strong>{0}</strong> has registered for <strong>{1}</strong> at <strong>{2}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{3}</strong> reserved</li><li><strong>{4}</strong> on the waiting list</li><li><strong>{5}</strong> applications</li></ul></p>", 
-                this.RegistrantName, 
-                activity.Name,
-                account.Name, 
-                activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc), 
-                activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc),
-                activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Application, dc));
+            var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{activity.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc)}</strong> reserved</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc)}</strong> on the waiting list</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Application, dc)}</strong> applications</li></ul></p>";
 
-            var message = string.Format(
-                "<p>Hello {0},</p>{1}<p>{2}</p>", 
-                activity.ContactName, 
-                details, 
-                Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification")
-                );
+            var message = $"<p>Hello {activity.ContactName},</p>{details}<p>{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
 
             return SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
@@ -1081,7 +1032,7 @@ namespace AfterSchoolLibrary
                                     Utilities.AppName(account.IsAfterSchool)
                                ),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
-                    subject: string.Format("You have a new registration for {0}", activity.Name),
+                    subject: $"You have a new registration for {activity.Name}",
                     body: message,
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
