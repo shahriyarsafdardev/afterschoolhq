@@ -164,9 +164,8 @@ namespace AfterSchoolLibrary
         public DateRange GetDateRange()
         {
             if (StartDateTime.HasValue && this.EndDateTime.HasValue)
-            {
                 return new DateRange(this.StartDateTime.Value, this.EndDateTime.Value);
-            }
+
             return null;
         }
 

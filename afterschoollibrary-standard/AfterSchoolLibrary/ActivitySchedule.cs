@@ -189,9 +189,10 @@ namespace AfterSchoolLibrary
         public List<ActivityInstance> GetInstances(bool forceReload = false, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue && (_instances.IsEmpty() || forceReload))
-            {
-                _instances = ActivityInstance.LoadByActivityScheduleId(this.ID.Value, dc).OrderBy(x => x.StartDateTime).ToList();
-            }
+                _instances = ActivityInstance.LoadByActivityScheduleId(this.ID.Value, dc)
+                    .OrderBy(x => x.StartDateTime)
+                    .ToList();
+
             return _instances;
         }
         
@@ -223,7 +224,7 @@ namespace AfterSchoolLibrary
             while (period.IsNotEmpty())
             {
                 counter++;
-                rtnName = name + " " + counter.ToString();
+                rtnName = $"{name} {counter.ToString()}";
                 period = ActivitySchedule.LoadByAccountIdByName(accountId, rtnName, dc);
             }
 
@@ -272,8 +273,8 @@ namespace AfterSchoolLibrary
             ActivitySchedule rtn = null;
 
             Database.ExecuteTransaction(
-               action: (SystemMessages actionMsgs, DatabaseConnection adc) => {
-
+               action: (SystemMessages actionMsgs, DatabaseConnection adc) => 
+               {
                    var schedule = new ActivitySchedule();
                    schedule.Name = scheduleName;
                    schedule.ScheduleDetails = details.IfBlank("").MaxChars(4000);
@@ -292,8 +293,12 @@ namespace AfterSchoolLibrary
 
                    rtn = schedule;
                },
-               onSuccess: (SystemMessages successMsgs) => { },
-               onFailure: (SystemMessages failureMsgs) => {
+               onSuccess: (SystemMessages successMsgs) => 
+               {
+                   msgs.AddRange(successMsgs);
+               },
+               onFailure: (SystemMessages failureMsgs) => 
+               {
                    msgs.AddRange(failureMsgs);
                },
                dc: dc
@@ -312,14 +317,13 @@ namespace AfterSchoolLibrary
             schedule.RepeatsWeekly = true;
 
             if (scheduleDates.IsNotEmpty())
-            {
-                schedule.AddInstances(scheduleDates.Select(x =>
+                schedule.AddInstances(
+                    scheduleDates.Select(x =>
                         new ActivityInstance()
                         {
                             StartDateTime = x.Split('-')[0].ToDateTime(),
                             EndDateTime = x.Split('-')[1].ToDateTime()
                         }).ToList());
-            }
 
             return schedule;
         }
@@ -379,14 +383,19 @@ namespace AfterSchoolLibrary
 
             // delete instances
             existingInstances
-                .Where(x => scheduleList
-                .Where(y => y[0].ToDateTime() == x.StartDateTime.Value && y[1].ToDateTime() == x.EndDateTime.Value).Count() == 0)
+                .Where(x => !scheduleList
+                    .Where(y => y[0].ToDateTime() == x.StartDateTime.Value && y[1].ToDateTime() == x.EndDateTime.Value)
+                    .Any()
+                 )
                 .ToList()
                 .ForEach(instance => msgs.AddRange(instance.Delete(dc)));
 
             // add new instances
             scheduleList
-                .Where(x => !existingInstances.Where(y => y.StartDateTime.Value == x[0].ToDateTime() && y.EndDateTime.Value == x[1].ToDateTime()).Any())
+                .Where(x => 
+                    !existingInstances
+                        .Where(y => y.StartDateTime.Value == x[0].ToDateTime() && y.EndDateTime.Value == x[1].ToDateTime())
+                        .Any())
                 .ToList()
                 .ForEach(item => this.AddInstance(item[0].ToDateTime(), item[1].ToDateTime(), loggedInUserId, msgs, dc));            
 
@@ -403,18 +412,11 @@ namespace AfterSchoolLibrary
 
             // check for dates where end time is less than start time
             if (updatedInstances.Where(x => !x.GetDateRange().IsValid()).Any())
-            {
                 msgs.Add("You have dates where the end time is earlier than or equal to the start time", MessageType.UserError);
-            }
-
-            if (msgs.HasNoErrors())
-            {
-                // check for overlapping times 
-                if (DateRange.HasOverlappingDates(updatedInstances.Select(x => x.GetDateRange())))
-                {
-                    msgs.Add("You have dates that overlap", MessageType.UserError);
-                }                
-            }
+            
+            // check for overlapping times 
+            if (msgs.HasNoErrors() && DateRange.HasOverlappingDates(updatedInstances.Select(x => x.GetDateRange())))
+                msgs.Add("You have dates that overlap", MessageType.UserError);
 
             return msgs;
         }
@@ -422,9 +424,8 @@ namespace AfterSchoolLibrary
         public List<DayOfWeekASL> GetDaysOfTheWeek(DatabaseConnection dc = null)
         {
             if (this.GetInstances(false, dc).IsNotEmpty())
-            {
                 return this.GetInstances(false, dc).Select(x => x.Day).Distinct().ToList();
-            }
+
             return new List<DayOfWeekASL>();
         }
 
