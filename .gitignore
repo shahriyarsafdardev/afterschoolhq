@@ -1,20 +1,17 @@
 # Compiled source #
 ###################
 *.suo
-RebornProjects.sln
 obj
 debug
 release
 Backup
-_UpgradeReport_Files
 Uploads
-XamerinStripe
-Dwolla.dll
-RestSharp.dll
 *.orig
-BasicLibrary.*
-AfterSchoolLibrary.*
-AfterSchool.*
+*.dll
+*.dll.config
+# BasicLibrary.*
+# AfterSchoolLibrary.*
+# AfterSchool.*
 .vs
 
 # Packages #
