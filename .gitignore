@@ -3,6 +3,7 @@
 *.suo
 obj
 debug
+bin
 release
 Backup
 Uploads
