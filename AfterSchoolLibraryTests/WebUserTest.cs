@@ -259,7 +259,7 @@ namespace AfterSchoolLibraryTests
 
             var testAccount = new Account() { };
             testAccount.Save(dc);
-            testAccount.AddUser(currentUser, ut , id , msgs, dc);
+            msgs.AddRange(testAccount.AddUser(currentUser, ut, id, dc));
             var test = currentUser.GetUserType(testAccount, dc);
 
             Assert.Equal(UserType.Administrator, test);
@@ -315,7 +315,7 @@ namespace AfterSchoolLibraryTests
 
             var testAccount = new Account() { };
             testAccount.Save(dc);
-            testAccount.AddUser(currentUser, UserType.Parent, id, msgs, dc);
+            msgs.AddRange(testAccount.AddUser(currentUser, UserType.Parent, id, dc));
 
             Assert.False(currentUser.HasAccessToFeature(FeatureType.ManageForms,testAccount,dc));
         }
@@ -329,7 +329,7 @@ namespace AfterSchoolLibraryTests
 
             var testAccount = new Account() { };
             testAccount.Save(dc);
-            testAccount.AddUser(currentUser, UserType.SuperAdmin, id, msgs, dc);
+            msgs.AddRange(testAccount.AddUser(currentUser, UserType.SuperAdmin, id, dc));
 
             Assert.True(currentUser.HasAccessToFeature(FeatureType.ViewInsights, testAccount, dc));
         }
