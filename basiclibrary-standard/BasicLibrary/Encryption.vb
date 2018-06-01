@@ -3,8 +3,45 @@ Imports System.Security
 Imports System.Security.Cryptography
 Imports System.Data.SqlClient
 
+''' <summary>
+''' Enum of all the Keys
+''' </summary>
+''' <remarks></remarks>
+Public Enum AESKey
+    BasicLibrary = 0
+    SpecialOffspring = 1
+    IntegratorGuide = 2
+    MinistryAvenue = 3
+End Enum
 
 Public Class Encryption
+
+    ''' <summary>
+    '''  The Key used by iCensus
+    ''' </summary>
+    ''' <remarks></remarks>
+    Private Shared BasicLibraryAESKey() As Byte = System.Text.Encoding.UTF8.GetBytes("932eid*rieu&af3%3g%ed(p.{'Jew&1h")
+    Private Shared SpecialOffspringAESKey() As Byte = System.Text.Encoding.UTF8.GetBytes("93keid*rieu&hfy%3D%eo(p.{'Jeh&1h")
+    Private Shared IntegratorGuideAESKey() As Byte = System.Text.Encoding.UTF8.GetBytes("i39ejdue93*73jE7&en3*3w)sbe#ne!k")
+    Private Shared MinistryAvenueAESKey() As Byte = System.Text.Encoding.UTF8.GetBytes("3ide0ke3#&emdA*3md!mdl;snd&hdns@")
+
+    ''' <summary>
+    ''' Encrypts the input string with 256 bit AES encryption
+    ''' </summary>
+    ''' <param name="strInput">The string to be encrypted</param>
+    ''' <param name="eAESKey">The key to use</param>
+    ''' <param name="IV">The IV to use</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function Encrypt(ByVal strInput As String, ByVal eAESKey As AESKey, ByVal IV() As Byte) As Byte()
+
+        Return Encrypt(System.Text.Encoding.UTF8.GetBytes(strInput), eAESKey, IV)
+
+    End Function
+
+    Public Shared Function Encrypt(ByVal Input() As Byte, ByVal eAESKey As AESKey, ByVal IV() As Byte) As Byte()
+        Return Encrypt(Input, GetAESKey(eAESKey), IV)
+    End Function
 
     Public Shared Function Encrypt(ByVal strInput As String, ByVal AESKey() As Byte, ByVal IV() As Byte) As Byte()
         Return Encrypt(System.Text.Encoding.UTF8.GetBytes(strInput), AESKey, IV)
@@ -87,10 +124,51 @@ Public Class Encryption
         Return (objRij.IV)
     End Function
 
+    ''' <summary>
+    ''' retrieves the correct key for the enum 
+    ''' </summary>
+    ''' <param name="eAESKey"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Private Shared Function GetAESKey(ByVal eAESKey As AESKey) As Byte()
+
+        Select Case eAESKey
+            Case AESKey.BasicLibrary
+                Return BasicLibraryAESKey
+            Case AESKey.SpecialOffspring
+                Return SpecialOffspringAESKey
+            Case AESKey.IntegratorGuide
+                Return IntegratorGuideAESKey
+            Case AESKey.MinistryAvenue
+                Return MinistryAvenueAESKey
+            Case Else
+                Throw New ApplicationException("No key available for " & eAESKey.ToString)
+
+        End Select
+
+    End Function
+
+    ''' <summary>
+    ''' Decrypts the Cipher byte() 
+    ''' </summary>
+    ''' <param name="Cipher">The byte() to be decrypted</param>
+    ''' <param name="eAESKey">The key to use</param>
+    ''' <param name="IV">The IV to use</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function DecryptToString(ByVal Cipher() As Byte, ByVal eAESKey As AESKey, ByVal IV() As Byte) As String
+
+        Return System.Text.Encoding.UTF8.GetString(DecryptToByteArray(Cipher, GetAESKey(eAESKey), IV))
+
+    End Function
     Public Shared Function DecryptToString(ByVal Cipher() As Byte, ByVal AESKey() As Byte, ByVal IV() As Byte) As String
 
         Return System.Text.Encoding.UTF8.GetString(DecryptToByteArray(Cipher, AESKey, IV))
 
+    End Function
+
+    Public Shared Function DecryptToByteArray(ByVal Cipher() As Byte, ByVal eAESKey As AESKey, ByVal IV() As Byte) As Byte()
+        Return DecryptToByteArray(Cipher, GetAESKey(eAESKey), IV)
     End Function
 
     ''' <summary>
