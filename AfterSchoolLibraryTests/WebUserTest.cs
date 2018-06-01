@@ -478,6 +478,8 @@ namespace AfterSchoolLibraryTests
 
             var currentUser = new WebUser() { };
             currentUser.Save(dc);
+            var a = new Activity();
+            currentUser.HasAccessToActivity(a, dc);
 
 
             Assert.NotNull(currentUser.SendVerificationEmail(true));
