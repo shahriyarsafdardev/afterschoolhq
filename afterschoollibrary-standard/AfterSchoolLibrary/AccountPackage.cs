@@ -234,6 +234,25 @@ namespace AfterSchoolLibrary
         {
             return this.GetFeatures(dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
         }
+        
+        public SystemMessages AddPackageFeature(PackageFeature pf, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var apf = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(this.ID.Value, pf.FeatureTypeId, dc);
+            if (apf.IsEmpty())
+            {
+                apf = new AccountPackageFeature();
+                apf.AccountPackageId = this.ID;
+                apf.FeatureTypeId = pf.FeatureTypeId;
+                apf.Max = pf.Max;
+                apf.CreateDate = DateTime.UtcNow;
+                apf.CreatedBy = loggedInUserId;
+                apf.LastModifiedDate = DateTime.UtcNow;
+                apf.LastModifiedBy = loggedInUserId;
+                msgs.AddRange(apf.Save(dc));
+            }
+            return msgs;
+        }
 
         public Package ToPackage()
         {
@@ -371,13 +390,9 @@ namespace AfterSchoolLibrary
             get
             {
                 if (IsDuringTrial)
-                {
                     return (TrialEndDate.Value - DateTime.UtcNow).Days + 1;
-                }
-                else
-                {
-                    return 0;
-                }
+
+                return 0;
             }
         }
 

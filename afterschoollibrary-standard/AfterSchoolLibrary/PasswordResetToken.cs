@@ -188,38 +188,60 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static PasswordResetToken AddOrUpdateToken(WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            PasswordResetToken token = null;
+
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            if (!PasswordResetToken.ExistsAndIsValidByWebUserId(user.ID.Value, dc))
+            {
+                token = new PasswordResetToken
+                {
+                    ExpireDate = DateTime.UtcNow.AddDays(3),
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = user.ID,
+                    WebUserId = user.ID
+                };
+            }
+            else
+            {
+                token = PasswordResetToken.LoadValidByWebUserId(user.ID.Value, dc);
+                token.ExpireDate = DateTime.UtcNow.AddDays(3);
+            }
+
+            token.LastModifiedDate = DateTime.UtcNow;
+            token.LastModifiedBy = user.ID.Value;
+            msgs.AddRange(token.Save(dc));
+
+            return token;
+        }
+
         public static SystemMessages UseToken(Guid uid, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var doCommit = false;
 
-            if (dc.IsEmpty())
-            {
-                dc = Database.StartTransaction();
-                doCommit = true;
-            }
-
-            try
-            {
-                var token = PasswordResetToken.LoadValidByUid(uid, dc);
-                token.Used = true;
-                token.LastModifiedBy = token.WebUserId;
-                token.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(token.Save(dc));
-
-                msgs.AddRange(token.GetWebUser(dc).MarkAsVerified(dc));
-            }
-            catch (Exception ex)
-            {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-            }
-            finally
-            {
-                if (doCommit)
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    Database.EndTransaction(dc, msgs);
-                }
-            }
+                    var token = PasswordResetToken.LoadValidByUid(uid, adc);
+                    token.Used = true;
+                    token.LastModifiedBy = token.WebUserId;
+                    token.LastModifiedDate = DateTime.UtcNow;
+                    amsgs.AddRange(token.Save(adc));
+
+                    amsgs.AddRange(token.GetWebUser(adc).MarkAsVerified(adc));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                dc: dc
+            );
 
             return msgs;
         }
@@ -231,14 +253,7 @@ namespace AfterSchoolLibrary
 
         public WebUser GetWebUser(DatabaseConnection dc = null)
         {
-            if (WebUserId.HasValue)
-            {
-                return WebUser.Load(WebUserId.Value, dc);
-            }
-            else
-            {
-                return null;
-            }
+            return WebUserId.HasValue ? WebUser.Load(WebUserId.Value, dc) : null;
         }
 
         #endregion

@@ -263,13 +263,11 @@ namespace AfterSchoolLibrary
 
         public static string EncryptPassword(string password)
         {
-            //System.Text.UTF8Encoding.UTF8.GetString()
             return Convert.ToBase64String(Encryption.Encrypt(password, Utilities.AppAESKey, Utilities.AppIV));
         }
 
         public static string DecryptPassword(string password)
         {
-            //System.Text.UTF8Encoding.UTF8.GetBytes(password)
             return Encryption.DecryptToString(Convert.FromBase64String(password), Utilities.AppAESKey, Utilities.AppIV);
         }
         public SystemMessages SendInvite(string email, string message, WebUser loggedInUser, Account account, DatabaseConnection dc = null)
@@ -279,18 +277,12 @@ namespace AfterSchoolLibrary
             var body = "";
 
             if (!message.IsEmpty())
-            {
                 body += "<p>" + message + "</p><p>-------------------------------</p>";
-            }
 
             if (!this.IsActive)
-            {
-                body += string.Format("<p>Click on the following link to create your account and start using " + Utilities.AppName(account.IsAfterSchool) + ": <a href=\"{0}\">{0}</a></p>", this.GetInviteUrl(account));
-            }
+                body += $"<p>Click on the following link to create your account and start using {Utilities.AppName(account.IsAfterSchool)}: <a href=\"{this.GetInviteUrl(account)}\">{this.GetInviteUrl(account)}</a></p>";
             else
-            {
-                body += "<p>Click the following login link to access \"" + account.Name + "\": <a href=\"" + AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool) + "login?group=" + account.ID.Value.ToString() + "\">" + AfterSchoolLibrary.Email.HostName(account.IsAfterSchool) + "/login</a></p>";
-            }
+                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{AfterSchoolLibrary.Email.HostName(account.IsAfterSchool)}/login</a></p>";
 
             body += "<p>Thank you!!</p>";
             body += AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
@@ -318,9 +310,7 @@ namespace AfterSchoolLibrary
             {
                 var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, this.ID.Value, dc);
                 if (!awu.IsEmpty())
-                {
                     return awu.UserTypeId;
-                }
             }
             return UserType.NotSet;
         }
@@ -340,18 +330,13 @@ namespace AfterSchoolLibrary
         }
         public bool HasAccessToFeature(FeatureType ft, Account g, DatabaseConnection dc = null)
         {
-            bool hasAccess = false;
-
             if (!g.IsEmpty())
             {
                 var awu = AccountWebUser.LoadByAccountIdByWebUserId(g.ID.Value, this.ID.Value, dc);
                 if (awu.IsEmpty() == false && awu.UserTypeId != UserType.NotSet)
-                {
-                    hasAccess = awu.HasAccessToFeature(ft);
-                }
+                    return awu.HasAccessToFeature(ft);
             }
-
-            return hasAccess;
+            return false;
         }
         public bool HasAccessTo(Account a, DatabaseConnection dc = null)
         {
@@ -369,29 +354,25 @@ namespace AfterSchoolLibrary
         }
         public ActivityWebUser GetActivityWebUser(Activity a, DatabaseConnection dc = null)
         {
-            if (a.ID.HasValue)
-            {
-                return ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, this.ID.Value, dc);
-            }
-            else
-            {
-                return null;
-            }
+            return a.ID.HasValue ? ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, this.ID.Value, dc): null;
         }
-        public bool IsActiveFor(Account g, DatabaseConnection dc = null)
+        public bool IsActiveFor(Account a, DatabaseConnection dc = null)
         {
-            return ((!g.IsEmpty()) && (g.IsEmpty() || this.HasAccessTo(g, dc)));
+            return this.HasAccessTo(a, dc);
         }
 
         public static string GenerateUsername(string firstName, string lastName, DatabaseConnection dc = null)
         {
             //unique name
-            System.Text.RegularExpressions.Regex reg = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+            var reg = new System.Text.RegularExpressions.Regex(
+                BasicLibrary.Utilities.UrlFriendlyRegEx, 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline
+                );
 
-            string username = firstName + " " + lastName;
+            string username = $"{firstName} {lastName}";
             string origUniqueName = reg.Replace(username, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            WebUser duplicate = WebUser.LoadByUsername(uniqueName, dc);
+            var duplicate = WebUser.LoadByUsername(uniqueName, dc);
             int count = 1;
             while (!duplicate.IsEmpty())
             {
@@ -426,25 +407,7 @@ namespace AfterSchoolLibrary
         public SystemMessages SendPasswordResetToken(bool isAfterSchool, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            PasswordResetToken token = null;
-
-            if (!PasswordResetToken.ExistsAndIsValidByWebUserId(this.ID.Value, dc))
-            {
-                token = new PasswordResetToken();
-                token.ExpireDate = DateTime.UtcNow.AddDays(3);
-                token.CreateDate = DateTime.UtcNow;
-                token.CreatedBy = this.ID;
-                token.WebUserId = this.ID;
-            }
-            else
-            {
-                token = PasswordResetToken.LoadValidByWebUserId(this.ID.Value, dc);
-                token.ExpireDate = DateTime.UtcNow.AddDays(3);
-            }
-
-            token.LastModifiedDate = DateTime.UtcNow;
-            token.LastModifiedBy = this.ID.Value;
-            msgs.AddRange(token.Save(dc));
+            var token = PasswordResetToken.AddOrUpdateToken(this, msgs, dc);
 
             msgs.AddRange(EmailHelper.SendPasswordReset(this, token, isAfterSchool));
 

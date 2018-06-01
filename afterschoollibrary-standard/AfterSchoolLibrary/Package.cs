@@ -198,7 +198,7 @@ namespace AfterSchoolLibrary
 
         public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Count() > 0;
+            return this.GetFeatures(dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Any();
         }
 
         public PackageFeature GetFeature(FeatureType featureType, DatabaseConnection dc = null)
@@ -215,9 +215,8 @@ namespace AfterSchoolLibrary
         public List<PackageFeature> GetFeatures(DatabaseConnection dc = null)
         {
             if (_Features.IsEmpty())
-            {
                 _Features = PackageFeature.LoadByPackageId(this.ID.Value, dc);
-            }
+
             return _Features;
         }
 
@@ -357,7 +356,6 @@ namespace AfterSchoolLibrary
         public bool IsAnyAccountUsing(DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-            {
                 return AccountPackage.GetCount(
                     criterias: new Hashtable()
                     {
@@ -365,47 +363,26 @@ namespace AfterSchoolLibrary
                     },
                     dc: dc
                 ) > 0;
-            }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public bool IsFree(BillingPeriodType billingPeriodType)
         {
             if (billingPeriodType == BillingPeriodType.Month)
-            {
                 return this.Price.Value == (0).ToDecimal();
-            }
-            else
-            {
-                return this.PricePerYear.Value == (0).ToDecimal();
-            }
+
+            return this.PricePerYear.Value == (0).ToDecimal();
         }
 
         public SystemMessages CopyFeaturesToAccountPackage(AccountPackage ap, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var pfs = this.GetFeatures(dc);
             var apfs = ap.GetFeatures(dc);
-            if (apfs.Count == 0)
-            {
-                foreach (var pf in pfs)
-                {
-                    var apf = new AccountPackageFeature();
-                    apf.AccountPackageId = ap.ID;
-                    apf.FeatureTypeId = pf.FeatureTypeId;
-                    apf.Max = pf.Max;
-                    apf.CreateDate = DateTime.UtcNow;
-                    apf.CreatedBy = loggedInUserId;
-                    apf.LastModifiedDate = DateTime.UtcNow;
-                    apf.LastModifiedBy = loggedInUserId;
-                    msgs.AddRange(apf.Save(dc));
-                }
+            
+            this.GetFeatures(dc).ForEach(pf => msgs.AddRange(ap.AddPackageFeature(pf, loggedInUserId, dc)));
+            ap.ResetFeatureList();
 
-                ap.ResetFeatureList();
-            }
             return msgs;
         }
 
