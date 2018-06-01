@@ -582,21 +582,15 @@ namespace AfterSchoolLibrary
             var isinviteonly = values["isinviteonly"];
 
             if (name.IsEmpty())
-            {
                 msgs.Add("Label is required", MessageType.UserError);
-            }
             else if (ActivityGroup.ExistsByAccountIdByName(account.ID.Value, name, activityGroupUid.ToGuid()))
-            {
                 msgs.Add("Label is already in use", MessageType.UserError);
-            }
+
             if (regmode.IsEmpty())
-            {
                 msgs.Add("Registration Mode is required", MessageType.UserError);
-            }
+
             if (form.IsEmpty())
-            {
                 msgs.Add("Form is required", MessageType.UserError);
-            }
 
             var group = ActivityGroup.LoadByUid(activityGroupUid.ToGuid());
             var isNew = false;
