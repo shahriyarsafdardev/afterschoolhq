@@ -11,11 +11,13 @@ namespace AfterSchoolLibraryTests
     public class WebUserTest : IDisposable
     {
         DatabaseConnection dc = null;
+        SystemMessages msgs = null;
 
         public WebUserTest()
         {
             AfterSchoolLibrary.Utilities.InitializeApp();
             dc = new DatabaseConnection(Database.Credentials.ConnectionString);
+            msgs = new SystemMessages();
             dc.Open();
             dc.BeginTransaction();
         }
@@ -26,6 +28,7 @@ namespace AfterSchoolLibraryTests
             dc.Close();
             dc.Dispose();
         }
+
 
         [Fact]
         public void LoadByEmailTest()
@@ -200,5 +203,150 @@ namespace AfterSchoolLibraryTests
 
             Assert.Equal(testPassword, testPasswordDecrypted);
         }
+
+        [Fact]
+        public void SendInviteTest()
+        {
+            var testUsername = "test";
+            var emailAddress1 = "test1@test.com";
+
+
+            var currentUser = new WebUser() { Username = testUsername };
+            currentUser.Save(dc);
+
+            var testAccount = new Account() { };
+            currentUser.Save(dc);
+
+            Assert.NotNull(currentUser.SendInvite(emailAddress1, "test message", currentUser, testAccount, dc));
+        }
+
+        [Fact]
+        public void GetAccountsTest()
+        {
+            var testUsername = "test";
+            var emailAddress1 = "test1@test.com";
+
+
+            var currentUser = new WebUser() { Username = testUsername };
+            currentUser.Save(dc);
+
+            var testAccount = new Account() { };
+            currentUser.Save(dc);
+
+            Assert.NotNull(currentUser.GetAccounts(dc));
+        }
+
+        //TODO: is there a way to remove an account from a User? and finish below
+        [Fact]
+        public void GetUserTypeWithoutTypeTest()
+        {
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+
+            var testAccount = new Account() { };
+            testAccount.Save(dc);
+
+            Assert.Equal(UserType.NotSet, currentUser.GetUserType(testAccount, dc));
+        }
+        [Theory]
+        [InlineData(UserType.Administrator)]
+        public void GetUserTypeWithTypeTest(UserType ut)
+        {
+
+            var currentUser = new WebUser() {};       
+            currentUser.Save(dc);
+            var id = currentUser.ID.Value;
+
+            var testAccount = new Account() { };
+            testAccount.Save(dc);
+            testAccount.AddUser(currentUser, ut , id , msgs, dc);
+            var test = currentUser.GetUserType(testAccount, dc);
+
+            Assert.Equal(UserType.Administrator, test);
+        }
+
+        [Fact]
+        public void UpdateLastActivityTest()
+        {
+            var testUsername = "test";
+            var testdate = new DateTime() { };
+
+
+            var currentUser = new WebUser() { LastActivity = testdate};
+            currentUser.Save(dc);
+            //SystemMessages.alter()
+
+            var testAccount = new Account() { };
+            //testAccount.IsAdminAccount{ }
+            testAccount.Save(dc);
+
+            Assert.NotNull(currentUser.UpdateLastActivity(dc));
+
+            Assert.Null(currentUser.UpdateLastActivity(dc));
+        }
+        [Fact]
+        public void UpdateLastLoginTest()
+        {
+            var testUsername = "test";
+            var emailAddress1 = "test1@test.com";
+
+
+            var currentUser = new WebUser() { Username = testUsername };
+            currentUser.Save(dc);
+            //SystemMessages.alter()
+
+            var testAccount = new Account() { };
+            //testAccount.IsAdminAccount{ }
+            testAccount.Save(dc);
+
+            Assert.NotNull(currentUser.UpdateLastLogin(dc));
+
+            Assert.Null(currentUser.UpdateLastLogin(dc));
+        }
+        //^^TODO theese 3 above cant be right^^
+
+
+        [Fact]
+        public void HasAcessToFeatureFalseTest()
+        {
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+            var id = currentUser.ID.Value;
+
+            var testAccount = new Account() { };
+            testAccount.Save(dc);
+            testAccount.AddUser(currentUser, UserType.Parent, id, msgs, dc);
+
+            Assert.False(currentUser.HasAccessToFeature(FeatureType.ManageForms,testAccount,dc));
+        }
+
+        public void HasAcessToFeatureTrueTest()
+        {
+
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+            var id = currentUser.ID.Value;
+
+            var testAccount = new Account() { };
+            testAccount.Save(dc);
+            testAccount.AddUser(currentUser, UserType.SuperAdmin, id, msgs, dc);
+
+            Assert.True(currentUser.HasAccessToFeature(FeatureType.ViewInsights, testAccount, dc));
+        }
+        [Fact]
+        public void HasAcessToActivityTest()
+        {
+
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+
+            var testAccount = new Account() { };
+            testAccount.Save(dc);
+
+            var testActivity = new Activity() { };
+
+            Assert.True(currentUser.HasAccessToActivity(testActivity,dc));
+        }
+
     }
 }
