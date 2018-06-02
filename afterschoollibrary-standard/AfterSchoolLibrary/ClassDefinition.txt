@@ -107,21 +107,28 @@ loadmethod: UniqueName|AccountId
 type: Class
 name: Location
 inherits: BaseLocation
-property: AccountId, int?, Int
-property: IsDefault, bool, Bit
+property: OwnerAccountId, int?, Int
 property: Details, string, NVarChar(4000)
-loadmethod: AccountId, List<>
-loadmethod: AccountId|IsDefault
+loadmethod: OwnerAccountId, List<>
 [end]
 
 [begin]
 type: Class
-name: ActivityRecurrence
-inherits: BasicObjectWithModified
-property: RecurrenceTypeId, int?, Int
+name: ActivityLocation
+inherits: BaseObjectWithModified
 property: ActivityId, int?, Int
-property: WeekNumbersInMonth, string, NVarChar(50)
+property: LocationId, int?, Int
+property: Room, string, NVarChar(100)
+property: Details, string, NVarChar(4000)
+property: ApprovedDate, DateTime?, DateTime
+property: ApprovedBy, int?, Int
+join: Activity.ID, ActivityId, InnerJoin
+join: Location.ID, LocationId, InnerJoin
+joinproperty: Activity.Name, string, NVarChar
+joinproperty: Location.OwnerAccountId, string, NVarChar
+loadmethod: ActivityId|LocationId
 loadmethod: ActivityId, List<>
+loadmethod: LocationId, List<>
 [end]
 
 [begin]
@@ -223,14 +230,6 @@ joinproperty: Registrant.Phone, string, NVarChar
 
 [begin]
 type: Class
-name: Archive
-inherits: BasicLookUpObject
-property: AccountId, int?, Int
-loadmethod: AccountId, List<>
-[end]
-
-[begin]
-type: Class
 name: Account
 serializable: true
 inherits: BaseCompany
@@ -256,6 +255,32 @@ loadmethod: OwnerId, List<>
 loadmethod: UniqueName
 loadmethod: IsAdminAccount
 loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: AccountRelationship
+inherits: BasicObjectWithModified
+property: HostAccountId, int?, Int
+property: VisitorAccountId, int?, Int
+property: ApprovedDate, DateTime?, DateTime
+property: ApprovedBy, int?, Int
+loadmethod: HostAccountId, List<>
+loadmethod: VisitorAccountId, List<>
+loadmethod: HostAccountId|VisitorAccountId
+[end]
+
+[begin]
+type: Class
+name: AccountLocationRelationship
+inherits: BasicObjectWithModified
+property: AccountRelationshipId, int?, Int
+property: LocationId, int?, Int
+property: ApprovedDate, DateTime?, DateTime
+property: ApprovedBy, int?, Int
+loadmethod: AccountRelationshipId, List<>
+loadmethod: LocationId, List<>
+loadmethod: AccountRelationshipId|LocationId
 [end]
 
 [begin]
@@ -707,40 +732,6 @@ joinproperty: ActivityGroup.IsArchived, bool, Bit
 
 [begin]
 type: Class
-name: Leader
-inherits: BaseContact
-property: WebUserId, int?, Int
-property: AccountId, int?, Int
-property: ArchiveId, int?, Int
-property: Uid, Guid, UniqueIdentifier
-loadmethod: AccountId, List<>
-loadmethod: ArchiveId, List<>
-loadmethod: WebUserId, List<>
-loadmethod: Uid
-[end]
-
-[begin]
-type: Class
-name: ActivityLeader
-inherits: BasicObjectWithModified
-property: ActivityId, int?, Int
-property: LeaderId, int?, Int
-join: Activity.ID, ActivityId, InnerJoin
-join: Leader.ID, LeaderId, InnerJoin
-joinproperty: Leader.Email, string, NVarChar
-joinproperty: Leader.FirstName, string, NVarChar
-joinproperty: Leader.LastName, string, NVarChar
-joinproperty: Leader.Phone, string, NVarChar
-joinproperty: Leader.Uid, Guid, UniqueIdentifier
-joinproperty: Activity.Name, string, NVarChar
-joinproperty: Activity.Uid, Guid, UniqueIdentifier
-loadmethod: ActivityId, List<>
-loadmethod: LeaderId, List<>
-loadmethod: ActivityId|LeaderId
-[end]
-
-[begin]
-type: Class
 name: ActivityWebUser
 inherits: BasicObjectWithModified
 property: ActivityId, int?, Int
@@ -1076,12 +1067,6 @@ values: NotSet, SuperAdmin, Owner, Administrator, Student, Teacher, Staff, Paren
 type: Enum
 name: FileType
 values: NotSet, Document, Image, Video, Audio, Text, Html
-[end]
-
-[begin]
-type: Enum
-name: RecurrenceType
-values: NotSet, Once, Daily, Weekly, Monthly, Annually
 [end]
 
 [begin]

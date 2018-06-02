@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ActivityLeader.cs" />
+    <Compile Remove="ActivityRecurrence.cs" />
+    <Compile Remove="Archive.cs" />
+    <Compile Remove="Leader.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Rollbar" Version="1.4.0" />
     <PackageReference Include="Sendgrid" Version="9.9.0" />
     <PackageReference Include="Stripe.net" Version="16.3.0" />
