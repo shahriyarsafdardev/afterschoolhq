@@ -89,6 +89,80 @@ namespace AfterSchoolLibraryTests
             Assert.NotEqual(0,url.Length);
         }
 
+        [Fact]
+        public void ReloadTest()
+        {
+            var testUid = new System.Guid();
+            var user = new WebUser() { Uid = testUid };
+            user.Save(dc);
+
+            var user2 = user.Reload(dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void LoadByUidTest()
+        {
+            var testUid = new System.Guid();
+            var user = new WebUser() { Uid = testUid  };
+            user.Save(dc);
+
+            var user2 = WebUser.LoadByUid(testUid, dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void LoadByUidIsActiveTest()
+        {
+            var testUid = new System.Guid();
+            var user = new WebUser() { Uid = testUid,IsActive = true };
+            user.Save(dc);
+
+            var user2 = WebUser.LoadByUidByIsActive(testUid,true ,dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void LoadByIsActiveTest()
+        {
+            var testUid = new System.Guid();
+            var user = new WebUser() { IsActive = true };
+            user.Save(dc);
+
+            var user2 = WebUser.LoadByIsActive( true, dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void LoadByFacebookIdTest()
+        {
+            var testid = "test";
+            var user = new WebUser() { FacebookId = testid };
+            user.Save(dc);
+
+            var user2 = WebUser.LoadByFacebookId( testid ,dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void GetInviteUrlTest()
+        {
+            var testid = "test";
+            var user = new WebUser() { FacebookId = testid };
+            user.Save(dc);
+
+            var testAccount = new Account() { };
+
+            var url = user.GetInviteUrl(testAccount);
+
+            Assert.NotEqual(0,url.Length);
+        }
+
 
         [Fact]
         public void ReloadTest()
@@ -478,8 +552,6 @@ namespace AfterSchoolLibraryTests
 
             var currentUser = new WebUser() { };
             currentUser.Save(dc);
-            var a = new Activity();
-            currentUser.HasAccessToActivity(a, dc);
 
 
             Assert.NotNull(currentUser.SendVerificationEmail(true));
