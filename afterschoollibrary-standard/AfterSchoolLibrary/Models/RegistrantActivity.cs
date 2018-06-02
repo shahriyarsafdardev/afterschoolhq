@@ -922,56 +922,65 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public SystemMessages AdjustSeatIndex(int amount, RegistrationAssignmentType rat, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            switch (rat)
+            {
+                case RegistrationAssignmentType.Application:
+                    this.ApplicationSeatIndex += amount;
+                    break;
+                case RegistrationAssignmentType.Reserved:
+                    this.SeatIndex += amount;
+                    break;
+                case RegistrationAssignmentType.WaitingList:
+                    this.WaitingListSeatIndex += amount;
+                    break;
+            }
+            msgs.AddRange(this.Save(dc));
+            return msgs;
+        }
+
         public SystemMessages AdjustSeatIndexesDuringRemoval(Registrant registrant = null, DatabaseConnection dc = null)
         {
             if (registrant.IsEmpty())
-            {
                 registrant = this.ToRegistrant();
-            }
 
             // get all all registrant activities where the activity id is the same, 
             // the day is the same, and ony update people with the same assignment type, 
             // UPDATE: No longer the same day because registration is now according to a schedule, not a day
             // I think they need to be in the same registration period if it exists   
             var msgs = new SystemMessages();
-            var otherPeoplesActivities = RegistrantActivity.LoadByActivityId(this.ActivityId.Value, dc).Where(x => x.RegistrantId != registrant.ID);
+            var otherPeoplesActivities = RegistrantActivity.LoadByActivityId(this.ActivityId.Value, dc)
+                .Where(x => x.RegistrantId != registrant.ID);
 
             if (this.NumberOfSeats > 0)
-            {
-                foreach (var item in otherPeoplesActivities.Where(x => x.SeatIndex > this.SeatIndex))
-                {
-                    if (this.RegistrationPeriodId == item.RegistrationPeriodId)
-                    {
-                        item.SeatIndex -= this.NumberOfSeats;
-                        msgs.AddRange(item.Save(dc));
-                    }
-                }
-            }
+                // TODO: Review if I need to check the same registration period, probably more related to the activity group if anything?
+                otherPeoplesActivities
+                    .Where(x => x.SeatIndex > this.SeatIndex && this.RegistrationPeriodId == x.RegistrationPeriodId)
+                    .ToList()
+                    .ForEach(item => item.AdjustSeatIndex(this.NumberOfSeats.Value * -1, RegistrationAssignmentType.Reserved, dc));
 
             if (this.NumberOfWaitingListSeats > 0)
-            {
-                foreach (var item in otherPeoplesActivities.Where(x => x.WaitingListSeatIndex > this.WaitingListSeatIndex))
-                {
-                    if (this.RegistrationPeriodId == item.RegistrationPeriodId)
-                    {
-                        item.WaitingListSeatIndex -= this.NumberOfWaitingListSeats;
-                        msgs.AddRange(item.Save(dc));
-                    }
-                }
-            }
+                otherPeoplesActivities
+                    .Where(x => x.WaitingListSeatIndex > this.WaitingListSeatIndex && this.RegistrationPeriodId == x.RegistrationPeriodId)
+                    .ToList()
+                    .ForEach(item => item.AdjustSeatIndex(this.NumberOfWaitingListSeats.Value * -1, RegistrationAssignmentType.WaitingList, dc));
 
             if (this.NumberOfApplicationSeats > 0)
-            {
-                foreach (var item in otherPeoplesActivities.Where(x => x.ApplicationSeatIndex > this.ApplicationSeatIndex))
-                {
-                    if (this.RegistrationPeriodId == item.RegistrationPeriodId)
-                    {
-                        item.ApplicationSeatIndex -= this.NumberOfApplicationSeats;
-                        msgs.AddRange(item.Save(dc));
-                    }
-                }
-            }
+                otherPeoplesActivities
+                    .Where(x => x.ApplicationSeatIndex > this.ApplicationSeatIndex && this.RegistrationPeriodId == x.RegistrationPeriodId)
+                    .ToList()
+                    .ForEach(item => item.AdjustSeatIndex(this.NumberOfApplicationSeats.Value * -1, RegistrationAssignmentType.Application, dc));
 
+            return msgs;
+        }
+
+        public SystemMessages AdjustPreferenceNumber(int amount, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            this.PreferenceNumber -= 1;
+            msgs.AddRange(this.Save(dc));
             return msgs;
         }
 
@@ -995,11 +1004,7 @@ namespace AfterSchoolLibrary
             registrantActivities
                 .Where(x => x.PreferenceNumber.HasValue && x.PreferenceNumber.Value > this.PreferenceNumber.Value)
                 .ToList()
-                .ForEach(ra =>
-                {
-                    ra.PreferenceNumber -= 1;
-                    msgs.AddRange(ra.Save(dc));
-                });
+                .ForEach(ra => ra.AdjustPreferenceNumber(-1, dc));
 
             return msgs;
         }
