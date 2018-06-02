@@ -29,6 +29,80 @@ namespace AfterSchoolLibraryTests
             dc.Dispose();
         }
 
+        [Fact]
+        public void ReloadTest()
+        {
+            var testUid = new System.Guid();
+            var user = new WebUser() { Uid = testUid };
+            user.Save(dc);
+
+            var user2 = user.Reload(dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void LoadByUidTest()
+        {
+            var testUid = new System.Guid();
+            var user = new WebUser() { Uid = testUid  };
+            user.Save(dc);
+
+            var user2 = WebUser.LoadByUid(testUid, dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void LoadByUidIsActiveTest()
+        {
+            var testUid = new System.Guid();
+            var user = new WebUser() { Uid = testUid,IsActive = true };
+            user.Save(dc);
+
+            var user2 = WebUser.LoadByUidByIsActive(testUid,true ,dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void LoadByIsActiveTest()
+        {
+            var testUid = new System.Guid();
+            var user = new WebUser() { IsActive = true };
+            user.Save(dc);
+
+            var user2 = WebUser.LoadByIsActive( true, dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void LoadByFacebookIdTest()
+        {
+            var testid = "test";
+            var user = new WebUser() { FacebookId = testid };
+            user.Save(dc);
+
+            var user2 = WebUser.LoadByFacebookId( testid ,dc);
+
+            Assert.NotNull(user2);
+        }
+
+        [Fact]
+        public void GetInviteUrlTest()
+        {
+            var testid = "test";
+            var user = new WebUser() { FacebookId = testid };
+            user.Save(dc);
+
+            var testAccount = new Account() { };
+
+            var url = user.GetInviteUrl(testAccount);
+
+            Assert.NotEqual(0,url.Length);
+        }
+
 
         [Fact]
         public void LoadByEmailTest()
@@ -233,7 +307,7 @@ namespace AfterSchoolLibraryTests
 
             var testAccount = new Account() { };
             currentUser.Save(dc);
-            testAccount.AddUser(currentUser, UserType.Parent, id , dc);
+            testAccount.AddUser(currentUser, UserType.Parent, id, dc);
             Assert.True(currentUser.GetAccounts(dc).Contains(testAccount));
         }
 
@@ -254,7 +328,7 @@ namespace AfterSchoolLibraryTests
         public void GetUserTypeWithTypeTest(UserType ut)
         {
 
-            var currentUser = new WebUser() {};       
+            var currentUser = new WebUser() { };
             currentUser.Save(dc);
             var id = currentUser.ID.Value;
 
@@ -272,7 +346,7 @@ namespace AfterSchoolLibraryTests
             var testdate = new DateTime() { };
 
 
-            var currentUser = new WebUser() { LastActivity = testdate};
+            var currentUser = new WebUser() { LastActivity = testdate };
             currentUser.Save(dc);
 
             var pre = currentUser.LastActivity;
@@ -280,19 +354,19 @@ namespace AfterSchoolLibraryTests
             var post = currentUser.LastActivity;
 
 
-            Assert.NotEqual(pre,post);
+            Assert.NotEqual(pre, post);
         }
         [Fact]
         public void UpdateLastLoginTest()
         {
-            var currentUser = new WebUser() {};
+            var currentUser = new WebUser() { };
             currentUser.Save(dc);
             var prev = currentUser.LastLogin;
 
             currentUser.UpdateLastLogin(dc);
             var post = currentUser.LastLogin;
 
-            Assert.NotEqual(prev, post );
+            Assert.NotEqual(prev, post);
         }
 
         //cannot test beacuse Feature is not fully implemeted always returns true currently
@@ -307,9 +381,10 @@ namespace AfterSchoolLibraryTests
             testAccount.Save(dc);
             msgs.AddRange(testAccount.AddUser(currentUser, UserType.Parent, id, dc));
 
-            Assert.False(currentUser.HasAccessToFeature(FeatureType.ManageForms,testAccount,dc));
+            Assert.False(currentUser.HasAccessToFeature(FeatureType.ManageForms, testAccount, dc));
         }
 
+        [Fact]
         public void HasAcessToFeatureTrueTest()
         {
 
@@ -324,18 +399,89 @@ namespace AfterSchoolLibraryTests
             Assert.True(currentUser.HasAccessToFeature(FeatureType.ViewInsights, testAccount, dc));
         }
         [Fact]
-        public void HasAcessToActivityTest()
+        public void GenerateUsernameTest()
+        {
+            var f = "John";
+            var l = "Doe";
+
+
+            Assert.NotNull(WebUser.GenerateUsername(f, l, dc));
+        }
+
+        [Fact]
+        public void SendVerificationEmailTest()
         {
 
             var currentUser = new WebUser() { };
             currentUser.Save(dc);
-            var a = new Activity();
-            currentUser.HasAccessToActivity(a, dc);
 
-            var testAccount = new Account() { };
-            testAccount.Save(dc);
 
-            Assert.True(currentUser.HasAccessToActivity(a,dc));
+            Assert.NotNull(currentUser.SendVerificationEmail(true));
+        }
+
+        [Fact]
+        public void MarkAsVerifiedTest()
+        {
+
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+            currentUser.MarkAsVerified(dc);
+
+
+            Assert.True(currentUser.VerifiedAccount);
+        }
+
+        [Fact]
+        public void ChangePasswordTest()
+        { 
+            var currentUser = new WebUser() {Password = "test" };
+            var pre = currentUser.Password;
+            currentUser.Save(dc);
+            currentUser.ChangePassword("new", dc);
+            var post = currentUser.Password;
+
+
+            Assert.NotEqual(pre, post);
+        }
+
+        [Fact]
+        public void SendPasswordResetTokenTest()
+        {
+            var currentUser = new WebUser() {};
+            currentUser.Save(dc);
+
+            Assert.True(currentUser.SendPasswordResetToken(true, dc).IsNotEmpty());
+        }
+
+        [Fact]
+        public void CreateRegistrantTest()
+        {
+            var currentUser = new WebUser() {};
+            currentUser.Save(dc);
+
+
+            Assert.NotNull(currentUser.CreateRegistrant(RegistrantType.Individual,true,msgs,dc));
+        }
+
+        [Fact]
+        public void CreateRegistrantWithFieldsTest()
+        {
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+
+
+            Assert.True(currentUser.CreateRegistrant(RegistrantType.Individual, true, msgs, dc).IsMaster);
+        }
+
+        [Fact]
+        public void GetRegistrantsTest()
+        {
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+            var reg = currentUser.CreateRegistrant(RegistrantType.Individual, true, msgs, dc);
+
+
+            Assert.NotNull(currentUser.GetRegistrants());
         }
 
     }
