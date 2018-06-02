@@ -94,6 +94,7 @@ joinproperty: ActivityGroup.IsArchived, bool?, Bit
 joinproperty: ActivityGroup.Name, string, NVarChar
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
+loadmethod: LocationId, List<>
 loadmethod: ArchiveId, List<>
 loadmethod: Uid
 loadmethod: AccountId|ArchiveId
@@ -107,28 +108,11 @@ loadmethod: UniqueName|AccountId
 type: Class
 name: Location
 inherits: BaseLocation
-property: OwnerAccountId, int?, Int
+property: HostAccountId, int?, Int
+property: IsDefault, bool, Bit
 property: Details, string, NVarChar(4000)
-loadmethod: OwnerAccountId, List<>
-[end]
-
-[begin]
-type: Class
-name: ActivityLocation
-inherits: BaseObjectWithModified
-property: ActivityId, int?, Int
-property: LocationId, int?, Int
-property: Room, string, NVarChar(100)
-property: Details, string, NVarChar(4000)
-property: ApprovedDate, DateTime?, DateTime
-property: ApprovedBy, int?, Int
-join: Activity.ID, ActivityId, InnerJoin
-join: Location.ID, LocationId, InnerJoin
-joinproperty: Activity.Name, string, NVarChar
-joinproperty: Location.OwnerAccountId, string, NVarChar
-loadmethod: ActivityId|LocationId
-loadmethod: ActivityId, List<>
-loadmethod: LocationId, List<>
+loadmethod: HostAccountId, List<>
+loadmethod: HostAccountId|IsDefault
 [end]
 
 [begin]
@@ -272,15 +256,21 @@ loadmethod: HostAccountId|VisitorAccountId
 
 [begin]
 type: Class
-name: AccountLocationRelationship
+name: AccountRelationshipLocation
 inherits: BasicObjectWithModified
 property: AccountRelationshipId, int?, Int
+property: HostAccountId, int?, Int
+property: VisitorAccountId, int?, Int
 property: LocationId, int?, Int
 property: ApprovedDate, DateTime?, DateTime
 property: ApprovedBy, int?, Int
 loadmethod: AccountRelationshipId, List<>
 loadmethod: LocationId, List<>
+loadmethod: HostAccountId, List<>
+loadmethod: VisitorAccountId, List<>
+loadmethod: HostAccountId|VisitorAccountId, List<>
 loadmethod: AccountRelationshipId|LocationId
+loadmethod: HostAccountId|VisitorAccountId|LocationId
 [end]
 
 [begin]

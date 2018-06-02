@@ -355,6 +355,14 @@ namespace AfterSchoolLibrary
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<Activity> LoadByLocationId(int LocationId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["LocationId"], LocationId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static List<Activity> LoadByArchiveId(int ArchiveId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -451,24 +459,6 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static string GenerateUniqueName(string name, int? activityId, int? accountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            //unique name
-            var reg = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
-
-            string origUniqueName = reg.Replace(name, "").MaxChars(25);
-            string uniqueName = origUniqueName;
-            var duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc);
-            int count = 1;
-            while (duplicate?.ID != activityId)
-            {
-                uniqueName = origUniqueName + count.ToString();
-                count++;
-                duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc);
-            }
-            return uniqueName;
-        }
-
         private static DatabaseQuery LoadByAccountIdQuery(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -542,34 +532,6 @@ namespace AfterSchoolLibrary
                 dq.Criterias.Add(ObjectMap["RegistrationCloseDate"], endDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
-        public int GetSeatsTaken(DatabaseConnection dc = null)
-        {
-            return this.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc);
-        }
-
-        public int GetWaitingListSeatsTaken(DatabaseConnection dc = null)
-        {
-            return this.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc);
-        }
-
-        public int GetSeatsRemaining(DatabaseConnection dc = null)
-        {
-            var rtn = 0;
-            if (SeatsAvailable.HasValue)
-                rtn = SeatsAvailable.Value - this.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc);
-
-            return Math.Max(0, rtn);
-        }
-
-        public int GetWaitingListSeatsRemaining(DatabaseConnection dc = null)
-        {
-            var rtn = 0;
-            if (WaitingListSeats.HasValue)
-                rtn = WaitingListSeats.Value - this.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc);
-
-            return Math.Max(0, rtn);
         }
 
         public string RegistrationTimeZoneAbbr

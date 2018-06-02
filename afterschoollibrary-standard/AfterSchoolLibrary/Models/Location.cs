@@ -15,7 +15,7 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
-		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		public int? HostAccountId { get { return (int?)MDV["HostAccountId"].Value; } set { MDV["HostAccountId"].Value = value; } }
 		public bool IsDefault { get { return (bool)MDV["IsDefault"].Value; } set { MDV["IsDefault"].Value = value; } }
 		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
 		
@@ -35,7 +35,7 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Location).Name;
                 _dp = BaseLocation.get_BaseObjectMap(className);
-				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "HostAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDefault", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar, 4000);
 				
@@ -106,7 +106,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AccountId"]);
+			dps.Add(ObjectMap["HostAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -127,19 +127,19 @@ namespace AfterSchoolLibrary
 			return Location.Load(this.ID.Value, dc);
 		}
 		
-		public static List<Location> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Location> LoadByHostAccountId(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static Location LoadByAccountIdByIsDefault(int AccountId, bool IsDefault, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Location LoadByHostAccountIdByIsDefault(int HostAccountId, bool IsDefault, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
 			dq.Criterias.Add(ObjectMap["IsDefault"], IsDefault);
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}

@@ -1043,5 +1043,31 @@ namespace AfterSchoolLibrary
 
             return account;
         }
+
+        public static List<Account> GetVisitorAccounts(this Account account, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByHostAccountId(account.ID.Value, dc)
+                .Select(x => x.GetVisitorAccount(dc))
+                .ToList();
+        }
+
+        public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByVisitorAccountId(account.ID.Value, dc)
+                .Select(x => x.GetHostAccount(dc))
+                .ToList();
+        }
+
+        public static List<Location> GetVisitorLocations(this Account account, DatabaseConnection dc = null)
+        {
+            return AccountRelationshipLocation.LoadByVisitorAccountId(account.ID.Value, dc)
+                .Select(x => x.GetLocation(dc))
+                .ToList();
+        }
+
+        public static List<Location> GetHostedLocations(this Account account, DatabaseConnection dc = null)
+        {
+            return Location.LoadByHostAccountId(account.ID.Value, dc);
+        }
     }
 }

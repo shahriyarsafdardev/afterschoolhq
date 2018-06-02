@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using System.Data;
 using System.Collections;
-using Rollbar;
 
 namespace AfterSchoolLibrary
 {
-
+	
     public class ActivityMessage : BasicObject
     {
 		#region "ClassGenerator"
@@ -278,13 +280,10 @@ namespace AfterSchoolLibrary
                 SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                         Email.AppAdminEmailAddress, 
-                        string.Format("CC: {0} via {1}", account.Name, Utilities.AppName(account.IsAfterSchool))),
+                        $"CC: {account.Name} via {Utilities.AppName(account.IsAfterSchool)}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                     subject: am.Subject,
-                    body: string.Format(
-                        "{0}{1}", 
-                        am.Body, 
-                        Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activitygroup_message")),
+                    body: $"{am.Body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activitygroup_message"))}",
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
             }
@@ -319,10 +318,10 @@ namespace AfterSchoolLibrary
                 var sendMsgs = SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                         Email.AppAdminEmailAddress, 
-                        string.Format("{0} via {1}", fromName, Utilities.AppName(account.IsAfterSchool))),
+                        $"{fromName} via {Utilities.AppName(account.IsAfterSchool)}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(amr.RegistrantEmail, amr.RegistrantDisplayName),
                     subject: this.Subject,
-                    body: string.Format("{0}{1}", body, Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message")),
+                    body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
                     replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
@@ -346,8 +345,9 @@ namespace AfterSchoolLibrary
             }
             else
             {
-                RollbarLocator.RollbarInstance.Configure(new RollbarConfig(Utilities.RollbarAccessToken));
-                RollbarLocator.RollbarInstance.Log(ErrorLevel.Error, msgs.RenderMessageList(MessageOutputType.Text));
+                // TODO: Fix Rollbar reporting
+                // RollbarLocator.RollbarInstance.Configure(new RollbarConfig(Utilities.RollbarAccessToken));
+                // RollbarLocator.RollbarInstance.Log(ErrorLevel.Error, msgs.RenderMessageList(MessageOutputType.Text));
             }
 
             return msgs;

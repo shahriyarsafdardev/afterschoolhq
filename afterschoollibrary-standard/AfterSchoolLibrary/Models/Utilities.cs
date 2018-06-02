@@ -645,12 +645,12 @@ namespace AfterSchoolLibrary
             var accounts = Account.Load(dc: dc);
             foreach (var account in accounts)
             {
-                var locations = Location.LoadByAccountId(account.ID.Value, dc);
+                var locations = Location.LoadByHostAccountId(account.ID.Value, dc);
                 if (locations.Count == 0)
                 {
                     var location = new Location();
                     location.IsDefault = true;
-                    location.AccountId = account.ID.Value;
+                    location.HostAccountId = account.ID.Value;
                     location.Address1 = account.Address1;
                     location.Address2 = account.Address2;
                     location.City = account.City;
