@@ -922,6 +922,30 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public SystemMessages AdjustSeatIndexesDuringRemoval(Registrant registrant = null, DatabaseConnection dc = null)
+        {
+            // get all all registrant activities where the activity id is the same, 
+            // the day is the same, and ony update people with the same assignment type, 
+            // UPDATE: No longer the same day because registration is now according to a schedule, not a day
+            // I think they need to be in the same registration period if it exists   
+            // TODO: Review if I need to check the same registration period, probably more related to the activity group if anything?
+
+            if (registrant.IsEmpty())
+                registrant = this.ToRegistrant();
+
+            var msgs = new SystemMessages();
+
+            var otherPeoplesActivities = RegistrantActivity.LoadByActivityId(this.ActivityId.Value, dc)
+                .Where(x => x.RegistrantId != registrant.ID)
+                .ToList();
+
+            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Reserved, -1, dc);
+            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.WaitingList, -1, dc);
+            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Application, -1, dc);
+
+            return msgs;
+        }
+
         public SystemMessages AdjustSeatIndex(int amount, RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -941,37 +965,33 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public SystemMessages AdjustSeatIndexesDuringRemoval(Registrant registrant = null, DatabaseConnection dc = null)
+        public SystemMessages AdjustSeatIndexes(List<RegistrantActivity> ras, RegistrationAssignmentType rat, int factor, DatabaseConnection dc = null)
         {
-            if (registrant.IsEmpty())
-                registrant = this.ToRegistrant();
-
-            // get all all registrant activities where the activity id is the same, 
-            // the day is the same, and ony update people with the same assignment type, 
-            // UPDATE: No longer the same day because registration is now according to a schedule, not a day
-            // I think they need to be in the same registration period if it exists   
             var msgs = new SystemMessages();
-            var otherPeoplesActivities = RegistrantActivity.LoadByActivityId(this.ActivityId.Value, dc)
-                .Where(x => x.RegistrantId != registrant.ID);
-
-            if (this.NumberOfSeats > 0)
-                // TODO: Review if I need to check the same registration period, probably more related to the activity group if anything?
-                otherPeoplesActivities
-                    .Where(x => x.SeatIndex > this.SeatIndex && this.RegistrationPeriodId == x.RegistrationPeriodId)
-                    .ToList()
-                    .ForEach(item => item.AdjustSeatIndex(this.NumberOfSeats.Value * -1, RegistrationAssignmentType.Reserved, dc));
-
-            if (this.NumberOfWaitingListSeats > 0)
-                otherPeoplesActivities
-                    .Where(x => x.WaitingListSeatIndex > this.WaitingListSeatIndex && this.RegistrationPeriodId == x.RegistrationPeriodId)
-                    .ToList()
-                    .ForEach(item => item.AdjustSeatIndex(this.NumberOfWaitingListSeats.Value * -1, RegistrationAssignmentType.WaitingList, dc));
-
-            if (this.NumberOfApplicationSeats > 0)
-                otherPeoplesActivities
-                    .Where(x => x.ApplicationSeatIndex > this.ApplicationSeatIndex && this.RegistrationPeriodId == x.RegistrationPeriodId)
-                    .ToList()
-                    .ForEach(item => item.AdjustSeatIndex(this.NumberOfApplicationSeats.Value * -1, RegistrationAssignmentType.Application, dc));
+            switch (rat)
+            {
+                case RegistrationAssignmentType.Reserved:
+                    if (this.NumberOfSeats > 0)
+                        ras
+                            .Where(x => x.SeatIndex > this.SeatIndex)
+                            .ToList()
+                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfSeats.Value * factor, RegistrationAssignmentType.Reserved, dc));
+                    break;
+                case RegistrationAssignmentType.WaitingList:
+                    if (this.NumberOfWaitingListSeats > 0)
+                        ras
+                            .Where(x => x.WaitingListSeatIndex > this.WaitingListSeatIndex)
+                            .ToList()
+                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfWaitingListSeats.Value * factor, RegistrationAssignmentType.WaitingList, dc));
+                    break;
+                case RegistrationAssignmentType.Application:
+                    if (this.NumberOfApplicationSeats > 0)
+                        ras
+                            .Where(x => x.ApplicationSeatIndex > this.ApplicationSeatIndex)
+                            .ToList()
+                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfApplicationSeats.Value * factor, RegistrationAssignmentType.Application, dc));
+                    break;
+            }
 
             return msgs;
         }
