@@ -231,15 +231,12 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return dq.Select().Rows[0][0].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetPossibleCount(int attendanceId, DatabaseConnection dc = null)
@@ -252,15 +249,12 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return dq.Select().Rows[0][0].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetPresentCountByActivityId(int activityId, DatabaseConnection dc = null)
@@ -273,15 +267,12 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return dq.Select().Rows[0][0].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetPossibleCountByActivityId(int activityId, DatabaseConnection dc = null)
@@ -294,15 +285,12 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return results.Rows[0][0].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetPresentCountByAccountId(int accountId, DatabaseConnection dc = null)
@@ -315,15 +303,12 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["RegistrantAccountId"], accountId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return dq.Select().Rows[0][0].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static int GetPossibleCountByAccountId(int accountId, DatabaseConnection dc = null)
@@ -336,15 +321,12 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["RegistrantAccountId"], accountId);
+
             var results = dq.Select();
             if (results.Rows.Any())
-            {
                 return results.Rows[0][0].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         #endregion

@@ -369,28 +369,18 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                var rat = RegistrationAssignmentType.NotSet;
                 if (this.NumberOfSeats > 0)
-                {
-                    rat = RegistrationAssignmentType.Reserved;
-                }
+                    return RegistrationAssignmentType.Reserved;
                 else if (this.NumberOfWaitingListSeats > 0)
-                {
-                    rat = RegistrationAssignmentType.WaitingList;
-                }
+                    return RegistrationAssignmentType.WaitingList;
                 else if (this.NumberOfApplicationSeats > 0)
-                {
-                    rat = RegistrationAssignmentType.Application;
-                }
+                    return RegistrationAssignmentType.Application;
                 else if (this.NumberOfInvitationSeats > 0)
-                {
-                    rat = RegistrationAssignmentType.Invited;
-                }
+                    return RegistrationAssignmentType.Invited;
                 else if (this.NumberOfSeatsDeclined > 0)
-                {
-                    rat = RegistrationAssignmentType.Declined;
-                }
-                return rat;
+                    return RegistrationAssignmentType.Declined;
+
+                return RegistrationAssignmentType.NotSet;
             }
         }
 

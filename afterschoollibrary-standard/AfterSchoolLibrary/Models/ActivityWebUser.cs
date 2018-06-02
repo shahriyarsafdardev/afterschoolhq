@@ -194,10 +194,7 @@ namespace AfterSchoolLibrary
 
         public ActivityWebUser Copy(int newActivityId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty())
-            {
-                msgs = new SystemMessages();
-            }
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var awu = new ActivityWebUser()
             {

@@ -167,9 +167,8 @@ namespace AfterSchoolLibrary
         public Activity GetActivity(DatabaseConnection dc = null)
         {
             if (_Activity.IsEmpty())
-            {
                 _Activity = Activity.Load(this.ActivityId.Value, dc);
-            }
+
             return _Activity;
         }
 

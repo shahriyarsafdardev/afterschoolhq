@@ -186,19 +186,15 @@ namespace AfterSchoolLibrary
         public Activity ToActivity(bool loadFromDb = false, DatabaseConnection dc = null)
         {
             if (loadFromDb)
-            {
                 return Activity.Load(this.ActivityId.Value, dc);
-            }
-            else
+            
+            return new Activity()
             {
-                return new Activity()
-                {
-                    ID = ActivityId,
-                    Name = ActivityName,
-                    AccountId = ActivityAccountId,
-                    Uid = ActivityUid
-                };
-            }
+                ID = ActivityId,
+                Name = ActivityName,
+                AccountId = ActivityAccountId,
+                Uid = ActivityUid
+            };
         }
 
         public List<AttendanceRegistrant> GetAttendanceRegistrants(DatabaseConnection dc = null)

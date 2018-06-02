@@ -149,10 +149,14 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var cart = new Cart();
-            cart.RegistrationId = registrationId;
-            cart.CreateDate = cart.LastModifiedDate = DateTime.UtcNow;
-            cart.CreatedBy = cart.LastModifiedBy = 0;
+            var cart = new Cart
+            {
+                RegistrationId = registrationId,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = 0,
+                LastModifiedBy = 0
+            };
             msgs.AddRange(cart.Save());
 
             return cart;
@@ -169,23 +173,27 @@ namespace AfterSchoolLibrary
 
             if (this.GetCartItems(dc).Where(x => x.ActivityId == activityId && x.Day == day).Count() == 0)
             {
-                var item = new CartItem();
-                item.CartId = this.ID;
-                item.ActivityId = activityId;
-                item.Day = day;
-                item.RegistrantActivityId = registrantActivityId;
-                item.CreateDate = item.LastModifiedDate = DateTime.UtcNow;
-                item.CreatedBy = item.LastModifiedBy = 0;
+                var item = new CartItem
+                {
+                    CartId = this.ID,
+                    ActivityId = activityId,
+                    Day = day,
+                    RegistrantActivityId = registrantActivityId,
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedDate = DateTime.UtcNow,
+                    CreatedBy = 0,
+                    LastModifiedBy = 0
+                };
                 msgs.AddRange(item.Save(dc));
 
                 //force reload
                 this.ResetCartItems();
                 return item;
             }
-            else
-            {
-                return this.GetCartItems(dc).Where(x => x.ActivityId == activityId && x.Day == day).First();
-            }
+
+            return this.GetCartItems(dc)
+                .Where(x => x.ActivityId == activityId && x.Day == day)
+                .First();
 
         }
 
@@ -193,9 +201,8 @@ namespace AfterSchoolLibrary
         public List<CartItem> GetCartItems(DatabaseConnection dc = null)
         {
             if (_CartItems.IsEmpty())
-            {
                 _CartItems = CartItem.LoadByCartId(this.ID.Value, dc);
-            }
+
             return _CartItems;
         }
 
