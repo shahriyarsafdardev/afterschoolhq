@@ -484,15 +484,17 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(currentUser.GetRegistrants());
         }
 
+        // How to update activity
         [Fact]
         public void isActiveForTest()
         {
-            var currentUser = new WebUser() { };
+            var currentUser = new WebUser() {IsActive = true };
             currentUser.Save(dc);
-            var id = currentUser.ID;
+            var id = currentUser.ID.Value;
 
             var a = new Account() { CreatedBy = id};
-            currentUser.UpdateLastActivity(dc);
+            msgs.AddRange(a.Save(dc));
+            msgs.AddRange(a.AddUser(currentUser, UserType.ActivityLeader,id,dc));
 
             Assert.True(currentUser.IsActiveFor(a,dc));
         }
@@ -500,16 +502,55 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetActivityWebUserTest()
         {
-            var currentUser = new WebUser() { };
+            var currentUser = new WebUser() {IsActive = true };
             currentUser.Save(dc);
-            var id = currentUser.ID;
+            var id = currentUser.ID.Value;
 
-            var a = new Activity() { };
-            currentUser.UpdateLastActivity(dc);
+            var account = new Account() { };
+            account.Save(dc);
+            account.AddUser(currentUser, UserType.ActivityLeader, id, dc);
+
+            var activity = new Activity() { CreatedBy = id};
+            activity.Save(dc);
+
+            var awu = new ActivityWebUser();
+            awu.ActivityId = activity.ID;
+            awu.WebUserId = currentUser.ID;
+            awu.CreateDate = DateTime.UtcNow;
+            awu.CreatedBy = currentUser.ID;
+            awu.Save(dc);
 
 
-            Assert.NotNull(currentUser.GetActivityWebUser(a,dc));
+            Assert.NotNull(currentUser.GetActivityWebUser(activity,dc));
         }
+
+        [Fact]
+        public void isActivityLeaderTest()
+        {
+            var currentUser = new WebUser() { IsActive = true };
+            currentUser.Save(dc);
+            var id = currentUser.ID.Value;
+
+            var a = new Account() { CreatedBy = id };
+            msgs.AddRange(a.Save(dc));
+            msgs.AddRange(a.AddUser(currentUser, UserType.ActivityLeader, id, dc));
+            var aid = a.ID;
+
+            var testActivity = new Activity() { AccountId = aid };
+            testActivity.Save(dc);
+
+            var awu = new ActivityWebUser();
+            awu.ActivityId = testActivity.ID;
+            awu.WebUserId = currentUser.ID;
+            awu.CreateDate = DateTime.UtcNow;
+            awu.CreatedBy = currentUser.ID;
+            awu.IsLeader = true;
+            awu.Save(dc);
+
+
+            Assert.True(currentUser.IsActivityLeader(testActivity, dc));
+        }
+
 
 
 
