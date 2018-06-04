@@ -548,7 +548,6 @@ namespace AfterSchoolLibraryTests
             Assert.True(currentUser.GetRegistrants(dc).IsNotEmpty());
         }
 
-
         [Fact]
         public void isActiveForTest()
         {
@@ -614,7 +613,6 @@ namespace AfterSchoolLibraryTests
 
             Assert.True(currentUser.IsActivityLeader(testActivity, dc));
         }
-
 
 
 
