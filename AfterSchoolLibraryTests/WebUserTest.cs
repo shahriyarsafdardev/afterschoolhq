@@ -386,7 +386,6 @@ namespace AfterSchoolLibraryTests
             Assert.True(currentUser.GetAccounts(dc).Contains(testAccount));
         }
 
-        //TODO: is there a way to remove an account from a User? and finish below
         [Fact]
         public void GetUserTypeNotSetTest()
         {
@@ -554,7 +553,6 @@ namespace AfterSchoolLibraryTests
             var currentUser = new WebUser() { };
             currentUser.Save(dc);
             var reg = currentUser.CreateRegistrant(RegistrantType.Individual, true, msgs, dc);
-
 
             Assert.NotNull(currentUser.GetRegistrants());
         }
