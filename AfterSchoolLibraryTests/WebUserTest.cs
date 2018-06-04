@@ -484,5 +484,36 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(currentUser.GetRegistrants());
         }
 
+        [Fact]
+        public void isActiveForTest()
+        {
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+            var id = currentUser.ID;
+
+            var a = new Account() { CreatedBy = id};
+            currentUser.UpdateLastActivity(dc);
+
+            Assert.True(currentUser.IsActiveFor(a,dc));
+        }
+
+        [Fact]
+        public void GetActivityWebUserTest()
+        {
+            var currentUser = new WebUser() { };
+            currentUser.Save(dc);
+            var id = currentUser.ID;
+
+            var a = new Activity() { };
+            currentUser.UpdateLastActivity(dc);
+
+
+            Assert.NotNull(currentUser.GetActivityWebUser(a,dc));
+        }
+
+
+
+
+
     }
 }
