@@ -380,10 +380,14 @@ namespace AfterSchoolLibraryTests
             currentUser.Save(dc);
             var id = currentUser.ID.Value;
 
+            var cu = new AccountWebUser() { IsActive = true};
+            cu.Save(dc);
+
             var testAccount = new Account() { };
             currentUser.Save(dc);
             testAccount.AddUser(currentUser, UserType.Parent, id, dc);
-            Assert.True(currentUser.GetAccounts(dc).Contains(testAccount));
+
+            Assert.NotNull(currentUser.GetAccounts(dc));
         }
 
         [Fact]
@@ -552,12 +556,14 @@ namespace AfterSchoolLibraryTests
         {
             var currentUser = new WebUser() { };
             currentUser.Save(dc);
+
+
             var reg = currentUser.CreateRegistrant(RegistrantType.Individual, true, msgs, dc);
 
-            Assert.NotNull(currentUser.GetRegistrants());
+            Assert.True(currentUser.GetRegistrants(dc).IsNotEmpty());
         }
 
-        // How to update activity
+
         [Fact]
         public void isActiveForTest()
         {

@@ -104,8 +104,6 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["Abbreviation"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
-
             return msgs;
         }
 
