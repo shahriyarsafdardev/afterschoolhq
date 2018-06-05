@@ -430,9 +430,9 @@ namespace AfterSchoolLibrary
             return registrant;
         }
 
-        public List<Registrant> GetRegistrants()
+        public List<Registrant> GetRegistrants(DatabaseConnection dc = null)
         {
-            return Registrant.LoadByWebUserIdByIsMaster(this.ID.Value, true);
+            return Registrant.LoadByWebUserIdByIsMaster(this.ID.Value, true, dc);
         }
 
         #endregion
