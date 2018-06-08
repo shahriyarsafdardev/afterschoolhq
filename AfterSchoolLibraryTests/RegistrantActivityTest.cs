@@ -66,7 +66,7 @@ namespace AfterSchoolLibraryTests
 
             registrantActivity = registrantActivity.Reload(dc);
 
-            Assert.NotNull(RegistrantActivity.LoadByActivityId(activity.ID.Value,dc));
+            Assert.Single(RegistrantActivity.LoadByActivityId(activity.ID.Value,dc));
         }
 
         [Fact]
@@ -92,7 +92,7 @@ namespace AfterSchoolLibraryTests
 
             registrantActivity = registrantActivity.Reload(dc);
 
-            Assert.NotNull(RegistrantActivity.LoadByAccountId(account.ID.Value,null,null,dc));
+            Assert.Single(RegistrantActivity.LoadByAccountId(account.ID.Value,null,null,dc));
         }
 
         [Fact]
@@ -105,9 +105,9 @@ namespace AfterSchoolLibraryTests
             registrantActivity.NumberOfSeats = 12;
             registrantActivity.NumberOfWaitingListSeats = 1;
             registrantActivity.NumberOfApplicationSeats = 1;
-            registrantActivity = registrantActivity.Reload(dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
 
-            Assert.NotEqual(0,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value,dc));
+            Assert.NotEqual(0,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrationPeriod.ID.Value,dc));
         }
 
         [Fact]
@@ -115,13 +115,10 @@ namespace AfterSchoolLibraryTests
         {
             var account = Factories.AccountFactory.Create(msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            //var activityGroup = 
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
-            registrantActivity = registrantActivity.Reload(dc);
-
-            Assert.NotNull(RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value, dc));
+            Assert.NotEqual(0 ,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value, dc));
         }
 
         [Fact]
@@ -132,10 +129,12 @@ namespace AfterSchoolLibraryTests
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
-            List<int> list = new List<int>();
-            list.Add(registrantActivity.RegistrationId.Value);
+            var r = registrantActivity.RegistrationId.Value;
 
-            Assert.NotEqual(0,RegistrantActivity.LoadByRegistrationIds(list,dc).Count);
+            List<int> list = new List<int>();
+            list.Add(r);
+
+            Assert.Single(RegistrantActivity.LoadByRegistrationIds(list,dc));
         }
 
         [Fact]
@@ -146,7 +145,7 @@ namespace AfterSchoolLibraryTests
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
-            Assert.NotEqual(0, RegistrantActivity.LoadByRegistrantId(registrant.ID.Value,dc).Count);
+            Assert.Single(RegistrantActivity.LoadByRegistrantId(registrant.ID.Value,dc));
         }
 
         [Fact]
@@ -166,7 +165,7 @@ namespace AfterSchoolLibraryTests
             List<int> list2 = new List<int>();
             list.Add(activity.ID.Value);
 
-            Assert.NotNull(RegistrantActivity.GetByActivityIds(list2,list,s,dc));
+            Assert.Single(RegistrantActivity.GetByActivityIds(list2,list,s,dc));
         }
 
         [Fact]
@@ -177,7 +176,7 @@ namespace AfterSchoolLibraryTests
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
-            Assert.NotNull( registrantActivity.GetRegistrationActivity(dc));
+            Assert.NotNull(registrantActivity.GetRegistrationActivity(dc));
         }
 
         [Fact]
@@ -202,10 +201,10 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+            var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
+            var registrationActivity = Factories.RegistrationActivityFactory.Create(activity, registration, msgs, dc);
 
-            registrantActivity.DeleteRegistrationActivity(dc);
-
-            Assert.NotNull(registrantActivity.CancelRegistration(dc));
+            Assert.True(registrantActivity.CancelRegistration(dc).HasNoErrors());
         }
 
 
@@ -221,7 +220,7 @@ namespace AfterSchoolLibraryTests
 
             registrantActivity.DeleteRegistrationActivity(dc);
 
-            Assert.NotNull(registrantActivity.SendNewRegistrationNotice(account,activity,dc));
+            Assert.True(registrantActivity.SendNewRegistrationNotice(account,activity,dc).HasNoErrors());
         }
 
     }
