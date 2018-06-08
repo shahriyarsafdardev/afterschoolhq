@@ -859,29 +859,6 @@ loadmethod: AccountPackageId|FeatureTypeId
 
 [begin]
 type: Class
-name: AccountInvoice
-inherits: BasicObjectWithModified
-property: AccountPackageId, int?, Int
-property: AccountId, int?, Int
-property: Uid, Guid, UniqueIdentifier
-join: AccountPackage.PackageId, PackageId, InnerJoin
-join: Package.ID, AccountPackage.PackageId, InnerJoin
-joinproperty: AccountPackage.PackageId, int?, Int
-joinproperty: AccountPackage.StartDate, DateTime?, DateTime
-joinproperty: AccountPackage.EndDate, DateTime?, DateTime
-joinproperty: AccountPackage.TrialStartDate, DateTime?, DateTime
-joinproperty: AccountPackage.TrialEndDate, DateTime?, DateTime
-joinproperty: Package.Name, string, NVarChar
-joinproperty: Package.MaxActivities, string, NVarChar
-joinproperty: Package.MaxRegistrants, string, NVarChar
-joinproperty: Package.MaxUploadSpace, string, NVarChar
-loadmethod: AccountPackageId, List<>
-loadmethod: AccountId, List<>
-loadmethod: Uid
-[end]
-
-[begin]
-type: Class
 name: AccountPayment
 inherits: BasicObjectWithModified
 property: Amount, decimal?, Decimal

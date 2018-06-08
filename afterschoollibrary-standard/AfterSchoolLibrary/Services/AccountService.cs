@@ -214,11 +214,6 @@ namespace AfterSchoolLibrary
             return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc);
         }
 
-        public static List<AccountInvoice> GetInvoices(this Account account, DatabaseConnection dc = null)
-        {
-            return AccountInvoice.LoadByAccountId(account.ID.Value, dc);
-        }
-
         public static AccountPackage GetActiveAccountPackage(this Account account, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountIdByIsActive(account.ID.Value, true, dc);

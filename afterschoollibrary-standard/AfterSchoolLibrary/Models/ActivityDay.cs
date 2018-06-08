@@ -91,7 +91,13 @@ namespace AfterSchoolLibrary
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityDay).Name);
+			var msgs = new SystemMessages();
+
+			
+			if (msgs.HasNoErrors())
+				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityDay).Name));
+
+			return msgs;
         }
 
         public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
