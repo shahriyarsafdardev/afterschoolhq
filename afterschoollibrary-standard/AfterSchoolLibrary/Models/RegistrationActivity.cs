@@ -45,7 +45,6 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityUid", typeof(Activity).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "Activity");
 				_dp.Add(className, "ActivityAccountId", typeof(Activity).Name, "AccountId", System.Data.SqlDbType.Int, "Activity");
 				_dp.Add(className, "ActivityCostPerRegistrant", typeof(Activity).Name, "CostPerRegistrant", System.Data.SqlDbType.Decimal, "Activity");
-				_dp.Add(className, "ActivityConfirmationMessage", typeof(Activity).Name, "ConfirmationMessage", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityIsArchived", typeof(Activity).Name, "IsArchived", System.Data.SqlDbType.Bit, "Activity");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
 				
