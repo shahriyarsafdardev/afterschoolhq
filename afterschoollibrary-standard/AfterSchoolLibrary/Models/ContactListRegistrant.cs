@@ -96,7 +96,7 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.RegistrantId.IsEmpty())
-				msgs.Add("RegistrantId is required", MessageType.Error);
+				msgs.Add("RegistrantId is required on ContactListRegistrant object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ContactListRegistrant).Name));

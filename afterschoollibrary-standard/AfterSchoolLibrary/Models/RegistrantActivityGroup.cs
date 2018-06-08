@@ -116,9 +116,9 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.RegistrantId.IsEmpty())
-				msgs.Add("RegistrantId is required", MessageType.Error);
+				msgs.Add("RegistrantId is required on RegistrantActivityGroup object", MessageType.Error);
 			if (this.ActivityGroupId.IsEmpty())
-				msgs.Add("ActivityGroupId is required", MessageType.Error);
+				msgs.Add("ActivityGroupId is required on RegistrantActivityGroup object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantActivityGroup).Name));

@@ -177,7 +177,7 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.AccountId.IsEmpty())
-				msgs.Add("AccountId is required", MessageType.Error);
+				msgs.Add("AccountId is required on Activity object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Activity).Name));

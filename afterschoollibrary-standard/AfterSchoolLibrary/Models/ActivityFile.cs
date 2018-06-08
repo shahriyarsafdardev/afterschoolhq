@@ -100,7 +100,7 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.FileId.IsEmpty())
-				msgs.Add("FileId is required", MessageType.Error);
+				msgs.Add("FileId is required on ActivityFile object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityFile).Name));

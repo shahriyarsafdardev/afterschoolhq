@@ -151,11 +151,11 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.FormId.IsEmpty())
-				msgs.Add("FormId is required", MessageType.Error);
+				msgs.Add("FormId is required on ActivityForm object", MessageType.Error);
 			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required", MessageType.Error);
+				msgs.Add("ActivityId is required on ActivityForm object", MessageType.Error);
 			if (this.AccountId.IsEmpty())
-				msgs.Add("AccountId is required", MessageType.Error);
+				msgs.Add("AccountId is required on ActivityForm object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityForm).Name));
