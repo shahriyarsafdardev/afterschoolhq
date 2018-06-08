@@ -38,7 +38,7 @@ namespace AfterSchoolLibraryTests
             var a = new Registrant { };
             a.Save(dc);
             var id = a.ID.Value;
-            Assert.NotNull(Activity.Load(id, dc));
+            Assert.NotNull(Registrant.Load(id, dc));
         }
 
         [Fact]
