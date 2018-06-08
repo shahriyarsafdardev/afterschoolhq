@@ -715,7 +715,6 @@ joinproperty: Activity.Name, string, NVarChar
 joinproperty: Activity.Uid, Guid, UniqueIdentifier
 joinproperty: Activity.AccountId, int?, Int
 joinproperty: Activity.CostPerRegistrant, decimal?, Decimal
-joinproperty: Activity.ConfirmationMessage, string, NVarChar
 joinproperty: Activity.IsArchived, bool, Bit
 joinproperty: ActivityGroup.IsArchived, bool, Bit
 [end]

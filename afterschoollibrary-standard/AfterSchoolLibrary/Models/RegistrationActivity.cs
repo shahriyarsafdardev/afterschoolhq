@@ -21,7 +21,6 @@ namespace AfterSchoolLibrary
 		public Guid ActivityUid { get { return (Guid)MDV["ActivityUid"].Value; } }
 		public int? ActivityAccountId { get { return (int?)MDV["ActivityAccountId"].Value; } }
 		public decimal? ActivityCostPerRegistrant { get { return (decimal?)MDV["ActivityCostPerRegistrant"].Value; } }
-		public string ActivityConfirmationMessage { get { return (string)MDV["ActivityConfirmationMessage"].Value; } }
 		public bool ActivityIsArchived { get { return (bool)MDV["ActivityIsArchived"].Value; } }
 		public bool ActivityGroupIsArchived { get { return (bool)MDV["ActivityGroupIsArchived"].Value; } }
 		
