@@ -2,31 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 using AfterSchoolLibrary;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibraryTests
 {
-    public class WebUserTest : IDisposable
+    public class WebUserTest : BaseTest
     {
-        DatabaseConnection dc = null;
-        SystemMessages msgs = null;
-
-        public WebUserTest()
+        public WebUserTest(ITestOutputHelper output) : base(output)
         {
-            AfterSchoolLibrary.Utilities.InitializeApp();
-            dc = new DatabaseConnection(Database.Credentials.ConnectionString);
-            msgs = new SystemMessages();
-            dc.Open();
-            dc.BeginTransaction();
-        }
-
-        public void Dispose()
-        {
-            dc.RollbackTransaction();
-            dc.Close();
-            dc.Dispose();
         }
 
         [Fact]

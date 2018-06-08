@@ -28,21 +28,14 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ToActivitydbTest()
         {
-            var account = new Account();
-            msgs.AddRange(account.Save(dc));
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var a = new Activity() { AccountId = account.ID };
-            msgs.AddRange(a.Save(dc));
+            registrantActivity = registrantActivity.Reload(dc);
 
-            var reg = new Registrant() { };
-            msgs.AddRange(reg.Save(dc));
-
-            var ra = new RegistrantActivity { RegistrantId = reg.ID, ActivityId = a.ID };
-            msgs.AddRange(ra.Save(dc));
-
-            ra = ra.Reload(dc);
-
-            Assert.NotNull(ra.ToActivity(false));
+            Assert.NotNull(registrantActivity.ToActivity(false));
         }
 
         [Fact]
