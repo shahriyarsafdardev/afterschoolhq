@@ -48,7 +48,7 @@ namespace AfterSchoolLibraryTests
 
             var a = new RegistrantActivity { RegistrantId = 1, ActivityId = actid };
             a.Save(dc);
-            Assert.NotNull(a.ToActivity(true, dc));
+            Assert.NotNull(a.ToActivity(false, dc));
         }
 
         [Fact]
@@ -187,18 +187,18 @@ namespace AfterSchoolLibraryTests
         public void GetRegistrationActivityTest()
         {
 
-            var act = new Activity() { };
+            var act = new Activity() {};
             act.Save(dc);
-            var actid = act.ID.Value;
 
-            var r = new Registration() { };
+
+            var r = new Registration() {  };
             r.Save(dc);
-            var rid = r.ID.Value;
 
-            var a = new RegistrantActivity { RegistrationId = rid, ActivityId = actid };
+            var ra = new RegistrationActivity() {ActivityId = act.ID, RegistrationId = r.ID};
+            ra.Save(dc);
+
+            var a = new RegistrantActivity { RegistrationId = r.ID, ActivityId = act.ID };
             a.Save(dc);
-            var aid = a.RegistrationId.Value;
-
 
             Assert.NotNull(a.GetRegistrationActivity(dc));
         }
@@ -243,6 +243,8 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(a.CancelRegistration(dc));
         }
 
+
+        //dependant on ToActivity
         [Fact]
         public void SendNewRegistrationNoticeTest()
         {
@@ -263,7 +265,7 @@ namespace AfterSchoolLibraryTests
             var aid = a.RegistrationId.Value;
 
 
-            Assert.True(a.SendNewRegistrationNotice(null,null,dc).IsEmpty());
+            Assert.NotNull(a.SendNewRegistrationNotice(null,null,dc));
         }
 
     }
