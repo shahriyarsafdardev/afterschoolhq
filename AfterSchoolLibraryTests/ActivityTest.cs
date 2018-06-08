@@ -20,175 +20,146 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
-            Assert.NotNull(Activity.Load(id, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            Assert.NotNull(Activity.Load(activity.ID.Value, dc));
         }
-
-        [Fact]
-        public void LoadLongTest()
-        {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
-            var c = new System.Collections.Hashtable();
-            Assert.NotNull(Account.Load(c, 0, c.Count, dc));
-        }
-
 
         [Fact]
         public void GetCountTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
-            var c = new System.Collections.Hashtable();
-            Assert.NotNull(Activity.GetCount(c, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            Assert.Equal(1,Activity.GetCount(null, dc));
         }
 
         [Fact]
         public void SaveTest()
         {
-            var a = new Activity() { };
-            Assert.NotNull(a.Save(dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            Assert.True(activity.Save(dc).HasNoErrors());
         }
 
         [Fact]
         public void DeleteTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
-            a.Delete(dc);
-            Assert.Null(Activity.Load(id, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            activity.Delete(dc);
+            Assert.Null(Activity.Load(activity.ID.Value, dc));
         }
 
         [Fact]
         public void CreateTest()
         {
-            Assert.NotNull(Activity.Create(dc));
+            Assert.True(Activity.Create(dc).HasNoErrors());
         }
 
         [Fact]
         public void AlterTest()
         {
-            Assert.NotNull(Activity.Alter(dc));
+            Assert.True(Activity.Alter(dc).HasNoErrors());
         }
 
 
         [Fact]
         public void ReloadTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            Assert.NotNull(a.Reload(dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            Assert.NotNull(activity.Reload(dc));
         }
 
         [Fact]
         public void LoadByAccountIdTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
-            Assert.NotNull(Activity.LoadByAccountId(id, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            Assert.Single(Activity.LoadByAccountId(account.ID.Value, dc));
         }
 
         [Fact]
         public void LoadByAccountIdByIsPublishedTest()
         {
-            var a = new Activity() { IsPublished = true };
-            a.Save(dc);
-            var id = a.ID.Value;
-            Assert.NotNull(Activity.LoadByAccountIdByIsPublished(id, true, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            Assert.NotNull(Activity.LoadByAccountIdByIsPublished(account.ID.Value, true, dc));
         }
 
         [Fact]
         public void LoadByLocationIdTest()
         {
-            var a = new Activity() { LocationId = 1234 };
-            a.Save(dc);
-            var id = a.LocationId.Value;
-            Assert.NotNull(Activity.LoadByLocationId(id, dc));
-        }
-
-        [Fact]
-        public void LoadByArchiveIdTest()
-        {
-            var a = new Activity() { ArchiveId = 1234 };
-            a.Save(dc);
-            var id = a.ArchiveId.Value;
-            Assert.NotNull(Activity.LoadByArchiveId(id, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var location = new Location() {};
+            location.Save(dc);
+            activity.LocationId = location.ID.Value;
+            Assert.NotNull(Activity.LoadByLocationId(activity.LocationId.Value, dc));
         }
 
         [Fact]
         public void LoadByUidTest()
         {
-            var g = new Guid();
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            //activity.Uid = new Guid() { };
 
-            var a = new Activity() { Uid = g };
-            a.Save(dc);
-            var id = a.Uid;
-            Assert.NotNull(Activity.LoadByUid(id, dc));
-        }
-
-        [Fact]
-        public void LoadByAccountIdByArchiveIdTest()
-        {
-            var a = new Activity() { ParentActivityId = 1234 };
-            a.Save(dc);
-            var id = a.ParentActivityId.Value;
-            Assert.NotNull(Activity.LoadByParentActivityId(id, dc));
+            Assert.NotNull(Activity.LoadByUid(activity.Uid, dc));
         }
 
         [Fact]
         public void LoadByActivityGroupIdTest()
         {
-            var a = new Activity() { ActivityGroupId = 1234 };
-            a.Save(dc);
-            var id = a.ActivityGroupId.Value;
-            Assert.NotNull(Activity.LoadByActivityGroupId(id, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var activityGroup = new ActivityGroup() { };
+            activity.ActivityGroupId = activityGroup.ID.Value;
+
+            Assert.Single(Activity.LoadByActivityGroupId(activity.ActivityGroupId.Value, dc));
         }
 
         [Fact]
         public void LoadByActivityScheduleIdTest()
         {
-            var a = new Activity() { ActivityScheduleId = 1234 };
-            a.Save(dc);
-            var id = a.ActivityScheduleId.Value;
-            Assert.NotNull(Activity.LoadByActivityScheduleId(id, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            activity.ActivityScheduleId = 12;
+            Assert.NotNull(Activity.LoadByActivityScheduleId(activity.ActivityScheduleId.Value, dc));
         }
 
         [Fact]
         public void LoadByUniqueNameByAccountIdTest()
         {
-            var a = new Activity() { UniqueName = "test", ID = 1};
-            a.Save(dc);
-            var id = a.ID.Value;
-            var name = a.UniqueName;
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            activity.UniqueName = "test";
 
-            Assert.NotNull(Activity.LoadByUniqueNameByAccountId(name, id, dc));
+            Assert.NotNull(Activity.LoadByUniqueNameByAccountId(activity.UniqueName, account.ID.Value, dc));
         }
 
         [Fact]
         public void LoadListTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
-            var list = new List<int> { 1, 2, 3, 4, 5,id };
-            Assert.NotNull(Activity.LoadList(list, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+
+            List<int> list = new List<int>();
+            list.Add(activity.ID.Value);
+
+
+            Assert.Single(Activity.LoadList(list, dc));
         }
 
         [Fact]
         public void GetCountByAccountIdTest()
         {
 
-            var a = new Activity() { AccountId = 1234, IsArchived = true, IsDeleted = false };
-            a.Save(dc);
-            var id = a.AccountId.Value;
-            var actid = a.ActivityGroupId;
-            Assert.NotNull(Activity.GetCountByAccountId(id, actid, true, false, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var activityGroup = new ActivityGroup() { };
+            activity.ActivityGroupId = activityGroup.ID.Value;
+            Assert.Equal(1,Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, false, false, dc));
         }
 
         [Fact]
@@ -205,10 +176,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void SetIsPublishedTest()
         {
-            var a = new Activity() { IsPublished = false };
-            a.Save(dc);
-            a.SetIsPublished(true, 1234, dc);
-            Assert.True(a.IsPublished);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            activity.SetIsPublished(true, account.ID.Value, dc);
+            Assert.True(activity.IsPublished);
         }
 
         /*
@@ -225,91 +196,87 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetDaysTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
 
-            var d = new ActivityDay() {ActivityId = id };
+            var d = new ActivityDay() {ActivityId = activity.ID.Value };
             d.Save(dc);
-
-            Assert.Equal(1,a.GetDays(dc).Count);
+            Assert.Equal(1,activity.GetDays(dc).Count);
         }
 
         [Fact]
         public void GetDaysOfTheWeekTest()
         {
 
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+
+            var d = new ActivityDay() { ActivityId = activity.ID.Value };
+            d.Save(dc);
 
             var s = new DateTime(1, 1, 1, 1, 1, 1);
             var e = new DateTime(7, 7, 7, 7, 7, 7);
 
             //a.AddNewSchedule("mondays","meets every monday",true,s,e,e,e,"dates",id,id,msgs,dc);
 
-            Assert.NotNull(a.GetDaysOfTheWeek(dc));
+            Assert.Single(activity.GetDaysOfTheWeek(dc));
         }
 
         [Fact]
         public void GetRegistrantsTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            registrant.AccountId = account.ID.Value;
 
-            //var r = new RegistrantActivity() { ActivityId = id, NumberOfApplicationSeats=1,NumberOfSeats = 1, NumberOfWaitingListSeats=1 };
-            //r.Save(dc);
-
-            Assert.NotNull(a.GetRegistrants(dc));
+            Assert.Single(activity.GetRegistrants(dc));
         }
 
         [Fact]
         public void GetRegistrantsActivitiesTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
-            //var r = new RegistrantActivity() { ActivityId = id, NumberOfApplicationSeats=1,NumberOfSeats = 1, NumberOfWaitingListSeats=1 };
-            //r.Save(dc);
-
-            Assert.NotNull(a.GetRegistrantActivities(dc));
+            Assert.Single(activity.GetRegistrantActivities(dc));
         }
 
         [Fact]
         public void GetRegistrantsActivitiesLongTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            Assert.NotNull(a.GetRegistrantActivities(true, dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+
+            Assert.Single(activity.GetRegistrantActivities(true, dc));
         }
 
         [Fact]
         public void GetRegistrantsCountTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
-            var id = a.ID.Value;
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
-            var r = new RegistrantActivity() { ActivityId = id, NumberOfApplicationSeats=1,NumberOfSeats = 1, NumberOfWaitingListSeats=1 };
-            r.Save(dc);
-
-            Assert.Equal(0, a.GetRegistrantCount(dc));
+            Assert.Equal(1, activity.GetRegistrantCount(dc));
         }
 
         [Fact]
         public void GetRegistrantCountByApplicationTypeTest()
         {
-            var a = new Activity() { };
-            a.Save(dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
-            var r = new RegistrantActivity() { };
-            r.Save(dc);
-            var rid = r.ID.Value;
+            var n = new RegistrantAssignment() { RegistrantId = registrant.ID.Value };
 
-            var n = new RegistrantAssignment() { RegistrantId = rid };
-
-            Assert.Equal(0, a.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc));
+            Assert.Equal(1, activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc));
         }
         //how to make seats avaible
         [Fact]
