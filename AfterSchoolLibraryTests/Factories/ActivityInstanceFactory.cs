@@ -14,7 +14,7 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static ActivityInstance Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new ActivityInstance() { ActivityId = activity.ID };
+            var obj = new ActivityInstance() { };
             msgs.AddRange(obj.Save(dc));
             return obj;
         }

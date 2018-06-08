@@ -20,10 +20,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ToRegistrantTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity = registrantActivity.Reload(dc);
 
@@ -33,10 +33,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ToActivitydbTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity = registrantActivity.Reload(dc);
 
@@ -46,10 +46,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ToActivityTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity = registrantActivity.Reload(dc);
 
@@ -59,10 +59,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByActivityIdTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity = registrantActivity.Reload(dc);
 
@@ -72,10 +72,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetSeatCountByActivityIdTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity = registrantActivity.Reload(dc);
 
@@ -85,10 +85,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetSeatCountByAccountIdTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity = registrantActivity.Reload(dc);
 
@@ -98,10 +98,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetSeatCountByRegistrationPeriodIdTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             registrantActivity.NumberOfSeats = 12;
             registrantActivity.NumberOfWaitingListSeats = 1;
             registrantActivity.NumberOfApplicationSeats = 1;
@@ -113,11 +113,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetSeatCountByActivityGroupIdTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             //var activityGroup = 
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity = registrantActivity.Reload(dc);
 
@@ -127,10 +127,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByRegistrationIdsTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             List<int> list = new List<int>();
             list.Add(registrantActivity.RegistrationId.Value);
@@ -141,10 +141,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByRegistrantIdTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             Assert.NotEqual(0, RegistrantActivity.LoadByRegistrantId(registrant.ID.Value,dc).Count);
         }
@@ -152,10 +152,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetByActivityIdsTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             activity.StartDateTime = new DateTime(0, 0, 0, 0, 0, 0);
             var s = activity.StartDateTime.Value;
@@ -172,10 +172,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetRegistrationActivityTest()
         {
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             Assert.NotNull( registrantActivity.GetRegistrationActivity(dc));
         }
@@ -184,10 +184,10 @@ namespace AfterSchoolLibraryTests
         public void DeleteRegistrationActivityTest()
         {
 
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity.DeleteRegistrationActivity(dc);
 
@@ -198,10 +198,10 @@ namespace AfterSchoolLibraryTests
         public void CancelRegistrationTest()
         {
 
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity.DeleteRegistrationActivity(dc);
 
@@ -214,10 +214,10 @@ namespace AfterSchoolLibraryTests
         public void SendNewRegistrationNoticeTest()
         {
 
-            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
-            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
-            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
 
             registrantActivity.DeleteRegistrationActivity(dc);
 
