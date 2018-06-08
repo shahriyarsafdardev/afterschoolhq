@@ -123,7 +123,17 @@ namespace AfterSchoolLibrary
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return base._Save2(DatabaseQuery, dc, ObjectMap, typeof(AccountWebUser).Name);
+			var msgs = new SystemMessages();
+
+			if (this.WebUserId.IsEmpty())
+				msgs.Add("WebUserId is required", MessageType.Error);
+			if (this.AccountId.IsEmpty())
+				msgs.Add("AccountId is required", MessageType.Error);
+			
+			if (msgs.HasNoErrors())
+				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(AccountWebUser).Name));
+
+			return msgs;
         }
 
         public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)

@@ -148,7 +148,19 @@ namespace AfterSchoolLibrary
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityForm).Name);
+			var msgs = new SystemMessages();
+
+			if (this.FormId.IsEmpty())
+				msgs.Add("FormId is required", MessageType.Error);
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required", MessageType.Error);
+			if (this.AccountId.IsEmpty())
+				msgs.Add("AccountId is required", MessageType.Error);
+			
+			if (msgs.HasNoErrors())
+				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityForm).Name));
+
+			return msgs;
         }
 
         public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)

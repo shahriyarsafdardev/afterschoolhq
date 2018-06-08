@@ -116,7 +116,17 @@ namespace AfterSchoolLibrary
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return base._Save2(DatabaseQuery, dc, ObjectMap, typeof(AttendanceRegistrant).Name);
+			var msgs = new SystemMessages();
+
+			if (this.RegistrantId.IsEmpty())
+				msgs.Add("RegistrantId is required", MessageType.Error);
+			if (this.AttendanceId.IsEmpty())
+				msgs.Add("AttendanceId is required", MessageType.Error);
+			
+			if (msgs.HasNoErrors())
+				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(AttendanceRegistrant).Name));
+
+			return msgs;
         }
 
         public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)

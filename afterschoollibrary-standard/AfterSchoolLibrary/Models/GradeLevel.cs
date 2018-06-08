@@ -82,7 +82,13 @@ namespace AfterSchoolLibrary
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return base._Save2(DatabaseQuery, dc, ObjectMap, typeof(GradeLevel).Name);
+			var msgs = new SystemMessages();
+
+			
+			if (msgs.HasNoErrors())
+				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(GradeLevel).Name));
+
+			return msgs;
         }
 
         public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -103,6 +109,8 @@ namespace AfterSchoolLibrary
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Abbreviation"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			
 
             return msgs;
         }
