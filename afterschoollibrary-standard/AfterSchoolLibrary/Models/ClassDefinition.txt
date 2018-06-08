@@ -52,7 +52,6 @@ name: Activity
 inherits: BaseEventWithAddress
 property: SeatsAvailable, int?, Int
 property: AccountId, int?, Int
-property: ArchiveId, int?, Int
 property: AgeStart, int?, Int
 property: AgeEnd, int?, Int
 property: GradeLevelStart, int?, Int
@@ -95,9 +94,7 @@ joinproperty: ActivityGroup.Name, string, NVarChar
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
-loadmethod: ArchiveId, List<>
 loadmethod: Uid
-loadmethod: AccountId|ArchiveId
 loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>

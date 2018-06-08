@@ -31,7 +31,8 @@ namespace AfterSchoolLibraryTests
 
         public void Dispose()
         {
-            _output.WriteLine(msgs.RenderMessageList(MessageOutputType.Text));
+            if (msgs.Count > 0)
+                _output.WriteLine(msgs.RenderMessageList(MessageOutputType.Text));
 
             dc.RollbackTransaction();
             dc.Close();

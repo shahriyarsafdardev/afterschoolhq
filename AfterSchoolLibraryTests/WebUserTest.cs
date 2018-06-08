@@ -18,10 +18,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ReloadTest()
         {
-            var testUid = new System.Guid();
-            var user = new WebUser() { Uid = testUid };
-            user.Save(dc);
-
+            var user = Factories.WebUserFactory.Create(msgs, dc);
             var user2 = user.Reload(dc);
 
             Assert.NotNull(user2);
@@ -30,35 +27,30 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByUidTest()
         {
-            var testUid = new System.Guid();
-            var user = new WebUser() { Uid = testUid  };
-            user.Save(dc);
-
-            var user2 = WebUser.LoadByUid(testUid, dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var user2 = WebUser.LoadByUid(user.Uid, dc);
 
             Assert.NotNull(user2);
         }
 
-        [Fact]
-        public void LoadByUidIsActiveTest()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void LoadByUidIsActiveTest(bool isActive)
         {
-            var testUid = new System.Guid();
-            var user = new WebUser() { Uid = testUid,IsActive = true };
-            user.Save(dc);
-
-            var user2 = WebUser.LoadByUidByIsActive(testUid,true ,dc);
+            var user = Factories.WebUserFactory.Create(isActive, msgs, dc);
+            var user2 = WebUser.LoadByUidByIsActive(user.Uid, isActive, dc);
 
             Assert.NotNull(user2);
         }
 
-        [Fact]
-        public void LoadByIsActiveTest()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void LoadByIsActiveTest(bool isActive)
         {
-            var testUid = new System.Guid();
-            var user = new WebUser() { IsActive = true };
-            user.Save(dc);
-
-            var user2 = WebUser.LoadByIsActive( true, dc);
+            var user = Factories.WebUserFactory.Create(isActive, msgs, dc);
+            var user2 = WebUser.LoadByIsActive(isActive, dc);
 
             Assert.NotNull(user2);
         }
@@ -66,11 +58,13 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByFacebookIdTest()
         {
-            var testid = "test";
-            var user = new WebUser() { FacebookId = testid };
-            user.Save(dc);
+            var testId = "testid";
 
-            var user2 = WebUser.LoadByFacebookId( testid ,dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            user.FacebookId = "testid";
+            msgs.AddRange(user.Save(dc));
+
+            var user2 = WebUser.LoadByFacebookId(testId, dc);
 
             Assert.NotNull(user2);
         }
@@ -78,179 +72,96 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetInviteUrlTest()
         {
-            var testid = "test";
-            var user = new WebUser() { FacebookId = testid };
-            user.Save(dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var url = user.GetInviteUrl(account);
 
-            var testAccount = new Account() { };
-
-            var url = user.GetInviteUrl(testAccount);
-
-            Assert.NotEqual(0,url.Length);
+            Assert.NotEqual(0, url.Length);
         }
 
         [Fact]
         public void LoadByEmailTest()
         {
-            var emailAddress = "darye@reborncode.com";
-
-            var user = new WebUser() { Email = emailAddress };
-            user.Save(dc);
-
-            var user2 = WebUser.LoadByEmail(emailAddress, dc);
+            var user = Factories.WebUserFactory.CreateWithEmail("test@test.com", msgs, dc);
+            var user2 = WebUser.LoadByEmail(user.Email, dc);
 
             Assert.NotNull(user2);
         }
 
-        [Fact]
-        public void IsEmailInUseByAnotherUserPassingTest()
+        [Theory]
+        [InlineData("test1@test.com", "test2@test.com", "test2@test.com", true)]
+        [InlineData("test1@test.com", "test2@test.com", "test3@test.com", false)]
+        public void IsEmailInUseByAnotherUserTest(string email1, string email2, string testEmail, bool result)
         {
-            var emailAddress1 = "test1@test.com";
-            var emailAddress2 = "test2@test.com";
+            var user = Factories.WebUserFactory.CreateWithEmail(email1, msgs, dc);
+            var user2 = Factories.WebUserFactory.CreateWithEmail(email2, msgs, dc);
 
-            var currentUser = new WebUser() { Email = emailAddress1 };
-            currentUser.Save(dc);
-
-            var otherUser = new WebUser() { Email = emailAddress2 };
-            otherUser.Save(dc);
-
-            Assert.True(WebUser.IsEmailInUseByAnotherUser(emailAddress2, currentUser.ID.Value, dc));
+            Assert.True(WebUser.IsEmailInUseByAnotherUser(testEmail, user.ID.Value, dc) == result);
         }
 
-        [Fact]
-        public void IsEmailInUseByAnotherUserFailingTest()
+        [Theory]
+        [InlineData("test1@test.com", "test1@test.com", true)]
+        [InlineData("test1@test.com", "test2@test.com", false)]
+        public void ExistsByEmailTest(string email1, string testEmail, bool result)
         {
-            var emailAddress1 = "test1@test.com";
-            var emailAddress2 = "test2@test.com";
-            var emailAddress3 = "test3@test.com";
+            var user = Factories.WebUserFactory.CreateWithEmail(email1, msgs, dc);
 
-            var currentUser = new WebUser() { Email = emailAddress1 };
-            currentUser.Save(dc);
-
-            var otherUser = new WebUser() { Email = emailAddress2 };
-            otherUser.Save(dc);
-
-            Assert.False(WebUser.IsEmailInUseByAnotherUser(emailAddress3, currentUser.ID.Value, dc));
-        }
-
-        [Fact]
-        public void ExistsByEmailPassingTest()
-        {
-            var emailAddress1 = "test1@test.com";
-
-            var currentUser = new WebUser() { Email = emailAddress1 };
-            currentUser.Save(dc);
-
-            Assert.True(WebUser.ExistsByEmail(emailAddress1, dc));
-        }
-
-        [Fact]
-        public void ExistsByEmailFailingTest()
-        {
-            var emailAddress1 = "test1@test.com";
-            var emailAddress2 = "test2@test.com";
-
-            var currentUser = new WebUser() { Email = emailAddress1 };
-            currentUser.Save(dc);
-
-            Assert.False(WebUser.ExistsByEmail(emailAddress2, dc));
+            Assert.True(WebUser.ExistsByEmail(testEmail, dc) == result);
         }
 
         [Fact]
         public void ExistsByUidPassingTest()
         {
-            var testUID = System.Guid.NewGuid();
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
-            var currentUser = new WebUser() { Uid = testUID };
-            currentUser.Save(dc);
-
-            Assert.True(WebUser.ExistsByUid(testUID, dc));
+            Assert.True(WebUser.ExistsByUid(user.Uid, dc));
         }
 
         [Fact]
         public void ExistsByUidFailingTest()
         {
-            var testUID = System.Guid.NewGuid();
-            var testUID2 = System.Guid.NewGuid();
-            var currentUser = new WebUser() { Uid = testUID2 };
-            currentUser.Save(dc);
-
-            Assert.False(WebUser.ExistsByUid(testUID, dc));
+            Assert.False(WebUser.ExistsByUid(Guid.NewGuid(), dc));
         }
 
         [Fact]
-        public void LoadByUsernamePassingTest()
+        public void LoadByUsernameTest()
         {
-            var testUsername = "test";
-            var testUsername2 = "test2";
-            var currentUser = new WebUser() { Username = testUsername };
-            currentUser.Save(dc);
+            var user = Factories.WebUserFactory.CreateWithUsername("username1", msgs, dc);
 
-            Assert.NotNull(WebUser.LoadByUsername(testUsername, dc));
+            Assert.NotNull(WebUser.LoadByUsername(user.Username, dc));
         }
 
-        [Fact]
-        public void LoadByUsernameFailingTest()
+        [Theory]
+        [InlineData("username1", "password1", "username1", "password1", true)]
+        [InlineData("username1", "password1", "username2", "password1", false)]
+        [InlineData("username1", "password1", "username1", "password2", false)]
+        [InlineData("username1", "password1", "username2", "password2", false)]
+        public void LoginByUsernameTest(string username, string password, string testUsername, string testPassword, bool result)
         {
-            var testUsername = "test";
-            var testUsername2 = "test2";
-            var currentUser = new WebUser() { Username = testUsername };
-            currentUser.Save(dc);
+            var user = Factories.WebUserFactory.CreateWithUsername(username, password, msgs, dc);
 
-            Assert.Null(WebUser.LoadByUsername(testUsername2, dc));
+            Assert.True(WebUser.LoginByUsername(testUsername, testPassword, dc).IsNotEmpty() == result);
         }
 
-        [Fact]
-        public void LoginByUsernamePassingTest()
+        [Theory]
+        [InlineData("test1@test.com", "password1", "test1@test.com", "password1", true)]
+        [InlineData("test1@test.com", "password1", "test2@test.com", "password1", false)]
+        [InlineData("test1@test.com", "password1", "test1@test.com", "password2", false)]
+        [InlineData("test1@test.com", "password1", "test2@test.com", "password2", false)]
+        public void LoginByEmailTest(string email, string password, string testEmail, string testPassword, bool result)
         {
-            var testUsername = "test";
-            var testPassword = "test2";
-            var currentUser = new WebUser() { Username = testUsername, Password = WebUser.EncryptPassword(testPassword) };
-            currentUser.Save(dc);
+            var user = Factories.WebUserFactory.CreateWithEmail(email, password, msgs, dc);
 
-            Assert.NotNull(WebUser.LoginByUsername(testUsername, testPassword, dc));
+            Assert.True(WebUser.LoginByEmail(testEmail, testPassword, dc).IsNotEmpty() == result);
         }
 
-        [Fact]
-        public void LoginByUsernameFailingTest()
+        [Theory]
+        [InlineData("password1")]
+        public void EncryptPasswordTest(string password)
         {
-            var testUsername = "test";
-            var testPassword = "test2";
-            var currentUser = new WebUser() { Username = testUsername, Password = testPassword };
-            currentUser.Save(dc);
+            var passwordEncrypted = WebUser.EncryptPassword(password);
 
-            Assert.Null(WebUser.LoginByUsername(testUsername, "wrong", dc));
-        }
-
-        [Fact]
-        public void LoginByEmailPassingTest()
-        {
-            var testEmail = "test";
-            var testPassword = "test2";
-            var currentUser = new WebUser() { Email = testEmail, Password = WebUser.EncryptPassword(testPassword) };
-            currentUser.Save(dc);
-
-            Assert.NotNull(WebUser.LoginByEmail(testEmail, testPassword, dc));
-        }
-
-        [Fact]
-        public void LoginByEmailFailingTest()
-        {
-            var testEmail = "test";
-            var testPassword = "test2";
-            var currentUser = new WebUser() { Email = testEmail, Password = WebUser.EncryptPassword(testPassword) };
-            currentUser.Save(dc);
-
-            Assert.Null(WebUser.LoginByUsername(testEmail, "wrong", dc));
-        }
-
-        [Fact]
-        public void EncryptPasswordTest()
-        {
-            var testPassword = "test2";
-            var testPasswordEncrypted = WebUser.EncryptPassword(testPassword);
-
-            Assert.NotEqual(testPassword, testPasswordEncrypted);
+            Assert.NotEqual(password, passwordEncrypted);
         }
 
         [Fact]
@@ -263,287 +174,202 @@ namespace AfterSchoolLibraryTests
             Assert.Equal(testPassword, testPasswordDecrypted);
         }
 
-        [Fact]
-        public void SendInviteTest()
+        [Theory]
+        [InlineData("test@test.com", true)]
+        [InlineData("test@test.com@test.com", false)]
+        public void SendInviteTest(string email, bool result)
         {
-            var testUsername = "test";
-            var emailAddress1 = "test1@test.com";
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
-
-            var currentUser = new WebUser() { Username = testUsername };
-            currentUser.Save(dc);
-
-            var testAccount = new Account() { };
-            currentUser.Save(dc);
-
-            Assert.NotNull(currentUser.SendInvite(emailAddress1, "test message", currentUser, testAccount, dc));
+            Assert.True(user.SendInvite(email, "invite message", user, account, dc).HasNoErrors() == result);
         }
 
-        [Fact]
-        public void GetAccountsTest()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        public void GetAccountsTest(int numberOfAccounts)
         {
-            var testUsername = "test";
-            var emailAddress1 = "test1@test.com";
+            var user = Factories.WebUserFactory.Create(true, msgs, dc);
+            for (var i = 0; i < numberOfAccounts; i++)
+            {
+                var account = Factories.AccountFactory.Create(msgs, dc);
+                msgs.AddRange(account.AddUser(user, UserType.Administrator, user.ID.Value, dc));
+            }
 
-
-            var currentUser = new WebUser() { Username = testUsername };
-            currentUser.Save(dc);
-            var id = currentUser.ID.Value;
-
-            var cu = new AccountWebUser() { IsActive = true};
-            cu.Save(dc);
-
-            var testAccount = new Account() { };
-            currentUser.Save(dc);
-            testAccount.AddUser(currentUser, UserType.Parent, id, dc);
-
-            Assert.NotNull(currentUser.GetAccounts(dc));
+            Assert.Equal(numberOfAccounts, user.GetAccounts(dc).Count);
         }
 
-        [Fact]
-        public void GetUserTypeNotSetTest()
-        {
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
-
-            var testAccount = new Account() { };
-            testAccount.Save(dc);
-
-            Assert.Equal(UserType.NotSet, currentUser.GetUserType(testAccount, dc));
-        }
         [Theory]
         [InlineData(UserType.Administrator)]
-        public void GetUserTypeWithTypeTest(UserType ut)
+        [InlineData(UserType.Parent)]
+        public void GetUserTypeTest(UserType ut)
         {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var awu = Factories.AccountWebUserFactory.Create(account, user, ut, true, msgs, dc);
 
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
-            var id = currentUser.ID.Value;
-
-            var testAccount = new Account() { };
-            testAccount.Save(dc);
-            msgs.AddRange(testAccount.AddUser(currentUser, ut, id, dc));
-            var test = currentUser.GetUserType(testAccount, dc);
-
-            Assert.Equal(UserType.Administrator, test);
+            Assert.Equal(ut, user.GetUserType(account, dc));
         }
 
         [Fact]
         public void UpdateLastActivityTest()
         {
-            var testdate = new DateTime() { };
+            var testdate = new DateTime();
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            user.LastActivity = testdate;
+            msgs.AddRange(user.Save(dc));
 
-
-            var currentUser = new WebUser() { LastActivity = testdate };
-            currentUser.Save(dc);
-
-            var pre = currentUser.LastActivity;
-            currentUser.UpdateLastActivity(dc);
-            var post = currentUser.LastActivity;
-
+            var pre = user.LastActivity;
+            msgs.AddRange(user.UpdateLastActivity(dc));
+            var post = user.LastActivity;
 
             Assert.NotEqual(pre, post);
         }
+
         [Fact]
         public void UpdateLastLoginTest()
         {
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
-            var prev = currentUser.LastLogin;
+            var testdate = new DateTime();
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            user.LastLogin = testdate;
+            msgs.AddRange(user.Save(dc));
 
-            currentUser.UpdateLastLogin(dc);
-            var post = currentUser.LastLogin;
+            var pre = user.LastLogin;
+            msgs.AddRange(user.UpdateLastLogin(dc));
+            var post = user.LastLogin;
 
-            Assert.NotEqual(prev, post);
+            Assert.NotEqual(pre, post);
         }
 
-        //cannot test beacuse Feature is not fully implemeted always returns true currently
+        //cannot test because Feature is not fully implemeted always returns true currently
         [Fact]
         public void HasAcessToFeatureFalseTest()
         {
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
-            var id = currentUser.ID.Value;
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
 
-            var testAccount = new Account() { };
-            testAccount.Save(dc);
-            msgs.AddRange(testAccount.AddUser(currentUser, UserType.Parent, id, dc));
+            msgs.AddRange(account.AddUser(user, UserType.Parent, user.ID.Value, dc));
 
-            Assert.False(currentUser.HasAccessToFeature(FeatureType.ManageForms, testAccount, dc));
+            Assert.False(user.HasAccessToFeature(FeatureType.ManageForms, account, dc));
         }
 
         [Fact]
         public void HasAcessToFeatureTrueTest()
         {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
 
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
-            var id = currentUser.ID.Value;
+            msgs.AddRange(account.AddUser(user, UserType.SuperAdmin, user.ID.Value, dc));
 
-            var testAccount = new Account() { };
-            testAccount.Save(dc);
-            msgs.AddRange(testAccount.AddUser(currentUser, UserType.SuperAdmin, id, dc));
-
-            Assert.True(currentUser.HasAccessToFeature(FeatureType.ViewInsights, testAccount, dc));
+            Assert.True(user.HasAccessToFeature(FeatureType.ViewInsights, account, dc));
         }
         [Fact]
         public void GenerateUsernameTest()
         {
             var f = "John";
             var l = "Doe";
+            var username = "JohnDoe";
 
-
-            Assert.NotNull(WebUser.GenerateUsername(f, l, dc));
+            Assert.Equal(username, WebUser.GenerateUsername(f, l, dc));
         }
 
-        [Fact]
-        public void SendVerificationEmailTest()
+        [Theory]
+        [InlineData("test@test.com", true)]
+        [InlineData("test@test.com@test.com", false)]
+        public void SendVerificationEmailTest(string email, bool result)
         {
-
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
-
-
-            Assert.NotNull(currentUser.SendVerificationEmail(true));
+            var user = Factories.WebUserFactory.CreateWithEmail(email, msgs, dc);
+            Assert.True(user.SendVerificationEmail(true).HasNoErrors() == result);
         }
 
         [Fact]
         public void MarkAsVerifiedTest()
         {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            msgs.AddRange(user.MarkAsVerified(dc));
 
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
-            currentUser.MarkAsVerified(dc);
-
-
-            Assert.True(currentUser.VerifiedAccount);
+            Assert.True(user.VerifiedAccount);
         }
 
-        [Fact]
-        public void ChangePasswordTest()
-        { 
-            var currentUser = new WebUser() {Password = "test" };
-            var pre = currentUser.Password;
-            currentUser.Save(dc);
-            currentUser.ChangePassword("new", dc);
-            var post = currentUser.Password;
-
-
-            Assert.NotEqual(pre, post);
-        }
-
-        [Fact]
-        public void SendPasswordResetTokenTest()
+        [Theory]
+        [InlineData("username1", "password1", "password2")]
+        public void ChangePasswordTest(string username, string password, string password2)
         {
-            var currentUser = new WebUser() {};
-            currentUser.Save(dc);
+            var user = Factories.WebUserFactory.CreateWithUsername(username, password, msgs, dc);
+            msgs.AddRange(user.ChangePassword(password2, dc));
 
-            Assert.True(currentUser.SendPasswordResetToken(true, dc).IsNotEmpty());
+            Assert.NotNull(WebUser.LoginByUsername(username, password2, dc));
         }
 
-        [Fact]
-        public void CreateRegistrantTest()
+        [Theory]
+        [InlineData("test@test.com", true)]
+        [InlineData("test@test.com@test.com", false)]
+        public void SendPasswordResetTokenTest(string email, bool result)
         {
-            var currentUser = new WebUser() {};
-            currentUser.Save(dc);
+            var user = Factories.WebUserFactory.CreateWithEmail(email, msgs, dc);
 
-
-            Assert.NotNull(currentUser.CreateRegistrant(RegistrantType.Individual,true,msgs,dc));
+            Assert.True(user.SendPasswordResetToken(true, dc).HasNoErrors() == result);
         }
 
-        [Fact]
-        public void CreateRegistrantWithFieldsTest()
+        [Theory]
+        [InlineData(RegistrantType.Individual, false)]
+        [InlineData(RegistrantType.Individual, true)]
+        [InlineData(RegistrantType.Organization, true)]
+        public void CreateRegistrantTest(RegistrantType rt, bool isMaster)
         {
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var registrant = user.CreateRegistrant(rt, isMaster, msgs, dc);
 
-
-            Assert.True(currentUser.CreateRegistrant(RegistrantType.Individual, true, msgs, dc).IsMaster);
+            Assert.NotNull(registrant);
         }
 
-        [Fact]
-        public void GetRegistrantsTest()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(3)]
+        public void GetRegistrantsTest(int numberOfRegistrants)
         {
-            var currentUser = new WebUser() { };
-            currentUser.Save(dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
+            for (var i = 0; i < numberOfRegistrants; i++)
+            {
+                user.CreateRegistrant(RegistrantType.Individual, true, msgs, dc);
+            }            
 
-            var reg = currentUser.CreateRegistrant(RegistrantType.Individual, true, msgs, dc);
-
-            Assert.True(currentUser.GetRegistrants(dc).IsNotEmpty());
+            Assert.Equal(numberOfRegistrants, user.GetRegistrants(dc).Count);
         }
 
         [Fact]
         public void isActiveForTest()
         {
-            var currentUser = new WebUser() {IsActive = true };
-            currentUser.Save(dc);
-            var id = currentUser.ID.Value;
-
-            var a = new Account() { CreatedBy = id};
-            msgs.AddRange(a.Save(dc));
-            msgs.AddRange(a.AddUser(currentUser, UserType.ActivityLeader,id,dc));
-
-            Assert.True(currentUser.IsActiveFor(a,dc));
+            var user = Factories.WebUserFactory.Create(true, msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var awu = Factories.AccountWebUserFactory.Create(account, user, UserType.ActivityLeader, true, msgs, dc);
+            
+            Assert.True(user.IsActiveFor(account, dc));
         }
 
         [Fact]
         public void GetActivityWebUserTest()
         {
-            var currentUser = new WebUser() {IsActive = true };
-            currentUser.Save(dc);
-            var id = currentUser.ID.Value;
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var awu = Factories.ActivityWebUserFactory.Create(activity, user, msgs, dc);
 
-            var account = new Account() { };
-            account.Save(dc);
-            account.AddUser(currentUser, UserType.ActivityLeader, id, dc);
-
-            var activity = new Activity() { CreatedBy = id};
-            activity.Save(dc);
-
-            var awu = new ActivityWebUser();
-            awu.ActivityId = activity.ID;
-            awu.WebUserId = currentUser.ID;
-            awu.CreateDate = DateTime.UtcNow;
-            awu.CreatedBy = currentUser.ID;
-            awu.Save(dc);
-
-
-            Assert.NotNull(currentUser.GetActivityWebUser(activity,dc));
+            Assert.NotNull(user.GetActivityWebUser(activity, dc));
         }
 
         [Fact]
         public void isActivityLeaderTest()
         {
-            var currentUser = new WebUser() { IsActive = true };
-            currentUser.Save(dc);
-            var id = currentUser.ID.Value;
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
 
-            var a = new Account() { CreatedBy = id };
-            msgs.AddRange(a.Save(dc));
-            msgs.AddRange(a.AddUser(currentUser, UserType.ActivityLeader, id, dc));
-            var aid = a.ID;
-
-            var testActivity = new Activity() { AccountId = aid };
-            testActivity.Save(dc);
-
-            var awu = new ActivityWebUser();
-            awu.ActivityId = testActivity.ID;
-            awu.WebUserId = currentUser.ID;
-            awu.CreateDate = DateTime.UtcNow;
-            awu.CreatedBy = currentUser.ID;
-            awu.IsLeader = true;
-            awu.Save(dc);
-
-
-            Assert.True(currentUser.IsActivityLeader(testActivity, dc));
+            Assert.True(user.IsActivityLeader(activity, dc));
         }
-
-
-
-
-
-
 
     }
 }

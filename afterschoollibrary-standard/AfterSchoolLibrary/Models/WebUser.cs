@@ -201,7 +201,7 @@ namespace AfterSchoolLibrary
 
         public string GetInviteUrl(Account account)
         {
-            return AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool) + string.Format("signup/new/{0}?a={1}", this.Uid.ToString(), account.Uid);
+            return AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{this.Uid.ToString()}?a={account.Uid}";
         }
 
         public static WebUser LoadByEmail(string email, DatabaseConnection dc = null)
@@ -347,7 +347,7 @@ namespace AfterSchoolLibrary
         public bool HasAccessTo(Account a, DatabaseConnection dc = null)
         {
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, this.ID.Value, dc);
-            return !awu.IsEmpty() && awu.IsActive;
+            return awu.IsNotEmpty() && awu.IsActive;
         }
         public bool HasAccessToActivity(Activity a, DatabaseConnection dc = null)
         {
