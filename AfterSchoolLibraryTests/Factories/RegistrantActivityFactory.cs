@@ -11,11 +11,11 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class RegistrantActivityFactory
     {
-        public static RegistrantActivity CreateRegistrantActivity(Activity activity, Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RegistrantActivity Create(Activity activity, Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var ra = new RegistrantActivity() { ActivityId = activity.ID, RegistrantId = registrant.ID };
-            msgs.AddRange(ra.Save(dc));
-            return ra;
+            var obj = new RegistrantActivity() { ActivityId = activity.ID, RegistrantId = registrant.ID };
+            msgs.AddRange(obj.Save(dc));
+            return obj;
         }
     }
 }

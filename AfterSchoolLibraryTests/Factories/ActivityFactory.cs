@@ -11,12 +11,11 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class ActivityFactory
     {
-        public static Activity CreateActivity(Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Activity Create(Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var af = new AccountFactory();
-            var activity = new Activity() { AccountId = account.ID };
-            msgs.AddRange(activity.Save(dc));
-            return activity;
+            var obj = new Activity() { AccountId = account.ID };
+            msgs.AddRange(obj.Save(dc));
+            return obj;
         }
     }
 }

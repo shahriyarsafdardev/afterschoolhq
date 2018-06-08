@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using AfterSchoolLibrary;
+
+namespace AfterSchoolLibraryTests.Factories
+{
+    public class ActivityFormWebUserFactory
+    {
+        public static ActivityForm Create(Account account, Activity activity, Form form, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new ActivityForm() { AccountId = account.ID, ActivityId = activity.ID, FormId = form.ID };
+            msgs.AddRange(obj.Save(dc));
+            return obj;
+        }
+    }
+}
