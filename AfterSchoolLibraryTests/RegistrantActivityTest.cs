@@ -20,9 +20,14 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ToRegistrantTest()
         {
-            var a = new RegistrantActivity { RegistrantId=1 };
-            a.Save(dc);
-            Assert.NotNull(a.ToRegistrant());
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+
+            registrantActivity = registrantActivity.Reload(dc);
+
+            Assert.NotNull(registrantActivity.ToRegistrant());
         }
 
         [Fact]
@@ -41,193 +46,166 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ToActivityTest()
         {
-            var a = new RegistrantActivity { RegistrantId = 1 };
-            a.Save(dc);
-            Assert.NotNull(a.ToActivity(false,dc));
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+
+            registrantActivity = registrantActivity.Reload(dc);
+
+            Assert.NotNull(registrantActivity.ToActivity(true,dc));
         }
 
         [Fact]
         public void LoadByActivityIdTest()
         {
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var a = new RegistrantActivity { RegistrantId = 1 };
-            a.Save(dc);
+            registrantActivity = registrantActivity.Reload(dc);
 
-            Assert.NotNull(RegistrantActivity.LoadByActivityId(actid,dc));
+            Assert.NotNull(RegistrantActivity.LoadByActivityId(activity.ID.Value,dc));
         }
 
         [Fact]
         public void GetSeatCountByActivityIdTest()
         {
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var a = new RegistrantActivity { };
-            a.Save(dc);
+            registrantActivity = registrantActivity.Reload(dc);
 
-            Assert.NotNull(RegistrantActivity.GetSeatCountByActivityId(actid, dc));
+            Assert.NotNull(RegistrantActivity.GetSeatCountByActivityId(activity.ID.Value,dc));
         }
 
         [Fact]
         public void GetSeatCountByAccountIdTest()
         {
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var a = new RegistrantActivity { RegistrantId = 1 };
-            a.Save(dc);
-            var aid = a.ID.Value;
+            registrantActivity = registrantActivity.Reload(dc);
 
-            Assert.NotNull(RegistrantActivity.GetSeatCountByAccountId(aid,dc));
+            Assert.NotNull(RegistrantActivity.LoadByAccountId(account.ID.Value,null,null,dc));
         }
 
         [Fact]
         public void GetSeatCountByRegistrationPeriodIdTest()
         {
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
+            registrantActivity.NumberOfSeats = 12;
+            registrantActivity.NumberOfWaitingListSeats = 1;
+            registrantActivity.NumberOfApplicationSeats = 1;
+            registrantActivity = registrantActivity.Reload(dc);
 
-            var a = new RegistrantActivity {RegistrationPeriodId =12 };
-            a.Save(dc);
-            var aid = a.ID.Value;
-
-            Assert.NotNull(RegistrantActivity.GetSeatCountByRegistrationPeriodId(12, dc));
+            Assert.NotEqual(0,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value,dc));
         }
 
         [Fact]
         public void GetSeatCountByActivityGroupIdTest()
         {
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            //var activityGroup = 
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var a = new RegistrantActivity { ActivityGroupId = 12 };
-            a.Save(dc);
-            var aid = a.ID.Value;
+            registrantActivity = registrantActivity.Reload(dc);
 
-            Assert.NotNull(RegistrantActivity.GetSeatCountByActivityGroupId(12, dc));
+            Assert.NotNull(RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value, dc));
         }
 
         [Fact]
         public void LoadByRegistrationIdsTest()
         {
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var a = new RegistrantActivity {RegistrationId =12};
-            a.Save(dc);
-            var aid = a.RegistrationId.Value;
+            List<int> list = new List<int>();
+            list.Add(registrantActivity.RegistrationId.Value);
 
-            List<int> iList = new List<int>();
-            iList.Add(2);
-            iList.Add(aid);
-
-            Assert.NotNull(RegistrantActivity.LoadByRegistrationIds(iList, dc));
+            Assert.NotEqual(0,RegistrantActivity.LoadByRegistrationIds(list,dc).Count);
         }
 
         [Fact]
         public void LoadByRegistrantIdTest()
         {
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var a = new RegistrantActivity { RegistrationId = 12 };
-            a.Save(dc);
-            var aid = a.RegistrationId.Value;
-
-            Assert.NotNull(RegistrantActivity.LoadByRegistrantId(aid,dc));
+            Assert.NotEqual(0, RegistrantActivity.LoadByRegistrantId(registrant.ID.Value,dc).Count);
         }
 
         [Fact]
         public void GetByActivityIdsTest()
         {
-            var start = new DateTime(1,1,1,1,1,1) { };
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var act = new Activity() {StartDateTime = start };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            activity.StartDateTime = new DateTime(0, 0, 0, 0, 0, 0);
+            var s = activity.StartDateTime.Value;
 
-            var a = new RegistrantActivity { RegistrationId = 12, ActivityId = actid };
-            a.Save(dc);
-            var aid = a.RegistrationId.Value;
+            List<int> list = new List<int>();
+            list.Add(registrant.ID.Value);
 
-            List<int> aList = new List<int>();
-            aList.Add(2);
-            aList.Add(aid);
+            List<int> list2 = new List<int>();
+            list.Add(activity.ID.Value);
 
-            List<int> rList = new List<int>();
-            rList.Add(2);
-            rList.Add(aid);
-
-            Assert.NotNull(RegistrantActivity.GetByActivityIds(aList,rList,start,dc));
+            Assert.NotNull(RegistrantActivity.GetByActivityIds(list2,list,s,dc));
         }
 
         [Fact]
         public void GetRegistrationActivityTest()
         {
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var act = new Activity() {};
-            act.Save(dc);
-
-
-            var r = new Registration() {  };
-            r.Save(dc);
-
-            var ra = new RegistrationActivity() {ActivityId = act.ID, RegistrationId = r.ID};
-            ra.Save(dc);
-
-            var a = new RegistrantActivity { RegistrationId = r.ID, ActivityId = act.ID };
-            a.Save(dc);
-
-            Assert.NotNull(a.GetRegistrationActivity(dc));
+            Assert.NotNull( registrantActivity.GetRegistrationActivity(dc));
         }
 
         [Fact]
         public void DeleteRegistrationActivityTest()
         {
 
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var r = new Registration() { };
-            r.Save(dc);
-            var rid = r.ID.Value;
+            registrantActivity.DeleteRegistrationActivity(dc);
 
-            var a = new RegistrantActivity { RegistrationId = rid, ActivityId = actid };
-            a.Save(dc);
-            var aid = a.RegistrationId.Value;
-
-
-            Assert.NotNull(a.DeleteRegistrationActivity(dc));
+            Assert.True(RegistrantActivity.LoadByActivityId(registrantActivity.ID.Value,dc).IsEmpty());
         }
 
         [Fact]
         public void CancelRegistrationTest()
         {
 
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var r = new Registration() { };
-            r.Save(dc);
-            var rid = r.ID.Value;
+            registrantActivity.DeleteRegistrationActivity(dc);
 
-            var a = new RegistrantActivity { RegistrationId = rid, ActivityId = actid };
-            a.Save(dc);
-            var aid = a.RegistrationId.Value;
-
-
-            Assert.NotNull(a.CancelRegistration(dc));
+            Assert.NotNull(registrantActivity.CancelRegistration(dc));
         }
 
 
@@ -236,23 +214,14 @@ namespace AfterSchoolLibraryTests
         public void SendNewRegistrationNoticeTest()
         {
 
-            var accnt = new Account() { };
-            accnt.Save(dc);
+            var account = Factories.AccountFactory.CreateAccount(msgs, dc);
+            var activity = Factories.ActivityFactory.CreateActivity(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.CreateRegistrant(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.CreateRegistrantActivity(activity, registrant, msgs, dc);
 
-            var act = new Activity() { };
-            act.Save(dc);
-            var actid = act.ID.Value;
+            registrantActivity.DeleteRegistrationActivity(dc);
 
-            var r = new Registration() { };
-            r.Save(dc);
-            var rid = r.ID.Value;
-
-            var a = new RegistrantActivity { RegistrationId = rid, ActivityId = actid };
-            a.Save(dc);
-            var aid = a.RegistrationId.Value;
-
-
-            Assert.NotNull(a.SendNewRegistrationNotice(null,null,dc));
+            Assert.NotNull(registrantActivity.SendNewRegistrationNotice(account,activity,dc));
         }
 
     }
