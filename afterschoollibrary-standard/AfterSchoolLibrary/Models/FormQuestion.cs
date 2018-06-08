@@ -126,7 +126,7 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.FormQuestionGroupId.IsEmpty())
-				msgs.Add("FormQuestionGroupId is required", MessageType.Error);
+				msgs.Add("FormQuestionGroupId is required on FormQuestion object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(FormQuestion).Name));

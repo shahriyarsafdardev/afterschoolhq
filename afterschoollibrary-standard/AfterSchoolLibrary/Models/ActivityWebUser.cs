@@ -106,9 +106,9 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required", MessageType.Error);
+				msgs.Add("ActivityId is required on ActivityWebUser object", MessageType.Error);
 			if (this.WebUserId.IsEmpty())
-				msgs.Add("WebUserId is required", MessageType.Error);
+				msgs.Add("WebUserId is required on ActivityWebUser object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityWebUser).Name));

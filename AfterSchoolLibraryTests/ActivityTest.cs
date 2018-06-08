@@ -4,31 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 using AfterSchoolLibrary;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibraryTests
 {
-    public class ActivityTest : IDisposable
+    public class ActivityTest : BaseTest
     {
-        DatabaseConnection dc = null;
-        SystemMessages msgs = null;
-
-        public ActivityTest()
+        public ActivityTest(ITestOutputHelper output) : base(output)
         {
-            AfterSchoolLibrary.Utilities.InitializeApp();
-            dc = new DatabaseConnection(Database.Credentials.ConnectionString);
-            msgs = new SystemMessages();
-            dc.Open();
-            dc.BeginTransaction();
-        }
-
-        public void Dispose()
-        {
-            dc.RollbackTransaction();
-            dc.Close();
-            dc.Dispose();
         }
 
         [Fact]

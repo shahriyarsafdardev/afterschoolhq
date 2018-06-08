@@ -117,7 +117,7 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.PackageId.IsEmpty())
-				msgs.Add("PackageId is required", MessageType.Error);
+				msgs.Add("PackageId is required on AccountPackage object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(AccountPackage).Name));

@@ -104,9 +104,9 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.RegistrationPeriodId.IsEmpty())
-				msgs.Add("RegistrationPeriodId is required", MessageType.Error);
+				msgs.Add("RegistrationPeriodId is required on ActivityRegistrationPeriod object", MessageType.Error);
 			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required", MessageType.Error);
+				msgs.Add("ActivityId is required on ActivityRegistrationPeriod object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityRegistrationPeriod).Name));

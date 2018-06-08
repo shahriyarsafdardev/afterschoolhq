@@ -102,7 +102,7 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required", MessageType.Error);
+				msgs.Add("ActivityId is required on Attendance object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Attendance).Name));
