@@ -11,21 +11,19 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	
-    public class AccountPayment : BasicObjectWithModified
+    public class Tag : BasicObjectWithModified
     {
 		#region "ClassGenerator"
 
-		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
-		public int? InvoiceId { get { return (int?)MDV["InvoiceId"].Value; } set { MDV["InvoiceId"].Value = value; } }
+		public int? ParentTagId { get { return (int?)MDV["ParentTagId"].Value; } set { MDV["ParentTagId"].Value = value; } }
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
-		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public string Name { get { return (string)MDV["Name"].Value; } set { MDV["Name"].Value = value; } }
 		
 
-        public AccountPayment()
+        public Tag()
         {
-            this.Config(ObjectMap, DatabaseQuery, typeof(AccountPayment).Name, "ID");
+            this.Config(ObjectMap, DatabaseQuery, typeof(Tag).Name, "ID");
             this.LoadObjectValues(ObjectMap);
-			this.Uid = Guid.NewGuid();
 			
         }
 
@@ -34,20 +32,19 @@ namespace AfterSchoolLibrary
             get
             {
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
-                string className = typeof(AccountPayment).Name;
+                string className = typeof(Tag).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "Amount", System.Data.SqlDbType.Decimal);
-				_dp.Add(className, "InvoiceId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParentTagId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "Name", System.Data.SqlDbType.NVarChar, 100);
 				
                 return _dp;
             }
         }
 
-        protected static AccountPayment LoadObject(System.Data.DataRow row)
+        protected static Tag LoadObject(System.Data.DataRow row)
         {
-            AccountPayment obj = new AccountPayment();
+            Tag obj = new Tag();
             obj.LoadObjectValues(ObjectMap, row);
             return obj;
         }
@@ -56,13 +53,13 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(AccountPayment).Name);
+                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(Tag).Name);
 				
                 return dq;
             }
         }
 
-        public static AccountPayment Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Tag Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -70,21 +67,21 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<AccountPayment> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Tag> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return AccountPayment.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return Tag.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return AccountPayment.BaseGetCount(criterias, ObjectMap, dq);
+            return Tag.BaseGetCount(criterias, ObjectMap, dq);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -93,14 +90,14 @@ namespace AfterSchoolLibrary
 
 			
 			if (msgs.HasNoErrors())
-				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(AccountPayment).Name));
+				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Tag).Name));
 
 			return msgs;
         }
 
         public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(AccountPayment).Name);
+            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(Tag).Name);
         }
 
         public static SystemMessages Create(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -114,11 +111,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Amount"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["InvoiceId"]);
+			dps.Add(ObjectMap["ParentTagId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -126,7 +119,7 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Uid"]);
+			dps.Add(ObjectMap["Name"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -134,20 +127,37 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public AccountPayment Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Tag Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountPayment.Load(this.ID.Value, dc);
+			return Tag.Load(this.ID.Value, dc);
 		}
 		
-		public static List<AccountPayment> LoadByInvoiceId(int InvoiceId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Tag LoadByName(string Name, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["InvoiceId"], InvoiceId);
+			dq.Criterias.Add(ObjectMap["Name"], Name);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static Tag LoadByNameByAccountId(string Name, int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Name"], Name);
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<Tag> LoadByParentTagId(int ParentTagId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ParentTagId"], ParentTagId);
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountPayment> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Tag> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -155,12 +165,13 @@ namespace AfterSchoolLibrary
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static AccountPayment LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Tag> LoadByAccountIdByParentTagId(int AccountId, int ParentTagId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["ParentTagId"], ParentTagId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		

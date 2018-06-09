@@ -83,6 +83,7 @@ property: ActivityGroupId, int?, Int
 property: ActivityScheduleId, int?, Int
 property: ScheduleRequiresAllDays, bool, Bit
 property: UniqueName, string, NVarChar(100)
+property: IsTemplate, bool, Bit
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
@@ -123,6 +124,33 @@ property: StartTime, DateTime?, DateTime
 property: EndTime, DateTime?, DateTime
 loadmethod: ActivityId, List<>
 loadmethod: ActivityRecurrenceId, List<>
+[end]
+
+
+[begin]
+type: Class
+name: Tag
+inherits: BasicObjectWithModified
+property: ParentTagId, int?, Int
+property: AccountId, int?, Int
+property: Name, string, NVarChar(100)
+loadmethod: Name
+loadmethod: Name|AccountId
+loadmethod: ParentTagId, List<>
+loadmethod: AccountId, List<>
+loadmethod: AccountId|ParentTagId, List<>
+[end]
+
+[begin]
+type: Class
+name: ObjectTag
+inherits: BasicObject
+property: ActivityId, int?, Int
+property: TagId, int?, Int
+join: Tag.ID, TagId, InnerJoin
+joinproperty: Tag.Name, string, NVarChar
+loadmethod: ActivityId, List<>
+loadmethod: TagId, List<>
 [end]
 
 [begin]
@@ -232,10 +260,12 @@ property: StripeUserId, string, NVarChar(100)
 property: TimeZone, string, NVarChar(30)
 property: LogoUrl, string, NVarChar(400)
 property: LandingPageText, string, NVarChar(4000)
+property: AccountTypeId, AccountType, Int
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
 loadmethod: IsAdminAccount
 loadmethod: Uid
+loadmethod: AccountTypeId, List<>
 [end]
 
 [begin]
@@ -244,6 +274,7 @@ name: AccountRelationship
 inherits: BasicObjectWithModified
 property: HostAccountId, int?, Int
 property: VisitorAccountId, int?, Int
+property: HostPermissionTypeId, HostPermissionType, Int
 property: ApprovedDate, DateTime?, DateTime
 property: ApprovedBy, int?, Int
 loadmethod: HostAccountId, List<>
@@ -374,6 +405,7 @@ property: IsPublished, bool, Bit
 property: IsArchived, bool, Bit
 property: IsInviteOnly, bool, Bit
 property: HasLotteryRun, bool, Bit
+property: ActivityGroupTypeId, ActivityGroupType, Int
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
@@ -856,19 +888,6 @@ loadmethod: AccountPackageId|FeatureTypeId
 
 [begin]
 type: Class
-name: AccountPayment
-inherits: BasicObjectWithModified
-property: Amount, decimal?, Decimal
-property: InvoiceId, int?, Int
-property: AccountId, int?, Int
-property: Uid, Guid, UniqueIdentifier
-loadmethod: InvoiceId, List<>
-loadmethod: AccountId, List<>
-loadmethod: Uid
-[end]
-
-[begin]
-type: Class
 name: File
 inherits: BaseFile
 property: Label, string, NVarChar(50)
@@ -997,6 +1016,67 @@ loadmethod: Uid
 [end]
 
 [begin]
+type: Class
+name: PaymentPlan
+serializable: true
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int
+property: TotalPeriods, int?, Int
+property: BillingPeriodTypeId, int?, Int
+property: CostPerPeriod, decimal?, Decimal
+property: IsActive, bool, Bit
+[end]
+
+[begin]
+type: Class
+name: SubscriptionPlan
+serializable: true
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int
+property: CostPerPeriod, decimal?, Decimal
+property: BillingPeriodTypeId, int?, Int
+property: DoesAutoRenew, bool, Bit
+property: IsActive, bool, Bit
+[end]
+
+[begin]
+type: Class
+name: RegistrantPaymentPlan
+serializable: true
+inherits: BasicObjectWithModified
+property: PaymentPlanId, int?, Int
+property: RegistrantId, int?, Int
+property: StartDate, DateTime?, DateTime
+[end]
+
+[begin]
+type: Class
+name: RegistrantSubscriptionPlan
+serializable: true
+inherits: BasicObjectWithModified
+property: SubscriptionPlanId, int?, Int
+property: RegistrantId, int?, Int
+property: StartDate, DateTime?, DateTime
+[end]
+
+[begin]
+type: Class
+name: Transaction
+serializable: true
+inherits: BasicObjectWithModified
+property: Amount, decimal?, Decimal
+property: BillerAccountId, int?, int
+property: PayerAccountId, int?, Int
+property: SourceTypeId, SourceType, Int
+property: TransactionTypeId, TransactionType, Int
+property: RegistrantSubscriptionId, int?, Int
+property: RegistrantPaymentPlanId, int?, Int
+property: Description, string, NVarChar(400)
+property: ActivityId, int?, Int
+property: ActivityGroupId, int?, Int
+[end]
+
+[begin]
 type: Enum
 name: SessionActionType
 values: NotSet, OrganizationHomeView, RegistrationFormView, RegistrationCompletedView, ActivityCreate, ActivityPublish, ActivityUnpublish, ActivityRegistrationCompleted, ActivityRegistrationUpdated, RegistrationUpdated, RegistrationAddActivity, RegistrationRemoveActivity, ActivityMoveToReserved, ActivityMoveToApplication, ActivityMoveToWaitingList, ActivityGroupCreate, ActivityGroupPublish, ActivityGroupUnpublish
@@ -1041,7 +1121,7 @@ values: NotSet, Account
 [begin]
 type: Enum
 name: PaymentType
-values: NotSet, CreditCard, PayPal, Check, Cash
+values: NotSet, CreditCard, PayPal, Check, Cash, ACH
 [end]
 
 [begin]
@@ -1095,11 +1175,35 @@ values: NotSet, Basic, Detailed, SingleActivity
 [begin]
 type: Enum
 name: BillingPeriodType
-values: NotSet, Month, Year
+values: NotSet, Month, Year, Week
 [end]
 
 [begin]
 type: Enum
 name: RegistrationStatus
 values: NotSet, Past, Current, Future
+[end]
+
+[begin]
+type: Enum
+name: HostPermissionType
+values: NotSet, Approve, Edit, Admin
+[end]
+
+[begin]
+type: Enum
+name: AccountType
+values: NotSet, ActivityProvider, School, SchoolDistrict
+[end]
+
+[begin]
+type: Enum
+name: ActivityGroupType
+values: NotSet, Session, League
+[end]
+
+[begin]
+type: Enum
+name: TransactionType
+values: NotSet, Credit, Debit
 [end]

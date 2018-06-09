@@ -17,7 +17,6 @@ namespace AfterSchoolLibrary
 
 		public int? SeatsAvailable { get { return (int?)MDV["SeatsAvailable"].Value; } set { MDV["SeatsAvailable"].Value = value; } }
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
-		public int? ArchiveId { get { return (int?)MDV["ArchiveId"].Value; } set { MDV["ArchiveId"].Value = value; } }
 		public int? AgeStart { get { return (int?)MDV["AgeStart"].Value; } set { MDV["AgeStart"].Value = value; } }
 		public int? AgeEnd { get { return (int?)MDV["AgeEnd"].Value; } set { MDV["AgeEnd"].Value = value; } }
 		public int? GradeLevelStart { get { return (int?)MDV["GradeLevelStart"].Value; } set { MDV["GradeLevelStart"].Value = value; } }
@@ -49,6 +48,7 @@ namespace AfterSchoolLibrary
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
 		public bool ScheduleRequiresAllDays { get { return (bool)MDV["ScheduleRequiresAllDays"].Value; } set { MDV["ScheduleRequiresAllDays"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
+		public bool IsTemplate { get { return (bool)MDV["IsTemplate"].Value; } set { MDV["IsTemplate"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountPayPalEmailAddress { get { return (string)MDV["AccountPayPalEmailAddress"].Value; } }
 		public string AccountStripePublishableKey { get { return (string)MDV["AccountStripePublishableKey"].Value; } }
@@ -73,6 +73,7 @@ namespace AfterSchoolLibrary
 			this.IsPublished = false;
 			this.IsArchived = false;
 			this.ScheduleRequiresAllDays = false;
+			this.IsTemplate = false;
 			
         }
 
@@ -85,7 +86,6 @@ namespace AfterSchoolLibrary
                 _dp = BaseEventWithAddress.get_BaseObjectMap(className);
 				_dp.Add(className, "SeatsAvailable", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ArchiveId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AgeStart", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AgeEnd", System.Data.SqlDbType.Int);
 				_dp.Add(className, "GradeLevelStart", System.Data.SqlDbType.Int);
@@ -117,6 +117,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ScheduleRequiresAllDays", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "IsTemplate", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountPayPalEmailAddress", typeof(Account).Name, "PayPalEmailAddress", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountStripePublishableKey", typeof(Account).Name, "StripePublishableKey", System.Data.SqlDbType.NVarChar, "Account");
@@ -206,10 +207,6 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AccountId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ArchiveId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -336,6 +333,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["UniqueName"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsTemplate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -371,28 +372,11 @@ namespace AfterSchoolLibrary
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Activity> LoadByArchiveId(int ArchiveId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ArchiveId"], ArchiveId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
 		public static Activity LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-		}
-
-		public static Activity LoadByAccountIdByArchiveId(int AccountId, int ArchiveId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			dq.Criterias.Add(ObjectMap["ArchiveId"], ArchiveId);
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
