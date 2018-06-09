@@ -1023,7 +1023,7 @@ inherits: BasicObjectWithModified
 property: ActivityId, int?, Int, required
 property: TotalPeriods, int?, Int, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
-property: CostPerPeriod, decimal?, Money
+property: CostPerPeriod, decimal?, Money, required
 property: IsActive, bool, Bit
 [end]
 
