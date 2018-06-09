@@ -17,9 +17,9 @@ namespace AfterSchoolLibrary
 
 		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
+		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		public bool IsPublished { get { return (bool)MDV["IsPublished"].Value; } set { MDV["IsPublished"].Value = value; } }
-		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public string ActivityName { get { return (string)MDV["ActivityName"].Value; } }
 		public string ActivityDetails { get { return (string)MDV["ActivityDetails"].Value; } }
@@ -67,9 +67,9 @@ namespace AfterSchoolLibrary
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
 				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsPublished", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityDetails", typeof(Activity).Name, "Details", System.Data.SqlDbType.NVarChar, "Activity");
@@ -86,7 +86,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityCity", typeof(Activity).Name, "City", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityState", typeof(Activity).Name, "State", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityPostalCode", typeof(Activity).Name, "PostalCode", System.Data.SqlDbType.NVarChar, "Activity");
-				_dp.Add(className, "ActivityCostPerRegistrant", typeof(Activity).Name, "CostPerRegistrant", System.Data.SqlDbType.Decimal, "Activity");
+				_dp.Add(className, "ActivityCostPerRegistrant", typeof(Activity).Name, "CostPerRegistrant", System.Data.SqlDbType.Money, "Activity");
 				_dp.Add(className, "ActivityCostDescription", typeof(Activity).Name, "CostDescription", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityAcceptPayPal", typeof(Activity).Name, "AcceptPayPal", System.Data.SqlDbType.Bit, "Activity");
 				_dp.Add(className, "ActivityAcceptCreditCard", typeof(Activity).Name, "AcceptCreditCard", System.Data.SqlDbType.Bit, "Activity");
@@ -187,15 +187,15 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsActive"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsPublished"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

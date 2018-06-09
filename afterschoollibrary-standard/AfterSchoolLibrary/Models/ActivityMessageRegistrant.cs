@@ -103,6 +103,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.ActivityMessageId.IsEmpty())
+				msgs.Add("ActivityMessageId is required on ActivityMessageRegistrant object", MessageType.Error);
 			if (this.RegistrantId.IsEmpty())
 				msgs.Add("RegistrantId is required on ActivityMessageRegistrant object", MessageType.Error);
 			

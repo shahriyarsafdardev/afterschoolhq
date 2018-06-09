@@ -15,9 +15,9 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
-		public bool IsTemplate { get { return (bool)MDV["IsTemplate"].Value; } set { MDV["IsTemplate"].Value = value; } }
 		public int? FormQuestionGroupId { get { return (int?)MDV["FormQuestionGroupId"].Value; } set { MDV["FormQuestionGroupId"].Value = value; } }
 		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
+		public bool IsTemplate { get { return (bool)MDV["IsTemplate"].Value; } set { MDV["IsTemplate"].Value = value; } }
 		public string Text { get { return (string)MDV["Text"].Value; } set { MDV["Text"].Value = value; } }
 		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		public QuestionType QuestionTypeId { get { return (QuestionType)MDV["QuestionTypeId"].Value; } set { MDV["QuestionTypeId"].Value = value; } }
@@ -55,9 +55,9 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(FormQuestion).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "IsTemplate", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "FormQuestionGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsTemplate", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar, 4000);
 				_dp.Add(className, "QuestionTypeId", System.Data.SqlDbType.Int);
@@ -127,6 +127,8 @@ namespace AfterSchoolLibrary
 
 			if (this.FormQuestionGroupId.IsEmpty())
 				msgs.Add("FormQuestionGroupId is required on FormQuestion object", MessageType.Error);
+			if (this.FormId.IsEmpty())
+				msgs.Add("FormId is required on FormQuestion object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(FormQuestion).Name));
@@ -150,15 +152,15 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsTemplate"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FormQuestionGroupId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FormId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsTemplate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

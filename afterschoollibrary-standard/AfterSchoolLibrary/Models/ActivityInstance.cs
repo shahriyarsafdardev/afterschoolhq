@@ -93,6 +93,14 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.ActivityScheduleId.IsEmpty())
+				msgs.Add("ActivityScheduleId is required on ActivityInstance object", MessageType.Error);
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required on ActivityInstance object", MessageType.Error);
+			if (this.StartDateTime.IsEmpty())
+				msgs.Add("StartDateTime is required on ActivityInstance object", MessageType.Error);
+			if (this.EndDateTime.IsEmpty())
+				msgs.Add("EndDateTime is required on ActivityInstance object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityInstance).Name));

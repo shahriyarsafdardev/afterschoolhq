@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary
 
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public decimal? CostPerPeriod { get { return (decimal?)MDV["CostPerPeriod"].Value; } set { MDV["CostPerPeriod"].Value = value; } }
-		public int? BillingPeriodTypeId { get { return (int?)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
+		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		public bool DoesAutoRenew { get { return (bool)MDV["DoesAutoRenew"].Value; } set { MDV["DoesAutoRenew"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		
@@ -26,6 +26,7 @@ namespace AfterSchoolLibrary
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(SubscriptionPlan).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.BillingPeriodTypeId = BillingPeriodType.NotSet;
 			this.DoesAutoRenew = false;
 			this.IsActive = false;
 			
@@ -39,7 +40,7 @@ namespace AfterSchoolLibrary
                 string className = typeof(SubscriptionPlan).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "CostPerPeriod", System.Data.SqlDbType.Decimal);
+				_dp.Add(className, "CostPerPeriod", System.Data.SqlDbType.Money);
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DoesAutoRenew", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
@@ -94,6 +95,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required on SubscriptionPlan object", MessageType.Error);
+			if (this.CostPerPeriod.IsEmpty())
+				msgs.Add("CostPerPeriod is required on SubscriptionPlan object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(SubscriptionPlan).Name));

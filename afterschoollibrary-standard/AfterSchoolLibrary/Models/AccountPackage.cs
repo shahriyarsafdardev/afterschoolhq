@@ -15,12 +15,12 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		public int? PackageId { get { return (int?)MDV["PackageId"].Value; } set { MDV["PackageId"].Value = value; } }
+		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
 		public DateTime? EndDate { get { return (DateTime?)MDV["EndDate"].Value; } set { MDV["EndDate"].Value = value; } }
 		public decimal? Price { get { return (decimal?)MDV["Price"].Value; } set { MDV["Price"].Value = value; } }
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
-		public int? PackageId { get { return (int?)MDV["PackageId"].Value; } set { MDV["PackageId"].Value = value; } }
-		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public DateTime? TrialStartDate { get { return (DateTime?)MDV["TrialStartDate"].Value; } set { MDV["TrialStartDate"].Value = value; } }
 		public DateTime? TrialEndDate { get { return (DateTime?)MDV["TrialEndDate"].Value; } set { MDV["TrialEndDate"].Value = value; } }
@@ -49,12 +49,12 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(AccountPackage).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
+				_dp.Add(className, "PackageId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "EndDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "Price", System.Data.SqlDbType.Money);
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "PackageId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "TrialStartDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "TrialEndDate", System.Data.SqlDbType.DateTime);
@@ -62,8 +62,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar, 50);
 				_dp.Add(className, "PackageName", typeof(Package).Name, "Name", System.Data.SqlDbType.NVarChar, "Package");
 				_dp.Add(className, "PackageUid", typeof(Package).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "Package");
-				_dp.Add(className, "PackagePrice", typeof(Package).Name, "Price", System.Data.SqlDbType.Decimal, "Package");
-				_dp.Add(className, "PackagePricePerYear", typeof(Package).Name, "PricePerYear", System.Data.SqlDbType.Decimal, "Package");
+				_dp.Add(className, "PackagePrice", typeof(Package).Name, "Price", System.Data.SqlDbType.Money, "Package");
+				_dp.Add(className, "PackagePricePerYear", typeof(Package).Name, "PricePerYear", System.Data.SqlDbType.Money, "Package");
 				
                 return _dp;
             }
@@ -118,6 +118,8 @@ namespace AfterSchoolLibrary
 
 			if (this.PackageId.IsEmpty())
 				msgs.Add("PackageId is required on AccountPackage object", MessageType.Error);
+			if (this.AccountId.IsEmpty())
+				msgs.Add("AccountId is required on AccountPackage object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(AccountPackage).Name));
@@ -141,6 +143,14 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PackageId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["StartDate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -154,14 +164,6 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["BillingPeriodTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PackageId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

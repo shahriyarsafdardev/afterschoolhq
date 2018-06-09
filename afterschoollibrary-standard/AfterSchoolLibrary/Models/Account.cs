@@ -125,6 +125,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on Account object", MessageType.Error);
+			if (this.UniqueName.IsEmpty())
+				msgs.Add("UniqueName is required on Account object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Account).Name));

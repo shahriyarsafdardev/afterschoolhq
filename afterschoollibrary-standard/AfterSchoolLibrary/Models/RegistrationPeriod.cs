@@ -92,6 +92,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on RegistrationPeriod object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(RegistrationPeriod).Name));

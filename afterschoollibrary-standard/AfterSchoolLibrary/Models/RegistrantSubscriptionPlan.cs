@@ -88,6 +88,12 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.SubscriptionPlanId.IsEmpty())
+				msgs.Add("SubscriptionPlanId is required on RegistrantSubscriptionPlan object", MessageType.Error);
+			if (this.RegistrantId.IsEmpty())
+				msgs.Add("RegistrantId is required on RegistrantSubscriptionPlan object", MessageType.Error);
+			if (this.StartDate.IsEmpty())
+				msgs.Add("StartDate is required on RegistrantSubscriptionPlan object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantSubscriptionPlan).Name));

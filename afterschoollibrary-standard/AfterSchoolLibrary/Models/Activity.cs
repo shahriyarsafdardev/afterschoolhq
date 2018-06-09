@@ -177,8 +177,12 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.SeatsAvailable.IsEmpty())
+				msgs.Add("SeatsAvailable is required on Activity object", MessageType.Error);
 			if (this.AccountId.IsEmpty())
 				msgs.Add("AccountId is required on Activity object", MessageType.Error);
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on Activity object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Activity).Name));
