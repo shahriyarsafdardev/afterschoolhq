@@ -224,11 +224,6 @@ namespace AfterSchoolLibrary
             return AccountPackage.LoadByAccountId(account.ID.Value, dc);
         }
 
-        public static List<AccountPayment> GetPayments(this Account account, DatabaseConnection dc = null)
-        {
-            return AccountPayment.LoadByAccountId(account.ID.Value, dc);
-        }
-
         public static SystemMessages AddUser(this Account account, WebUser user, UserType ut, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();

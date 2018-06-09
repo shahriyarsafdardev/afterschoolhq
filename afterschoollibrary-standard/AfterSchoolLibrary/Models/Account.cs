@@ -33,6 +33,7 @@ namespace AfterSchoolLibrary
 		public string TimeZone { get { return (string)MDV["TimeZone"].Value; } set { MDV["TimeZone"].Value = value; } }
 		public string LogoUrl { get { return (string)MDV["LogoUrl"].Value; } set { MDV["LogoUrl"].Value = value; } }
 		public string LandingPageText { get { return (string)MDV["LandingPageText"].Value; } set { MDV["LandingPageText"].Value = value; } }
+		public AccountType AccountTypeId { get { return (AccountType)MDV["AccountTypeId"].Value; } set { MDV["AccountTypeId"].Value = value; } }
 		
 
         public Account()
@@ -43,6 +44,7 @@ namespace AfterSchoolLibrary
 			this.IsAdminAccount = false;
 			this.IsActive = false;
 			this.IsAfterSchool = false;
+			this.AccountTypeId = AccountType.NotSet;
 			
         }
 
@@ -71,6 +73,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "TimeZone", System.Data.SqlDbType.NVarChar, 30);
 				_dp.Add(className, "LogoUrl", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "LandingPageText", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "AccountTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -216,6 +219,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["LandingPageText"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -256,6 +263,14 @@ namespace AfterSchoolLibrary
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<Account> LoadByAccountTypeId(AccountType AccountTypeId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountTypeId"], AccountTypeId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		

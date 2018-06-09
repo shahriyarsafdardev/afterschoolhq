@@ -4,5 +4,6 @@ public enum PaymentType
 	CreditCard,
 	PayPal,
 	Check,
-	Cash
+	Cash,
+	ACH
 }

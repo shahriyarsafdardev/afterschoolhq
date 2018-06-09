@@ -24,6 +24,7 @@ namespace AfterSchoolLibrary
 		public bool IsArchived { get { return (bool)MDV["IsArchived"].Value; } set { MDV["IsArchived"].Value = value; } }
 		public bool IsInviteOnly { get { return (bool)MDV["IsInviteOnly"].Value; } set { MDV["IsInviteOnly"].Value = value; } }
 		public bool HasLotteryRun { get { return (bool)MDV["HasLotteryRun"].Value; } set { MDV["HasLotteryRun"].Value = value; } }
+		public ActivityGroupType ActivityGroupTypeId { get { return (ActivityGroupType)MDV["ActivityGroupTypeId"].Value; } set { MDV["ActivityGroupTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -37,6 +38,7 @@ namespace AfterSchoolLibrary
 			this.IsArchived = false;
 			this.IsInviteOnly = false;
 			this.HasLotteryRun = false;
+			this.ActivityGroupTypeId = ActivityGroupType.NotSet;
 			
         }
 
@@ -56,6 +58,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsArchived", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsInviteOnly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "HasLotteryRun", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "ActivityGroupTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -167,6 +170,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["HasLotteryRun"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityGroupTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
