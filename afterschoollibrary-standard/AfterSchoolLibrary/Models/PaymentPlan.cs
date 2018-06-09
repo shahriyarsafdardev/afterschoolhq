@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary
 
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public int? TotalPeriods { get { return (int?)MDV["TotalPeriods"].Value; } set { MDV["TotalPeriods"].Value = value; } }
-		public int? BillingPeriodTypeId { get { return (int?)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
+		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		public decimal? CostPerPeriod { get { return (decimal?)MDV["CostPerPeriod"].Value; } set { MDV["CostPerPeriod"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		
@@ -26,6 +26,7 @@ namespace AfterSchoolLibrary
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(PaymentPlan).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.BillingPeriodTypeId = BillingPeriodType.NotSet;
 			this.IsActive = false;
 			
         }
@@ -40,7 +41,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TotalPeriods", System.Data.SqlDbType.Int);
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "CostPerPeriod", System.Data.SqlDbType.Decimal);
+				_dp.Add(className, "CostPerPeriod", System.Data.SqlDbType.Money);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
 				
                 return _dp;
@@ -93,6 +94,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required on PaymentPlan object", MessageType.Error);
+			if (this.TotalPeriods.IsEmpty())
+				msgs.Add("TotalPeriods is required on PaymentPlan object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(PaymentPlan).Name));

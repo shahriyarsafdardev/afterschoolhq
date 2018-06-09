@@ -85,7 +85,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "DatePaid", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar, 100);
 				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar, 50);
-				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Decimal);
+				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfSeats", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfWaitingListSeats", System.Data.SqlDbType.Int);
@@ -111,7 +111,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityUid", typeof(Activity).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "Activity");
 				_dp.Add(className, "ActivityAccountId", typeof(Activity).Name, "AccountId", System.Data.SqlDbType.Int, "Activity");
-				_dp.Add(className, "ActivityCostPerRegistrant", typeof(Activity).Name, "CostPerRegistrant", System.Data.SqlDbType.Decimal, "Activity");
+				_dp.Add(className, "ActivityCostPerRegistrant", typeof(Activity).Name, "CostPerRegistrant", System.Data.SqlDbType.Money, "Activity");
 				_dp.Add(className, "ActivityIsDeleted", typeof(Activity).Name, "IsDeleted", System.Data.SqlDbType.Bit, "Activity");
 				_dp.Add(className, "ActivityScheduleRequiresAllDays", typeof(Activity).Name, "ScheduleRequiresAllDays", System.Data.SqlDbType.Bit, "Activity");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
@@ -174,10 +174,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
-			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required on RegistrantActivity object", MessageType.Error);
 			if (this.RegistrantId.IsEmpty())
 				msgs.Add("RegistrantId is required on RegistrantActivity object", MessageType.Error);
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required on RegistrantActivity object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantActivity).Name));

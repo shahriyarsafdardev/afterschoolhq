@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Transaction).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "Amount", System.Data.SqlDbType.Decimal);
+				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
 				_dp.Add(className, "BillerAccountId", System.Data.SqlDbType.int);
 				_dp.Add(className, "PayerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SourceTypeId", System.Data.SqlDbType.Int);
@@ -103,6 +103,14 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.Amount.IsEmpty())
+				msgs.Add("Amount is required on Transaction object", MessageType.Error);
+			if (this.BillerAccountId.IsEmpty())
+				msgs.Add("BillerAccountId is required on Transaction object", MessageType.Error);
+			if (this.PayerAccountId.IsEmpty())
+				msgs.Add("PayerAccountId is required on Transaction object", MessageType.Error);
+			if (this.Description.IsEmpty())
+				msgs.Add("Description is required on Transaction object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Transaction).Name));

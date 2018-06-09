@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityUid", typeof(Activity).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "Activity");
 				_dp.Add(className, "ActivityAccountId", typeof(Activity).Name, "AccountId", System.Data.SqlDbType.Int, "Activity");
-				_dp.Add(className, "ActivityCostPerRegistrant", typeof(Activity).Name, "CostPerRegistrant", System.Data.SqlDbType.Decimal, "Activity");
+				_dp.Add(className, "ActivityCostPerRegistrant", typeof(Activity).Name, "CostPerRegistrant", System.Data.SqlDbType.Money, "Activity");
 				_dp.Add(className, "ActivityIsArchived", typeof(Activity).Name, "IsArchived", System.Data.SqlDbType.Bit, "Activity");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
 				
@@ -100,6 +100,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.RegistrationId.IsEmpty())
+				msgs.Add("RegistrationId is required on RegistrationActivity object", MessageType.Error);
 			if (this.ActivityId.IsEmpty())
 				msgs.Add("ActivityId is required on RegistrationActivity object", MessageType.Error);
 			

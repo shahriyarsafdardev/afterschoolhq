@@ -15,10 +15,10 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		public int? CartId { get { return (int?)MDV["CartId"].Value; } set { MDV["CartId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public DayOfWeekASL Day { get { return (DayOfWeekASL)MDV["Day"].Value; } set { MDV["Day"].Value = value; } }
-		public int? CartId { get { return (int?)MDV["CartId"].Value; } set { MDV["CartId"].Value = value; } }
 		public int? RegistrantActivityId { get { return (int?)MDV["RegistrantActivityId"].Value; } set { MDV["RegistrantActivityId"].Value = value; } }
 		
 
@@ -38,10 +38,10 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(CartItem).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
+				_dp.Add(className, "CartId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Day", System.Data.SqlDbType.Int);
-				_dp.Add(className, "CartId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantActivityId", System.Data.SqlDbType.Int);
 				
                 return _dp;
@@ -94,6 +94,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.CartId.IsEmpty())
+				msgs.Add("CartId is required on CartItem object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(CartItem).Name));
@@ -117,6 +119,10 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CartId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -126,10 +132,6 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Day"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["CartId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

@@ -98,6 +98,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.Price.IsEmpty())
+				msgs.Add("Price is required on Package object", MessageType.Error);
+			if (this.PricePerYear.IsEmpty())
+				msgs.Add("PricePerYear is required on Package object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Package).Name));

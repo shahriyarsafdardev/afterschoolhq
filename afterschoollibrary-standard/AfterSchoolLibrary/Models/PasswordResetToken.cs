@@ -15,9 +15,9 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public DateTime? ExpireDate { get { return (DateTime?)MDV["ExpireDate"].Value; } set { MDV["ExpireDate"].Value = value; } }
-		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
 		public bool Used { get { return (bool)MDV["Used"].Value; } set { MDV["Used"].Value = value; } }
 		
 
@@ -37,9 +37,9 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(PasswordResetToken).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
+				_dp.Add(className, "WebUserId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "ExpireDate", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "WebUserId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Used", System.Data.SqlDbType.Bit);
 				
                 return _dp;
@@ -92,6 +92,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.WebUserId.IsEmpty())
+				msgs.Add("WebUserId is required on PasswordResetToken object", MessageType.Error);
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on PasswordResetToken object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(PasswordResetToken).Name));
@@ -115,15 +119,15 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["WebUserId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ExpireDate"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["WebUserId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
