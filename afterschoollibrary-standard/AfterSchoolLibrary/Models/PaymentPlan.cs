@@ -98,6 +98,8 @@ namespace AfterSchoolLibrary
 				msgs.Add("ActivityId is required on PaymentPlan object", MessageType.Error);
 			if (this.TotalPeriods.IsEmpty())
 				msgs.Add("TotalPeriods is required on PaymentPlan object", MessageType.Error);
+			if (this.CostPerPeriod.IsEmpty())
+				msgs.Add("CostPerPeriod is required on PaymentPlan object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(PaymentPlan).Name));

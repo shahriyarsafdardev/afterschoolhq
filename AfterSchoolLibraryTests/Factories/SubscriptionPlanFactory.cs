@@ -11,9 +11,15 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class SubscriptionPlanFactory
     {
-        public static SubscriptionPlan Create(SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan Create(Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new SubscriptionPlan() { };
+            var obj = new SubscriptionPlan() { ActivityId = activity.ID, CostPerPeriod = 49.95.ToDecimal() };
+            msgs.AddRange(obj.Save(dc));
+            return obj;
+        }
+        public static SubscriptionPlan Create(Activity activity, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new SubscriptionPlan() { ActivityId = activity.ID, CostPerPeriod = costPerPeriod };
             msgs.AddRange(obj.Save(dc));
             return obj;
         }
