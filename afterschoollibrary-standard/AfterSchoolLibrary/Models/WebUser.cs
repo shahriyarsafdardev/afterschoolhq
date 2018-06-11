@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
+using System.Security.Cryptography;
 
 namespace AfterSchoolLibrary
 {
@@ -267,6 +268,21 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["email"], email);
             dq.Criterias.Add(ObjectMap["password"], WebUser.EncryptPassword(password));
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static string SaltPassword(string password)
+        {
+            string salt;
+            byte [] passwordBytes = ASCIIEncoding.ASCII.GetBytes(password);
+            long XORED = 0x00;
+
+            foreach (int x in passwordBytes)
+                XORED = XORED ^ x;
+
+            Random rand = new Random(Convert.ToInt32(XORED));
+            salt = rand.Next().ToString();
+            salt += rand.Next().ToString();
+            return salt;
         }
 
         public static string EncryptPassword(string password)
