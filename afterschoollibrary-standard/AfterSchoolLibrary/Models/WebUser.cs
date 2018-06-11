@@ -270,19 +270,30 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static string SaltPassword(string password)
+        public static string GenerateRandomCryptographicKey(int keyLength)
         {
-            string salt;
-            byte [] passwordBytes = ASCIIEncoding.ASCII.GetBytes(password);
-            long XORED = 0x00;
+            return Convert.ToBase64String(GenerateRandomCryptographicBytes(keyLength));
+        }
 
-            foreach (int x in passwordBytes)
-                XORED = XORED ^ x;
 
-            Random rand = new Random(Convert.ToInt32(XORED));
-            salt = rand.Next().ToString();
-            salt += rand.Next().ToString();
-            return salt;
+        public static byte[] GenerateRandomCryptographicBytes(int keyLength)
+        {
+            RNGCryptoServiceProvider rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            byte[] randomBytes = new byte[keyLength];
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+            return randomBytes;
+        }
+
+ 
+        public static (byte[] salt, byte[] hash) SaltandHashPassword(string password)
+        {
+            byte[] saltBytes = GenerateRandomCryptographicBytes(32 - password.Length);
+            byte[] passwordinBytes = Encoding.UTF8.GetBytes(password);
+            List<byte> passwordSalted = new List<byte>();
+            passwordSalted.AddRange(passwordinBytes);
+            passwordSalted.AddRange(saltBytes);
+            byte[] hashedBytes = SHA256.Create().ComputeHash(passwordSalted.ToArray());
+            return (saltBytes, hashedBytes);
         }
 
         public static string EncryptPassword(string password)

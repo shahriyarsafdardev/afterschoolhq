@@ -371,5 +371,19 @@ namespace AfterSchoolLibraryTests
             Assert.True(user.IsActivityLeader(activity, dc));
         }
 
+        [Fact]
+        public void saltPasswordTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
+
+            var orig = ASCIIEncoding.ASCII.GetBytes("test");
+            var saltAndHashed = WebUser.SaltandHashPassword("test");
+
+            Assert.NotEqual(orig , WebUser.SaltandHashPassword("test").hash);
+        }
+
     }
 }

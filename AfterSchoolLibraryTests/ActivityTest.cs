@@ -291,19 +291,18 @@ namespace AfterSchoolLibraryTests
 
             Assert.Equal(1, activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc));
         }
-        //how to make seats avaible
+        //weird error with DeBugging
         [Fact]
         public void isFullTest()
         {
-            var a = new Activity() { SeatsAvailable = 12 };
-            a.Save(dc);
-            var id = a.ID.Value;
-
-            var r = new RegistrantActivity() { NumberOfInvitationSeats = 6, NumberOfApplicationSeats = 2, NumberOfSeats = 1, ActivityId = id };
-            r.Save(dc);
-            var rid = r.ID.Value;
-
-            Assert.False(a.IsFull(dc));
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+            activity.SeatsAvailable = 1;
+            activity.Save(dc);
+            var x = activity.IsFull();
+            Assert.False(activity.IsFull(dc));
         }
 
         [Fact]
@@ -321,9 +320,10 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var gradeLevel = Factories.GradeLevelFactory.Create(msgs, dc);
-            activity.GradeLevelStart = 1;
-            activity.GradeLevelEnd = 2;
 
+            var activityGrade = Factories.ActivityGradeLevelFactory.Create(activity, gradeLevel, msgs, dc);
+
+            var x = activity.HasGradeLevel(gradeLevel, dc);
 
             Assert.True(activity.HasGradeLevel(gradeLevel, dc));
         }
@@ -331,18 +331,15 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetGradeLevelsTest()
         {
-            var a = new Activity() { GradeLevelStart = 1, GradeLevelEnd = 6 };
-            a.Save(dc);
-            var id = a.ID.Value;
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var gradeLevel = Factories.GradeLevelFactory.Create(msgs, dc);
+            gradeLevel.ID = 12;
+            gradeLevel.Save(dc);
 
-            var gr = new GradeLevel() { ID = 1 };
-            gr.Save(dc);
-            var gid = gr.ID.Value;
+            var activityGrade = Factories.ActivityGradeLevelFactory.Create(activity, gradeLevel, msgs, dc);
 
-            var g = new ActivityGradeLevel() { ActivityId = id, GradeLevelId = gid};
-            g.Save(dc);
-
-            Assert.NotNull( a.GetGradeLevels(dc));
+            Assert.Single( activity.GetGradeLevels(dc));
         }
 
         [Fact]
