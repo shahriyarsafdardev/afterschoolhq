@@ -391,7 +391,7 @@ namespace AfterSchoolLibraryTests
             Assert.Single(activity.GetActivityForms(dc));
         }
 
-        //TODO Attendance Factory
+
         [Fact]
         public void GetAttendanceTest()
         {
