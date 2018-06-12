@@ -1033,12 +1033,11 @@ namespace AfterSchoolLibrary
 
             return account;
         }
-
         public static List<Account> GetVisitorAccounts(this Account account, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByHostAccountId(account.ID.Value, dc)
-                .Select(x => x.GetVisitorAccount(dc))
-                .ToList();
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .ToList();            
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
