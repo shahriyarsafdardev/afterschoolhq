@@ -157,7 +157,7 @@ namespace AfterSchoolLibraryTests
         }
 
         /// <summary>
-        /// Will rewuest access to an account, approve it. Then list off the approved visitor accounts the host has
+        /// Will request access to an account, approve it. Then list off the approved visitor accounts the host has
         /// The expected result will a list filled with one visitor account.
         /// TODO: figure out  how to make sure all of the needed parameters are passed in.
         /// </summary>
@@ -174,6 +174,26 @@ namespace AfterSchoolLibraryTests
             hostaccount.ApproveAccessToAccount(visitoraccount,dc);
 
             Assert.Single(hostaccount.GetApprovedVisitorAccounts(dc));
+        }
+
+        /// <summary>
+        /// Will request access to an account, deny it. Then list off the denied visitor accounts the host has
+        /// The expected result will a list filled with one visitor account.
+        /// TODO: figure out  how to make sure all of the needed parameters are passed in.
+        /// </summary>
+
+        [Fact]
+        public void GetDeniedVisitorAccountsTest()
+        {
+            var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
+            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
+
+            visitoraccount.RequestAccessToAccount(hostaccount, dc);
+            hostaccount.DenyAccessToAccount(visitoraccount, dc);
+
+            Assert.Single(hostaccount.GetDeniedVisitorAccounts(dc));
         }
 
         /// <summary>
