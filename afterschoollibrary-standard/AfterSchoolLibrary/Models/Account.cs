@@ -327,7 +327,6 @@ namespace AfterSchoolLibrary
             }
         }
 
-        /*
         public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
             return this.GetActiveAccountPackage(dc).HasFeature(featureType);
@@ -559,11 +558,6 @@ namespace AfterSchoolLibrary
             return AccountWebUser.LoadByAccountIdByIsActive(this.ID.Value, true, dc);
         }
 
-        public List<AccountInvoice> GetInvoices(DatabaseConnection dc = null)
-        {
-            return AccountInvoice.LoadByAccountId(this.ID.Value, dc);
-        }
-
         public AccountPackage GetActiveAccountPackage(DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountIdByIsActive(this.ID.Value, true, dc);
@@ -572,11 +566,6 @@ namespace AfterSchoolLibrary
         public List<AccountPackage> GetAccountPackages(DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(this.ID.Value, dc);
-        }
-
-        public List<AccountPayment> GetPayments(DatabaseConnection dc = null)
-        {
-            return AccountPayment.LoadByAccountId(this.ID.Value, dc);
         }
 
         public WebUser AddUser(WebUser wu, UserType ut, int loggedInUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -1048,13 +1037,12 @@ namespace AfterSchoolLibrary
             if (msgs.HasNoErrors())
             {
                 Stripe.StripeCardCreateOptions options = new Stripe.StripeCardCreateOptions();
-                options.Source = new Stripe.StripeSourceOptions();
-                options.Source.Object = "card";
-                options.Source.Name = name;
-                options.Source.Number = number;
-                options.Source.ExpirationMonth = expMonth;
-                options.Source.ExpirationYear = expYear;
-                options.Source.Cvc = cvc;
+                options.SourceCard = new Stripe.SourceCard();
+                options.SourceCard.Name = name;
+                options.SourceCard.Number = number;
+                options.SourceCard.ExpirationMonth = expMonth.ToInteger();
+                options.SourceCard.ExpirationYear = expYear.ToInteger();
+                options.SourceCard.Cvc = cvc;
 
                 Stripe.StripeCard card = null;
                 Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
@@ -1357,7 +1345,7 @@ namespace AfterSchoolLibrary
             msgs.AddRange(account.SaveWithStripe(dc));
             return account;
         }
-        */
+        
         #endregion
     }
 }
