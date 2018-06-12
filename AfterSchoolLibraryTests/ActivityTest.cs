@@ -985,21 +985,24 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetFirstDateTest()
         {
-            var start = new DateTime(1, 1, 1, 1, 1, 1) { };
-            var end = new DateTime(2, 2, 2, 2, 2, 2) { };
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var Sched = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            Sched.StartDate = new DateTime(1, 1, 1);
+            Sched.EndDate = new DateTime(2020, 1, 1);
+            Sched.DailyStartTime = new DateTime(1, 1, 1, 1, 1, 1);
+            Sched.DailyEndTime = new DateTime(24, 1, 1, 1, 1, 1);
+            var activitySchedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            activity.ActivityScheduleId = activitySchedule.ID.Value;
+            activity.Save(dc);
+            var activityInstance = Factories.ActivityInstanceFactory.Create(activity, msgs, dc);
+            activityInstance.StartDateTime = new DateTime(1, 1, 1);
+            activityInstance.StartDateTime = new DateTime(2020, 1, 1);
+            activityInstance.ActivityScheduleId = activitySchedule.ID.Value;
+            activityInstance.Save(dc);
 
-
-            var act = new Activity() { StartDateTime = start, EndDateTime = end };
-            act.Save(dc);
-            var actid = act.ID.Value;
-
-            var user = new ActivityWebUser() { ActivityId = actid };
-            user.Save(dc);
-            var id = user.ID.Value;
-
-            var x = new AccountPropertyType() { };
-
-            Assert.NotNull(act.GetFirstDate(dc));
+            Assert.NotNull(activity.GetFirstDate(dc));
         }
 
         [Fact]
