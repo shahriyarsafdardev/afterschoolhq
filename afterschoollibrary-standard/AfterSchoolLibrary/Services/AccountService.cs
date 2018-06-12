@@ -1047,6 +1047,14 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
 
+        //Gets the accounts that are requesting the host's approval
+        public static List<Account> GetRequestedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByRequested(Hostaccount.ID.Value,dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .ToList();
+        }
+
         //Gets the accounts that the host has approved
         public static List<Account> GetApprovedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
@@ -1062,21 +1070,21 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
 
-        /*
+        
         public static List<Account> GetApprovedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByApproved(Hostaccount.ID, dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+            return AccountRelationship.LoadByApproved(Hostaccount.ID.Value, dc)
+                .Select(accountRelationship => accountRelationship.GetHostAccount(dc))
                 .ToList();
         }
 
         public static List<Account> GetDeniedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByDenied(Hostaccount.ID, dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+            return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc)
+                .Select(accountRelationship => accountRelationship.GetHostAccount(dc))
                 .ToList();
         }
-        */
+        
 
         public static List<Location> GetVisitorLocations(this Account account, DatabaseConnection dc = null)
         {
@@ -1103,6 +1111,7 @@ namespace AfterSchoolLibrary
                 var accountRelationship = new AccountRelationship();
                 accountRelationship.VisitorAccountId = visitorAccount.ID;
                 accountRelationship.HostAccountId = hostAccount.ID;
+                accountRelationship.HostPermissionTypeId = HostPermissionType.Requested;
                 accountRelationship.CreatedBy = visitorAccount.ID;
                 accountRelationship.CreateDate = DateTime.UtcNow;
                 accountRelationship.LastModifiedDate = DateTime.UtcNow;
@@ -1140,7 +1149,7 @@ namespace AfterSchoolLibrary
             //Denies access to the host account 
             var msgs = new SystemMessages();
             var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value);
-            accountRelationship.HostPermissionTypeId = HostPermissionType.NotSet;
+            accountRelationship.HostPermissionTypeId = HostPermissionType.Deny;
             accountRelationship.LastModifiedDate = DateTime.UtcNow;
             accountRelationship.LastModifiedBy = hostAccount.ID;
             msgs.AddRange(accountRelationship.Save(dc));
