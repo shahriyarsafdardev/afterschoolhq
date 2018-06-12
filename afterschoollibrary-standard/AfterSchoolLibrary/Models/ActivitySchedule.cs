@@ -101,6 +101,16 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.AccountId.IsEmpty())
+				msgs.Add("AccountId is required on ActivitySchedule object", MessageType.Error);
+			if (this.StartDate.IsEmpty())
+				msgs.Add("StartDate is required on ActivitySchedule object", MessageType.Error);
+			if (this.EndDate.IsEmpty())
+				msgs.Add("EndDate is required on ActivitySchedule object", MessageType.Error);
+			if (this.DailyStartTime.IsEmpty())
+				msgs.Add("DailyStartTime is required on ActivitySchedule object", MessageType.Error);
+			if (this.DailyEndTime.IsEmpty())
+				msgs.Add("DailyEndTime is required on ActivitySchedule object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivitySchedule).Name));

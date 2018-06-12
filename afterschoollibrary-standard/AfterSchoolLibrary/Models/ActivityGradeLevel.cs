@@ -91,6 +91,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required on ActivityGradeLevel object", MessageType.Error);
 			if (this.GradeLevelId.IsEmpty())
 				msgs.Add("GradeLevelId is required on ActivityGradeLevel object", MessageType.Error);
 			

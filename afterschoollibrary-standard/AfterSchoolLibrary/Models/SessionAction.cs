@@ -140,6 +140,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.SessionId.IsEmpty())
+				msgs.Add("SessionId is required on SessionAction object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(SessionAction).Name));

@@ -99,6 +99,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required on ActivityFile object", MessageType.Error);
 			if (this.FileId.IsEmpty())
 				msgs.Add("FileId is required on ActivityFile object", MessageType.Error);
 			

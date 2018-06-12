@@ -224,11 +224,6 @@ namespace AfterSchoolLibrary
             return AccountPackage.LoadByAccountId(account.ID.Value, dc);
         }
 
-        public static List<AccountPayment> GetPayments(this Account account, DatabaseConnection dc = null)
-        {
-            return AccountPayment.LoadByAccountId(account.ID.Value, dc);
-        }
-
         public static SystemMessages AddUser(this Account account, WebUser user, UserType ut, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -1038,12 +1033,11 @@ namespace AfterSchoolLibrary
 
             return account;
         }
-
         public static List<Account> GetVisitorAccounts(this Account account, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByHostAccountId(account.ID.Value, dc)
-                .Select(x => x.GetVisitorAccount(dc))
-                .ToList();
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .ToList();            
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)

@@ -16,10 +16,10 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		public int? FormQuestionId { get { return (int?)MDV["FormQuestionId"].Value; } set { MDV["FormQuestionId"].Value = value; } }
-		public string Text { get { return (string)MDV["Text"].Value; } set { MDV["Text"].Value = value; } }
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public int? RegistrationId { get { return (int?)MDV["RegistrationId"].Value; } set { MDV["RegistrationId"].Value = value; } }
+		public string Text { get { return (string)MDV["Text"].Value; } set { MDV["Text"].Value = value; } }
 		public QuestionDataType QuestionDataTypeId { get { return (QuestionDataType)MDV["QuestionDataTypeId"].Value; } set { MDV["QuestionDataTypeId"].Value = value; } }
 		public QuestionDataType FormQuestionQuestionDataTypeId { get { return (QuestionDataType)MDV["FormQuestionQuestionDataTypeId"].Value; } }
 		public QuestionType FormQuestionQuestionTypeId { get { return (QuestionType)MDV["FormQuestionQuestionTypeId"].Value; } }
@@ -48,10 +48,10 @@ namespace AfterSchoolLibrary
                 string className = typeof(FormQuestionAnswer).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "FormQuestionId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FormQuestionQuestionDataTypeId", typeof(FormQuestion).Name, "QuestionDataTypeId", System.Data.SqlDbType.Int, "FormQuestion");
 				_dp.Add(className, "FormQuestionQuestionTypeId", typeof(FormQuestion).Name, "QuestionTypeId", System.Data.SqlDbType.Int, "FormQuestion");
@@ -116,6 +116,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.FormQuestionId.IsEmpty())
+				msgs.Add("FormQuestionId is required on FormQuestionAnswer object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(FormQuestionAnswer).Name));
@@ -143,10 +145,6 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Text"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RegistrantId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -156,6 +154,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RegistrationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Text"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

@@ -33,6 +33,7 @@ namespace AfterSchoolLibrary
 		public string TimeZone { get { return (string)MDV["TimeZone"].Value; } set { MDV["TimeZone"].Value = value; } }
 		public string LogoUrl { get { return (string)MDV["LogoUrl"].Value; } set { MDV["LogoUrl"].Value = value; } }
 		public string LandingPageText { get { return (string)MDV["LandingPageText"].Value; } set { MDV["LandingPageText"].Value = value; } }
+		public AccountType AccountTypeId { get { return (AccountType)MDV["AccountTypeId"].Value; } set { MDV["AccountTypeId"].Value = value; } }
 		
 
         public Account()
@@ -43,6 +44,7 @@ namespace AfterSchoolLibrary
 			this.IsAdminAccount = false;
 			this.IsActive = false;
 			this.IsAfterSchool = false;
+			this.AccountTypeId = AccountType.NotSet;
 			
         }
 
@@ -71,6 +73,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "TimeZone", System.Data.SqlDbType.NVarChar, 30);
 				_dp.Add(className, "LogoUrl", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "LandingPageText", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "AccountTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -122,6 +125,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on Account object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Account).Name));
@@ -216,6 +221,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["LandingPageText"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -256,6 +265,14 @@ namespace AfterSchoolLibrary
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<Account> LoadByAccountTypeId(AccountType AccountTypeId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountTypeId"], AccountTypeId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
@@ -310,7 +327,6 @@ namespace AfterSchoolLibrary
             }
         }
 
-        /*
         public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
             return this.GetActiveAccountPackage(dc).HasFeature(featureType);
@@ -542,11 +558,6 @@ namespace AfterSchoolLibrary
             return AccountWebUser.LoadByAccountIdByIsActive(this.ID.Value, true, dc);
         }
 
-        public List<AccountInvoice> GetInvoices(DatabaseConnection dc = null)
-        {
-            return AccountInvoice.LoadByAccountId(this.ID.Value, dc);
-        }
-
         public AccountPackage GetActiveAccountPackage(DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountIdByIsActive(this.ID.Value, true, dc);
@@ -555,11 +566,6 @@ namespace AfterSchoolLibrary
         public List<AccountPackage> GetAccountPackages(DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(this.ID.Value, dc);
-        }
-
-        public List<AccountPayment> GetPayments(DatabaseConnection dc = null)
-        {
-            return AccountPayment.LoadByAccountId(this.ID.Value, dc);
         }
 
         public WebUser AddUser(WebUser wu, UserType ut, int loggedInUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -1031,13 +1037,12 @@ namespace AfterSchoolLibrary
             if (msgs.HasNoErrors())
             {
                 Stripe.StripeCardCreateOptions options = new Stripe.StripeCardCreateOptions();
-                options.Source = new Stripe.StripeSourceOptions();
-                options.Source.Object = "card";
-                options.Source.Name = name;
-                options.Source.Number = number;
-                options.Source.ExpirationMonth = expMonth;
-                options.Source.ExpirationYear = expYear;
-                options.Source.Cvc = cvc;
+                options.SourceCard = new Stripe.SourceCard();
+                options.SourceCard.Name = name;
+                options.SourceCard.Number = number;
+                options.SourceCard.ExpirationMonth = expMonth.ToInteger();
+                options.SourceCard.ExpirationYear = expYear.ToInteger();
+                options.SourceCard.Cvc = cvc;
 
                 Stripe.StripeCard card = null;
                 Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
@@ -1340,7 +1345,7 @@ namespace AfterSchoolLibrary
             msgs.AddRange(account.SaveWithStripe(dc));
             return account;
         }
-        */
+        
         #endregion
     }
 }

@@ -17,6 +17,7 @@ namespace AfterSchoolLibrary
 
 		public int? HostAccountId { get { return (int?)MDV["HostAccountId"].Value; } set { MDV["HostAccountId"].Value = value; } }
 		public int? VisitorAccountId { get { return (int?)MDV["VisitorAccountId"].Value; } set { MDV["VisitorAccountId"].Value = value; } }
+		public HostPermissionType HostPermissionTypeId { get { return (HostPermissionType)MDV["HostPermissionTypeId"].Value; } set { MDV["HostPermissionTypeId"].Value = value; } }
 		public DateTime? ApprovedDate { get { return (DateTime?)MDV["ApprovedDate"].Value; } set { MDV["ApprovedDate"].Value = value; } }
 		public int? ApprovedBy { get { return (int?)MDV["ApprovedBy"].Value; } set { MDV["ApprovedBy"].Value = value; } }
 		
@@ -25,6 +26,7 @@ namespace AfterSchoolLibrary
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(AccountRelationship).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.HostPermissionTypeId = HostPermissionType.NotSet;
 			
         }
 
@@ -37,6 +39,7 @@ namespace AfterSchoolLibrary
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "HostAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "VisitorAccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "HostPermissionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ApprovedDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "ApprovedBy", System.Data.SqlDbType.Int);
 				
@@ -90,6 +93,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.HostAccountId.IsEmpty())
+				msgs.Add("HostAccountId is required on AccountRelationship object", MessageType.Error);
+			if (this.VisitorAccountId.IsEmpty())
+				msgs.Add("VisitorAccountId is required on AccountRelationship object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(AccountRelationship).Name));
@@ -118,6 +125,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["VisitorAccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["HostPermissionTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

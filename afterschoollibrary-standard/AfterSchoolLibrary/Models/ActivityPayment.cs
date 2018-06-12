@@ -16,9 +16,9 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
-		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
 		
 
         public ActivityPayment()
@@ -37,9 +37,9 @@ namespace AfterSchoolLibrary
                 string className = typeof(ActivityPayment).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Amount", System.Data.SqlDbType.Decimal);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
 				
                 return _dp;
             }
@@ -91,6 +91,12 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.RegistrantId.IsEmpty())
+				msgs.Add("RegistrantId is required on ActivityPayment object", MessageType.Error);
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required on ActivityPayment object", MessageType.Error);
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on ActivityPayment object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityPayment).Name));
@@ -118,15 +124,15 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Amount"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ActivityId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Amount"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

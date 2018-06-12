@@ -34,7 +34,7 @@ name: WebUser
 serializable: true
 inherits: BaseWebUser
 property: FacebookId, string, NVarChar(100)
-property: Uid, Guid, UniqueIdentifier
+property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
 property: LastActivity, DateTime?, DateTime
 property: VerifiedAccount, bool, Bit
@@ -50,8 +50,8 @@ loadmethod: FacebookId
 type: Class
 name: Activity
 inherits: BaseEventWithAddress
-property: SeatsAvailable, int?, Int
-property: AccountId, int?, Int
+property: SeatsAvailable, int?, Int, required
+property: AccountId, int?, Int, required
 property: AgeStart, int?, Int
 property: AgeEnd, int?, Int
 property: GradeLevelStart, int?, Int
@@ -59,7 +59,7 @@ property: GradeLevelEnd, int?, Int
 property: CostPerRegistrant, decimal?, Money
 property: CostDescription, string, NVarChar(1000)
 property: AllowPreRegistration, bool, Bit
-property: Uid, Guid, UniqueIdentifier
+property: Uid, Guid, UniqueIdentifier, required
 property: Details, string, NVarChar(4000)
 property: LocationDetails, string, NVarChar(4000)
 property: ScheduleDetails, string, NVarChar(4000)
@@ -83,6 +83,7 @@ property: ActivityGroupId, int?, Int
 property: ActivityScheduleId, int?, Int
 property: ScheduleRequiresAllDays, bool, Bit
 property: UniqueName, string, NVarChar(100)
+property: IsTemplate, bool, Bit
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
@@ -105,7 +106,7 @@ loadmethod: UniqueName|AccountId
 type: Class
 name: Location
 inherits: BaseLocation
-property: HostAccountId, int?, Int
+property: HostAccountId, int?, Int, required
 property: IsDefault, bool, Bit
 property: Details, string, NVarChar(4000)
 loadmethod: HostAccountId, List<>
@@ -116,7 +117,7 @@ loadmethod: HostAccountId|IsDefault
 type: Class
 name: ActivityDay
 inherits: BasicObjectWithModified
-property: ActivityId, int?, Int
+property: ActivityId, int?, Int, required
 property: ActivityRecurrenceId, int?, Int
 property: Day, DayOfWeekASL, Int
 property: StartTime, DateTime?, DateTime
@@ -125,19 +126,46 @@ loadmethod: ActivityId, List<>
 loadmethod: ActivityRecurrenceId, List<>
 [end]
 
+
+[begin]
+type: Class
+name: Tag
+inherits: BasicObjectWithModified
+property: ParentTagId, int?, Int
+property: AccountId, int?, Int
+property: Name, string, NVarChar(100), required
+loadmethod: Name
+loadmethod: Name|AccountId
+loadmethod: ParentTagId, List<>
+loadmethod: AccountId, List<>
+loadmethod: AccountId|ParentTagId, List<>
+[end]
+
+[begin]
+type: Class
+name: ObjectTag
+inherits: BasicObject
+property: ActivityId, int?, Int
+property: TagId, int?, Int
+join: Tag.ID, TagId, InnerJoin
+joinproperty: Tag.Name, string, NVarChar
+loadmethod: ActivityId, List<>
+loadmethod: TagId, List<>
+[end]
+
 [begin]
 type: Class
 name: ActivitySchedule
 inherits: BasicObjectWithModified
 property: Name, string, NVarChar(100)
-property: AccountId, int?, Int
+property: AccountId, int?, Int, required
 property: ActivityGroupId, int?, Int
 property: ScheduleDetails, string, NVarChar(4000)
 property: RepeatsWeekly, bool, Bit
-property: StartDate, DateTime?, DateTime
-property: EndDate, DateTime?, DateTime
-property: DailyStartTime, DateTime?, DateTime
-property: DailyEndTime, DateTime?, DateTime
+property: StartDate, DateTime?, DateTime, required
+property: EndDate, DateTime?, DateTime, required
+property: DailyStartTime, DateTime?, DateTime, required
+property: DailyEndTime, DateTime?, DateTime, required
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 [end]
@@ -146,11 +174,11 @@ loadmethod: ActivityGroupId, List<>
 type: Class
 name: ActivityInstance
 inherits: BasicObjectWithModified
-property: ActivityScheduleId, int?, Int
-property: ActivityId, int?, Int
+property: ActivityScheduleId, int?, Int, required
+property: ActivityId, int?, Int, required
 property: Day, DayOfWeekASL, Int
-property: StartDateTime, DateTime?, DateTime
-property: EndDateTime, DateTime?, DateTime
+property: StartDateTime, DateTime?, DateTime, required
+property: EndDateTime, DateTime?, DateTime, required
 loadmethod: ActivityId, List<>
 loadmethod: ActivityScheduleId, List<>
 [end]
@@ -159,8 +187,8 @@ loadmethod: ActivityScheduleId, List<>
 type: Class
 name: ActivityGradeLevel
 inherits: BasicObject
-property: ActivityId, int?, Int
-property: GradeLevelId, int?, Int
+property: ActivityId, int?, Int, required
+property: GradeLevelId, int?, Int, required
 join: GradeLevel.ID, GradeLevelId, InnerJoin
 joinproperty: GradeLevel.Name, string, NVarChar
 joinproperty: GradeLevel.Abbreviation, string, NVarChar
@@ -175,7 +203,7 @@ name: ActivityMessage
 inherits: BasicObject
 property: ActivityId, int?, Int
 property: ActivityGroupId, int?, Int
-property: AccountId, int?, Int
+property: AccountId, int?, Int, required
 property: DateSent, DateTime?, DateTime
 property: Subject, string, NVarChar(150)
 property: Body, string, Text
@@ -193,8 +221,8 @@ loadmethod: ActivityGroupId, List<>
 type: Class
 name: ActivityMessageRegistrant
 inherits: BasicObject
-property: ActivityMessageId, int?, Int
-property: RegistrantId, int?, Int
+property: ActivityMessageId, int?, Int, required
+property: RegistrantId, int?, Int, required
 property: DateSent, DateTime?, DateTime
 property: SendErrors, string, NVarChar(1000)
 loadmethod: ActivityMessageId, List<>
@@ -217,7 +245,7 @@ inherits: BaseCompany
 property: StripeAccessToken, string, NVarChar(100)
 property: StripePublishableKey, string, NVarChar(100)
 property: StripeSecretKey, string, NVarChar(100)
-property: Uid, Guid, UniqueIdentifier
+property: Uid, Guid, UniqueIdentifier, required
 property: UniqueName, string, NVarChar(50)
 property: OwnerId, int?, Int
 property: IsAdminAccount, bool, Bit
@@ -232,18 +260,21 @@ property: StripeUserId, string, NVarChar(100)
 property: TimeZone, string, NVarChar(30)
 property: LogoUrl, string, NVarChar(400)
 property: LandingPageText, string, NVarChar(4000)
+property: AccountTypeId, AccountType, Int
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
 loadmethod: IsAdminAccount
 loadmethod: Uid
+loadmethod: AccountTypeId, List<>
 [end]
 
 [begin]
 type: Class
 name: AccountRelationship
 inherits: BasicObjectWithModified
-property: HostAccountId, int?, Int
-property: VisitorAccountId, int?, Int
+property: HostAccountId, int?, Int, required
+property: VisitorAccountId, int?, Int, required
+property: HostPermissionTypeId, HostPermissionType, Int
 property: ApprovedDate, DateTime?, DateTime
 property: ApprovedBy, int?, Int
 loadmethod: HostAccountId, List<>
@@ -256,9 +287,9 @@ type: Class
 name: AccountRelationshipLocation
 inherits: BasicObjectWithModified
 property: AccountRelationshipId, int?, Int
-property: HostAccountId, int?, Int
-property: VisitorAccountId, int?, Int
-property: LocationId, int?, Int
+property: HostAccountId, int?, Int, required
+property: VisitorAccountId, int?, Int, required
+property: LocationId, int?, Int, required
 property: ApprovedDate, DateTime?, DateTime
 property: ApprovedBy, int?, Int
 loadmethod: AccountRelationshipId, List<>
@@ -291,8 +322,8 @@ loadmethod: ActivityId|AccountPropertyTypeId
 type: Class
 name: AccountWebUser
 inherits: BasicObjectWithModified
-property: AccountId, int?, Int
-property: WebUserId, int?, Int
+property: AccountId, int?, Int, required
+property: WebUserId, int?, Int, required
 property: IsActive, bool, Bit
 property: IsDefault, bool, Bit
 property: UserTypeId, UserType, Int
@@ -333,7 +364,7 @@ name: RegistrationPeriod
 inherits: BaseEvent
 property: AccountId, int?, Int
 property: RegistrationModeId, RegistrationMode, Int
-property: Uid, Guid, UniqueIdentifier
+property: Uid, Guid, UniqueIdentifier, required
 property: ActivityGroupId, int?, Int
 loadmethod: AccountId, List<>
 loadmethod: Uid
@@ -344,8 +375,8 @@ loadmethod: ActivityGroupId, List<>
 type: Class
 name: ActivityRegistrationPeriod
 inherits: BasicObjectWithModified
-property: RegistrationPeriodId, int?, Int
-property: ActivityId, int?, Int
+property: RegistrationPeriodId, int?, Int, required
+property: ActivityId, int?, Int, required
 property: IsActive, bool, Bit
 join: RegistrationPeriod.ID, RegistrationPeriodId, InnerJoin
 join: Activity.ID, ActivityId, InnerJoin
@@ -365,15 +396,16 @@ loadmethod: RegistrationPeriodId|ActivityId
 type: Class
 name: ActivityGroup
 inherits: BasicLookUpObject
-property: AccountId, int?, Int
+property: AccountId, int?, Int, required
 property: RegistrationModeId, RegistrationMode, Int
 property: UniqueName, string, NVarChar(100)
-property: Uid, Guid, UniqueIdentifier
+property: Uid, Guid, UniqueIdentifier, required
 property: FormId, int?, Int
 property: IsPublished, bool, Bit
 property: IsArchived, bool, Bit
 property: IsInviteOnly, bool, Bit
 property: HasLotteryRun, bool, Bit
+property: ActivityGroupTypeId, ActivityGroupType, Int
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
@@ -391,7 +423,7 @@ name: Registrant
 inherits: BaseContact
 property: AccountId, int?, Int
 property: WebUserId, int?, Int
-property: Uid, Guid, UniqueIdentifier
+property: Uid, Guid, UniqueIdentifier, required
 property: RegistrantTypeId, RegistrantType, Int
 property: ParentRegistrantId, int?, Int
 property: IsMaster, bool, Bit
@@ -411,7 +443,7 @@ loadmethod: FirstRegistrantId, List<>
 type: Class
 name: ContactList
 inherits: BasicLookUpObject
-property: AccountId, int?, Int
+property: AccountId, int?, Int, required
 loadmethod: AccountId, List<>
 [end]
 
@@ -419,8 +451,8 @@ loadmethod: AccountId, List<>
 type: Class
 name: ContactListRegistrant
 inherits: BasicObject
-property: ContactListId, int?, Int
-property: RegistrantId, int?, Int
+property: ContactListId, int?, Int, required
+property: RegistrantId, int?, Int, required
 loadmethod: ContactListId|RegistrantId
 loadmethod: ContactListId, List<>
 loadmethod: RegistrantId, List<>
@@ -435,10 +467,10 @@ joinproperty: Registrant.Uid, Guid, UniqueIdentifier
 type: Class
 name: ActivityPayment
 inherits: BasicObjectWithModified
-property: RegistrantId, int?, Int
-property: Amount, decimal?, Decimal
-property: ActivityId, int?, Int
-property: Uid, Guid, UniqueIdentifier
+property: RegistrantId, int?, Int, required
+property: ActivityId, int?, Int, required
+property: Uid, Guid, UniqueIdentifier, required
+property: Amount, decimal?, Money
 loadmethod: ActivityId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: Uid
@@ -448,8 +480,8 @@ loadmethod: Uid
 type: Class
 name: RegistrantActivityGroup
 inherits: BasicObjectWithModified
-property: ActivityGroupId, int?, Int
-property: RegistrantId, int?, Int
+property: ActivityGroupId, int?, Int, required
+property: RegistrantId, int?, Int, required
 property: RegistrationPeriodId, int?, Int
 property: NumberOfInvitationSeats, int?, Int
 property: NumberOfSeatsDeclined, int?, Int
@@ -475,15 +507,15 @@ loadmethod: Uid
 type: Class
 name: RegistrantActivity
 inherits: BasicObjectWithModified
-property: RegistrantId, int?, Int
-property: ActivityId, int?, Int
+property: RegistrantId, int?, Int, required
+property: ActivityId, int?, Int, required
 property: RegistrationId, int?, Int
 property: Uid, Guid, UniqueIdentifier
 property: OnWaitingList, bool, Bit
 property: DatePaid, DateTime?, DateTime
 property: StripeChargeId, string, NVarChar(100)
 property: PayPalTransactionId, string, NVarChar(50)
-property: AmountPaid, decimal?, Decimal
+property: AmountPaid, decimal?, Money
 property: PaymentTypeId, PaymentType, Int
 property: NumberOfSeats, int?, Int
 property: NumberOfWaitingListSeats, int?, Int
@@ -513,7 +545,7 @@ joinproperty: Registrant.FirstRegistrantId, int?, Int
 joinproperty: Activity.Name, string, NVarChar
 joinproperty: Activity.Uid, Guid, UniqueIdentifier
 joinproperty: Activity.AccountId, int?, Int
-joinproperty: Activity.CostPerRegistrant, decimal?, Decimal
+joinproperty: Activity.CostPerRegistrant, decimal?, Money
 joinproperty: Activity.IsDeleted, bool, Bit
 joinproperty: Activity.ScheduleRequiresAllDays, bool, Bit
 joinproperty: Account.Name, string, NVarChar
@@ -535,11 +567,11 @@ loadmethod: ActivityGroupId, List<>
 type: Class
 name: ActivityForm
 inherits: BasicLookUpObject
-property: FormId, int?, Int
-property: ActivityId, int?, Int
+property: FormId, int?, Int, required
+property: ActivityId, int?, Int, required
+property: AccountId, int?, Int, required
 property: IsActive, bool, Bit
 property: IsPublished, bool, Bit
-property: AccountId, int?, Int
 property: Uid, Guid, UniqueIdentifier
 join: Form.ID, FormId, InnerJoin
 join: Activity.ID, ActivityId, InnerJoin
@@ -559,7 +591,7 @@ joinproperty: Activity.Address2, string, NVarChar
 joinproperty: Activity.City, string, NVarChar
 joinproperty: Activity.State, string, NVarChar
 joinproperty: Activity.PostalCode, string, NVarChar
-joinproperty: Activity.CostPerRegistrant, decimal?, Decimal
+joinproperty: Activity.CostPerRegistrant, decimal?, Money
 joinproperty: Activity.CostDescription, string, NVarChar
 joinproperty: Activity.AcceptPayPal, bool, Bit
 joinproperty: Activity.AcceptCreditCard, bool, Bit
@@ -582,8 +614,8 @@ loadmethod: Uid|IsPublished
 type: Class
 name: Form
 inherits: BasicLookUpObject
-property: AccountId, int?, Int
-property: Uid, Guid, UniqueIdentifier
+property: AccountId, int?, Int, required
+property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
 join: Account.ID, AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
@@ -595,9 +627,9 @@ loadmethod: Uid
 type: Class
 name: FormQuestion
 inherits: BasicObjectWithModified
+property: FormQuestionGroupId, int?, Int, required
+property: FormId, int?, Int, required
 property: IsTemplate, bool, Bit
-property: FormQuestionGroupId, int?, Int
-property: FormId, int?, Int
 property: Text, string, NVarChar(400)
 property: Description, string, NVarChar(4000)
 property: QuestionTypeId, QuestionType, Int
@@ -627,7 +659,7 @@ loadmethod: FormQuestionGroupId|QuestionDataTypeId
 type: Class
 name: FormQuestionGroup
 inherits: BasicLookUpObject
-property: FormId, int?, Int
+property: FormId, int?, Int, required
 property: DisplayOrder, int?, Int
 property: RegistrantTypeId, RegistrantType, Int
 property: QuestionGroupDataTypeId, QuestionGroupDataType, Int
@@ -639,11 +671,11 @@ loadmethod: FormId|RegistrantTypeId, List<>
 type: Class
 name: FormQuestionAnswer
 inherits: BasicObjectWithModified
-property: FormQuestionId, int?, Int
-property: Text, string, NVarChar(400)
+property: FormQuestionId, int?, Int, required
 property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
 property: RegistrationId, int?, Int
+property: Text, string, NVarChar(400)
 property: QuestionDataTypeId, QuestionDataType, Int
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
@@ -668,15 +700,15 @@ loadmethod: RegistrationId, List<>
 type: Class
 name: Registration
 inherits: BasicObjectWithModified
-property: Uid, Guid, UniqueIdentifier
-property: RegistrantId, int?, Int
+property: RegistrantId, int?, Int, required
+property: RegistrationPeriodId, int?, Int
 property: AccountId, int?, Int
+property: Uid, Guid, UniqueIdentifier, required
 property: DatePaid, DateTime?, DateTime
 property: StripeChargeId, string, NVarChar(100)
 property: PayPalTransactionId, string, NVarChar(50)
-property: AmountPaid, decimal?, Decimal
+property: AmountPaid, decimal?, Money
 property: PaymentTypeId, PaymentType, Int
-property: RegistrationPeriodId, int?, Int
 property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
@@ -701,8 +733,8 @@ joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
 type: Class
 name: RegistrationActivity
 inherits: BasicObject
-property: RegistrationId, int?, Int
-property: ActivityId, int?, Int
+property: RegistrationId, int?, Int, required
+property: ActivityId, int?, Int, required
 loadmethod: ActivityId|RegistrationId
 loadmethod: ActivityId, List<>
 loadmethod: RegistrationId, List<>
@@ -711,7 +743,7 @@ join: ActivityGroup.ID, Activity.ID, LeftOuterJoin
 joinproperty: Activity.Name, string, NVarChar
 joinproperty: Activity.Uid, Guid, UniqueIdentifier
 joinproperty: Activity.AccountId, int?, Int
-joinproperty: Activity.CostPerRegistrant, decimal?, Decimal
+joinproperty: Activity.CostPerRegistrant, decimal?, Money
 joinproperty: Activity.IsArchived, bool, Bit
 joinproperty: ActivityGroup.IsArchived, bool, Bit
 [end]
@@ -720,8 +752,8 @@ joinproperty: ActivityGroup.IsArchived, bool, Bit
 type: Class
 name: ActivityWebUser
 inherits: BasicObjectWithModified
-property: ActivityId, int?, Int
-property: WebUserId, int?, Int
+property: ActivityId, int?, Int, required
+property: WebUserId, int?, Int, required
 property: IsLeader, bool, Bit
 join: Activity.ID, ActivityId, InnerJoin
 join: WebUser.ID, WebUserId, InnerJoin
@@ -743,7 +775,7 @@ loadmethod: ActivityId|WebUserId
 type: Class
 name: Attendance
 inherits: BasicObjectWithModified
-property: ActivityId, int?, Int
+property: ActivityId, int?, Int, required
 property: ActivityInstanceId, int?, Int
 property: Date, DateTime?, DateTime
 property: IsCompleted, bool, Bit
@@ -763,8 +795,8 @@ loadmethod: ActivityInstanceId, List<>
 type: Class
 name: AttendanceRegistrant
 inherits: BasicObjectWithModified
-property: RegistrantId, int?, Int
-property: AttendanceId, int?, Int
+property: RegistrantId, int?, Int, required
+property: AttendanceId, int?, Int, required
 property: IsPresent, bool, Bit
 property: IsLate, bool, Bit
 property: NumberPresent, int?, Int
@@ -790,8 +822,8 @@ loadmethod: AttendanceId|RegistrantId, List<>
 type: Class
 name: Package
 inherits: BasicLookUpObject
-property: Price, decimal?, Money
-property: PricePerYear, decimal?, Money
+property: Price, decimal?, Money, required
+property: PricePerYear, decimal?, Money, required
 property: IsActive, bool, Bit
 property: IsPopular, bool, Bit
 property: IsAfterSchool, bool, Bit
@@ -807,13 +839,13 @@ loadmethod: Uid
 type: Class
 name: AccountPackage
 serializable: true
+property: PackageId, int?, Int, required
+property: AccountId, int?, Int, required
 inherits: BasicObjectWithModified
 property: StartDate, DateTime?, DateTime
 property: EndDate, DateTime?, DateTime
 property: Price, decimal?, Money
 property: BillingPeriodTypeId, BillingPeriodType, Int
-property: PackageId, int?, Int
-property: AccountId, int?, Int
 property: Uid, Guid, UniqueIdentifier
 property: TrialStartDate, DateTime?, DateTime
 property: TrialEndDate, DateTime?, DateTime
@@ -822,8 +854,8 @@ property: StripeSubscriptionId, string, NVarChar(50)
 join: Package.ID, PackageId, InnerJoin
 joinproperty: Package.Name, string, NVarChar
 joinproperty: Package.Uid, Guid, UniqueIdentifier
-joinproperty: Package.Price, decimal?, Decimal
-joinproperty: Package.PricePerYear, decimal?, Decimal
+joinproperty: Package.Price, decimal?, Money
+joinproperty: Package.PricePerYear, decimal?, Money
 loadmethod: PackageId, List<>
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsActive
@@ -835,7 +867,7 @@ type: Class
 name: PackageFeature
 serializable: true
 inherits: BasicObjectWithModified
-property: PackageId, int?, Int
+property: PackageId, int?, Int, required
 property: FeatureTypeId, FeatureType, Int
 property: Max, int?, Int
 loadmethod: PackageId, List<>
@@ -847,24 +879,11 @@ type: Class
 name: AccountPackageFeature
 serializable: true
 inherits: BasicObjectWithModified
-property: AccountPackageId, int?, Int
+property: AccountPackageId, int?, Int, required
 property: FeatureTypeId, FeatureType, Int
 property: Max, int?, Int
 loadmethod: AccountPackageId, List<>
 loadmethod: AccountPackageId|FeatureTypeId
-[end]
-
-[begin]
-type: Class
-name: AccountPayment
-inherits: BasicObjectWithModified
-property: Amount, decimal?, Decimal
-property: InvoiceId, int?, Int
-property: AccountId, int?, Int
-property: Uid, Guid, UniqueIdentifier
-loadmethod: InvoiceId, List<>
-loadmethod: AccountId, List<>
-loadmethod: Uid
 [end]
 
 [begin]
@@ -882,8 +901,8 @@ loadmethod: AccountId, List<>
 type: Class
 name: ActivityFile
 inherits: BasicObjectWithModified
-property: ActivityId, int?, Int
-property: FileId, int?, Int
+property: ActivityId, int?, Int, required
+property: FileId, int?, Int, required
 join: File.ID, FileId, InnerJoin
 joinproperty: File.Filename, string, NVarChar
 joinproperty: File.FileLocation, string, NVarChar
@@ -913,7 +932,7 @@ loadmethod: RegistrantId, List<>
 type: Class
 name: SessionAction
 inherits: BasicObject
-property: SessionId, int?, Int
+property: SessionId, int?, Int, required
 property: SessionActionTypeId, SessionActionType, Int
 property: WebUserId, int?, Int
 property: ActivityId, int?, Int
@@ -975,10 +994,10 @@ type: Class
 name: CartItem
 serializable: true
 inherits: BasicObjectWithModified
+property: CartId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier
 property: ActivityId, int?, Int
 property: Day, DayOfWeekASL, Int
-property: CartId, int?, Int
 property: RegistrantActivityId, int?, Int
 loadmethod: Uid
 loadmethod: CartId, List<>
@@ -989,11 +1008,72 @@ type: Class
 name: PasswordResetToken
 serializable: true
 inherits: BasicObjectWithModified
-property: Uid, Guid, UniqueIdentifier
+property: WebUserId, int?, Int, required
+property: Uid, Guid, UniqueIdentifier, required
 property: ExpireDate, DateTime?, DateTime
-property: WebUserId, int?, Int
 property: Used, bool, Bit
 loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: PaymentPlan
+serializable: true
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int, required
+property: TotalPeriods, int?, Int, required
+property: BillingPeriodTypeId, BillingPeriodType, Int
+property: CostPerPeriod, decimal?, Money, required
+property: IsActive, bool, Bit
+[end]
+
+[begin]
+type: Class
+name: SubscriptionPlan
+serializable: true
+inherits: BasicObjectWithModified
+property: ActivityId, int?, Int, required
+property: CostPerPeriod, decimal?, Money, required
+property: BillingPeriodTypeId, BillingPeriodType, Int
+property: DoesAutoRenew, bool, Bit
+property: IsActive, bool, Bit
+[end]
+
+[begin]
+type: Class
+name: RegistrantPaymentPlan
+serializable: true
+inherits: BasicObjectWithModified
+property: PaymentPlanId, int?, Int, required
+property: RegistrantId, int?, Int, required
+property: StartDate, DateTime?, DateTime, required
+[end]
+
+[begin]
+type: Class
+name: RegistrantSubscriptionPlan
+serializable: true
+inherits: BasicObjectWithModified
+property: SubscriptionPlanId, int?, Int, required
+property: RegistrantId, int?, Int, required
+property: StartDate, DateTime?, DateTime, required
+[end]
+
+[begin]
+type: Class
+name: Transaction
+serializable: true
+inherits: BasicObjectWithModified
+property: Amount, decimal?, Money, required
+property: BillerAccountId, int?, Int, required
+property: PayerAccountId, int?, Int, required
+property: PaymentTypeId, PaymentType, Int
+property: TransactionTypeId, TransactionType, Int
+property: RegistrantSubscriptionId, int?, Int
+property: RegistrantPaymentPlanId, int?, Int
+property: Description, string, NVarChar(400), required
+property: ActivityId, int?, Int
+property: ActivityGroupId, int?, Int
 [end]
 
 [begin]
@@ -1041,7 +1121,7 @@ values: NotSet, Account
 [begin]
 type: Enum
 name: PaymentType
-values: NotSet, CreditCard, PayPal, Check, Cash
+values: NotSet, CreditCard, PayPal, Check, Cash, ACH
 [end]
 
 [begin]
@@ -1095,11 +1175,35 @@ values: NotSet, Basic, Detailed, SingleActivity
 [begin]
 type: Enum
 name: BillingPeriodType
-values: NotSet, Month, Year
+values: NotSet, Month, Year, Week
 [end]
 
 [begin]
 type: Enum
 name: RegistrationStatus
 values: NotSet, Past, Current, Future
+[end]
+
+[begin]
+type: Enum
+name: HostPermissionType
+values: NotSet, Approve, Edit, Admin
+[end]
+
+[begin]
+type: Enum
+name: AccountType
+values: NotSet, ActivityProvider, School, SchoolDistrict
+[end]
+
+[begin]
+type: Enum
+name: ActivityGroupType
+values: NotSet, Session, League
+[end]
+
+[begin]
+type: Enum
+name: TransactionType
+values: NotSet, Credit, Debit
 [end]
