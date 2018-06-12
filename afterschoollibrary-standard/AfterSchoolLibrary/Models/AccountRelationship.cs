@@ -174,6 +174,14 @@ namespace AfterSchoolLibrary
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+        public static List<AccountRelationship> LoadByRequested(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["HostPermissionTypeId"], HostPermissionType.Requested);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
         public static List<AccountRelationship> LoadByApproved( int HostAccountId ,BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {

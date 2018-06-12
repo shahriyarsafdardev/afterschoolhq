@@ -176,5 +176,22 @@ namespace AfterSchoolLibraryTests
             Assert.Single(hostaccount.GetApprovedVisitorAccounts(dc));
         }
 
+        /// <summary>
+        /// Will request access to an account, approve it. Then list off the requested visitors for the host
+        /// </summary>
+
+        [Fact]
+        public void GetRequestedVisitorAccountsTest()
+        {
+            var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
+            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
+
+            visitoraccount.RequestAccessToAccount(hostaccount, dc);
+
+            Assert.Single(hostaccount.GetRequestedVisitorAccounts(dc));
+        }
+
     }
 }
