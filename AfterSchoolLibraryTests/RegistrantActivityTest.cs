@@ -105,6 +105,7 @@ namespace AfterSchoolLibraryTests
             registrantActivity.NumberOfSeats = 12;
             registrantActivity.NumberOfWaitingListSeats = 1;
             registrantActivity.NumberOfApplicationSeats = 1;
+            registrantActivity.Save(dc);
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
 
             Assert.NotEqual(0,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrationPeriod.ID.Value,dc));
@@ -117,7 +118,10 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
-
+            registrantActivity.NumberOfSeats = 12;
+            registrantActivity.NumberOfWaitingListSeats = 1;
+            registrantActivity.NumberOfApplicationSeats = 1;
+            registrantActivity.Save(dc);
             Assert.NotEqual(0 ,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value, dc));
         }
 
