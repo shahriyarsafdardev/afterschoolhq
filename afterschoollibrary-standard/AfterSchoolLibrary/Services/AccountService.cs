@@ -1047,6 +1047,37 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
 
+        //Gets the accounts that the host has approved
+        public static List<Account> GetApprovedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByApproved(Hostaccount.ID.Value,dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .ToList();
+        }
+        //Gets the accounts that the host has Denied
+        public static List<Account> GetDeniedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .ToList();
+        }
+
+        /*
+        public static List<Account> GetApprovedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByApproved(Hostaccount.ID, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .ToList();
+        }
+
+        public static List<Account> GetDeniedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByDenied(Hostaccount.ID, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .ToList();
+        }
+        */
+
         public static List<Location> GetVisitorLocations(this Account account, DatabaseConnection dc = null)
         {
             return AccountRelationshipLocation.LoadByVisitorAccountId(account.ID.Value, dc)
@@ -1058,5 +1089,71 @@ namespace AfterSchoolLibrary
         {
             return Location.LoadByHostAccountId(account.ID.Value, dc);
         }
+
+
+
+        public static SystemMessages RequestAccessToAccount(this Account visitorAccount,Account hostAccount, DatabaseConnection dc = null)
+        {
+            //creating an account relationship in which the visitor is requesting approval saving it to database
+            //and returning the system messages
+            var msgs = new SystemMessages();
+            // Makes sure that the visotor has not been previously denied by the host
+            if (!GetDeniedVisitorAccounts(hostAccount, dc).Contains(visitorAccount))
+            {
+                var accountRelationship = new AccountRelationship();
+                accountRelationship.VisitorAccountId = visitorAccount.ID;
+                accountRelationship.HostAccountId = hostAccount.ID;
+                accountRelationship.CreatedBy = visitorAccount.ID;
+                accountRelationship.CreateDate = DateTime.UtcNow;
+                accountRelationship.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(accountRelationship.Save(dc));
+                //TODO Notify Host account of request
+                if (msgs.HasNoErrors())
+                {
+                    msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
+                }
+            }
+            return msgs;
+        }
+
+        public static SystemMessages ApproveAccessToAccount(this Account hostAccount,Account visitorAccount ,DatabaseConnection dc = null)
+        {
+            //Approves access to the host account 
+            var msgs = new SystemMessages();
+            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value,visitorAccount.ID.Value);
+            accountRelationship.HostPermissionTypeId = HostPermissionType.Approve;
+            accountRelationship.LastModifiedDate = DateTime.UtcNow;
+            accountRelationship.LastModifiedBy = hostAccount.ID;
+            msgs.AddRange(accountRelationship.Save(dc));
+
+            //Notifies Host account of acceptance
+            if (msgs.HasNoErrors())
+            {
+                msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
+            }
+
+            return msgs;
+        }
+
+        public static SystemMessages DenyAccessToAccount(this Account hostAccount, Account visitorAccount, DatabaseConnection dc = null)
+        {
+            //Denies access to the host account 
+            var msgs = new SystemMessages();
+            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value);
+            accountRelationship.HostPermissionTypeId = HostPermissionType.NotSet;
+            accountRelationship.LastModifiedDate = DateTime.UtcNow;
+            accountRelationship.LastModifiedBy = hostAccount.ID;
+            msgs.AddRange(accountRelationship.Save(dc));
+
+            //Notifies Host account of Denial
+            if (msgs.HasNoErrors())
+            {
+                msgs.AddRange(EmailHelper.SendDenialNotificationToVisitor(visitorAccount, hostAccount));
+            }
+
+            return msgs;
+        }
+
+
     }
 }

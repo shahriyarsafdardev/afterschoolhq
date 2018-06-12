@@ -118,5 +118,63 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(Account.LoadByUid(u ,dc));
         }
 
+        /// <summary>
+        /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
+        /// </summary>
+        [Fact]
+        public void RequestAccessToAccountTest()
+        {
+            var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
+
+            Assert.True(visitoraccount.RequestAccessToAccount(hostaccount,dc).HasNoErrors());
+        }
+
+        /// <summary>
+        /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
+        /// </summary>
+        [Fact]
+        public void ApproveAccessToAccountTest()
+        {
+            var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
+            visitoraccount.RequestAccessToAccount(hostaccount, dc);
+
+            Assert.True(visitoraccount.ApproveAccessToAccount(visitoraccount, dc).HasNoErrors());
+        }
+
+        /// <summary>
+        /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
+        /// </summary>
+        [Fact]
+        public void DenyAccessToAccountTest()
+        {
+            var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
+            visitoraccount.RequestAccessToAccount(hostaccount, dc);
+
+            Assert.True(visitoraccount.DenyAccessToAccount(visitoraccount, dc).HasNoErrors());
+        }
+
+        /// <summary>
+        /// Will rewuest access to an account, approve it. Then list off the approved visitor accounts the host has
+        /// The expected result will a list filled with one visitor account.
+        /// TODO: figure out  how to make sure all of the needed parameters are passed in.
+        /// </summary>
+
+        [Fact]
+        public void GetApprovedVisitorAccountsTest()
+        {
+            var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
+            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
+            
+            visitoraccount.RequestAccessToAccount(hostaccount, dc);
+            hostaccount.ApproveAccessToAccount(visitoraccount,dc);
+
+            Assert.Single(hostaccount.GetApprovedVisitorAccounts(dc));
+        }
+
     }
 }
