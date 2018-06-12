@@ -246,7 +246,7 @@ property: StripeAccessToken, string, NVarChar(100)
 property: StripePublishableKey, string, NVarChar(100)
 property: StripeSecretKey, string, NVarChar(100)
 property: Uid, Guid, UniqueIdentifier, required
-property: UniqueName, string, NVarChar(50), required
+property: UniqueName, string, NVarChar(50)
 property: OwnerId, int?, Int
 property: IsAdminAccount, bool, Bit
 property: IsActive, bool, Bit
@@ -1065,9 +1065,9 @@ name: Transaction
 serializable: true
 inherits: BasicObjectWithModified
 property: Amount, decimal?, Money, required
-property: BillerAccountId, int?, int, required
+property: BillerAccountId, int?, Int, required
 property: PayerAccountId, int?, Int, required
-property: SourceTypeId, SourceType, Int
+property: PaymentTypeId, PaymentType, Int
 property: TransactionTypeId, TransactionType, Int
 property: RegistrantSubscriptionId, int?, Int
 property: RegistrantPaymentPlanId, int?, Int

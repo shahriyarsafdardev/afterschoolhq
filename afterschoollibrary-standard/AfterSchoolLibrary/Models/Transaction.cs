@@ -18,7 +18,7 @@ namespace AfterSchoolLibrary
 		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
 		public int? BillerAccountId { get { return (int?)MDV["BillerAccountId"].Value; } set { MDV["BillerAccountId"].Value = value; } }
 		public int? PayerAccountId { get { return (int?)MDV["PayerAccountId"].Value; } set { MDV["PayerAccountId"].Value = value; } }
-		public SourceType SourceTypeId { get { return (SourceType)MDV["SourceTypeId"].Value; } set { MDV["SourceTypeId"].Value = value; } }
+		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
 		public TransactionType TransactionTypeId { get { return (TransactionType)MDV["TransactionTypeId"].Value; } set { MDV["TransactionTypeId"].Value = value; } }
 		public int? RegistrantSubscriptionId { get { return (int?)MDV["RegistrantSubscriptionId"].Value; } set { MDV["RegistrantSubscriptionId"].Value = value; } }
 		public int? RegistrantPaymentPlanId { get { return (int?)MDV["RegistrantPaymentPlanId"].Value; } set { MDV["RegistrantPaymentPlanId"].Value = value; } }
@@ -31,6 +31,7 @@ namespace AfterSchoolLibrary
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(Transaction).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.PaymentTypeId = PaymentType.NotSet;
 			this.TransactionTypeId = TransactionType.NotSet;
 			
         }
@@ -43,9 +44,9 @@ namespace AfterSchoolLibrary
                 string className = typeof(Transaction).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
-				_dp.Add(className, "BillerAccountId", System.Data.SqlDbType.int);
+				_dp.Add(className, "BillerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PayerAccountId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "SourceTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantSubscriptionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantPaymentPlanId", System.Data.SqlDbType.Int);
@@ -146,7 +147,7 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["SourceTypeId"]);
+			dps.Add(ObjectMap["PaymentTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
