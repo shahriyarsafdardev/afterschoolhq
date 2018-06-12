@@ -13,7 +13,13 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static Activity Create(Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new Activity() { AccountId = account.ID };
+            var obj = new Activity() { AccountId = account.ID, SeatsAvailable = 4 };
+            msgs.AddRange(obj.Save(dc));
+            return obj;
+        }
+        public static Activity Create(Account account, int seatsAvailable, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new Activity() { AccountId = account.ID, SeatsAvailable = seatsAvailable };
             msgs.AddRange(obj.Save(dc));
             return obj;
         }
