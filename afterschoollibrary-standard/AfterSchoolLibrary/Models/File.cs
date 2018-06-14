@@ -62,29 +62,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static File Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static File Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<File> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<File> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return File.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return File.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return File.BaseGetCount(criterias, ObjectMap, dq);
+            return File.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -136,15 +136,15 @@ namespace AfterSchoolLibrary
 
 		public File Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return File.Load(this.ID.Value, dc);
+			return File.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<File> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<File> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		

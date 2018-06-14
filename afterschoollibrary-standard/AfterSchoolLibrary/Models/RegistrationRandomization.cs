@@ -187,7 +187,7 @@ namespace AfterSchoolLibrary
                     // if not full and doesn't have conflicting dates
                     if (!isFull && !hasActivityDuringScheduleAlready)
                     {
-                        msgs.AddRange(AddAssignment(ra, AssignmentType.Seat, dc));
+                        msgs.AddRange(AddAssignment(ra, AssignmentType.Seat, dc: dc));
                         allFull = false;
                         break;
                     }
@@ -195,12 +195,12 @@ namespace AfterSchoolLibrary
                     // unless they were placed in another activity for that same day with a higher preference number
                     else if (!isWLFull && !hasActivityDuringScheduleAlready)
                     {
-                        msgs.AddRange(AddAssignment(ra, AssignmentType.WaitingList, dc));
+                        msgs.AddRange(AddAssignment(ra, AssignmentType.WaitingList, dc: dc));
                     }
                     // puts it in the not assigned list
                     else
                     {
-                        msgs.AddRange(AddAssignment(ra, AssignmentType.NotSet, dc));
+                        msgs.AddRange(AddAssignment(ra, AssignmentType.NotSet, dc: dc));
                     }
                 }
 
@@ -224,13 +224,13 @@ namespace AfterSchoolLibrary
             if (this.RegistrationPeriod.IsNotEmpty())
             {
                 this.Registrations = this.RegistrationPeriod.GetRegistrations(dc: dc);
-                this.RegistrantActivities = this.RegistrationPeriod.GetRegistrantActivities(this.Registrations, dc);
+                this.RegistrantActivities = this.RegistrationPeriod.GetRegistrantActivities(this.Registrations, dc: dc);
                 this.Activities = this.RegistrationPeriod.GetActivities(dc);
             }
             else if (this.ActivityGroup.IsNotEmpty())
             {
                 this.Registrations = this.ActivityGroup.GetRegistrations(dc: dc);
-                this.RegistrantActivities = this.ActivityGroup.GetRegistrantActivities(this.Registrations, dc);
+                this.RegistrantActivities = this.ActivityGroup.GetRegistrantActivities(this.Registrations, dc: dc);
                 this.Activities = this.ActivityGroup.GetActivities(false, false, null, null, dc: dc);
             }
             
@@ -288,12 +288,12 @@ namespace AfterSchoolLibrary
                 foreach (var assignment in registrantAssignment.Assignments)
                 {
                     var ra = this.RegistrantActivities.Find(x => x.ID.Value == assignment);
-                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, dc));
+                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, dc: dc));
                 }
                 foreach (var assignment in registrantAssignment.WaitingListAssignments)
                 {
                     var ra = this.RegistrantActivities.Find(x => x.ID.Value == assignment);
-                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.WaitingList, dc));
+                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.WaitingList, dc: dc));
                 }
             }
             return msgs;

@@ -64,29 +64,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static AccountProperty Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static AccountProperty Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<AccountProperty> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountProperty> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return AccountProperty.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return AccountProperty.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return AccountProperty.BaseGetCount(criterias, ObjectMap, dq);
+            return AccountProperty.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -142,58 +142,58 @@ namespace AfterSchoolLibrary
 
 		public AccountProperty Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountProperty.Load(this.ID.Value, dc);
+			return AccountProperty.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<AccountProperty> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountProperty> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountProperty> LoadByActivityGroupId(int ActivityGroupId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountProperty> LoadByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountProperty> LoadByActivityId(int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountProperty> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static AccountProperty LoadByAccountIdByAccountPropertyTypeId(int AccountId, AccountPropertyType AccountPropertyTypeId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static AccountProperty LoadByAccountIdByAccountPropertyTypeId(int AccountId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static AccountProperty LoadByActivityGroupIdByAccountPropertyTypeId(int ActivityGroupId, AccountPropertyType AccountPropertyTypeId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static AccountProperty LoadByActivityGroupIdByAccountPropertyTypeId(int ActivityGroupId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
 			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static AccountProperty LoadByActivityIdByAccountPropertyTypeId(int ActivityId, AccountPropertyType AccountPropertyTypeId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static AccountProperty LoadByActivityIdByAccountPropertyTypeId(int ActivityId, AccountPropertyType AccountPropertyTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["AccountPropertyTypeId"], AccountPropertyTypeId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

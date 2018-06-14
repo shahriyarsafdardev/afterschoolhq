@@ -72,29 +72,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static Attendance Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Attendance Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Attendance> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Attendance> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return Attendance.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return Attendance.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return Attendance.BaseGetCount(criterias, ObjectMap, dq);
+            return Attendance.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -148,41 +148,41 @@ namespace AfterSchoolLibrary
 
 		public Attendance Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Attendance.Load(this.ID.Value, dc);
+			return Attendance.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<Attendance> LoadByActivityId(int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Attendance> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Attendance> LoadByActivityIdByDate(int ActivityId, DateTime Date, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Attendance> LoadByActivityIdByDate(int ActivityId, DateTime Date, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["Date"], Date);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Attendance> LoadByActivityIdByIsCompleted(int ActivityId, bool IsCompleted, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Attendance> LoadByActivityIdByIsCompleted(int ActivityId, bool IsCompleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["IsCompleted"], IsCompleted);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Attendance> LoadByActivityInstanceId(int ActivityInstanceId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Attendance> LoadByActivityInstanceId(int ActivityInstanceId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityInstanceId"], ActivityInstanceId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
@@ -194,7 +194,7 @@ namespace AfterSchoolLibrary
         public Activity ToActivity(bool loadFromDb = false, DatabaseConnection dc = null)
         {
             if (loadFromDb)
-                return Activity.Load(this.ActivityId.Value, dc);
+                return Activity.Load(this.ActivityId.Value, dc: dc);
             
             return new Activity()
             {
@@ -207,17 +207,17 @@ namespace AfterSchoolLibrary
 
         public List<AttendanceRegistrant> GetAttendanceRegistrants(DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.LoadByAttendanceId(this.ID.Value, dc);
+            return AttendanceRegistrant.LoadByAttendanceId(this.ID.Value, dc: dc);
         }
 
         public int GetAttendanceRegistrantCount(DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPossibleCount(this.ID.Value, dc);
+            return AttendanceRegistrant.GetPossibleCount(this.ID.Value, dc: dc);
         }
 
         public int GetPresentCount(DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPresentCount(this.ID.Value, dc);
+            return AttendanceRegistrant.GetPresentCount(this.ID.Value, dc: dc);
         }
 
         public static List<Attendance> LoadByAccountIdByDate(int AccountId, DateTime Date, BasicLibrary.DataAccess.DatabaseConnection dc = null)

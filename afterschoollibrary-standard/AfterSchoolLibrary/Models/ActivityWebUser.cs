@@ -76,29 +76,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static ActivityWebUser Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivityWebUser Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<ActivityWebUser> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityWebUser> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return ActivityWebUser.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return ActivityWebUser.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return ActivityWebUser.BaseGetCount(criterias, ObjectMap, dq);
+            return ActivityWebUser.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -150,50 +150,50 @@ namespace AfterSchoolLibrary
 
 		public ActivityWebUser Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityWebUser.Load(this.ID.Value, dc);
+			return ActivityWebUser.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<ActivityWebUser> LoadByActivityId(int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityWebUser> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityWebUser> LoadByWebUserId(int WebUserId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityWebUser> LoadByWebUserId(int WebUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityWebUser> LoadByWebUserIdByIsLeader(int WebUserId, bool IsLeader, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityWebUser> LoadByWebUserIdByIsLeader(int WebUserId, bool IsLeader, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
 			dq.Criterias.Add(ObjectMap["IsLeader"], IsLeader);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityWebUser> LoadByActivityIdByIsLeader(int ActivityId, bool IsLeader, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityWebUser> LoadByActivityIdByIsLeader(int ActivityId, bool IsLeader, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["IsLeader"], IsLeader);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static ActivityWebUser LoadByActivityIdByWebUserId(int ActivityId, int WebUserId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityWebUser LoadByActivityIdByWebUserId(int ActivityId, int WebUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

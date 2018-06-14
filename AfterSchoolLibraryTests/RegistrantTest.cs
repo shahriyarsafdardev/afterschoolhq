@@ -23,7 +23,7 @@ namespace AfterSchoolLibraryTests
             var a = new Registrant { };
             a.Save(dc);
             var id = a.ID.Value;
-            Assert.NotNull(Registrant.Load(id, dc));
+            Assert.NotNull(Registrant.Load(id, dc: dc));
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace AfterSchoolLibraryTests
             a.Save(dc);
             var id = a.ID.Value;
             var c = new System.Collections.Hashtable();
-            Assert.NotNull(Account.Load(c, 0, c.Count, dc));
+            Assert.NotNull(Account.Load(c, 0, c.Count, dc: dc));
         }
 
 
@@ -44,7 +44,7 @@ namespace AfterSchoolLibraryTests
             a.Save(dc);
             var id = a.ID.Value;
             var c = new System.Collections.Hashtable();
-            Assert.NotNull(Activity.GetCount(c, dc));
+            Assert.NotNull(Activity.GetCount(c, dc: dc));
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace AfterSchoolLibraryTests
             a.Save(dc);
             var id = a.ID.Value;
             a.Delete(dc);
-            Assert.Null(Activity.Load(id, dc));
+            Assert.Null(Activity.Load(id, dc: dc));
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace AfterSchoolLibraryTests
             var a = new Registrant() { };
             a.Save(dc);
             var id = a.ID.Value;
-            Assert.NotNull(Activity.LoadByAccountId(id, dc));
+            Assert.NotNull(Activity.LoadByAccountId(id, dc: dc));
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace AfterSchoolLibraryTests
             var id = a.ID.Value;
 
 
-            Assert.NotNull(Registrant.LoadByAccountIdByRegistrantTypeId(id,RegistrantType.Individual, dc));
+            Assert.NotNull(Registrant.LoadByAccountIdByRegistrantTypeId(id,RegistrantType.Individual, dc: dc));
         }
 
         [Fact]
@@ -146,7 +146,7 @@ namespace AfterSchoolLibraryTests
             a.Save(dc);
             var id = a.ID.Value;
 
-            Assert.NotNull(Registrant.LoadByWebUserId(wid, dc));
+            Assert.NotNull(Registrant.LoadByWebUserId(wid, dc: dc));
         }
 
         [Fact]
@@ -170,7 +170,7 @@ namespace AfterSchoolLibraryTests
             a.Save(dc);
             var id = a.FirstRegistrantId.Value;
 
-            Assert.NotNull(Registrant.LoadByFirstRegistrantId(id, dc));
+            Assert.NotNull(Registrant.LoadByFirstRegistrantId(id, dc: dc));
         }
 
 

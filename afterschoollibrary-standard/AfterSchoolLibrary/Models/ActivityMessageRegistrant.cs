@@ -74,29 +74,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static ActivityMessageRegistrant Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivityMessageRegistrant Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<ActivityMessageRegistrant> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityMessageRegistrant> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return ActivityMessageRegistrant.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return ActivityMessageRegistrant.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return ActivityMessageRegistrant.BaseGetCount(criterias, ObjectMap, dq);
+            return ActivityMessageRegistrant.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -152,32 +152,32 @@ namespace AfterSchoolLibrary
 
 		public ActivityMessageRegistrant Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityMessageRegistrant.Load(this.ID.Value, dc);
+			return ActivityMessageRegistrant.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<ActivityMessageRegistrant> LoadByActivityMessageId(int ActivityMessageId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityMessageRegistrant> LoadByActivityMessageId(int ActivityMessageId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityMessageId"], ActivityMessageId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityMessageRegistrant> LoadByRegistrantId(int RegistrantId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityMessageRegistrant> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static ActivityMessageRegistrant LoadByActivityMessageIdByRegistrantId(int ActivityMessageId, int RegistrantId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityMessageRegistrant LoadByActivityMessageIdByRegistrantId(int ActivityMessageId, int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityMessageId"], ActivityMessageId);
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

@@ -7,7 +7,6 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
-using System.Security.Cryptography;
 
 namespace AfterSchoolLibrary
 {
@@ -72,29 +71,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static WebUser Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static WebUser Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<WebUser> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<WebUser> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return WebUser.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return WebUser.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return WebUser.BaseGetCount(criterias, ObjectMap, dq);
+            return WebUser.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -103,6 +102,12 @@ namespace AfterSchoolLibrary
 
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on WebUser object", MessageType.Error);
+			if (this.FirstName.IsEmpty())
+				msgs.Add("FirstName is required on WebUser object", MessageType.Error);
+			if (this.LastName.IsEmpty())
+				msgs.Add("LastName is required on WebUser object", MessageType.Error);
+			if (this.Email.IsEmpty())
+				msgs.Add("Email is required on WebUser object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(WebUser).Name));
@@ -160,40 +165,40 @@ namespace AfterSchoolLibrary
 
 		public WebUser Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return WebUser.Load(this.ID.Value, dc);
+			return WebUser.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static WebUser LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static WebUser LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static WebUser LoadByUidByIsActive(Guid Uid, bool IsActive, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static WebUser LoadByUidByIsActive(Guid Uid, bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<WebUser> LoadByIsActive(bool IsActive, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<WebUser> LoadByIsActive(bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static WebUser LoadByFacebookId(string FacebookId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static WebUser LoadByFacebookId(string FacebookId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["FacebookId"], FacebookId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -336,14 +341,14 @@ namespace AfterSchoolLibrary
 
         public List<Account> GetAccounts(DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByWebUserIdByIsActive(this.ID.Value, true, dc).Select(x => x.ToAccount()).ToList();
+            return AccountWebUser.LoadByWebUserIdByIsActive(this.ID.Value, true, dc: dc).Select(x => x.ToAccount()).ToList();
         }
 
         public UserType GetUserType(Account a, DatabaseConnection dc = null)
         {
             if (!a.IsEmpty())
             {
-                var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, this.ID.Value, dc);
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, this.ID.Value, dc: dc);
                 if (!awu.IsEmpty())
                     return awu.UserTypeId;
             }
@@ -367,7 +372,7 @@ namespace AfterSchoolLibrary
         {
             if (!g.IsEmpty())
             {
-                var awu = AccountWebUser.LoadByAccountIdByWebUserId(g.ID.Value, this.ID.Value, dc);
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(g.ID.Value, this.ID.Value, dc: dc);
                 if (awu.IsEmpty() == false && awu.UserTypeId != UserType.NotSet)
                     return awu.HasAccessToFeature(ft);
             }
@@ -375,25 +380,25 @@ namespace AfterSchoolLibrary
         }
         public bool HasAccessTo(Account a, DatabaseConnection dc = null)
         {
-            var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, this.ID.Value, dc);
+            var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, this.ID.Value, dc: dc);
             return awu.IsNotEmpty() && awu.IsActive;
         }
         public bool HasAccessToActivity(Activity a, DatabaseConnection dc = null)
         {
-            return ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, this.ID.Value, dc).IsNotEmpty();
+            return ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, this.ID.Value, dc: dc).IsNotEmpty();
         }
         public bool IsActivityLeader(Activity a, DatabaseConnection dc = null)
         {
-            var awu = this.GetActivityWebUser(a, dc);
+            var awu = this.GetActivityWebUser(a, dc: dc);
             return awu.IsNotEmpty() && awu.IsLeader;
         }
         public ActivityWebUser GetActivityWebUser(Activity a, DatabaseConnection dc = null)
         {
-            return a.ID.HasValue ? ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, this.ID.Value, dc): null;
+            return a.ID.HasValue ? ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, this.ID.Value, dc: dc): null;
         }
         public bool IsActiveFor(Account a, DatabaseConnection dc = null)
         {
-            return this.HasAccessTo(a, dc);
+            return this.HasAccessTo(a, dc: dc);
         }
 
         public static string GenerateUsername(string firstName, string lastName, DatabaseConnection dc = null)
@@ -407,13 +412,13 @@ namespace AfterSchoolLibrary
             string username = $"{firstName} {lastName}";
             string origUniqueName = reg.Replace(username, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            var duplicate = WebUser.LoadByUsername(uniqueName, dc);
+            var duplicate = WebUser.LoadByUsername(uniqueName, dc: dc);
             int count = 1;
             while (!duplicate.IsEmpty())
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = WebUser.LoadByUsername(uniqueName, dc);
+                duplicate = WebUser.LoadByUsername(uniqueName, dc: dc);
             }
             return uniqueName;
         }
@@ -442,7 +447,7 @@ namespace AfterSchoolLibrary
         public SystemMessages SendPasswordResetToken(bool isAfterSchool, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var token = PasswordResetToken.AddOrUpdateToken(this, msgs, dc);
+            var token = PasswordResetToken.AddOrUpdateToken(this, msgs, dc: dc);
 
             msgs.AddRange(EmailHelper.SendPasswordReset(this, token, isAfterSchool));
 
@@ -467,7 +472,7 @@ namespace AfterSchoolLibrary
 
         public List<Registrant> GetRegistrants(DatabaseConnection dc = null)
         {
-            return Registrant.LoadByWebUserIdByIsMaster(this.ID.Value, true, dc);
+            return Registrant.LoadByWebUserIdByIsMaster(this.ID.Value, true, dc: dc);
         }
 
         #endregion

@@ -63,29 +63,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static RegistrationPeriod Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static RegistrationPeriod Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<RegistrationPeriod> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return RegistrationPeriod.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return RegistrationPeriod.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return RegistrationPeriod.BaseGetCount(criterias, ObjectMap, dq);
+            return RegistrationPeriod.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -139,31 +139,31 @@ namespace AfterSchoolLibrary
 
 		public RegistrationPeriod Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return RegistrationPeriod.Load(this.ID.Value, dc);
+			return RegistrationPeriod.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<RegistrationPeriod> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrationPeriod> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static RegistrationPeriod LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static RegistrationPeriod LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<RegistrationPeriod> LoadByActivityGroupId(int ActivityGroupId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrationPeriod> LoadByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
@@ -230,14 +230,14 @@ namespace AfterSchoolLibrary
         public static string GenerateUniqueName(int accountId, string name, DatabaseConnection dc = null)
         {
             var rtnName = name;
-            var period = RegistrationPeriod.LoadByAccountIdByName(accountId, name, dc);
+            var period = RegistrationPeriod.LoadByAccountIdByName(accountId, name, dc: dc);
             var counter = 1;
 
             while (period.IsNotEmpty())
             {
                 counter++;
                 rtnName = name + " " + counter.ToString();
-                period = RegistrationPeriod.LoadByAccountIdByName(accountId, rtnName, dc);
+                period = RegistrationPeriod.LoadByAccountIdByName(accountId, rtnName, dc: dc);
             }
 
             return rtnName;
@@ -275,7 +275,7 @@ namespace AfterSchoolLibrary
 
         public List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(DatabaseConnection dc = null)
         {
-            return ActivityRegistrationPeriod.LoadByRegistrationPeriodId(this.ID.Value, dc);
+            return ActivityRegistrationPeriod.LoadByRegistrationPeriodId(this.ID.Value, dc: dc);
         }
 
         public List<Activity> GetActivities(DatabaseConnection dc = null)
@@ -283,7 +283,7 @@ namespace AfterSchoolLibrary
             return Activity.LoadList(
                 GetActivityRegistrationPeriods(dc)
                     .Select(x => x.ActivityId.Value)
-                    .ToList(), dc)
+                    .ToList(), dc: dc)
                 .Where(x => x.IsDeleted == false)
                 .ToList();
         }
@@ -297,14 +297,14 @@ namespace AfterSchoolLibrary
                     { "IsActive", true },
                     { "ActivityIsDeleted", false }
                 },
-                dc
+                dc: dc
             );
         }
 
         public SystemMessages AddActivity(Activity activity, bool isActive, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var item = ActivityRegistrationPeriod.LoadByRegistrationPeriodIdByActivityId(this.ID.Value, activity.ID.Value, dc);
+            var item = ActivityRegistrationPeriod.LoadByRegistrationPeriodIdByActivityId(this.ID.Value, activity.ID.Value, dc: dc);
 
             if ((item.IsEmpty() || (item.IsNotEmpty() && !item.IsActive)) && isActive)
             {
@@ -362,7 +362,7 @@ namespace AfterSchoolLibrary
 
         public List<Registration> GetRegistrations(int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadByRegistrationPeriodId(this.ID.Value, start, length, dc);
+            return Registration.LoadByRegistrationPeriodId(this.ID.Value, start, length, dc: dc);
         }
 
         public int GetRegistrationCount(DatabaseConnection dc = null)
@@ -373,10 +373,10 @@ namespace AfterSchoolLibrary
         public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, DatabaseConnection dc = null)
         {
             if (registrations.IsEmpty())
-                registrations = Registration.LoadByRegistrationPeriodId(this.ID.Value, dc);
+                registrations = Registration.LoadByRegistrationPeriodId(this.ID.Value, dc: dc);
 
             if(registrations.Any())
-                return RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc)
+                return RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc: dc)
                     .Where(x => !x.ActivityIsDeleted)
                     .ToList();
             else
@@ -392,14 +392,14 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var rr = new RegistrationRandomization(this);
-            return rr.AttemptLottery(msgs, dc);
+            return rr.AttemptLottery(msgs, dc: dc);
         }
 
         public SystemMessages RandomizePlacementApply(List<RegistrantAssignment> assignments, Account account, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var rr = new RegistrationRandomization(this);
-            msgs.AddRange(rr.ApplyLottery(assignments, dc));
+            msgs.AddRange(rr.ApplyLottery(assignments, dc: dc));
             return msgs;
         }
 
@@ -432,7 +432,7 @@ namespace AfterSchoolLibrary
         public ActivityGroup GetGroup(DatabaseConnection dc = null)
         {
             if (_Group.IsEmpty())
-                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, dc);
+                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
 
             return _Group;
         }
@@ -444,7 +444,7 @@ namespace AfterSchoolLibrary
             {
                 if (this.AccountId.HasValue)
                 {
-                    _Account = Account.Load(this.AccountId.Value, dc);
+                    _Account = Account.Load(this.AccountId.Value, dc: dc);
                 }
                 else
                 {
@@ -459,14 +459,14 @@ namespace AfterSchoolLibrary
         public static SystemMessages NotifyRegistrants(int id, string emailmessage, List<int> registrationIds = null, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var regPeriod = RegistrationPeriod.Load(id, dc);
+            var regPeriod = RegistrationPeriod.Load(id, dc: dc);
             var account = regPeriod.GetAccount(dc);
             var registrations = new List<Registration>();
 
             if (registrationIds.IsEmpty())
                 registrations = regPeriod.GetGroup(dc).GetRegistrations(dc: dc);
             else
-                registrations = Registration.LoadList(registrationIds, dc);
+                registrations = Registration.LoadList(registrationIds, dc: dc);
 
             if (registrations.Any())
             {

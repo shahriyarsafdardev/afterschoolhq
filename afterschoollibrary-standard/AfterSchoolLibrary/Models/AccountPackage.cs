@@ -87,29 +87,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static AccountPackage Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static AccountPackage Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<AccountPackage> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountPackage> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return AccountPackage.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return AccountPackage.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return AccountPackage.BaseGetCount(criterias, ObjectMap, dq);
+            return AccountPackage.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -193,40 +193,40 @@ namespace AfterSchoolLibrary
 
 		public AccountPackage Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountPackage.Load(this.ID.Value, dc);
+			return AccountPackage.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<AccountPackage> LoadByPackageId(int PackageId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountPackage> LoadByPackageId(int PackageId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["PackageId"], PackageId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountPackage> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountPackage> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static AccountPackage LoadByAccountIdByIsActive(int AccountId, bool IsActive, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static AccountPackage LoadByAccountIdByIsActive(int AccountId, bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static AccountPackage LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static AccountPackage LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -248,7 +248,7 @@ namespace AfterSchoolLibrary
         public SystemMessages AddPackageFeature(PackageFeature pf, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var apf = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(this.ID.Value, pf.FeatureTypeId, dc);
+            var apf = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(this.ID.Value, pf.FeatureTypeId, dc: dc);
             if (apf.IsEmpty())
             {
                 apf = new AccountPackageFeature();
@@ -421,7 +421,7 @@ namespace AfterSchoolLibrary
         {
             if(_Features.IsEmpty())
             {
-                _Features = AccountPackageFeature.LoadByAccountPackageId(this.ID.Value, dc);
+                _Features = AccountPackageFeature.LoadByAccountPackageId(this.ID.Value, dc: dc);
             }
             return _Features;
         }

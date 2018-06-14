@@ -10,11 +10,11 @@ namespace AfterSchoolLibrary
     {
         public static Account GetHostAccount(this AccountRelationship ar, DatabaseConnection dc = null)
         {
-            return Account.Load(ar.HostAccountId.Value, dc);
+            return Account.Load(ar.HostAccountId.Value, dc: dc);
         }
         public static Account GetVisitorAccount(this AccountRelationship ar, DatabaseConnection dc = null)
         {
-            return Account.Load(ar.VisitorAccountId.Value, dc);
+            return Account.Load(ar.VisitorAccountId.Value, dc: dc);
         }
     }
 }

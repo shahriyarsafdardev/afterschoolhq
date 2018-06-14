@@ -121,29 +121,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static ActivityForm Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivityForm Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<ActivityForm> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityForm> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return ActivityForm.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return ActivityForm.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return ActivityForm.BaseGetCount(criterias, ObjectMap, dq);
+            return ActivityForm.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -209,66 +209,66 @@ namespace AfterSchoolLibrary
 
 		public ActivityForm Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityForm.Load(this.ID.Value, dc);
+			return ActivityForm.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<ActivityForm> LoadByFormId(int FormId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityForm> LoadByFormId(int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["FormId"], FormId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityForm> LoadByActivityId(int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityForm> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static ActivityForm LoadByActivityIdByFormId(int ActivityId, int FormId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityForm LoadByActivityIdByFormId(int ActivityId, int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["FormId"], FormId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static ActivityForm LoadByActivityIdByIsActive(int ActivityId, bool IsActive, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityForm LoadByActivityIdByIsActive(int ActivityId, bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<ActivityForm> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityForm> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static ActivityForm LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityForm LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static ActivityForm LoadByUidByIsPublished(Guid Uid, bool IsPublished, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityForm LoadByUidByIsPublished(Guid Uid, bool IsPublished, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -296,7 +296,7 @@ namespace AfterSchoolLibrary
         {
             if (loadFromDb)
             {
-                return Form.Load(this.FormId.Value, dc);
+                return Form.Load(this.FormId.Value, dc: dc);
             }
             else
             {
@@ -315,7 +315,7 @@ namespace AfterSchoolLibrary
         {
             if (loadFromDb)
             {
-                return Activity.Load(this.ActivityId.Value, dc);
+                return Activity.Load(this.ActivityId.Value, dc: dc);
             }
             else
             {
@@ -374,7 +374,7 @@ namespace AfterSchoolLibrary
         {            
             if (ActivitySeatsAvailable.HasValue)
             {
-                return ActivitySeatsAvailable.Value - this.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, dc);
+                return ActivitySeatsAvailable.Value - this.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, dc: dc);
             }
             else
             {
@@ -385,7 +385,7 @@ namespace AfterSchoolLibrary
         {
             if (ActivityWaitingListSeats.HasValue)
             {
-                return ActivityWaitingListSeats.Value - this.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, dc);
+                return ActivityWaitingListSeats.Value - this.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, dc: dc);
             }
             else
             {
@@ -395,7 +395,7 @@ namespace AfterSchoolLibrary
 
         public int GetRegistrantCount(DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByActivityId(this.ActivityId.Value, dc);
+            return RegistrantActivity.GetSeatCountByActivityId(this.ActivityId.Value, dc: dc);
         }
 
         public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
@@ -412,7 +412,7 @@ namespace AfterSchoolLibrary
             this.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(this.Save(dc));
             
-            var activity = this.ToActivity(true, dc);
+            var activity = this.ToActivity(true, dc: dc);
             if (!activity.IsChildActivity)
             {
                 var childActivities = activity.GetChildActivities(dc);
@@ -421,7 +421,7 @@ namespace AfterSchoolLibrary
                     var af = a.GetActiveActivityForm(dc);
                     if (af.IsNotEmpty())
                     {
-                        msgs.AddRange(af.SetIsPublished(isPublished, loggedInUserId, dc));
+                        msgs.AddRange(af.SetIsPublished(isPublished, loggedInUserId, dc: dc));
                     }
                 }
             }
@@ -432,7 +432,7 @@ namespace AfterSchoolLibrary
         //public SystemMessages ProcessStripePayment(RegistrantActivity ra, string ccname, string ccnumber, string cccvc, string ccexpmonth, string ccexpyear, DatabaseConnection dc = null)
         //{
         //    var msgs = new SystemMessages();
-        //    var account = Account.Load(this.AccountId.Value, dc);
+        //    var account = Account.Load(this.AccountId.Value, dc: dc);
         //    if(account.IsNotEmpty())
         //    {
         //        Stripe.StripeChargeCreateOptions options = new Stripe.StripeChargeCreateOptions();

@@ -87,29 +87,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static FormQuestionAnswer Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static FormQuestionAnswer Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<FormQuestionAnswer> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<FormQuestionAnswer> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return FormQuestionAnswer.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return FormQuestionAnswer.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return FormQuestionAnswer.BaseGetCount(criterias, ObjectMap, dq);
+            return FormQuestionAnswer.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -171,49 +171,49 @@ namespace AfterSchoolLibrary
 
 		public FormQuestionAnswer Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return FormQuestionAnswer.Load(this.ID.Value, dc);
+			return FormQuestionAnswer.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<FormQuestionAnswer> LoadByRegistrantId(int RegistrantId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<FormQuestionAnswer> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<FormQuestionAnswer> LoadByRegistrantIdByActivityId(int RegistrantId, int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<FormQuestionAnswer> LoadByRegistrantIdByActivityId(int RegistrantId, int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<FormQuestionAnswer> LoadByFormQuestionId(int FormQuestionId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<FormQuestionAnswer> LoadByFormQuestionId(int FormQuestionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["FormQuestionId"], FormQuestionId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static FormQuestionAnswer LoadByFormQuestionIdByRegistrantId(int FormQuestionId, int RegistrantId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static FormQuestionAnswer LoadByFormQuestionIdByRegistrantId(int FormQuestionId, int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["FormQuestionId"], FormQuestionId);
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<FormQuestionAnswer> LoadByRegistrationId(int RegistrationId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<FormQuestionAnswer> LoadByRegistrationId(int RegistrationId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
@@ -236,7 +236,7 @@ namespace AfterSchoolLibrary
         {
             if (loadFromDb)
             {
-                return FormQuestion.Load(this.FormQuestionId.Value, dc);
+                return FormQuestion.Load(this.FormQuestionId.Value, dc: dc);
             }
             else
             {
@@ -263,7 +263,7 @@ namespace AfterSchoolLibrary
             this.LastModifiedBy = loggedInUserId;
             msgs.AddRange(this.Save(dc));
 
-            msgs.AddRange(this.UpdateRegistrantInfo(registrant, dc));
+            msgs.AddRange(this.UpdateRegistrantInfo(registrant, dc: dc));
 
             return msgs;
         }

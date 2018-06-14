@@ -74,29 +74,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static ActivityMessage Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivityMessage Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<ActivityMessage> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityMessage> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return ActivityMessage.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return ActivityMessage.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return ActivityMessage.BaseGetCount(criterias, ObjectMap, dq);
+            return ActivityMessage.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -158,23 +158,23 @@ namespace AfterSchoolLibrary
 
 		public ActivityMessage Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityMessage.Load(this.ID.Value, dc);
+			return ActivityMessage.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<ActivityMessage> LoadByActivityId(int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityMessage> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityMessage> LoadByActivityGroupId(int ActivityGroupId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityMessage> LoadByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
@@ -188,7 +188,7 @@ namespace AfterSchoolLibrary
         {
             if (_ActivityMessageRegistrants.IsEmpty())
             {
-                _ActivityMessageRegistrants = ActivityMessageRegistrant.LoadByActivityMessageId(this.ID.Value, dc);
+                _ActivityMessageRegistrants = ActivityMessageRegistrant.LoadByActivityMessageId(this.ID.Value, dc: dc);
             }
             return _ActivityMessageRegistrants;
         }
@@ -224,7 +224,7 @@ namespace AfterSchoolLibrary
         {
             if (_Activity.IsEmpty())
             {
-                _Activity = Activity.Load(this.ActivityId.Value, dc);
+                _Activity = Activity.Load(this.ActivityId.Value, dc: dc);
             }
             return _Activity;
         }
@@ -234,7 +234,7 @@ namespace AfterSchoolLibrary
         {
             if (_ActivityGroup.IsEmpty())
             {
-                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, dc);
+                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
             }
             return _ActivityGroup;
         }
@@ -245,7 +245,7 @@ namespace AfterSchoolLibrary
             var activity = am.GetActivity(dc);
             var account = activity.GetAccount(dc);
 
-            msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc));
+            msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc: dc));
 
             if (msgs.HasNoErrors())
             {
@@ -280,7 +280,7 @@ namespace AfterSchoolLibrary
             var group = am.GetActivityGroup(dc);
             var account = group.GetAccount(dc);
 
-            msgs.AddRange(am.SendActivityMessage(account, account.Name, account.Email, account.Name, dc));
+            msgs.AddRange(am.SendActivityMessage(account, account.Name, account.Email, account.Name, dc: dc));
 
             if (msgs.HasNoErrors())
             {
@@ -363,12 +363,12 @@ namespace AfterSchoolLibrary
 
         public static SystemMessages Send(int id, DatabaseConnection dc = null)
         {
-            var am = ActivityMessage.Load(id, dc);
+            var am = ActivityMessage.Load(id, dc: dc);
 
             if (am.ActivityId.HasValue)
-                return ActivityMessage.SendForActivity(am, dc);
+                return ActivityMessage.SendForActivity(am, dc: dc);
             else if(am.ActivityGroupId.HasValue)
-                return ActivityMessage.SendForGroup(am, dc);
+                return ActivityMessage.SendForGroup(am, dc: dc);
             else
                 return new SystemMessages() { new SystemMessage() { Text = "Error", MessageType = MessageType.Error } };
         }

@@ -202,7 +202,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private SystemMessages AddContact(Registrant contact, ContactList contactList, DatabaseConnection dc = null)
         {
-            return contactList.AddContact(contact.ID.Value, SessionVariables.LoggedInUser.ID.Value, dc);
+            return contactList.AddContact(contact.ID.Value, SessionVariables.LoggedInUser.ID.Value, dc: dc);
         }
         private SystemMessages AddContact(string email, string firstname, string lastname, ContactList contactList, DatabaseConnection dc = null)
         {
@@ -218,11 +218,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (firstname.IsNotEmpty() && lastname.IsNotEmpty())
             {
-                contact = Registrant.LoadByNameByEmail(SessionVariables.CurrentAccount.ID.Value, firstname.Trim(), lastname.Trim(), email.Trim(), dc);
+                contact = Registrant.LoadByNameByEmail(SessionVariables.CurrentAccount.ID.Value, firstname.Trim(), lastname.Trim(), email.Trim(), dc: dc);
             }
             else
             {
-                contact = Registrant.LoadByEmailOnly(SessionVariables.CurrentAccount.ID.Value, email.Trim(), dc);
+                contact = Registrant.LoadByEmailOnly(SessionVariables.CurrentAccount.ID.Value, email.Trim(), dc: dc);
             }
 
             if (contact.IsEmpty())
@@ -241,7 +241,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors() && contactList.IsNotEmpty())
             {
-                AddContact(contact, contactList, dc);                
+                AddContact(contact, contactList, dc: dc);                
             }
             return msgs;
         }

@@ -69,29 +69,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static Package Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Package Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Package> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Package> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return Package.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return Package.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return Package.BaseGetCount(criterias, ObjectMap, dq);
+            return Package.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -155,49 +155,49 @@ namespace AfterSchoolLibrary
 
 		public Package Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Package.Load(this.ID.Value, dc);
+			return Package.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<Package> LoadByIsActive(bool IsActive, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Package> LoadByIsActive(bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Package> LoadByIsActiveByIsAfterSchool(bool IsActive, bool IsAfterSchool, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Package> LoadByIsActiveByIsAfterSchool(bool IsActive, bool IsAfterSchool, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
 			dq.Criterias.Add(ObjectMap["IsAfterSchool"], IsAfterSchool);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Package> LoadByIsPopular(bool IsPopular, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Package> LoadByIsPopular(bool IsPopular, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["IsPopular"], IsPopular);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Package> LoadByIsPopularByIsAfterSchool(bool IsPopular, bool IsAfterSchool, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Package> LoadByIsPopularByIsAfterSchool(bool IsPopular, bool IsAfterSchool, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["IsPopular"], IsPopular);
 			dq.Criterias.Add(ObjectMap["IsAfterSchool"], IsAfterSchool);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static Package LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Package LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -225,7 +225,7 @@ namespace AfterSchoolLibrary
         public List<PackageFeature> GetFeatures(DatabaseConnection dc = null)
         {
             if (_Features.IsEmpty())
-                _Features = PackageFeature.LoadByPackageId(this.ID.Value, dc);
+                _Features = PackageFeature.LoadByPackageId(this.ID.Value, dc: dc);
 
             return _Features;
         }
@@ -390,7 +390,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
             var apfs = ap.GetFeatures(dc);
             
-            this.GetFeatures(dc).ForEach(pf => msgs.AddRange(ap.AddPackageFeature(pf, loggedInUserId, dc)));
+            this.GetFeatures(dc).ForEach(pf => msgs.AddRange(ap.AddPackageFeature(pf, loggedInUserId, dc: dc)));
             ap.ResetFeatureList();
 
             return msgs;

@@ -96,29 +96,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static Account Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Account Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Account> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Account> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return Account.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return Account.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return Account.BaseGetCount(criterias, ObjectMap, dq);
+            return Account.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -127,6 +127,10 @@ namespace AfterSchoolLibrary
 
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Account object", MessageType.Error);
+			if (this.OwnerId.IsEmpty())
+				msgs.Add("OwnerId is required on Account object", MessageType.Error);
+			if (this.Name.IsEmpty())
+				msgs.Add("Name is required on Account object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Account).Name));
@@ -232,47 +236,47 @@ namespace AfterSchoolLibrary
 
 		public Account Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Account.Load(this.ID.Value, dc);
+			return Account.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<Account> LoadByOwnerId(int OwnerId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Account> LoadByOwnerId(int OwnerId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["OwnerId"], OwnerId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static Account LoadByUniqueName(string UniqueName, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Account LoadByUniqueName(string UniqueName, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["UniqueName"], UniqueName);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static Account LoadByIsAdminAccount(bool IsAdminAccount, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Account LoadByIsAdminAccount(bool IsAdminAccount, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["IsAdminAccount"], IsAdminAccount);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static Account LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Account LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<Account> LoadByAccountTypeId(AccountType AccountTypeId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Account> LoadByAccountTypeId(AccountType AccountTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountTypeId"], AccountTypeId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
@@ -334,12 +338,12 @@ namespace AfterSchoolLibrary
 
         public WebUser GetAccountOwner(DatabaseConnection dc = null)
         {
-            return WebUser.Load(this.OwnerId.Value, dc);
+            return WebUser.Load(this.OwnerId.Value, dc: dc);
         }
 
         public List<WebUser> GetAccountOwnersAndAdmins(DatabaseConnection dc = null)
         {
-            var awus = AccountWebUser.LoadByAccountIdByIsActive(this.ID.Value, true, dc);
+            var awus = AccountWebUser.LoadByAccountIdByIsActive(this.ID.Value, true, dc: dc);
             return awus.Where(x => x.UserTypeId == UserType.Administrator || x.UserTypeId == UserType.Owner).Select(x => x.ToWebUser()).ToList();
         }
 
@@ -384,22 +388,22 @@ namespace AfterSchoolLibrary
 
         public List<ActivityForm> GetActivityForms(DatabaseConnection dc = null)
         {
-            return ActivityForm.LoadByAccountId(this.ID.Value, dc);
+            return ActivityForm.LoadByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<Activity> GetActivities(UserType userType, WebUser user, bool? isArchived, bool? isDeleted, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }.Contains(userType))
             {
-                return Activity.LoadByAccountId(this.ID.Value, null, isArchived, isDeleted, start, length, dc).ToList();
+                return Activity.LoadByAccountId(this.ID.Value, null, isArchived, isDeleted, start, length, dc: dc).ToList();
             }
             else
             {
-                var activities = Activity.LoadByAccountId(this.ID.Value, null, isArchived, isDeleted, start, length, dc).ToList();
+                var activities = Activity.LoadByAccountId(this.ID.Value, null, isArchived, isDeleted, start, length, dc: dc).ToList();
                 var list = new List<Activity>();
                 foreach (var activity in activities)
                 {
-                    if (user.HasAccessToActivity(activity, dc))
+                    if (user.HasAccessToActivity(activity, dc: dc))
                     {
                         list.Add(activity);
                     }
@@ -413,7 +417,7 @@ namespace AfterSchoolLibrary
         {
             if (user.IsEmpty() || new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }.Contains(userType))
             {
-                return Activity.GetCountByAccountId(this.ID.Value, null, isArchived, isDeleted, dc);
+                return Activity.GetCountByAccountId(this.ID.Value, null, isArchived, isDeleted, dc: dc);
             }
             else
             {
@@ -423,27 +427,27 @@ namespace AfterSchoolLibrary
 
         public int SearchContactCount(string searchtext, int? contactListId, DatabaseConnection dc = null)
         {
-            return Registrant.SearchRegistrantCount(searchtext, contactListId, this.ID.Value, dc);
+            return Registrant.SearchRegistrantCount(searchtext, contactListId, this.ID.Value, dc: dc);
         }
 
         public List<Registrant> SearchContacts(string searchtext, int? contactListId, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registrant.SearchRegistrants(searchtext, contactListId, this.ID.Value, start, length, dc);
+            return Registrant.SearchRegistrants(searchtext, contactListId, this.ID.Value, start, length, dc: dc);
         }
 
         public int GetContactCount(int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registrant.GetCountByAccountId(this.ID.Value, dc);
+            return Registrant.GetCountByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<Registrant> GetContacts(int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAccountId(this.ID.Value, start, length, dc);
+            return Registrant.LoadByAccountId(this.ID.Value, start, length, dc: dc);
         }
 
         public List<ContactList> GetContactLists(int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return ContactList.LoadByAccountId(this.ID.Value, start, length, dc);
+            return ContactList.LoadByAccountId(this.ID.Value, start, length, dc: dc);
         }
 
         public int GetContactListCount(DatabaseConnection dc = null)
@@ -453,62 +457,62 @@ namespace AfterSchoolLibrary
 
         public List<Registrant> GetRegistrantsByActivityId(int activityId, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return this.GetRegistrantActivitiesByActivityId(activityId, start, length, dc).Select(x => x.ToRegistrant()).ToList();
+            return this.GetRegistrantActivitiesByActivityId(activityId, start, length, dc: dc).Select(x => x.ToRegistrant()).ToList();
         }
 
         public List<RegistrantActivity> GetRegistrantActivitiesByActivityId(int activityId, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByActivityId(activityId, start, length, dc).Where(x => x.ActivityAccountId == this.ID).ToList();
+            return RegistrantActivity.LoadByActivityId(activityId, start, length, dc: dc).Where(x => x.ActivityAccountId == this.ID).ToList();
         }
 
         public int GetRegistrantActivityCountByActivityId(int activityId, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetCountByActivityIdByAccountId(activityId, this.ID.Value, dc);
+            return RegistrantActivity.GetCountByActivityIdByAccountId(activityId, this.ID.Value, dc: dc);
         }
 
         public List<Form> GetForms(DatabaseConnection dc = null)
         {
-            return Form.LoadByAccountId(this.ID.Value, dc);
+            return Form.LoadByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<ActivityGroup> GetActivityGroups(DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(this.ID.Value, dc);
+            return ActivityGroup.LoadByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<ActivityGroup> GetPublishedActivityGroups(DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountIdByIsPublished(this.ID.Value, true, dc);
+            return ActivityGroup.LoadByAccountIdByIsPublished(this.ID.Value, true, dc: dc);
         }
 
         public List<ActivityGroup> GetActivityGroups(bool IsArchived, int? start, int? length, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(this.ID.Value, IsArchived, start, length, dc);
+            return ActivityGroup.LoadByAccountId(this.ID.Value, IsArchived, start, length, dc: dc);
         }
 
         public int GetActivityGroupCount(bool IsArchived = false, DatabaseConnection dc = null)
         {
-            return ActivityGroup.GetCount(new Hashtable() { { "AccountId", this.ID.Value }, { "IsArchived", IsArchived } }, dc);
+            return ActivityGroup.GetCount(new Hashtable() { { "AccountId", this.ID.Value }, { "IsArchived", IsArchived } }, dc: dc);
         }
 
         public List<ActivitySchedule> GetActivitySchedules(DatabaseConnection dc = null)
         {
-            return ActivitySchedule.LoadByAccountId(this.ID.Value, dc);
+            return ActivitySchedule.LoadByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<RegistrationPeriod> GetRegistrationPeriods(DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.LoadByAccountId(this.ID.Value, dc);
+            return RegistrationPeriod.LoadByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<RegistrationPeriod> GetRegistrationPeriods(int? start, int? length, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.LoadByAccountId(this.ID.Value, start, length, dc);
+            return RegistrationPeriod.LoadByAccountId(this.ID.Value, start, length, dc: dc);
         }
 
         public int GetRegistrationPeriodCount(DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", this.ID.Value } }, dc);
+            return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", this.ID.Value } }, dc: dc);
         }
 
         public List<RegistrationPeriod> GetUpcomingRegistrationPeriods(DatabaseConnection dc = null)
@@ -543,45 +547,44 @@ namespace AfterSchoolLibrary
             }
             else
             {
-                defaultFormId = Form.GetLatestTemplateForm(1, dc).ID;
+                defaultFormId = Form.GetLatestTemplateForm(1, dc: dc).ID;
             }
-            return Form.Load(defaultFormId.Value, dc);
+            return Form.Load(defaultFormId.Value, dc: dc);
         }
 
         public List<AccountWebUser> GetMembers(DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountId(this.ID.Value, dc);
+            return AccountWebUser.LoadByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<AccountWebUser> GetActiveMembers(DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsActive(this.ID.Value, true, dc);
+            return AccountWebUser.LoadByAccountIdByIsActive(this.ID.Value, true, dc: dc);
         }
 
         public AccountPackage GetActiveAccountPackage(DatabaseConnection dc = null)
         {
-            return AccountPackage.LoadByAccountIdByIsActive(this.ID.Value, true, dc);
+            return AccountPackage.LoadByAccountIdByIsActive(this.ID.Value, true, dc: dc);
         }
 
         public List<AccountPackage> GetAccountPackages(DatabaseConnection dc = null)
         {
-            return AccountPackage.LoadByAccountId(this.ID.Value, dc);
+            return AccountPackage.LoadByAccountId(this.ID.Value, dc: dc);
         }
 
         public WebUser AddUser(WebUser wu, UserType ut, int loggedInUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return AddUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUserId, msgs, dc);
+            return AddUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUserId, msgs, dc: dc);
         }
 
         public WebUser AddUser(string firstName, string lastName, string email, UserType ut, int loggedInUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return AddUser(firstName, lastName, email, null, false, true, false, ut, loggedInUserId, msgs, dc);
+            return AddUser(firstName, lastName, email, null, false, true, false, ut, loggedInUserId, msgs, dc: dc);
         }
 
         public WebUser AddUser(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, UserType ut, int loggedInUserId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
-            bool doCommit = false;
             WebUser wu = null;
 
             Database.ExecuteTransaction(
@@ -609,7 +612,7 @@ namespace AfterSchoolLibrary
                         amsgs.AddRange(wu.Save(adc));
                     }
 
-                    AccountWebUser gwu = AccountWebUser.LoadByAccountIdByWebUserId(this.ID.Value, wu.ID.Value, adc);
+                    AccountWebUser gwu = AccountWebUser.LoadByAccountIdByWebUserId(this.ID.Value, wu.ID.Value, dc: adc);
                     if (gwu.IsEmpty())
                     {
                         gwu = new AccountWebUser();
@@ -662,12 +665,12 @@ namespace AfterSchoolLibrary
 
         public SystemMessages InviteUser(WebUser wu, UserType ut, WebUser loggedInUser, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return InviteUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUser, dc);
+            return InviteUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUser, dc: dc);
         }
 
         public SystemMessages InviteUser(string firstName, string lastName, string email, UserType ut, WebUser loggedInUser, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            return InviteUser(firstName, lastName, email, null, ut, loggedInUser, dc);
+            return InviteUser(firstName, lastName, email, null, ut, loggedInUser, dc: dc);
         }
 
         public SystemMessages InviteUser(string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
@@ -693,7 +696,7 @@ namespace AfterSchoolLibrary
                         amsgs.AddRange(wu.Save(adc));
                     }
 
-                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(this.ID.Value, wu.ID.Value, adc);
+                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(this.ID.Value, wu.ID.Value, dc: adc);
                     if (awu.IsEmpty())
                     {
                         awu = new AccountWebUser();
@@ -722,7 +725,7 @@ namespace AfterSchoolLibrary
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    msgs.AddRange(wu.SendInvite(email.Trim(), message, loggedInUser, this, dc));
+                    msgs.AddRange(wu.SendInvite(email.Trim(), message, loggedInUser, this, dc: dc));
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {
@@ -742,13 +745,13 @@ namespace AfterSchoolLibrary
 
             string origUniqueName = reg.Replace(name, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            Account duplicate = Account.LoadByUniqueName(uniqueName, dc);
+            Account duplicate = Account.LoadByUniqueName(uniqueName, dc: dc);
             int count = 1;            
             while (duplicate.IsNotEmpty() && duplicate.ID != accountId)
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = Account.LoadByUniqueName(uniqueName, dc);
+                duplicate = Account.LoadByUniqueName(uniqueName, dc: dc);
             }
             return uniqueName;
         }
@@ -809,11 +812,11 @@ namespace AfterSchoolLibrary
             {
                 if (activePackage.IsEmpty())
                 {
-                    trialDayCount = p.HasFeature(FeatureType.TrialDays) ? p.GetFeature(FeatureType.TrialDays, dc).GetMaxValue() : 0;
+                    trialDayCount = p.HasFeature(FeatureType.TrialDays) ? p.GetFeature(FeatureType.TrialDays, dc: dc).GetMaxValue() : 0;
                 }
                 else if (activePackage.HasFeature(FeatureType.TrialDays))
                 {
-                    trialDayCount = this.GetTrialDaysRemaining(activePackage, dc);
+                    trialDayCount = this.GetTrialDaysRemaining(activePackage, dc: dc);
                 }
 
                 if (trialDayCount > 0)
@@ -846,7 +849,7 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
-                    p = Package.Load(package, dc);
+                    p = Package.Load(package, dc: dc);
                     currentPackage = this.GetActiveAccountPackage(dc);
 
                     var trialDayCount = 0;
@@ -856,7 +859,7 @@ namespace AfterSchoolLibrary
                     //      upgrading to a different package
                     //      paying for a new package with no trial account
 
-                    var signupType = this.GetSignUpType(p, currentPackage, billingPeriodType, ref trialDayCount, dc);
+                    var signupType = this.GetSignUpType(p, currentPackage, billingPeriodType, ref trialDayCount, dc: dc);
 
                     if (signupType != SignUpType.NotSet)
                     {
@@ -897,7 +900,7 @@ namespace AfterSchoolLibrary
                                     newap.StartDate = DateTime.UtcNow;
                                 }
 
-                                msgs.AddRange(newap.SaveWithStripe(this.StripeCustomerId, false, newStripePlanId, dc));
+                                msgs.AddRange(newap.SaveWithStripe(this.StripeCustomerId, false, newStripePlanId, dc: dc));
                             }
                             // if it has a trial date end in the future, then end it now if they are converting from trial
                             else if (currentPackage.TrialEndDate.HasValue && currentPackage.TrialEndDate.Value >= DateTime.Now)
@@ -906,7 +909,7 @@ namespace AfterSchoolLibrary
                                 currentPackage.LastModifiedDate = DateTime.UtcNow;
                                 currentPackage.LastModifiedBy = loggedInUser.ID;
 
-                                msgs.AddRange(currentPackage.SaveWithStripe(this.StripeCustomerId, true, null, dc));
+                                msgs.AddRange(currentPackage.SaveWithStripe(this.StripeCustomerId, true, null, dc: dc));
 
                                 newap = currentPackage;
                             }
@@ -915,13 +918,13 @@ namespace AfterSchoolLibrary
 
                         if (msgs.HasNoErrors() && newap.ID.HasValue)
                         {
-                            msgs.AddRange(p.CopyFeaturesToAccountPackage(newap, loggedInUser.ID.Value, dc));
+                            msgs.AddRange(p.CopyFeaturesToAccountPackage(newap, loggedInUser.ID.Value, dc: dc));
                         }
 
                         // make sure the account package is set to the real trial days passed in
                         if (msgs.HasNoErrors())
                         {
-                            var apf = newap.GetFeature(FeatureType.TrialDays, dc);
+                            var apf = newap.GetFeature(FeatureType.TrialDays, dc: dc);
                             if (apf.IsNotEmpty())
                             {
                                 apf.Max = trialDayCount;
@@ -1234,7 +1237,7 @@ namespace AfterSchoolLibrary
 
         public List<RegistrantActivity> GetRegistrantActivities(int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByAccountId(this.ID.Value, start, length, dc).ToList();
+            return RegistrantActivity.LoadByAccountId(this.ID.Value, start, length, dc: dc).ToList();
         }
 
         public int GetRegistrantActivityCount(DatabaseConnection dc = null)
@@ -1244,67 +1247,67 @@ namespace AfterSchoolLibrary
 
         public int GetRegistrantCount(DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAccountId(this.ID.Value, dc);
+            return RegistrantActivity.GetSeatCountByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<Attendance> GetCompletedAttendance(DatabaseConnection dc = null)
         {
-            return Attendance.LoadByAccountIdByIsCompleted(this.ID.Value, true, dc);
+            return Attendance.LoadByAccountIdByIsCompleted(this.ID.Value, true, dc: dc);
         }
 
         public int GetAttendancePresentCount(DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPresentCountByAccountId(this.ID.Value, dc);
+            return AttendanceRegistrant.GetPresentCountByAccountId(this.ID.Value, dc: dc);
         }
 
         public int GetAttendancePossibleCount(DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPossibleCountByAccountId(this.ID.Value, dc);
+            return AttendanceRegistrant.GetPossibleCountByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<Attendance> GetAttendanceByDate(DateTime date, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByAccountIdByDate(this.ID.Value, date, dc);
+            return Attendance.LoadByAccountIdByDate(this.ID.Value, date, dc: dc);
         }
 
         public List<AccountPackageFeature> GetAccountPackageFeatures(DatabaseConnection dc = null)
         {
-            return AccountPackageFeature.LoadByAccountPackageId(this.GetActiveAccountPackage(dc).ID.Value, dc);
+            return AccountPackageFeature.LoadByAccountPackageId(this.GetActiveAccountPackage(dc).ID.Value, dc: dc);
         }
 
         public AccountProperty GetAccountProperty(AccountPropertyType propertyType, DatabaseConnection dc = null)
         {
-            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(this.ID.Value, propertyType, dc);
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(this.ID.Value, propertyType, dc: dc);
         }
 
         public List<Registration> GetRegistrations(DatabaseConnection dc = null)
         {
-            return Registration.LoadByAccountId(this.ID.Value, dc);
+            return Registration.LoadByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<Registration> GetCurrentRegistrations(DatabaseConnection dc = null)
         {
-            return Registration.LoadCurrentByAccountId(this.ID.Value, dc);
+            return Registration.LoadCurrentByAccountId(this.ID.Value, dc: dc);
         }
 
         public List<Registration> GetRegistrations(int start, int length, DatabaseConnection dc = null)
         {
-            return Registration.LoadByAccountId(this.ID.Value, start, length, dc);
+            return Registration.LoadByAccountId(this.ID.Value, start, length, dc: dc);
         }
 
         public int GetRegistrationCount(DatabaseConnection dc = null)
         {
-            return Registration.GetCount(new Hashtable() { { "AccountId", this.ID.Value } }, dc);
+            return Registration.GetCount(new Hashtable() { { "AccountId", this.ID.Value } }, dc: dc);
         }
 
         public List<Registration> SearchRegistrations(string searchText, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, int? start, int? length, DatabaseConnection dc = null)
         {
-            return Registration.Search(searchText, this.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, start, length, dc);
+            return Registration.Search(searchText, this.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, start, length, dc: dc);
         }
 
         public int SearchRegistrationCount(string searchText, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
-            return Registration.SearchCount(searchText, this.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, dc);
+            return Registration.SearchCount(searchText, this.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, dc: dc);
         }
 
         public Activity GetDefaultNewActivity()
@@ -1338,7 +1341,7 @@ namespace AfterSchoolLibrary
             account.IsActive = isActive;
             account.Email = email;
             account.Phone = phone;
-            account.UniqueName = Account.GenerateUniqueName(account.Name, account.ID, dc);
+            account.UniqueName = Account.GenerateUniqueName(account.Name, account.ID, dc: dc);
             account.CreateDate = account.LastModifiedDate = DateTime.UtcNow;
             account.CreatedBy = account.LastModifiedBy = loggedInUserId;
             account.IsAfterSchool = isAfterSchool;

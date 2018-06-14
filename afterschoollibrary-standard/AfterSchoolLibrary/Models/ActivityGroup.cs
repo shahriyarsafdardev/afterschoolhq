@@ -83,29 +83,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static ActivityGroup Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivityGroup Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<ActivityGroup> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityGroup> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return ActivityGroup.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return ActivityGroup.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return ActivityGroup.BaseGetCount(criterias, ObjectMap, dq);
+            return ActivityGroup.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -185,70 +185,70 @@ namespace AfterSchoolLibrary
 
 		public ActivityGroup Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityGroup.Load(this.ID.Value, dc);
+			return ActivityGroup.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<ActivityGroup> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityGroup> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityGroup> LoadByAccountIdByIsPublished(int AccountId, bool IsPublished, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityGroup> LoadByAccountIdByIsPublished(int AccountId, bool IsPublished, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityGroup> LoadByAccountIdByIsPublishedByIsInviteOnly(int AccountId, bool IsPublished, bool IsInviteOnly, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityGroup> LoadByAccountIdByIsPublishedByIsInviteOnly(int AccountId, bool IsPublished, bool IsInviteOnly, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
 			dq.Criterias.Add(ObjectMap["IsInviteOnly"], IsInviteOnly);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static ActivityGroup LoadByAccountIdByUniqueName(int AccountId, string UniqueName, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityGroup LoadByAccountIdByUniqueName(int AccountId, string UniqueName, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["UniqueName"], UniqueName);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static ActivityGroup LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityGroup LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static ActivityGroup LoadByUidByIsPublished(Guid Uid, bool IsPublished, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityGroup LoadByUidByIsPublished(Guid Uid, bool IsPublished, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static ActivityGroup LoadByUidByIsPublishedByIsInviteOnly(Guid Uid, bool IsPublished, bool IsInviteOnly, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityGroup LoadByUidByIsPublishedByIsInviteOnly(Guid Uid, bool IsPublished, bool IsInviteOnly, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
 			dq.Criterias.Add(ObjectMap["IsInviteOnly"], IsInviteOnly);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -342,13 +342,13 @@ namespace AfterSchoolLibrary
 
             string origUniqueName = reg.Replace(name, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            var duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, dc);
+            var duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, dc: dc);
             int count = 1;
             while (!duplicate.IsEmpty() && duplicate.ID != accountId)
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, dc);
+                duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, dc: dc);
             }
             return uniqueName;            
         }
@@ -357,14 +357,14 @@ namespace AfterSchoolLibrary
         public List<RegistrationPeriod> GetRegistrationPeriods(DatabaseConnection dc = null)
         {
             if (_RegistrationPeriods.IsEmpty())
-                _RegistrationPeriods = RegistrationPeriod.LoadByActivityGroupId(this.ID.Value, dc);
+                _RegistrationPeriods = RegistrationPeriod.LoadByActivityGroupId(this.ID.Value, dc: dc);
 
             return _RegistrationPeriods;
         }
 
         public List<Registration> GetRegistrations(int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadByActivityGroupId(this.ID.Value, start, length, dc);
+            return Registration.LoadByActivityGroupId(this.ID.Value, start, length, dc: dc);
         }
 
         public int GetRegistrationCount(DatabaseConnection dc = null)
@@ -375,12 +375,12 @@ namespace AfterSchoolLibrary
         private List<Activity> _Activities = null;
         public List<Activity> GetActivities(DatabaseConnection dc = null)
         {
-            return GetActivities(false, false, null, null, false, dc);
+            return GetActivities(false, false, null, null, false, dc: dc);
         }
         public List<Activity> GetActivities(bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, DatabaseConnection dc = null)
         {
             if (_Activities.IsEmpty() || forceReload)
-                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, IsArchived, isDeleted, start, length, dc);
+                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, IsArchived, isDeleted, start, length, dc: dc);
 
             return _Activities;
         }
@@ -389,7 +389,7 @@ namespace AfterSchoolLibrary
         public Form GetForm(DatabaseConnection dc = null)
         {
             if (_Form.IsEmpty())
-                _Form = Form.Load(this.FormId.Value, dc);
+                _Form = Form.Load(this.FormId.Value, dc: dc);
 
             return _Form;
         }
@@ -398,12 +398,12 @@ namespace AfterSchoolLibrary
         public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, DatabaseConnection dc = null)
         {
             if (registrations.IsEmpty())
-                registrations = Registration.LoadByActivityGroupId(this.ID.Value, dc);
+                registrations = Registration.LoadByActivityGroupId(this.ID.Value, dc: dc);
 
             if (_RegistrantActivities.IsEmpty())
             {
                 if (registrations.Any())
-                    _RegistrantActivities = RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc)
+                    _RegistrantActivities = RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc: dc)
                         .Where(x => !x.ActivityIsDeleted)
                         .ToList();
                 else
@@ -415,12 +415,12 @@ namespace AfterSchoolLibrary
 
         public List<Registrant> GetRegistrants(List<Registration> registrations = null, DatabaseConnection dc = null)
         {
-            return GetRegistrantActivities(registrations, dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
+            return GetRegistrantActivities(registrations, dc: dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
         }
 
         public int GetTotalSeatsLeft(DatabaseConnection dc = null)
         {
-            return this.GetActivities(false, false, null, null, false, dc: dc).Sum(x => x.SeatsAvailable.Value) - this.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved, dc);
+            return this.GetActivities(false, false, null, null, false, dc: dc).Sum(x => x.SeatsAvailable.Value) - this.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved, dc: dc);
         }
 
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
@@ -433,7 +433,7 @@ namespace AfterSchoolLibrary
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var rr = new RegistrationRandomization(this);
             rr.RegistrationPeriod = period;
-            return rr.AttemptLottery(msgs, dc);
+            return rr.AttemptLottery(msgs, dc: dc);
         }
 
         public SystemMessages RandomizePlacementApply(RegistrationPeriod period, List<RegistrantAssignment> assignments, DatabaseConnection dc = null)
@@ -441,7 +441,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
             var rr = new RegistrationRandomization(this);
             rr.RegistrationPeriod = period;
-            msgs.AddRange(rr.ApplyLottery(assignments, dc));
+            msgs.AddRange(rr.ApplyLottery(assignments, dc: dc));
             return msgs;
         }
 
@@ -473,7 +473,7 @@ namespace AfterSchoolLibrary
         public int GetActivityCount(bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return Activity.GetCountByAccountId(this.AccountId.Value, this.ID, isArchived, isDeleted, dc);
+                return Activity.GetCountByAccountId(this.AccountId.Value, this.ID, isArchived, isDeleted, dc: dc);
 
             return 0;
         }
@@ -482,7 +482,7 @@ namespace AfterSchoolLibrary
         public Account GetAccount(DatabaseConnection dc = null)
         {
             if (_Account.IsEmpty())
-                _Account = Account.Load(this.AccountId.Value, dc);
+                _Account = Account.Load(this.AccountId.Value, dc: dc);
 
             return _Account;
         }
@@ -558,7 +558,7 @@ namespace AfterSchoolLibrary
         public RegistrantActivityGroup InviteContact(Registrant contact, int? periodId, int invitationSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
-            var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(this.ID.Value, contact.ID.Value, dc);
+            var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(this.ID.Value, contact.ID.Value, dc: dc);
 
             if (rag.IsEmpty())
             {
@@ -637,7 +637,7 @@ namespace AfterSchoolLibrary
                     if (form.ToInteger() == 0)
                     {
                         var defaultForm = account.GetDefaultForm(dc);
-                        var newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, dc);
+                        var newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, dc: dc);
                         newForm.Name = (group.Name + " Form").MaxChars(100, "...");
                         msgs.AddRange(newForm.Save(dc));
 
@@ -645,7 +645,7 @@ namespace AfterSchoolLibrary
                     }
 
                     group.AccountId = account.ID;
-                    group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, dc);
+                    group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, dc: dc);
                     group.LastModifiedDate = DateTime.UtcNow;
                     group.LastModifiedBy = loggedInUserId;
                     msgs.AddRange(group.Save(dc));
@@ -659,10 +659,10 @@ namespace AfterSchoolLibrary
 
                     if (isNew)
                     {
-                        group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUserId, msgs, dc);
-                        group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUserId, msgs, dc);
-                        group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUserId, msgs, dc);
-                        group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUserId, msgs, dc);
+                        group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUserId, msgs, dc: dc);
+                        group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUserId, msgs, dc: dc);
+                        group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUserId, msgs, dc: dc);
+                        group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUserId, msgs, dc: dc);
                     }
                 }
                 catch (Exception ex)
@@ -683,7 +683,7 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var ap = this.GetGroupProperty(type, dc);
+            var ap = this.GetGroupProperty(type, dc: dc);
 
             if (ap.IsEmpty())
             {
@@ -711,7 +711,7 @@ namespace AfterSchoolLibrary
         public List<AccountProperty> GetGroupProperties(DatabaseConnection dc = null)
         {
             if (_Properties.IsEmpty())
-                _Properties = AccountProperty.LoadByActivityGroupId(this.ID.Value, dc);
+                _Properties = AccountProperty.LoadByActivityGroupId(this.ID.Value, dc: dc);
 
             return _Properties;
         }
@@ -720,7 +720,7 @@ namespace AfterSchoolLibrary
         public List<ActivityMessage> GetMessages(DatabaseConnection dc = null)
         {
             if (_ActivityMessages.IsEmpty())
-                _ActivityMessages = ActivityMessage.LoadByActivityGroupId(this.ID.Value, dc);
+                _ActivityMessages = ActivityMessage.LoadByActivityGroupId(this.ID.Value, dc: dc);
 
             return _ActivityMessages;
         }
@@ -783,7 +783,7 @@ namespace AfterSchoolLibrary
 
         public List<ActivitySchedule> GetSchedules(DatabaseConnection dc = null)
         {
-            return ActivitySchedule.LoadByActivityGroupId(this.ID.Value, dc);
+            return ActivitySchedule.LoadByActivityGroupId(this.ID.Value, dc: dc);
         }
 
         public SystemMessages MoveFromArchive(int loggedInUserId, DatabaseConnection dc = null)
@@ -801,9 +801,9 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             contacts.ForEach(contact => {
-                this.InviteContact(contact, period?.ID, 1, loggedInUserId, msgs, dc);
+                this.InviteContact(contact, period?.ID, 1, loggedInUserId, msgs, dc: dc);
                 if (activityIds.Any())
-                    msgs.AddRange(contact.AddInviteToActivities(activityIds, loggedInUserId, this.ID, period?.ID, dc));
+                    msgs.AddRange(contact.AddInviteToActivities(activityIds, loggedInUserId, this.ID, period?.ID, dc: dc));
             });
 
             return msgs;
@@ -812,11 +812,11 @@ namespace AfterSchoolLibrary
         public static SystemMessages EmailInvitedContacts(int id, int periodId, List<int> contactIds, string emailmessage, string inviteUrl, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.Load(id, dc);
+            var group = ActivityGroup.Load(id, dc: dc);
             var account = group.GetAccount(dc);
-            var period = RegistrationPeriod.Load(periodId, dc);
-            var loggedInUser = WebUser.Load(loggedInUserId, dc);
-            var contacts = Registrant.LoadList(contactIds, dc);
+            var period = RegistrationPeriod.Load(periodId, dc: dc);
+            var loggedInUser = WebUser.Load(loggedInUserId, dc: dc);
+            var contacts = Registrant.LoadList(contactIds, dc: dc);
 
             if (contacts.IsNotEmpty() && contacts.Any())
             {
@@ -843,7 +843,7 @@ namespace AfterSchoolLibrary
 
                 contacts.ForEach(contact => {
                     var finalInviteUrl = inviteUrl;
-                    var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(group.ID.Value, contact.ID.Value, dc);
+                    var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(group.ID.Value, contact.ID.Value, dc: dc);
 
                     var salutation = "<p>Hello,</p>";
                     if (contact.FirstName.IsNotBlank())
@@ -882,7 +882,7 @@ namespace AfterSchoolLibrary
 
         public List<RegistrantActivityGroup> GetInvitedContacts(int? start, int? length, DatabaseConnection dc = null)
         {
-            return RegistrantActivityGroup.LoadByActivityGroupId(this.ID.Value, start, length, dc);
+            return RegistrantActivityGroup.LoadByActivityGroupId(this.ID.Value, start, length, dc: dc);
         }
 
         public int GetInvitedContactCount(DatabaseConnection dc = null)
@@ -896,7 +896,7 @@ namespace AfterSchoolLibrary
         public static SystemMessages SendRegistrationConfirmations(int id, List<Registration> registrations = null, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.Load(id, dc);
+            var group = ActivityGroup.Load(id, dc: dc);
 
             if (registrations.IsEmpty())
                 registrations = group.GetRegistrations(dc: dc);

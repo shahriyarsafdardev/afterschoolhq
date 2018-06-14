@@ -64,29 +64,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static Form Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Form Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Form> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Form> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return Form.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return Form.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return Form.BaseGetCount(criterias, ObjectMap, dq);
+            return Form.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -138,23 +138,23 @@ namespace AfterSchoolLibrary
 
 		public Form Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Form.Load(this.ID.Value, dc);
+			return Form.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<Form> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Form> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static Form LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Form LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -169,7 +169,7 @@ namespace AfterSchoolLibrary
                 new Hashtable() {
                     { "FormId", this.ID.Value }
                 },
-                dc
+                dc: dc
             );
         }
 
@@ -187,17 +187,17 @@ namespace AfterSchoolLibrary
 
         public List<FormQuestion> GetAllQuestions(DatabaseConnection dc = null)
         {
-            return FormQuestion.LoadByFormId(this.ID.Value, dc);
+            return FormQuestion.LoadByFormId(this.ID.Value, dc: dc);
         }
 
         public List<FormQuestion> GetActiveQuestions(DatabaseConnection dc = null)
         {
-            return FormQuestion.LoadByFormIdByIsActive(this.ID.Value, true, dc);
+            return FormQuestion.LoadByFormIdByIsActive(this.ID.Value, true, dc: dc);
         }
 
         public List<FormQuestionGroup> GetQuestionGroups(DatabaseConnection dc = null)
         {
-            return FormQuestionGroup.LoadByFormId(this.ID.Value, dc).OrderBy(x => x.DisplayOrder).ToList();
+            return FormQuestionGroup.LoadByFormId(this.ID.Value, dc: dc).OrderBy(x => x.DisplayOrder).ToList();
         }
 
         public Form Copy(int loggedInUserId, int newAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -218,10 +218,10 @@ namespace AfterSchoolLibrary
             };
             msgs.AddRange(form.Save(dc));
 
-            var groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc);
+            var groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc: dc);
             foreach (var group in groups)
             {
-                var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc);
+                var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc: dc);
 
                 var newGroup = group.Copy();
                 newGroup.LastModifiedDate = DateTime.UtcNow;
@@ -242,7 +242,7 @@ namespace AfterSchoolLibrary
             }
 
             //check for default form existence
-            var account = Account.Load(newAccountId, dc);
+            var account = Account.Load(newAccountId, dc: dc);
             if(account.IsNotEmpty() && !account.DefaultFormId.HasValue)
             {
                 account.DefaultFormId = form.ID;

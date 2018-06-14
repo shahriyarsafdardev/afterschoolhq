@@ -18,12 +18,12 @@ namespace AfterSchoolLibrary
 
         public static WebUser GetAccountOwner(this Account account, DatabaseConnection dc = null)
         {
-            return WebUser.Load(account.OwnerId.Value, dc);
+            return WebUser.Load(account.OwnerId.Value, dc: dc);
         }
 
         public static List<WebUser> GetAccountOwnersAndAdmins(this Account account, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc)
+            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc: dc)
                 .Where(x => x.UserTypeId == UserType.Administrator || x.UserTypeId == UserType.Owner)
                 .Select(x => x.ToWebUser())
                 .ToList();
@@ -41,19 +41,19 @@ namespace AfterSchoolLibrary
 
         public static List<ActivityForm> GetActivityForms(this Account account, DatabaseConnection dc = null)
         {
-            return ActivityForm.LoadByAccountId(account.ID.Value, dc);
+            return ActivityForm.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, bool? isArchived, bool? isDeleted, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }.Contains(userType))
             {
-                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, dc).ToList();
+                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, dc: dc).ToList();
             }
             else
             {
-                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, dc)
-                    .Where(activity => user.HasAccessToActivity(activity, dc))
+                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, dc: dc)
+                    .Where(activity => user.HasAccessToActivity(activity, dc: dc))
                     .ToList();
             }
         }
@@ -62,7 +62,7 @@ namespace AfterSchoolLibrary
         {
             if (user.IsEmpty() || new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }.Contains(userType))
             {
-                return Activity.GetCountByAccountId(account.ID.Value, null, isArchived, isDeleted, dc);
+                return Activity.GetCountByAccountId(account.ID.Value, null, isArchived, isDeleted, dc: dc);
             }
             else
             {
@@ -72,27 +72,27 @@ namespace AfterSchoolLibrary
 
         public static int SearchContactCount(this Account account, string searchtext, int? contactListId, DatabaseConnection dc = null)
         {
-            return Registrant.SearchRegistrantCount(searchtext, contactListId, account.ID.Value, dc);
+            return Registrant.SearchRegistrantCount(searchtext, contactListId, account.ID.Value, dc: dc);
         }
 
         public static List<Registrant> SearchContacts(this Account account, string searchtext, int? contactListId, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registrant.SearchRegistrants(searchtext, contactListId, account.ID.Value, start, length, dc);
+            return Registrant.SearchRegistrants(searchtext, contactListId, account.ID.Value, start, length, dc: dc);
         }
 
         public static int GetContactCount(this Account account, DatabaseConnection dc = null)
         {
-            return Registrant.GetCountByAccountId(account.ID.Value, dc);
+            return Registrant.GetCountByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<Registrant> GetContacts(this Account account, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAccountId(account.ID.Value, start, length, dc);
+            return Registrant.LoadByAccountId(account.ID.Value, start, length, dc: dc);
         }
 
         public static List<ContactList> GetContactLists(this Account account, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return ContactList.LoadByAccountId(account.ID.Value, start, length, dc);
+            return ContactList.LoadByAccountId(account.ID.Value, start, length, dc: dc);
         }
 
         public static int GetContactListCount(this Account account, DatabaseConnection dc = null)
@@ -102,66 +102,66 @@ namespace AfterSchoolLibrary
 
         public static List<Registrant> GetRegistrantsByActivityId(this Account account, int activityId, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return account.GetRegistrantActivitiesByActivityId(activityId, start, length, dc)
+            return account.GetRegistrantActivitiesByActivityId(activityId, start, length, dc: dc)
                 .Select(x => x.ToRegistrant())
                 .ToList();
         }
 
         public static List<RegistrantActivity> GetRegistrantActivitiesByActivityId(this Account account, int activityId, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByActivityId(activityId, start, length, dc)
+            return RegistrantActivity.LoadByActivityId(activityId, start, length, dc: dc)
                 .Where(x => x.ActivityAccountId == account.ID)
                 .ToList();
         }
 
         public static int GetRegistrantActivityCountByActivityId(this Account account, int activityId, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetCountByActivityIdByAccountId(activityId, account.ID.Value, dc);
+            return RegistrantActivity.GetCountByActivityIdByAccountId(activityId, account.ID.Value, dc: dc);
         }
 
         public static List<Form> GetForms(this Account account, DatabaseConnection dc = null)
         {
-            return Form.LoadByAccountId(account.ID.Value, dc);
+            return Form.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<ActivityGroup> GetActivityGroups(this Account account, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<ActivityGroup> GetPublishedActivityGroups(this Account account, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, dc);
+            return ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, dc: dc);
         }
 
         public static List<ActivityGroup> GetActivityGroups(this Account account, bool IsArchived, int? start, int? length, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, IsArchived, start, length, dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, IsArchived, start, length, dc: dc);
         }
 
         public static int GetActivityGroupCount(this Account account, bool IsArchived = false, DatabaseConnection dc = null)
         {
-            return ActivityGroup.GetCount(new Hashtable() { { "AccountId", account.ID.Value }, { "IsArchived", IsArchived } }, dc);
+            return ActivityGroup.GetCount(new Hashtable() { { "AccountId", account.ID.Value }, { "IsArchived", IsArchived } }, dc: dc);
         }
 
         public static List<ActivitySchedule> GetActivitySchedules(this Account account, DatabaseConnection dc = null)
         {
-            return ActivitySchedule.LoadByAccountId(account.ID.Value, dc);
+            return ActivitySchedule.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<RegistrationPeriod> GetRegistrationPeriods(this Account account, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.LoadByAccountId(account.ID.Value, dc);
+            return RegistrationPeriod.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<RegistrationPeriod> GetRegistrationPeriods(this Account account, int? start, int? length, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.LoadByAccountId(account.ID.Value, start, length, dc);
+            return RegistrationPeriod.LoadByAccountId(account.ID.Value, start, length, dc: dc);
         }
 
         public static int GetRegistrationPeriodCount(this Account account, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, dc);
+            return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, dc: dc);
         }
 
         public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Account account, DatabaseConnection dc = null)
@@ -199,29 +199,29 @@ namespace AfterSchoolLibrary
         public static Form GetDefaultForm(this Account account, DatabaseConnection dc = null)
         {
             if (account.DefaultFormId.HasValue)
-                return Form.Load(account.DefaultFormId.Value, dc);
+                return Form.Load(account.DefaultFormId.Value, dc: dc);
 
-            return Form.Load(Form.GetLatestTemplateForm(1, dc).ID.Value, dc);
+            return Form.Load(Form.GetLatestTemplateForm(1, dc: dc).ID.Value, dc: dc);
         }
 
         public static List<AccountWebUser> GetMembers(this Account account, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountId(account.ID.Value, dc);
+            return AccountWebUser.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<AccountWebUser> GetActiveMembers(this Account account, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc);
+            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc: dc);
         }
 
         public static AccountPackage GetActiveAccountPackage(this Account account, DatabaseConnection dc = null)
         {
-            return AccountPackage.LoadByAccountIdByIsActive(account.ID.Value, true, dc);
+            return AccountPackage.LoadByAccountIdByIsActive(account.ID.Value, true, dc: dc);
         }
 
         public static List<AccountPackage> GetAccountPackages(this Account account, DatabaseConnection dc = null)
         {
-            return AccountPackage.LoadByAccountId(account.ID.Value, dc);
+            return AccountPackage.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
         public static SystemMessages AddUser(this Account account, WebUser user, UserType ut, int loggedInUserId, DatabaseConnection dc = null)
@@ -231,7 +231,7 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var gwu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, adc);
+                    var gwu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: adc);
                     if (gwu.IsEmpty())
                     {
                         gwu = new AccountWebUser();
@@ -273,7 +273,7 @@ namespace AfterSchoolLibrary
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, null, false, true, false, ut, loggedInUserId, msgs, dc);
+            return account.AddUser(firstName, lastName, email, null, false, true, false, ut, loggedInUserId, msgs, dc: dc);
         }
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -317,7 +317,7 @@ namespace AfterSchoolLibrary
             );
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(AddUser(account, user, ut, loggedInUserId, dc));
+                msgs.AddRange(AddUser(account, user, ut, loggedInUserId, dc: dc));
 
             return user;
 
@@ -335,12 +335,12 @@ namespace AfterSchoolLibrary
 
         public static SystemMessages InviteUser(this Account account, WebUser wu, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
         {
-            return account.InviteUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUser, dc);
+            return account.InviteUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUser, dc: dc);
         }
 
         public static SystemMessages InviteUser(this Account account, string firstName, string lastName, string email, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
         {
-            return account.InviteUser(firstName, lastName, email, null, ut, loggedInUser, dc);
+            return account.InviteUser(firstName, lastName, email, null, ut, loggedInUser, dc: dc);
         }
 
         public static SystemMessages InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
@@ -366,7 +366,7 @@ namespace AfterSchoolLibrary
                         amsgs.AddRange(wu.Save(adc));
                     }
 
-                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, wu.ID.Value, adc);
+                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, wu.ID.Value, dc: adc);
                     if (awu.IsEmpty())
                     {
                         awu = new AccountWebUser();
@@ -395,7 +395,7 @@ namespace AfterSchoolLibrary
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    msgs.AddRange(wu.SendInvite(email.Trim(), message, loggedInUser, account, dc));
+                    msgs.AddRange(wu.SendInvite(email.Trim(), message, loggedInUser, account, dc: dc));
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {
@@ -415,13 +415,13 @@ namespace AfterSchoolLibrary
 
             string origUniqueName = reg.Replace(name, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            Account duplicate = Account.LoadByUniqueName(uniqueName, dc);
+            Account duplicate = Account.LoadByUniqueName(uniqueName, dc: dc);
             int count = 1;
             while (duplicate.IsNotEmpty() && duplicate.ID != accountId)
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = Account.LoadByUniqueName(uniqueName, dc);
+                duplicate = Account.LoadByUniqueName(uniqueName, dc: dc);
             }
             return uniqueName;
         }
@@ -482,11 +482,11 @@ namespace AfterSchoolLibrary
             {
                 if (activePackage.IsEmpty())
                 {
-                    trialDayCount = p.HasFeature(FeatureType.TrialDays) ? p.GetFeature(FeatureType.TrialDays, dc).GetMaxValue() : 0;
+                    trialDayCount = p.HasFeature(FeatureType.TrialDays) ? p.GetFeature(FeatureType.TrialDays, dc: dc).GetMaxValue() : 0;
                 }
                 else if (activePackage.HasFeature(FeatureType.TrialDays))
                 {
-                    trialDayCount = account.GetTrialDaysRemaining(activePackage, dc);
+                    trialDayCount = account.GetTrialDaysRemaining(activePackage, dc: dc);
                 }
 
                 if (trialDayCount > 0)
@@ -518,7 +518,7 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
-                    p = Package.Load(package, adc);
+                    p = Package.Load(package, dc: adc);
                     currentPackage = account.GetActiveAccountPackage(adc);
 
                     var trialDayCount = 0;
@@ -528,7 +528,7 @@ namespace AfterSchoolLibrary
                     //      upgrading to a different package
                     //      paying for a new package with no trial account
 
-                    var signupType = account.GetSignUpType(p, currentPackage, billingPeriodType, ref trialDayCount, adc);
+                    var signupType = account.GetSignUpType(p, currentPackage, billingPeriodType, ref trialDayCount, dc: adc);
 
                     if (signupType != SignUpType.NotSet)
                     {
@@ -916,7 +916,7 @@ namespace AfterSchoolLibrary
 
         public static List<RegistrantActivity> GetRegistrantActivities(this Account account, int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByAccountId(account.ID.Value, start, length, dc).ToList();
+            return RegistrantActivity.LoadByAccountId(account.ID.Value, start, length, dc: dc).ToList();
         }
 
         public static int GetRegistrantActivityCount(this Account account, DatabaseConnection dc = null)
@@ -926,67 +926,67 @@ namespace AfterSchoolLibrary
 
         public static int GetRegistrantCount(this Account account, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAccountId(account.ID.Value, dc);
+            return RegistrantActivity.GetSeatCountByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<Attendance> GetCompletedAttendance(this Account account, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByAccountIdByIsCompleted(account.ID.Value, true, dc);
+            return Attendance.LoadByAccountIdByIsCompleted(account.ID.Value, true, dc: dc);
         }
 
         public static int GetAttendancePresentCount(this Account account, DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPresentCountByAccountId(account.ID.Value, dc);
+            return AttendanceRegistrant.GetPresentCountByAccountId(account.ID.Value, dc: dc);
         }
 
         public static int GetAttendancePossibleCount(this Account account, DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPossibleCountByAccountId(account.ID.Value, dc);
+            return AttendanceRegistrant.GetPossibleCountByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<Attendance> GetAttendanceByDate(this Account account, DateTime date, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByAccountIdByDate(account.ID.Value, date, dc);
+            return Attendance.LoadByAccountIdByDate(account.ID.Value, date, dc: dc);
         }
 
         public static List<AccountPackageFeature> GetAccountPackageFeatures(this Account account, DatabaseConnection dc = null)
         {
-            return AccountPackageFeature.LoadByAccountPackageId(account.GetActiveAccountPackage(dc).ID.Value, dc);
+            return AccountPackageFeature.LoadByAccountPackageId(account.GetActiveAccountPackage(dc).ID.Value, dc: dc);
         }
 
         public static AccountProperty GetAccountProperty(this Account account, AccountPropertyType propertyType, DatabaseConnection dc = null)
         {
-            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(account.ID.Value, propertyType, dc);
+            return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(account.ID.Value, propertyType, dc: dc);
         }
 
         public static List<Registration> GetRegistrations(this Account account, DatabaseConnection dc = null)
         {
-            return Registration.LoadByAccountId(account.ID.Value, dc);
+            return Registration.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<Registration> GetCurrentRegistrations(this Account account, DatabaseConnection dc = null)
         {
-            return Registration.LoadCurrentByAccountId(account.ID.Value, dc);
+            return Registration.LoadCurrentByAccountId(account.ID.Value, dc: dc);
         }
 
         public static List<Registration> GetRegistrations(this Account account, int start, int length, DatabaseConnection dc = null)
         {
-            return Registration.LoadByAccountId(account.ID.Value, start, length, dc);
+            return Registration.LoadByAccountId(account.ID.Value, start, length, dc: dc);
         }
 
         public static int GetRegistrationCount(this Account account, DatabaseConnection dc = null)
         {
-            return Registration.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, dc);
+            return Registration.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, dc: dc);
         }
 
         public static List<Registration> SearchRegistrations(this Account account, string searchText, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, int? start, int? length, DatabaseConnection dc = null)
         {
-            return Registration.Search(searchText, account.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, start, length, dc);
+            return Registration.Search(searchText, account.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, start, length, dc: dc);
         }
 
         public static int SearchRegistrationCount(this Account account, string searchText, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
-            return Registration.SearchCount(searchText, account.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, dc);
+            return Registration.SearchCount(searchText, account.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, dc: dc);
         }
 
         public static Activity GetDefaultNewActivity(this Account account)
@@ -1022,7 +1022,7 @@ namespace AfterSchoolLibrary
             account.IsActive = isActive;
             account.Email = email;
             account.Phone = phone;
-            account.UniqueName = AccountService.GenerateUniqueName(account.Name, account.ID, dc);
+            account.UniqueName = AccountService.GenerateUniqueName(account.Name, account.ID, dc: dc);
             account.CreateDate = DateTime.UtcNow;
             account.LastModifiedDate = DateTime.UtcNow;
             account.CreatedBy = loggedInUserId;
@@ -1035,14 +1035,14 @@ namespace AfterSchoolLibrary
         }
         public static List<Account> GetVisitorAccounts(this Account account, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByHostAccountId(account.ID.Value, dc)
+            return AccountRelationship.LoadByHostAccountId(account.ID.Value, dc: dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
                 .ToList();            
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByVisitorAccountId(account.ID.Value, dc)
+            return AccountRelationship.LoadByVisitorAccountId(account.ID.Value, dc: dc)
                 .Select(x => x.GetHostAccount(dc))
                 .ToList();
         }
@@ -1065,7 +1065,7 @@ namespace AfterSchoolLibrary
         //Gets the accounts that the host has Denied
         public static List<Account> GetDeniedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc)
+            return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc: dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
                 .ToList();
         }
@@ -1073,14 +1073,14 @@ namespace AfterSchoolLibrary
         
         public static List<Account> GetApprovedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByApproved(Hostaccount.ID.Value, dc)
+            return AccountRelationship.LoadByApproved(Hostaccount.ID.Value, dc: dc)
                 .Select(accountRelationship => accountRelationship.GetHostAccount(dc))
                 .ToList();
         }
 
         public static List<Account> GetDeniedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc)
+            return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc: dc)
                 .Select(accountRelationship => accountRelationship.GetHostAccount(dc))
                 .ToList();
         }
@@ -1088,14 +1088,14 @@ namespace AfterSchoolLibrary
 
         public static List<Location> GetVisitorLocations(this Account account, DatabaseConnection dc = null)
         {
-            return AccountRelationshipLocation.LoadByVisitorAccountId(account.ID.Value, dc)
+            return AccountRelationshipLocation.LoadByVisitorAccountId(account.ID.Value, dc: dc)
                 .Select(x => x.GetLocation(dc))
                 .ToList();
         }
 
         public static List<Location> GetHostedLocations(this Account account, DatabaseConnection dc = null)
         {
-            return Location.LoadByHostAccountId(account.ID.Value, dc);
+            return Location.LoadByHostAccountId(account.ID.Value, dc: dc);
         }
 
 
@@ -1106,7 +1106,7 @@ namespace AfterSchoolLibrary
             //and returning the system messages
             var msgs = new SystemMessages();
             // Makes sure that the visitor has not been previously denied by the host
-            if (!GetDeniedVisitorAccounts(hostAccount, dc).Contains(visitorAccount))
+            if (!GetDeniedVisitorAccounts(hostAccount, dc: dc).Contains(visitorAccount))
             {
                 var accountRelationship = new AccountRelationship();
                 accountRelationship.VisitorAccountId = visitorAccount.ID;
@@ -1129,7 +1129,7 @@ namespace AfterSchoolLibrary
         {
             //Approves access to the host account 
             var msgs = new SystemMessages();
-            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, dc);
+            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, dc: dc);
             accountRelationship.HostPermissionTypeId = HostPermissionType.Approve;
             accountRelationship.LastModifiedDate = DateTime.UtcNow;
             accountRelationship.LastModifiedBy = hostAccount.ID;

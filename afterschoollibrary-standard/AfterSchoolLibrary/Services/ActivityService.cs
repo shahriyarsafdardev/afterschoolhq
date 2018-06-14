@@ -10,7 +10,7 @@ namespace AfterSchoolLibrary
     {
         public static Location GetLocation(this Activity activity, DatabaseConnection dc)
         {
-            return Location.Load(activity.LocationId.Value, dc);
+            return Location.Load(activity.LocationId.Value, dc: dc);
         }
 
         public static string GenerateUniqueName(string name, int? activityId, int? accountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -20,32 +20,32 @@ namespace AfterSchoolLibrary
 
             string origUniqueName = reg.Replace(name, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            var duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc);
+            var duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc: dc);
             int count = 1;
             while (duplicate?.ID != activityId)
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc);
+                duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc: dc);
             }
             return uniqueName;
         }
 
         public static int GetSeatsTaken(this Activity activity, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc);
+            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc);
         }
 
         public static int GetWaitingListSeatsTaken(this Activity activity, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc);
+            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc);
         }
 
         public static int GetSeatsRemaining(this Activity activity, DatabaseConnection dc = null)
         {
             var rtn = 0;
             if (activity.SeatsAvailable.HasValue)
-                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc);
+                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc);
 
             return Math.Max(0, rtn);
         }
@@ -54,7 +54,7 @@ namespace AfterSchoolLibrary
         {
             var rtn = 0;
             if (activity.WaitingListSeats.HasValue)
-                rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc);
+                rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc);
 
             return Math.Max(0, rtn);
         }

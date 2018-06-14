@@ -45,16 +45,16 @@ Namespace DataAccess
 			Try
 				' Test CRUD methods
 				Dim obj As BasicObject = TestClassInit(type)
-				msgs.AddRange(TestClassCreate(obj, dc))
+                msgs.AddRange(TestClassCreate(obj, dc))
+                If Not msgs.HasAny(SystemMessages.ErrorTypes) Then
+                    msgs.AddRange(TestClassRead(obj, dc))
+                End If
 				If Not msgs.HasAny(SystemMessages.ErrorTypes) Then
-					msgs.AddRange(TestClassRead(obj, dc))
-				End If
+                    msgs.AddRange(TestClassUpdate(obj, dc))
+                End If
 				If Not msgs.HasAny(SystemMessages.ErrorTypes) Then
-					msgs.AddRange(TestClassUpdate(obj, dc))
-				End If
-				If Not msgs.HasAny(SystemMessages.ErrorTypes) Then
-					msgs.AddRange(TestClassDelete(obj, dc))
-				End If
+                    msgs.AddRange(TestClassDelete(obj, dc))
+                End If
 			Catch ex As Exception
 				msgs.Add("Exception: " & ex.ToString(), MessageType.Error)
 			Finally

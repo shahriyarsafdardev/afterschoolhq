@@ -11,14 +11,14 @@ namespace AfterSchoolLibrary
     {
         public static List<Account> GetVisitorAccounts(this Location location, DatabaseConnection dc = null)
         {
-            return AccountRelationshipLocation.LoadByLocationId(location.ID.Value, dc)
+            return AccountRelationshipLocation.LoadByLocationId(location.ID.Value, dc: dc)
                 .Select(x => x.GetVisitorAccount(dc))
                 .ToList();
         }
         
         public static Account GetHostAcount(this Location location, DatabaseConnection dc = null)
         {
-            return Account.Load(location.HostAccountId.Value, dc);
+            return Account.Load(location.HostAccountId.Value, dc: dc);
         }
     }
 }

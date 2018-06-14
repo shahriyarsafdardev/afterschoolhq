@@ -72,29 +72,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static ActivitySchedule Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivitySchedule Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<ActivitySchedule> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivitySchedule> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return ActivitySchedule.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return ActivitySchedule.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return ActivitySchedule.BaseGetCount(criterias, ObjectMap, dq);
+            return ActivitySchedule.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -176,23 +176,23 @@ namespace AfterSchoolLibrary
 
 		public ActivitySchedule Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivitySchedule.Load(this.ID.Value, dc);
+			return ActivitySchedule.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<ActivitySchedule> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivitySchedule> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivitySchedule> LoadByActivityGroupId(int ActivityGroupId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivitySchedule> LoadByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
@@ -205,7 +205,7 @@ namespace AfterSchoolLibrary
         public List<ActivityInstance> GetInstances(bool forceReload = false, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue && (_instances.IsEmpty() || forceReload))
-                _instances = ActivityInstance.LoadByActivityScheduleId(this.ID.Value, dc)
+                _instances = ActivityInstance.LoadByActivityScheduleId(this.ID.Value, dc: dc)
                     .OrderBy(x => x.StartDateTime)
                     .ToList();
 
@@ -234,14 +234,14 @@ namespace AfterSchoolLibrary
         public static string GenerateUniqueName(int accountId, string name, DatabaseConnection dc = null)
         {
             var rtnName = name;
-            var period = ActivitySchedule.LoadByAccountIdByName(accountId, name, dc);
+            var period = ActivitySchedule.LoadByAccountIdByName(accountId, name, dc: dc);
             var counter = 1;
 
             while (period.IsNotEmpty())
             {
                 counter++;
                 rtnName = $"{name} {counter.ToString()}";
-                period = ActivitySchedule.LoadByAccountIdByName(accountId, rtnName, dc);
+                period = ActivitySchedule.LoadByAccountIdByName(accountId, rtnName, dc: dc);
             }
 
             return rtnName;
@@ -255,7 +255,7 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-                    var schedule = ActivitySchedule.Load(scheduleId.ToInteger(), adc);
+                    var schedule = ActivitySchedule.Load(scheduleId.ToInteger(), dc: adc);
                     schedule.Name = scheduleName;
                     schedule.ScheduleDetails = details.IfBlank("").MaxChars(4000);
                     schedule.RepeatsWeekly = repeatsWeekly;
@@ -353,8 +353,8 @@ namespace AfterSchoolLibrary
 
         public static ActivitySchedule LoadWithInstances(int ActivityScheduleId, DatabaseConnection dc = null)
         {
-            var schedule = ActivitySchedule.Load(ActivityScheduleId, dc);
-            schedule?.GetInstances(false, dc);
+            var schedule = ActivitySchedule.Load(ActivityScheduleId, dc: dc);
+            schedule?.GetInstances(false, dc: dc);
             return schedule;
         }
 
@@ -385,7 +385,7 @@ namespace AfterSchoolLibrary
             this.CreatedBy = this.LastModifiedBy = loggedInUserId;
             msgs.AddRange(this.Save(dc));
 
-            msgs.AddRange(UpdateInstances(scheduleDates, loggedInUserId, dc));
+            msgs.AddRange(UpdateInstances(scheduleDates, loggedInUserId, dc: dc));
 
             return msgs;
         }
@@ -395,7 +395,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             var scheduleList = scheduleDates.Split(',').Select(x => x.Split('-')).ToList();
-            var existingInstances = this.GetInstances(false, dc);
+            var existingInstances = this.GetInstances(false, dc: dc);
 
             // delete instances
             existingInstances
@@ -413,7 +413,7 @@ namespace AfterSchoolLibrary
                         .Where(y => y.StartDateTime.Value == x[0].ToDateTime() && y.EndDateTime.Value == x[1].ToDateTime())
                         .Any())
                 .ToList()
-                .ForEach(item => this.AddInstance(item[0].ToDateTime(), item[1].ToDateTime(), loggedInUserId, msgs, dc));            
+                .ForEach(item => this.AddInstance(item[0].ToDateTime(), item[1].ToDateTime(), loggedInUserId, msgs, dc: dc));            
 
             msgs.AddRange(this.ValidateInstances(dc));
 
@@ -439,8 +439,8 @@ namespace AfterSchoolLibrary
 
         public List<DayOfWeekASL> GetDaysOfTheWeek(DatabaseConnection dc = null)
         {
-            if (this.GetInstances(false, dc).IsNotEmpty())
-                return this.GetInstances(false, dc).Select(x => x.Day).Distinct().ToList();
+            if (this.GetInstances(false, dc: dc).IsNotEmpty())
+                return this.GetInstances(false, dc: dc).Select(x => x.Day).Distinct().ToList();
 
             return new List<DayOfWeekASL>();
         }
@@ -510,17 +510,17 @@ namespace AfterSchoolLibrary
 
         public List<Activity> GetActivities(DatabaseConnection dc = null)
         {
-            return Activity.LoadByActivityScheduleId(this.ID.Value, dc);
+            return Activity.LoadByActivityScheduleId(this.ID.Value, dc: dc);
         }
 
         public Account GetAccount(DatabaseConnection dc = null)
         {
-            return Account.Load(this.AccountId.Value, dc);
+            return Account.Load(this.AccountId.Value, dc: dc);
         }
 
         public ActivityGroup GetActivityGroup(DatabaseConnection dc = null)
         {
-            return ActivityGroup.Load(this.ActivityGroupId.Value, dc);
+            return ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
         }
 
         #endregion

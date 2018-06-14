@@ -145,29 +145,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static RegistrantActivity Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static RegistrantActivity Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<RegistrantActivity> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<RegistrantActivity> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return RegistrantActivity.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return RegistrantActivity.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return RegistrantActivity.BaseGetCount(criterias, ObjectMap, dq);
+            return RegistrantActivity.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -299,74 +299,74 @@ namespace AfterSchoolLibrary
 
 		public RegistrantActivity Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return RegistrantActivity.Load(this.ID.Value, dc);
+			return RegistrantActivity.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<RegistrantActivity> LoadByActivityId(int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<RegistrantActivity> LoadByRegistrantId(int RegistrantId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<RegistrantActivity> LoadByRegistrationId(int RegistrationId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByRegistrationId(int RegistrationId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static RegistrantActivity LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static RegistrantActivity LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static RegistrantActivity LoadByActivityIdByRegistrantId(int ActivityId, int RegistrantId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static RegistrantActivity LoadByActivityIdByRegistrantId(int ActivityId, int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<RegistrantActivity> LoadByActivityIdByDay(int ActivityId, DayOfWeekASL Day, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByActivityIdByDay(int ActivityId, DayOfWeekASL Day, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["Day"], Day);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<RegistrantActivity> LoadByActivityIdByOnWaitingList(int ActivityId, bool OnWaitingList, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByActivityIdByOnWaitingList(int ActivityId, bool OnWaitingList, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["OnWaitingList"], OnWaitingList);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<RegistrantActivity> LoadByActivityGroupId(int ActivityGroupId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<RegistrantActivity> LoadByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
@@ -462,7 +462,7 @@ namespace AfterSchoolLibrary
         public Activity ToActivity(bool loadFromDb = false, DatabaseConnection dc = null)
         {
             if (loadFromDb)
-                return Activity.Load(this.ActivityId.Value, dc);
+                return Activity.Load(this.ActivityId.Value, dc: dc);
             else
                 return new Activity()
                 {
@@ -478,7 +478,7 @@ namespace AfterSchoolLibrary
                 };
         }
 
-        public static List<RegistrantActivity> LoadByActivityId(int ActivityId, int? start = null, int? length = null, DatabaseConnection dc = null)
+        public static List<RegistrantActivity> LoadByActivityId(int ActivityId, int? start, int? length, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -501,7 +501,7 @@ namespace AfterSchoolLibrary
         public Registration GetRegistration(DatabaseConnection dc = null)
         {
             if (_Registration.IsEmpty() && this.RegistrationId.HasValue)
-                _Registration = Registration.Load(this.RegistrationId.Value, dc);
+                _Registration = Registration.Load(this.RegistrationId.Value, dc: dc);
 
             return _Registration;
         }
@@ -712,7 +712,7 @@ namespace AfterSchoolLibrary
 
         public RegistrationActivity GetRegistrationActivity(DatabaseConnection dc = null)
         {
-            return RegistrationActivity.LoadByActivityIdByRegistrationId(this.ActivityId.Value, this.RegistrationId.Value, dc);
+            return RegistrationActivity.LoadByActivityIdByRegistrationId(this.ActivityId.Value, this.RegistrationId.Value, dc: dc);
         }
 
         public SystemMessages DeleteRegistrationActivity(DatabaseConnection dc = null)
@@ -945,13 +945,13 @@ namespace AfterSchoolLibrary
 
             var msgs = new SystemMessages();
 
-            var otherPeoplesActivities = RegistrantActivity.LoadByActivityId(this.ActivityId.Value, dc)
+            var otherPeoplesActivities = RegistrantActivity.LoadByActivityId(this.ActivityId.Value, dc: dc)
                 .Where(x => x.RegistrantId != registrant.ID)
                 .ToList();
 
-            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Reserved, -1, dc);
-            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.WaitingList, -1, dc);
-            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Application, -1, dc);
+            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Reserved, -1, dc: dc);
+            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.WaitingList, -1, dc: dc);
+            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Application, -1, dc: dc);
 
             return msgs;
         }
@@ -985,21 +985,21 @@ namespace AfterSchoolLibrary
                         ras
                             .Where(x => x.SeatIndex > this.SeatIndex)
                             .ToList()
-                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfSeats.Value * factor, RegistrationAssignmentType.Reserved, dc));
+                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfSeats.Value * factor, RegistrationAssignmentType.Reserved, dc: dc));
                     break;
                 case RegistrationAssignmentType.WaitingList:
                     if (this.NumberOfWaitingListSeats > 0)
                         ras
                             .Where(x => x.WaitingListSeatIndex > this.WaitingListSeatIndex)
                             .ToList()
-                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfWaitingListSeats.Value * factor, RegistrationAssignmentType.WaitingList, dc));
+                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfWaitingListSeats.Value * factor, RegistrationAssignmentType.WaitingList, dc: dc));
                     break;
                 case RegistrationAssignmentType.Application:
                     if (this.NumberOfApplicationSeats > 0)
                         ras
                             .Where(x => x.ApplicationSeatIndex > this.ApplicationSeatIndex)
                             .ToList()
-                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfApplicationSeats.Value * factor, RegistrationAssignmentType.Application, dc));
+                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfApplicationSeats.Value * factor, RegistrationAssignmentType.Application, dc: dc));
                     break;
             }
 
@@ -1021,7 +1021,7 @@ namespace AfterSchoolLibrary
                 // has to be for the same registration period and same account
                 // need a better function to filter out registration period in the query
                 registrantActivities = RegistrantActivity
-                                        .LoadByRegistrantId(this.RegistrantId.Value, dc)
+                                        .LoadByRegistrantId(this.RegistrantId.Value, dc: dc)
                                         .Where(x => x.RegistrationPeriodId == this.RegistrationPeriodId)
                                         .ToList();
             }
@@ -1034,20 +1034,20 @@ namespace AfterSchoolLibrary
             registrantActivities
                 .Where(x => x.PreferenceNumber.HasValue && x.PreferenceNumber.Value > this.PreferenceNumber.Value)
                 .ToList()
-                .ForEach(ra => ra.AdjustPreferenceNumber(-1, dc));
+                .ForEach(ra => ra.AdjustPreferenceNumber(-1, dc: dc));
 
             return msgs;
         }
 
         public SystemMessages SendNewRegistrationNotice(Account account = null, Activity activity = null, DatabaseConnection dc = null)
         {
-            activity = activity ?? this.ToActivity(true, dc);
+            activity = activity ?? this.ToActivity(true, dc: dc);
             account = account ?? activity.GetAccount(dc);
 
             if (account.Email.IsSameAs(activity.ContactEmail))
                 return new SystemMessages();
 
-            var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{activity.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc)}</strong> reserved</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc)}</strong> on the waiting list</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Application, dc)}</strong> applications</li></ul></p>";
+            var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{activity.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Application, dc: dc)}</strong> applications</li></ul></p>";
 
             var message = $"<p>Hello {activity.ContactName},</p>{details}<p>{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
 

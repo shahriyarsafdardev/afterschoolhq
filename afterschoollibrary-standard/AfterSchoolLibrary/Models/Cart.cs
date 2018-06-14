@@ -58,29 +58,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static Cart Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Cart Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Cart> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Cart> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return Cart.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return Cart.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return Cart.BaseGetCount(criterias, ObjectMap, dq);
+            return Cart.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -124,15 +124,15 @@ namespace AfterSchoolLibrary
 
 		public Cart Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Cart.Load(this.ID.Value, dc);
+			return Cart.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static Cart LoadByUid(Guid Uid, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Cart LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -170,7 +170,7 @@ namespace AfterSchoolLibrary
 
         public CartItem AddCartItem(RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddCartItem(ra.ActivityId.Value, ra.Day, ra.ID.Value, msgs, dc);
+            return AddCartItem(ra.ActivityId.Value, ra.Day, ra.ID.Value, msgs, dc: dc);
         }
 
         public CartItem AddCartItem(int activityId, DayOfWeekASL day, int? registrantActivityId, SystemMessages msgs, DatabaseConnection dc = null)
@@ -207,7 +207,7 @@ namespace AfterSchoolLibrary
         public List<CartItem> GetCartItems(DatabaseConnection dc = null)
         {
             if (_CartItems.IsEmpty())
-                _CartItems = CartItem.LoadByCartId(this.ID.Value, dc);
+                _CartItems = CartItem.LoadByCartId(this.ID.Value, dc: dc);
 
             return _CartItems;
         }

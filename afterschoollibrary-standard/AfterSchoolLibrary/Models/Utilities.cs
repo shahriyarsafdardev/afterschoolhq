@@ -279,7 +279,7 @@ namespace AfterSchoolLibrary
                 adminEmail = adminEmail.IfEmpty("darye@reborncode.com");
                 adminPassword = adminPassword.IfEmpty("aDm1n1906");
 
-                if (WebUser.LoadByEmail(adminEmail, dc) != null)
+                if (WebUser.LoadByEmail(adminEmail, dc: dc) != null)
                     throw new Exception("User with the same email address already exists.");
 
                 WebUser wu = new WebUser();
@@ -304,7 +304,7 @@ namespace AfterSchoolLibrary
                 a.IsActive = true;
                 msgs.AddRange(a.Save(dc));
 
-                msgs.AddRange(a.AddUser(wu, UserType.Owner, 0, dc));
+                msgs.AddRange(a.AddUser(wu, UserType.Owner, 0, dc: dc));
 
             }
             catch (Exception ex)
@@ -363,7 +363,7 @@ namespace AfterSchoolLibrary
 
            foreach(WebUser user in webUsers)
             {
-                WebUser.LoadByUid(user.Uid, dc);
+                WebUser.LoadByUid(user.Uid, dc: dc);
 
             }
 
@@ -393,7 +393,7 @@ namespace AfterSchoolLibrary
                 new GradeLevel() { Name = "12th", Abbreviation = "12" }.Save(dc);
             }
 
-            Form f = Form.LoadByAccountId(1, dc).FirstOrDefault();
+            Form f = Form.LoadByAccountId(1, dc: dc).FirstOrDefault();
             if (f.IsEmpty())
             {
                 f = new Form();
@@ -504,7 +504,7 @@ namespace AfterSchoolLibrary
                         groupDisplayOrder++;
                     }
 
-                    FormQuestion q = FormQuestion.LoadByFormQuestionGroupIdByQuestionDataTypeId(group.ID.Value, question.QuestionDataTypeId, dc);
+                    FormQuestion q = FormQuestion.LoadByFormQuestionGroupIdByQuestionDataTypeId(group.ID.Value, question.QuestionDataTypeId, dc: dc);
                     if (q.IsEmpty())
                     {
                         q = new FormQuestion();
@@ -557,7 +557,7 @@ namespace AfterSchoolLibrary
                                 },
                                 null,
                                 null,
-                                dc);
+                                dc: dc);
 
                             if (hasGroup.Count == 0)
                             {
@@ -597,7 +597,7 @@ namespace AfterSchoolLibrary
                                    },
                                    null,
                                    null,
-                                   dc);
+                                   dc: dc);
 
                             if (hasGroup.Count == 0)
                             {
@@ -645,7 +645,7 @@ namespace AfterSchoolLibrary
             var aps = AccountPackage.Load(dc: dc);
             foreach (var ap in aps)
             {
-                msgs.AddRange(ap.ToPackage().CopyFeaturesToAccountPackage(ap, 0, dc));
+                msgs.AddRange(ap.ToPackage().CopyFeaturesToAccountPackage(ap, 0, dc: dc));
             }
 
             return msgs;
@@ -658,7 +658,7 @@ namespace AfterSchoolLibrary
             var accounts = Account.Load(dc: dc);
             foreach (var account in accounts)
             {
-                var locations = Location.LoadByHostAccountId(account.ID.Value, dc);
+                var locations = Location.LoadByHostAccountId(account.ID.Value, dc: dc);
                 if (locations.Count == 0)
                 {
                     var location = new Location();
@@ -701,7 +701,7 @@ namespace AfterSchoolLibrary
             answers = answers.Where(x => x.ActivityId.HasValue).ToList();
             foreach (var answer in answers)
             {
-                var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(answer.ActivityId.Value, answer.RegistrantId.Value, dc);
+                var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(answer.ActivityId.Value, answer.RegistrantId.Value, dc: dc);
                 if (ra.IsNotEmpty() && ra.RegistrationId.HasValue)
                 {
                     answer.RegistrationId = ra.RegistrationId;
@@ -744,7 +744,7 @@ namespace AfterSchoolLibrary
 
                 foreach (var match in matches)
                 {
-                    msgs.AddRange(registration.AddRelatedRegistration(match, 0, dc));
+                    msgs.AddRange(registration.AddRelatedRegistration(match, 0, dc: dc));
                     registrations.Remove(match);
                 }
 
@@ -760,15 +760,15 @@ namespace AfterSchoolLibrary
                 var activities = registrant.GetActivities(dc);
                 if (registrationCount == 0 && activities.Any())
                 {
-                    var registration = registrant.AddRegistration(0, registrant.AccountId, null, msgs, dc);
+                    var registration = registrant.AddRegistration(0, registrant.AccountId, null, msgs, dc: dc);
                     registration.CreateDate = registration.LastModifiedDate = registrant.CreateDate;
                     msgs.AddRange(registration.Save(dc));
 
                     foreach (var activity in activities)
                     {
-                        msgs.AddRange(registration.AddActivity(activity, 0, dc));
+                        msgs.AddRange(registration.AddActivity(activity, 0, dc: dc));
 
-                        var regactivity = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ID.Value, dc);
+                        var regactivity = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ID.Value, dc: dc);
                         if (regactivity.IsNotEmpty())
                         {
                             regactivity.RegistrationId = registration.ID.Value;
@@ -844,7 +844,7 @@ namespace AfterSchoolLibrary
 
                 foreach (var match in matches)
                 {
-                    msgs.AddRange(registrant.AddRelatedRegistrant(match, 0, dc));
+                    msgs.AddRange(registrant.AddRelatedRegistrant(match, 0, dc: dc));
                     registrants.Remove(match);
                 }
 
@@ -875,7 +875,7 @@ namespace AfterSchoolLibrary
             var accounts = Account.Load(dc: dc);
             foreach (var account in accounts)
             {
-                var properties = AccountProperty.LoadByAccountId(account.ID.Value, dc);
+                var properties = AccountProperty.LoadByAccountId(account.ID.Value, dc: dc);
                 if (properties.Count == 0 && account.LandingPageText.IsNotBlank())
                 {
                     var property = new AccountProperty();
@@ -923,10 +923,10 @@ namespace AfterSchoolLibrary
                 {
                     for (var i = activity.GradeLevelStart.Value; i <= activity.GradeLevelEnd.Value; i++)
                     {
-                        var grade = GradeLevel.Load(i, dc);
+                        var grade = GradeLevel.Load(i, dc: dc);
                         if (grade.IsNotEmpty())
                         {
-                            activity.AddGrade(grade.ID.Value, activity.LastModifiedBy.Value, msgs, dc);
+                            activity.AddGrade(grade.ID.Value, activity.LastModifiedBy.Value, msgs, dc: dc);
                         }
                     }
                 }
@@ -1045,7 +1045,7 @@ namespace AfterSchoolLibrary
 
             foreach (var f in forms)
             {
-                var account = Account.Load(f.AccountId.Value, dc);
+                var account = Account.Load(f.AccountId.Value, dc: dc);
 
                 foreach (var question in questions)
                 {
@@ -1112,7 +1112,7 @@ namespace AfterSchoolLibrary
 
             foreach (var id in activityIds)
             {
-                var activity = Activity.Load(id, dc);
+                var activity = Activity.Load(id, dc: dc);
                 var activityRas = new List<RegistrantActivity>();
                 if (activity.GetDays().Count == 0)
                 {
@@ -1152,7 +1152,7 @@ namespace AfterSchoolLibrary
 
             foreach (var action in actions)
             {
-                var activity = Activity.Load(action.ActivityId.Value, dc);
+                var activity = Activity.Load(action.ActivityId.Value, dc: dc);
                 if (activity.IsNotEmpty())
                 {
                     var regperiod = activity.GetActiveRegistrationPeriod(dc);
@@ -1186,7 +1186,7 @@ namespace AfterSchoolLibrary
                     group.LastModifiedBy = period.LastModifiedBy;
                     group.Description = period.Description;
                     group.Name = period.Name;
-                    group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, dc);
+                    group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, dc: dc);
                     msgs.AddRange(group.Save(dc));
 
                     period.ActivityGroupId = group.ID;
@@ -1275,7 +1275,7 @@ namespace AfterSchoolLibrary
             foreach (var activity in activities)
             {
                 var schedule = new ActivitySchedule();
-                schedule.Name = ActivitySchedule.GenerateUniqueName(activity.AccountId.Value, activity.Name, dc);
+                schedule.Name = ActivitySchedule.GenerateUniqueName(activity.AccountId.Value, activity.Name, dc: dc);
                 schedule.ScheduleDetails = activity.ScheduleDetails.IfBlank("").MaxChars(4000);
                 schedule.AccountId = activity.AccountId;
                 schedule.CreateDate = schedule.LastModifiedDate = DateTime.UtcNow;
@@ -1343,7 +1343,7 @@ namespace AfterSchoolLibrary
         {
             // running for bellechasse
             var msgs = new SystemMessages();
-            var registrations = Registration.LoadByActivityGroupId(175, dc);
+            var registrations = Registration.LoadByActivityGroupId(175, dc: dc);
 
             while (registrations.Any())
             {
@@ -1369,7 +1369,7 @@ namespace AfterSchoolLibrary
                     var distinctActivityIds = new List<int>();
                     var finalActivityIds = new List<int>();
                     var allRegistrants = allRelated.Select(x => x.GetRegistrant(dc)).ToList();
-                    var studentGrades = allRegistrants.Select(x => x.GetAnswer(QuestionDataType.RegistrantGrade, dc)).DistinctBy(x => x.Text).ToList();
+                    var studentGrades = allRegistrants.Select(x => x.GetAnswer(QuestionDataType.RegistrantGrade, dc: dc)).DistinctBy(x => x.Text).ToList();
 
                     if (studentGrades.Count != 1)
                     {
@@ -1391,7 +1391,7 @@ namespace AfterSchoolLibrary
                         // if doesn't contain grade level then it will need to be removed
                         foreach (var activityId in distinctActivityIds)
                         {
-                            var activity = Activity.Load(activityId, dc);
+                            var activity = Activity.Load(activityId, dc: dc);
                             var activityGrades = activity.GetGradeLevels(dc).Select(x => x.Name.Trim().ToLower()).ToList();
 
                             if (activityGrades.Contains(studentGrades.First().Text.Trim().ToLower()))
@@ -1403,7 +1403,7 @@ namespace AfterSchoolLibrary
                         // keep last registration
                         foreach (var activityId in finalActivityIds)
                         {
-                            var activity = Activity.Load(activityId, dc);
+                            var activity = Activity.Load(activityId, dc: dc);
                             // get only reg activities for the last registrant
                             var lastRegistrantActivities = regActivities.Where(x => x.RegistrantId == lastRegistrant.ID).ToList();
 
@@ -1433,7 +1433,7 @@ namespace AfterSchoolLibrary
                         foreach (var activityId in activityIdsToRemove)
                         {
                             // removes it from the registrant as well
-                            msgs.AddRange(lastRegistration.RemoveActivity(activityId, dc));
+                            msgs.AddRange(lastRegistration.RemoveActivity(activityId, dc: dc));
                         }
 
                         // Remove all activities from other registrations and registrants
@@ -1443,7 +1443,7 @@ namespace AfterSchoolLibrary
                             foreach (var activityId in regActivities.Where(x => x.RegistrationId == item.ID).Select(x => x.ActivityId.Value))
                             {
                                 // removes it from the registrant as well
-                                msgs.AddRange(item.RemoveActivity(activityId, dc));
+                                msgs.AddRange(item.RemoveActivity(activityId, dc: dc));
                             }
                         }
 
@@ -1512,10 +1512,10 @@ namespace AfterSchoolLibrary
         public static SystemMessages CreateMasterRecord(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var registrant = Registrant.Load(5735, dc);
+            var registrant = Registrant.Load(5735, dc: dc);
             var questionIds = registrant.GetAnswers(dc).Select(x => x.FormQuestionId.Value).ToList();
-            var questions = FormQuestion.Load(questionIds, dc);
-            registrant.CreateMasterCopy(questions, 0, msgs, dc);
+            var questions = FormQuestion.Load(questionIds, dc: dc);
+            registrant.CreateMasterCopy(questions, 0, msgs, dc: dc);
             return msgs;
         }
 
@@ -1531,7 +1531,7 @@ namespace AfterSchoolLibrary
 
             foreach (var registrant in registrants)
             {
-                var user = WebUser.Load(registrant.WebUserId.Value, dc);
+                var user = WebUser.Load(registrant.WebUserId.Value, dc: dc);
                 if (user.Password.IsNotEmpty() && !user.GetAccounts(dc).Any())
                 {
                     var master = Registrant.Load(
@@ -1558,7 +1558,7 @@ namespace AfterSchoolLibrary
 
             foreach (var registrant in registrants)
             {
-                var user = WebUser.Load(registrant.WebUserId.Value, dc);
+                var user = WebUser.Load(registrant.WebUserId.Value, dc: dc);
                 if (user.Password.IsNotEmpty())
                 {
                     var accounts = user.GetAccounts(dc);
@@ -1566,7 +1566,7 @@ namespace AfterSchoolLibrary
                     {
                         msgs.AddRange(account.Delete(dc));
                     }
-                    var awus = AccountWebUser.LoadByWebUserId(user.ID.Value, dc);
+                    var awus = AccountWebUser.LoadByWebUserId(user.ID.Value, dc: dc);
                     foreach (var awu in awus)
                     {
                         msgs.AddRange(awu.Delete(dc));
@@ -1592,8 +1592,8 @@ namespace AfterSchoolLibrary
                     else
                     {
                         var answers = registrant.GetAnswers(dc);
-                        var questions = FormQuestion.Load(answers.Select(x => x.FormQuestionId.Value).ToList(), dc);
-                        var master = registrant.CreateMasterCopy(questions, user.ID.Value, msgs, dc);
+                        var questions = FormQuestion.Load(answers.Select(x => x.FormQuestionId.Value).ToList(), dc: dc);
+                        var master = registrant.CreateMasterCopy(questions, user.ID.Value, msgs, dc: dc);
                     }
                 }
             }
@@ -1654,12 +1654,12 @@ namespace AfterSchoolLibrary
             foreach(var question in questions)
             {
                 var currentGroup = question.GetFormQuestionGroup(dc);
-                var newGroup = FormQuestionGroup.LoadByFormId(question.FormId.Value, dc).Find(x => x.QuestionGroupDataTypeId == QuestionGroupDataType.ContactInformation);
+                var newGroup = FormQuestionGroup.LoadByFormId(question.FormId.Value, dc: dc).Find(x => x.QuestionGroupDataTypeId == QuestionGroupDataType.ContactInformation);
 
                 if (currentGroup.IsNotEmpty() && newGroup.IsNotEmpty())
                 {
-                    msgs.AddRange(currentGroup.RemoveQuestion(question, dc));
-                    msgs.AddRange(newGroup.AddQuestion(question, 0, dc));
+                    msgs.AddRange(currentGroup.RemoveQuestion(question, dc: dc));
+                    msgs.AddRange(newGroup.AddQuestion(question, 0, dc: dc));
                 }
             }
 

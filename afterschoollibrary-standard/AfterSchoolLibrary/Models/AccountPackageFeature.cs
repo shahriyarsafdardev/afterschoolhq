@@ -60,29 +60,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static AccountPackageFeature Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static AccountPackageFeature Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<AccountPackageFeature> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountPackageFeature> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return AccountPackageFeature.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return AccountPackageFeature.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return AccountPackageFeature.BaseGetCount(criterias, ObjectMap, dq);
+            return AccountPackageFeature.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -132,24 +132,24 @@ namespace AfterSchoolLibrary
 
 		public AccountPackageFeature Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountPackageFeature.Load(this.ID.Value, dc);
+			return AccountPackageFeature.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<AccountPackageFeature> LoadByAccountPackageId(int AccountPackageId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountPackageFeature> LoadByAccountPackageId(int AccountPackageId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountPackageId"], AccountPackageId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static AccountPackageFeature LoadByAccountPackageIdByFeatureTypeId(int AccountPackageId, FeatureType FeatureTypeId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static AccountPackageFeature LoadByAccountPackageIdByFeatureTypeId(int AccountPackageId, FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountPackageId"], AccountPackageId);
 			dq.Criterias.Add(ObjectMap["FeatureTypeId"], FeatureTypeId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

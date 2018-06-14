@@ -561,7 +561,7 @@ namespace AfterSchool.Controllers
             var act = item.GetActivity(dc);
 
             //check if already registered for this activity
-            if (registrant.ParentRegistrantId.HasValue && RegistrantActivity.LoadByActivityIdByRegistrantId(act.ID.Value, registrant.ParentRegistrantId.Value, dc).IsNotEmpty())
+            if (registrant.ParentRegistrantId.HasValue && RegistrantActivity.LoadByActivityIdByRegistrantId(act.ID.Value, registrant.ParentRegistrantId.Value, dc: dc).IsNotEmpty())
             {
                 msgs.Add(string.Format("You're already registered for {0}", act.Name), MessageType.UserError);
             }
@@ -580,7 +580,7 @@ namespace AfterSchool.Controllers
 
             if (registrationMode == RegistrationMode.Register)
             {
-                msgs.AddRange(SetSeatAvailable(item, act, numberOfSeatsRequested, out numberOfSeatsLeft, out numberOfWaitingListSeatsLeft, out totalSeatsLeft, dc));
+                msgs.AddRange(SetSeatAvailable(item, act, numberOfSeatsRequested, out numberOfSeatsLeft, out numberOfWaitingListSeatsLeft, out totalSeatsLeft, dc: dc));
             }
 
             if (msgs.HasNoErrors())
@@ -595,16 +595,16 @@ namespace AfterSchool.Controllers
 
                 UpdateRegistrantSeats(act, registrationMode, numberOfSeatsRequested, numberOfSeatsLeft, ref registrantSeats, ref registrantWaitingListSeats, ref registrantApplicationSeats, ref registrantInvitationSeats, ref registrantDeclinedSeats);
 
-                msgs.AddRange(CheckOverlappingDates(registrationMode, dc));
+                msgs.AddRange(CheckOverlappingDates(registrationMode, dc: dc));
 
                 // adds new registrant activity or updates existing activity, assumes a registrant and one activity is a unique record
-                ras.Add(registrant.AddOrUpdateActivity(registration.ID.Value, act.ID.Value, item.Day, registrantSeats, registrantWaitingListSeats, registrantApplicationSeats, registrantInvitationSeats, registrantDeclinedSeats, choiceNumber, regPeriodId, groupId, 0, msgs, dc));
+                ras.Add(registrant.AddOrUpdateActivity(registration.ID.Value, act.ID.Value, item.Day, registrantSeats, registrantWaitingListSeats, registrantApplicationSeats, registrantInvitationSeats, registrantDeclinedSeats, choiceNumber, regPeriodId, groupId, 0, msgs, dc: dc));
             }
 
             if (msgs.HasNoErrors())
             {
                 // checks before it adds a new one
-                msgs.AddRange(registration.AddActivity(act, 0, dc));
+                msgs.AddRange(registration.AddActivity(act, 0, dc: dc));
             }
 
             if (msgs.HasNoErrors())
@@ -614,7 +614,7 @@ namespace AfterSchool.Controllers
                 {
                     actionType = SessionActionType.ActivityRegistrationUpdated;
                 }
-                UpdateSession(actionType, account.ID, act.ID, null, registrant.ID, registration.ID, regPeriodId, null, dc);
+                UpdateSession(actionType, account.ID, act.ID, null, registrant.ID, registration.ID, regPeriodId, null, dc: dc);
             }
 
             return msgs;
@@ -1197,7 +1197,7 @@ namespace AfterSchool.Controllers
             // if not a copy of an existing profile, then mark say where you got the profile information from originally
             if (profile.IsGuid() && copy.IsBlank())
             {
-                masterRegistrant = Registrant.LoadByUid(profile.ToGuid(), dc);
+                masterRegistrant = Registrant.LoadByUid(profile.ToGuid(), dc: dc);
 
                 // sometimes users use a profile but they're really trying to copy.
                 // so if it's not a match to the master registrant then don't connect it
@@ -1242,7 +1242,7 @@ namespace AfterSchool.Controllers
             // first create master copy of registrant (if this is a first time registrant)
             // have to create a master copy so that the user can edit their own profile when logged in without editing existing registration information 
             // need to create a master registrant if there is a logged in user no matter what
-            var masterRegistrant = registrant.CreateMasterCopy(questions, loggedInUserId, msgs, dc);
+            var masterRegistrant = registrant.CreateMasterCopy(questions, loggedInUserId, msgs, dc: dc);
 
             // don't create any extra records if this is a copy of an existing record that has 
             // already went through this process of creating parents, a user account, etc
@@ -1254,24 +1254,24 @@ namespace AfterSchool.Controllers
                     // get parent info
                     userFirstName = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1FirstName)
                         .First()
-                        .GetAnswer(registrant.ID.Value, dc)
+                        .GetAnswer(registrant.ID.Value, dc: dc)
                         .Text;
 
                     if (questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1LastName).Any())
                         userLastName = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1LastName)
                             .First()
-                            .GetAnswer(registrant.ID.Value, dc)
+                            .GetAnswer(registrant.ID.Value, dc: dc)
                             .Text;
 
                     if (questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1Email).Any())
                         userEmail = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1Email)
                             .First()
-                            .GetAnswer(registrant.ID.Value, dc)
+                            .GetAnswer(registrant.ID.Value, dc: dc)
                             .Text;
                 }
 
                 // create a user account for the registrant or registrant parent
-                var user = masterRegistrant.MatchCreateOrUpdateUser(userFirstName, userLastName, userEmail, password, SessionVariables.IsAfterSchool.Value, isAdminMode, msgs, dc);
+                var user = masterRegistrant.MatchCreateOrUpdateUser(userFirstName, userLastName, userEmail, password, SessionVariables.IsAfterSchool.Value, isAdminMode, msgs, dc: dc);
 
                 if (user.IsEmpty())
                     return;
@@ -1295,21 +1295,21 @@ namespace AfterSchool.Controllers
                     // check for existing parent1 info
 
                     // what if parent already exists
-                    var parent1 = user.CreateRegistrant(registrantTypeId, true, msgs, dc);
+                    var parent1 = user.CreateRegistrant(registrantTypeId, true, msgs, dc: dc);
 
                     // set default email answer on parent, can be overwritten if there is a parent email
-                    parent1.AddAnswer(userEmail, QuestionDataType.RegistrantEmail, loggedInUserId, msgs, dc);
+                    parent1.AddAnswer(userEmail, QuestionDataType.RegistrantEmail, loggedInUserId, msgs, dc: dc);
 
                     foreach (var qt in parent1QuestionTypes)
                     {
                         if (questions.Where(x => x.QuestionDataTypeId == qt).Any())
                         {
                             var parentQuestion = questions.Where(x => x.QuestionDataTypeId == qt).First();
-                            var answerText = parentQuestion.GetAnswer(registrant.ID.Value, dc).Text;
+                            var answerText = parentQuestion.GetAnswer(registrant.ID.Value, dc: dc).Text;
 
                             // translate answer from parent field on registrant to registrant field on new parent registrant
                             var parentQt = (QuestionDataType)Enum.Parse(typeof(QuestionDataType), qt.ToString().Replace("Parent1", "Registrant"));
-                            parent1.AddAnswer(answerText, parentQt, loggedInUserId, msgs, dc);
+                            parent1.AddAnswer(answerText, parentQt, loggedInUserId, msgs, dc: dc);
                         }
                     }
 
@@ -1318,22 +1318,22 @@ namespace AfterSchool.Controllers
 
                     if (questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent2FirstName).Any() &&
                         questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent2FirstName).First()
-                        .GetAnswer(registrant.ID.Value, dc).Text.IsNotBlank())
+                        .GetAnswer(registrant.ID.Value, dc: dc).Text.IsNotBlank())
                     {
-                        var parent2 = user.CreateRegistrant(registrantTypeId, true, msgs, dc);
+                        var parent2 = user.CreateRegistrant(registrantTypeId, true, msgs, dc: dc);
 
                         // set default email answer on parent, can be overwritten if there is a parent email
-                        parent2.AddAnswer(userEmail, QuestionDataType.RegistrantEmail, loggedInUserId, msgs, dc);
+                        parent2.AddAnswer(userEmail, QuestionDataType.RegistrantEmail, loggedInUserId, msgs, dc: dc);
 
                         foreach (var qt in parent2QuestionTypes)
                         {
                             if (questions.Where(x => x.QuestionDataTypeId == qt).Any())
                             {
                                 var parentQuestion = questions.Where(x => x.QuestionDataTypeId == qt).First();
-                                var answerText = parentQuestion.GetAnswer(registrant.ID.Value, dc).Text;
+                                var answerText = parentQuestion.GetAnswer(registrant.ID.Value, dc: dc).Text;
 
                                 var parentQt = (QuestionDataType)Enum.Parse(typeof(QuestionDataType), qt.ToString().Replace("Parent2", "Registrant"));
-                                var answer = parent2.AddAnswer(answerText, parentQt, loggedInUserId, msgs, dc);
+                                var answer = parent2.AddAnswer(answerText, parentQt, loggedInUserId, msgs, dc: dc);
                             }
                         }
                     }
@@ -1523,7 +1523,7 @@ namespace AfterSchool.Controllers
                 }
                 else
                 {
-                    registration.AddAnswer(answerText.IfEmpty("").Trim(), question, registrant, 0, msgs, dc);
+                    registration.AddAnswer(answerText.IfEmpty("").Trim(), question, registrant, 0, msgs, dc: dc);
                 }
             }
 

@@ -40,6 +40,9 @@ property: LastActivity, DateTime?, DateTime
 property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
+baseproperty: FirstName, required
+baseproperty: LastName, required
+baseproperty: Email, required
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>
@@ -261,6 +264,7 @@ property: TimeZone, string, NVarChar(30)
 property: LogoUrl, string, NVarChar(400)
 property: LandingPageText, string, NVarChar(4000)
 property: AccountTypeId, AccountType, Int
+baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
 loadmethod: IsAdminAccount

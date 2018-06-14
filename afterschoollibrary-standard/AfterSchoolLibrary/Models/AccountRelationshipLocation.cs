@@ -65,29 +65,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static AccountRelationshipLocation Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static AccountRelationshipLocation Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<AccountRelationshipLocation> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountRelationshipLocation> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return AccountRelationshipLocation.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return AccountRelationshipLocation.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return AccountRelationshipLocation.BaseGetCount(criterias, ObjectMap, dq);
+            return AccountRelationshipLocation.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -153,67 +153,67 @@ namespace AfterSchoolLibrary
 
 		public AccountRelationshipLocation Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountRelationshipLocation.Load(this.ID.Value, dc);
+			return AccountRelationshipLocation.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<AccountRelationshipLocation> LoadByAccountRelationshipId(int AccountRelationshipId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountRelationshipLocation> LoadByAccountRelationshipId(int AccountRelationshipId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountRelationshipId"], AccountRelationshipId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountRelationshipLocation> LoadByLocationId(int LocationId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountRelationshipLocation> LoadByLocationId(int LocationId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["LocationId"], LocationId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountRelationshipLocation> LoadByHostAccountId(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountRelationshipLocation> LoadByHostAccountId(int HostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountRelationshipLocation> LoadByVisitorAccountId(int VisitorAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountRelationshipLocation> LoadByVisitorAccountId(int VisitorAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["VisitorAccountId"], VisitorAccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<AccountRelationshipLocation> LoadByHostAccountIdByVisitorAccountId(int HostAccountId, int VisitorAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<AccountRelationshipLocation> LoadByHostAccountIdByVisitorAccountId(int HostAccountId, int VisitorAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
 			dq.Criterias.Add(ObjectMap["VisitorAccountId"], VisitorAccountId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static AccountRelationshipLocation LoadByAccountRelationshipIdByLocationId(int AccountRelationshipId, int LocationId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static AccountRelationshipLocation LoadByAccountRelationshipIdByLocationId(int AccountRelationshipId, int LocationId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountRelationshipId"], AccountRelationshipId);
 			dq.Criterias.Add(ObjectMap["LocationId"], LocationId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static AccountRelationshipLocation LoadByHostAccountIdByVisitorAccountIdByLocationId(int HostAccountId, int VisitorAccountId, int LocationId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static AccountRelationshipLocation LoadByHostAccountIdByVisitorAccountIdByLocationId(int HostAccountId, int VisitorAccountId, int LocationId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
 			dq.Criterias.Add(ObjectMap["VisitorAccountId"], VisitorAccountId);
 			dq.Criterias.Add(ObjectMap["LocationId"], LocationId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

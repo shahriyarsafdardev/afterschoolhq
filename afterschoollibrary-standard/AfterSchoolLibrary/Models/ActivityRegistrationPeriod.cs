@@ -74,29 +74,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static ActivityRegistrationPeriod Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ActivityRegistrationPeriod Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<ActivityRegistrationPeriod> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityRegistrationPeriod> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return ActivityRegistrationPeriod.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return ActivityRegistrationPeriod.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return ActivityRegistrationPeriod.BaseGetCount(criterias, ObjectMap, dq);
+            return ActivityRegistrationPeriod.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -148,41 +148,41 @@ namespace AfterSchoolLibrary
 
 		public ActivityRegistrationPeriod Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityRegistrationPeriod.Load(this.ID.Value, dc);
+			return ActivityRegistrationPeriod.Load(this.ID.Value, dc: dc);
 		}
 		
-		public static List<ActivityRegistrationPeriod> LoadByRegistrationPeriodId(int RegistrationPeriodId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityRegistrationPeriod> LoadByRegistrationPeriodId(int RegistrationPeriodId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ActivityRegistrationPeriod> LoadByActivityId(int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ActivityRegistrationPeriod> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static ActivityRegistrationPeriod LoadByActivityIdByIsActive(int ActivityId, bool IsActive, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityRegistrationPeriod LoadByActivityIdByIsActive(int ActivityId, bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static ActivityRegistrationPeriod LoadByRegistrationPeriodIdByActivityId(int RegistrationPeriodId, int ActivityId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static ActivityRegistrationPeriod LoadByRegistrationPeriodIdByActivityId(int RegistrationPeriodId, int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		
@@ -195,7 +195,7 @@ namespace AfterSchoolLibrary
         {
             if (loadFromDb)
             {
-                return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc);
+                return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc: dc);
             }
             else
             {
@@ -215,7 +215,7 @@ namespace AfterSchoolLibrary
         {
             if (loadFromDb)
             {
-                return Activity.Load(this.ActivityId.Value, dc);
+                return Activity.Load(this.ActivityId.Value, dc: dc);
             }
             else
             {
@@ -232,12 +232,12 @@ namespace AfterSchoolLibrary
 
         public RegistrationPeriod GetRegistrationPeriod(DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc);
+            return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc: dc);
         }
 
         public Activity GetActivity(DatabaseConnection dc = null)
         {
-            return Activity.Load(this.ActivityId.Value, dc);
+            return Activity.Load(this.ActivityId.Value, dc: dc);
         }
 
         #endregion
