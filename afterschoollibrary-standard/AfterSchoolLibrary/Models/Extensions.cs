@@ -19,9 +19,12 @@ namespace AfterSchoolLibrary
         public static IEnumerable<System.Data.DataRow> AsEnumerable(this System.Data.DataTable dt)
         {
             var rows = new List<System.Data.DataRow>();
-            foreach(System.Data.DataRow dr in dt.Rows)
+            if (dt != null)
             {
-                rows.Add(dr);
+                foreach (System.Data.DataRow dr in dt.Rows)
+                {
+                    rows.Add(dr);
+                }
             }
             return rows.AsEnumerable();
         }
