@@ -247,7 +247,7 @@ property: StripePublishableKey, string, NVarChar(100)
 property: StripeSecretKey, string, NVarChar(100)
 property: Uid, Guid, UniqueIdentifier, required
 property: UniqueName, string, NVarChar(50)
-property: OwnerId, int?, Int
+property: OwnerId, int?, Int, required
 property: IsAdminAccount, bool, Bit
 property: IsActive, bool, Bit
 property: IsAfterSchool, bool, Bit
