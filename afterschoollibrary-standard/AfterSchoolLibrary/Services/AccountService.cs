@@ -1125,11 +1125,11 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages ApproveAccessToAccount(this Account hostAccount,Account visitorAccount ,DatabaseConnection dc = null)
+        public static SystemMessages ApproveAccessToAccount(this Account hostAccount,Account visitorAccount, DatabaseConnection dc = null)
         {
             //Approves access to the host account 
-            SystemMessages msgs = new SystemMessages();
-            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value,visitorAccount.ID.Value);
+            var msgs = new SystemMessages();
+            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, dc);
             accountRelationship.HostPermissionTypeId = HostPermissionType.Approve;
             accountRelationship.LastModifiedDate = DateTime.UtcNow;
             accountRelationship.LastModifiedBy = hostAccount.ID;
