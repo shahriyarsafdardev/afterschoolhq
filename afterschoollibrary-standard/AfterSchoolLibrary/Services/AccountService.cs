@@ -1148,7 +1148,7 @@ namespace AfterSchoolLibrary
         {
             //Denies access to the host account 
             var msgs = new SystemMessages();
-            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value);
+            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value,dc);
             accountRelationship.HostPermissionTypeId = HostPermissionType.Deny;
             accountRelationship.LastModifiedDate = DateTime.UtcNow;
             accountRelationship.LastModifiedBy = hostAccount.ID;

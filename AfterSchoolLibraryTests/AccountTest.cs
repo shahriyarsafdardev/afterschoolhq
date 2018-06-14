@@ -176,25 +176,22 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DenyAccessToAccountTest()
         {
-            var webuser = Factories.WebUserFactory.Create(msgs, dc);
-            webuser.Email = "test@test";
-            webuser.Save(dc);
-            var webuser2 = Factories.WebUserFactory.Create(msgs, dc);
-            webuser2.Email = "test2@test";
-            webuser2.Save(dc);
+            var webuser = Factories.WebUserFactory.CreateWithEmail("test@test", msgs, dc);
+            var webuser2 = Factories.WebUserFactory.CreateWithEmail("test2@test", msgs, dc);
 
             var hostaccount = Factories.AccountFactory.Create(msgs, dc);
             hostaccount.OwnerId = webuser.ID.Value;
             hostaccount.Name = "test";
-            hostaccount.Save(dc);
+            msgs.AddRange(hostaccount.Save(dc));
 
             var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
             visitoraccount.OwnerId = webuser2.ID.Value;
             visitoraccount.Name = "test2";
-            visitoraccount.Save(dc);
-            visitoraccount.RequestAccessToAccount(hostaccount, dc);
+            msgs.AddRange(visitoraccount.Save(dc));
+            msgs.AddRange(visitoraccount.RequestAccessToAccount(hostaccount, dc));
+            msgs.AddRange(hostaccount.DenyAccessToAccount(visitoraccount, dc));
 
-            Assert.True(visitoraccount.DenyAccessToAccount(visitoraccount, dc).HasNoErrors());
+            Assert.True(msgs.HasNoErrors());
         }
 
         /// <summary>

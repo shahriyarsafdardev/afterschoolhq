@@ -90,6 +90,7 @@ namespace AfterSchoolLibrary
             return WebUser.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+
         public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -196,11 +197,25 @@ namespace AfterSchoolLibrary
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
+
+        public static SystemMessages LoadAndHashAll(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var users = WebUser.Load(null, null, null, dc);
+            foreach (WebUser user in users)
+            {
+                var Pass = WebUser.DecryptPassword(user.Password);
+                user.Password = WebUser.SaltandHashPassword(Pass).hash.ToString();
+                msgs.AddRange(user.Save(dc));
+
+            }
+            return msgs;
+        }
 
         public string GetInviteUrl(Account account)
         {
@@ -267,6 +282,15 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["email"], email);
             dq.Criterias.Add(ObjectMap["password"], WebUser.EncryptPassword(password));
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static WebUser LoginByEmailHashed(string email, string password, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["email"], email);
+            dq.Criterias.Add(ObjectMap["password"], WebUser.SaltandHashPassword(password));
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 

@@ -174,6 +174,12 @@ namespace AfterSchoolLibrary
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+
+
+        #endregion
+
+        #region "UserDefined"
+
         public static List<AccountRelationship> LoadByRequested(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -183,7 +189,7 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<AccountRelationship> LoadByApproved( int HostAccountId ,BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountRelationship> LoadByApproved(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -200,12 +206,6 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["HostPermissionTypeId"], HostPermissionType.Deny);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-
-
-
-        #endregion
-
-        #region "UserDefined"
 
         #endregion
     }

@@ -376,8 +376,6 @@ namespace AfterSchoolLibraryTests
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
 
             var orig = ASCIIEncoding.ASCII.GetBytes("test");
             var saltAndHashed = WebUser.SaltandHashPassword("test");
@@ -394,16 +392,47 @@ namespace AfterSchoolLibraryTests
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
 
             var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
             var encrypt = AfterSchoolLibrary.Utilities.EncryptToBase64("test");
-            var decrypt = AfterSchoolLibrary.Utilities.DecryptFromBase64("test");
+            var decrypt = AfterSchoolLibrary.Utilities.DecryptFromBase64(encrypt);
             var saltAndHashed = WebUser.SaltandHashPassword(decrypt);
 
             Assert.NotEqual(decrypt, saltAndHashed.ToString());
         }
 
+        [Fact]
+        public void LoadAndHashAllTest()
+        {
+            var user = Factories.WebUserFactory.CreateWithEmail("notDarye", "NothisPassword", msgs, dc);
+            var orig = user.Password;
+            var origInBytes = ASCIIEncoding.ASCII.GetBytes(orig);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+
+            var message = WebUser.LoadAndHashAll(null, null, null, dc);
+            var newBytes = user.Password;
+
+
+            user = WebUser.LoginByEmailHashed("notDarye", "nothisPassword",dc);
+
+            Assert.NotEqual(orig, newBytes);
+        }
+
+        [Fact]
+        public void LoadAndHashAllT2est()
+        {
+            var user = Factories.WebUserFactory.CreateWithEmail("notDarye", "NothisPassword", msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
+
+            var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
+            var message = WebUser.LoadAndHashAll(null, null, null, dc);
+            user.Reload(dc);
+
+            user = WebUser.LoginByEmailHashed("notDarye", "nothisPassword", dc);
+
+            Assert.NotNull(user);
+        }
     }
 }
