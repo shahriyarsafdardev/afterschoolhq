@@ -125,8 +125,11 @@ namespace AfterSchoolLibraryTests
         public void RequestAccessToAccountTest()
         {
             var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            hostaccount.Uid = new Guid() { };
+            hostaccount.Save(dc);
             var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
-
+            visitoraccount.Uid = new Guid() { };
+            visitoraccount.Save(dc);
             Assert.True(visitoraccount.RequestAccessToAccount(hostaccount,dc).HasNoErrors());
         }
 

@@ -1105,7 +1105,7 @@ namespace AfterSchoolLibrary
             //creating an account relationship in which the visitor is requesting approval saving it to database
             //and returning the system messages
             var msgs = new SystemMessages();
-            // Makes sure that the visotor has not been previously denied by the host
+            // Makes sure that the visitor has not been previously denied by the host
             if (!GetDeniedVisitorAccounts(hostAccount, dc).Contains(visitorAccount))
             {
                 var accountRelationship = new AccountRelationship();
@@ -1128,7 +1128,7 @@ namespace AfterSchoolLibrary
         public static SystemMessages ApproveAccessToAccount(this Account hostAccount,Account visitorAccount ,DatabaseConnection dc = null)
         {
             //Approves access to the host account 
-            var msgs = new SystemMessages();
+            SystemMessages msgs = new SystemMessages();
             var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value,visitorAccount.ID.Value);
             accountRelationship.HostPermissionTypeId = HostPermissionType.Approve;
             accountRelationship.LastModifiedDate = DateTime.UtcNow;

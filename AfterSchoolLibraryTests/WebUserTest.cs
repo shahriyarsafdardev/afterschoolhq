@@ -384,6 +384,26 @@ namespace AfterSchoolLibraryTests
 
             Assert.NotEqual(orig , WebUser.SaltandHashPassword("test").hash);
         }
+        /// <summary>
+        /// Then decrypt their passwords using the old method, 
+        /// then encrypt and store the new passwords in the db with the new 
+        /// encryption method, then test that the passwords still work
+        /// </summary>
+        [Fact]
+        public void FullPasswordTest()
+        {
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
+
+            var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
+            var encrypt = AfterSchoolLibrary.Utilities.EncryptToBase64("test");
+            var decrypt = AfterSchoolLibrary.Utilities.DecryptFromBase64("test");
+            var saltAndHashed = WebUser.SaltandHashPassword(decrypt);
+
+            Assert.NotEqual(decrypt, saltAndHashed.ToString());
+        }
 
     }
 }
