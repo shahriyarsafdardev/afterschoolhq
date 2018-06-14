@@ -120,16 +120,28 @@ namespace AfterSchoolLibraryTests
 
         /// <summary>
         /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
+        /// need to ask about sending emails and name parameters!
         /// </summary>
         [Fact]
         public void RequestAccessToAccountTest()
         {
+            var webuser = Factories.WebUserFactory.Create(msgs, dc);
+            webuser.Email = "test@test";
+            webuser.Save(dc);
+            var webuser2 = Factories.WebUserFactory.Create(msgs, dc);
+            webuser2.Email = "test2@test";
+            webuser2.Save(dc);
+
             var hostaccount = Factories.AccountFactory.Create(msgs, dc);
-            hostaccount.Uid = new Guid() { };
+            hostaccount.OwnerId = webuser.ID.Value;
+            hostaccount.Name = "test";
             hostaccount.Save(dc);
+
             var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
-            visitoraccount.Uid = new Guid() { };
+            visitoraccount.OwnerId = webuser2.ID.Value;
+            visitoraccount.Name = "test2";
             visitoraccount.Save(dc);
+
             Assert.True(visitoraccount.RequestAccessToAccount(hostaccount,dc).HasNoErrors());
         }
 
@@ -139,11 +151,25 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ApproveAccessToAccountTest()
         {
+            var webuser = Factories.WebUserFactory.Create(msgs, dc);
+            webuser.Email = "test@test";
+            webuser.Save(dc);
+            var webuser2 = Factories.WebUserFactory.Create(msgs, dc);
+            webuser2.Email = "test2@test";
+            webuser2.Save(dc);
+
             var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            hostaccount.OwnerId = webuser.ID.Value;
+            hostaccount.Name = "test";
+            hostaccount.Save(dc);
+
             var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
+            visitoraccount.OwnerId = webuser2.ID.Value;
+            visitoraccount.Name = "test2";
+            visitoraccount.Save(dc);
             visitoraccount.RequestAccessToAccount(hostaccount, dc);
 
-            Assert.True(visitoraccount.ApproveAccessToAccount(visitoraccount, dc).HasNoErrors());
+            Assert.True(hostaccount.ApproveAccessToAccount(visitoraccount, dc).HasNoErrors());
         }
 
         /// <summary>
@@ -152,8 +178,22 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DenyAccessToAccountTest()
         {
+            var webuser = Factories.WebUserFactory.Create(msgs, dc);
+            webuser.Email = "test@test";
+            webuser.Save(dc);
+            var webuser2 = Factories.WebUserFactory.Create(msgs, dc);
+            webuser2.Email = "test2@test";
+            webuser2.Save(dc);
+
             var hostaccount = Factories.AccountFactory.Create(msgs, dc);
+            hostaccount.OwnerId = webuser.ID.Value;
+            hostaccount.Name = "test";
+            hostaccount.Save(dc);
+
             var visitoraccount = Factories.AccountFactory.Create(msgs, dc);
+            visitoraccount.OwnerId = webuser2.ID.Value;
+            visitoraccount.Name = "test2";
+            visitoraccount.Save(dc);
             visitoraccount.RequestAccessToAccount(hostaccount, dc);
 
             Assert.True(visitoraccount.DenyAccessToAccount(visitoraccount, dc).HasNoErrors());
