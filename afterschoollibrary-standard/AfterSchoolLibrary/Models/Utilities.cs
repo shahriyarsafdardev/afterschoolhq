@@ -357,6 +357,19 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages LoadByList(List<WebUser> webUsers, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            SystemMessages msgs = new SystemMessages();
+
+           foreach(WebUser user in webUsers)
+            {
+                WebUser.LoadByUid(user.Uid, dc);
+
+            }
+
+            return msgs;
+        }
+
         public static SystemMessages AdditionalData(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             SystemMessages msgs = new SystemMessages();
@@ -1814,5 +1827,7 @@ namespace AfterSchoolLibrary
 
         public static string SenderHostName { get; set; }
     }
+
+
 
 }
