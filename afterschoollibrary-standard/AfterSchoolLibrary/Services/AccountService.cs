@@ -1119,7 +1119,7 @@ namespace AfterSchoolLibrary
                 //TODO Notify Host account of request
                 if (msgs.HasNoErrors())
                 {
-                    msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
+                    //msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
                 }
             }
             return msgs;
@@ -1138,7 +1138,7 @@ namespace AfterSchoolLibrary
             //Notifies Host account of acceptance
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
+                //msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
             }
 
             return msgs;
@@ -1157,7 +1157,7 @@ namespace AfterSchoolLibrary
             //Notifies Host account of Denial
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(EmailHelper.SendDenialNotificationToVisitor(visitorAccount, hostAccount));
+                //msgs.AddRange(EmailHelper.SendDenialNotificationToVisitor(visitorAccount, hostAccount));
             }
 
             return msgs;
