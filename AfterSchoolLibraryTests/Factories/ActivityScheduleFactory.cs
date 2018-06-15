@@ -14,7 +14,7 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static ActivitySchedule Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new ActivitySchedule() { };
+            var obj = new ActivitySchedule() { Name = "whatever" };
             msgs.AddRange(obj.Save(dc));
             return obj;
         }

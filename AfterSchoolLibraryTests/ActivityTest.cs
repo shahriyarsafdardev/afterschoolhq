@@ -581,15 +581,12 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void CopyTest()
         {
-            var currentUser = new WebUser() { IsActive = true, };
-            currentUser.Save(dc);
-            var loggedInUserId = currentUser.ID.Value;
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var form = Factories.FormFactory.Create(account, msgs, dc);
+            var user = Factories.WebUserFactory.Create(true, msgs, dc);
 
-            var a = new Activity() {AccountId = loggedInUserId };
-            a.Save(dc);
-            var aid = a.ID.Value;
-
-            Assert.NotNull(a.Copy("newActivity", true, loggedInUserId, msgs, dc));
+            Assert.NotNull(activity.Copy("newActivity", false, user.ID.Value, msgs, dc));
         }
 
         [Fact]
@@ -598,9 +595,11 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var form = Factories.FormFactory.Create(account, msgs, dc);
+            account.DefaultFormId = form.ID.Value;
+            account.Save(dc);
             var user = Factories.WebUserFactory.Create(true, msgs, dc);
 
-            Assert.NotNull(activity.CopyDefaultForm(user.ID.Value, dc).HasNoErrors());
+            Assert.True(activity.CopyDefaultForm(user.ID.Value, dc).HasNoErrors());
         }
 
         [Fact]
@@ -614,7 +613,6 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(activity.AddFormAndActivitate(form, user.ID.Value, false, msgs, dc));
         }
 
-        //How to construct a base adresss?
         [Fact]
         public void HasAdressTest()
         {
@@ -669,6 +667,9 @@ namespace AfterSchoolLibraryTests
         {
             var account = Factories.AccountFactory.Create(msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            activity.ActivityGroupId = activityGroup.ID.Value;
+            activity.Save(dc);
             var user = Factories.WebUserFactory.Create(msgs, dc);
 
             var nv = new System.Collections.Specialized.NameValueCollection() { };
@@ -715,6 +716,8 @@ namespace AfterSchoolLibraryTests
             var form = Factories.FormFactory.Create(account, msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var gradeLevel = Factories.GradeLevelFactory.Create(msgs, dc);
+            gradeLevel.ID = 12;
+            gradeLevel.Save(dc);
             var grade = Factories.ActivityGradeLevelFactory.Create(activity, gradeLevel, msgs, dc);
 
 
@@ -728,6 +731,8 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var gradeLevel = Factories.GradeLevelFactory.Create(msgs, dc);
+            gradeLevel.ID = 12;
+            gradeLevel.Save(dc);
             var grade = Factories.ActivityGradeLevelFactory.Create(activity, gradeLevel, msgs, dc);
 
             Assert.NotNull(activity.AddGrade(gradeLevel.ID.Value, user.ID.Value, msgs, dc));
@@ -737,43 +742,36 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void MarkAsDeletedTest()
         {
-            var currentUser = new WebUser() { IsActive = true };
-            currentUser.Save(dc);
-            var UserId = currentUser.ID.Value;
-
-            var act = new Activity() { AccountId = UserId };
-            act.Save(dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
 
-            Assert.True(act.MarkAsDeleted(UserId, dc).HasNoErrors());
+            Assert.True(activity.MarkAsDeleted(user.ID.Value, dc).HasNoErrors());
         }
 
         [Fact]
         public void MoveToArchiveTest()
         {
             var currentUser = new WebUser() { IsActive = true };
-            currentUser.Save(dc);
-            var UserId = currentUser.ID.Value;
-
-            var act = new Activity() { AccountId = UserId };
-            act.Save(dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
 
-            Assert.True(act.MoveToArchive(UserId, dc).HasNoErrors());
+            Assert.True(activity.MoveToArchive(user.ID.Value, dc).HasNoErrors());
         }
 
         [Fact]
         public void MoveFromArchiveTest()
         {
             var currentUser = new WebUser() { IsActive = true };
-            currentUser.Save(dc);
-            var UserId = currentUser.ID.Value;
-
-            var act = new Activity() { AccountId = UserId };
-            act.Save(dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
 
-            Assert.True(act.MoveFromArchive(UserId, dc).HasNoErrors());
+            Assert.True(activity.MoveFromArchive(user.ID.Value, dc).HasNoErrors());
         }
 
 
@@ -807,26 +805,32 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void HasSheduleTest()
         {
-            var x = new ActivitySchedule() { };
-            x.Save(dc);
-            var xid = x.ID.Value;
+            var currentUser = new WebUser() { IsActive = true };
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var activityShedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            activityShedule.ID = 12;
+            activityShedule.Save(dc);
 
-            var act = new Activity() { ActivityScheduleId = xid };
-            act.Save(dc);
+            activity.ActivityScheduleId = activityShedule.ID.Value;
+            activity.Save(dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc);
 
-            Assert.True(act.HasSchedule);
+            Assert.True(activity.HasSchedule);
         }
 
         [Fact]
         public void GetSheduleTest()
         {
-            var x = new ActivitySchedule() { };
-            x.Save(dc);
-            var xid = x.ID.Value;
+            var currentUser = new WebUser() { IsActive = true };
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var activityShedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            activityShedule.ID = 12;
+            activityShedule.Save(dc);
+            var activityInstance = Factories.ActivityInstanceFactory.Create(activity, msgs, dc);
 
-            var act = new Activity() {ActivityScheduleId = xid};
-            act.Save(dc);
-            Assert.NotNull(act.GetSchedule(false, dc ));
+            Assert.NotNull(activity.GetSchedule(false, dc ));
         }
 
         [Fact]

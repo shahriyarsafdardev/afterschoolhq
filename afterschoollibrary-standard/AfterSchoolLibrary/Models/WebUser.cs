@@ -23,7 +23,7 @@ namespace AfterSchoolLibrary
 		public bool VerifiedAccount { get { return (bool)MDV["VerifiedAccount"].Value; } set { MDV["VerifiedAccount"].Value = value; } }
 		public bool IsRegistered { get { return (bool)MDV["IsRegistered"].Value; } set { MDV["IsRegistered"].Value = value; } }
 		public int? DefaultAccountId { get { return (int?)MDV["DefaultAccountId"].Value; } set { MDV["DefaultAccountId"].Value = value; } }
-		
+        public string Salt { get { return (string)MDV["Salt"].Value; } set { MDV["Salt"].Value = value; } }
 
         public WebUser()
         {
@@ -50,7 +50,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "VerifiedAccount", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsRegistered", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "DefaultAccountId", System.Data.SqlDbType.Int);
-				
+                _dp.Add(className, "Salt", System.Data.SqlDbType.Int);
+
                 return _dp;
             }
         }
@@ -154,7 +155,9 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["DefaultAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["Salt"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
             return msgs;
         }
@@ -196,6 +199,13 @@ namespace AfterSchoolLibrary
 			dq.Criterias.Add(ObjectMap["FacebookId"], FacebookId);
 			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
+        public static WebUser LoadBySalt(string salt, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Salt"], salt);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
 
 
 
@@ -210,7 +220,9 @@ namespace AfterSchoolLibrary
             foreach (WebUser user in users)
             {
                 var Pass = WebUser.DecryptPassword(user.Password);
-                user.Password = WebUser.SaltandHashPassword(Pass).hash.ToString();
+                user.Salt = System.Text.Encoding.UTF8.GetString(WebUser.SaltandHashPassword(Pass).saltedbytes);
+                //user.Salt = WebUser.SaltandHashPassword(Pass).saltedbytes.ToString();
+                user.Password = WebUser.SaltandHashPassword(Pass).hashedbytes.ToString();
                 msgs.AddRange(user.Save(dc));
 
             }
@@ -309,7 +321,7 @@ namespace AfterSchoolLibrary
         }
 
  
-        public static (byte[] salt, byte[] hash) SaltandHashPassword(string password)
+        public static (byte[] saltedbytes, byte[] hashedbytes) SaltandHashPassword( string password)
         {
             byte[] saltBytes = GenerateRandomCryptographicBytes(32 - password.Length);
             byte[] passwordinBytes = Encoding.UTF8.GetBytes(password);

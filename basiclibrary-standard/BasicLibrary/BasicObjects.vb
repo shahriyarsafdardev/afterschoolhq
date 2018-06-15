@@ -1217,6 +1217,14 @@ Public MustInherit Class BaseWebUser
             MDV("Password").Value = value
         End Set
     End Property
+    Public Property Salt() As String
+        Get
+            Return MDV("Salt").Value
+        End Get
+        Set(ByVal value As String)
+            MDV("Salt").Value = value
+        End Set
+    End Property
     Public Property ImageUrl() As String
         Get
             Return MDV("ImageUrl").Value

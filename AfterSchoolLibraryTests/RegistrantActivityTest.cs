@@ -100,13 +100,15 @@ namespace AfterSchoolLibraryTests
         {
             var account = Factories.AccountFactory.Create(msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var user = Factories.WebUserFactory.CreateWithEmail("test", msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             registrantActivity.NumberOfSeats = 12;
             registrantActivity.NumberOfWaitingListSeats = 1;
             registrantActivity.NumberOfApplicationSeats = 1;
             registrantActivity.Save(dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs,dc);
+            registrationPeriod.AddActivity(activity, true, user.ID.Value, dc);
 
             Assert.NotEqual(0,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrationPeriod.ID.Value,dc));
         }

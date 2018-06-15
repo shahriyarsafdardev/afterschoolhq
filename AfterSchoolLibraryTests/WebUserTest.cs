@@ -380,7 +380,7 @@ namespace AfterSchoolLibraryTests
             var orig = ASCIIEncoding.ASCII.GetBytes("test");
             var saltAndHashed = WebUser.SaltandHashPassword("test");
 
-            Assert.NotEqual(orig , WebUser.SaltandHashPassword("test").hash);
+            Assert.NotEqual(orig , WebUser.SaltandHashPassword("test").hashedbytes);
         }
         /// <summary>
         /// Then decrypt their passwords using the old method, 
@@ -398,7 +398,7 @@ namespace AfterSchoolLibraryTests
             var decrypt = AfterSchoolLibrary.Utilities.DecryptFromBase64(encrypt);
             var saltAndHashed = WebUser.SaltandHashPassword(decrypt);
 
-            Assert.NotEqual(decrypt, saltAndHashed.ToString());
+            Assert.NotEqual(decrypt, saltAndHashed.hashedbytes.ToString());
         }
 
         [Fact]
@@ -411,9 +411,6 @@ namespace AfterSchoolLibraryTests
 
             var message = WebUser.LoadAndHashAll(null, null, null, dc);
             var newBytes = user.Password;
-
-
-            user = WebUser.LoginByEmailHashed("notDarye", "nothisPassword",dc);
 
             Assert.NotEqual(orig, newBytes);
         }
