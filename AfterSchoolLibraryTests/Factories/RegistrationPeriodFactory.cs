@@ -14,7 +14,7 @@ namespace AfterSchoolLibraryTests.Factories
         public static RegistrationPeriod Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new RegistrationPeriod() { };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
     }

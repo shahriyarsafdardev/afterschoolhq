@@ -15,13 +15,13 @@ namespace AfterSchoolLibraryTests.Factories
         public static ActivitySchedule Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new ActivitySchedule() { };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static ActivitySchedule Create(Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new ActivitySchedule() { AccountId = account.ID };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
     }

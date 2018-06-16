@@ -15,13 +15,13 @@ namespace AfterSchoolLibraryTests.Factories
         public static ActivityInstance Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new ActivityInstance() { };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static ActivityInstance Create(Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new ActivityInstance() { ActivityId = activity.ID };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
     }

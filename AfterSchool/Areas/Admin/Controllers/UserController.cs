@@ -68,7 +68,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                 if (password1.IsNotEmpty() && password2.IsNotEmpty())
                 {
-                    user.Password = WebUser.EncryptPassword(password1);
+                    user.Password = WebUserService.EncryptPassword(password1);
                 }
 
                 user.IsActive = !isactive.IsEmpty();
@@ -157,18 +157,11 @@ namespace AfterSchool.Areas.Admin.Controllers
             WebUser user = null;
 
             if (uid.IsEmpty() && id.IsNumber())
-            {
-                var account = Account.Load(id.ToInteger());
-                user = account.GetAccountOwner();
-            }
+                user = Account.Load(id.ToInteger()).GetAccountOwner();
             else if(uid.IsGuid())
-            {
                 user = WebUser.LoadByUid(uid.ToGuid());
-            }
             else
-            {
                 msgs.Add("Invalid params", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
@@ -186,13 +179,9 @@ namespace AfterSchool.Areas.Admin.Controllers
                 ViewBag.Messages = msgs;
 
                 if (id.IsNotEmpty())
-                {
                     return RedirectToAction("Team", "Account", new { id = id });
-                }
                 else
-                {
                     return RedirectToAction("Index", "User");
-                }
             }
         }
 

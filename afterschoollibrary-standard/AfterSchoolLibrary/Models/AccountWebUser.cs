@@ -176,9 +176,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public AccountWebUser Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public AccountWebUser Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountWebUser.Load(this.ID.Value, dc: dc);
+			return AccountWebUser.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<AccountWebUser> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

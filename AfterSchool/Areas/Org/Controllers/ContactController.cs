@@ -123,7 +123,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     }
                                     else
                                     {
-                                        contactList = ContactList.CreateNew(listname, SessionVariables.CurrentAccount.ID.Value, SessionVariables.LoggedInUser.ID.Value, amsgs, adc);
+                                        contactList = ContactList.CreateNew(listname, SessionVariables.CurrentAccount.ID.Value, SessionVariables.LoggedInUser.ID.Value, amsgs, dc: adc);
                                     }
                                 }
 
@@ -236,7 +236,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 contact.Email = email;
                 contact.FirstName = firstname;
                 contact.LastName = lastname;
-                msgs.AddRange(contact.Save(dc));
+                msgs.AddRange(contact.Save(dc: dc));
             }
 
             if (msgs.HasNoErrors() && contactList.IsNotEmpty())

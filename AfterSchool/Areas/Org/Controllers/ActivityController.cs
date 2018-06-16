@@ -935,7 +935,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         //create attendance records for this date and mark as absent by default (even if temporary)
                         attendance = new Attendance();
                         //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
-                        var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(id.ToInteger(), false, adc);
+                        var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(id.ToInteger(), false, dc: adc);
                         if (attendanceList.Count > 0)
                         {
                             foreach (var a in attendanceList)
@@ -1013,7 +1013,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                        attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), adc);
+                        attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), dc: adc);
                         attendance.ActivityInstanceId = activityinstance.ToInteger();
                         attendance.IsCompleted = true;
                         attendance.LastModifiedBy = SessionVariables.LoggedInUser.ID;
@@ -1532,9 +1532,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             }
 
                             var hasSeatsAvailable = activity.GetRegistrantCount(adc) < activity.SeatsAvailable;
-                            var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, adc);
-                            var registration = registrant.AddRegistration(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, activity.ActivityGroupId, amsgs, adc);
-                            var ra = registrant.AddOrUpdateActivity(registration.ID.Value, af.ActivityId.Value, seatCount, waitingListSeatCount, applicationSeatCount, invitationSeatCount, declinedSeatCount, 0, amsgs, adc);
+                            var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
+                            var registration = registrant.AddRegistration(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, activity.ActivityGroupId, amsgs, dc: adc);
+                            var ra = registrant.AddOrUpdateActivity(registration.ID.Value, af.ActivityId.Value, seatCount, waitingListSeatCount, applicationSeatCount, invitationSeatCount, declinedSeatCount, 0, amsgs, dc: adc);
 
                             for (var i = 0; i < headers.Count; i++)
                             {
@@ -1546,7 +1546,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                     if (field.IsNotBlank())
                                     {
-                                        var answer = registration.AddAnswer(field, question, registrant, 0, amsgs, adc);
+                                        var answer = registration.AddAnswer(field, question, registrant, 0, amsgs, dc: adc);
                                     }
                                 }
                             }
@@ -1718,8 +1718,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (qg.IsNumber())
                         {
-                            questions = FormQuestion.LoadByFormQuestionGroupId(qg.ToInteger(), adc);
-                            questionGroup = FormQuestionGroup.Load(qg.ToInteger(), adc);
+                            questions = FormQuestion.LoadByFormQuestionGroupId(qg.ToInteger(), dc: adc);
+                            questionGroup = FormQuestionGroup.Load(qg.ToInteger(), dc: adc);
                         }
 
                         if (questionGroup.IsNotEmpty())
@@ -1888,7 +1888,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-                    activity = Activity.Load(id.ToInteger(), adc);
+                    activity = Activity.Load(id.ToInteger(), dc: adc);
                     account = activity.GetAccount(adc);
                     users = account.GetActiveMembers(adc).Select(x => x.ToWebUser()).ToList();
 
@@ -1898,7 +1898,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (doNotSkip)
                         {
-                            var awu = user.GetActivityWebUser(activity, adc);
+                            var awu = user.GetActivityWebUser(activity, dc: adc);
 
                             if (Request["onteam-" + user.ID.Value.ToString()].IsNotEmpty())
                             {

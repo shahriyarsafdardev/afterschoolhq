@@ -52,7 +52,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var schedule = ActivitySchedule.Load(id.ToInteger(), adc);
+                        var schedule = ActivitySchedule.Load(id.ToInteger(), dc: adc);
                         var currentActivities = schedule.GetActivities(adc);
                         var activities = schedule.GetActivityGroup(adc).GetActivities(adc);
 
@@ -232,16 +232,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        contact = Registrant.LoadByUid(id.ToGuid(), adc);
+                        contact = Registrant.LoadByUid(id.ToGuid(), dc: adc);
                         if (contact.IsNotEmpty() && contact.AccountId == SessionVariables.CurrentAccount.ID && contact.IsContactOnly)
                         {
-                            var rags = RegistrantActivityGroup.LoadByRegistrantId(contact.ID.Value, adc);
+                            var rags = RegistrantActivityGroup.LoadByRegistrantId(contact.ID.Value, dc: adc);
                             foreach(var rag in rags)
                             {
                                 amsgs.AddRange(rag.Delete(adc));
                             }
 
-                            var ras = RegistrantActivity.LoadByRegistrantId(contact.ID.Value, adc);
+                            var ras = RegistrantActivity.LoadByRegistrantId(contact.ID.Value, dc: adc);
                             foreach(var ra in ras)
                             {
                                 amsgs.AddRange(ra.Delete(adc));

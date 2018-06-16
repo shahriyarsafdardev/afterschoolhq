@@ -150,9 +150,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityMessageRegistrant Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityMessageRegistrant Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityMessageRegistrant.Load(this.ID.Value, dc: dc);
+			return ActivityMessageRegistrant.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityMessageRegistrant> LoadByActivityMessageId(int ActivityMessageId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

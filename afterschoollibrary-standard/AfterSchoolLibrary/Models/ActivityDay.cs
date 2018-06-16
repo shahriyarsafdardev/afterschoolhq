@@ -142,9 +142,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityDay Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityDay Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityDay.Load(this.ID.Value, dc: dc);
+			return ActivityDay.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityDay> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

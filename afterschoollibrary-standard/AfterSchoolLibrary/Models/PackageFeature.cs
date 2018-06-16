@@ -130,9 +130,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public PackageFeature Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public PackageFeature Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return PackageFeature.Load(this.ID.Value, dc: dc);
+			return PackageFeature.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<PackageFeature> LoadByPackageId(int PackageId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

@@ -14,13 +14,13 @@ namespace AfterSchoolLibraryTests.Factories
         public static Registrant Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new Registrant();
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static Registrant Create(Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new Registrant() { AccountId = account.ID };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
     }

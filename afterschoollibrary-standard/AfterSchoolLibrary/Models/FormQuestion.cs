@@ -216,9 +216,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public FormQuestion Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public FormQuestion Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return FormQuestion.Load(this.ID.Value, dc: dc);
+			return FormQuestion.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<FormQuestion> LoadByFormId(int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

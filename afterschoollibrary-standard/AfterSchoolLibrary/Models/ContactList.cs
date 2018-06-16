@@ -117,9 +117,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ContactList Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ContactList Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ContactList.Load(this.ID.Value, dc: dc);
+			return ContactList.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ContactList> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -154,7 +154,7 @@ namespace AfterSchoolLibrary
             contactList.CreateDate = contactList.LastModifiedDate = DateTime.UtcNow;
             contactList.CreatedBy = contactList.LastModifiedBy = loggedInUserId;
             contactList.AccountId = accountId;
-            msgs.AddRange(contactList.Save(dc));
+            msgs.AddRange(contactList.Save(dc: dc));
 
             return contactList;
         }
@@ -171,7 +171,7 @@ namespace AfterSchoolLibrary
                 clr.RegistrantId = registrantId;
                 clr.CreateDate = DateTime.UtcNow;
                 clr.CreatedBy = loggedInUserId;
-                msgs.AddRange(clr.Save(dc));
+                msgs.AddRange(clr.Save(dc: dc));
             }
 
             return msgs;
@@ -183,7 +183,7 @@ namespace AfterSchoolLibrary
 
             var clr = ContactListRegistrant.LoadByContactListIdByRegistrantId(this.ID.Value, registrantId, dc: dc);
             if (clr.IsNotEmpty())
-                msgs.AddRange(clr.Delete(dc));
+                msgs.AddRange(clr.Delete(dc: dc));
 
             return msgs;
         }

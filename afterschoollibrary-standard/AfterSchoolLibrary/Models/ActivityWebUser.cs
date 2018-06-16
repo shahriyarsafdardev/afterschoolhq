@@ -148,9 +148,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityWebUser Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityWebUser Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityWebUser.Load(this.ID.Value, dc: dc);
+			return ActivityWebUser.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityWebUser> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -217,7 +217,7 @@ namespace AfterSchoolLibrary
                 WebUserId = this.WebUserId
             };
 
-            msgs.AddRange(awu.Save(dc));
+            msgs.AddRange(awu.Save(dc: dc));
 
             return awu;
         }

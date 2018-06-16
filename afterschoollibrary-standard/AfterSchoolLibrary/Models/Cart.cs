@@ -122,9 +122,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Cart Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Cart Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Cart.Load(this.ID.Value, dc: dc);
+			return Cart.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static Cart LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -177,7 +177,7 @@ namespace AfterSchoolLibrary
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
-            if (this.GetCartItems(dc).Where(x => x.ActivityId == activityId && x.Day == day).Count() == 0)
+            if (this.GetCartItems(dc: dc).Where(x => x.ActivityId == activityId && x.Day == day).Count() == 0)
             {
                 var item = new CartItem
                 {
@@ -190,14 +190,14 @@ namespace AfterSchoolLibrary
                     CreatedBy = 0,
                     LastModifiedBy = 0
                 };
-                msgs.AddRange(item.Save(dc));
+                msgs.AddRange(item.Save(dc: dc));
 
                 //force reload
                 this.ResetCartItems();
                 return item;
             }
 
-            return this.GetCartItems(dc)
+            return this.GetCartItems(dc: dc)
                 .Where(x => x.ActivityId == activityId && x.Day == day)
                 .First();
 

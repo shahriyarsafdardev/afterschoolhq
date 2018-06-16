@@ -133,9 +133,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public RegistrantSubscriptionPlan Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public RegistrantSubscriptionPlan Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return RegistrantSubscriptionPlan.Load(this.ID.Value, dc: dc);
+			return RegistrantSubscriptionPlan.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		

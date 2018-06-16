@@ -174,9 +174,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivitySchedule Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivitySchedule Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivitySchedule.Load(this.ID.Value, dc: dc);
+			return ActivitySchedule.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivitySchedule> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -367,7 +367,7 @@ namespace AfterSchoolLibrary
             instance.CreateDate = instance.LastModifiedDate = DateTime.UtcNow;
             instance.CreatedBy = instance.LastModifiedBy = loggedInUserId;
             instance.Day = instance.StartDateTime.Value.DayOfWeek.ToDayOfWeekASL();
-            msgs.AddRange(instance.Save(dc));
+            msgs.AddRange(instance.Save(dc: dc));
 
             return instance;
         }
@@ -383,7 +383,7 @@ namespace AfterSchoolLibrary
             this.DailyEndTime = dailyEndTime;
             this.CreateDate = this.LastModifiedDate = DateTime.UtcNow;
             this.CreatedBy = this.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             msgs.AddRange(UpdateInstances(scheduleDates, loggedInUserId, dc: dc));
 
@@ -404,7 +404,7 @@ namespace AfterSchoolLibrary
                     .Any()
                  )
                 .ToList()
-                .ForEach(instance => msgs.AddRange(instance.Delete(dc)));
+                .ForEach(instance => msgs.AddRange(instance.Delete(dc: dc)));
 
             // add new instances
             scheduleList
@@ -415,7 +415,7 @@ namespace AfterSchoolLibrary
                 .ToList()
                 .ForEach(item => this.AddInstance(item[0].ToDateTime(), item[1].ToDateTime(), loggedInUserId, msgs, dc: dc));            
 
-            msgs.AddRange(this.ValidateInstances(dc));
+            msgs.AddRange(this.ValidateInstances(dc: dc));
 
             return msgs;
         }

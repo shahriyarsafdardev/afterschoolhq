@@ -18,8 +18,7 @@ namespace AfterSchoolLibrary
 		public int? HostAccountId { get { return (int?)MDV["HostAccountId"].Value; } set { MDV["HostAccountId"].Value = value; } }
 		public int? VisitorAccountId { get { return (int?)MDV["VisitorAccountId"].Value; } set { MDV["VisitorAccountId"].Value = value; } }
 		public HostPermissionType HostPermissionTypeId { get { return (HostPermissionType)MDV["HostPermissionTypeId"].Value; } set { MDV["HostPermissionTypeId"].Value = value; } }
-		public DateTime? ApprovedDate { get { return (DateTime?)MDV["ApprovedDate"].Value; } set { MDV["ApprovedDate"].Value = value; } }
-		public int? ApprovedBy { get { return (int?)MDV["ApprovedBy"].Value; } set { MDV["ApprovedBy"].Value = value; } }
+		public ApprovalStatus ApprovalStatusId { get { return (ApprovalStatus)MDV["ApprovalStatusId"].Value; } set { MDV["ApprovalStatusId"].Value = value; } }
 		
 
         public AccountRelationship()
@@ -27,6 +26,7 @@ namespace AfterSchoolLibrary
             this.Config(ObjectMap, DatabaseQuery, typeof(AccountRelationship).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.HostPermissionTypeId = HostPermissionType.NotSet;
+			this.ApprovalStatusId = ApprovalStatus.NotSet;
 			
         }
 
@@ -40,8 +40,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "HostAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "VisitorAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "HostPermissionTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ApprovedDate", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "ApprovedBy", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ApprovalStatusId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -132,11 +131,7 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ApprovedDate"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ApprovedBy"]);
+			dps.Add(ObjectMap["ApprovalStatusId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -144,9 +139,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public AccountRelationship Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public AccountRelationship Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountRelationship.Load(this.ID.Value, dc: dc);
+			return AccountRelationship.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<AccountRelationship> LoadByHostAccountId(int HostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -157,11 +152,29 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<AccountRelationship> LoadByHostAccountIdByApprovalStatusId(int HostAccountId, ApprovalStatus ApprovalStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+			dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatusId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static List<AccountRelationship> LoadByVisitorAccountId(int VisitorAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["VisitorAccountId"], VisitorAccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<AccountRelationship> LoadByVisitorAccountIdByApprovalStatusId(int VisitorAccountId, ApprovalStatus ApprovalStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["VisitorAccountId"], VisitorAccountId);
+			dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatusId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -174,11 +187,38 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
+
+        public static List<AccountRelationship> LoadByRequested(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Requested);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<AccountRelationship> LoadByApproved(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Approved);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<AccountRelationship> LoadByDenied(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Denied);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
         #endregion
     }

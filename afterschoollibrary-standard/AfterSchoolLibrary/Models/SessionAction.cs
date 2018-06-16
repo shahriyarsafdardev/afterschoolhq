@@ -205,9 +205,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public SessionAction Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public SessionAction Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return SessionAction.Load(this.ID.Value, dc: dc);
+			return SessionAction.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<SessionAction> LoadBySessionId(int SessionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

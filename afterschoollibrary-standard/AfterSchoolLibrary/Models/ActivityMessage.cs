@@ -156,9 +156,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityMessage Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityMessage Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityMessage.Load(this.ID.Value, dc: dc);
+			return ActivityMessage.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityMessage> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -216,7 +216,7 @@ namespace AfterSchoolLibrary
 
         public int GetSentCount(DatabaseConnection dc = null)
         {
-            return this.GetRegistrantCount(dc) - this.GetUnsentCount(dc);
+            return this.GetRegistrantCount(dc: dc) - this.GetUnsentCount(dc: dc);
         }
 
         private Activity _Activity = null;
@@ -242,14 +242,14 @@ namespace AfterSchoolLibrary
         private static SystemMessages SendForActivity(ActivityMessage am, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var activity = am.GetActivity(dc);
-            var account = activity.GetAccount(dc);
+            var activity = am.GetActivity(dc: dc);
+            var account = activity.GetAccount(dc: dc);
 
             msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc: dc));
 
             if (msgs.HasNoErrors())
             {
-                var members = activity.GetTeamMembers(dc);
+                var members = activity.GetTeamMembers(dc: dc);
                 foreach (var member in members)
                 {
                     var body = am.Body;
@@ -277,8 +277,8 @@ namespace AfterSchoolLibrary
         private static SystemMessages SendForGroup(ActivityMessage am, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var group = am.GetActivityGroup(dc);
-            var account = group.GetAccount(dc);
+            var group = am.GetActivityGroup(dc: dc);
+            var account = group.GetAccount(dc: dc);
 
             msgs.AddRange(am.SendActivityMessage(account, account.Name, account.Email, account.Name, dc: dc));
 
@@ -302,7 +302,7 @@ namespace AfterSchoolLibrary
         private SystemMessages SendActivityMessage(Account account, string fromName, string replyToEmail, string replyToName, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var amrs = this.GetActivityMessageRegistrants(dc);
+            var amrs = this.GetActivityMessageRegistrants(dc: dc);
 
             foreach (var amr in amrs)
             {
@@ -337,19 +337,19 @@ namespace AfterSchoolLibrary
                 if (sendMsgs.HasNoErrors())
                 {
                     amr.DateSent = DateTime.UtcNow;
-                    msgs.AddRange(amr.Save(dc));
+                    msgs.AddRange(amr.Save(dc: dc));
                 }
                 else
                 {
                     amr.SendErrors = sendMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000);
-                    msgs.AddRange(amr.Save(dc));
+                    msgs.AddRange(amr.Save(dc: dc));
                 }
             }
 
             if (msgs.HasNoErrors())
             {
                 this.DateSent = DateTime.UtcNow;
-                msgs.AddRange(this.Save(dc));
+                msgs.AddRange(this.Save(dc: dc));
             }
             else
             {
@@ -383,7 +383,7 @@ namespace AfterSchoolLibrary
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUserId
             };
-            msgs.AddRange(amr.Save(dc));
+            msgs.AddRange(amr.Save(dc: dc));
             return amr;
         }
 

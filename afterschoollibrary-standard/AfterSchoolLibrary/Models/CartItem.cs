@@ -143,9 +143,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public CartItem Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public CartItem Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return CartItem.Load(this.ID.Value, dc: dc);
+			return CartItem.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static CartItem LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

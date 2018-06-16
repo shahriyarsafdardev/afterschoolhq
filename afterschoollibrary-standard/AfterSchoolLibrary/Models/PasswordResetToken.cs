@@ -139,9 +139,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public PasswordResetToken Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public PasswordResetToken Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return PasswordResetToken.Load(this.ID.Value, dc: dc);
+			return PasswordResetToken.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static PasswordResetToken LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -222,7 +222,7 @@ namespace AfterSchoolLibrary
 
             token.LastModifiedDate = DateTime.UtcNow;
             token.LastModifiedBy = user.ID.Value;
-            msgs.AddRange(token.Save(dc));
+            msgs.AddRange(token.Save(dc: dc));
 
             return token;
         }
@@ -234,7 +234,7 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var token = PasswordResetToken.LoadValidByUid(uid, adc);
+                    var token = PasswordResetToken.LoadValidByUid(uid, dc: adc);
                     token.Used = true;
                     token.LastModifiedBy = token.WebUserId;
                     token.LastModifiedDate = DateTime.UtcNow;

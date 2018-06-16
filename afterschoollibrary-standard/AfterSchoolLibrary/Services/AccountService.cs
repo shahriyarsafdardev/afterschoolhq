@@ -13,7 +13,7 @@ namespace AfterSchoolLibrary
     {
         public static bool HasFeature(this Account account, FeatureType featureType, DatabaseConnection dc = null)
         {
-            return account.GetActiveAccountPackage(dc).HasFeature(featureType);
+            return account.GetActiveAccountPackage(dc: dc).HasFeature(featureType);
         }
 
         public static WebUser GetAccountOwner(this Account account, DatabaseConnection dc = null)
@@ -31,12 +31,12 @@ namespace AfterSchoolLibrary
 
         public static List<Activity> GetPublishedActivities(this Account account, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenAndUpcomingRegistrationPeriods(dc);
+            var periods = account.GetOpenAndUpcomingRegistrationPeriods(dc: dc);
             var activities = new List<Activity>();
 
-            periods.ForEach(period => activities.AddRange(period.GetActivities(dc).Where(x => x.IsPubliclyViewable)));
+            periods.ForEach(period => activities.AddRange(period.GetActivities(dc: dc).Where(x => x.IsPubliclyViewable)));
 
-            return activities.Where(activity => activity.GetActiveActivityForm(dc).IsNotEmpty()).ToList();
+            return activities.Where(activity => activity.GetActiveActivityForm(dc: dc).IsNotEmpty()).ToList();
         }
 
         public static List<ActivityForm> GetActivityForms(this Account account, DatabaseConnection dc = null)
@@ -191,8 +191,8 @@ namespace AfterSchoolLibrary
 
         public static List<RegistrationPeriod> GetOpenAndUpcomingRegistrationPeriods(this Account account, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenRegistrationPeriods(dc);
-            periods.AddRange(account.GetUpcomingRegistrationPeriods(dc));
+            var periods = account.GetOpenRegistrationPeriods(dc: dc);
+            periods.AddRange(account.GetUpcomingRegistrationPeriods(dc: dc));
             return periods;
         }
 
@@ -290,9 +290,9 @@ namespace AfterSchoolLibrary
                         user.FirstName = firstName;
                         user.LastName = lastName;
                         user.Email = email.Trim();
-                        user.Username = WebUser.GenerateUsername(firstName, lastName, adc);
+                        user.Username = WebUserService.GenerateUsername(firstName, lastName, dc: adc);
                         if (!password.IsEmpty())
-                            user.Password = WebUser.EncryptPassword(password);
+                            user.Password = WebUserService.EncryptPassword(password);
 
                         user.CreateDate = user.LastModifiedDate = DateTime.Now;
                         user.CreatedBy = user.LastModifiedBy = loggedInUserId;
@@ -325,12 +325,12 @@ namespace AfterSchoolLibrary
 
         public static SystemMessages SendWelcomeEmailTrial(this Account account, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc), account);
+            return EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
         }
 
         public static SystemMessages SendWelcomeEmailPurchase(this Account account, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc), account);
+            return EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
         }
 
         public static SystemMessages InviteUser(this Account account, WebUser wu, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
@@ -351,7 +351,7 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    wu = WebUser.LoadByEmail(email.Trim(), adc);
+                    wu = WebUser.LoadByEmail(email.Trim(), dc: adc);
 
                     if (wu.IsEmpty())
                     {
@@ -593,7 +593,7 @@ namespace AfterSchoolLibrary
                         // make sure the account package is set to the real trial days passed in
                         if (amsgs.HasNoErrors())
                         {
-                            var apf = newap.GetFeature(FeatureType.TrialDays, adc);
+                            var apf = newap.GetFeature(FeatureType.TrialDays, dc: adc);
                             if (apf.IsNotEmpty())
                             {
                                 apf.Max = trialDayCount;
@@ -624,7 +624,7 @@ namespace AfterSchoolLibrary
         public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, DatabaseConnection dc = null)
         {
             var daysRemaining = 0;
-            var firstAccountPackage = account.GetAccountPackages(dc).OrderBy(x => x.StartDate.Value).First();
+            var firstAccountPackage = account.GetAccountPackages(dc: dc).OrderBy(x => x.StartDate.Value).First();
             var daysSinceSignUp = (DateTime.UtcNow - firstAccountPackage.StartDate.Value).Days;
             if (daysSinceSignUp < currentPackage.GetFeature(FeatureType.TrialDays).GetMaxValue() + 1) // they get the full last day
             {
@@ -637,11 +637,11 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            msgs.AddRange(account.Save(dc));
+            msgs.AddRange(account.Save(dc: dc));
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(account.CreateStripeCustomer(dc));
+                msgs.AddRange(account.CreateStripeCustomer(dc: dc));
             }
 
             return msgs;
@@ -691,7 +691,7 @@ namespace AfterSchoolLibrary
                 if (!customer.IsEmpty())
                 {
                     account.StripeCustomerId = customer.Id;
-                    msgs.AddRange(account.Save(dc));
+                    msgs.AddRange(account.Save(dc: dc));
                 }
             }
             return msgs;
@@ -703,7 +703,7 @@ namespace AfterSchoolLibrary
 
             if (account.StripeCustomerId.IsEmpty())
             {
-                msgs.AddRange(account.CreateStripeCustomer(dc));
+                msgs.AddRange(account.CreateStripeCustomer(dc: dc));
             }
 
             if (msgs.HasNoErrors())
@@ -726,7 +726,7 @@ namespace AfterSchoolLibrary
                     if (!card.IsEmpty() && makePrimary)
                     {
                         account.StripeDefaultCardId = card.Id;
-                        msgs.AddRange(account.Save(dc));
+                        msgs.AddRange(account.Save(dc: dc));
                     }
                 }
                 catch (Stripe.StripeException ex)
@@ -883,7 +883,7 @@ namespace AfterSchoolLibrary
                 CreatedBy = loggedInUserId,
                 LastModifiedBy = loggedInUserId
             };
-            msgs.AddRange(registrant.Save(dc));
+            msgs.AddRange(registrant.Save(dc: dc));
 
             return registrant;
         }
@@ -951,7 +951,7 @@ namespace AfterSchoolLibrary
 
         public static List<AccountPackageFeature> GetAccountPackageFeatures(this Account account, DatabaseConnection dc = null)
         {
-            return AccountPackageFeature.LoadByAccountPackageId(account.GetActiveAccountPackage(dc).ID.Value, dc: dc);
+            return AccountPackageFeature.LoadByAccountPackageId(account.GetActiveAccountPackage(dc: dc).ID.Value, dc: dc);
         }
 
         public static AccountProperty GetAccountProperty(this Account account, AccountPropertyType propertyType, DatabaseConnection dc = null)
@@ -1029,21 +1029,21 @@ namespace AfterSchoolLibrary
             account.LastModifiedBy = loggedInUserId;
             account.IsAfterSchool = isAfterSchool;
 
-            msgs.AddRange(account.SaveWithStripe(dc));
+            msgs.AddRange(account.SaveWithStripe(dc: dc));
 
             return account;
         }
         public static List<Account> GetVisitorAccounts(this Account account, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByHostAccountId(account.ID.Value, dc: dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
                 .ToList();            
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByVisitorAccountId(account.ID.Value, dc: dc)
-                .Select(x => x.GetHostAccount(dc))
+                .Select(x => x.GetHostAccount(dc: dc))
                 .ToList();
         }
 
@@ -1051,7 +1051,7 @@ namespace AfterSchoolLibrary
         public static List<Account> GetRequestedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByRequested(Hostaccount.ID.Value,dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
                 .ToList();
         }
 
@@ -1059,14 +1059,14 @@ namespace AfterSchoolLibrary
         public static List<Account> GetApprovedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByApproved(Hostaccount.ID.Value,dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
                 .ToList();
         }
         //Gets the accounts that the host has Denied
         public static List<Account> GetDeniedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc: dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc))
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
                 .ToList();
         }
 
@@ -1074,14 +1074,14 @@ namespace AfterSchoolLibrary
         public static List<Account> GetApprovedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByApproved(Hostaccount.ID.Value, dc: dc)
-                .Select(accountRelationship => accountRelationship.GetHostAccount(dc))
+                .Select(accountRelationship => accountRelationship.GetHostAccount(dc: dc))
                 .ToList();
         }
 
         public static List<Account> GetDeniedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc: dc)
-                .Select(accountRelationship => accountRelationship.GetHostAccount(dc))
+                .Select(accountRelationship => accountRelationship.GetHostAccount(dc: dc))
                 .ToList();
         }
         
@@ -1089,7 +1089,7 @@ namespace AfterSchoolLibrary
         public static List<Location> GetVisitorLocations(this Account account, DatabaseConnection dc = null)
         {
             return AccountRelationshipLocation.LoadByVisitorAccountId(account.ID.Value, dc: dc)
-                .Select(x => x.GetLocation(dc))
+                .Select(x => x.GetLocation(dc: dc))
                 .ToList();
         }
 
@@ -1111,11 +1111,11 @@ namespace AfterSchoolLibrary
                 var accountRelationship = new AccountRelationship();
                 accountRelationship.VisitorAccountId = visitorAccount.ID;
                 accountRelationship.HostAccountId = hostAccount.ID;
-                accountRelationship.HostPermissionTypeId = HostPermissionType.Requested;
+                accountRelationship.ApprovalStatusId = ApprovalStatus.Requested;
                 accountRelationship.CreatedBy = visitorAccount.ID;
                 accountRelationship.CreateDate = DateTime.UtcNow;
                 accountRelationship.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(accountRelationship.Save(dc));
+                msgs.AddRange(accountRelationship.Save(dc: dc));
                 //TODO Notify Host account of request
                 if (msgs.HasNoErrors())
                 {
@@ -1133,7 +1133,7 @@ namespace AfterSchoolLibrary
             accountRelationship.HostPermissionTypeId = HostPermissionType.Approve;
             accountRelationship.LastModifiedDate = DateTime.UtcNow;
             accountRelationship.LastModifiedBy = hostAccount.ID;
-            msgs.AddRange(accountRelationship.Save(dc));
+            msgs.AddRange(accountRelationship.Save(dc: dc));
 
             //Notifies Host account of acceptance
             if (msgs.HasNoErrors())
@@ -1149,10 +1149,10 @@ namespace AfterSchoolLibrary
             //Denies access to the host account 
             var msgs = new SystemMessages();
             var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value);
-            accountRelationship.HostPermissionTypeId = HostPermissionType.Deny;
+            accountRelationship.ApprovalStatusId = ApprovalStatus.Denied;
             accountRelationship.LastModifiedDate = DateTime.UtcNow;
             accountRelationship.LastModifiedBy = hostAccount.ID;
-            msgs.AddRange(accountRelationship.Save(dc));
+            msgs.AddRange(accountRelationship.Save(dc: dc));
 
             //Notifies Host account of Denial
             if (msgs.HasNoErrors())

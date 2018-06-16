@@ -163,9 +163,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Registrant Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Registrant Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Registrant.Load(this.ID.Value, dc: dc);
+			return Registrant.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<Registrant> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -423,7 +423,7 @@ namespace AfterSchoolLibrary
             reg.CreateDate = reg.LastModifiedDate = DateTime.UtcNow;
             reg.CreatedBy = reg.LastModifiedBy = loggedInUserId;
             reg.LastUpdated = DateTime.UtcNow;
-            msgs.AddRange(reg.Save(dc));
+            msgs.AddRange(reg.Save(dc: dc));
 
             return reg;
         }
@@ -495,7 +495,7 @@ namespace AfterSchoolLibrary
                     ra.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: RegistrationAssignmentType.Application, activityId: activityId, dc: dc) + 1;
             }
 
-            msgs.AddRange(ra.Save(dc));
+            msgs.AddRange(ra.Save(dc: dc));
 
             return ra;
         }
@@ -523,7 +523,7 @@ namespace AfterSchoolLibrary
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
             answer.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(answer.Save(dc));
+            msgs.AddRange(answer.Save(dc: dc));
 
             msgs.AddRange(answer.UpdateRegistrantInfo(this, dc: dc));
 
@@ -554,7 +554,7 @@ namespace AfterSchoolLibrary
             ra.NumberOfSeatsDeclined = 0;
 
             ra.RegistrationPeriodId = registrationPeriodId;
-            msgs.AddRange(ra.Save(dc));
+            msgs.AddRange(ra.Save(dc: dc));
             return msgs;
         }
 
@@ -611,7 +611,7 @@ namespace AfterSchoolLibrary
                 {
                     if (WebUser.ExistsByEmail(email, adc))
                     {
-                        user = WebUser.LoadByEmail(email, adc);
+                        user = WebUser.LoadByEmail(email, dc: adc);
 
                         if(this.WebUserId.HasValue && user.ID != this.WebUserId)
                             amsgs.Add("This email is already registered to another account", MessageType.UserError);
@@ -631,7 +631,7 @@ namespace AfterSchoolLibrary
                                 IsRegistered = false
                             };
 
-                            user.Username = WebUser.GenerateUsername(user.FirstName, user.LastName, adc);
+                            user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, dc: adc);
                         }
 
                         user.FirstName = firstname.MaxChars(50);
@@ -643,7 +643,7 @@ namespace AfterSchoolLibrary
                         {
                             user.IsActive = true;
                             user.IsRegistered = true;
-                            user.Password = WebUser.EncryptPassword(password);
+                            user.Password = WebUserService.EncryptPassword(password);
                         }
 
                         msgs.AddRange(user.Save(adc));
@@ -677,10 +677,10 @@ namespace AfterSchoolLibrary
             master.IsMaster = true;
             master.IsContactOnly = true;
             master.AccountId = null;
-            msgs.AddRange(master.Save(dc));
+            msgs.AddRange(master.Save(dc: dc));
 
             this.ParentRegistrantId = master.ID;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             return master;
         }
@@ -694,7 +694,7 @@ namespace AfterSchoolLibrary
             copy.CreatedBy = copy.LastModifiedBy = loggedInUserId;
             copy.Uid = Guid.NewGuid();
             copy.ResetID();
-            msgs.AddRange(copy.Save(dc));
+            msgs.AddRange(copy.Save(dc: dc));
 
             questions.ForEach(question => 
                 copy.AddAnswer(question.GetAnswer(this.ID.Value, dc: dc).Text, question.QuestionDataTypeId, loggedInUserId, msgs, dc: dc)
@@ -780,7 +780,7 @@ namespace AfterSchoolLibrary
                 this.FirstRegistrantId = firstRegistrant.ID;
                 this.LastModifiedBy = 0;
                 this.LastModifiedDate = DateTime.UtcNow;
-                return this.Save(dc);
+                return this.Save(dc: dc);
             }
 
             return new SystemMessages();
@@ -813,7 +813,7 @@ namespace AfterSchoolLibrary
             registrant.FirstRegistrantId = this.ID.Value;
             registrant.LastModifiedBy = loggedInUserId;
             registrant.LastModifiedDate = DateTime.UtcNow;
-            return registrant.Save(dc);
+            return registrant.Save(dc: dc);
         }
 
         public List<Registrant> GetRelatedRegistrants(DatabaseConnection dc = null)
@@ -871,7 +871,7 @@ namespace AfterSchoolLibrary
             var sas = SessionAction.LoadByRegistrantId(this.ID.Value, dc: dc);
             foreach (var sa in sas)
             {
-                msgs.AddRange(sa.Delete(dc));
+                msgs.AddRange(sa.Delete(dc: dc));
             }
 
             return msgs;
@@ -882,10 +882,10 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             // delete related activities
-            var ras = this.GetRegistrantActivities(dc);
+            var ras = this.GetRegistrantActivities(dc: dc);
             foreach (var ra in ras)
             {
-                msgs.AddRange(ra.CancelRegistration(dc));
+                msgs.AddRange(ra.CancelRegistration(dc: dc));
             }
 
             return msgs;

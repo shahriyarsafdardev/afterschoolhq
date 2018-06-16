@@ -100,7 +100,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (qg.IsNumber())
                         {
-                            questionGroup = FormQuestionGroup.Load(qg.ToInteger(), adc);
+                            questionGroup = FormQuestionGroup.Load(qg.ToInteger(), dc: adc);
                             questions = questionGroup.GetAllQuestions(adc);
                         }
 

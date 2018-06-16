@@ -130,9 +130,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Location Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Location Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Location.Load(this.ID.Value, dc: dc);
+			return Location.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<Location> LoadByHostAccountId(int HostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

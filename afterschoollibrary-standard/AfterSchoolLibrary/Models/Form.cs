@@ -136,9 +136,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Form Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Form Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Form.Load(this.ID.Value, dc: dc);
+			return Form.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<Form> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -216,7 +216,7 @@ namespace AfterSchoolLibrary
                 IsActive = true,
                 Uid = Guid.NewGuid()
             };
-            msgs.AddRange(form.Save(dc));
+            msgs.AddRange(form.Save(dc: dc));
 
             var groups = FormQuestionGroup.LoadByFormId(this.ID.Value, dc: dc);
             foreach (var group in groups)
@@ -228,7 +228,7 @@ namespace AfterSchoolLibrary
                 newGroup.CreateDate = DateTime.UtcNow;
                 newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
                 newGroup.FormId = form.ID;
-                msgs.AddRange(newGroup.Save(dc));
+                msgs.AddRange(newGroup.Save(dc: dc));
 
                 questions.ForEach(question => {
                     var newQuestion = question.Copy();
@@ -237,7 +237,7 @@ namespace AfterSchoolLibrary
                     newQuestion.FormQuestionGroupId = newGroup.ID;
                     newQuestion.FormId = form.ID;
                     newQuestion.IsTemplate = false;
-                    msgs.AddRange(newQuestion.Save(dc));
+                    msgs.AddRange(newQuestion.Save(dc: dc));
                 });
             }
 
@@ -246,7 +246,7 @@ namespace AfterSchoolLibrary
             if(account.IsNotEmpty() && !account.DefaultFormId.HasValue)
             {
                 account.DefaultFormId = form.ID;
-                msgs.AddRange(account.Save(dc));
+                msgs.AddRange(account.Save(dc: dc));
             }
 
             return form;

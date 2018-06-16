@@ -225,7 +225,7 @@ namespace AfterSchoolLibrary
             {
                 this.Registrations = this.RegistrationPeriod.GetRegistrations(dc: dc);
                 this.RegistrantActivities = this.RegistrationPeriod.GetRegistrantActivities(this.Registrations, dc: dc);
-                this.Activities = this.RegistrationPeriod.GetActivities(dc);
+                this.Activities = this.RegistrationPeriod.GetActivities(dc: dc);
             }
             else if (this.ActivityGroup.IsNotEmpty())
             {
@@ -240,8 +240,8 @@ namespace AfterSchoolLibrary
                     new ActivityAndSeatCount()
                     {
                         ActivityId = activity.ID.Value,
-                        ReservedSeatsTaken = activity.GetSeatsTaken(dc),
-                        WaitingListSeatsTaken = activity.GetWaitingListSeatsTaken(dc)
+                        ReservedSeatsTaken = activity.GetSeatsTaken(dc: dc),
+                        WaitingListSeatsTaken = activity.GetWaitingListSeatsTaken(dc: dc)
                     }
                 );
             }
@@ -256,14 +256,14 @@ namespace AfterSchoolLibrary
                 assignment.RegistrantId = registrant.ID.Value;
                 this.RegistrantAssignments.Add(assignment);
 
-                var registrations = registrant.GetRegistrations(dc);
+                var registrations = registrant.GetRegistrations(dc: dc);
                 foreach(var registration in registrations)
                 {
-                    var related = registration.GetCurrentRelatedRegistrations(dc);
+                    var related = registration.GetCurrentRelatedRegistrations(dc: dc);
                     var existingRas = new List<RegistrantActivity>();
                     foreach(var rel in related)
                     {
-                        existingRas.AddRange(rel.GetRegistrantActivities(dc));
+                        existingRas.AddRange(rel.GetRegistrantActivities(dc: dc));
                     }
 
                     // only add date ranges of activities that are reserved

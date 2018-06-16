@@ -151,9 +151,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public AccountRelationshipLocation Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public AccountRelationshipLocation Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountRelationshipLocation.Load(this.ID.Value, dc: dc);
+			return AccountRelationshipLocation.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<AccountRelationshipLocation> LoadByAccountRelationshipId(int AccountRelationshipId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

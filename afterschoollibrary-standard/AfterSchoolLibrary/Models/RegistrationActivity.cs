@@ -139,9 +139,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public RegistrationActivity Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public RegistrationActivity Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return RegistrationActivity.Load(this.ID.Value, dc: dc);
+			return RegistrationActivity.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static RegistrationActivity LoadByActivityIdByRegistrationId(int ActivityId, int RegistrationId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

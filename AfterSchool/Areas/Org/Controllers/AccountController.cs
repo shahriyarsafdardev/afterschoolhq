@@ -298,12 +298,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     var selectedPackageArr = selectedpackage.Split('_');
                     var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
 
-                    package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), adc);
+                    package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), dc: adc);
 
                     amsgs.AddRange(a.AddCreditCard(name, number, expmonth, expyear, cvc, true, adc));
                     if (amsgs.HasNoErrors())
                     {
-                        a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+                        a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, dc: adc);
                     }
                     SessionVariables.AccountPackage = a.GetActiveAccountPackage(adc);
                 },
@@ -422,7 +422,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         if (Request[type.ToString()].IsNotEmpty())
                         {
-                            var accountFeature = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(accountPackage.ID.Value, type, adc);
+                            var accountFeature = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(accountPackage.ID.Value, type, dc: adc);
                             if (accountFeature.IsEmpty())
                             {
                                 accountFeature = new AccountPackageFeature();

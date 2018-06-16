@@ -279,10 +279,11 @@ inherits: BasicObjectWithModified
 property: HostAccountId, int?, Int, required
 property: VisitorAccountId, int?, Int, required
 property: HostPermissionTypeId, HostPermissionType, Int
-property: ApprovedDate, DateTime?, DateTime
-property: ApprovedBy, int?, Int
+property: ApprovalStatusId, ApprovalStatus, Int
 loadmethod: HostAccountId, List<>
+loadmethod: HostAccountId|ApprovalStatusId, List<>
 loadmethod: VisitorAccountId, List<>
+loadmethod: VisitorAccountId|ApprovalStatusId, List<>
 loadmethod: HostAccountId|VisitorAccountId
 [end]
 
@@ -360,6 +361,7 @@ type: Class
 name: GradeLevel
 inherits: BasicLookUpObject
 property: Abbreviation, string, NVarChar(50)
+baseproperty: Name, required
 [end]
 
 [begin]
@@ -370,6 +372,8 @@ property: AccountId, int?, Int
 property: RegistrationModeId, RegistrationMode, Int
 property: Uid, Guid, UniqueIdentifier, required
 property: ActivityGroupId, int?, Int
+baseproperty: StartDateTime, required
+baseproperty: EndDateTime, required
 loadmethod: AccountId, List<>
 loadmethod: Uid
 loadmethod: ActivityGroupId, List<>
@@ -410,6 +414,7 @@ property: IsArchived, bool, Bit
 property: IsInviteOnly, bool, Bit
 property: HasLotteryRun, bool, Bit
 property: ActivityGroupTypeId, ActivityGroupType, Int
+baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
@@ -428,11 +433,12 @@ inherits: BaseContact
 property: AccountId, int?, Int
 property: WebUserId, int?, Int
 property: Uid, Guid, UniqueIdentifier, required
-property: RegistrantTypeId, RegistrantType, Int
+property: RegistrantTypeId, RegistrantType, Int, required
 property: ParentRegistrantId, int?, Int
 property: IsMaster, bool, Bit
 property: IsContactOnly, bool, Bit
 property: FirstRegistrantId, int?, Int
+baseproperty: Email, required
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId, List<>
@@ -1192,6 +1198,12 @@ values: NotSet, Past, Current, Future
 type: Enum
 name: HostPermissionType
 values: NotSet, Approve, Edit, Admin
+[end]
+
+[begin]
+type: Enum
+name: ApprovalStatus
+values: NotSet, Requested, Approved, Denied
 [end]
 
 [begin]

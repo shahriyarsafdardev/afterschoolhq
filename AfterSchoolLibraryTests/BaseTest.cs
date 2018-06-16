@@ -26,7 +26,7 @@ namespace AfterSchoolLibraryTests
             dc = new DatabaseConnection(Database.Credentials.ConnectionString);
             msgs = new SystemMessages();
             dc.Open();
-            Database.AlterTables(dc);
+            Database.AlterTables(dc: dc);
             dc.BeginTransaction();
         }
 

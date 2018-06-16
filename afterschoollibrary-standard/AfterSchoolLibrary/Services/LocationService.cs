@@ -12,7 +12,7 @@ namespace AfterSchoolLibrary
         public static List<Account> GetVisitorAccounts(this Location location, DatabaseConnection dc = null)
         {
             return AccountRelationshipLocation.LoadByLocationId(location.ID.Value, dc: dc)
-                .Select(x => x.GetVisitorAccount(dc))
+                .Select(x => x.GetVisitorAccount(dc: dc))
                 .ToList();
         }
         

@@ -183,9 +183,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityGroup Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityGroup Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityGroup.Load(this.ID.Value, dc: dc);
+			return ActivityGroup.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityGroup> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -288,7 +288,7 @@ namespace AfterSchoolLibrary
             this.IsPublished = isPublished;
             this.LastModifiedBy = loggedInUserId;
             this.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             return msgs;
         }
@@ -489,18 +489,18 @@ namespace AfterSchoolLibrary
 
         public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(DatabaseConnection dc = null)
         {
-            var period = this.GetCurrentRegistrationPeriod(dc);
+            var period = this.GetCurrentRegistrationPeriod(dc: dc);
             if (period.IsEmpty())
-                return GetNextRegistrationPeriod(dc);
+                return GetNextRegistrationPeriod(dc: dc);
 
             return period;
         }
 
         public RegistrationPeriod GetNextRegistrationPeriod(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return this.GetRegistrationPeriods(dc)
+            return this.GetRegistrationPeriods(dc: dc)
                 .Where(x => now < x.StartDateTime.Value)
                 .OrderBy(x => x.StartDateTime.Value)
                 .FirstOrDefault();
@@ -508,33 +508,33 @@ namespace AfterSchoolLibrary
 
         public RegistrationPeriod GetCurrentRegistrationPeriod(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return this.GetRegistrationPeriods(dc)
+            return this.GetRegistrationPeriods(dc: dc)
                 .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
                 .FirstOrDefault();
         }
 
         public bool IsOpenNow(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return this.GetRegistrationPeriods(dc)
+            return this.GetRegistrationPeriods(dc: dc)
                 .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
                 .Any();
         }
 
         public bool IsClosedNow(DatabaseConnection dc = null)
         {
-            return !IsOpenNow(dc);
+            return !IsOpenNow(dc: dc);
         }
 
         public bool WillOpen(DatabaseConnection dc = null)
         {
-            if (!IsOpenNow(dc))
+            if (!IsOpenNow(dc: dc))
             {
-                var periods = this.GetRegistrationPeriods(dc);
-                var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+                var periods = this.GetRegistrationPeriods(dc: dc);
+                var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
                 return periods.Where(x => now < x.StartDateTime.Value).Any();
             }
             return false;
@@ -542,10 +542,10 @@ namespace AfterSchoolLibrary
 
         public TimeSpan WillOpenIn(DatabaseConnection dc = null)
         {
-            if (WillOpen(dc))
+            if (WillOpen(dc: dc))
             {
-                var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-                var periods = this.GetRegistrationPeriods(dc);
+                var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+                var periods = this.GetRegistrationPeriods(dc: dc);
                 var period = periods.Where(x => x.StartDateTime.Value >= now && now <= x.EndDateTime.Value)
                     .OrderBy(x => x.StartDateTime.Value)
                     .FirstOrDefault();
@@ -573,16 +573,16 @@ namespace AfterSchoolLibrary
             rag.RegistrationPeriodId = periodId;
             rag.LastModifiedDate = DateTime.UtcNow;
             rag.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(rag.Save(dc));
+            msgs.AddRange(rag.Save(dc: dc));
             return rag;
         }
 
         public TimeSpan WillCloseIn(DatabaseConnection dc = null)
         {
-            if (IsOpenNow(dc))
+            if (IsOpenNow(dc: dc))
             {
-                var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-                return this.GetCurrentRegistrationPeriod(dc).EndDateTime.Value - now;
+                var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+                return this.GetCurrentRegistrationPeriod(dc: dc).EndDateTime.Value - now;
             }
 
             return new TimeSpan();
@@ -636,10 +636,10 @@ namespace AfterSchoolLibrary
                 {
                     if (form.ToInteger() == 0)
                     {
-                        var defaultForm = account.GetDefaultForm(dc);
+                        var defaultForm = account.GetDefaultForm(dc: dc);
                         var newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, dc: dc);
                         newForm.Name = (group.Name + " Form").MaxChars(100, "...");
-                        msgs.AddRange(newForm.Save(dc));
+                        msgs.AddRange(newForm.Save(dc: dc));
 
                         group.FormId = newForm.ID;
                     }
@@ -648,13 +648,13 @@ namespace AfterSchoolLibrary
                     group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, dc: dc);
                     group.LastModifiedDate = DateTime.UtcNow;
                     group.LastModifiedBy = loggedInUserId;
-                    msgs.AddRange(group.Save(dc));
+                    msgs.AddRange(group.Save(dc: dc));
 
                     var activities = group.GetActivities(false, false, null, null, false, dc: dc);
                     foreach (var activity in activities)
                     {
                         activity.RegistrationModeId = group.RegistrationModeId;
-                        msgs.AddRange(activity.Save(dc));
+                        msgs.AddRange(activity.Save(dc: dc));
                     }
 
                     if (isNew)
@@ -697,14 +697,14 @@ namespace AfterSchoolLibrary
             ap.Value = value;
             ap.LastModifiedDate = DateTime.UtcNow;
             ap.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(ap.Save(dc));
+            msgs.AddRange(ap.Save(dc: dc));
 
             return ap;
         }
 
         public AccountProperty GetGroupProperty(AccountPropertyType propertyType, DatabaseConnection dc = null)
         {
-            return GetGroupProperties(dc).Find(x => x.AccountPropertyTypeId == propertyType);
+            return GetGroupProperties(dc: dc).Find(x => x.AccountPropertyTypeId == propertyType);
         }
 
         private List<AccountProperty> _Properties = null;
@@ -741,7 +741,7 @@ namespace AfterSchoolLibrary
                     am.Body = body;
                     am.CreateDate = DateTime.UtcNow;
                     am.CreatedBy = loggedInUserId;
-                    msgs.AddRange(am.Save(dc));
+                    msgs.AddRange(am.Save(dc: dc));
 
                     if (msgs.HasNoErrors())
                     {
@@ -751,7 +751,7 @@ namespace AfterSchoolLibrary
                             amr.ActivityMessageId = am.ID;
                             amr.CreateDate = DateTime.UtcNow;
                             amr.CreatedBy = loggedInUserId;
-                            msgs.AddRange(amr.Save(dc));
+                            msgs.AddRange(amr.Save(dc: dc));
                         });
                     }
                 },
@@ -776,7 +776,7 @@ namespace AfterSchoolLibrary
             this.IsArchived = true;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             return msgs;
         }
@@ -792,7 +792,7 @@ namespace AfterSchoolLibrary
             this.IsArchived = false;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
             return msgs;
         }
 
@@ -813,7 +813,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var group = ActivityGroup.Load(id, dc: dc);
-            var account = group.GetAccount(dc);
+            var account = group.GetAccount(dc: dc);
             var period = RegistrationPeriod.Load(periodId, dc: dc);
             var loggedInUser = WebUser.Load(loggedInUserId, dc: dc);
             var contacts = Registrant.LoadList(contactIds, dc: dc);
@@ -828,9 +828,9 @@ namespace AfterSchoolLibrary
                 var regOpenText = "";
                 if (period.IsNotEmpty())
                 {
-                    if (period.IsOpen(dc))
+                    if (period.IsOpen(dc: dc))
                         regOpenText = "Registration is open now.";
-                    else if (group.WillOpen(dc))
+                    else if (group.WillOpen(dc: dc))
                         regOpenText = "Registration will open " + period.StartDateTime.ToShortDateString() + ".";
                 }
 
@@ -929,7 +929,7 @@ namespace AfterSchoolLibrary
                     group.IsPublished = false;
                     group.Name = newName;
                     group.RegistrationModeId = this.RegistrationModeId;
-                    group.UniqueName = ActivityGroup.GenerateUniqueName(this.AccountId.Value, newName, adc);
+                    group.UniqueName = ActivityGroup.GenerateUniqueName(this.AccountId.Value, newName, dc: adc);
                     msgs.AddRange(group.Save(adc));
 
                     // copy AccountProperties / Content
@@ -945,7 +945,7 @@ namespace AfterSchoolLibrary
 
                     // activities
                     this.GetActivities(adc).ForEach(activity => {
-                        var newact = activity.Copy(activity.Name, true, loggedInUserId, amsgs, adc);
+                        var newact = activity.Copy(activity.Name, true, loggedInUserId, amsgs, dc: adc);
                         newact.ActivityGroupId = group.ID;
                         newact.ActivityScheduleId = null;
                         newact.IsPublished = true;

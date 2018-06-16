@@ -297,9 +297,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public RegistrantActivity Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public RegistrantActivity Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return RegistrantActivity.Load(this.ID.Value, dc: dc);
+			return RegistrantActivity.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<RegistrantActivity> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -508,7 +508,7 @@ namespace AfterSchoolLibrary
 
         public List<FormQuestionAnswer> GetAnswers(DatabaseConnection dc = null)
         {
-            return this.GetRegistration(dc).GetAnswers(dc);
+            return this.GetRegistration(dc: dc).GetAnswers(dc: dc);
         }
 
         public static List<RegistrantActivity> LoadByAccountId(int AccountId, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -718,10 +718,10 @@ namespace AfterSchoolLibrary
         public SystemMessages DeleteRegistrationActivity(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var ra = this.GetRegistrationActivity(dc);
+            var ra = this.GetRegistrationActivity(dc: dc);
 
             if (ra.IsNotEmpty())
-                msgs.AddRange(ra.Delete(dc));
+                msgs.AddRange(ra.Delete(dc: dc));
 
             return msgs;
         }
@@ -773,7 +773,7 @@ namespace AfterSchoolLibrary
                     this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfApplicationSeats = 0;
                     this.ApplicationSeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.WaitingList)
                 {
@@ -781,21 +781,21 @@ namespace AfterSchoolLibrary
                     this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfApplicationSeats = 0;
                     this.ApplicationSeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Invited)
                 {
                     this.NumberOfInvitationSeats = this.NumberOfApplicationSeats;
                     this.NumberOfApplicationSeats = 0;
                     this.ApplicationSeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Declined)
                 {
                     this.NumberOfSeatsDeclined = this.NumberOfApplicationSeats;
                     this.NumberOfApplicationSeats = 0;
                     this.ApplicationSeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
             }
             else if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.WaitingList)
@@ -806,7 +806,7 @@ namespace AfterSchoolLibrary
                     this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfWaitingListSeats = 0;
                     this.WaitingListSeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Application)
                 {
@@ -814,21 +814,21 @@ namespace AfterSchoolLibrary
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfWaitingListSeats = 0;
                     this.WaitingListSeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Invited)
                 {
                     this.NumberOfInvitationSeats = this.NumberOfWaitingListSeats;
                     this.NumberOfWaitingListSeats = 0;
                     this.WaitingListSeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Declined)
                 {
                     this.NumberOfSeatsDeclined = this.NumberOfWaitingListSeats;
                     this.NumberOfWaitingListSeats = 0;
                     this.WaitingListSeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
             }
             else if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Reserved)
@@ -839,7 +839,7 @@ namespace AfterSchoolLibrary
                     this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfSeats = 0;
                     this.SeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Application)
                 {
@@ -847,21 +847,21 @@ namespace AfterSchoolLibrary
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfSeats = 0;
                     this.SeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Invited)
                 {
                     this.NumberOfInvitationSeats = this.NumberOfSeats;
                     this.NumberOfSeats = 0;
                     this.SeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Declined)
                 {
                     this.NumberOfSeatsDeclined = this.NumberOfSeats;
                     this.NumberOfSeats = 0;
                     this.SeatIndex = null;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
             }
             else if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Invited)
@@ -871,27 +871,27 @@ namespace AfterSchoolLibrary
                     this.NumberOfSeats = this.NumberOfInvitationSeats;
                     this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.WaitingList)
                 {
                     this.NumberOfWaitingListSeats = this.NumberOfInvitationSeats;
                     this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Application)
                 {
                     this.NumberOfApplicationSeats = this.NumberOfInvitationSeats;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Declined)
                 {
                     this.NumberOfSeatsDeclined = this.NumberOfInvitationSeats;
                     this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
             }
             else if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Declined)
@@ -901,27 +901,27 @@ namespace AfterSchoolLibrary
                     this.NumberOfSeats = this.NumberOfSeatsDeclined;
                     this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.WaitingList)
                 {
                     this.NumberOfWaitingListSeats = this.NumberOfSeatsDeclined;
                     this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Application)
                 {
                     this.NumberOfApplicationSeats = this.NumberOfSeatsDeclined;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
                     this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
                 else if (to == RegistrationAssignmentType.Invited)
                 {
                     this.NumberOfInvitationSeats = this.NumberOfSeatsDeclined;
                     this.NumberOfSeatsDeclined = 0;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
                 }
             }
 
@@ -971,7 +971,7 @@ namespace AfterSchoolLibrary
                     this.WaitingListSeatIndex += amount;
                     break;
             }
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
             return msgs;
         }
 
@@ -1010,7 +1010,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             this.PreferenceNumber -= 1;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
             return msgs;
         }
 
@@ -1042,7 +1042,7 @@ namespace AfterSchoolLibrary
         public SystemMessages SendNewRegistrationNotice(Account account = null, Activity activity = null, DatabaseConnection dc = null)
         {
             activity = activity ?? this.ToActivity(true, dc: dc);
-            account = account ?? activity.GetAccount(dc);
+            account = account ?? activity.GetAccount(dc: dc);
 
             if (account.Email.IsSameAs(activity.ContactEmail))
                 return new SystemMessages();

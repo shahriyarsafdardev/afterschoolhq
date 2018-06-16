@@ -146,9 +146,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Attendance Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Attendance Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Attendance.Load(this.ID.Value, dc: dc);
+			return Attendance.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<Attendance> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

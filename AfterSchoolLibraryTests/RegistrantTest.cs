@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests
         public void LoadTest()
         {
             var a = new Registrant { };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
             Assert.NotNull(Registrant.Load(id, dc: dc));
         }
@@ -30,7 +30,7 @@ namespace AfterSchoolLibraryTests
         public void LoadLongTest()
         {
             var a = new Registrant() { };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
             var c = new System.Collections.Hashtable();
             Assert.NotNull(Account.Load(c, 0, c.Count, dc: dc));
@@ -41,7 +41,7 @@ namespace AfterSchoolLibraryTests
         public void GetCountTest()
         {
             var a = new Registrant() { };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
             var c = new System.Collections.Hashtable();
             Assert.NotNull(Activity.GetCount(c, dc: dc));
@@ -51,29 +51,29 @@ namespace AfterSchoolLibraryTests
         public void SaveTest()
         {
             var a = new Registrant() { };
-            Assert.NotNull(a.Save(dc));
+            Assert.NotNull(a.Save(dc: dc));
         }
 
         [Fact]
         public void DeleteTest()
         {
             var a = new Registrant() { };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
-            a.Delete(dc);
+            a.Delete(dc: dc);
             Assert.Null(Activity.Load(id, dc: dc));
         }
 
         [Fact]
         public void CreateTest()
         {
-            Assert.NotNull(Registrant.Create(dc));
+            Assert.NotNull(Registrant.Create(dc: dc));
         }
 
         [Fact]
         public void AlterTest()
         {
-            Assert.NotNull(Registrant.Alter(dc));
+            Assert.NotNull(Registrant.Alter(dc: dc));
         }
 
 
@@ -81,15 +81,15 @@ namespace AfterSchoolLibraryTests
         public void ReloadTest()
         {
             var a = new Registrant() { };
-            a.Save(dc);
-            Assert.NotNull(a.Reload(dc));
+            a.Save(dc: dc);
+            Assert.NotNull(a.Reload(dc: dc));
         }
 
         [Fact]
         public void LoadByAccountIdTest()
         {
             var a = new Registrant() { };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
             Assert.NotNull(Activity.LoadByAccountId(id, dc: dc));
         }
@@ -98,15 +98,15 @@ namespace AfterSchoolLibraryTests
         public void LoadByParentRegistrantIdTest()
         {
             var a = new Registrant() { ParentRegistrantId =12};
-            a.Save(dc);
-            Assert.NotNull(Registrant.LoadByParentRegistrantId(12,dc));
+            a.Save(dc: dc);
+            Assert.NotNull(Registrant.LoadByParentRegistrantId(12, dc: dc));
         }
 
         [Fact]
         public void LoadByAccountIdByRegistrantTypeIdTest()
         {
             var a = new Registrant() { ParentRegistrantId = 12 };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
 
 
@@ -117,10 +117,10 @@ namespace AfterSchoolLibraryTests
         public void LoadByAccountIdByIsContactOnlyTest()
         {
             var a = new Registrant() { IsContactOnly = true };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
 
-            Assert.NotNull(Registrant.LoadByAccountIdByIsContactOnly(id,true,dc));
+            Assert.NotNull(Registrant.LoadByAccountIdByIsContactOnly(id,true, dc: dc));
         }
 
         [Fact]
@@ -129,21 +129,21 @@ namespace AfterSchoolLibraryTests
             var g = new Guid() { };
 
             var a = new Registrant() { Uid = g };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
 
-            Assert.NotNull(Registrant.LoadByUid(g,dc));
+            Assert.NotNull(Registrant.LoadByUid(g, dc: dc));
         }
 
         [Fact]
         public void LoadByWebUserIdTest()
         {
             var u = new WebUser() { };
-            u.Save(dc);
+            u.Save(dc: dc);
             var wid = u.ID.Value;
 
             var a = new Registrant() { WebUserId = wid };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
 
             Assert.NotNull(Registrant.LoadByWebUserId(wid, dc: dc));
@@ -153,21 +153,21 @@ namespace AfterSchoolLibraryTests
         public void LoadByWebUserIdByIsMasterTest()
         {
             var u = new WebUser() { };
-            u.Save(dc);
+            u.Save(dc: dc);
             var wid = u.ID.Value;
 
             var a = new Registrant() {WebUserId = wid ,IsMaster= true};
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.ID.Value;
 
-            Assert.NotNull(Registrant.LoadByWebUserIdByIsMaster(wid,true,dc));
+            Assert.NotNull(Registrant.LoadByWebUserIdByIsMaster(wid,true, dc: dc));
         }
 
         [Fact]
         public void LoadByFirstRegistrantIdTest()
         {
             var a = new Registrant() {  FirstRegistrantId =12 };
-            a.Save(dc);
+            a.Save(dc: dc);
             var id = a.FirstRegistrantId.Value;
 
             Assert.NotNull(Registrant.LoadByFirstRegistrantId(id, dc: dc));

@@ -153,9 +153,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Package Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Package Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Package.Load(this.ID.Value, dc: dc);
+			return Package.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<Package> LoadByIsActive(bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -208,12 +208,12 @@ namespace AfterSchoolLibrary
 
         public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Any();
+            return this.GetFeatures(dc: dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Any();
         }
 
         public PackageFeature GetFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
+            return this.GetFeatures(dc: dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
         }
 
         public void ResetFeatureList()
@@ -234,7 +234,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             //add to stripe plan, should do on every save
             if (msgs.HasNoErrors())
@@ -388,9 +388,9 @@ namespace AfterSchoolLibrary
         public SystemMessages CopyFeaturesToAccountPackage(AccountPackage ap, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var apfs = ap.GetFeatures(dc);
+            var apfs = ap.GetFeatures(dc: dc);
             
-            this.GetFeatures(dc).ForEach(pf => msgs.AddRange(ap.AddPackageFeature(pf, loggedInUserId, dc: dc)));
+            this.GetFeatures(dc: dc).ForEach(pf => msgs.AddRange(ap.AddPackageFeature(pf, loggedInUserId, dc: dc)));
             ap.ResetFeatureList();
 
             return msgs;

@@ -207,9 +207,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityForm Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityForm Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityForm.Load(this.ID.Value, dc: dc);
+			return ActivityForm.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityForm> LoadByFormId(int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -357,17 +357,17 @@ namespace AfterSchoolLibrary
 
         public List<FormQuestion> GetAllQuestions(DatabaseConnection dc = null)
         {
-            return this.ToForm().GetAllQuestions(dc);
+            return this.ToForm().GetAllQuestions(dc: dc);
         }
 
         public List<FormQuestion> GetActiveQuestions(DatabaseConnection dc = null)
         {
-            return this.ToForm().GetActiveQuestions(dc);
+            return this.ToForm().GetActiveQuestions(dc: dc);
         }
 
         public List<FormQuestionGroup> GetQuestionGroups(DatabaseConnection dc = null)
         {
-            return this.ToForm().GetQuestionGroups(dc);
+            return this.ToForm().GetQuestionGroups(dc: dc);
         }
 
         public int GetSeatsRemaining(DatabaseConnection dc = null)
@@ -410,15 +410,15 @@ namespace AfterSchoolLibrary
             this.IsPublished = isPublished;
             this.LastModifiedBy = loggedInUserId;
             this.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
             
             var activity = this.ToActivity(true, dc: dc);
             if (!activity.IsChildActivity)
             {
-                var childActivities = activity.GetChildActivities(dc);
+                var childActivities = activity.GetChildActivities(dc: dc);
                 foreach (var a in childActivities)
                 {
-                    var af = a.GetActiveActivityForm(dc);
+                    var af = a.GetActiveActivityForm(dc: dc);
                     if (af.IsNotEmpty())
                     {
                         msgs.AddRange(af.SetIsPublished(isPublished, loggedInUserId, dc: dc));
@@ -459,7 +459,7 @@ namespace AfterSchoolLibrary
         //            ra.DatePaid = DateTime.UtcNow;
         //            ra.AmountPaid = this.ActivityCostPerRegistrant;
         //            ra.PaymentTypeId = PaymentType.CreditCard;
-        //            msgs.AddRange(ra.Save(dc));
+        //            msgs.AddRange(ra.Save(dc: dc));
 
         //        }
         //        catch (Stripe.StripeException ex)

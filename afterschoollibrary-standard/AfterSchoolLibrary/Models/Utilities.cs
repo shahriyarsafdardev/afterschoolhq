@@ -287,11 +287,11 @@ namespace AfterSchoolLibrary
                 wu.LastName = "User";
                 wu.Email = adminEmail;
                 wu.Username = "admin";
-                wu.Password = WebUser.EncryptPassword(adminPassword);
+                wu.Password = WebUserService.EncryptPassword(adminPassword);
                 wu.IsActive = true;
                 wu.CreateDate = wu.LastModifiedDate = DateTime.UtcNow;
                 wu.CreatedBy = wu.LastModifiedBy = 0;
-                msgs.AddRange(wu.Save(dc));
+                msgs.AddRange(wu.Save(dc: dc));
 
                 System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.SpecialCharsRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
@@ -302,7 +302,7 @@ namespace AfterSchoolLibrary
                 a.UniqueName = AccountService.GenerateUniqueName(a.Name, a.ID);
                 a.IsAdminAccount = true;
                 a.IsActive = true;
-                msgs.AddRange(a.Save(dc));
+                msgs.AddRange(a.Save(dc: dc));
 
                 msgs.AddRange(a.AddUser(wu, UserType.Owner, 0, dc: dc));
 
@@ -321,29 +321,29 @@ namespace AfterSchoolLibrary
 
             try
             {
-                //msgs.AddRange(AdditionalData(dc));
-                //msgs.AddRange(UpdateAccountFeatures(dc));
-                //msgs.AddRange(UpdateLocations(dc));
-                //msgs.AddRange(UpdateQuestionGroups(dc));
-                //msgs.AddRange(UpdateRegistrationModes(dc));
-                //msgs.AddRange(UpdateRegistrations(dc));
-                //msgs.AddRange(UpdateRegistrants(dc));
-                //msgs.AddRange(UpdateAccountProperties(dc));
-                //msgs.AddRange(UpdateAnswers(dc));
-                //msgs.AddRange(UpdateGradeLevels(dc));
-                //// msgs.AddRange(AddBellecChasseCustomQuestions(dc));
-                //// msgs.AddRange(UpdateApplicationSeatIndexesRunOnce(dc));
-                //msgs.AddRange(UpdateSessionActions(dc));
-                //// msgs.AddRange(UpdateActivityGroupsRunOnce(dc));
-                //// msgs.AddRange(UpdateActivities(dc));
-                //msgs.AddRange(UpdateAccountPackages(dc));
-                // msgs.AddRange(UpdateActivitySchedules(dc));
-                //msgs.AddRange(UpdateRegistrantActivities(dc));
-                //// msgs.AddRange(HandleDuplicateRegistrations(dc));
-                //msgs.AddRange(FixMissingMasterRecords(dc));
-                //// msgs.AddRange(FixMessedUpPreferences(dc));
-                // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc));
-                // msgs.AddRange(CreateMasterRecord(dc));
+                //msgs.AddRange(AdditionalData(dc: dc));
+                //msgs.AddRange(UpdateAccountFeatures(dc: dc));
+                //msgs.AddRange(UpdateLocations(dc: dc));
+                //msgs.AddRange(UpdateQuestionGroups(dc: dc));
+                //msgs.AddRange(UpdateRegistrationModes(dc: dc));
+                //msgs.AddRange(UpdateRegistrations(dc: dc));
+                //msgs.AddRange(UpdateRegistrants(dc: dc));
+                //msgs.AddRange(UpdateAccountProperties(dc: dc));
+                //msgs.AddRange(UpdateAnswers(dc: dc));
+                //msgs.AddRange(UpdateGradeLevels(dc: dc));
+                //// msgs.AddRange(AddBellecChasseCustomQuestions(dc: dc));
+                //// msgs.AddRange(UpdateApplicationSeatIndexesRunOnce(dc: dc));
+                //msgs.AddRange(UpdateSessionActions(dc: dc));
+                //// msgs.AddRange(UpdateActivityGroupsRunOnce(dc: dc));
+                //// msgs.AddRange(UpdateActivities(dc: dc));
+                //msgs.AddRange(UpdateAccountPackages(dc: dc));
+                // msgs.AddRange(UpdateActivitySchedules(dc: dc));
+                //msgs.AddRange(UpdateRegistrantActivities(dc: dc));
+                //// msgs.AddRange(HandleDuplicateRegistrations(dc: dc));
+                //msgs.AddRange(FixMissingMasterRecords(dc: dc));
+                //// msgs.AddRange(FixMessedUpPreferences(dc: dc));
+                // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc: dc));
+                // msgs.AddRange(CreateMasterRecord(dc: dc));
             }
             catch (Exception ex)
             {
@@ -377,20 +377,20 @@ namespace AfterSchoolLibrary
             var gradeLevels = GradeLevel.Load();
             if (gradeLevels.Count == 0)
             {
-                new GradeLevel() { Name = "Pre-K", Abbreviation = "P" }.Save(dc);
-                new GradeLevel() { Name = "Kindergarten", Abbreviation = "K" }.Save(dc);
-                new GradeLevel() { Name = "1st", Abbreviation = "1" }.Save(dc);
-                new GradeLevel() { Name = "2nd", Abbreviation = "2" }.Save(dc);
-                new GradeLevel() { Name = "3rd", Abbreviation = "3" }.Save(dc);
-                new GradeLevel() { Name = "4th", Abbreviation = "4" }.Save(dc);
-                new GradeLevel() { Name = "5th", Abbreviation = "5" }.Save(dc);
-                new GradeLevel() { Name = "6th", Abbreviation = "6" }.Save(dc);
-                new GradeLevel() { Name = "7th", Abbreviation = "7" }.Save(dc);
-                new GradeLevel() { Name = "8th", Abbreviation = "8" }.Save(dc);
-                new GradeLevel() { Name = "9th", Abbreviation = "9" }.Save(dc);
-                new GradeLevel() { Name = "10th", Abbreviation = "10" }.Save(dc);
-                new GradeLevel() { Name = "11th", Abbreviation = "11" }.Save(dc);
-                new GradeLevel() { Name = "12th", Abbreviation = "12" }.Save(dc);
+                new GradeLevel() { Name = "Pre-K", Abbreviation = "P" }.Save(dc: dc);
+                new GradeLevel() { Name = "Kindergarten", Abbreviation = "K" }.Save(dc: dc);
+                new GradeLevel() { Name = "1st", Abbreviation = "1" }.Save(dc: dc);
+                new GradeLevel() { Name = "2nd", Abbreviation = "2" }.Save(dc: dc);
+                new GradeLevel() { Name = "3rd", Abbreviation = "3" }.Save(dc: dc);
+                new GradeLevel() { Name = "4th", Abbreviation = "4" }.Save(dc: dc);
+                new GradeLevel() { Name = "5th", Abbreviation = "5" }.Save(dc: dc);
+                new GradeLevel() { Name = "6th", Abbreviation = "6" }.Save(dc: dc);
+                new GradeLevel() { Name = "7th", Abbreviation = "7" }.Save(dc: dc);
+                new GradeLevel() { Name = "8th", Abbreviation = "8" }.Save(dc: dc);
+                new GradeLevel() { Name = "9th", Abbreviation = "9" }.Save(dc: dc);
+                new GradeLevel() { Name = "10th", Abbreviation = "10" }.Save(dc: dc);
+                new GradeLevel() { Name = "11th", Abbreviation = "11" }.Save(dc: dc);
+                new GradeLevel() { Name = "12th", Abbreviation = "12" }.Save(dc: dc);
             }
 
             Form f = Form.LoadByAccountId(1, dc: dc).FirstOrDefault();
@@ -402,7 +402,7 @@ namespace AfterSchoolLibrary
                 f.LastModifiedBy = f.CreatedBy = 0;
                 f.Name = "Default Form";
                 f.IsActive = true;
-                msgs.AddRange(f.Save(dc));
+                msgs.AddRange(f.Save(dc: dc));
 
                 var questions = new QuestionHolder[]
                 {
@@ -499,7 +499,7 @@ namespace AfterSchoolLibrary
                         group.RegistrantTypeId = question.RegistrantTypeId;
                         group.LastModifiedDate = group.CreateDate = DateTime.UtcNow;
                         group.LastModifiedBy = group.CreatedBy = 0;
-                        msgs.AddRange(group.Save(dc));
+                        msgs.AddRange(group.Save(dc: dc));
 
                         groupDisplayOrder++;
                     }
@@ -521,7 +521,7 @@ namespace AfterSchoolLibrary
                         q.Options = question.Options;
                         q.LastModifiedDate = q.CreateDate = DateTime.UtcNow;
                         q.LastModifiedBy = q.CreatedBy = 0;
-                        msgs.AddRange(q.Save(dc));
+                        msgs.AddRange(q.Save(dc: dc));
 
                         displayOrder++;
                     }
@@ -534,18 +534,18 @@ namespace AfterSchoolLibrary
                 {
                     var passed = 0;
                     //make modifications
-                    var groups = form.GetQuestionGroups(dc);
+                    var groups = form.GetQuestionGroups(dc: dc);
                     foreach (var group in groups)
                     {
                         if (passed > 1)
                         {
                             group.DisplayOrder = group.DisplayOrder + 2;
-                            msgs.AddRange(group.Save(dc));
+                            msgs.AddRange(group.Save(dc: dc));
                         }
                         else if (passed > 0)
                         {
                             group.DisplayOrder = group.DisplayOrder + 1;
-                            msgs.AddRange(group.Save(dc));
+                            msgs.AddRange(group.Save(dc: dc));
                         }
 
                         if (group.Name == "Parent 1 Information" || group.Name == "Parent/Guardian 1")
@@ -568,9 +568,9 @@ namespace AfterSchoolLibrary
                                 newGroup.RegistrantTypeId = RegistrantType.Individual;
                                 newGroup.LastModifiedDate = newGroup.CreateDate = DateTime.UtcNow;
                                 newGroup.LastModifiedBy = newGroup.CreatedBy = 0;
-                                msgs.AddRange(newGroup.Save(dc));
+                                msgs.AddRange(newGroup.Save(dc: dc));
 
-                                var questions = group.GetAllQuestions(dc);
+                                var questions = group.GetAllQuestions(dc: dc);
                                 var i = 0;
                                 foreach (var question in questions)
                                 {
@@ -580,7 +580,7 @@ namespace AfterSchoolLibrary
                                     {
                                         question.FormQuestionGroupId = newGroup.ID;
                                         question.DisplayOrder = i;
-                                        msgs.AddRange(question.Save(dc));
+                                        msgs.AddRange(question.Save(dc: dc));
                                         i++;
                                     }
 
@@ -608,9 +608,9 @@ namespace AfterSchoolLibrary
                                 newGroup.RegistrantTypeId = RegistrantType.Individual;
                                 newGroup.LastModifiedDate = newGroup.CreateDate = DateTime.UtcNow;
                                 newGroup.LastModifiedBy = newGroup.CreatedBy = 0;
-                                msgs.AddRange(newGroup.Save(dc));
+                                msgs.AddRange(newGroup.Save(dc: dc));
 
-                                var questions = group.GetAllQuestions(dc);
+                                var questions = group.GetAllQuestions(dc: dc);
                                 var i = 0;
                                 foreach (var question in questions)
                                 {
@@ -620,7 +620,7 @@ namespace AfterSchoolLibrary
                                     {
                                         question.FormQuestionGroupId = newGroup.ID;
                                         question.DisplayOrder = i;
-                                        msgs.AddRange(question.Save(dc));
+                                        msgs.AddRange(question.Save(dc: dc));
                                         i++;
                                     }
 
@@ -669,7 +669,7 @@ namespace AfterSchoolLibrary
                     location.City = account.City;
                     location.State = account.State;
                     location.PostalCode = account.PostalCode;
-                    msgs.AddRange(location.Save(dc));
+                    msgs.AddRange(location.Save(dc: dc));
                 }
             }
 
@@ -686,7 +686,7 @@ namespace AfterSchoolLibrary
                 if (Enum.TryParse<QuestionGroupDataType>(questionGroup.Name.Replace(" ", ""), out datatype))
                 {
                     questionGroup.QuestionGroupDataTypeId = datatype;
-                    msgs.AddRange(questionGroup.Save(dc));
+                    msgs.AddRange(questionGroup.Save(dc: dc));
                 }
             }
 
@@ -706,7 +706,7 @@ namespace AfterSchoolLibrary
                 {
                     answer.RegistrationId = ra.RegistrationId;
                     answer.QuestionDataTypeId = answer.FormQuestionQuestionDataTypeId;
-                    msgs.AddRange(answer.Save(dc));
+                    msgs.AddRange(answer.Save(dc: dc));
                 }
             }
 
@@ -756,13 +756,13 @@ namespace AfterSchoolLibrary
             var registrants = Registrant.Load(criterias: new Hashtable() { { "IsContactOnly", false } },dc: dc);
             foreach (var registrant in registrants)
             {
-                var registrationCount = registrant.GetRegistrationCount(dc);
-                var activities = registrant.GetActivities(dc);
+                var registrationCount = registrant.GetRegistrationCount(dc: dc);
+                var activities = registrant.GetActivities(dc: dc);
                 if (registrationCount == 0 && activities.Any())
                 {
                     var registration = registrant.AddRegistration(0, registrant.AccountId, null, msgs, dc: dc);
                     registration.CreateDate = registration.LastModifiedDate = registrant.CreateDate;
-                    msgs.AddRange(registration.Save(dc));
+                    msgs.AddRange(registration.Save(dc: dc));
 
                     foreach (var activity in activities)
                     {
@@ -772,21 +772,21 @@ namespace AfterSchoolLibrary
                         if (regactivity.IsNotEmpty())
                         {
                             regactivity.RegistrationId = registration.ID.Value;
-                            msgs.AddRange(regactivity.Save(dc));
+                            msgs.AddRange(regactivity.Save(dc: dc));
 
                             registration.StripeChargeId = regactivity.StripeChargeId;
                             registration.PaymentTypeId = regactivity.PaymentTypeId;
                             registration.PayPalTransactionId = regactivity.PayPalTransactionId;
                             registration.DatePaid = regactivity.DatePaid;
                             registration.AmountPaid = regactivity.AmountPaid;
-                            msgs.AddRange(registration.Save(dc));
+                            msgs.AddRange(registration.Save(dc: dc));
 
-                            var answers = regactivity.GetAnswers(dc);
+                            var answers = regactivity.GetAnswers(dc: dc);
                             foreach (var answer in answers)
                             {
                                 answer.RegistrationId = registration.ID;
                                 answer.QuestionDataTypeId = answer.FormQuestionQuestionDataTypeId;
-                                msgs.AddRange(answer.Save(dc));
+                                msgs.AddRange(answer.Save(dc: dc));
                             }
                         }
                     }
@@ -796,7 +796,7 @@ namespace AfterSchoolLibrary
             var registrations = Registration.Load(criterias: new Hashtable() { { "LastUpdated", DBNull.Value } }, dc: dc);
             foreach(var reg in registrations)
             {
-                var ras = reg.GetRegistrantActivities(dc);
+                var ras = reg.GetRegistrantActivities(dc: dc);
                 if(ras.Any())
                 {
                     var maxdate = ras.Max(x => x.LastModifiedDate.Value);
@@ -807,7 +807,7 @@ namespace AfterSchoolLibrary
                     reg.LastUpdated = reg.LastModifiedDate;
                 }
 
-                msgs.AddRange(reg.Save(dc));
+                msgs.AddRange(reg.Save(dc: dc));
             }
             */
 
@@ -884,7 +884,7 @@ namespace AfterSchoolLibrary
                     property.Value = account.LandingPageText;
                     property.CreateDate = property.LastModifiedDate = DateTime.UtcNow;
                     property.CreatedBy = property.LastModifiedBy = 0;
-                    msgs.AddRange(property.Save(dc));
+                    msgs.AddRange(property.Save(dc: dc));
                 }
             }
             return msgs;
@@ -898,14 +898,14 @@ namespace AfterSchoolLibrary
             foreach (var activity in activities)
             {
                 activity.RegistrationModeId = RegistrationMode.Register;
-                msgs.AddRange(activity.Save(dc));
+                msgs.AddRange(activity.Save(dc: dc));
             }
 
             activities = Activity.Load(criterias: new Hashtable() { { "RegistrationModeId", DBNull.Value } }, dc: dc);
             foreach (var activity in activities)
             {
                 activity.RegistrationModeId = RegistrationMode.Register;
-                msgs.AddRange(activity.Save(dc));
+                msgs.AddRange(activity.Save(dc: dc));
             }
 
             return msgs;
@@ -919,7 +919,7 @@ namespace AfterSchoolLibrary
             activities = activities.Where(x => x.GradeLevelStart.HasValue && x.GradeLevelEnd.HasValue).ToList();
             foreach (var activity in activities)
             {
-                if (activity.GetGradeLevels(dc).Count == 0)
+                if (activity.GetGradeLevels(dc: dc).Count == 0)
                 {
                     for (var i = activity.GradeLevelStart.Value; i <= activity.GradeLevelEnd.Value; i++)
                     {
@@ -1055,7 +1055,7 @@ namespace AfterSchoolLibrary
 
                     if (group.IsEmpty())
                     {
-                        int groupDisplayOrder = f.GetQuestionGroups(dc).Where(x => x.RegistrantTypeId == RegistrantType.Individual).OrderBy(x => x.DisplayOrder).Last().DisplayOrder.Value + 1;
+                        int groupDisplayOrder = f.GetQuestionGroups(dc: dc).Where(x => x.RegistrantTypeId == RegistrantType.Individual).OrderBy(x => x.DisplayOrder).Last().DisplayOrder.Value + 1;
                         group = new FormQuestionGroup();
                         group.Name = question.GroupName;
                         group.FormId = f.ID;
@@ -1063,16 +1063,16 @@ namespace AfterSchoolLibrary
                         group.RegistrantTypeId = question.RegistrantTypeId;
                         group.LastModifiedDate = group.CreateDate = DateTime.UtcNow;
                         group.LastModifiedBy = group.CreatedBy = 0;
-                        msgs.AddRange(group.Save(dc));
+                        msgs.AddRange(group.Save(dc: dc));
                     }
 
                     FormQuestion q = FormQuestion.Load(criterias: new Hashtable() { { "Text", question.Text }, { "FormId", f.ID.Value } }, dc: dc).FirstOrDefault();
                     if (q.IsEmpty())
                     {
                         int displayOrder = 0;
-                        if (group.GetAllQuestions(dc).Any())
+                        if (group.GetAllQuestions(dc: dc).Any())
                         {
-                            displayOrder = group.GetAllQuestions(dc).OrderBy(x => x.DisplayOrder).Last().DisplayOrder.Value + 1;
+                            displayOrder = group.GetAllQuestions(dc: dc).OrderBy(x => x.DisplayOrder).Last().DisplayOrder.Value + 1;
                         }
                         q = new FormQuestion();
                         q.Text = question.Text;
@@ -1089,7 +1089,7 @@ namespace AfterSchoolLibrary
                         q.Link = question.Link;
                         q.LastModifiedDate = q.CreateDate = DateTime.UtcNow;
                         q.LastModifiedBy = q.CreatedBy = 0;
-                        msgs.AddRange(q.Save(dc));
+                        msgs.AddRange(q.Save(dc: dc));
                     }
                 }
             }
@@ -1122,7 +1122,7 @@ namespace AfterSchoolLibrary
                     {
                         index++;
                         ra.ApplicationSeatIndex = index;
-                        msgs.AddRange(ra.Save(dc));
+                        msgs.AddRange(ra.Save(dc: dc));
                     }
                 }
                 else
@@ -1135,7 +1135,7 @@ namespace AfterSchoolLibrary
                         {
                             index++;
                             ra.ApplicationSeatIndex = index;
-                            msgs.AddRange(ra.Save(dc));
+                            msgs.AddRange(ra.Save(dc: dc));
                         }
                     }
                 }
@@ -1155,11 +1155,11 @@ namespace AfterSchoolLibrary
                 var activity = Activity.Load(action.ActivityId.Value, dc: dc);
                 if (activity.IsNotEmpty())
                 {
-                    var regperiod = activity.GetActiveRegistrationPeriod(dc);
+                    var regperiod = activity.GetActiveRegistrationPeriod(dc: dc);
                     if (regperiod.IsNotEmpty())
                     {
                         action.RegistrationPeriodId = regperiod.ID.Value;
-                        msgs.AddRange(action.Save(dc));
+                        msgs.AddRange(action.Save(dc: dc));
                     }
                 }
             }
@@ -1187,30 +1187,30 @@ namespace AfterSchoolLibrary
                     group.Description = period.Description;
                     group.Name = period.Name;
                     group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, dc: dc);
-                    msgs.AddRange(group.Save(dc));
+                    msgs.AddRange(group.Save(dc: dc));
 
                     period.ActivityGroupId = group.ID;
-                    msgs.AddRange(period.Save(dc));
+                    msgs.AddRange(period.Save(dc: dc));
 
-                    var activities = period.GetActivities(dc);
+                    var activities = period.GetActivities(dc: dc);
                     foreach(var activity in activities)
                     {
                         activity.ActivityGroupId = group.ID;
-                        msgs.AddRange(activity.Save(dc));
+                        msgs.AddRange(activity.Save(dc: dc));
                     }
 
                     var registrations = period.GetRegistrations(dc: dc);
                     foreach (var registration in registrations)
                     {
                         registration.ActivityGroupId = group.ID;
-                        msgs.AddRange(registration.Save(dc));
+                        msgs.AddRange(registration.Save(dc: dc));
                     }
 
                     var ras = period.GetRegistrantActivities(dc: dc);
                     foreach (var ra in ras)
                     {
                         ra.ActivityGroupId = group.ID;
-                        msgs.AddRange(ra.Save(dc));
+                        msgs.AddRange(ra.Save(dc: dc));
                     }
 
                     group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", 0, msgs);
@@ -1236,11 +1236,11 @@ namespace AfterSchoolLibrary
             //moving publishing to the actual activity instead of the activity form
             foreach(var activity in activities)
             {
-                var form = activity.GetActiveActivityForm(dc);
+                var form = activity.GetActiveActivityForm(dc: dc);
                 if (form.IsNotEmpty())
                 {
                     activity.IsPublished = form.IsPublished;
-                    msgs.AddRange(activity.Save(dc));
+                    msgs.AddRange(activity.Save(dc: dc));
                 }
             }
 
@@ -1255,7 +1255,7 @@ namespace AfterSchoolLibrary
             foreach (var accountPackage in accountPackages)
             {
                 accountPackage.BillingPeriodTypeId = BillingPeriodType.Month;
-                msgs.AddRange(accountPackage.Save(dc));
+                msgs.AddRange(accountPackage.Save(dc: dc));
             }
 
             return msgs;
@@ -1280,10 +1280,10 @@ namespace AfterSchoolLibrary
                 schedule.AccountId = activity.AccountId;
                 schedule.CreateDate = schedule.LastModifiedDate = DateTime.UtcNow;
                 schedule.CreatedBy = schedule.LastModifiedBy = activity.LastModifiedBy;
-                msgs.AddRange(schedule.Save(dc));
+                msgs.AddRange(schedule.Save(dc: dc));
 
                 activity.ActivityScheduleId = schedule.ID;
-                msgs.AddRange(activity.Save(dc));
+                msgs.AddRange(activity.Save(dc: dc));
             }
             */
 
@@ -1300,7 +1300,7 @@ namespace AfterSchoolLibrary
                 if (activity.ActivityGroupId.HasValue)
                 {
                     item.ActivityGroupId = activity.ActivityGroupId;
-                    msgs.AddRange(item.Save(dc));
+                    msgs.AddRange(item.Save(dc: dc));
                 }
             }
 
@@ -1362,13 +1362,13 @@ namespace AfterSchoolLibrary
                 if (allRelated.Count > 1)
                 {
                     var lastRegistration = allRelated.OrderBy(x => x.CreateDate).Last();
-                    var lastRegistrant = lastRegistration.GetRegistrant(dc);
+                    var lastRegistrant = lastRegistration.GetRegistrant(dc: dc);
 
                     var regActivities = new List<RegistrantActivity>();
                     var registrationActivities = new List<RegistrationActivity>();
                     var distinctActivityIds = new List<int>();
                     var finalActivityIds = new List<int>();
-                    var allRegistrants = allRelated.Select(x => x.GetRegistrant(dc)).ToList();
+                    var allRegistrants = allRelated.Select(x => x.GetRegistrant(dc: dc)).ToList();
                     var studentGrades = allRegistrants.Select(x => x.GetAnswer(QuestionDataType.RegistrantGrade, dc: dc)).DistinctBy(x => x.Text).ToList();
 
                     if (studentGrades.Count != 1)
@@ -1381,8 +1381,8 @@ namespace AfterSchoolLibrary
                     {
                         foreach (var item in allRelated)
                         {
-                            regActivities.AddRange(item.GetRegistrantActivities(dc));
-                            registrationActivities.AddRange(item.GetRegistrationActivities(dc));
+                            regActivities.AddRange(item.GetRegistrantActivities(dc: dc));
+                            registrationActivities.AddRange(item.GetRegistrationActivities(dc: dc));
                         }
 
                         distinctActivityIds = regActivities.Select(x => x.ActivityId.Value).Distinct().ToList();
@@ -1392,7 +1392,7 @@ namespace AfterSchoolLibrary
                         foreach (var activityId in distinctActivityIds)
                         {
                             var activity = Activity.Load(activityId, dc: dc);
-                            var activityGrades = activity.GetGradeLevels(dc).Select(x => x.Name.Trim().ToLower()).ToList();
+                            var activityGrades = activity.GetGradeLevels(dc: dc).Select(x => x.Name.Trim().ToLower()).ToList();
 
                             if (activityGrades.Contains(studentGrades.First().Text.Trim().ToLower()))
                             {
@@ -1418,13 +1418,13 @@ namespace AfterSchoolLibrary
                                 var regActivityToMove = regActivities.Where(x => x.ActivityId == activityId).OrderBy(x => x.CreateDate).FirstOrDefault();
                                 regActivityToMove.RegistrationId = lastRegistration.ID;
                                 regActivityToMove.RegistrantId = lastRegistrant.ID;
-                                msgs.AddRange(regActivityToMove.Save(dc));
+                                msgs.AddRange(regActivityToMove.Save(dc: dc));
 
                                 // move the matching registration
                                 // TODO: probably should cross reference the original registrationId of the regactivity to move with this one that is found
                                 var registrationActivityToMove = registrationActivities.Where(x => x.ActivityId == activityId).OrderBy(x => x.CreateDate).FirstOrDefault();
                                 registrationActivityToMove.RegistrationId = lastRegistration.ID;
-                                msgs.AddRange(registrationActivityToMove.Save(dc));
+                                msgs.AddRange(registrationActivityToMove.Save(dc: dc));
                             }
                         }
 
@@ -1450,35 +1450,35 @@ namespace AfterSchoolLibrary
                         // now delete the other registrants and registrations
                         foreach (var item in allRelated.Where(x => x.ID != lastRegistration.ID))
                         {
-                            var registrant = item.GetRegistrant(dc);
-                            msgs.AddRange(registrant.Delete(dc));
-                            msgs.AddRange(item.Delete(dc));
+                            var registrant = item.GetRegistrant(dc: dc);
+                            msgs.AddRange(registrant.Delete(dc: dc));
+                            msgs.AddRange(item.Delete(dc: dc));
 
                             if (lastRegistration.FirstRegistrationId == item.ID)
                             {
                                 lastRegistration.FirstRegistrationId = null;
-                                msgs.AddRange(lastRegistration.Save(dc));
+                                msgs.AddRange(lastRegistration.Save(dc: dc));
                             }
                             if (lastRegistrant.FirstRegistrantId == registrant.ID)
                             {
                                 lastRegistrant.FirstRegistrantId = null;
-                                msgs.AddRange(lastRegistrant.Save(dc));
+                                msgs.AddRange(lastRegistrant.Save(dc: dc));
                             }
                         }
 
-                        var newRegistrantActivities = lastRegistration.GetRegistrantActivities(dc).OrderBy(x => x.PreferenceNumber).ThenBy(x => x.CreateDate);
+                        var newRegistrantActivities = lastRegistration.GetRegistrantActivities(dc: dc).OrderBy(x => x.PreferenceNumber).ThenBy(x => x.CreateDate);
                         // update preference order
                         int i = 1;
                         foreach(var ra in newRegistrantActivities)
                         {
                             ra.PreferenceNumber = i;
-                            msgs.AddRange(ra.Save(dc));
+                            msgs.AddRange(ra.Save(dc: dc));
                             i++;
                         }
 
                         // check registrations and activities
-                        var newRelatedRegs = lastRegistration.GetRelatedRegistrations(dc).Where(x => x.ActivityGroupId == 175).ToList();
-                        var newRegistrationActivityIds = lastRegistration.GetRegistrationActivities(dc).Select(x => x.ActivityId.Value).ToList();
+                        var newRelatedRegs = lastRegistration.GetRelatedRegistrations(dc: dc).Where(x => x.ActivityGroupId == 175).ToList();
+                        var newRegistrationActivityIds = lastRegistration.GetRegistrationActivities(dc: dc).Select(x => x.ActivityId.Value).ToList();
                         var newRegistrantActivityIds = newRegistrantActivities.Select(x => x.ActivityId.Value).ToList();
 
                         if (newRelatedRegs.Count == 0 &&
@@ -1513,7 +1513,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var registrant = Registrant.Load(5735, dc: dc);
-            var questionIds = registrant.GetAnswers(dc).Select(x => x.FormQuestionId.Value).ToList();
+            var questionIds = registrant.GetAnswers(dc: dc).Select(x => x.FormQuestionId.Value).ToList();
             var questions = FormQuestion.Load(questionIds, dc: dc);
             registrant.CreateMasterCopy(questions, 0, msgs, dc: dc);
             return msgs;
@@ -1532,7 +1532,7 @@ namespace AfterSchoolLibrary
             foreach (var registrant in registrants)
             {
                 var user = WebUser.Load(registrant.WebUserId.Value, dc: dc);
-                if (user.Password.IsNotEmpty() && !user.GetAccounts(dc).Any())
+                if (user.Password.IsNotEmpty() && !user.GetAccounts(dc: dc).Any())
                 {
                     var master = Registrant.Load(
                                                criterias: new Hashtable()
@@ -1545,7 +1545,7 @@ namespace AfterSchoolLibrary
                     if (master.IsNotEmpty() && master.FirstName.ToLower().Trim() != registrant.FirstName.ToLower().Trim())
                     {
                         registrant.ParentRegistrantId = null;
-                        msgs.AddRange(registrant.Save(dc));
+                        msgs.AddRange(registrant.Save(dc: dc));
                     }
                 }
             }
@@ -1561,15 +1561,15 @@ namespace AfterSchoolLibrary
                 var user = WebUser.Load(registrant.WebUserId.Value, dc: dc);
                 if (user.Password.IsNotEmpty())
                 {
-                    var accounts = user.GetAccounts(dc);
+                    var accounts = user.GetAccounts(dc: dc);
                     foreach(var account in accounts)
                     {
-                        msgs.AddRange(account.Delete(dc));
+                        msgs.AddRange(account.Delete(dc: dc));
                     }
                     var awus = AccountWebUser.LoadByWebUserId(user.ID.Value, dc: dc);
                     foreach (var awu in awus)
                     {
-                        msgs.AddRange(awu.Delete(dc));
+                        msgs.AddRange(awu.Delete(dc: dc));
                     }
 
                     var potentialMaster = Registrant.Load(
@@ -1587,11 +1587,11 @@ namespace AfterSchoolLibrary
                     if (potentialMaster.IsNotEmpty())
                     {
                         registrant.ParentRegistrantId = potentialMaster.ID;
-                        msgs.AddRange(registrant.Save(dc));
+                        msgs.AddRange(registrant.Save(dc: dc));
                     }
                     else
                     {
-                        var answers = registrant.GetAnswers(dc);
+                        var answers = registrant.GetAnswers(dc: dc);
                         var questions = FormQuestion.Load(answers.Select(x => x.FormQuestionId.Value).ToList(), dc: dc);
                         var master = registrant.CreateMasterCopy(questions, user.ID.Value, msgs, dc: dc);
                     }
@@ -1653,7 +1653,7 @@ namespace AfterSchoolLibrary
 
             foreach(var question in questions)
             {
-                var currentGroup = question.GetFormQuestionGroup(dc);
+                var currentGroup = question.GetFormQuestionGroup(dc: dc);
                 var newGroup = FormQuestionGroup.LoadByFormId(question.FormId.Value, dc: dc).Find(x => x.QuestionGroupDataTypeId == QuestionGroupDataType.ContactInformation);
 
                 if (currentGroup.IsNotEmpty() && newGroup.IsNotEmpty())

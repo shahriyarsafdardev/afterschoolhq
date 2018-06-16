@@ -127,13 +127,13 @@ namespace AfterSchool.Controllers
 
                         user.FirstName = firstname;
                         user.LastName = lastname;
-                        user.Username = WebUser.GenerateUsername(user.FirstName, user.LastName, adc);
+                        user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, dc: adc);
                         user.IsRegistered = true;
                         user.IsActive = true;
-                        user.Password = WebUser.EncryptPassword(password1);
+                        user.Password = WebUserService.EncryptPassword(password1);
                         amsgs.AddRange(user.Save(adc));
 
-                        var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, adc);
+                        var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: adc);
                         if (awu.IsNotEmpty())
                         {
                             awu.IsActive = true;
@@ -271,7 +271,7 @@ namespace AfterSchool.Controllers
                     {
                         if (Request.QueryString["i"].IsGuid())
                         {
-                            wu = WebUser.LoadByUidByIsActive(Request.QueryString["i"].ToGuid(), false, adc);
+                            wu = WebUser.LoadByUidByIsActive(Request.QueryString["i"].ToGuid(), false, dc: adc);
                         }
                         else
                         {
@@ -281,7 +281,7 @@ namespace AfterSchool.Controllers
                         wu.LastName = Request.Form["lastname"];
                         wu.Email = Request.Form["email"];
                         wu.Username = Request.Form["username"];
-                        wu.Password = WebUser.EncryptPassword(Request.Form["password"]);
+                        wu.Password = WebUserService.EncryptPassword(Request.Form["password"]);
                         wu.TimeZoneId = Request.Form["timezone"].ToDouble();
                         wu.IsActive = true;
                         wu.LastModifiedDate = wu.CreateDate = DateTime.Now;
@@ -406,7 +406,7 @@ namespace AfterSchool.Controllers
             {
                 user.IsRegistered = true;
                 user.IsActive = true;
-                user.Password = WebUser.EncryptPassword(password1);
+                user.Password = WebUserService.EncryptPassword(password1);
                 msgs.AddRange(user.Save());
 
                 user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value);

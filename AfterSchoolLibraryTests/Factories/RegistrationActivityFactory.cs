@@ -14,7 +14,7 @@ namespace AfterSchoolLibraryTests.Factories
         public static RegistrationActivity Create(Activity activity, Registration registration, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new RegistrationActivity() { ActivityId = activity.ID, RegistrationId = registration.ID };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
     }

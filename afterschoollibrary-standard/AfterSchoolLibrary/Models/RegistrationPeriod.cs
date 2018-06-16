@@ -137,9 +137,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public RegistrationPeriod Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public RegistrationPeriod Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return RegistrationPeriod.Load(this.ID.Value, dc: dc);
+			return RegistrationPeriod.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<RegistrationPeriod> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -174,11 +174,11 @@ namespace AfterSchoolLibrary
 
         public string GetStatus(DatabaseConnection dc = null)
         {
-            if (WillOpen(dc))
+            if (WillOpen(dc: dc))
                 return "Not Open";
-            else if (IsOpen(dc))
+            else if (IsOpen(dc: dc))
                 return "Open";
-            else if (IsClosed(dc))
+            else if (IsClosed(dc: dc))
                 return "Closed";
 
             return "N/A";
@@ -245,31 +245,31 @@ namespace AfterSchoolLibrary
 
         public bool IsOpen(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.StartDateTime.Value <= now && this.EndDateTime.Value >= now;
         }
 
         public bool IsClosed(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.EndDateTime.Value < now;
         }
 
         public bool WillOpen(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.StartDateTime.Value > now;
         }
 
         public TimeSpan WillOpenIn(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.StartDateTime.Value - now;
         }
 
         public TimeSpan WillCloseIn(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.EndDateTime.Value - now;
         }
 
@@ -281,7 +281,7 @@ namespace AfterSchoolLibrary
         public List<Activity> GetActivities(DatabaseConnection dc = null)
         {
             return Activity.LoadList(
-                GetActivityRegistrationPeriods(dc)
+                GetActivityRegistrationPeriods(dc: dc)
                     .Select(x => x.ActivityId.Value)
                     .ToList(), dc: dc)
                 .Where(x => x.IsDeleted == false)
@@ -308,11 +308,11 @@ namespace AfterSchoolLibrary
 
             if ((item.IsEmpty() || (item.IsNotEmpty() && !item.IsActive)) && isActive)
             {
-                activity.GetActivityRegistrationPeriods(dc).ForEach(period => {
+                activity.GetActivityRegistrationPeriods(dc: dc).ForEach(period => {
                     period.IsActive = false;
                     period.LastModifiedDate = DateTime.UtcNow;
                     period.LastModifiedBy = loggedInUserId;
-                    msgs.AddRange(period.Save(dc));
+                    msgs.AddRange(period.Save(dc: dc));
                 });
             }
 
@@ -329,12 +329,12 @@ namespace AfterSchoolLibrary
                     CreatedBy = loggedInUserId,
                     LastModifiedBy = loggedInUserId
                 };
-                msgs.AddRange(activityperiod.Save(dc));
+                msgs.AddRange(activityperiod.Save(dc: dc));
             }
             else
             {
                 item.IsActive = isActive;
-                msgs.AddRange(item.Save(dc));
+                msgs.AddRange(item.Save(dc: dc));
             }
 
             return msgs;
@@ -355,7 +355,7 @@ namespace AfterSchoolLibrary
                 Name = newName.IfEmpty(this.Name + " Copy"),
                 StartDateTime = this.StartDateTime
             };
-            msgs.AddRange(period.Save(dc));
+            msgs.AddRange(period.Save(dc: dc));
 
             return period;
         }
@@ -448,9 +448,9 @@ namespace AfterSchoolLibrary
                 }
                 else
                 {
-                    var arps = this.GetActivityRegistrationPeriods(dc).Where(x => x.IsActive).ToList();
+                    var arps = this.GetActivityRegistrationPeriods(dc: dc).Where(x => x.IsActive).ToList();
                     if (arps.Any())
-                        _Account = arps.First().GetActivity(dc).GetAccount(dc);
+                        _Account = arps.First().GetActivity(dc: dc).GetAccount(dc: dc);
                 }
             }
             return _Account;
@@ -460,11 +460,11 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var regPeriod = RegistrationPeriod.Load(id, dc: dc);
-            var account = regPeriod.GetAccount(dc);
+            var account = regPeriod.GetAccount(dc: dc);
             var registrations = new List<Registration>();
 
             if (registrationIds.IsEmpty())
-                registrations = regPeriod.GetGroup(dc).GetRegistrations(dc: dc);
+                registrations = regPeriod.GetGroup(dc: dc).GetRegistrations(dc: dc);
             else
                 registrations = Registration.LoadList(registrationIds, dc: dc);
 

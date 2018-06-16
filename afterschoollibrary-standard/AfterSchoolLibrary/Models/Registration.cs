@@ -202,9 +202,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Registration Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Registration Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Registration.Load(this.ID.Value, dc: dc);
+			return Registration.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static Registration LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -400,7 +400,7 @@ namespace AfterSchoolLibrary
                 this.FirstRegistrationId = firstRegistration.ID;
                 this.LastModifiedBy = 0;
                 this.LastModifiedDate = DateTime.UtcNow;
-                return this.Save(dc);
+                return this.Save(dc: dc);
             }
 
             return new SystemMessages();
@@ -433,7 +433,7 @@ namespace AfterSchoolLibrary
             registration.FirstRegistrationId = this.ID.Value;
             registration.LastModifiedBy = loggedInUserId;
             registration.LastModifiedDate = DateTime.UtcNow;
-            return registration.Save(dc);
+            return registration.Save(dc: dc);
         }
 
         public List<Registration> GetRelatedRegistrations(DatabaseConnection dc = null)
@@ -513,7 +513,7 @@ namespace AfterSchoolLibrary
             answer.QuestionDataTypeId = question.QuestionDataTypeId;
             answer.CreateDate = answer.LastModifiedDate = DateTime.UtcNow;
             answer.CreatedBy = answer.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(answer.Save(dc));
+            msgs.AddRange(answer.Save(dc: dc));
             
             msgs.AddRange(answer.UpdateRegistrantInfo(registrant, dc: dc));
 
@@ -525,14 +525,14 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             // delete previous relationships to old registration
-            msgs.AddRange(ra.DeleteRegistrationActivity(dc));
+            msgs.AddRange(ra.DeleteRegistrationActivity(dc: dc));
 
             // move to new registrant and registration
             ra.RegistrantId = this.RegistrantId;
             ra.RegistrationId = this.ID;
             ra.LastModifiedBy = loggedInUserId;
             ra.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(ra.Save(dc));
+            msgs.AddRange(ra.Save(dc: dc));
 
             // add to this registration record 
             // TODO: hopefully will remove this in the future, the whole registration activity object :(
@@ -553,7 +553,7 @@ namespace AfterSchoolLibrary
                 ra.RegistrationId = this.ID;
                 ra.CreateDate = DateTime.UtcNow;
                 ra.CreatedBy = loggedInUserId;
-                msgs.AddRange(ra.Save(dc));
+                msgs.AddRange(ra.Save(dc: dc));
             }
 
             return msgs;
@@ -607,7 +607,7 @@ namespace AfterSchoolLibrary
             var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.RegistrantId.Value, dc: dc);
             if (ra.IsNotEmpty())
             {
-                msgs.AddRange(ra.CancelRegistration(dc));
+                msgs.AddRange(ra.CancelRegistration(dc: dc));
             }
 
             return msgs;
@@ -618,7 +618,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             this.LastUpdated = DateTime.UtcNow;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             return msgs;
         }
@@ -630,7 +630,7 @@ namespace AfterSchoolLibrary
             {
                 var showChoice = registrantActivities.Where(x => x.PreferenceNumber != ra.PreferenceNumber).Any();
                 var activityname = "";
-                activityname = ra.ToActivity().GetDaysOfTheWeek(dc).Select(x => x.ToString()).ToStringList(", ", " & ") + ": ";
+                activityname = ra.ToActivity().GetDaysOfTheWeek(dc: dc).Select(x => x.ToString()).ToStringList(", ", " & ") + ": ";
                 activityname += ra.ActivityName;
                 if (showChoice) activityname += " (" + ra.PreferenceNumber.Value.ToOrdinal() + " Choice)";
                 activities += string.Format("<li>{0}</li>", activityname);
@@ -647,9 +647,9 @@ namespace AfterSchoolLibrary
             var registrantActivities = RegistrantActivity.LoadByRegistrationId(reg.ID.Value, dc: dc)
                 .OrderBy(x => x.PreferenceNumber)
                 .ToList();
-            var account = reg.GetAccount(dc);
-            var group = reg.GetActivityGroup(dc);
-            var registrant = reg.GetRegistrant(dc);
+            var account = reg.GetAccount(dc: dc);
+            var group = reg.GetActivityGroup(dc: dc);
+            var registrant = reg.GetRegistrant(dc: dc);
             AccountProperty thankyou = null;
 
             var reservedRas = registrantActivities.Where(x => x.NumberOfSeats > 0)
@@ -786,7 +786,7 @@ namespace AfterSchoolLibrary
                     this.DatePaid = DateTime.UtcNow;
                     this.AmountPaid = costPerRegistrant;
                     this.PaymentTypeId = PaymentType.CreditCard;
-                    msgs.AddRange(this.Save(dc));
+                    msgs.AddRange(this.Save(dc: dc));
 
                 }
                 catch (Stripe.StripeException ex)
@@ -1138,7 +1138,7 @@ namespace AfterSchoolLibrary
 
         public SystemMessages CancelAll(DatabaseConnection dc = null)
         {
-            return this.DeleteWithRelatedRecords(dc);
+            return this.DeleteWithRelatedRecords(dc: dc);
         }
 
         public static List<Registration> LoadByRegistrationPeriodId(int RegistrationPeriodId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -1255,7 +1255,7 @@ namespace AfterSchoolLibrary
 
             if (reportType != RegistrationReportType.SingleActivity)
             {
-                registrations.ForEach(registration => allRegistrations.AddRange(registration.GetRelatedRegistrations(dc)));
+                registrations.ForEach(registration => allRegistrations.AddRange(registration.GetRelatedRegistrations(dc: dc)));
 
                 var firstRegistrations = allRegistrations.Where(x => !x.FirstRegistrationId.HasValue).ToList();
                 var registrantIds = allRegistrations.Select(x => x.RegistrantId.Value).ToList();
@@ -1289,7 +1289,7 @@ namespace AfterSchoolLibrary
                 allDayActivities = Activity.GetByActivitiesByRegistrants(allActivityIds, registrantIds, DayOfWeekASL.NotSet, regStatus, groupIds, dc: dc);
 
                 // preload days for each activity (trying to find a faster way to do this)
-                allDayActivities.ForEach(x => x.GetDays(dc));
+                allDayActivities.ForEach(x => x.GetDays(dc: dc));
 
                 loopingRegistrations = firstRegistrations;
             }
@@ -1480,7 +1480,7 @@ namespace AfterSchoolLibrary
 
             days.ForEach(day =>
             {
-                var dayActivities = allDayActivities.Where(x => activityIds.Contains(x.ID.Value) && x.GetDaysOfTheWeek(dc).Contains(day));
+                var dayActivities = allDayActivities.Where(x => activityIds.Contains(x.ID.Value) && x.GetDaysOfTheWeek(dc: dc).Contains(day));
                 if (dayActivities.Any())
                     row.Add(dayActivities.Select(x => x.Name).ToStringList(", "));
                 else
@@ -1548,13 +1548,13 @@ namespace AfterSchoolLibrary
 
         public bool IsRegisteredFor(Activity activity, DayOfWeekASL day, DatabaseConnection dc = null)
         {
-            return this.GetRegistrantActivities(dc).Where(x => x.ActivityId.Value == activity.ID.Value && x.Day == day).Count() > 0;
+            return this.GetRegistrantActivities(dc: dc).Where(x => x.ActivityId.Value == activity.ID.Value && x.Day == day).Count() > 0;
         }
         public bool IsRegisteredFor(Activity activity, DatabaseConnection dc = null)
         {
             if (activity.GetDays().Count == 1)
             {
-                return this.GetRegistrantActivities(dc).Where(x => x.ActivityId.Value == activity.ID.Value && activity.GetDaysOfTheWeek().First() == x.Day).Count() > 0;
+                return this.GetRegistrantActivities(dc: dc).Where(x => x.ActivityId.Value == activity.ID.Value && activity.GetDaysOfTheWeek().First() == x.Day).Count() > 0;
             }
             return false;
         }
@@ -1743,7 +1743,7 @@ namespace AfterSchoolLibrary
                 {
                     // reset the first registration id
                     laterReg.FirstRegistrationId = null;
-                    laterReg.Save(dc);
+                    laterReg.Save(dc: dc);
 
                     msgs.AddRange(laterReg.FindAndSetFirstRegistration(laterReg.RegistrantFirstName, laterReg.RegistrantLastName, laterReg.RegistrantEmail, dc: dc));
                 }

@@ -138,9 +138,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityFile Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityFile Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityFile.Load(this.ID.Value, dc: dc);
+			return ActivityFile.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityFile> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

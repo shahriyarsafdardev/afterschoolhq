@@ -137,9 +137,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public FormQuestionGroup Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public FormQuestionGroup Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return FormQuestionGroup.Load(this.ID.Value, dc: dc);
+			return FormQuestionGroup.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<FormQuestionGroup> LoadByFormId(int FormId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -169,16 +169,16 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            var questions = this.GetAllQuestions(dc).Where(x => x.DisplayOrder >= atIndex).OrderBy(x => x.DisplayOrder).ToList();
+            var questions = this.GetAllQuestions(dc: dc).Where(x => x.DisplayOrder >= atIndex).OrderBy(x => x.DisplayOrder).ToList();
             foreach(var item in questions)
             {
                 item.DisplayOrder = item.DisplayOrder + 1;
-                msgs.AddRange(item.Save(dc));
+                msgs.AddRange(item.Save(dc: dc));
             }
 
             question.FormQuestionGroupId = this.ID;
             question.DisplayOrder = atIndex;
-            msgs.AddRange(question.Save(dc));
+            msgs.AddRange(question.Save(dc: dc));
 
             return msgs;
         }
@@ -189,13 +189,13 @@ namespace AfterSchoolLibrary
 
             question.FormQuestionGroupId = null;
             question.DisplayOrder = null;
-            msgs.AddRange(question.Save(dc));
+            msgs.AddRange(question.Save(dc: dc));
 
-            var questions = this.GetAllQuestions(dc).OrderBy(x => x.DisplayOrder).ToList();
+            var questions = this.GetAllQuestions(dc: dc).OrderBy(x => x.DisplayOrder).ToList();
             for (var i = 0; i < questions.Count; i++)
             {
                 questions[i].DisplayOrder = i;
-                msgs.AddRange(questions[i].Save(dc));
+                msgs.AddRange(questions[i].Save(dc: dc));
             }
 
             return msgs;

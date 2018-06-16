@@ -14,13 +14,13 @@ namespace AfterSchoolLibraryTests.Factories
         public static PaymentPlan Create(Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new PaymentPlan() { ActivityId = activity.ID, TotalPeriods = 5, CostPerPeriod = 30 };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static PaymentPlan Create(Activity activity, int totalPeriods, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var obj = new PaymentPlan() { ActivityId = activity.ID, TotalPeriods = totalPeriods, CostPerPeriod = costPerPeriod };
-            msgs.AddRange(obj.Save(dc));
+            msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
     }

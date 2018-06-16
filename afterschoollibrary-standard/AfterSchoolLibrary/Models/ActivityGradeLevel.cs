@@ -130,9 +130,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityGradeLevel Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityGradeLevel Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityGradeLevel.Load(this.ID.Value, dc: dc);
+			return ActivityGradeLevel.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityGradeLevel> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

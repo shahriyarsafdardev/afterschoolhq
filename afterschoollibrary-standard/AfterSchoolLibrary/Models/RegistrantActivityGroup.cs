@@ -170,9 +170,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public RegistrantActivityGroup Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public RegistrantActivityGroup Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return RegistrantActivityGroup.Load(this.ID.Value, dc: dc);
+			return RegistrantActivityGroup.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static RegistrantActivityGroup LoadByActivityGroupIdByRegistrantId(int ActivityGroupId, int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -232,14 +232,14 @@ namespace AfterSchoolLibrary
 
         public string GetInviteUrl(DatabaseConnection dc = null)
         {
-            var url = this.GetGroup(dc).HomePageUrl;
+            var url = this.GetGroup(dc: dc).HomePageUrl;
             url += (url.Contains("?") ? "&" : "?") + "invite=" + this.Uid.ToString();
             return url;
         }
 
         public string GetDeclineUrl(DatabaseConnection dc= null)
         {
-            return GetInviteUrl(dc) + "&decline=1";
+            return GetInviteUrl(dc: dc) + "&decline=1";
         }
 
         private ActivityGroup _Group = null;

@@ -346,9 +346,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Activity Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Activity Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Activity.Load(this.ID.Value, dc: dc);
+			return Activity.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<Activity> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -560,12 +560,12 @@ namespace AfterSchoolLibrary
             if (!this.ActivityGroupId.HasValue)
             {
                 totalFields++;
-                if (this.GetActiveRegistrationPeriod(dc).IsEmpty())
+                if (this.GetActiveRegistrationPeriod(dc: dc).IsEmpty())
                 {
                     totalErrors++;
                 }
                 totalFields++;
-                if (this.GetActiveActivityForm(dc).IsEmpty())
+                if (this.GetActiveActivityForm(dc: dc).IsEmpty())
                 {
                     totalErrors++;
                 }
@@ -677,12 +677,12 @@ namespace AfterSchoolLibrary
             this.IsPublished = isPublished;
             this.LastModifiedBy = loggedInUserId;
             this.LastModifiedDate = DateTime.UtcNow;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
             
             // DEPRECATED
             if (!this.IsChildActivity)
             {
-                var childActivities = this.GetChildActivities(dc);
+                var childActivities = this.GetChildActivities(dc: dc);
                 foreach (var a in childActivities)
                 {
                     msgs.AddRange(a.SetIsPublished(isPublished, loggedInUserId, dc: dc));
@@ -713,7 +713,7 @@ namespace AfterSchoolLibrary
 
         public List<DayOfWeekASL> GetDaysOfTheWeek(DatabaseConnection dc = null)
         {
-            if (this.GetSchedule(dc: dc)?.GetDaysOfTheWeek(dc).Any() ?? false)
+            if (this.GetSchedule(dc: dc)?.GetDaysOfTheWeek(dc: dc).Any() ?? false)
                 return this.GetSchedule(dc: dc)?.GetDaysOfTheWeek();
 
             return new List<DayOfWeekASL>();
@@ -721,7 +721,7 @@ namespace AfterSchoolLibrary
 
         public List<Registrant> GetRegistrants(DatabaseConnection dc = null)
         {
-            return GetRegistrantActivities(dc).Select(x => x.ToRegistrant()).ToList();
+            return GetRegistrantActivities(dc: dc).Select(x => x.ToRegistrant()).ToList();
         }
 
         public List<RegistrantActivity> GetRegistrantActivities(DatabaseConnection dc = null)
@@ -757,17 +757,17 @@ namespace AfterSchoolLibrary
 
         public bool IsFull(DatabaseConnection dc = null)
         {
-            return this.GetSeatsRemaining(dc) == 0;
+            return this.GetSeatsRemaining(dc: dc) == 0;
         }
 
         public bool IsWaitingListFull(DatabaseConnection dc = null)
         {
-            return this.GetWaitingListSeatsRemaining(dc) == 0;
+            return this.GetWaitingListSeatsRemaining(dc: dc) == 0;
         }
 
         public bool HasGradeLevel(GradeLevel grade, DatabaseConnection dc = null)
         {
-            return GetGradeLevels(dc).Where(x => x.ID.Value == grade.ID.Value).Count() > 0;
+            return GetGradeLevels(dc: dc).Where(x => x.ID.Value == grade.ID.Value).Count() > 0;
         }
 
         private List<GradeLevel> _GradeLevels = null;
@@ -791,7 +791,7 @@ namespace AfterSchoolLibrary
 
         public Form GetActiveForm(DatabaseConnection dc = null)
         {
-            var af = GetActiveActivityForm(dc);
+            var af = GetActiveActivityForm(dc: dc);
             if (af.IsEmpty())
                 return null;
 
@@ -846,7 +846,7 @@ namespace AfterSchoolLibrary
 
         public List<RegistrationPeriod> GetRegistrationPeriods(DatabaseConnection dc = null)
         {
-            return GetActivityRegistrationPeriods(dc).Select(x => x.ToRegistrationPeriod()).ToList();
+            return GetActivityRegistrationPeriods(dc: dc).Select(x => x.ToRegistrationPeriod()).ToList();
         }
 
         public List<RegistrationPeriod> GetUpcomingRegistrationPeriods(DatabaseConnection dc = null)
@@ -861,9 +861,9 @@ namespace AfterSchoolLibrary
 
         public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(DatabaseConnection dc = null)
         {
-            var period = this.GetCurrentRegistrationPeriod(dc);
+            var period = this.GetCurrentRegistrationPeriod(dc: dc);
             if (period.IsEmpty())
-                return GetUpcomingRegistrationPeriods(dc).FirstOrDefault();
+                return GetUpcomingRegistrationPeriods(dc: dc).FirstOrDefault();
 
             return period;
         }
@@ -951,10 +951,10 @@ namespace AfterSchoolLibrary
             activity.CreatedBy = loggedInUserId;
             activity.LastModifiedDate = DateTime.UtcNow;
             activity.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(activity.Save(dc));
+            msgs.AddRange(activity.Save(dc: dc));
 
             //link activity with form for the parent activity
-            var parentActivityForm = this.GetActiveActivityForm(dc);
+            var parentActivityForm = this.GetActiveActivityForm(dc: dc);
             activity.AddFormAndActivitate(parentActivityForm.ToForm(true, dc: dc), loggedInUserId, parentActivityForm.IsPublished, msgs, dc: dc);
 
             //will use same team permissions as parent
@@ -989,7 +989,7 @@ namespace AfterSchoolLibrary
                         if (formToUse.IsEmpty())
                             formToUse = account.GetDefaultForm(adc);
 
-                        activity.AddFormAndActivitate(formToUse, loggedInUserId, false, amsgs, adc);
+                        activity.AddFormAndActivitate(formToUse, loggedInUserId, false, amsgs, dc: adc);
                     }
                     //copy form completely
                     else
@@ -1000,8 +1000,8 @@ namespace AfterSchoolLibrary
                         else
                             formToCopy = account.GetDefaultForm(adc);
 
-                        var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, amsgs, adc);
-                        activity.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, adc);
+                        var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, amsgs, dc: adc);
+                        activity.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, dc: adc);
                     }
 
                     // copy team and permissions
@@ -1013,8 +1013,8 @@ namespace AfterSchoolLibrary
                         //copy registration period if doesn't have activity groups
                         if (!account.HasFeature(FeatureType.ManageActivityGroups, adc))
                         {
-                            var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, string.Format("{0} - Reg Window", activity.Name), adc);
-                            RegistrationPeriod newPeriod = activePeriod.Copy(periodName, loggedInUserId, amsgs, adc);
+                            var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, string.Format("{0} - Reg Window", activity.Name), dc: adc);
+                            RegistrationPeriod newPeriod = activePeriod.Copy(periodName, loggedInUserId, amsgs, dc: adc);
                             amsgs.AddRange(newPeriod.AddActivity(activity, true, loggedInUserId, adc));
                         }
                         else
@@ -1047,7 +1047,7 @@ namespace AfterSchoolLibrary
 
                     // copy grades
                     this.GetGradeLevels(adc).ForEach(grade => {
-                        activity.AddGrade(grade.ID.Value, loggedInUserId, amsgs, adc);
+                        activity.AddGrade(grade.ID.Value, loggedInUserId, amsgs, dc: adc);
                     });
 
                     // NOTE: copy schedule?
@@ -1069,15 +1069,15 @@ namespace AfterSchoolLibrary
         public SystemMessages CopyDefaultForm(int loggedInUserId, DatabaseConnection dc = null)
         {
             SystemMessages msgs = new SystemMessages();
-            if(this.GetActiveForm(dc).IsEmpty())
+            if(this.GetActiveForm(dc: dc).IsEmpty())
             {
-                var account = this.GetAccount(dc);
-                var formToCopy = account.GetDefaultForm(dc);
+                var account = this.GetAccount(dc: dc);
+                var formToCopy = account.GetDefaultForm(dc: dc);
                 var newForm = formToCopy.Copy(loggedInUserId, this.AccountId.Value, msgs, dc: dc);
                 var af = this.AddFormAndActivitate(newForm, loggedInUserId, false, msgs, dc: dc);
 
                 account.DefaultFormId = af.FormId;
-                msgs.AddRange(account.Save(dc));
+                msgs.AddRange(account.Save(dc: dc));
             }
 
             return msgs;
@@ -1088,11 +1088,11 @@ namespace AfterSchoolLibrary
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             //deactivate all other ones
-            var afs = this.GetActivityForms(dc);
+            var afs = this.GetActivityForms(dc: dc);
             foreach(var item in afs)
             {
                 item.IsActive = false;
-                msgs.AddRange(item.Save(dc));
+                msgs.AddRange(item.Save(dc: dc));
             }
 
             var af = ActivityForm.LoadByActivityIdByFormId(this.ID.Value, form.ID.Value, dc: dc);
@@ -1112,7 +1112,7 @@ namespace AfterSchoolLibrary
             af.LastModifiedDate = DateTime.UtcNow;
             af.LastModifiedBy = loggedInUserId;
             af.IsActive = true;
-            msgs.AddRange(af.Save(dc));
+            msgs.AddRange(af.Save(dc: dc));
 
             return af;
         }
@@ -1487,7 +1487,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             var gradeIdsList = gradeIds.IsEmpty() ? new List<int>() : gradeIds.Split(',').Select(x => x.ToInteger()).ToList();
-            var currentGrades = this.GetGradeLevels(dc);
+            var currentGrades = this.GetGradeLevels(dc: dc);
 
             currentGrades
                 .Where(x => !gradeIdsList.Contains(x.ID.Value))
@@ -1547,7 +1547,7 @@ namespace AfterSchoolLibrary
 
                 // always be sure to associate the schedule id with the current activity
                 this.ActivityScheduleId = sched.ID.Value;
-                msgs.AddRange(this.Save(dc));
+                msgs.AddRange(this.Save(dc: dc));
             }
 
             return msgs;
@@ -1561,7 +1561,7 @@ namespace AfterSchoolLibrary
             newDay.ActivityId = this.ID;
             newDay.CreateDate = newDay.LastModifiedDate = DateTime.UtcNow;
             newDay.CreatedBy = newDay.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(newDay.Save(dc));
+            msgs.AddRange(newDay.Save(dc: dc));
             return newDay;
         }
 
@@ -1569,14 +1569,14 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var daysList = days.Split(',').Select(x => (DayOfWeekASL)x.ToInteger()).ToList();
-            var currentDaysOfWeek = this.GetDaysOfTheWeek(dc);
-            var currentDays = this.GetDays(dc);
+            var currentDaysOfWeek = this.GetDaysOfTheWeek(dc: dc);
+            var currentDays = this.GetDays(dc: dc);
 
             // delete days
             currentDaysOfWeek
                 .Where(x => !daysList.Contains(x))
                 .ToList()
-                .ForEach(day => msgs.AddRange(currentDays.Where(x => x.Day == day).First().Delete(dc)));
+                .ForEach(day => msgs.AddRange(currentDays.Where(x => x.Day == day).First().Delete(dc: dc)));
 
             // add days
             daysList
@@ -1617,7 +1617,7 @@ namespace AfterSchoolLibrary
                     period.EndDateTime = string.Format("{0} {1}", registrationclosedate, registrationclosetime).ToDateTime();
                     period.LastModifiedDate = DateTime.UtcNow;
                     period.LastModifiedBy = loggedInUserId;
-                    msgs.AddRange(period.Save(dc));
+                    msgs.AddRange(period.Save(dc: dc));
                 }
                 msgs.AddRange(period.AddActivity(this, true, loggedInUserId, dc: dc));
             }
@@ -1636,7 +1636,7 @@ namespace AfterSchoolLibrary
             }
 
             //add account admins to activity
-            account.GetAccountOwnersAndAdmins(dc)
+            account.GetAccountOwnersAndAdmins(dc: dc)
                 .ForEach(user => this.AddTeamMember(user.ID.Value, true, loggedInUserId, msgs, dc: dc));
 
             return msgs;
@@ -1645,7 +1645,7 @@ namespace AfterSchoolLibrary
         private SystemMessages SetupNewForm(int formId, Account account, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var activeForm = this.GetActiveActivityForm(dc);
+            var activeForm = this.GetActiveActivityForm(dc: dc);
 
             //already has created a form, no need to copy it again
             if (activeForm.IsEmpty() || activeForm.FormId != formId)
@@ -1658,17 +1658,17 @@ namespace AfterSchoolLibrary
                     //deactivate old form
                     isPublished = activeForm.IsPublished;
                     activeForm.IsActive = false;
-                    msgs.AddRange(activeForm.Save(dc));
+                    msgs.AddRange(activeForm.Save(dc: dc));
                 }
 
                 Form newForm = null;
                 if (formId == 0)
                 {
                     //if creating a new form, copy from the default form
-                    var defaultForm = account.GetDefaultForm(dc);
+                    var defaultForm = account.GetDefaultForm(dc: dc);
                     newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, dc: dc);
                     newForm.Name = (this.Name + " Form").MaxChars(100, "...");
-                    msgs.AddRange(newForm.Save(dc));
+                    msgs.AddRange(newForm.Save(dc: dc));
                 }
                 else
                 {
@@ -1682,15 +1682,15 @@ namespace AfterSchoolLibrary
                     this.AddFormAndActivitate(newForm, loggedInUserId, isPublished, msgs, dc: dc);
 
                     //add to children
-                    var children = this.GetChildActivities(dc);
+                    var children = this.GetChildActivities(dc: dc);
                     foreach (var child in children)
                     {
                         //deactivate old form
-                        var childActiveForm = child.GetActiveActivityForm(dc);
+                        var childActiveForm = child.GetActiveActivityForm(dc: dc);
                         if (childActiveForm.IsNotEmpty())
                         {
                             childActiveForm.IsActive = false;
-                            msgs.AddRange(childActiveForm.Save(dc));
+                            msgs.AddRange(childActiveForm.Save(dc: dc));
                         }
                         child.AddFormAndActivitate(newForm, loggedInUserId, isPublished, msgs, dc: dc);
                     }
@@ -1707,7 +1707,7 @@ namespace AfterSchoolLibrary
             var schedule = ActivitySchedule.CreateNew(scheduleName, details, repeatsWeekly, startDate, endDate, dailyStartTime, dailyEndTime, scheduleDates, accountId, loggedInUserId, this.ActivityGroupId, msgs, dc: dc);
 
             this.ActivityScheduleId = schedule.ID;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             return schedule;
         }
@@ -1721,7 +1721,7 @@ namespace AfterSchoolLibrary
             period.AccountId = accountId;
             period.CreateDate = period.LastModifiedDate = DateTime.UtcNow;
             period.CreatedBy = period.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(period.Save(dc));
+            msgs.AddRange(period.Save(dc: dc));
 
             msgs.AddRange(period.AddActivity(this, true, loggedInUserId, dc: dc));
 
@@ -1738,7 +1738,7 @@ namespace AfterSchoolLibrary
             teammember.CreatedBy = loggedInUserId;
             teammember.LastModifiedDate = DateTime.UtcNow;
             teammember.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(teammember.Save(dc));
+            msgs.AddRange(teammember.Save(dc: dc));
 
             return teammember;
         }
@@ -1749,7 +1749,7 @@ namespace AfterSchoolLibrary
             var activityGrade = ActivityGradeLevel.LoadByActivityIdByGradeLevelId(this.ID.Value, grade.ID.Value, dc: dc);
             if (activityGrade.IsNotEmpty())
             {
-                msgs.AddRange(activityGrade.Delete(dc));
+                msgs.AddRange(activityGrade.Delete(dc: dc));
             }
             return msgs;
         }
@@ -1765,7 +1765,7 @@ namespace AfterSchoolLibrary
                 activityGrade.GradeLevelId = gradeId;
                 activityGrade.CreateDate = DateTime.UtcNow;
                 activityGrade.CreatedBy = loggedInUserId;
-                msgs.AddRange(activityGrade.Save(dc));
+                msgs.AddRange(activityGrade.Save(dc: dc));
             }
 
             return activityGrade;
@@ -1777,7 +1777,7 @@ namespace AfterSchoolLibrary
             this.IsDeleted = true;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
             return msgs;
         }
 
@@ -1787,7 +1787,7 @@ namespace AfterSchoolLibrary
             this.IsArchived = true;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
             return msgs;
         }
 
@@ -1797,7 +1797,7 @@ namespace AfterSchoolLibrary
             this.IsArchived = false;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
             return msgs;
         }
 
@@ -1830,7 +1830,7 @@ namespace AfterSchoolLibrary
             ap.Value = value;
             ap.LastModifiedDate = DateTime.UtcNow;
             ap.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(ap.Save(dc));
+            msgs.AddRange(ap.Save(dc: dc));
 
             return ap;
         }
@@ -1855,7 +1855,7 @@ namespace AfterSchoolLibrary
 
         public AccountProperty GetActivityProperty(AccountPropertyType propertyType, DatabaseConnection dc = null)
         {
-            return GetActivityProperties(dc)?.Find(x => x.AccountPropertyTypeId == propertyType); 
+            return GetActivityProperties(dc: dc)?.Find(x => x.AccountPropertyTypeId == propertyType); 
         }
 
         private List<AccountProperty> _Properties = null;
@@ -2018,7 +2018,7 @@ namespace AfterSchoolLibrary
 
         public bool IsInSession(DatabaseConnection dc = null)
         {
-            var account = this.GetAccount(dc);
+            var account = this.GetAccount(dc: dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
             var instances = this.GetSchedule(dc: dc).GetInstances(dc: dc);
             return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
@@ -2026,7 +2026,7 @@ namespace AfterSchoolLibrary
 
         public bool WillBeInSession(DatabaseConnection dc = null)
         {
-            var account = this.GetAccount(dc);
+            var account = this.GetAccount(dc: dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
             var instances = this.GetSchedule(dc: dc).GetInstances(dc: dc);
             return now < instances.First().StartDateTime;
@@ -2034,7 +2034,7 @@ namespace AfterSchoolLibrary
 
         public bool IsOutOfSession(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             var instances = this.GetSchedule(dc: dc).GetInstances(dc: dc);
             return now > instances.Last().StartDateTime;
         }
@@ -2053,13 +2053,13 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var activity = Activity.Load(activityId, dc: dc);
-            var registrants = activity.GetRegistrants(dc);
+            var registrants = activity.GetRegistrants(dc: dc);
 
             string subject = $"{activity.Name} Registration Summary Report";
             string body = $"<p>{activity.ContactName},</p><p>Here's your registration summary report for <strong>{activity.Name}</strong>. You have <strong>{registrants.Count.ToString()}</strong> registrations.</p>";
 
             msgs.AddRange(Registration.EmailCSVReport(
-                activity.GetAccount(dc).ID.Value, 
+                activity.GetAccount(dc: dc).ID.Value, 
                 null,
                 null,
                 activity.ActivityGroupId.HasValue ? activity.ActivityGroupId.Value.AsList() : null, 

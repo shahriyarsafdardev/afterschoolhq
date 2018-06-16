@@ -147,9 +147,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public PaymentPlan Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public PaymentPlan Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return PaymentPlan.Load(this.ID.Value, dc: dc);
+			return PaymentPlan.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		

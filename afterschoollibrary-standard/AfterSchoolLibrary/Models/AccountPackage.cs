@@ -191,9 +191,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public AccountPackage Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public AccountPackage Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountPackage.Load(this.ID.Value, dc: dc);
+			return AccountPackage.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<AccountPackage> LoadByPackageId(int PackageId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -237,12 +237,12 @@ namespace AfterSchoolLibrary
 
         public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Count() > 0;
+            return this.GetFeatures(dc: dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Count() > 0;
         }
 
         public AccountPackageFeature GetFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
+            return this.GetFeatures(dc: dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
         }
         
         public SystemMessages AddPackageFeature(PackageFeature pf, int loggedInUserId, DatabaseConnection dc = null)
@@ -259,7 +259,7 @@ namespace AfterSchoolLibrary
                 apf.CreatedBy = loggedInUserId;
                 apf.LastModifiedDate = DateTime.UtcNow;
                 apf.LastModifiedBy = loggedInUserId;
-                msgs.AddRange(apf.Save(dc));
+                msgs.AddRange(apf.Save(dc: dc));
             }
             return msgs;
         }
@@ -279,12 +279,12 @@ namespace AfterSchoolLibrary
         {
             this.IsActive = false;
             this.EndDate = DateTime.UtcNow;
-            return this.Save(dc);
+            return this.Save(dc: dc);
         }
 
         public SystemMessages CancelPackageWithStripe(string stripeCustomerId, DatabaseConnection dc = null)
         {
-            var msgs = this.CancelPackage(dc);
+            var msgs = this.CancelPackage(dc: dc);
 
             if(!this.StripeSubscriptionId.IsEmpty())
             {
@@ -306,7 +306,7 @@ namespace AfterSchoolLibrary
         {
             SystemMessages msgs = new SystemMessages();
 
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             if (!stripeCustomerId.IsEmpty())
             {
@@ -326,7 +326,7 @@ namespace AfterSchoolLibrary
 
                         var subscription = service.Create(stripeCustomerId, this.ToPackage().GetStripePlanId(this.BillingPeriodTypeId), options);
                         this.StripeSubscriptionId = subscription.Id;
-                        msgs.AddRange(this.Save(dc));
+                        msgs.AddRange(this.Save(dc: dc));
                     }
                     else
                     {
@@ -431,7 +431,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             this.TrialEndDate = TrialStartDate.Value.AddDays(trialDays);
-            msgs.AddRange(this.Save(dc));
+            msgs.AddRange(this.Save(dc: dc));
 
             return msgs;
         }

@@ -146,9 +146,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityRegistrationPeriod Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityRegistrationPeriod Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityRegistrationPeriod.Load(this.ID.Value, dc: dc);
+			return ActivityRegistrationPeriod.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityRegistrationPeriod> LoadByRegistrationPeriodId(int RegistrationPeriodId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

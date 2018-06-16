@@ -140,9 +140,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ActivityPayment Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ActivityPayment Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ActivityPayment.Load(this.ID.Value, dc: dc);
+			return ActivityPayment.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ActivityPayment> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

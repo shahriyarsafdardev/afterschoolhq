@@ -407,15 +407,15 @@ namespace AfterSchool.Controllers
                             // is existing registration
                             if (reg.IsGuid())
                             {
-                                registration = Registration.LoadByUid(reg.ToGuid(), adc);
+                                registration = Registration.LoadByUid(reg.ToGuid(), dc: adc);
                                 registrant = registration.GetRegistrant(adc);
                                 existingAnswers = registration.GetAnswers(adc);
                                 activityGroup = registration.GetActivityGroup(adc);
                             }
                             else
                             {
-                                registrant = account.AddRegistrant(loggedInUserId, registrantTypeId, false, amsgs, adc);
-                                registration = registrant.AddRegistration(loggedInUserId, account.ID, groupId, amsgs, adc);
+                                registrant = account.AddRegistrant(loggedInUserId, registrantTypeId, false, amsgs, dc: adc);
+                                registration = registrant.AddRegistration(loggedInUserId, account.ID, groupId, amsgs, dc: adc);
                             }
 
                             // save answers to the current registrant
@@ -474,7 +474,7 @@ namespace AfterSchool.Controllers
                             // create a user account for this registrant if the user has a newly created a password
                             // otherwise do not create any accounts automatically
                             if (registrant.ParentRegistrantId.IsEmpty() && password.IsNotBlank())
-                                CreateRegistrantAccount(registrant, password, registrantTypeId, account, questions, copy, loggedInUserId, isAdminMode, amsgs, adc);
+                                CreateRegistrantAccount(registrant, password, registrantTypeId, account, questions, copy, loggedInUserId, isAdminMode, amsgs, dc: adc);
 
                         },
                         onSuccess: (SystemMessages smsgs) =>
@@ -558,7 +558,7 @@ namespace AfterSchool.Controllers
             var numberOfSeatsLeft = 0;
             var numberOfWaitingListSeatsLeft = 0;
             var totalSeatsLeft = 0;
-            var act = item.GetActivity(dc);
+            var act = item.GetActivity(dc: dc);
 
             //check if already registered for this activity
             if (registrant.ParentRegistrantId.HasValue && RegistrantActivity.LoadByActivityIdByRegistrantId(act.ID.Value, registrant.ParentRegistrantId.Value, dc: dc).IsNotEmpty())
@@ -570,7 +570,7 @@ namespace AfterSchool.Controllers
             if (group.IsEmpty())
             {
                 registrationMode = act.RegistrationModeId;
-                regperiod = act.GetActiveRegistrationPeriod(dc);
+                regperiod = act.GetActiveRegistrationPeriod(dc: dc);
                 if (regperiod.RegistrationModeId != RegistrationMode.NotSet)
                 {
                     registrationMode = regperiod.RegistrationModeId;
@@ -1227,7 +1227,7 @@ namespace AfterSchool.Controllers
                 }
             }
 
-            msgs.AddRange(registrant.Save(dc));
+            msgs.AddRange(registrant.Save(dc: dc));
 
             return msgs;
         }
@@ -1278,7 +1278,7 @@ namespace AfterSchool.Controllers
 
                 //add registrant to the main new user account;
                 registrant.WebUserId = user.ID;
-                msgs.AddRange(registrant.Save(dc));
+                msgs.AddRange(registrant.Save(dc: dc));
 
                 // set the new user as the logged in user, so if they go to register again it will already be loaded
                 if (password.IsNotBlank())
@@ -1373,8 +1373,8 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
 
-            numberOfSeatsLeft = act.GetSeatsRemaining(dc);
-            numberOfWaitingListSeatsLeft = act.GetWaitingListSeatsRemaining(dc);
+            numberOfSeatsLeft = act.GetSeatsRemaining(dc: dc);
+            numberOfWaitingListSeatsLeft = act.GetWaitingListSeatsRemaining(dc: dc);
             totalSeatsLeft = numberOfSeatsLeft + numberOfWaitingListSeatsLeft;
 
             if (numberOfSeatsRequested > totalSeatsLeft)
@@ -1536,11 +1536,11 @@ namespace AfterSchool.Controllers
             //do clean up if removing activities from an existing registration
             //NEED TO READJUST SEAT INDEXES
             
-            var registrantactivities = registration.GetRegistrantActivities(dc);
+            var registrantactivities = registration.GetRegistrantActivities(dc: dc);
             var rasToDelete = registrantactivities.Where(x => items.Select(y => y.ActivityId).Contains(x.ActivityId.Value) == false);
             foreach (var ra in rasToDelete)
             {
-                msgs.AddRange(ra.CancelRegistration(dc));
+                msgs.AddRange(ra.CancelRegistration(dc: dc));
             }
             return msgs;
         }

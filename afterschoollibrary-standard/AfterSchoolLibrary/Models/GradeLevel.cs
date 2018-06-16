@@ -115,9 +115,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public GradeLevel Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public GradeLevel Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return GradeLevel.Load(this.ID.Value, dc: dc);
+			return GradeLevel.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		

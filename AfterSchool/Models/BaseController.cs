@@ -59,7 +59,7 @@ namespace AfterSchool.Models
                 action.ActivityGroupId = activityGroupId;
                 action.CreateDate = DateTime.UtcNow;
                 action.CreatedBy = SessionVariables.LoggedInUser.IsNotEmpty() ? SessionVariables.LoggedInUser.ID : 0;
-                action.Save(dc);
+                action.Save(dc: dc);
             }
         }
 

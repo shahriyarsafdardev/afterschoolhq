@@ -19,7 +19,7 @@ namespace AfterSchoolLibraryTests
         public void ReloadTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var user2 = user.Reload(dc);
+            var user2 = user.Reload(dc: dc);
 
             Assert.NotNull(user2);
         }
@@ -62,7 +62,7 @@ namespace AfterSchoolLibraryTests
 
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
             user.FacebookId = "testid";
-            msgs.AddRange(user.Save(dc));
+            msgs.AddRange(user.Save(dc: dc));
 
             var user2 = WebUser.LoadByFacebookId(testId, dc: dc);
 
@@ -89,14 +89,14 @@ namespace AfterSchoolLibraryTests
         }
 
         [Theory]
-        [InlineData("test1@test.com", "test2@test.com", "test2@test.com", true)]
-        [InlineData("test1@test.com", "test2@test.com", "test3@test.com", false)]
-        public void IsEmailInUseByAnotherUserTest(string email1, string email2, string testEmail, bool result)
+        [InlineData("test1@test.com", "test2@test.com", "test2@test.com", false)]
+        [InlineData("test1@test.com", "test2@test.com", "test3@test.com", true)]
+        public void CanEmailBeUsedTest(string email1, string email2, string testEmail, bool result)
         {
             var user = Factories.WebUserFactory.CreateWithEmail(email1, msgs, dc: dc);
             var user2 = Factories.WebUserFactory.CreateWithEmail(email2, msgs, dc: dc);
 
-            Assert.True(WebUser.IsEmailInUseByAnotherUser(testEmail, user.ID.Value, dc: dc) == result);
+            Assert.True(user.CanEmailBeUsed(testEmail, dc: dc) == result);
         }
 
         [Theory]
@@ -159,7 +159,7 @@ namespace AfterSchoolLibraryTests
         [InlineData("password1")]
         public void EncryptPasswordTest(string password)
         {
-            var passwordEncrypted = WebUser.EncryptPassword(password);
+            var passwordEncrypted = WebUserService.EncryptPassword(password);
 
             Assert.NotEqual(password, passwordEncrypted);
         }
@@ -168,8 +168,8 @@ namespace AfterSchoolLibraryTests
         public void DecryptPasswordTest()
         {
             var testPassword = "test2";
-            var testPasswordEncrypted = WebUser.EncryptPassword(testPassword);
-            var testPasswordDecrypted = WebUser.DecryptPassword(testPasswordEncrypted);
+            var testPasswordEncrypted = WebUserService.EncryptPassword(testPassword);
+            var testPasswordDecrypted = WebUserService.DecryptPassword(testPasswordEncrypted);
 
             Assert.Equal(testPassword, testPasswordDecrypted);
         }
@@ -195,9 +195,9 @@ namespace AfterSchoolLibraryTests
             {
                 var account = Factories.AccountFactory.Create(msgs, dc: dc);
                 msgs.AddRange(account.AddUser(user, UserType.Administrator, user.ID.Value, dc: dc));
-            }
+            }       
 
-            Assert.Equal(numberOfAccounts, user.GetAccounts(dc).Count);
+            Assert.Equal(numberOfAccounts, user.GetAccounts(dc: dc).Count);
         }
 
         [Theory]
@@ -218,10 +218,10 @@ namespace AfterSchoolLibraryTests
             var testdate = new DateTime();
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
             user.LastActivity = testdate;
-            msgs.AddRange(user.Save(dc));
+            msgs.AddRange(user.Save(dc: dc));
 
             var pre = user.LastActivity;
-            msgs.AddRange(user.UpdateLastActivity(dc));
+            msgs.AddRange(user.UpdateLastActivity(dc: dc));
             var post = user.LastActivity;
 
             Assert.NotEqual(pre, post);
@@ -233,10 +233,10 @@ namespace AfterSchoolLibraryTests
             var testdate = new DateTime();
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
             user.LastLogin = testdate;
-            msgs.AddRange(user.Save(dc));
+            msgs.AddRange(user.Save(dc: dc));
 
             var pre = user.LastLogin;
-            msgs.AddRange(user.UpdateLastLogin(dc));
+            msgs.AddRange(user.UpdateLastLogin(dc: dc));
             var post = user.LastLogin;
 
             Assert.NotEqual(pre, post);
@@ -271,7 +271,7 @@ namespace AfterSchoolLibraryTests
             var l = "Doe";
             var username = "JohnDoe";
 
-            Assert.Equal(username, WebUser.GenerateUsername(f, l, dc: dc));
+            Assert.Equal(username, WebUserService.GenerateUsername(f, l, dc: dc));
         }
 
         [Theory]
@@ -287,7 +287,7 @@ namespace AfterSchoolLibraryTests
         public void MarkAsVerifiedTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            msgs.AddRange(user.MarkAsVerified(dc));
+            msgs.AddRange(user.MarkAsVerified(dc: dc));
 
             Assert.True(user.VerifiedAccount);
         }
@@ -336,7 +336,7 @@ namespace AfterSchoolLibraryTests
                 user.CreateRegistrant(RegistrantType.Individual, true, msgs, dc: dc);
             }            
 
-            Assert.Equal(numberOfRegistrants, user.GetRegistrants(dc).Count);
+            Assert.Equal(numberOfRegistrants, user.GetRegistrants(dc: dc).Count);
         }
 
         [Fact]
@@ -380,9 +380,9 @@ namespace AfterSchoolLibraryTests
             var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc: dc);
 
             var orig = ASCIIEncoding.ASCII.GetBytes("test");
-            var saltAndHashed = WebUser.SaltandHashPassword("test");
+            var saltAndHashed = WebUserService.SaltandHashPassword("test");
 
-            Assert.NotEqual(orig , WebUser.SaltandHashPassword("test").hash);
+            Assert.NotEqual(orig , WebUserService.SaltandHashPassword("test").hash);
         }
         /// <summary>
         /// Then decrypt their passwords using the old method, 
@@ -400,7 +400,7 @@ namespace AfterSchoolLibraryTests
             var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
             var encrypt = AfterSchoolLibrary.Utilities.EncryptToBase64("test");
             var decrypt = AfterSchoolLibrary.Utilities.DecryptFromBase64("test");
-            var saltAndHashed = WebUser.SaltandHashPassword(decrypt);
+            var saltAndHashed = WebUserService.SaltandHashPassword(decrypt);
 
             Assert.NotEqual(decrypt, saltAndHashed.ToString());
         }

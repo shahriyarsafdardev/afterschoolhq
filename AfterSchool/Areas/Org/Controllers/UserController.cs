@@ -68,7 +68,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (!password1.IsEmpty())
                 {
-                    user.Password = WebUser.EncryptPassword(password1);
+                    user.Password = WebUserService.EncryptPassword(password1);
                 }
 
                 msgs.AddRange(user.Save());

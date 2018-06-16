@@ -140,9 +140,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public AccountProperty Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public AccountProperty Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return AccountProperty.Load(this.ID.Value, dc: dc);
+			return AccountProperty.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<AccountProperty> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

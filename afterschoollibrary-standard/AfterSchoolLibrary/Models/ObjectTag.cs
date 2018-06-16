@@ -124,9 +124,9 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public ObjectTag Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public ObjectTag Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return ObjectTag.Load(this.ID.Value, dc: dc);
+			return ObjectTag.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
 		public static List<ObjectTag> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

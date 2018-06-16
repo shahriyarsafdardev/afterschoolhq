@@ -158,7 +158,7 @@ namespace AfterSchool.Controllers
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var prt = PasswordResetToken.LoadValidByUid(token.ToGuid(), adc);
+                        var prt = PasswordResetToken.LoadValidByUid(token.ToGuid(), dc: adc);
                         user = prt.GetWebUser(adc);
                         amsgs.AddRange(user.ChangePassword(password1, adc));
                         amsgs.AddRange(prt.Use(adc));
