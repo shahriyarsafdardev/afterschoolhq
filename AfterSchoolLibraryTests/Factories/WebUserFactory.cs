@@ -13,42 +13,42 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static WebUser Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new WebUser() { };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com" };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
 
         public static WebUser Create(bool isActive, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new WebUser() { IsActive = isActive };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", IsActive = isActive };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
 
         public static WebUser CreateWithEmail(string email, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new WebUser() { Email = email };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = email };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
 
         public static WebUser CreateWithEmail(string email, string password, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new WebUser() { Email = email, Password = WebUserService.EncryptPassword(password) };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = email, Password = WebUserService.EncryptPassword(password) };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
 
         public static WebUser CreateWithUsername(string username, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new WebUser() { Username = username };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", Username = username };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
 
         public static WebUser CreateWithUsername(string username, string password, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new WebUser() { Username = username, Password = WebUserService.EncryptPassword(password) };
+            var obj = new WebUser() { FirstName = "Don", LastName = "John", Email = "don@john.com", Username = username, Password = WebUserService.EncryptPassword(password) };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

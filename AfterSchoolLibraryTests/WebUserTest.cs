@@ -73,7 +73,7 @@ namespace AfterSchoolLibraryTests
         public void GetInviteUrlTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var url = user.GetInviteUrl(account);
 
             Assert.NotEqual(0, url.Length);
@@ -179,8 +179,8 @@ namespace AfterSchoolLibraryTests
         [InlineData("test@test.com@test.com", false)]
         public void SendInviteTest(string email, bool result)
         {
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
 
             Assert.True(user.SendInvite(email, "invite message", user, account, dc: dc).HasNoErrors() == result);
         }
@@ -190,10 +190,11 @@ namespace AfterSchoolLibraryTests
         [InlineData(2)]
         public void GetAccountsTest(int numberOfAccounts)
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(true, msgs, dc: dc);
             for (var i = 0; i < numberOfAccounts; i++)
             {
-                var account = Factories.AccountFactory.Create(msgs, dc: dc);
+                var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
                 msgs.AddRange(account.AddUser(user, UserType.Administrator, user.ID.Value, dc: dc));
             }       
 
@@ -205,8 +206,9 @@ namespace AfterSchoolLibraryTests
         [InlineData(UserType.Parent)]
         public void GetUserTypeTest(UserType ut)
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var awu = Factories.AccountWebUserFactory.Create(account, user, ut, true, msgs, dc: dc);
 
             Assert.Equal(ut, user.GetUserType(account, dc: dc));
@@ -246,8 +248,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void HasAcessToFeatureFalseTest()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
 
             msgs.AddRange(account.AddUser(user, UserType.Parent, user.ID.Value, dc: dc));
 
@@ -257,8 +260,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void HasAcessToFeatureTrueTest()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
 
             msgs.AddRange(account.AddUser(user, UserType.SuperAdmin, user.ID.Value, dc: dc));
 
@@ -342,8 +346,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void isActiveForTest()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(true, msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var awu = Factories.AccountWebUserFactory.Create(account, user, UserType.ActivityLeader, true, msgs, dc: dc);
             
             Assert.True(user.IsActiveFor(account, dc: dc));
@@ -352,8 +357,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetActivityWebUserTest()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var awu = Factories.ActivityWebUserFactory.Create(activity, user, msgs, dc: dc);
 
@@ -363,8 +369,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void isActivityLeaderTest()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc: dc);
 
@@ -374,48 +381,16 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void saltPasswordTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc: dc);
-
-            var orig = ASCIIEncoding.ASCII.GetBytes("test");
-            var saltAndHashed = WebUserService.SaltandHashPassword("test");
-
-            Assert.NotEqual(orig , WebUserService.SaltandHashPassword("test").hash);
-        }
-        /// <summary>
-        /// Then decrypt their passwords using the old method, 
-        /// then encrypt and store the new passwords in the db with the new 
-        /// encryption method, then test that the passwords still work
-        /// </summary>
-        [Fact]
-        public void FullPasswordTest()
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc: dc);
-
-            var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
-            var encrypt = AfterSchoolLibrary.Utilities.EncryptToBase64("test");
-            var decrypt = AfterSchoolLibrary.Utilities.DecryptFromBase64("test");
-            var saltAndHashed = WebUserService.SaltandHashPassword(decrypt);
-
-            Assert.NotEqual(decrypt, saltAndHashed.ToString());
-        }
-
-        [Fact]
-        public void saltPasswordTest()
-        {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
             var orig = ASCIIEncoding.ASCII.GetBytes("test");
             var saltAndHashed = WebUser.SaltandHashPassword("test");
 
-            Assert.NotEqual(orig , WebUser.SaltandHashPassword("test").hashedbytes);
+            Assert.NotEqual(orig, WebUser.SaltandHashPassword("test").hashedbytes);
         }
+
         /// <summary>
         /// Then decrypt their passwords using the old method, 
         /// then encrypt and store the new passwords in the db with the new 
@@ -424,8 +399,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void FullPasswordTest()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
             var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
             var encrypt = AfterSchoolLibrary.Utilities.EncryptToBase64("test");
@@ -438,12 +414,13 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadAndHashAllTest()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.CreateWithEmail("notDarye", "NothisPassword", msgs, dc);
             var orig = user.Password;
             var origInBytes = ASCIIEncoding.ASCII.GetBytes(orig);
-            var account = Factories.AccountFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
-            var message = WebUser.LoadAndHashAll(null, null, null, dc);
+            var message = AfterSchoolLibrary.Utilities.LoadAndHashAllUsers(dc);
             var newBytes = user.Password;
 
             Assert.NotEqual(orig, newBytes);
@@ -452,14 +429,15 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadAndHashAllT2est()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.CreateWithEmail("notDarye", "NothisPassword", msgs, dc);
-            var account = Factories.AccountFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
 
             var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
-            var message = WebUser.LoadAndHashAll(null, null, null, dc);
-            user.Reload(dc);
+            var message = AfterSchoolLibrary.Utilities.LoadAndHashAllUsers(dc);
+            user.Reload(dc: dc);
 
             user = WebUser.LoginByEmailHashed("notDarye", "nothisPassword", dc);
 
