@@ -59,29 +59,29 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static Tag Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Tag Load(int id, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Tag> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Tag> Load(Hashtable criterias = null, int? start = null, int? length = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
 			dq.UseParameterizedQuery = false;
 			dq.SelectRange.Start = start;
 			dq.SelectRange.Length = length;
-            return Tag.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return Tag.BaseLoad(criterias, ObjectMap, dq).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            return Tag.BaseGetCount(criterias, ObjectMap, dq, msgs);
+            return Tag.BaseGetCount(criterias, ObjectMap, dq);
         }
 
 		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -129,51 +129,51 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-		public Tag Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public Tag Reload(BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			return Tag.Load(this.ID.Value, msgs, dc: dc);
+			return Tag.Load(this.ID.Value, dc);
 		}
 		
-		public static Tag LoadByName(string Name, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Tag LoadByName(string Name, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			var dq = DatabaseQuery;
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Name"], Name);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static Tag LoadByNameByAccountId(string Name, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static Tag LoadByNameByAccountId(string Name, int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			var dq = DatabaseQuery;
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Name"], Name);
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static List<Tag> LoadByParentTagId(int ParentTagId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Tag> LoadByParentTagId(int ParentTagId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			var dq = DatabaseQuery;
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ParentTagId"], ParentTagId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Tag> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Tag> LoadByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			var dq = DatabaseQuery;
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Tag> LoadByAccountIdByParentTagId(int AccountId, int ParentTagId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Tag> LoadByAccountIdByParentTagId(int AccountId, int ParentTagId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
-			var dq = DatabaseQuery;
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["ParentTagId"], ParentTagId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		

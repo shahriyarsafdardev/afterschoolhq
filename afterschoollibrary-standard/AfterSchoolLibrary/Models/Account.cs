@@ -279,6 +279,14 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<Account> LoadByAccountTypeId(AccountType AccountTypeId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountTypeId"], AccountTypeId);
+			return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
