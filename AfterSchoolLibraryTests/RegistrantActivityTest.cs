@@ -98,15 +98,17 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetSeatCountByRegistrationPeriodIdTest()
         {
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var user = Factories.WebUserFactory.CreateWithEmail("test", msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             registrantActivity.NumberOfSeats = 12;
             registrantActivity.NumberOfWaitingListSeats = 1;
             registrantActivity.NumberOfApplicationSeats = 1;
-            registrantActivity.Save(dc: dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
+            registrantActivity.Save(dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs,dc);
+            registrationPeriod.AddActivity(activity, true, user.ID.Value, dc);
 
             Assert.NotEqual(0,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrationPeriod.ID.Value, dc: dc));
         }
@@ -114,14 +116,14 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetSeatCountByActivityGroupIdTest()
         {
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             registrantActivity.NumberOfSeats = 12;
             registrantActivity.NumberOfWaitingListSeats = 1;
             registrantActivity.NumberOfApplicationSeats = 1;
-            registrantActivity.Save(dc: dc);
+            registrantActivity.Save(dc);
             Assert.NotEqual(0 ,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value, dc: dc));
         }
 
