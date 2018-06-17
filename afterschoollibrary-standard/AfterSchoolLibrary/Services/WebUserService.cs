@@ -264,23 +264,30 @@ namespace AfterSchoolLibrary
             return null;
         }
 
-        public static Account AddNewAccount(this WebUser user, string orgName, string phone, bool isActive, AccountType accountType, int packageId, BillingPeriodType packageBillingPeriod, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int packageId, BillingPeriodType packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AccountService.CreateNew(orgName, user.Email, phone, isActive, accountType, user, loggedInUser.ID.Value, true, msgs, dc);
+            var account = AccountService.CreateNew(
+                orgName: orgName, 
+                email: accountOwner.Email, 
+                phone: phone, 
+                isActive: isActive, 
+                accountType: accountType, 
+                accountOwner: accountOwner, 
+                packageId: packageId,
+                packageBillingPeriod: packageBillingPeriod,
+                loggedInUser: loggedInUser, 
+                isAfterSchool: isAfterSchool, 
+                msgs: msgs, 
+                dc: dc);
 
-            msgs.AddRange(account.AddUser(user, UserType.Owner, loggedInUser.ID.Value, dc));
-
-            if (msgs.HasNoErrors())
-            {
-                // need to add a package
-                account.AddPackage(packageId, packageBillingPeriod, loggedInUser, msgs, dc);
-
-                //create default form for account to use for registration
-                var form = account.GetDefaultForm(dc);
-                var defaultForm = form.Copy(user.ID.Value, account.ID.Value, msgs, dc: dc);               
-            }
+            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc));
 
             return account;
+        }
+
+        public static SystemMessages AddAccount(this WebUser user, Account account, UserType userTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.AddUser(user, UserType.Owner, loggedInUser.ID.Value, dc);
         }
 
         public static SystemMessages CompleteSignUp(this WebUser user, Account account, string firstName, string lastName, string email, string password, DatabaseConnection dc = null)

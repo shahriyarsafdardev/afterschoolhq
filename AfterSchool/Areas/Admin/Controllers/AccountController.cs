@@ -44,7 +44,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-
             return View(accounts);
         }
         
@@ -52,11 +51,12 @@ namespace AfterSchool.Areas.Admin.Controllers
         public ActionResult Invite()
         {
             ViewBag.Messages = new SystemMessages();
+            ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
             return View();
         }
 
         [HttpPost]
-        public ActionResult Invite(string orgname, string accounttype, string email, string firstname, string lastname)
+        public ActionResult Invite(string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname)
         {
             var msgs = new SystemMessages();
             WebUser user = null;
@@ -65,7 +65,11 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (orgname.IsEmpty())
                 msgs.Add("Organization Name is required", MessageType.UserError);
             if (!accounttype.IsNumber())
-                msgs.Add("Invalid account type", MessageType.UserError);
+                msgs.Add("Organization type is required", MessageType.UserError);
+            if (!package.IsNumber())
+                msgs.Add("Package is required", MessageType.UserError);
+            if (!billingperiod.IsNumber())
+                msgs.Add("Billing Period is required", MessageType.UserError);
 
             if (email.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
@@ -100,7 +104,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                             phone: null,
                             isActive: true, 
                             accountType: (AccountType)accounttype.ToInteger(), 
-                            loggedInUserId: SessionVariables.LoggedInUser.ID.Value, 
+                            packageId: package.ToInteger(),
+                            packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
+                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                            loggedInUser: SessionVariables.LoggedInUser, 
                             msgs: amsgs, 
                             dc: adc);
                     },
@@ -121,6 +128,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (msgs.HasNoErrors())
                 return View("InviteSent", user);
 
+            ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
             return View();
         }
     }

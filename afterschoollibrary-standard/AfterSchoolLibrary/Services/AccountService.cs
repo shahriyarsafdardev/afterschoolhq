@@ -196,7 +196,15 @@ namespace AfterSchoolLibrary
             return periods;
         }
 
-        public static Form GetDefaultForm(this Account account, DatabaseConnection dc = null)
+        public static Form CreateDefaultForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var form = account.GetDefaultForm(dc);
+            if (form.AccountId != account.ID)
+                form = form.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, dc: dc);
+            return form;
+        }
+
+        private static Form GetDefaultForm(this Account account, DatabaseConnection dc = null)
         {
             if (account.DefaultFormId.HasValue)
                 return Form.Load(account.DefaultFormId.Value, dc: dc);
@@ -956,7 +964,7 @@ namespace AfterSchoolLibrary
             return activePeriod;
         }
 
-        public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser owner, int loggedInUserId, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int packageId, BillingPeriodType packageBillingPeriod, WebUser loggedInUser, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var uniqueName = AccountService.GenerateUniqueName(orgName, null, dc: dc);
@@ -968,16 +976,25 @@ namespace AfterSchoolLibrary
                 IsActive = isActive,
                 Email = email,
                 Phone = phone,
-                OwnerId = owner.ID,
+                OwnerId = accountOwner.ID,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
-                CreatedBy = loggedInUserId,
-                LastModifiedBy = loggedInUserId,
+                CreatedBy = loggedInUser.ID,
+                LastModifiedBy = loggedInUser.ID,
                 IsAfterSchool = isAfterSchool,
                 AccountTypeId = accountType,
                 UniqueName = uniqueName
             };
             msgs.AddRange(account.SaveWithStripe(dc: dc));
+
+            if (msgs.HasNoErrors())
+            {
+                // need to add a package
+                account.AddPackage(packageId, packageBillingPeriod, loggedInUser, msgs, dc);
+
+                //create default form for account to use for registration
+                account.CreateDefaultForm(loggedInUser, msgs, dc);
+            }
 
             return account;
         }
