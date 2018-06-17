@@ -12,9 +12,50 @@ namespace AfterSchoolLibrary
         {
             return Account.Load(ar.HostAccountId.Value, dc: dc);
         }
+
         public static Account GetVisitorAccount(this AccountRelationship ar, DatabaseConnection dc = null)
         {
             return Account.Load(ar.VisitorAccountId.Value, dc: dc);
+        }
+
+        public static AccountRelationship CreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountRelationship = new AccountRelationship
+            {
+                VisitorAccountId = visitorAccount.ID,
+                HostAccountId = hostAccount.ID,
+                ApprovalStatusId = approvalStatus,
+                HostPermissionTypeId = hostPermissionType,
+                CreatedBy = loggedInUser.ID,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUser.ID,
+                LastModifiedDate = DateTime.UtcNow
+            };
+
+            msgs.AddRange(accountRelationship.Save(dc: dc));
+
+            return accountRelationship;
+        }
+
+        public static SystemMessages UpdateApprovalStatus(this AccountRelationship accountRelationship, ApprovalStatus approvalStatus, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            accountRelationship.ApprovalStatusId = approvalStatus;
+            accountRelationship.LastModifiedBy = loggedInUser.ID;
+            accountRelationship.LastModifiedDate = DateTime.UtcNow;
+            return accountRelationship.Save(dc);
+        }
+
+        public static SystemMessages UpdateApprovalStatus(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, dc: dc);
+
+            if (accountRelationship.IsNotEmpty())
+                msgs.AddRange(accountRelationship.UpdateApprovalStatus(approvalStatus, loggedInUser, dc));
+            else
+                msgs.Add("No access request found", MessageType.UserError);
+
+            return msgs;
         }
     }
 }

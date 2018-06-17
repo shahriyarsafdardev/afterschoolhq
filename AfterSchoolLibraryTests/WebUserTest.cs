@@ -179,10 +179,11 @@ namespace AfterSchoolLibraryTests
         [InlineData("test@test.com@test.com", false)]
         public void SendInviteTest(string email, bool result)
         {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.CreateWithEmail(email, msgs, dc: dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
 
-            Assert.True(user.SendInvite("invite message", user, account, dc).HasNoErrors() == result);
+            Assert.True(user.SendInviteToAccount(account, "invite message", loggedInUser, dc).HasNoErrors() == result);
         }
 
         [Theory]

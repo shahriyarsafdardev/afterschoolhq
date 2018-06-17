@@ -336,17 +336,6 @@ namespace AfterSchoolLibrary
         {
             return EmailHelper.SendAccountInvitedEmail(account.GetAccountOwner(dc: dc), account);
         }
-        /*
-        public static SystemMessages InviteUser(this Account account, WebUser wu, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
-        {
-            return account.InviteUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUser, dc: dc);
-        }
-
-        public static SystemMessages InviteUser(this Account account, string firstName, string lastName, string email, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
-        {
-            return account.InviteUser(firstName, lastName, email, null, ut, loggedInUser, dc: dc);
-        }
-        */
 
         public static SystemMessages InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
         {
@@ -354,7 +343,7 @@ namespace AfterSchoolLibrary
 
             var wu = account.AddUser(firstName, lastName, email, ut, loggedInUser.ID.Value, msgs, dc);
             if (msgs.HasNoErrors())
-                msgs.AddRange(wu.SendInvite(message, loggedInUser, account, dc: dc));
+                msgs.AddRange(wu.SendInviteToAccount(account, message, loggedInUser, dc: dc));
             
             if (msgs.HasErrors())
                 msgs.Add($"An invitation was not sent to ${email.Trim()}, a system error has occurred", MessageType.UserError);       
@@ -461,18 +450,18 @@ namespace AfterSchoolLibrary
             return signupType;
         }
 
-        public static AccountPackage AddPackage(this Account account, int package, BillingPeriodType billingPeriodType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountPackage AddPackage(this Account account, int packageId, BillingPeriodType billingPeriodType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            Package p = null;
+            Package package = null;
             AccountPackage currentPackage = null;
             var newap = new AccountPackage();
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
-                    p = Package.Load(package, dc: adc);
+                    package = Package.Load(packageId, dc: adc);
                     currentPackage = account.GetActiveAccountPackage(adc);
 
                     var trialDayCount = 0;
@@ -482,7 +471,7 @@ namespace AfterSchoolLibrary
                     //      upgrading to a different package
                     //      paying for a new package with no trial account
 
-                    var signupType = account.GetSignUpType(p, currentPackage, billingPeriodType, ref trialDayCount, dc: adc);
+                    var signupType = account.GetSignUpType(package, currentPackage, billingPeriodType, ref trialDayCount, dc: adc);
 
                     if (signupType != SignUpType.NotSet)
                     {
@@ -498,18 +487,18 @@ namespace AfterSchoolLibrary
                         {
                             if (signupType != SignUpType.ConvertingFromTrial)
                             {
-                                var newStripePlanId = p.GetStripePlanId(billingPeriodType);
+                                var newStripePlanId = package.GetStripePlanId(billingPeriodType);
 
                                 //create new package
                                 newap.AccountId = account.ID;
-                                newap.PackageId = package;
+                                newap.PackageId = packageId;
                                 newap.BillingPeriodTypeId = billingPeriodType;
                                 newap.CreateDate = DateTime.UtcNow;
                                 newap.CreatedBy = loggedInUser.ID;
                                 newap.LastModifiedDate = DateTime.UtcNow;
                                 newap.LastModifiedBy = loggedInUser.ID;
                                 newap.IsActive = true;
-                                newap.Price = billingPeriodType == BillingPeriodType.Month ? p.Price : p.PricePerYear;
+                                newap.Price = billingPeriodType == BillingPeriodType.Month ? package.Price : package.PricePerYear;
                                 newap.StripeSubscriptionId = currentPackage?.StripeSubscriptionId ?? null;
 
                                 // set trial end date if there are still trial days
@@ -541,7 +530,7 @@ namespace AfterSchoolLibrary
 
                         if (amsgs.HasNoErrors() && newap.ID.HasValue)
                         {
-                            amsgs.AddRange(p.CopyFeaturesToAccountPackage(newap, loggedInUser.ID.Value, adc));
+                            amsgs.AddRange(package.CopyFeaturesToAccountPackage(newap, loggedInUser.ID.Value, adc));
                         }
 
                         // make sure the account package is set to the real trial days passed in
@@ -557,13 +546,13 @@ namespace AfterSchoolLibrary
                     }
                     else
                     {
-                        amsgs.Add(string.Format("Credit Card is required to sign up for {0} Package", p.Name), MessageType.UserError);
+                        amsgs.Add($"Credit Card is required to sign up for {package.Name} Package", MessageType.UserError);
                     }
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    msgs.Add(string.Format("{0} Package has been activated", p.Name), MessageType.Success);
+                    msgs.Add($"{package.Name} Package has been activated", MessageType.Success);
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {
@@ -967,7 +956,7 @@ namespace AfterSchoolLibrary
             return activePeriod;
         }
 
-        public static Account NewAccount(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser owner, int loggedInUserId, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser owner, int loggedInUserId, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var uniqueName = AccountService.GenerateUniqueName(orgName, null, dc: dc);
@@ -1057,24 +1046,32 @@ namespace AfterSchoolLibrary
             return Location.LoadByHostAccountId(account.ID.Value, dc: dc);
         }
 
-
-
-        public static SystemMessages RequestAccessToAccount(this Account visitorAccount,Account hostAccount, DatabaseConnection dc = null)
+        /// <summary>
+        /// creating an account relationship in which the visitor is requesting approval saving it to database
+        /// and returning the system messages
+        /// </summary>
+        /// <param name="visitorAccount"></param>
+        /// <param name="hostAccount"></param>
+        /// <param name="hostPermissionType"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static SystemMessages RequestAccessToAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, WebUser loggedInUser, DatabaseConnection dc = null)
         {
-            //creating an account relationship in which the visitor is requesting approval saving it to database
-            //and returning the system messages
             var msgs = new SystemMessages();
+
             // Makes sure that the visitor has not been previously denied by the host
             if (!GetDeniedVisitorAccounts(hostAccount, dc: dc).Contains(visitorAccount))
             {
-                var accountRelationship = new AccountRelationship();
-                accountRelationship.VisitorAccountId = visitorAccount.ID;
-                accountRelationship.HostAccountId = hostAccount.ID;
-                accountRelationship.ApprovalStatusId = ApprovalStatus.Requested;
-                accountRelationship.CreatedBy = visitorAccount.ID;
-                accountRelationship.CreateDate = DateTime.UtcNow;
-                accountRelationship.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(accountRelationship.Save(dc: dc));
+                var accountRelationship = AccountRelationshipService.CreateNew(
+                    hostAccount, 
+                    visitorAccount, 
+                    ApprovalStatus.Requested, 
+                    hostPermissionType, 
+                    loggedInUser, 
+                    msgs, 
+                    dc);
+
                 //TODO Notify Host account of request
                 if (msgs.HasNoErrors())
                 {
@@ -1084,40 +1081,42 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages ApproveAccessToAccount(this Account hostAccount,Account visitorAccount, DatabaseConnection dc = null)
+        /// <summary>
+        /// Approves access to the host account 
+        /// </summary>
+        /// <param name="hostAccount"></param>
+        /// <param name="visitorAccount"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static SystemMessages ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, DatabaseConnection dc = null)
         {
-            //Approves access to the host account 
             var msgs = new SystemMessages();
-            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, dc: dc);
-            accountRelationship.HostPermissionTypeId = HostPermissionType.Approve;
-            accountRelationship.LastModifiedDate = DateTime.UtcNow;
-            accountRelationship.LastModifiedBy = hostAccount.ID;
-            msgs.AddRange(accountRelationship.Save(dc: dc));
 
-            //Notifies Host account of acceptance
-            if (msgs.HasNoErrors())
-            {
-                //msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
-            }
+            msgs.AddRange(AccountRelationshipService.UpdateApprovalStatus(hostAccount, visitorAccount, ApprovalStatus.Approved, loggedInUser, dc));
+
+            // if (msgs.HasNoErrors())
+            // msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
 
             return msgs;
         }
 
-        public static SystemMessages DenyAccessToAccount(this Account hostAccount, Account visitorAccount, DatabaseConnection dc = null)
+        /// <summary>
+        /// Denies access to the host account 
+        /// </summary>
+        /// <param name="hostAccount"></param>
+        /// <param name="visitorAccount"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static SystemMessages DenyAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, DatabaseConnection dc = null)
         {
-            //Denies access to the host account 
             var msgs = new SystemMessages();
-            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value);
-            accountRelationship.ApprovalStatusId = ApprovalStatus.Denied;
-            accountRelationship.LastModifiedDate = DateTime.UtcNow;
-            accountRelationship.LastModifiedBy = hostAccount.ID;
-            msgs.AddRange(accountRelationship.Save(dc: dc));
 
-            //Notifies Host account of Denial
-            if (msgs.HasNoErrors())
-            {
-                //msgs.AddRange(EmailHelper.SendDenialNotificationToVisitor(visitorAccount, hostAccount));
-            }
+            msgs.AddRange(AccountRelationshipService.UpdateApprovalStatus(hostAccount, visitorAccount, ApprovalStatus.Denied, loggedInUser, dc));
+
+            // if (msgs.HasNoErrors())
+            // msgs.AddRange(EmailHelper.SendDenialNotificationToVisitor(visitorAccount, hostAccount));
 
             return msgs;
         }

@@ -88,7 +88,7 @@ namespace AfterSchool.Controllers
             {
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
             }
-            else if(user.CanEmailBeUsed(email))
+            else if(!user.CanEmailBeUsed(email))
             {
                 msgs.Add("This email has already been registered", MessageType.UserError);
             }

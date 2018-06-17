@@ -83,7 +83,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.NewUser(
+                        user = WebUserService.CreateNew(
                             firstName: firstname, 
                             lastName: lastname, 
                             email: email, 

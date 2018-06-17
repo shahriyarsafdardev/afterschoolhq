@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary
         {
             return Encryption.DecryptToString(Convert.FromBase64String(password), Utilities.AppAESKey, Utilities.AppIV);
         }
-        public static SystemMessages SendInvite(this WebUser user, string message, WebUser loggedInUser, Account account, DatabaseConnection dc = null)
+        public static SystemMessages SendInviteToAccount(this WebUser user, Account account, string message, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var subject = $"You have been invited by {account.Name} to use {Utilities.AppName(account.IsAfterSchool)}";
@@ -185,7 +185,8 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
             var token = PasswordResetToken.AddOrUpdateToken(user, msgs, dc: dc);
 
-            msgs.AddRange(EmailHelper.SendPasswordReset(user, token, isAfterSchool));
+            if (msgs.HasNoErrors())
+                msgs.AddRange(EmailHelper.SendPasswordReset(user, token, isAfterSchool));
 
             return msgs;
         }
@@ -220,7 +221,7 @@ namespace AfterSchoolLibrary
             return AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
-        public static WebUser NewUser(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser CreateNew(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (firstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -263,17 +264,20 @@ namespace AfterSchoolLibrary
             return null;
         }
 
-        public static Account AddNewAccount(this WebUser user, string orgName, string phone, bool isActive, AccountType accountType, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccount(this WebUser user, string orgName, string phone, bool isActive, AccountType accountType, int packageId, BillingPeriodType packageBillingPeriod, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AccountService.NewAccount(orgName, user.Email, phone, isActive, accountType, user, loggedInUserId, true, msgs, dc);
+            var account = AccountService.CreateNew(orgName, user.Email, phone, isActive, accountType, user, loggedInUser.ID.Value, true, msgs, dc);
 
-            msgs.AddRange(account.AddUser(user, UserType.Owner, loggedInUserId, dc));
+            msgs.AddRange(account.AddUser(user, UserType.Owner, loggedInUser.ID.Value, dc));
 
             if (msgs.HasNoErrors())
             {
+                // need to add a package
+                account.AddPackage(packageId, packageBillingPeriod, loggedInUser, msgs, dc);
+
                 //create default form for account to use for registration
                 var form = account.GetDefaultForm(dc);
-                var defaultForm = form.Copy(user.ID.Value, account.ID.Value, msgs, dc: dc);
+                var defaultForm = form.Copy(user.ID.Value, account.ID.Value, msgs, dc: dc);               
             }
 
             return account;
@@ -296,12 +300,12 @@ namespace AfterSchoolLibrary
                 user.Email = email;
 
             msgs.AddRange(user.Save(dc));
-            msgs.AddRange(user.ActivateForAccount(account, dc));
+            msgs.AddRange(user.ActivateForAccount(account, 0, dc));
 
             return msgs;
         }
 
-        public static SystemMessages ActivateForAccount(this WebUser user, Account account, DatabaseConnection dc = null)
+        public static SystemMessages ActivateForAccount(this WebUser user, Account account, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
@@ -309,6 +313,8 @@ namespace AfterSchoolLibrary
             if (awu.IsNotEmpty())
             {
                 awu.IsActive = true;
+                awu.LastModifiedDate = DateTime.UtcNow;
+                awu.LastModifiedBy = loggedInUserId;
                 msgs.AddRange(awu.Save(dc));
             }
             else

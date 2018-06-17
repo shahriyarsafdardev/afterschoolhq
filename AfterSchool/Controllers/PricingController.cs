@@ -91,7 +91,7 @@ namespace AfterSchool.Controllers
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
-                        user = WebUserService.NewUser(
+                        user = WebUserService.CreateNew(
                                 firstName: firstname,
                                 lastName: lastname,
                                 email: email,
@@ -109,7 +109,9 @@ namespace AfterSchool.Controllers
                             isActive: true, 
                             phone: phone,
                             accountType: AccountType.School,
-                            loggedInUserId: user.ID.Value, 
+                            packageId: package.ID.Value,
+                            packageBillingPeriod: selectedBillingPeriodType,
+                            loggedInUser: user, 
                             msgs: amsgs, 
                             dc: adc);
 

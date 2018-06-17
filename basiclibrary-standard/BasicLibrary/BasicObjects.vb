@@ -541,33 +541,33 @@ Public MustInherit Class BasicIDObject
             values = GetModifiedValues()
         End If
 
-        'If values.Count > 0 Then
+        If values.Count > 0 Then
 
-        If saveType = DataAccess.SaveType.NotSet Then
-            If ID.HasValue Then
-                saveType = DataAccess.SaveType.Update
+            If saveType = DataAccess.SaveType.NotSet Then
+                If ID.HasValue Then
+                    saveType = DataAccess.SaveType.Update
+                Else
+                    saveType = DataAccess.SaveType.Insert
+                End If
+            End If
+
+            If saveType = DataAccess.SaveType.Update Then
+                dq.UpdateParameters.AddRange(values)
+                dq.Criterias.Add(ObjectMap("id"), ID.Value)
+                dq.Update(saveTableName, msgs)
             Else
-                saveType = DataAccess.SaveType.Insert
+                dq.InsertParameters.AddRange(values)
+                Dim newId As Integer = dq.Insert(saveTableName, msgs)
+                If ID.HasValue = False Then
+                    Me.ID = newId
+                End If
             End If
-        End If
 
-        If saveType = DataAccess.SaveType.Update And values.Count > 0 Then
-            dq.UpdateParameters.AddRange(values)
-            dq.Criterias.Add(ObjectMap("id"), ID.Value)
-            dq.Update(saveTableName, msgs)
-        Else
-            dq.InsertParameters.AddRange(values)
-            Dim newId As Integer = dq.Insert(saveTableName, msgs)
-            If ID.HasValue = False Then
-                Me.ID = newId
+            If msgs.HasAny(SystemMessages.ErrorTypes) = False Then
+                Me.ResetObjectAfterSave()
             End If
-        End If
 
-        If msgs.HasAny(SystemMessages.ErrorTypes) = False Then
-            Me.ResetObjectAfterSave()
         End If
-
-        'End If
 
         Return msgs
     End Function
