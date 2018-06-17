@@ -52,17 +52,13 @@ namespace AfterSchool.Areas.Org.Controllers
             bool isArchived = false;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
-            {
                 pageNumber = pn.ToInteger();
-            }
+
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
                 recordsPerPage = rpp.ToInteger();
-            }
+
             if(archive.IsBoolean())
-            {
                 isArchived = archive.ToInteger().ToBoolean();
-            }
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;

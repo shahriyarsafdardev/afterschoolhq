@@ -16,7 +16,7 @@
     {
         previousLink = Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber - 1 });
     }
-    if (Model.PageNumber > 1)
+    if (Model.PageNumber < Model.TotalPages)
     {
         nextLink = Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber + 1 });
     }

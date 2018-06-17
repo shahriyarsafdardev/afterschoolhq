@@ -43,45 +43,32 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
 
             if (username.IsEmpty())
-            {
                 msgs.Add("Username is required", MessageType.UserError);
-            }
+
             if (password.IsEmpty())
-            {
                 msgs.Add("Password is required", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
                 WebUser user = null;
 
                 if (username.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-                {
                     user = WebUser.LoginByEmail(username, password);
-                }
                 else
-                {
                     user = WebUser.LoginByUsername(username, password);
-                }
+
                 if (user.IsEmpty())
-                {
                     msgs.Add("Invalid username and/or password", MessageType.UserError);
-                }
                 else
-                {
                     msgs.AddRange(LoadSessionInfo(user, !Request.Params["remember"].IsEmpty()));
-                }
             }
 
+            ViewBag.Messages = msgs;
+
             if (msgs.HasNoErrors())
-            {
                 return LoginRedirect();
-            }
             else
-            {
-                ViewBag.Messages = msgs;
                 return View();
-            }
         }        
 
         [HttpGet]

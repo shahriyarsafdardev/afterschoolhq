@@ -19,20 +19,14 @@ namespace AfterSchool.Controllers
             WebUser wu = null;
 
             if(!id.IsGuid() || !a.IsGuid())
-            {
                 msgs.Add("Invalid invitation code", MessageType.UserError);
-            }
             else
             {
                 wu = WebUser.LoadByUid(id.ToGuid(), null);
                 if(wu.IsEmpty())
-                {
                     msgs.Add("Invalid invitation code", MessageType.UserError);
-                }
                 else if(wu.IsActive)
-                {
                     msgs.Add("Account has already been created. Please proceed to the login page", MessageType.UserError);
-                }
             }
             
             ViewBag.Messages = msgs;
@@ -94,21 +88,17 @@ namespace AfterSchool.Controllers
             {
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
             }
-            else if(user.Email != email)
+            else if(user.CanEmailBeUsed(email))
             {
-                WebUser emailCheck = WebUser.LoadByEmail(email);
-                if(emailCheck.IsNotEmpty())
-                {
-                    msgs.Add("This email has already been registered", MessageType.UserError);
-                }
+                msgs.Add("This email has already been registered", MessageType.UserError);
             }
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
             {
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             }
-            else if (password1.Length < 6)
+            else if (password1.Length < 8)
             {
-                msgs.Add("Password must be at least 6 characters", MessageType.UserError);
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
             }
 
             if (msgs.HasNoErrors())
@@ -116,41 +106,13 @@ namespace AfterSchool.Controllers
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
-                        if (user.Email.ToLower().Trim() != email.ToLower().Trim())
-                        {
-                            user.Email = email;
-                        }
-                        else
-                        {
-                            user.VerifiedAccount = true;
-                        }
-
-                        user.FirstName = firstname;
-                        user.LastName = lastname;
-                        user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, dc: adc);
-                        user.IsRegistered = true;
-                        user.IsActive = true;
-                        user.Password = WebUserService.EncryptPassword(password1);
-                        amsgs.AddRange(user.Save(adc));
-
-                        var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: adc);
-                        if (awu.IsNotEmpty())
-                        {
-                            awu.IsActive = true;
-                            amsgs.AddRange(awu.Save(adc));
-                        }
-                        else
-                        {
-                            msgs.Add("Invalid invitation code", MessageType.UserError);
-                        }
+                        msgs.AddRange(user.CompleteSignUp(account, firstname, lastname, email, password1, adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
                         if (!user.VerifiedAccount)
-                        {
                             msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));
-                        }
                     },
                     onFailure: (SystemMessages fmsgs) =>
                     {
@@ -160,9 +122,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
                 msgs.AddRange(LoadSessionInfo(user));
-            }
 
             if (msgs.HasNoErrors())
             {

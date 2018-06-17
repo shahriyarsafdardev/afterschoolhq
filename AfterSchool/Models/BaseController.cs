@@ -133,21 +133,20 @@ namespace AfterSchool.Models
 
         protected RedirectToRouteResult LoginRedirect()
         {
-            if (SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
-            {
-                if (SessionVariables.CurrentAccount.IsAdminAccount)
-                {
-                    return RedirectToAction("index", "account", new { area = "admin" });
-                }
-                else
-                {
-                    return RedirectToAction("index", "home", new { area = "org" });
-                }
-            }
-            else
-            {
+            if (SessionVariables.CurrentAccount.IsEmpty())
                 return RedirectToAction("index", "home", new { area = "user" });
-            }
+            else if (SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
+                switch (SessionVariables.CurrentAccount.AccountTypeId)
+                {
+                    case AccountType.AfterSchool:
+                        return RedirectToAction("index", "account", new { area = "admin" });
+                    case AccountType.SchoolDistrict:
+                        return RedirectToAction("index", "home", new { area = "district" });
+                    default:
+                        return RedirectToAction("index", "home", new { area = "org" });
+                }
+
+            return RedirectToAction("index", "login");
         }
 
         protected SystemMessages LoadSessionInfo(WebUser user, bool doRememberMe = false)
@@ -157,9 +156,9 @@ namespace AfterSchool.Models
             SessionVariables.LoggedInUser = user;
             var awus = AccountWebUser.LoadByWebUserIdByIsActive(user.ID.Value, true);
 
-            if (awus.Count > 0)
+            if (awus.Any())
             {
-                if (awus.Where(x => x.IsDefault).Count() > 0)
+                if (awus.Where(x => x.IsDefault).Any())
                 {
                     SessionVariables.CurrentAccount = awus.Where(x => x.IsDefault).First().ToAccount(true);
                     SessionVariables.AccountUserType = awus.Where(x => x.IsDefault).First().UserTypeId;

@@ -231,27 +231,26 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var gwu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: adc);
-                    if (gwu.IsEmpty())
-                    {
-                        gwu = new AccountWebUser();
-                        gwu.CreateDate = DateTime.UtcNow;
-                        gwu.CreatedBy = loggedInUserId;
-                        gwu.WebUserId = user.ID.Value;
-                        gwu.AccountId = account.ID.Value;
-                        gwu.IsDefault = false;
-                        gwu.IsActive = user.IsActive;
-                    }
+                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: adc);
+                    if (awu.IsEmpty())
+                        awu = new AccountWebUser
+                        {
+                            CreateDate = DateTime.UtcNow,
+                            CreatedBy = loggedInUserId,
+                            WebUserId = user.ID.Value,
+                            AccountId = account.ID.Value,
+                            IsDefault = false,
+                            IsActive = user.IsActive
+                        };
                     else
-                        gwu.IsActive = true;
+                        awu.IsActive = true;
 
-                    gwu.LastModifiedDate = DateTime.UtcNow;
-                    gwu.LastModifiedBy = loggedInUserId;
-                    gwu.UserTypeId = ut;
+                    awu.LastModifiedDate = DateTime.UtcNow;
+                    awu.LastModifiedBy = loggedInUserId;
+                    awu.UserTypeId = ut;
+                    amsgs.AddRange(awu.Save(adc));
 
-                    amsgs.AddRange(gwu.Save(adc));
-
-                    if (ut == UserType.Owner)
+                    if (ut == UserType.Owner && account.OwnerId != user.ID)
                     {
                         account.OwnerId = user.ID.Value;
                         amsgs.AddRange(account.Save(adc));
@@ -333,6 +332,11 @@ namespace AfterSchoolLibrary
             return EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
         }
 
+        public static SystemMessages SendInvitedEmail(this Account account, DatabaseConnection dc = null)
+        {
+            return EmailHelper.SendAccountInvitedEmail(account.GetAccountOwner(dc: dc), account);
+        }
+        /*
         public static SystemMessages InviteUser(this Account account, WebUser wu, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             return account.InviteUser(wu.FirstName, wu.LastName, wu.Email, ut, loggedInUser, dc: dc);
@@ -342,68 +346,18 @@ namespace AfterSchoolLibrary
         {
             return account.InviteUser(firstName, lastName, email, null, ut, loggedInUser, dc: dc);
         }
+        */
 
         public static SystemMessages InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            WebUser wu = null;
 
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    wu = WebUser.LoadByEmail(email.Trim(), dc: adc);
-
-                    if (wu.IsEmpty())
-                    {
-                        wu = new WebUser();
-                        wu.FirstName = firstName;
-                        wu.LastName = lastName;
-                        wu.Email = email.Trim();
-                        wu.CreateDate = wu.LastModifiedDate = DateTime.Now;
-                        wu.CreatedBy = wu.LastModifiedBy = loggedInUser.ID.Value;
-                        wu.IsActive = false;
-                        wu.Uid = Guid.NewGuid();
-                        amsgs.AddRange(wu.Save(adc));
-                    }
-
-                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, wu.ID.Value, dc: adc);
-                    if (awu.IsEmpty())
-                    {
-                        awu = new AccountWebUser();
-                        awu.CreateDate = DateTime.Now;
-                        awu.CreatedBy = loggedInUser.ID.Value;
-                        awu.WebUserId = wu.ID.Value;
-                        awu.AccountId = account.ID.Value;
-                        awu.IsDefault = true;
-                    }
-                    else
-                    {
-                        awu.IsActive = true;
-                    }
-                    awu.LastModifiedDate = DateTime.Now;
-                    awu.LastModifiedBy = loggedInUser.ID.Value;
-                    awu.UserTypeId = ut;
-
-                    amsgs.AddRange(awu.Save(adc));
-
-                    if (ut == UserType.Owner)
-                    {
-                        account.OwnerId = wu.ID.Value;
-                        amsgs.AddRange(account.Save(adc));
-                    }
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                    msgs.AddRange(wu.SendInvite(email.Trim(), message, loggedInUser, account, dc: dc));
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                    msgs.Add("An invitation was not sent to " + email.Trim() + ", a system error has occurred", MessageType.UserError);
-                },
-                dc: dc
-            );
+            var wu = account.AddUser(firstName, lastName, email, ut, loggedInUser.ID.Value, msgs, dc);
+            if (msgs.HasNoErrors())
+                msgs.AddRange(wu.SendInvite(message, loggedInUser, account, dc: dc));
+            
+            if (msgs.HasErrors())
+                msgs.Add($"An invitation was not sent to ${email.Trim()}, a system error has occurred", MessageType.UserError);       
 
             return msgs;
         }
@@ -1013,22 +967,27 @@ namespace AfterSchoolLibrary
             return activePeriod;
         }
 
-        public static Account NewAccount(string company, string email, string phone, bool isActive, int loggedInUserId, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
+        public static Account NewAccount(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser owner, int loggedInUserId, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var account = new Account();
-            account.Name = company;
-            account.IsAdminAccount = false;
-            account.IsActive = isActive;
-            account.Email = email;
-            account.Phone = phone;
-            account.UniqueName = AccountService.GenerateUniqueName(account.Name, account.ID, dc: dc);
-            account.CreateDate = DateTime.UtcNow;
-            account.LastModifiedDate = DateTime.UtcNow;
-            account.CreatedBy = loggedInUserId;
-            account.LastModifiedBy = loggedInUserId;
-            account.IsAfterSchool = isAfterSchool;
+            var uniqueName = AccountService.GenerateUniqueName(orgName, null, dc: dc);
 
+            var account = new Account
+            {
+                Name = orgName,
+                IsAdminAccount = false,
+                IsActive = isActive,
+                Email = email,
+                Phone = phone,
+                OwnerId = owner.ID,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedBy = loggedInUserId,
+                IsAfterSchool = isAfterSchool,
+                AccountTypeId = accountType,
+                UniqueName = uniqueName
+            };
             msgs.AddRange(account.SaveWithStripe(dc: dc));
 
             return account;

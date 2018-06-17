@@ -13,12 +13,34 @@ namespace AfterSchool.Areas.Admin.Controllers
     {
         // GET: User
         [HttpGet]
-        public ActionResult Index(int? start = null, int? length = null)
+        public ActionResult Index(string pn, string rpp)
         {
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            int userCount = WebUser.GetCount();
+            var users = WebUser.Load(start: start, length: length);
+            var totalPages = Math.Ceiling(userCount.ToDouble() / recordsPerPage).ToInteger();
+
             ViewBag.Messages = new SystemMessages();
-            return View(WebUser.Load(                
-                start: start,
-                length: length));
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = userCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
+            return View(users);
         }
 
         [HttpGet]

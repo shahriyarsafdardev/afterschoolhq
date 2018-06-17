@@ -179,10 +179,10 @@ namespace AfterSchoolLibraryTests
         [InlineData("test@test.com@test.com", false)]
         public void SendInviteTest(string email, bool result)
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+            var user = Factories.WebUserFactory.CreateWithEmail(email, msgs, dc: dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
 
-            Assert.True(user.SendInvite(email, "invite message", user, account, dc: dc).HasNoErrors() == result);
+            Assert.True(user.SendInvite("invite message", user, account, dc).HasNoErrors() == result);
         }
 
         [Theory]
@@ -386,9 +386,9 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
             var orig = ASCIIEncoding.ASCII.GetBytes("test");
-            var saltAndHashed = WebUser.SaltandHashPassword("test");
+            var saltAndHashed = WebUserService.SaltandHashPassword("test");
 
-            Assert.NotEqual(orig, WebUser.SaltandHashPassword("test").hashedbytes);
+            Assert.NotEqual(orig, WebUserService.SaltandHashPassword("test").hashedbytes);
         }
 
         /// <summary>
@@ -406,7 +406,7 @@ namespace AfterSchoolLibraryTests
             var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
             var encrypt = AfterSchoolLibrary.Utilities.EncryptToBase64("test");
             var decrypt = AfterSchoolLibrary.Utilities.DecryptFromBase64(encrypt);
-            var saltAndHashed = WebUser.SaltandHashPassword(decrypt);
+            var saltAndHashed = WebUserService.SaltandHashPassword(decrypt);
 
             Assert.NotEqual(decrypt, saltAndHashed.hashedbytes.ToString());
         }

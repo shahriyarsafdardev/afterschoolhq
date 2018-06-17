@@ -286,10 +286,11 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["email"], email);
-            dq.Criterias.Add(ObjectMap["password"], WebUser.SaltandHashPassword(password));
+            dq.Criterias.Add(ObjectMap["password"], WebUserService.SaltandHashPassword(password));
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        /*
         public static string GenerateRandomCryptographicKey(int keyLength)
         {
             return Convert.ToBase64String(GenerateRandomCryptographicBytes(keyLength));
@@ -328,7 +329,7 @@ namespace AfterSchoolLibrary
         public SystemMessages SendInvite(string email, string message, WebUser loggedInUser, Account account, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var subject = string.Format("You have been invited by {0} to use {1}", account.Name, Utilities.AppName(account.IsAfterSchool));
+            var subject = $"You have been invited by {account.Name} to use {Utilities.AppName(account.IsAfterSchool)}";
             var body = "";
 
             if (!message.IsEmpty())
@@ -353,7 +354,7 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }        
-
+        */
         #endregion
     }
 }

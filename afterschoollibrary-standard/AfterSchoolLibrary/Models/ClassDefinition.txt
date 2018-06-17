@@ -1209,7 +1209,7 @@ values: NotSet, Requested, Approved, Denied
 [begin]
 type: Enum
 name: AccountType
-values: NotSet, ActivityProvider, School, SchoolDistrict
+values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool
 [end]
 
 [begin]

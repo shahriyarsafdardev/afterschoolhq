@@ -363,9 +363,9 @@ namespace AfterSchoolLibrary
             var users = WebUser.Load(dc: dc);
             foreach (WebUser user in users)
             {
-                var Pass = WebUser.DecryptPassword(user.Password);
-                user.Salt = System.Text.Encoding.UTF8.GetString(WebUser.SaltandHashPassword(Pass).saltedbytes);
-                user.Password = WebUser.SaltandHashPassword(Pass).hashedbytes.ToString();
+                var Pass = WebUserService.DecryptPassword(user.Password);
+                user.Salt = System.Text.Encoding.UTF8.GetString(WebUserService.SaltandHashPassword(Pass).saltedbytes);
+                user.Password = WebUserService.SaltandHashPassword(Pass).hashedbytes.ToString();
                 msgs.AddRange(user.Save(dc));
 
             }
