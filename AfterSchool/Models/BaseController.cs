@@ -23,7 +23,7 @@ namespace AfterSchool.Models
         {
             base.Initialize(requestContext);
 
-            AfterSchool.Models.Utilities.DetectAfterSchool();
+            Utilities.DetectAfterSchool();
 
             if (SessionVariables.VisitorSession.IsEmpty())
             {
@@ -48,18 +48,19 @@ namespace AfterSchool.Models
         {
             if (SessionVariables.VisitorSession.IsNotEmpty())
             {
-                var action = new SessionAction();
-                action.ActivityId = activityId;
-                action.AccountId = accountId;
-                action.SessionActionTypeId = sat;
-                action.WebUserId = webUserId;
-                action.SessionId = SessionVariables.VisitorSession.ID;
-                action.RegistrantId = registrantId;
-                action.RegistrationPeriodId = registrationPeriodId;
-                action.ActivityGroupId = activityGroupId;
-                action.CreateDate = DateTime.UtcNow;
-                action.CreatedBy = SessionVariables.LoggedInUser.IsNotEmpty() ? SessionVariables.LoggedInUser.ID : 0;
-                action.Save(dc: dc);
+                new SessionAction
+                {
+                    ActivityId = activityId,
+                    AccountId = accountId,
+                    SessionActionTypeId = sat,
+                    WebUserId = webUserId,
+                    SessionId = SessionVariables.VisitorSession.ID,
+                    RegistrantId = registrantId,
+                    RegistrationPeriodId = registrationPeriodId,
+                    ActivityGroupId = activityGroupId,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = SessionVariables.LoggedInUser.IsNotEmpty() ? SessionVariables.LoggedInUser.ID : 0
+                }.Save(dc: dc);
             }
         }
 
@@ -71,15 +72,8 @@ namespace AfterSchool.Models
         protected void HandleIsLoggedIn(HttpContextBase requestContext)
         {
             if (!IsLoggedIn())
-            {
                 requestContext.Response.Redirect("/login?url=" + requestContext.Server.UrlEncode(requestContext.Request.Url.PathAndQuery));
-            }
         }
-
-        //protected override System.Web.Mvc.ViewResult View(string viewName, string masterName, object model)
-        //{
-        //    return base.View(viewName, masterName, model);
-        //}
 
         protected void WriteOutput(object obj, ResponseType rt)
         {
@@ -134,15 +128,22 @@ namespace AfterSchool.Models
         protected RedirectToRouteResult LoginRedirect()
         {
             if (SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction("index", "home", new { area = "user" });
+                return RedirectToAction("index", "home", new { area = "user" });   
+            
             else if (SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
                         return RedirectToAction("index", "account", new { area = "admin" });
                     case AccountType.SchoolDistrict:
+                        if (SessionVariables.AccountPackage.IsEmpty())
+                            return RedirectToAction("newbilling", "account", new { area = "district" });
+
                         return RedirectToAction("index", "home", new { area = "district" });
                     default:
+                        if (SessionVariables.AccountPackage.IsEmpty())
+                            return RedirectToAction("newbilling", "account", new { area = "org" });
+
                         return RedirectToAction("index", "home", new { area = "org" });
                 }
 

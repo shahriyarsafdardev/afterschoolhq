@@ -1,8 +1,8 @@
 ﻿@model AfterSchoolLibrary.Account
 @{
     ViewBag.Title = Model.Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-    Package package = (Package)ViewBag.Package;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var package = (Package)ViewBag.Package;
     var currentPackage = SessionVariables.AccountPackage;
     var packages = (List<Package>)ViewBag.Packages;
 }
@@ -39,7 +39,8 @@
                             {
                                 var monthlySelected = "";
                                 var yearlySelected = "";
-                                if(p.ID == currentPackage.PackageId)
+
+                                if(package.IsNotEmpty() && currentPackage.IsNotEmpty() && package.ID == currentPackage.ID)
                                 {
                                     if(currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
                                     {

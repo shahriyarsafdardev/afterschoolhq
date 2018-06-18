@@ -81,7 +81,6 @@ namespace AfterSchool.Controllers
 
             var package = Package.LoadByUid(id.ToGuid());
             var selectedBillingPeriodType = BillingPeriodType.Month;
-            AccountPackage accountPackage = null;
 
             if (msgs.HasNoErrors())
             {
@@ -92,17 +91,16 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
                         user = WebUserService.CreateNew(
-                                firstName: firstname,
-                                lastName: lastname,
-                                email: email,
-                                password: password1,
-                                isActive: true,
-                                isRegistered: true,
-                                isVerified: false,
-                                loggedInUserId: 0,
-                                msgs: amsgs,
-                                dc: adc
-                            );
+                            firstName: firstname,
+                            lastName: lastname,
+                            email: email,
+                            password: password1,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            loggedInUserId: 0,
+                            msgs: amsgs,
+                            dc: adc);
 
                         account = user.AddNewAccount(
                             orgName: orgname, 
@@ -111,17 +109,11 @@ namespace AfterSchool.Controllers
                             accountType: AccountType.School,
                             packageId: package.ID.Value,
                             packageBillingPeriod: selectedBillingPeriodType,
+                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
                             loggedInUser: user, 
                             msgs: amsgs, 
                             dc: adc);
-
-                        if (amsgs.HasNoErrors())
-                        {
-                            if (package.IsFree(selectedBillingPeriodType) || package.HasFeature(FeatureType.TrialDays))
-                            {
-                                accountPackage = account.AddPackage(package.ID.Value, selectedBillingPeriodType, user, amsgs, dc: adc);
-                            }
-                        }                        
+                        
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -133,13 +125,10 @@ namespace AfterSchool.Controllers
                         SessionVariables.AccountPackage = account.GetActiveAccountPackage();
 
                         if (isTrial)
-                        {
                             SessionVariables.CurrentAccount.SendWelcomeEmailTrial();
-                        }
                         else
-                        {
                             SessionVariables.CurrentAccount.SendWelcomeEmailPurchase();
-                        }
+
                         SessionVariables.LoggedInUser.SendVerificationEmail(SessionVariables.IsAfterSchool.Value);
                     },
                     onFailure: (SystemMessages fmsgs) =>
@@ -155,13 +144,9 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 if(package.IsFree(selectedBillingPeriodType) || isTrial)
-                {
                     return RedirectToAction("index", "home", new { area = "org" });
-                }
                 else
-                {
                     return RedirectToAction("newbilling", "account", new { area = "org", id = package.Uid.ToString() });
-                }
             }
             else
             {
