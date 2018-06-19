@@ -329,10 +329,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void isWaitingListFullTest()
         {
-            var account = Factories.AccountFactory.Create(msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, 5, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, 5, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             Assert.True(activity.IsWaitingListFull(dc: dc)); //0 open with 0 on waiting list means full
         }
 
@@ -341,8 +342,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void HasGradeLevelTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var gradeLevel = Factories.GradeLevelFactory.Create(msgs, dc: dc);
 
@@ -357,8 +358,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetGradeLevelsTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var gradeLevel = Factories.GradeLevelFactory.Create(msgs, dc: dc);
             gradeLevel.ID = 12;
@@ -372,8 +373,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetTeamMembersTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var User = Factories.WebUserFactory.Create(msgs, dc: dc);
             var activityWebUser = Factories.ActivityWebUserFactory.Create(activity, User, msgs, dc: dc);
@@ -385,8 +386,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetFormsTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
@@ -399,8 +400,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetActiveFormTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
@@ -413,8 +414,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetActivityFormsTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
@@ -426,8 +427,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetAttendanceTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
@@ -443,8 +444,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetCompletedAttendanceTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
@@ -460,8 +461,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetAttendancePresentCountTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc: dc);
@@ -479,8 +480,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetAttendancePossibleCountTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc: dc);
@@ -499,8 +500,8 @@ namespace AfterSchoolLibraryTests
         public void GetAttendanceByDateTest()
         {
             var date = new DateTime(2018, 10, 10) { };
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc: dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc: dc);
@@ -524,8 +525,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetActivityRegistrationPeriodsTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
@@ -537,8 +538,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetRegistrationPeriodsTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
@@ -552,8 +553,8 @@ namespace AfterSchoolLibraryTests
         public void GetUpcommingRegistrationPeriodsTest()
         {
             var date = new DateTime(2018, 10, 10);
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
@@ -571,8 +572,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetCurrentRegistrationPeriodsTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
@@ -586,8 +587,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetCurrentOrNextRegistrationPeriodTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
@@ -601,8 +602,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetActiveRegistrationPeriodTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
@@ -630,36 +631,36 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void CopyTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
 
-            Assert.NotNull(activity.Copy("newActivity", false, user.ID.Value, msgs, dc: dc));
+            Assert.NotNull(activity.Copy("newActivity", false, accountOwner.ID.Value, msgs, dc: dc));
         }
 
         [Fact]
         public void CopyDefaultFormTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var form = Factories.FormFactory.Create(account, msgs, dc);
             account.DefaultFormId = form.ID.Value;
             account.Save(dc);
 
-            Assert.True(activity.CopyDefaultForm(user.ID.Value, dc).HasNoErrors());
+            Assert.True(activity.CopyDefaultForm(accountOwner.ID.Value, dc).HasNoErrors());
         }
 
         [Fact]
         public void AddFormAndActivateTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var form = Factories.FormFactory.Create(account, msgs, dc);
 
-            Assert.NotNull(activity.AddFormAndActivitate(form, user.ID.Value, false, msgs, dc));
+            Assert.NotNull(activity.AddFormAndActivitate(form, accountOwner.ID.Value, false, msgs, dc));
         }
 
         [Fact]
