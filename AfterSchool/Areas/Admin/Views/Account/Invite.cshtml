@@ -1,0 +1,142 @@
+﻿@{
+    ViewBag.Title = "Invite Organization";
+
+    var packages = (List<Package>)ViewBag.Packages;
+}
+
+@{ Html.RenderPartial("AdminHeader"); }
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", (SystemMessages)ViewBag.Messages); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-id"></i> Invite Organization
+        </div>
+
+        <div class="panel-body">
+
+            <form class="form-horizontal" method="post" action="@Url.Action("invite", "account")">
+
+                <div class="row">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <h3>Organization</h3>
+                        <hr />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">
+                        Organization Name
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" maxlength="50" name="orgname" id="orgname" class="form-control" value="@Request["orgname"]" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">
+                        Organization Type
+                    </div>
+                    <div class="col-sm-6">
+                        <select name="accounttype" id="accounttype" class="form-control">
+                            <option value="">Select...</option>
+                            @foreach (var item in Enum.GetValues(typeof(AccountType)).Cast<AccountType>().OrderBy(x => x.ToString()))
+                            {
+                                if (item != AccountType.AfterSchool && item != AccountType.NotSet)
+                                {
+                                    <option value="@((int)item)" @(Request["accounttype"] == ((int)item).ToString() ? "selected=\"selected\"" : "")>
+                                        @item.ToString().SplitByUpperCase()
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">
+                        Package
+                    </div>
+                    <div class="col-sm-6">
+                        <select name="package" id="package" class="form-control">
+                            <option value="">Select...</option>
+                            @foreach (var item in packages)
+                            {
+                                <option value="@item.ID" @(Request["package"] == item.ID.ToString() ? "selected=\"selected\"" : "")>
+                                    @item.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">
+                        Billing Period
+                    </div>
+                    <div class="col-sm-6">
+                        <select name="billingperiod" id="billingperiod" class="form-control">
+                            <option value="">Select...</option>
+                            @foreach (var item in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().OrderBy(x => x.ToString()))
+                            {
+                                if (item != BillingPeriodType.NotSet)
+                                {
+                                    <option value="@((int)item)" @(Request["package"] == ((int)item).ToString() ? "selected=\"selected\"" : "")>
+                                        Per @item.ToString().SplitByUpperCase()
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <h3>Personal Details</h3>
+                        <hr />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">
+                        First Name
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" maxlength="50" name="firstname" id="firstname" class="form-control" value="@Request["firstname"]" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">
+                        Last Name
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" maxlength="50" name="lastname" id="lastname" class="form-control" value="@Request["lastname"]" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">
+                        Email
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" maxlength="50" name="email" id="email" class="form-control" value="@Request["email"]" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <button type="reset" class="btn btn-default" onclick="location.href='@Url.Action("index", "account")'">Cancel</button>
+                        <button type="submit" class="btn btn-primary pull-right"><i class="s7-paper-plane"></i> Send Invite</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

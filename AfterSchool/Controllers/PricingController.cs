@@ -30,7 +30,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateAccount(string id, string firstname, string lastname, string company, string phone, string email, string password1, string password2, string terms, string trial)
+        public ActionResult CreateAccount(string id, string firstname, string lastname, string orgname, string phone, string email, string password1, string password2, string terms, string trial)
         {
             var msgs = new SystemMessages();
 
@@ -42,9 +42,9 @@ namespace AfterSchool.Controllers
             {
                 msgs.Add("Last Name is required", MessageType.UserError);
             }
-            if (company.IsEmpty())
+            if (orgname.IsEmpty())
             {
-                msgs.Add("Organization is required", MessageType.UserError);
+                msgs.Add("Organization Name is required", MessageType.UserError);
             }
             if (phone.IsEmpty())
             {
@@ -66,9 +66,9 @@ namespace AfterSchool.Controllers
             {
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             }
-            else if(password1.Length < 6)
+            else if(password1.Length < 8)
             {
-                msgs.Add("Password must be at least 6 characters", MessageType.UserError);
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
             }
             if(terms.IsEmpty())
             {
@@ -81,7 +81,6 @@ namespace AfterSchool.Controllers
 
             var package = Package.LoadByUid(id.ToGuid());
             var selectedBillingPeriodType = BillingPeriodType.Month;
-            AccountPackage accountPackage = null;
 
             if (msgs.HasNoErrors())
             {
@@ -91,47 +90,30 @@ namespace AfterSchool.Controllers
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
-                        account = AccountService.NewAccount(
-                            company: company,
+                        user = WebUserService.CreateNew(
+                            firstName: firstname,
+                            lastName: lastname,
                             email: email,
-                            phone: phone,
+                            password: password1,
                             isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
                             loggedInUserId: 0,
-                            isAfterSchool: AfterSchool.Models.Utilities.IsAfterSchool(),
                             msgs: amsgs,
-                            dc: adc
-                            );
+                            dc: adc);
 
-                        if (amsgs.HasNoErrors())
-                        {
-                            user = account.AddUser(
-                                firstName: firstname,
-                                lastName: lastname,
-                                email: email,
-                                password: password1,
-                                isActive: true,
-                                isRegistered: true,
-                                isVerified: false,
-                                ut: UserType.Owner,
-                                loggedInUserId: 0,
-                                msgs: amsgs,
-                                dc: adc
-                                );
-                        }
-
-                        if (amsgs.HasNoErrors())
-                        {
-                            if (package.IsFree(selectedBillingPeriodType) || package.HasFeature(FeatureType.TrialDays))
-                            {
-                                accountPackage = account.AddPackage(package.ID.Value, selectedBillingPeriodType, user, amsgs, dc: adc);
-                            }
-                        }
-                        if (amsgs.HasNoErrors())
-                        {
-                            //create default form
-                            var form = account.GetDefaultForm(adc);
-                            var defaultForm = form.Copy(user.ID.Value, account.ID.Value, amsgs, dc: adc);
-                        }
+                        account = user.AddNewAccount(
+                            orgName: orgname, 
+                            isActive: true, 
+                            phone: phone,
+                            accountType: AccountType.School,
+                            packageId: package.ID.Value,
+                            packageBillingPeriod: selectedBillingPeriodType,
+                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                            loggedInUser: user, 
+                            msgs: amsgs, 
+                            dc: adc);
+                        
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -143,13 +125,10 @@ namespace AfterSchool.Controllers
                         SessionVariables.AccountPackage = account.GetActiveAccountPackage();
 
                         if (isTrial)
-                        {
                             SessionVariables.CurrentAccount.SendWelcomeEmailTrial();
-                        }
                         else
-                        {
                             SessionVariables.CurrentAccount.SendWelcomeEmailPurchase();
-                        }
+
                         SessionVariables.LoggedInUser.SendVerificationEmail(SessionVariables.IsAfterSchool.Value);
                     },
                     onFailure: (SystemMessages fmsgs) =>
@@ -165,13 +144,9 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 if(package.IsFree(selectedBillingPeriodType) || isTrial)
-                {
                     return RedirectToAction("index", "home", new { area = "org" });
-                }
                 else
-                {
                     return RedirectToAction("newbilling", "account", new { area = "org", id = package.Uid.ToString() });
-                }
             }
             else
             {

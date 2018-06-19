@@ -1,34 +1,31 @@
 ﻿@model List<AfterSchoolLibrary.Account>
 @{
     ViewBag.Title = "Accounts";
-    
+    var paging = (PagingModel)ViewBag.PagingModel;
+
 }
 
-<div class="page-head">
-    <h2>Accounts</h2>
-</div>
+@{ Html.RenderPartial("AdminHeader"); }
+
 <div class="main-content">
 
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <i class="s7-id"></i> Accounts
+            <a href="@Url.Action("invite", "account")" class="btn btn-primary btn-space pull-right">
+                <i class="icon icon-left s7-plus"></i>
+                Invite Organization
+            </a>
+            <i class="s7-id"></i> Organizations
         </div>
 
         <div class="panel-body">
-            
-            @*
-            <a href="@Url.Action("edit", "account")" class="btn btn-primary btn-space">
-                <i class="icon icon-left s7-plus"></i>
-                Add Account
-            </a>
-            *@
 
             <div class="table-responsive">
                 <table class="table table-striped">
                     <tr>
                         <th></th>
-                        <th>Account Name</th>
+                        <th>Org Name</th>
                         <th>Account #</th>
                         <th>Is Active</th>
                         <th>Member Since</th>
@@ -56,6 +53,19 @@
                     }
                 </table>
             </div>
+
+
+            @{Html.RenderPartial(
+                      "~/Views/Shared/_Paging.cshtml",
+                      paging,
+                      new ViewDataDictionary()
+                      {
+                        { "id", "" },
+                        { "action", "index" },
+                        { "controller", "account" }
+                      }
+                  );
+            }
         </div>
     </div>
 </div>

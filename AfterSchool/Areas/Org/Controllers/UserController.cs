@@ -43,11 +43,11 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 msgs.Add("Email is required", MessageType.UserError);
             }
-            else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
             {
                 msgs.Add("Email must be valid", MessageType.UserError);
             }
-            else if(WebUser.ExistsByEmail(email))
+            else if(!SessionVariables.LoggedInUser.CanEmailBeUsed(email))
             {
                 msgs.Add("Email is already in use by another user", MessageType.UserError); 
             }

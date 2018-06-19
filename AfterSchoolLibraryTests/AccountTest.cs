@@ -59,12 +59,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DeleteTest()
         {
-            var a = new Account() {OwnerId = 12 };
-            a.Save(dc: dc);
-            var id = a.OwnerId.Value;
-
-            Assert.NotNull(a.Delete(dc: dc));
-            
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            Assert.NotNull(account.Delete(dc));
         }
 
         //Creates and returns a new Account
@@ -129,25 +126,15 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void RequestAccessToAccountTest()
         {
-            var webuser = Factories.WebUserFactory.Create(msgs, dc: dc);
-            webuser.Email = "test@test";
-            webuser.Save(dc: dc);
-            var webuser2 = Factories.WebUserFactory.Create(msgs, dc: dc);
-            webuser2.Email = "test2@test";
-            webuser2.Save(dc: dc);
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var webuser = Factories.WebUserFactory.CreateWithEmail("test@test.com", msgs, dc);
+            var webuser2 = Factories.WebUserFactory.CreateWithEmail("tes2t@test.com", msgs, dc);
+            var hostaccount = Factories.AccountFactory.Create(webuser, msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(webuser2, msgs, dc);
 
-            var hostaccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            hostaccount.OwnerId = webuser.ID.Value;
-            hostaccount.Name = "test";
-            hostaccount.Save(dc: dc);
-
-            var visitoraccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            visitoraccount.OwnerId = webuser2.ID.Value;
-            visitoraccount.Name = "test2";
-            visitoraccount.Save(dc: dc);
-
-            Assert.True(visitoraccount.RequestAccessToAccount(hostaccount, dc: dc).HasNoErrors());
+            Assert.True(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc: dc).HasNoErrors());
         }
+
 
         /// <summary>
         /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
@@ -155,50 +142,15 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ApproveAccessToAccountTest()
         {
-            var webuser = Factories.WebUserFactory.CreateWithEmail("test@test", msgs, dc: dc);
-            var webuser2 = Factories.WebUserFactory.CreateWithEmail("test2@test", msgs, dc: dc);
-
-            var hostaccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            hostaccount.OwnerId = webuser.ID.Value;
-            hostaccount.Name = "test";
-            msgs.AddRange(hostaccount.Save(dc: dc));
-
-            var visitoraccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            visitoraccount.OwnerId = webuser2.ID.Value;
-            visitoraccount.Name = "test2";
-            msgs.AddRange(visitoraccount.Save(dc: dc));
-            msgs.AddRange(visitoraccount.RequestAccessToAccount(hostaccount, dc: dc));
-
-            msgs.AddRange(hostaccount.ApproveAccessToAccount(visitoraccount, dc: dc));
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var hostUser = Factories.WebUserFactory.CreateWithEmail("test@test.com", msgs, dc);
+            var visitorUser = Factories.WebUserFactory.CreateWithEmail("test2@test.com", msgs, dc);
+            var hostaccount = Factories.AccountFactory.Create(hostUser, msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
+            msgs.AddRange(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc));
+            msgs.AddRange(hostaccount.ApproveAccessToAccount(visitoraccount, loggedInUser, dc));
 
             Assert.True(msgs.HasNoErrors());
-        }
-
-        /// <summary>
-        /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
-        /// </summary>
-        [Fact]
-        public void DenyAccessToAccountTest()
-        {
-            var webuser = Factories.WebUserFactory.Create(msgs, dc: dc);
-            webuser.Email = "test@test";
-            webuser.Save(dc: dc);
-            var webuser2 = Factories.WebUserFactory.Create(msgs, dc: dc);
-            webuser2.Email = "test2@test";
-            webuser2.Save(dc: dc);
-
-            var hostaccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            hostaccount.OwnerId = webuser.ID.Value;
-            hostaccount.Name = "test";
-            hostaccount.Save(dc: dc);
-
-            var visitoraccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            visitoraccount.OwnerId = webuser2.ID.Value;
-            visitoraccount.Name = "test2";
-            visitoraccount.Save(dc: dc);
-            visitoraccount.RequestAccessToAccount(hostaccount, dc: dc);
-
-            Assert.True(visitoraccount.DenyAccessToAccount(visitoraccount, dc: dc).HasNoErrors());
         }
 
         /// <summary>
@@ -210,15 +162,52 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetApprovedVisitorAccountsTest()
         {
-            var hostaccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            var visitoraccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc: dc);
-            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc: dc);
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var hostaccount = Factories.AccountFactory.Create(hostuser, msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
             
-            visitoraccount.RequestAccessToAccount(hostaccount, dc: dc);
-            hostaccount.ApproveAccessToAccount(visitoraccount, dc: dc);
+            visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc: dc);
+            hostaccount.ApproveAccessToAccount(visitoraccount, loggedInUser, dc: dc);
 
             Assert.Single(hostaccount.GetApprovedVisitorAccounts(dc: dc));
+        }
+
+        /// <summary>
+        /// Will request access to an account, approve it. Then list off the requested visitors for the host
+        /// </summary>
+
+        [Fact]
+        public void GetRequestedVisitorAccountsTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var hostaccount = Factories.AccountFactory.Create(hostuser, msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
+
+            visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc: dc);
+
+            Assert.Single(hostaccount.GetRequestedVisitorAccounts(dc: dc));
+        }
+
+        /// <summary>
+        /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
+        /// </summary>
+        [Fact]
+        public void DenyAccessToAccountTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var hostuser = Factories.WebUserFactory.CreateWithEmail("test@test", msgs, dc);
+            var visitorUser = Factories.WebUserFactory.CreateWithEmail("test2@test", msgs, dc);
+            var hostaccount = Factories.AccountFactory.Create(hostuser, msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
+
+            msgs.AddRange(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc));
+            msgs.AddRange(hostaccount.DenyAccessToAccount(visitoraccount, loggedInUser, dc));
+
+            Assert.True(msgs.HasNoErrors());
         }
 
         /// <summary>
@@ -230,32 +219,16 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetDeniedVisitorAccountsTest()
         {
-            var hostaccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            var visitoraccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc: dc);
-            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc: dc);
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var hostaccount = Factories.AccountFactory.Create(hostuser, msgs, dc);
+            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
 
-            visitoraccount.RequestAccessToAccount(hostaccount, dc: dc);
-            hostaccount.DenyAccessToAccount(visitoraccount, dc: dc);
+            visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc);
+            hostaccount.DenyAccessToAccount(visitoraccount, loggedInUser, dc);
 
-            Assert.Single(hostaccount.GetDeniedVisitorAccounts(dc: dc));
-        }
-
-        /// <summary>
-        /// Will request access to an account, approve it. Then list off the requested visitors for the host
-        /// </summary>
-
-        [Fact]
-        public void GetRequestedVisitorAccountsTest()
-        {
-            var hostaccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            var visitoraccount = Factories.AccountFactory.Create(msgs, dc: dc);
-            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc: dc);
-            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc: dc);
-
-            visitoraccount.RequestAccessToAccount(hostaccount, dc: dc);
-
-            Assert.Single(hostaccount.GetRequestedVisitorAccounts(dc: dc));
+            Assert.Single(hostaccount.GetDeniedVisitorAccounts(dc));
         }
 
     }

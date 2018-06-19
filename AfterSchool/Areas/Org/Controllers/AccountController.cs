@@ -275,13 +275,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult NewBilling(string id)
         {
-            Account a = SessionVariables.CurrentAccount;
-            Package p = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage.ToPackage();
+            var account = SessionVariables.CurrentAccount;
+            var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
 
-            ViewBag.Package = p;
+            ViewBag.Package = package;
             ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
             ViewBag.Messages = new SystemMessages();
-            return View(a);
+            return View(account);
         }
 
         [HttpPost]

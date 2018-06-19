@@ -18,13 +18,13 @@ namespace AfterSchoolLibrary
 
         public static byte[] GenerateRandomCryptographicBytes(int keyLength)
         {
-            var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            RNGCryptoServiceProvider rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             byte[] randomBytes = new byte[keyLength];
             rngCryptoServiceProvider.GetBytes(randomBytes);
             return randomBytes;
         }
 
-        public static (byte[] salt, byte[] hash) SaltandHashPassword(string password)
+        public static (byte[] saltedbytes, byte[] hashedbytes) SaltandHashPassword(string password)
         {
             byte[] saltBytes = GenerateRandomCryptographicBytes(32 - password.Length);
             byte[] passwordinBytes = Encoding.UTF8.GetBytes(password);
@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary
         {
             return Encryption.DecryptToString(Convert.FromBase64String(password), Utilities.AppAESKey, Utilities.AppIV);
         }
-        public static SystemMessages SendInvite(this WebUser user, string email, string message, WebUser loggedInUser, Account account, DatabaseConnection dc = null)
+        public static SystemMessages SendInviteToAccount(this WebUser user, Account account, string message, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var subject = $"You have been invited by {account.Name} to use {Utilities.AppName(account.IsAfterSchool)}";
@@ -56,14 +56,14 @@ namespace AfterSchoolLibrary
             if (!user.IsActive)
                 body += $"<p>Click on the following link to create your account and start using {Utilities.AppName(account.IsAfterSchool)}: <a href=\"{user.GetInviteUrl(account)}\">{user.GetInviteUrl(account)}</a></p>";
             else
-                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{AfterSchoolLibrary.Email.HostName(account.IsAfterSchool)}/login</a></p>";
+                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{Email.HostName(account.IsAfterSchool)}/login</a></p>";
 
             body += "<p>Thank you!!</p>";
-            body += AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
+            body += Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
 
             msgs.AddRange(SendGridHelper.SendMail(
                 fromEmail: new EmailAddress(Email.AppEmailAddress, Utilities.AppName(account.IsAfterSchool)),
-                toEmail: new EmailAddress(email),
+                toEmail: new EmailAddress(user.Email),
                 subject: subject,
                 body: body,
                 replyTo: new EmailAddress(loggedInUser.Email, loggedInUser.DisplayName),
@@ -80,11 +80,11 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
 
-        public static UserType GetUserType(this WebUser user, Account a, DatabaseConnection dc = null)
+        public static UserType GetUserType(this WebUser user, Account account, DatabaseConnection dc = null)
         {
-            if (!a.IsEmpty())
+            if (!account.IsEmpty())
             {
-                var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, dc: dc);
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
                 if (!awu.IsEmpty())
                     return awu.UserTypeId;
             }
@@ -104,11 +104,11 @@ namespace AfterSchoolLibrary
             msgs.AddRange(user.Save(dc: dc));
             return msgs;
         }
-        public static bool HasAccessToFeature(this WebUser user, FeatureType ft, Account g, DatabaseConnection dc = null)
+        public static bool HasAccessToFeature(this WebUser user, FeatureType ft, Account account, DatabaseConnection dc = null)
         {
-            if (!g.IsEmpty())
+            if (!account.IsEmpty())
             {
-                var awu = AccountWebUser.LoadByAccountIdByWebUserId(g.ID.Value, user.ID.Value, dc: dc);
+                var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
                 if (awu.IsEmpty() == false && awu.UserTypeId != UserType.NotSet)
                     return awu.HasAccessToFeature(ft);
             }
@@ -185,7 +185,8 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
             var token = PasswordResetToken.AddOrUpdateToken(user, msgs, dc: dc);
 
-            msgs.AddRange(EmailHelper.SendPasswordReset(user, token, isAfterSchool));
+            if (msgs.HasNoErrors())
+                msgs.AddRange(EmailHelper.SendPasswordReset(user, token, isAfterSchool));
 
             return msgs;
         }
@@ -220,97 +221,114 @@ namespace AfterSchoolLibrary
             return AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
-        public static WebUser SignUpUser(string userUid, string accountUid, string firstName, string lastName, string email, string password, string verifyPassword, bool isAfterSchool, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser CreateNew(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            WebUser user = null;
-            Account account = null;
-
-            if (!userUid.IsGuid())
-                msgs.Add("Invalid invitation code", MessageType.UserError);
-            else
-            {
-                user = WebUser.LoadByUid(userUid.ToGuid(), null);
-
-                if (user.IsEmpty())
-                    msgs.Add("Invalid invitation code", MessageType.UserError);
-                else if (user.IsActive)
-                    msgs.Add("Account has already been created. Please proceed to the login page", MessageType.UserError);
-            }
-
-            if (!accountUid.IsGuid())
-            {
-                msgs.Add("Invalid invitation code", MessageType.UserError);
-            }
-            else
-            {
-                account = Account.LoadByUid(accountUid.ToGuid());
-                if (account.IsEmpty())
-                    msgs.Add("Invalid invitation code", MessageType.UserError);
-            }
-
             if (firstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
-
             if (lastName.IsEmpty())
                 msgs.Add("Last Name is required", MessageType.UserError);
 
             if (email.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
-                msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (!user.CanEmailBeUsed(email))
-                msgs.Add("This email has already been registered", MessageType.UserError);
+                msgs.Add("Email must valid", MessageType.UserError);
+            else if (WebUser.ExistsByEmail(email))
+                msgs.Add("Email is already in use by another user", MessageType.UserError);
 
-            if (password.IsEmpty() || verifyPassword.IsEmpty() || (password != verifyPassword))
-                msgs.Add("Passwords are required and must match", MessageType.UserError);
-            else if (password.Length < 6)
-                msgs.Add("Password must be at least 6 characters", MessageType.UserError);
+            if (password.IsNotEmpty() && password.Length < 8)
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
-                    {
-                        if (user.Email.ToLower().Trim() != email.ToLower().Trim())
-                            user.Email = email;
-                        else
-                            user.VerifiedAccount = true;
+                var user = new WebUser()
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    IsActive = isActive,
+                    IsRegistered = isRegistered,
+                    VerifiedAccount = isVerified,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId,
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = loggedInUserId,
+                    Username = WebUserService.GenerateUsername(firstName, lastName)
+                };
 
-                        user.FirstName = firstName;
-                        user.LastName = lastName;
-                        user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, dc: adc);
-                        user.IsRegistered = true;
-                        user.IsActive = true;
-                        user.Password = WebUserService.EncryptPassword(password);
-                        amsgs.AddRange(user.Save(adc));
+                if (password.IsNotEmpty())
+                    user.Password = WebUserService.EncryptPassword(password);
 
-                        var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: adc);
-                        if (awu.IsNotEmpty())
-                        {
-                            awu.IsActive = true;
-                            amsgs.AddRange(awu.Save(adc));
-                        }
-                        else
-                            msgs.Add("Invalid invitation code", MessageType.UserError);
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                        if (!user.VerifiedAccount)
-                        {
-                            msgs.AddRange(user.SendVerificationEmail(isAfterSchool));
-                        }
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
+                msgs.AddRange(user.Save(dc));
+                return user;
             }
-
-            return user;
+            return null;
         }
+
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = AccountService.CreateNew(
+                orgName: orgName, 
+                email: accountOwner.Email, 
+                phone: phone, 
+                isActive: isActive, 
+                accountType: accountType, 
+                accountOwner: accountOwner, 
+                packageId: packageId,
+                packageBillingPeriod: packageBillingPeriod,
+                loggedInUser: loggedInUser, 
+                isAfterSchool: isAfterSchool, 
+                msgs: msgs, 
+                dc: dc);
+
+            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc));
+
+            return account;
+        }
+
+        public static SystemMessages AddAccount(this WebUser user, Account account, UserType userTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.AddUser(user, UserType.Owner, loggedInUser.ID.Value, dc);
+        }
+
+        public static SystemMessages CompleteSignUp(this WebUser user, Account account, string firstName, string lastName, string email, string password, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, dc: dc);
+            user.IsRegistered = true;
+            user.IsActive = true;
+            user.Password = WebUserService.EncryptPassword(password);
+
+            if (user.Email.IsSameAs(email))
+                user.VerifiedAccount = true;
+            else
+                user.Email = email;
+
+            msgs.AddRange(user.Save(dc));
+            msgs.AddRange(user.ActivateForAccount(account, 0, dc));
+
+            return msgs;
+        }
+
+        public static SystemMessages ActivateForAccount(this WebUser user, Account account, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
+
+            if (awu.IsNotEmpty())
+            {
+                awu.IsActive = true;
+                awu.LastModifiedDate = DateTime.UtcNow;
+                awu.LastModifiedBy = loggedInUserId;
+                msgs.AddRange(awu.Save(dc));
+            }
+            else
+                msgs.Add("User not valid for account", MessageType.UserError);
+
+            return msgs;
+        }
+
     }
 }

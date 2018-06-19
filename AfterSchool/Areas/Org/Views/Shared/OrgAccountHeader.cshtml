@@ -1,14 +1,17 @@
-﻿@if (SessionVariables.AccountPackage.IsDuringTrial)
+﻿@if (SessionVariables.AccountPackage.IsNotEmpty())
 {
-    <div class="trial-header text-center text-white bg-warning">
-        You have @SessionVariables.AccountPackage.TrialDaysRemaining day(s) remaining in your trial <a href="@Url.Action("newbilling", "account", new { id = SessionVariables.AccountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
-    </div>
-}
-else if (SessionVariables.AccountPackage.IsTrialExpired(SessionVariables.CurrentAccount))
-{
-    <div class="trial-header text-center text-white bg-danger">
-        It looks like your trial has expired. <a href="@Url.Action("newbilling", "account", new { id = SessionVariables.AccountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
-    </div>
+    if (SessionVariables.AccountPackage.IsDuringTrial)
+    {
+        <div class="trial-header text-center text-white bg-warning">
+            You have @SessionVariables.AccountPackage.TrialDaysRemaining day(s) remaining in your trial <a href="@Url.Action("newbilling", "account", new { id = SessionVariables.AccountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+        </div>
+    }
+    else if (SessionVariables.AccountPackage.IsTrialExpired(SessionVariables.CurrentAccount))
+    {
+        <div class="trial-header text-center text-white bg-danger">
+            It looks like your trial has expired. <a href="@Url.Action("newbilling", "account", new { id = SessionVariables.AccountPackage.PackageUid })" class="btn btn-alt5 margin-h-10">Purchase Now &raquo;</a>
+        </div>
+    }
 }
 @if (!SessionVariables.LoggedInUser.VerifiedAccount)
 {
@@ -20,7 +23,7 @@ else if (SessionVariables.AccountPackage.IsTrialExpired(SessionVariables.Current
 <div class="page-head">
     <div class="pull-right">
         <p>
-            @SessionVariables.AccountPackage.PackageName Package<br />
+            @Html.Raw(SessionVariables.AccountPackage.IsNotEmpty() ? $"{SessionVariables.AccountPackage.PackageName} Package<br />" : "")
             Logged in as: @SessionVariables.LoggedInUser.DisplayName
         </p>
     </div>

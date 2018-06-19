@@ -357,16 +357,18 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages LoadByList(List<WebUser> webUsers, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static SystemMessages LoadAndHashAllUsers(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            SystemMessages msgs = new SystemMessages();
-
-           foreach(WebUser user in webUsers)
+            var msgs = new SystemMessages();
+            var users = WebUser.Load(dc: dc);
+            foreach (WebUser user in users)
             {
-                WebUser.LoadByUid(user.Uid, dc: dc);
+                var Pass = WebUserService.DecryptPassword(user.Password);
+                user.Salt = System.Text.Encoding.UTF8.GetString(WebUserService.SaltandHashPassword(Pass).saltedbytes);
+                user.Password = WebUserService.SaltandHashPassword(Pass).hashedbytes.ToString();
+                msgs.AddRange(user.Save(dc));
 
             }
-
             return msgs;
         }
 

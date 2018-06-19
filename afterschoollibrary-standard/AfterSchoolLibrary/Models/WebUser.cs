@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
+using System.Security.Cryptography;
 
 namespace AfterSchoolLibrary
 {
@@ -22,7 +23,7 @@ namespace AfterSchoolLibrary
 		public bool VerifiedAccount { get { return (bool)MDV["VerifiedAccount"].Value; } set { MDV["VerifiedAccount"].Value = value; } }
 		public bool IsRegistered { get { return (bool)MDV["IsRegistered"].Value; } set { MDV["IsRegistered"].Value = value; } }
 		public int? DefaultAccountId { get { return (int?)MDV["DefaultAccountId"].Value; } set { MDV["DefaultAccountId"].Value = value; } }
-		
+        public string Salt { get { return (string)MDV["Salt"].Value; } set { MDV["Salt"].Value = value; } }
 
         public WebUser()
         {
@@ -49,7 +50,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "VerifiedAccount", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsRegistered", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "DefaultAccountId", System.Data.SqlDbType.Int);
-				
+                _dp.Add(className, "Salt", System.Data.SqlDbType.Int);
+
                 return _dp;
             }
         }
@@ -158,7 +160,9 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["DefaultAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["Salt"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
             return msgs;
         }
@@ -200,12 +204,19 @@ namespace AfterSchoolLibrary
 			dq.Criterias.Add(ObjectMap["FacebookId"], FacebookId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
+        public static WebUser LoadBySalt(string salt, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Salt"], salt);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         public static WebUser LoadByEmail(string email, DatabaseConnection dc = null)
         {
@@ -270,6 +281,80 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static WebUser LoginByEmailHashed(string email, string password, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["email"], email);
+            dq.Criterias.Add(ObjectMap["password"], WebUserService.SaltandHashPassword(password));
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        /*
+        public static string GenerateRandomCryptographicKey(int keyLength)
+        {
+            return Convert.ToBase64String(GenerateRandomCryptographicBytes(keyLength));
+        }
+
+
+        public static byte[] GenerateRandomCryptographicBytes(int keyLength)
+        {
+            RNGCryptoServiceProvider rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            byte[] randomBytes = new byte[keyLength];
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+            return randomBytes;
+        }
+
+ 
+        public static (byte[] saltedbytes, byte[] hashedbytes) SaltandHashPassword( string password)
+        {
+            byte[] saltBytes = GenerateRandomCryptographicBytes(32 - password.Length);
+            byte[] passwordinBytes = Encoding.UTF8.GetBytes(password);
+            List<byte> passwordSalted = new List<byte>();
+            passwordSalted.AddRange(passwordinBytes);
+            passwordSalted.AddRange(saltBytes);
+            byte[] hashedBytes = SHA256.Create().ComputeHash(passwordSalted.ToArray());
+            return (saltBytes, hashedBytes);
+        }
+
+        public static string EncryptPassword(string password)
+        {
+            return Convert.ToBase64String(Encryption.Encrypt(password, Utilities.AppAESKey, Utilities.AppIV));
+        }
+
+        public static string DecryptPassword(string password)
+        {
+            return Encryption.DecryptToString(Convert.FromBase64String(password), Utilities.AppAESKey, Utilities.AppIV);
+        }
+        public SystemMessages SendInvite(string email, string message, WebUser loggedInUser, Account account, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var subject = $"You have been invited by {account.Name} to use {Utilities.AppName(account.IsAfterSchool)}";
+            var body = "";
+
+            if (!message.IsEmpty())
+                body += "<p>" + message + "</p><p>-------------------------------</p>";
+
+            if (!this.IsActive)
+                body += $"<p>Click on the following link to create your account and start using {Utilities.AppName(account.IsAfterSchool)}: <a href=\"{this.GetInviteUrl(account)}\">{this.GetInviteUrl(account)}</a></p>";
+            else
+                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{AfterSchoolLibrary.Email.HostName(account.IsAfterSchool)}/login</a></p>";
+
+            body += "<p>Thank you!!</p>";
+            body += AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
+
+            msgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(AfterSchoolLibrary.Email.AppEmailAddress, Utilities.AppName(account.IsAfterSchool)),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                subject: subject,
+                body: body,
+                replyTo: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email, loggedInUser.DisplayName),
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                ));
+
+            return msgs;
+        }        
+        */
         #endregion
     }
 }

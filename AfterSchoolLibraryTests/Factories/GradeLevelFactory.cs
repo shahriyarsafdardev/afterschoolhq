@@ -13,7 +13,7 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static GradeLevel Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new GradeLevel() { };
+            var obj = new GradeLevel() { Name = "whatever" };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

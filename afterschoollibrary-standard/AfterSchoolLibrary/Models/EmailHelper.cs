@@ -156,6 +156,39 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendAccountInvitedEmail(WebUser user, Account account)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", user.FirstName },
+                { "ProductName", Utilities.AppName(account.IsAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress(account.IsAfterSchool) },
+                { "InviteUrl", user.GetInviteUrl(account) }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Account_Invited,
+                model,
+                "accountinvited",
+                msgs
+                );
+
+            var subject = $"You have been invited to use {Utilities.AppName(account.IsAfterSchool)}!";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
         public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account Hostaccount)
         {
             var msgs = new SystemMessages();

@@ -285,6 +285,8 @@ loadmethod: HostAccountId|ApprovalStatusId, List<>
 loadmethod: VisitorAccountId, List<>
 loadmethod: VisitorAccountId|ApprovalStatusId, List<>
 loadmethod: HostAccountId|VisitorAccountId
+loadmethod: HostAccountId|HostPermissionTypeId, List<>
+loadmethod: VisitorAccountId|HostPermissionTypeId, List<>
 [end]
 
 [begin]
@@ -1197,7 +1199,7 @@ values: NotSet, Past, Current, Future
 [begin]
 type: Enum
 name: HostPermissionType
-values: NotSet, Approve, Edit, Admin
+values: NotSet, ApproveOnly, Edit, Admin
 [end]
 
 [begin]
@@ -1209,7 +1211,7 @@ values: NotSet, Requested, Approved, Denied
 [begin]
 type: Enum
 name: AccountType
-values: NotSet, ActivityProvider, School, SchoolDistrict
+values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool
 [end]
 
 [begin]
