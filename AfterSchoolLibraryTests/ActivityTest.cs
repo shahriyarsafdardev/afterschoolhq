@@ -17,6 +17,9 @@ namespace AfterSchoolLibraryTests
         {
         }
 
+        //loads an Activity from the database, in order to properly create an activity 
+        //it is dependant on having an account ID and a number of seats set, in the
+        //base method the automatic number of seats avaible is 4
         [Fact]
         public void LoadTest()
         {
@@ -24,7 +27,7 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             Assert.NotNull(Activity.Load(activity.ID.Value, dc: dc));
         }
-
+        //Gets the number of Activiites in the DB
         [Fact]
         public void GetCountTest()
         {
@@ -32,7 +35,8 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             Assert.Equal(1, Activity.GetCount(null, dc: dc));
         }
-
+        //Saves the Account in the DB, returns messages that will send errors if this is not recorded 
+        // in the DB properly
         [Fact]
         public void SaveTest()
         {
@@ -40,7 +44,7 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             Assert.True(activity.Save(dc: dc).HasNoErrors());
         }
-
+        //Removes the Activity from the DB, it should not be able to be loaded from the DB afterwards
         [Fact]
         public void DeleteTest()
         {
@@ -49,20 +53,20 @@ namespace AfterSchoolLibraryTests
             activity.Delete(dc: dc);
             Assert.Null(Activity.Load(activity.ID.Value, dc: dc));
         }
-
+        //Creates an ----------- and returns a message regarding the status of the ------ 
         [Fact]
         public void CreateTest()
         {
             Assert.True(Activity.Create(dc: dc).HasNoErrors());
         }
-
+        //
         [Fact]
         public void AlterTest()
         {
             Assert.True(Activity.Alter(dc: dc).HasNoErrors());
         }
 
-
+        //Loads the activity from the DB (using it's ID) and returns it.
         [Fact]
         public void ReloadTest()
         {
@@ -109,7 +113,8 @@ namespace AfterSchoolLibraryTests
 
             Assert.NotNull(Activity.LoadByUid(activity.Uid, dc: dc));
         }
-
+        // activity groups are collections of activities, this methos will load a list of 
+        // the activities in a group from the DB
         [Fact]
         public void LoadByActivityGroupIdTest()
         {
@@ -140,7 +145,7 @@ namespace AfterSchoolLibraryTests
             activity.Save(dc: dc);
             Assert.NotNull(Activity.LoadByUniqueNameByAccountId(activity.UniqueName, account.ID.Value, dc: dc));
         }
-
+        // Loads using a List of Activity Ids
         [Fact]
         public void LoadListTest()
         {
@@ -153,7 +158,10 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(Activity.LoadList(list, dc: dc));
         }
-
+        // One account can set up multiple activities 
+        // *the only required fields are the accounts ID and the DB conection,
+        // you can filter the results using the additional feilds*
+        // This will get the number of Activitiess under one Account
         [Fact]
         public void GetCountByAccountIdTest()
         {
@@ -166,15 +174,17 @@ namespace AfterSchoolLibraryTests
             Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, false, false, dc: dc));
         }
 
+        // This loads the Activities under one Account, very similar to the above
         [Fact]
         public void LoadByAccountIdLongTest()
         {
 
-            var a = new Activity() { AccountId = 1234, IsArchived = true, IsDeleted = false };
-            a.Save(dc: dc);
-            var id = a.AccountId.Value;
-            var actid = a.ActivityGroupId;
-            Assert.NotNull(Activity.LoadByAccountId(id, actid, true, false, 0, 100, dc: dc));
+            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc: dc);
+            activity.ActivityGroupId = activityGroup.ID.Value;
+            activity.Save(dc: dc);
+            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, null, null, null, null, dc: dc));
         }
 
         [Fact]

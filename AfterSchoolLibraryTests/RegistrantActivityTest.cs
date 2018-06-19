@@ -73,13 +73,12 @@ namespace AfterSchoolLibraryTests
         public void GetSeatCountByActivityIdTest()
         {
             var account = Factories.AccountFactory.Create(msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+            var activity = Factories.ActivityFactory.Create(account,10 ,msgs, dc: dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-
             registrantActivity = registrantActivity.Reload(dc: dc);
 
-            Assert.NotNull(RegistrantActivity.GetSeatCountByActivityId(activity.ID.Value, dc: dc));
+            Assert.NotEqual(0, RegistrantActivity.GetSeatCountByActivityId(activity.ID.Value, dc: dc));
         }
 
         [Fact]

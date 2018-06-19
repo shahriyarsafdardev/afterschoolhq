@@ -36,6 +36,7 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(Account.Load(c, 0, c.Count, dc: dc));
         }
 
+        //Gets the Number of accounts in the DB
         [Fact]
         public void GetCountTest()
         {
@@ -46,13 +47,15 @@ namespace AfterSchoolLibraryTests
             Assert.Equal(1,Account.GetCount(null, dc: dc));
         }
 
+        //saves the account to the DB
         [Fact]
         public void SaveTest()
         {
             var a = new Account() { };
             Assert.NotNull(a.Save(dc: dc));
         }
-
+        
+        //removes the account from the DB
         [Fact]
         public void DeleteTest()
         {
@@ -64,6 +67,7 @@ namespace AfterSchoolLibraryTests
             
         }
 
+        //Creates and returns a new Account
         [Fact]
         public void CreateTest()
         {
@@ -76,7 +80,7 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(Account.Alter(dc: dc));
         }
 
-
+        //loads the account using its own ID
         [Fact]
         public void ReloadTest()
         {
@@ -100,7 +104,7 @@ namespace AfterSchoolLibraryTests
             a.Save(dc: dc);
             Assert.NotNull(Account.LoadByUniqueName("test", dc: dc));
         }
-
+        //loads the first admin account found
         [Fact]
         public void LoadByIsAdminTest()
         {
