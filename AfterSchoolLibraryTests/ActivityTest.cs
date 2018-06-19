@@ -498,7 +498,8 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetAttendanceByDate(date, dc: dc));
         }
-
+        // gets the Activity Registration Periods for the current activity
+        // activity registration periods contain more methods that DO things
         [Fact]
         public void GetActivityRegistrationPeriodsTest()
         {
@@ -510,7 +511,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetActivityRegistrationPeriods(dc: dc));
         }
-
+        // Registration periods hold more of the fields of a registration
         [Fact]
         public void GetRegistrationPeriodsTest()
         {
@@ -523,7 +524,7 @@ namespace AfterSchoolLibraryTests
             Assert.Single(activity.GetRegistrationPeriods(dc: dc));
         }
 
-        // HELP
+        // TODO HELP
         [Fact]
         public void GetUpcommingRegistrationPeriodsTest()
         {
@@ -584,7 +585,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.NotNull(activity.GetActiveRegistrationPeriod(dc: dc));
         }
-
+        // returns the account that started the 
         [Fact]
         public void GetAccountTest()
         {
