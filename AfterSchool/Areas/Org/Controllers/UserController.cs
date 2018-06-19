@@ -47,7 +47,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 msgs.Add("Email must be valid", MessageType.UserError);
             }
-            else if(WebUser.IsEmailInUseByAnotherUser(email, SessionVariables.LoggedInUser.ID.Value))
+            else if(WebUser.ExistsByEmail(email))
             {
                 msgs.Add("Email is already in use by another user", MessageType.UserError); 
             }

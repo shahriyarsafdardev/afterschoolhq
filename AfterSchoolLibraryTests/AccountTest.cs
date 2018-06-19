@@ -43,7 +43,7 @@ namespace AfterSchoolLibraryTests
             a.Save(dc: dc);
             var id = a.ID.Value;
 
-            Assert.NotNull(Account.GetCount(null, dc: dc));
+            Assert.Equal(1,Account.GetCount(null, dc: dc));
         }
 
         [Fact]
