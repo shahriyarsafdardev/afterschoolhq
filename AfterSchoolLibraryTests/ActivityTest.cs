@@ -171,7 +171,7 @@ namespace AfterSchoolLibraryTests
             var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc: dc);
             activity.ActivityGroupId = activityGroup.ID.Value;
             activity.Save(dc: dc);
-            Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, false, false, dc: dc));
+            Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, null, null, dc: dc));
         }
 
         // This loads the Activities under one Account, very similar to the above
@@ -207,6 +207,7 @@ namespace AfterSchoolLibraryTests
         }
         */
 
+        // Gets the number of ActivitiyDays associated with the activity
         [Fact]
         public void GetDaysTest()
         {
@@ -217,7 +218,7 @@ namespace AfterSchoolLibraryTests
             d.Save(dc: dc);
             Assert.Equal(1, activity.GetDays(dc: dc).Count);
         }
-
+        // Gets the days of the week that the activity repeats on weekly
         [Fact]
         public void GetDaysOfTheWeekTest()
         {
@@ -241,7 +242,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetDaysOfTheWeek(dc: dc));
         }
-
+        // Returns a list of the registrants that have "signed up" for the activity
         [Fact]
         public void GetRegistrantsTest()
         {
@@ -265,6 +266,8 @@ namespace AfterSchoolLibraryTests
                     Assert.Single(activity.GetRegistrantActivities(dc: dc));
                 }
         */
+
+        // Returns a list of all of the RegistrantActivities associated with the activity
         [Fact]
         public void GetRegistrantsActivitiesLongTest()
         {
@@ -275,7 +278,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetRegistrantActivities(true, dc: dc));
         }
-
+        // Returns a list of all of the RegistrantActivities associated with the activity
         [Fact]
         public void GetRegistrantsCountTest()
         {
@@ -289,6 +292,7 @@ namespace AfterSchoolLibraryTests
             Assert.NotEqual(0, activity.GetRegistrantCount(dc: dc));
         }
 
+        // will count the number of registrants for the particular activity of a given registrantion type
         [Fact]
         public void GetRegistrantCountByApplicationTypeTest()
         {
@@ -301,29 +305,34 @@ namespace AfterSchoolLibraryTests
 
             Assert.Equal(1, activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc));
         }
+        
+        //returns if an activity is full or not (checks the SeatsAvaible feild)
+        
         //weird error with DeBugging
         [Fact]
         public void isFullTest()
         {
             var account = Factories.AccountFactory.Create(msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+            var activity = Factories.ActivityFactory.Create(account,5, msgs, dc: dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
             var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-            activity.SeatsAvailable = 1;
-            activity.Save(dc: dc);
-            var x = activity.IsFull();
             Assert.False(activity.IsFull(dc: dc));
         }
 
+        //returns bolean (if Waitinglistseats = 10 and registration type)
+        //TODO add registrant to waitlist
         [Fact]
         public void isWaitingListFullTest()
         {
-            var a = new Activity() { };
-            a.Save(dc: dc);
-            Assert.True(a.IsWaitingListFull(dc: dc)); //0 open with 0 on waiting list means full
+            var account = Factories.AccountFactory.Create(msgs, dc: dc);
+            var activity = Factories.ActivityFactory.Create(account, 5, msgs, dc: dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
+            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+            Assert.True(activity.IsWaitingListFull(dc: dc)); //0 open with 0 on waiting list means full
         }
 
         // difference between grade and grade level?
+        // returns true if the activity his for students of the passed in gradelevel
         [Fact]
         public void HasGradeLevelTest()
         {
@@ -338,6 +347,7 @@ namespace AfterSchoolLibraryTests
             Assert.True(activity.HasGradeLevel(gradeLevel, dc: dc));
         }
 
+        //Returns a list of all of the grade levels associated with that activity
         [Fact]
         public void GetGradeLevelsTest()
         {
@@ -351,7 +361,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetGradeLevels(dc: dc));
         }
-
+        //Returns a list of all WebUSers signed up for the same activityID
         [Fact]
         public void GetTeamMembersTest()
         {
@@ -363,7 +373,7 @@ namespace AfterSchoolLibraryTests
             Assert.Single(activity.GetTeamMembers(dc: dc));
         }
 
-
+        //returns a list of all forms ascociated with that activity
         [Fact]
         public void GetFormsTest()
         {
@@ -376,7 +386,7 @@ namespace AfterSchoolLibraryTests
         }
 
 
-
+        // Same as above, but they must also be active (not to be confused with a simple activity form)
         [Fact]
         public void GetActiveFormTest()
         {
@@ -389,7 +399,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.NotNull(activity.GetActiveForm(dc: dc));
         }
-
+        // Returns a list of the activity forms
         [Fact]
         public void GetActivityFormsTest()
         {
@@ -401,7 +411,7 @@ namespace AfterSchoolLibraryTests
             Assert.Single(activity.GetActivityForms(dc: dc));
         }
 
-
+        // Returns a list of the Attendance objects asociated with this activity.
         [Fact]
         public void GetAttendanceTest()
         {
@@ -416,6 +426,7 @@ namespace AfterSchoolLibraryTests
             Assert.Single(activity.GetAttendance(dc: dc));
         }
 
+        // does the same as above as long as the attendace has been completed
         [Fact]
         public void GetCompletedAttendanceTest()
         {
@@ -430,7 +441,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetCompletedAttendance(dc: dc));
         }
-
+        // returns the numberof attendance objects asociated with the activity that have been marked as present
         [Fact]
         public void GetAttendancePresentCountTest()
         {
@@ -447,7 +458,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.Equal(1, activity.GetAttendancePresentCount(dc: dc));
         }
-
+        
         [Fact]
         public void GetAttendancePossibleCountTest()
         {
@@ -475,6 +486,7 @@ namespace AfterSchoolLibraryTests
             var activityForm = Factories.ActivityFormWebUserFactory.Create(account, activity, form, msgs, dc: dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, msgs, dc: dc);
             var attendance = new Attendance() { ActivityId = activity.ID.Value, ActivityInstanceId = activityInstance.ID.Value };
+            attendance.
             attendance.Save(dc: dc);
             var registrant = Factories.RegistrantFactory.Create(account, msgs, dc: dc);
             var attendanceRegistrant = new AttendanceRegistrant() { AttendanceId = attendance.ID.Value, NumberPresent = 1, RegistrantId = registrant.ID.Value, NumberPossible = 1, NumberLate = 0 };
