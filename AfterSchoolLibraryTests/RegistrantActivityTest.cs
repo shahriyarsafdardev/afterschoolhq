@@ -81,10 +81,9 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-
             registrantActivity = registrantActivity.Reload(dc: dc);
 
-            Assert.NotNull(RegistrantActivity.GetSeatCountByActivityId(activity.ID.Value, dc: dc));
+            Assert.NotEqual(0, RegistrantActivity.GetSeatCountByActivityId(activity.ID.Value, dc: dc));
         }
 
         [Fact]
