@@ -393,7 +393,7 @@ namespace AfterSchoolLibraryTests
         /// <summary>
         /// Then decrypt their passwords using the old method, 
         /// then encrypt and store the new passwords in the db with the new 
-        /// encryption method, then test that the passwords still work
+        /// encryption method, then test that the passwords are different
         /// </summary>
         [Fact]
         public void FullPasswordTest()
