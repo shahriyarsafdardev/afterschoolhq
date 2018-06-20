@@ -1,0 +1,28 @@
+﻿@model List<AfterSchoolLibrary.WebUser>
+@{
+    ViewBag.Title = "Team";
+
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Team
+        </div>
+        <div class="panel-body">
+            @{ Html.RenderPartial(
+                    "~/Views/Shared/_Users.cshtml",
+                    Model,
+                    new ViewDataDictionary() {
+                        { "AccountId", ViewBag.AccountId },
+                        { "ReturnUrl", ViewBag.ReturnUrl } ,
+                        { "PagingModel", ViewBag.PagingModel }
+                    });
+            }
+        </div>
+    </div>
+</div>
+
+

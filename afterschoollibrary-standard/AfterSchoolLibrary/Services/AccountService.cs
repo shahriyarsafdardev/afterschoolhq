@@ -1144,6 +1144,27 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static int GetUserCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountWebUser.GetCount(
+                new Hashtable() { { "AccountId", account.ID } },
+                msgs,
+                dc
+                );
+        }
+
+        public static List<WebUser> GetUsers(this Account account, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountWebUser.Load(
+                new Hashtable() { { "AccountId", account.ID } },
+                start,
+                length,
+                msgs,
+                dc
+                )
+                .Select(x => x.ToWebUser())
+                .ToList();
+        }
 
     }
 }
