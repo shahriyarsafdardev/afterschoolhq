@@ -94,6 +94,10 @@ namespace AfterSchoolLibrary
 
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on RegistrationPeriod object", MessageType.Error);
+			if (this.StartDateTime.IsEmpty())
+				msgs.Add("StartDateTime is required on RegistrationPeriod object", MessageType.Error);
+			if (this.EndDateTime.IsEmpty())
+				msgs.Add("EndDateTime is required on RegistrationPeriod object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(RegistrationPeriod).Name));

@@ -237,7 +237,7 @@
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
-    <Compile Include="Areas\District\Controllers\LeagueController.cs" />
+    <Compile Include="Areas\District\Controllers\SportController.cs" />
     <Compile Include="Areas\District\Controllers\MessageController.cs" />
     <Compile Include="Areas\District\Controllers\ProfileController.cs" />
     <Compile Include="Areas\District\Controllers\SchoolController.cs" />
@@ -691,8 +691,12 @@
     <Content Include="Areas\District\Views\User\Index.cshtml" />
     <Content Include="Areas\District\Views\User\Invite.cshtml" />
     <Content Include="Areas\District\Views\Profile\index.cshtml" />
-    <Content Include="Areas\District\Views\League\Index.cshtml" />
+    <Content Include="Areas\District\Views\Sport\Summary.cshtml" />
     <Content Include="Areas\District\Views\Message\Index.cshtml" />
+    <Content Include="Areas\District\Views\School\Index.cshtml" />
+    <Content Include="Areas\District\Views\Shared\_SportsHeader.cshtml" />
+    <Content Include="Areas\District\Views\School\Invite.cshtml" />
+    <Content Include="Areas\District\Views\School\InviteSent.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1088,7 +1092,6 @@
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
     <Folder Include="Areas\District\Models\" />
-    <Folder Include="Areas\District\Views\School\" />
     <Folder Include="Areas\Org\Models\" />
     <Folder Include="Areas\User\Models\" />
     <Folder Include="Views\R\" />
@@ -1129,7 +1132,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>False</UseIIS>
+          <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>54849</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

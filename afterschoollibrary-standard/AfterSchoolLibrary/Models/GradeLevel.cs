@@ -84,6 +84,8 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.Name.IsEmpty())
+				msgs.Add("Name is required on GradeLevel object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(GradeLevel).Name));

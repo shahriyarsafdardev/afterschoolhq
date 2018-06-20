@@ -345,9 +345,9 @@ namespace AfterSchoolLibrary
             return EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
         }
 
-        public static SystemMessages SendInvitedEmail(this Account account, DatabaseConnection dc = null)
+        public static SystemMessages SendInvitedEmail(this Account invitedAccount, WebUser invitedUser, WebUser loggedInUser, string customMessage = null, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendAccountInvitedEmail(account.GetAccountOwner(dc: dc), account);
+            return EmailHelper.SendAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
         }
 
         public static SystemMessages InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
@@ -1086,14 +1086,12 @@ namespace AfterSchoolLibrary
             // Makes sure that the visitor has not been previously denied by the host
             if (!GetDeniedVisitorAccounts(hostAccount, dc: dc).Contains(visitorAccount))
             {
-                var accountRelationship = AccountRelationshipService.CreateNew(
-                    hostAccount, 
-                    visitorAccount, 
+                msgs.AddRange(visitorAccount.AddHostAccount(
+                    hostAccount,
+                    hostPermissionType,
                     ApprovalStatus.Requested, 
-                    hostPermissionType, 
                     loggedInUser, 
-                    msgs, 
-                    dc);
+                    dc));
 
                 //TODO Notify Host account of request
                 if (msgs.HasNoErrors())
@@ -1164,6 +1162,48 @@ namespace AfterSchoolLibrary
                 )
                 .Select(x => x.ToWebUser())
                 .ToList();
+        }
+
+        public static SystemMessages AddVisitorAccount(this Account hostAccount, Account visitorAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            AccountRelationshipService.CreateNew(
+                    hostAccount,
+                    visitorAccount,
+                    approvalStatus,
+                    hostPermissionType,
+                    loggedInUser,
+                    msgs,
+                    dc);
+
+            return msgs;
+        }
+
+        /// <summary>
+        /// Should only be used in situations where the visiting account doesn't need approval status. Otherwise use RequestAccessToAccount
+        /// </summary>
+        /// <param name="visitorAccount"></param>
+        /// <param name="hostAccount"></param>
+        /// <param name="hostPermissionType"></param>
+        /// <param name="approvalStatus"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        private static SystemMessages AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            AccountRelationshipService.CreateNew(
+                    hostAccount,
+                    visitorAccount,
+                    approvalStatus,
+                    hostPermissionType,
+                    loggedInUser,
+                    msgs,
+                    dc);
+
+            return msgs;
         }
 
     }

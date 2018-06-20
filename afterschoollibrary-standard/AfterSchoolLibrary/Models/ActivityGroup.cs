@@ -25,6 +25,10 @@ namespace AfterSchoolLibrary
 		public bool IsInviteOnly { get { return (bool)MDV["IsInviteOnly"].Value; } set { MDV["IsInviteOnly"].Value = value; } }
 		public bool HasLotteryRun { get { return (bool)MDV["HasLotteryRun"].Value; } set { MDV["HasLotteryRun"].Value = value; } }
 		public ActivityGroupType ActivityGroupTypeId { get { return (ActivityGroupType)MDV["ActivityGroupTypeId"].Value; } set { MDV["ActivityGroupTypeId"].Value = value; } }
+		public int? MinGradeLevelId { get { return (int?)MDV["MinGradeLevelId"].Value; } set { MDV["MinGradeLevelId"].Value = value; } }
+		public int? MaxGradeLevelId { get { return (int?)MDV["MaxGradeLevelId"].Value; } set { MDV["MaxGradeLevelId"].Value = value; } }
+		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
+		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -39,6 +43,7 @@ namespace AfterSchoolLibrary
 			this.IsInviteOnly = false;
 			this.HasLotteryRun = false;
 			this.ActivityGroupTypeId = ActivityGroupType.NotSet;
+			this.GenderRestriction = GenderRestrictionType.None;
 			
         }
 
@@ -59,6 +64,10 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsInviteOnly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "HasLotteryRun", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityGroupTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "MinGradeLevelId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "MaxGradeLevelId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -116,6 +125,8 @@ namespace AfterSchoolLibrary
 				msgs.Add("AccountId is required on ActivityGroup object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on ActivityGroup object", MessageType.Error);
+			if (this.Name.IsEmpty())
+				msgs.Add("Name is required on ActivityGroup object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityGroup).Name));
@@ -176,6 +187,22 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ActivityGroupTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MinGradeLevelId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MaxGradeLevelId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["GenderRestriction"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityScheduleId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

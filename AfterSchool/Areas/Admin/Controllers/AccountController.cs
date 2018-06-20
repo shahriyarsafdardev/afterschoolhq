@@ -56,7 +56,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult Invite(string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname)
+        public ActionResult Invite(string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname, string message)
         {
             var msgs = new SystemMessages();
             WebUser user = null;
@@ -114,7 +114,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        msgs.AddRange(account.SendInvitedEmail());
+                        msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.LoggedInUser, message));
                     },
                     onFailure: (SystemMessages fmsgs) =>
                     {

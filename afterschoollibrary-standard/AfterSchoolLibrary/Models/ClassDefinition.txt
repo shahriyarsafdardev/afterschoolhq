@@ -178,12 +178,26 @@ type: Class
 name: ActivityInstance
 inherits: BasicObjectWithModified
 property: ActivityScheduleId, int?, Int, required
-property: ActivityId, int?, Int, required
+property: ActivityId, int?, Int
+property: ActivityGroupId, int?, Int
 property: Day, DayOfWeekASL, Int
 property: StartDateTime, DateTime?, DateTime, required
 property: EndDateTime, DateTime?, DateTime, required
 loadmethod: ActivityId, List<>
+loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
+[end]
+
+[begin]
+type: Class
+name: TeamMatch
+inherits: BasicObjectWithModified
+property: HomeTeamId, int?, Int, required
+property: AwayTeamId, int?, Int, required
+property: LocationId, int?, Int
+property: HomeTeamScore, int?, Int
+property: AwayTeamScore, int?, Int
+property: ActivityInstanceId, int?, Int, required
 [end]
 
 [begin]
@@ -416,6 +430,10 @@ property: IsArchived, bool, Bit
 property: IsInviteOnly, bool, Bit
 property: HasLotteryRun, bool, Bit
 property: ActivityGroupTypeId, ActivityGroupType, Int
+property: MinGradeLevelId, int?, Int
+property: MaxGradeLevelId, int?, Int
+property: GenderRestriction, GenderRestrictionType, Int
+property: ActivityScheduleId, int?, Int
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>

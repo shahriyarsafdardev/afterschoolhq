@@ -156,16 +156,20 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages SendAccountInvitedEmail(WebUser user, Account account)
+        public static SystemMessages SendAccountInvitedEmail(WebUser invitedUser, Account invitedAccount, WebUser loggedInUser, string customMessage = null)
         {
             var msgs = new SystemMessages();
 
+            if (customMessage.IsNotEmpty())
+                customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
+
             var model = new NameValueCollection()
             {
-                { "FirstName", user.FirstName },
-                { "ProductName", Utilities.AppName(account.IsAfterSchool) },
-                { "SupportEmail", Email.AppSupportEmailAddress(account.IsAfterSchool) },
-                { "InviteUrl", user.GetInviteUrl(account) }
+                { "FirstName", invitedUser.FirstName },
+                { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress(invitedAccount.IsAfterSchool) },
+                { "InviteUrl", invitedUser.GetInviteUrl(invitedAccount) },
+                { "CustomMessage", customMessage }
             };
 
             var body = ProcessTemplate(
@@ -175,14 +179,14 @@ namespace AfterSchoolLibrary
                 msgs
                 );
 
-            var subject = $"You have been invited to use {Utilities.AppName(account.IsAfterSchool)}!";
+            var subject = $"{loggedInUser.DisplayName} has invited you to use {Utilities.AppName(invitedAccount.IsAfterSchool)}!";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
+                fromEmail: Email.SendGridAppEmailAddress(invitedAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(invitedUser.Email),
                 subject: subject,
                 body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(invitedAccount.IsAfterSchool)
                 );
 
             msgs.AddRange(mailMsgs);

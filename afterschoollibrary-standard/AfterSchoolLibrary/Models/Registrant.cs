@@ -104,6 +104,10 @@ namespace AfterSchoolLibrary
 
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Registrant object", MessageType.Error);
+			if (this.RegistrantTypeId.IsEmpty())
+				msgs.Add("RegistrantTypeId is required on Registrant object", MessageType.Error);
+			if (this.Email.IsEmpty())
+				msgs.Add("Email is required on Registrant object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Registrant).Name));

@@ -17,6 +17,7 @@ namespace AfterSchoolLibrary
 
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
+		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public DayOfWeekASL Day { get { return (DayOfWeekASL)MDV["Day"].Value; } set { MDV["Day"].Value = value; } }
 		public DateTime? StartDateTime { get { return (DateTime?)MDV["StartDateTime"].Value; } set { MDV["StartDateTime"].Value = value; } }
 		public DateTime? EndDateTime { get { return (DateTime?)MDV["EndDateTime"].Value; } set { MDV["EndDateTime"].Value = value; } }
@@ -39,6 +40,7 @@ namespace AfterSchoolLibrary
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Day", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDateTime", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "EndDateTime", System.Data.SqlDbType.DateTime);
@@ -95,8 +97,6 @@ namespace AfterSchoolLibrary
 
 			if (this.ActivityScheduleId.IsEmpty())
 				msgs.Add("ActivityScheduleId is required on ActivityInstance object", MessageType.Error);
-			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required on ActivityInstance object", MessageType.Error);
 			if (this.StartDateTime.IsEmpty())
 				msgs.Add("StartDateTime is required on ActivityInstance object", MessageType.Error);
 			if (this.EndDateTime.IsEmpty())
@@ -132,6 +132,10 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityGroupId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Day"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -158,6 +162,14 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<ActivityInstance> LoadByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 

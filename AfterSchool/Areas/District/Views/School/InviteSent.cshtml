@@ -1,0 +1,33 @@
+﻿@model WebUser
+@{
+    ViewBag.Title = "Invite School";
+    ViewBag.Messages = ViewBag.Messages;
+}
+
+@{ Html.RenderPartial("DistrictHeader"); }
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", (SystemMessages)ViewBag.Messages); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-id"></i> Invite School
+        </div>
+
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <p>
+                        <i class="s7-check text-success"></i> Your invite has been sent successfully to @Model.Email.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+

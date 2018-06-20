@@ -187,11 +187,29 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static List<AccountRelationship> LoadByHostAccountIdByHostPermissionTypeId(int HostAccountId, HostPermissionType HostPermissionTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+			dq.Criterias.Add(ObjectMap["HostPermissionTypeId"], HostPermissionTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
 
+		public static List<AccountRelationship> LoadByVisitorAccountIdByHostPermissionTypeId(int VisitorAccountId, HostPermissionType HostPermissionTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["VisitorAccountId"], VisitorAccountId);
+			dq.Criterias.Add(ObjectMap["HostPermissionTypeId"], HostPermissionTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         public static List<AccountRelationship> LoadByRequested(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {

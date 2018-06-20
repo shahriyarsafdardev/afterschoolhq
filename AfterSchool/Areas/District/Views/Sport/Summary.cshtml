@@ -1,0 +1,30 @@
+﻿@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{ Html.RenderPartial("_SportsHeader", SessionVariables.CurrentAccount); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2><i class="s7-ball"></i> Sports</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+            <div class="widget">
+                <div class="widget-head">
+                    <h1>Manage all of your sports here</h1>
+                </div>
+                <div class="widget-tile">
+                    <hr />
+                    Your sports
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
