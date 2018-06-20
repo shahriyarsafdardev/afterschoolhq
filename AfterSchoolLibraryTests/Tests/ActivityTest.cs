@@ -771,10 +771,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void HasAdressTest()
         {
-            var a = new Activity() { };
-            a.Save(dc: dc);
+            var activity = new Activity() { };
+            activity.Save(dc: dc);
 
-            Assert.False(a.HasAddress);
+            Assert.False(activity.HasAddress);
         }
 
         [Fact(Skip = "Need to add this test in the future")]
