@@ -41,10 +41,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalCount = 0;
             var hasArchivedGroups = false;
 
-            totalCount = SessionVariables.CurrentAccount.GetActivityGroupCount(isArchived);
+            totalCount = SessionVariables.CurrentAccount.GetSessionCount(isArchived);
             groups = SessionVariables.CurrentAccount.GetActivityGroups(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
 
-            hasArchivedGroups = SessionVariables.CurrentAccount.GetActivityGroupCount(true) > 0;
+            hasArchivedGroups = SessionVariables.CurrentAccount.GetSessionCount(true) > 0;
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 

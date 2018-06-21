@@ -29,6 +29,7 @@ namespace AfterSchoolLibrary
 		public int? MaxGradeLevelId { get { return (int?)MDV["MaxGradeLevelId"].Value; } set { MDV["MaxGradeLevelId"].Value = value; } }
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
+		public int? NumberOfMatchesPerTeam { get { return (int?)MDV["NumberOfMatchesPerTeam"].Value; } set { MDV["NumberOfMatchesPerTeam"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -68,6 +69,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "MaxGradeLevelId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "NumberOfMatchesPerTeam", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -205,6 +207,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["ActivityScheduleId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["NumberOfMatchesPerTeam"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -220,6 +226,15 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<ActivityGroup> LoadByAccountIdByActivityGroupTypeId(int AccountId, ActivityGroupType ActivityGroupTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["ActivityGroupTypeId"], ActivityGroupTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -320,22 +335,24 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static List<ActivityGroup> LoadByAccountId(int AccountId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["ActivityGroupTypeId"], (int)activityGroupTypeId);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<ActivityGroup> LoadByAccountId(int AccountId, bool isArchived, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, bool isArchived, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["isArchived"], isArchived);
+            dq.Criterias.Add(ObjectMap["ActivityGroupTypeId"], (int)activityGroupTypeId);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);

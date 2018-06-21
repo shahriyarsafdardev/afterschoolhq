@@ -90,7 +90,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = new SystemMessages();
-            ViewBag.Groups = SessionVariables.CurrentAccount.GetActivityGroups();
+            ViewBag.Groups = SessionVariables.CurrentAccount.GetSessions();
             ViewBag.Group = activityGroup;
             ViewBag.NeedToUpgrade = totalActivityCount >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.HasArchivedActivities = hasArchivedActivities;

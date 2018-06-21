@@ -49,6 +49,7 @@ namespace AfterSchoolLibrary
 		public bool ScheduleRequiresAllDays { get { return (bool)MDV["ScheduleRequiresAllDays"].Value; } set { MDV["ScheduleRequiresAllDays"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
 		public bool IsTemplate { get { return (bool)MDV["IsTemplate"].Value; } set { MDV["IsTemplate"].Value = value; } }
+		public int? ActivitySectionId { get { return (int?)MDV["ActivitySectionId"].Value; } set { MDV["ActivitySectionId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountPayPalEmailAddress { get { return (string)MDV["AccountPayPalEmailAddress"].Value; } }
 		public string AccountStripePublishableKey { get { return (string)MDV["AccountStripePublishableKey"].Value; } }
@@ -118,6 +119,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ScheduleRequiresAllDays", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar, 100);
 				_dp.Add(className, "IsTemplate", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "ActivitySectionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountPayPalEmailAddress", typeof(Account).Name, "PayPalEmailAddress", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountStripePublishableKey", typeof(Account).Name, "StripePublishableKey", System.Data.SqlDbType.NVarChar, "Account");
@@ -339,6 +341,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsTemplate"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivitySectionId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

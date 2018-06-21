@@ -915,7 +915,7 @@ namespace AfterSchool.Controllers
                     }
                     else
                     {
-                        groups = account.GetPublishedActivityGroups()
+                        groups = account.GetPublishedSessions()
                             .Where(x => x.IsPubliclyViewable && (!x.IsInviteOnly || adminMode))
                             .Where(x => x.IsOpenNow() || x.WillOpen())
                             .ToList();

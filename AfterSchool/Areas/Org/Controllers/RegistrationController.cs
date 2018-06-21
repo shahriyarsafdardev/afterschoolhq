@@ -70,7 +70,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.LoggedInUser, false, false).OrderBy(x => x.Name).ToList();
-            groups = SessionVariables.CurrentAccount.GetActivityGroups();
+            groups = SessionVariables.CurrentAccount.GetSessions();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
             {

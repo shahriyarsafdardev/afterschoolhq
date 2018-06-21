@@ -87,6 +87,7 @@ property: ActivityScheduleId, int?, Int
 property: ScheduleRequiresAllDays, bool, Bit
 property: UniqueName, string, NVarChar(100)
 property: IsTemplate, bool, Bit
+property: ActivitySectionId, int?, Int
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
@@ -128,7 +129,6 @@ property: EndTime, DateTime?, DateTime
 loadmethod: ActivityId, List<>
 loadmethod: ActivityRecurrenceId, List<>
 [end]
-
 
 [begin]
 type: Class
@@ -198,6 +198,14 @@ property: LocationId, int?, Int
 property: HomeTeamScore, int?, Int
 property: AwayTeamScore, int?, Int
 property: ActivityInstanceId, int?, Int, required
+[end]
+
+[begin]
+type: Class
+name: ActivitySection
+inherits: BasicLookUpObject
+property: ActivityGroupId, int?, Int, required
+baseproperty: Name, required
 [end]
 
 [begin]
@@ -434,8 +442,10 @@ property: MinGradeLevelId, int?, Int
 property: MaxGradeLevelId, int?, Int
 property: GenderRestriction, GenderRestrictionType, Int
 property: ActivityScheduleId, int?, Int
+property: NumberOfMatchesPerTeam, int?, Int
 baseproperty: Name, required
 loadmethod: AccountId, List<>
+loadmethod: AccountId|ActivityGroupTypeId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
 loadmethod: AccountId|UniqueName

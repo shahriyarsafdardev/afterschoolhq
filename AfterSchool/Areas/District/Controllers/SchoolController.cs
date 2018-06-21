@@ -14,9 +14,34 @@ namespace AfterSchool.Areas.District.Controllers
     {
         // GET: District/School
         [HttpGet]
-        public ActionResult Index()
+
+        public ActionResult Index(string pn, string rpp)
         {
-            return View(SessionVariables.CurrentAccount.GetVisitorAccounts());
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount();
+            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(start, length);
+            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = count,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+            return View(visitorAccounts);
         }
 
         [HttpGet]

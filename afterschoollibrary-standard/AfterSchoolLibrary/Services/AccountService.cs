@@ -124,24 +124,51 @@ namespace AfterSchoolLibrary
             return Form.LoadByAccountId(account.ID.Value, dc: dc);
         }
 
-        public static List<ActivityGroup> GetActivityGroups(this Account account, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetLeagues(this Account account, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, dc: dc);
+            return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.League, dc: dc);
         }
 
-        public static List<ActivityGroup> GetPublishedActivityGroups(this Account account, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, DatabaseConnection dc = null)
+        {
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, start, length, dc: dc);
+        }
+
+        public static int GetLeagueCount(this Account account, bool IsArchived, DatabaseConnection dc = null)
+        {
+            return ActivityGroup.GetCount(
+                new Hashtable() {
+                    { "AccountId", account.ID.Value },
+                    { "ActivityGroupTypeId", (int)ActivityGroupType.League },
+                    { "IsArchived", IsArchived }
+                },
+                dc: dc);
+        }
+
+        public static List<ActivityGroup> GetSessions(this Account account, DatabaseConnection dc = null)
+        {
+            return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.Session, dc: dc);
+        }
+
+        public static List<ActivityGroup> GetPublishedSessions(this Account account, DatabaseConnection dc = null)
         {
             return ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, dc: dc);
         }
 
-        public static List<ActivityGroup> GetActivityGroups(this Account account, bool IsArchived, int? start, int? length, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, IsArchived, start, length, dc: dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, dc: dc);
         }
 
-        public static int GetActivityGroupCount(this Account account, bool IsArchived = false, DatabaseConnection dc = null)
+        public static int GetSessionCount(this Account account, bool IsArchived = false, DatabaseConnection dc = null)
         {
-            return ActivityGroup.GetCount(new Hashtable() { { "AccountId", account.ID.Value }, { "IsArchived", IsArchived } }, dc: dc);
+            return ActivityGroup.GetCount(
+                new Hashtable() {
+                    { "AccountId", account.ID.Value },
+                    { "ActivityGroupTypeId", (int)ActivityGroupType.Session },
+                    { "IsArchived", IsArchived }
+                }, 
+                dc: dc);
         }
 
         public static List<ActivitySchedule> GetActivitySchedules(this Account account, DatabaseConnection dc = null)
@@ -1004,11 +1031,24 @@ namespace AfterSchoolLibrary
 
             return account;
         }
-        public static List<Account> GetVisitorAccounts(this Account account, DatabaseConnection dc = null)
+
+        public static List<Account> GetVisitorAccounts(this Account hostAccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByHostAccountId(account.ID.Value, dc: dc)
+            return AccountRelationship.LoadByHostAccountId(hostAccount.ID.Value, dc: dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
-                .ToList();            
+                .ToList();
+        }
+
+        public static List<Account> GetVisitorAccounts(this Account hostAccount, int? start, int? length, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByHostAccountId(hostAccount.ID.Value, dc: dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
+                .ToList();
+        }
+
+        public static int GetVisitorAccountsCount(this Account hostAccount, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value } }, dc: dc);
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
@@ -1019,54 +1059,54 @@ namespace AfterSchoolLibrary
         }
 
         //Gets the accounts that are requesting the host's approval
-        public static List<Account> GetRequestedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        public static List<Account> GetRequestedVisitorAccounts(this Account hostAccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByRequested(Hostaccount.ID.Value,dc)
+            return AccountRelationship.LoadByRequested(hostAccount.ID.Value,dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
                 .ToList();
         }
 
         //Gets the accounts that the host has approved
-        public static List<Account> GetApprovedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        public static List<Account> GetApprovedVisitorAccounts(this Account hostAccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByApproved(Hostaccount.ID.Value,dc)
+            return AccountRelationship.LoadByApproved(hostAccount.ID.Value,dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
                 .ToList();
         }
         //Gets the accounts that the host has Denied
-        public static List<Account> GetDeniedVisitorAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        public static List<Account> GetDeniedVisitorAccounts(this Account hostAccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc: dc)
+            return AccountRelationship.LoadByDenied(hostAccount.ID.Value, dc: dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
                 .ToList();
         }
 
         
-        public static List<Account> GetApprovedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        public static List<Account> GetApprovedHostAccounts(this Account hostAccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByApproved(Hostaccount.ID.Value, dc: dc)
+            return AccountRelationship.LoadByApproved(hostAccount.ID.Value, dc: dc)
                 .Select(accountRelationship => accountRelationship.GetHostAccount(dc: dc))
                 .ToList();
         }
 
-        public static List<Account> GetDeniedHostAccounts(this Account Hostaccount, DatabaseConnection dc = null)
+        public static List<Account> GetDeniedHostAccounts(this Account hostAccount, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByDenied(Hostaccount.ID.Value, dc: dc)
+            return AccountRelationship.LoadByDenied(hostAccount.ID.Value, dc: dc)
                 .Select(accountRelationship => accountRelationship.GetHostAccount(dc: dc))
                 .ToList();
         }
         
 
-        public static List<Location> GetVisitorLocations(this Account account, DatabaseConnection dc = null)
+        public static List<Location> GetVisitorLocations(this Account visitorAccount, DatabaseConnection dc = null)
         {
-            return AccountRelationshipLocation.LoadByVisitorAccountId(account.ID.Value, dc: dc)
+            return AccountRelationshipLocation.LoadByVisitorAccountId(visitorAccount.ID.Value, dc: dc)
                 .Select(x => x.GetLocation(dc: dc))
                 .ToList();
         }
 
-        public static List<Location> GetHostedLocations(this Account account, DatabaseConnection dc = null)
+        public static List<Location> GetHostedLocations(this Account hostAccount, DatabaseConnection dc = null)
         {
-            return Location.LoadByHostAccountId(account.ID.Value, dc: dc);
+            return Location.LoadByHostAccountId(hostAccount.ID.Value, dc: dc);
         }
 
         /// <summary>
