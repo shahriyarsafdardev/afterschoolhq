@@ -11,7 +11,7 @@
         var willCloseIn = group.WillCloseIn();
         var willOpenIn = group.WillOpenIn();
         var seatsRemaining = group.GetTotalSeatsLeft();
-        var registerButtonText = string.Format("Register for {0} &raquo;", UILabel.ActivityLabel(true));
+        var registerButtonText = string.Format("Register for {0} &raquo;", UILabel.ActivityLabel(ActivityType.Activity, true));
         var registerButtonClass = "btn-primary";
 
         var labelDanger = "warning";
@@ -24,7 +24,7 @@
         if (!isOpen)
         {
             registerButtonClass = "btn-alt5";
-            registerButtonText = string.Format("Preview {0} &raquo;", UILabel.ActivityLabel(true));
+            registerButtonText = string.Format("Preview {0} &raquo;", UILabel.ActivityLabel(ActivityType.Activity, true));
         }
 
         <div class="col-md-12">

@@ -60,7 +60,7 @@
                              new ViewDataDictionary()
                              {
                                  { "registrant", registrant },
-                                 { "title", string.Format("Current {0}", UILabel.ActivityLabel(true)) }
+                                 { "title", string.Format("Current {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
                              }
                         );
 
@@ -70,13 +70,13 @@
                              new ViewDataDictionary()
                              {
                                  { "registrant", registrant },
-                                 { "title", string.Format("Upcoming {0}", UILabel.ActivityLabel(true)) }
+                                 { "title", string.Format("Upcoming {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
                              }
                         );
                     }
                     else
                     {
-                        <p>@registrant.FirstName.ToProperCase() is not registered for any @UILabel.ActivityLabel(true).ToLower()</p>
+                        <p>@registrant.FirstName.ToProperCase() is not registered for any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()</p>
                     }
                 </div> 
             </div>

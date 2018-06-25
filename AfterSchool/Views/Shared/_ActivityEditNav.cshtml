@@ -52,7 +52,7 @@
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
                             { "Url", Url.Action("editdetails", "activity", new { id = Model.ID.ToString() }) },
-                            { "Text", "About Your " + UILabel.ActivityLabel() },
+                            { "Text", "About Your " + UILabel.ActivityLabel(Model.ActivityTypeId) },
                             { "IsActive", isActive },
                         }
                     );

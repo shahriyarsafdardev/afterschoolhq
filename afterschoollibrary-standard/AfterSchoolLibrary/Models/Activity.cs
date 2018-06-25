@@ -50,6 +50,7 @@ namespace AfterSchoolLibrary
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
 		public bool IsTemplate { get { return (bool)MDV["IsTemplate"].Value; } set { MDV["IsTemplate"].Value = value; } }
 		public int? ActivitySectionId { get { return (int?)MDV["ActivitySectionId"].Value; } set { MDV["ActivitySectionId"].Value = value; } }
+		public ActivityType ActivityTypeId { get { return (ActivityType)MDV["ActivityTypeId"].Value; } set { MDV["ActivityTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountPayPalEmailAddress { get { return (string)MDV["AccountPayPalEmailAddress"].Value; } }
 		public string AccountStripePublishableKey { get { return (string)MDV["AccountStripePublishableKey"].Value; } }
@@ -75,6 +76,7 @@ namespace AfterSchoolLibrary
 			this.IsArchived = false;
 			this.ScheduleRequiresAllDays = false;
 			this.IsTemplate = false;
+			this.ActivityTypeId = ActivityType.NotSet;
 			
         }
 
@@ -120,6 +122,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar, 100);
 				_dp.Add(className, "IsTemplate", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivitySectionId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ActivityTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountPayPalEmailAddress", typeof(Account).Name, "PayPalEmailAddress", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountStripePublishableKey", typeof(Account).Name, "StripePublishableKey", System.Data.SqlDbType.NVarChar, "Account");
@@ -185,6 +188,8 @@ namespace AfterSchoolLibrary
 				msgs.Add("AccountId is required on Activity object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Activity object", MessageType.Error);
+			if (this.ActivityTypeId.IsEmpty())
+				msgs.Add("ActivityTypeId is required on Activity object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Activity).Name));
@@ -345,6 +350,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ActivitySectionId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

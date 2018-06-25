@@ -3,21 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Collections;
+using AfterSchoolLibrary;
 
 namespace AfterSchool.Models
 {
     public class UILabel
     {
-        public static string ActivityLabel(bool plural = false)
+        public static string ActivityLabel(ActivityGroupType activityGroupType, bool plural = false)
         {
+            if (activityGroupType == ActivityGroupType.League)
+                return ActivityLabel(ActivityType.Team);
+
+            return ActivityLabel(ActivityType.Activity);
+        }
+        public static string ActivityLabel(ActivityType activityType, bool plural = false)
+        {
+            if (activityType == ActivityType.Team)
+                return GetLabelConfigParam("Team", plural);
+
             return GetLabelConfigParam("Activity", plural);
         }
         public static string RegistrantLabel(bool plural = false)
         {
             return GetLabelConfigParam("Registrant", plural);
         }
-        public static string ActivityGroupLabel(bool plural = false)
+        public static string ActivityGroupLabel(ActivityGroupType groupType, bool plural = false)
         {
+            if (groupType == ActivityGroupType.League)
+                return GetLabelConfigParam("League", plural);
+
             return GetLabelConfigParam("ActivityGroup", plural);
         }
         public static string RegistrationPeriodLabel(bool plural = false)

@@ -1,0 +1,79 @@
+﻿@model ActivityGroup
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var forms = (List<Form>)ViewBag.Forms;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_LeagueHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", Model.Name.IfBlank("New " + UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId))); }
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-12 col-lg-12">
+
+                <form id="form1" method="post" action="@Url.Action("edit", "league", new { id = Model.Uid })" class="form-horizontal">
+
+                    @{ Html.RenderPartial("~/Views/Shared/_ActivityGroupEdit.cshtml", Model); }
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="reset" class="btn btn-default">Discard Changes</button>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('.text-editor').wysihtml5({
+            toolbar: {
+                'image': false,
+                'color': false,
+            }
+        });
+
+        $('.text-editor').on('blur', function () {
+            $('#description').val($('#description-div').html());
+        });
+        $('#description').val($('#description-div').html());
+    });
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $('#form').change(function () {
+            checkFormVal();
+        });
+
+        checkFormVal();
+
+    });
+
+    function checkFormVal() {
+        if ($('#form').val().length > 0 && $('#form').val() != "0") {
+            $('#editForm').removeClass('hide');
+            $('#editForm').attr('href', '@Url.Action("edit", "form")/' + $('#form').val());
+        } else {
+            $('#editForm').addClass('hide');
+        }
+    }
+
+</script>

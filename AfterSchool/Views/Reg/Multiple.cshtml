@@ -50,7 +50,7 @@
     <div class="page-head registration-titlebar">
         @if (!isPreview && false)
         {
-            <p><a href="/@Model.UniqueName?reg=@registrationUid&group=@Request["group"]&invite=@Request["invite"]" class="text-white">&laquo; Modify @UILabel.ActivityLabel(true)</a></p>
+            <p><a href="/@Model.UniqueName?reg=@registrationUid&group=@Request["group"]&invite=@Request["invite"]" class="text-white">&laquo; Modify @UILabel.ActivityLabel(ActivityType.Activity, true)</a></p>
         }
         <h2>
             <i class="icon icon-left s7-note2"></i> 

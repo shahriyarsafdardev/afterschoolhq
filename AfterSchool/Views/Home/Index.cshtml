@@ -38,7 +38,7 @@
         <div class="row">
             <div class="col-sm-12 features">
                 <h3>Features</h3>
-                <p>We have all the tools you need to manage your @UILabel.ActivityLabel(true)</p>
+                <p>We have all the tools you need to manage your @UILabel.ActivityLabel(ActivityType.Activity, true)</p>
             </div>
         </div>
         <div class="row">
@@ -84,7 +84,7 @@
                 </div>
                 <h4>Waiting Lists</h4>
                 <p>
-                    Allow everyone who enrolls to see right away how many seats are available. When seats are filled you can easily open up a waiting list where each student will be placed in order of enrollment. @UILabel.ProductName() allows you to easily add a student to your @UILabel.ActivityLabel().ToLower() if a student drops out or you decide to add more seats.
+                    Allow everyone who enrolls to see right away how many seats are available. When seats are filled you can easily open up a waiting list where each student will be placed in order of enrollment. @UILabel.ProductName() allows you to easily add a student to your @UILabel.ActivityLabel(ActivityType.Activity).ToLower() if a student drops out or you decide to add more seats.
                 </p>
                 <a class="btn btn-features btn-lg hide" href="#"> Learn More</a>
 
@@ -95,7 +95,7 @@
                 </div>
                 <h4>Attendance</h4>
                 <p>
-                    Need to know which @UILabel.ActivityLabel(true) are getting the best attendance or which students are present? Take attendance to keep track of performance per @UILabel.ActivityLabel() and per student and view reports on demand.
+                    Need to know which @UILabel.ActivityLabel(ActivityType.Activity, true) are getting the best attendance or which students are present? Take attendance to keep track of performance per @UILabel.ActivityLabel(ActivityType.Activity) and per student and view reports on demand.
                 </p>
                 <a class="btn btn-features btn-lg hide" href="#"> Learn More</a>
 
@@ -106,7 +106,7 @@
                 </div>
                 <h4>Lottery</h4>
                 <p>
-                    Want to offer a lottery instead of first come first serve? Allow students to pick the @UILabel.ActivityLabel(true) they want and select their preference. Then when enrollment is closed, run a lottery to place your students.
+                    Want to offer a lottery instead of first come first serve? Allow students to pick the @UILabel.ActivityLabel(ActivityType.Activity, true) they want and select their preference. Then when enrollment is closed, run a lottery to place your students.
                 </p>
                 <a class="btn btn-features btn-lg hide" href="#"> Learn More</a>
 
@@ -301,7 +301,7 @@
                                 @if (features.Find(x => x.FeatureTypeId == FeatureType.ManageActivityGroups).IsNotEmpty() &&
                         features.Find(x => x.FeatureTypeId == FeatureType.ManageActivityGroups).Max == 1)
                                 {
-                                    @UILabel.ActivityGroupLabel(true)
+                                    @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)
                                 }
                                 else
                                 {

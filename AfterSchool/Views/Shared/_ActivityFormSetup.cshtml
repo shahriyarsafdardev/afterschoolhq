@@ -25,9 +25,9 @@
     <div class="panel-body">
 
         <div class="form-group">
-            <label class="col-sm-3 control-label">@UILabel.ActivityLabel() Name <span class="text-danger">*</span></label>
+            <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger">*</span></label>
             <div class="col-sm-9">
-                <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required placeholder="Your @UILabel.ActivityLabel() Name" />
+                <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name" />
             </div>
         </div>
 
@@ -58,7 +58,7 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label">
                         @UILabel.RegistrationPeriodLabel() <span class="text-danger">*</span>
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel().ToLower()" data-placement="top"></i>
+                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="The date range @UILabel.RegistrantLabel(true).ToLower() are able to register for your @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()" data-placement="top"></i>
                     </label>
                     <div class="col-md-6">
                         <select name="registrationperiod" id="registrationperiod" class="form-control" required>

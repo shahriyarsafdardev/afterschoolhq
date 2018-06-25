@@ -24,17 +24,13 @@ namespace AfterSchool.Areas.Org.Controllers
             bool isArchived = false;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
-            {
                 pageNumber = pn.ToInteger();
-            }
+
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
                 recordsPerPage = rpp.ToInteger();
-            }
+
             if (archive.IsBoolean())
-            {
                 isArchived = archive.ToInteger().ToBoolean();
-            }
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -42,14 +38,16 @@ namespace AfterSchool.Areas.Org.Controllers
             var hasArchivedGroups = false;
 
             totalCount = SessionVariables.CurrentAccount.GetSessionCount(isArchived);
-            groups = SessionVariables.CurrentAccount.GetActivityGroups(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
+            groups = SessionVariables.CurrentAccount.GetSessions(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
 
             hasArchivedGroups = SessionVariables.CurrentAccount.GetSessionCount(true) > 0;
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
+            ViewBag.GroupController = "group";
             ViewBag.Messages = new SystemMessages();
             ViewBag.HasArchivedGroups = hasArchivedGroups;
+            ViewBag.ActivityGroupType = ActivityGroupType.Session;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = totalCount,
@@ -93,6 +91,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 group.ID = new int?();
                 group.RegistrationModeId = RegistrationMode.Register;
+                group.ActivityGroupTypeId = ActivityGroupType.Session;
             }
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -115,11 +114,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "isinviteonly", isinviteonly }
             };
 
-            var group = ActivityGroup.SaveActivityGroup(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount, id, values, msgs);
+            var group = ActivityGroup.SaveSession(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityGroupLabel()), MessageType.Success);
+                msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
                 UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: group.ID);
             }
 
@@ -162,7 +161,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityGroupLabel()), MessageType.Success);
+                msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
@@ -387,7 +386,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     filename, 
                     (RegistrationReportType)reporttype.ToInteger(),
                     RegistrationAssignmentType.Reserved,
-                    UILabel.ActivityLabel(false), 
+                    UILabel.ActivityLabel(group.ActivityGroupTypeId, false), 
                     emails,
                     null,
                     null)

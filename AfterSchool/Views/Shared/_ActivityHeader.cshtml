@@ -18,6 +18,7 @@
     }
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
     var registrantCount = Model.GetRegistrantCount();
+    var group = Model.GetActivityGroup();
 }
 
 @if (Model?.ID.GetValueOrDefault(0) > 0)
@@ -55,7 +56,7 @@
             }
             @if (Model.ActivityGroupId.HasValue)
             {
-                <a href="@Url.Action("activities", "group", new {id = Model.GetActivityGroup().Uid})" class="btn btn-alt5"><i class="s7-date"></i> @UILabel.ActivityGroupLabel() &raquo;</a>
+                <a href="@Url.Action("activities", "group", new {id = group.Uid})" class="btn btn-alt5"><i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</a>
             }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
@@ -93,7 +94,7 @@
                 }
                 @if (Model.ActivityGroupId.HasValue)
                 {
-                    <option value="@Url.Action("summary", "group", new { id = Model.GetActivityGroup().Uid })">@UILabel.ActivityGroupLabel() &raquo;</option>
+                    <option value="@Url.Action("summary", "group", new { id = group.Uid })">@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</option>
                 }
             </select>
         </div>

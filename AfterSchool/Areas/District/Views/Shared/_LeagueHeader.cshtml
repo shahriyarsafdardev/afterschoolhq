@@ -1,21 +1,98 @@
-﻿@model Account
-
+﻿@model ActivityGroup
 @{
+    var publishClass = "btn-danger";
+    if (!Model.IsPublished)
+    {
+        publishClass = "btn-alt7";
+    }
+    else if (Model.IsPublishable)
+    {
+        publishClass = "btn-success";
+    }
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var activityCount = Model.GetActivityCount(null, false);
 }
+@if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0)
+{
+    <div class="btn-toolbar">
+        <div class="btn-group hidden-xs">
+            <a href="@Url.Action("summary", "group", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")">
+                <i class="s7-graph2"></i> Summary
+            </a>
+            <a href="@Url.Action("edit", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">
+                <i class="s7-edit"></i> Setup
+            </a>
+            <a href="@Url.Action("emailcontent", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "emailcontent" ? "-active" : "")">
+                <i class="s7-note2"></i> Content
+            </a>
+            <a href="@Url.Action("periods", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
+                <i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)
+            </a>
+            <a href="@Url.Action("activities", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
+                <i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
+            </a>
 
-<div class="btn-toolbar">
-    <div class="btn-group hidden-xs">
-        <a href="@Url.Action("summary", "sport" )" class="btn btn-alt6@(actionName == "summary" ? "-active" : "" )"><i class="s7-graph2"></i> Summary</a>
-        <a href="@Url.Action("division", "sport" )" class="btn btn-alt6@(actionName == "division" ? "-active" : "" )"><i class="s7-folder"></i> Divisions</a>
-        <a href="@Url.Action("league", "sport")" class="btn btn-alt6@(actionName == "league" ? "-active" : "")"><i class="s7-ball"></i> Leagues</a>
+            @if (activityCount > 0 || Model.IsPublished)
+            {
+                <a href="@Url.Action("registrations", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "registrations" ? "-active" : "")">
+                    <i class="s7-user"></i> @UILabel.RegistrantLabel(true)
+                </a>
+                <div class="btn-group">
+                    <button type="button" data-toggle="dropdown" class="btn btn-alt6 dropdown-toggle" aria-expanded="false">
+                        More... <span class="caret"></span>
+                    </button>
+                    <ul role="menu" class="dropdown-menu" id="list-add-menu">
+                        <li>
+                            <a href="@Url.Action("schedules", "group", new {id = Model.Uid})">
+                                <i class="s7-date"></i> Schedules
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("invited", "group", new {id = Model.Uid})">
+                                <!-- class="btn btn-alt6@(actionName == "invited" ? "-active" : "")"-->
+                                <i class="s7-user"></i> Invitations
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("messages", "group", new {id = Model.Uid})">
+                                <!-- class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"-->
+                                <i class="s7-mail"></i> Messaging
+                            </a>
+                        </li>
+                        @if (Model.RegistrationModeId == RegistrationMode.Apply && SessionVariables.AccountPackage.HasFeature(FeatureType.Lottery))
+                        {
+                            <li>
+                                <a href="@Url.Action("placement", "group", new { id = Model.Uid })">
+                                    <!-- class="btn btn-alt6@(actionName == "placement" ? "-active" : "")"-->
+                                    Lottery
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            <a href="@Url.Action("publishdetail", "group", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish</a>
+        </div>
+        <div class="hidden-lg hidden-sm hidden-md">
+            <select class="form-control" onchange="location.href=this.value;">
+                <option value="">Navigation</option>
+                <option value="@Url.Action("summary", "group", new { id = Model.Uid })">Summary</option>
+                <option value="@Url.Action("edit", "group", new {id = Model.Uid})">Setup</option>
+                <option value="@Url.Action("emailcontent", "group", new {id = Model.Uid})">Content</option>
+                <option value="@Url.Action("periods", "group", new {id = Model.Uid})">@UILabel.RegistrationPeriodLabel(true)</option>
+                <option value="@Url.Action("activities", "group", new { id = Model.Uid })">@UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)</option>
+                @if (activityCount > 0 || Model.IsPublished)
+                {
+                    <option value="@Url.Action("registrations", "group", new { id = Model.Uid })">@UILabel.RegistrantLabel(true)</option>
+                    <option value="@Url.Action("invited", "group", new { id = Model.Uid })">Invitations</option>
+                    <option value="@Url.Action("messages", "group", new { id = Model.Uid })">Messaging</option>
+                    if (Model.RegistrationModeId == RegistrationMode.Apply)
+                    {
+                        <option value="@Url.Action("placement", "group", new { id = Model.Uid })">Lottery</option>
+                    }
+                }
+                <option value="@Url.Action("publishdetail", "group", new { id = Model.Uid })">Publish</option>
+            </select>
+        </div>
     </div>
-    <div class="hidden-lg hidden-sm hidden-md">
-        <select class="form-control" onchange="location.href=this.value;">
-            <option value="">Navigation</option>
-            <option value="@Url.Action("summary", "sport")">Summary</option>
-            <option value="@Url.Action("league", "sport")">Leagues</option>
-            <option value="@Url.Action("division", "sport")">Divisions</option>
-        </select>
-    </div>
-</div>
+}

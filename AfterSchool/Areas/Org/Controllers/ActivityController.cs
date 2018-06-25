@@ -228,9 +228,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ActiveForm = activity.GetActiveActivityForm();
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel()), MessageType.Success);
-            }           
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
             if (msgs.HasNoErrors())
             {
@@ -298,7 +296,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel()), MessageType.Success);
+                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
@@ -364,7 +362,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel()), MessageType.Success);
+                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
@@ -427,7 +425,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel()), MessageType.Success);
+                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
@@ -546,7 +544,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel()), MessageType.Success);
+                msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
             }
 
             var instances = new List<ActivityInstance>();
@@ -627,7 +625,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel()), MessageType.Success);
+                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
@@ -700,7 +698,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel()), MessageType.Success);
+                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
@@ -763,7 +761,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel()), MessageType.Success);
+                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
@@ -1153,7 +1151,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.Load(id.ToInteger());
 
-            BackgroundJob.Enqueue(() => Activity.SendRegistrationSummaryReport(activity.ID.Value, UILabel.ActivityLabel(false), null));
+            BackgroundJob.Enqueue(() => 
+                Activity.SendRegistrationSummaryReport(activity.ID.Value, UILabel.ActivityLabel(activity.ActivityTypeId, false), null)
+            );
+
             msgs.Add("Your report will be sent shortly", MessageType.Success);
 
             ViewBag.Messages = msgs;

@@ -49,10 +49,10 @@
                     <div class="widget-tile">
                         <hr />
                         <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
-                        <p>You haven't created any @UILabel.ActivityLabel(true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel().ToLower()</a>.</p>
+                        <p>You haven't created any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(ActivityType.Activity).ToLower()</a>.</p>
                         <p>&nbsp;</p>
                         <p>
-                            <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel() &raquo;</a>
+                            <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(ActivityType.Activity) &raquo;</a>
                         </p>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
                                     <div data-toggle="counter" data-end="@classes.Count" data-decimals="0" data-suffix="" class="value">@classes.Count</div>
-                                    <div class="desc">@UILabel.ActivityLabel() Meetings</div>
+                                    <div class="desc">@UILabel.ActivityLabel(ActivityType.Activity) Meetings</div>
                                 </div>
                                 <div class="icon"><span class="s7-users"></span></div>
                             </div>

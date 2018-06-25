@@ -87,7 +87,7 @@
                                         </div>
                                         <div class="btn-group">
                                             <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">
-                                                Invite To @UILabel.ActivityGroupLabel() <span class="caret"></span>
+                                                Invite To @UILabel.ActivityGroupLabel(ActivityGroupType.Session) or @UILabel.ActivityGroupLabel(ActivityGroupType.League)<span class="caret"></span>
                                             </button>
                                             <ul role="menu" class="dropdown-menu" id="list-add-menu">
                                                 @foreach (var group in groups)

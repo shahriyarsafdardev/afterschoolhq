@@ -67,7 +67,7 @@
             if (Model.GetSeatsRemaining() == 0)
             {
                 <div class="widget">
-                    <h1>All available seats for this @UILabel.ActivityLabel().ToLower() have been filled. Once you complete the registration form you will be added to the waiting list.</h1>
+                    <h1>All available seats for this @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() have been filled. Once you complete the registration form you will be added to the waiting list.</h1>
                 </div>
             }
 
@@ -81,7 +81,7 @@
                 {
                     <div class="panel panel-alt4">
                         <div class="panel-heading">
-                            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", string.Format("{0} Details", UILabel.ActivityLabel())); }
+                            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", string.Format("{0} Details", UILabel.ActivityLabel(Model.ActivityTypeId))); }
                         </div>
                         <div class="panel-body">
                             @Html.Raw(Model.Details)

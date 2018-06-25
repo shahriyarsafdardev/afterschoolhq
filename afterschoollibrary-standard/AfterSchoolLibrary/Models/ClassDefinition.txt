@@ -88,6 +88,7 @@ property: ScheduleRequiresAllDays, bool, Bit
 property: UniqueName, string, NVarChar(100)
 property: IsTemplate, bool, Bit
 property: ActivitySectionId, int?, Int
+property: ActivityTypeId, ActivityType, Int, required
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
@@ -1246,6 +1247,12 @@ values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool
 type: Enum
 name: ActivityGroupType
 values: NotSet, Session, League
+[end]
+
+[begin]
+type: Enum
+name: ActivityType
+values: NotSet, Activity, Team
 [end]
 
 [begin]

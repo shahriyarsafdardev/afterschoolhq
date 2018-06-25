@@ -9,6 +9,7 @@ using System.Collections;
 using BasicLibrary;
 using SendGrid.Helpers.Mail;
 using SendGrid;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary
 {
@@ -117,20 +118,6 @@ namespace AfterSchoolLibrary
         public static string ReCaptchaPrivateKey { get; set; }
         public static string ReCaptchaPublicKey { get; set; }
 
-
-        //private static string _AppDocumentRoot;
-        //public static string AppDocumentRoot
-        //{
-        //    get
-        //    {
-        //        return HttpContext.Current.Request.PhysicalApplicationPath.Substring(0, HttpContext.Current.Request.PhysicalApplicationPath.Trim('\\').LastIndexOf("\\"));
-        //    }
-        //    set
-        //    {
-
-        //    }
-        //}
-
         private static string AppDocumentRoot;
 
         public static byte[] AppAESKey { get; set; }
@@ -175,19 +162,6 @@ namespace AfterSchoolLibrary
                 return System.Environment.MachineName;
             }
         }
-
-        //public static string HostName
-        //{
-        //    get
-        //    {
-        //        string rtn = HttpContext.Current.Request.Url.Host;
-        //        if (HttpContext.Current.Request.Url.Port != 80 && HttpContext.Current.Request.Url.Port != 443)
-        //        {
-        //            rtn += ":" + HttpContext.Current.Request.Url.Port.ToString();
-        //        }
-        //        return rtn.Replace("www.", "");
-        //    }
-        //}
 
         public static string HostName(bool isAfterSchool)
         {
@@ -344,6 +318,8 @@ namespace AfterSchoolLibrary
                 //// msgs.AddRange(FixMessedUpPreferences(dc: dc));
                 // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc: dc));
                 // msgs.AddRange(CreateMasterRecord(dc: dc));
+                msgs.AddRange(CreateSessionsLeagues(dc: dc));
+                msgs.AddRange(CreateActivitiesTeams(dc: dc));
             }
             catch (Exception ex)
             {
@@ -353,6 +329,38 @@ namespace AfterSchoolLibrary
             {
                 Database.EndTransaction(dc, msgs);
             }
+
+            return msgs;
+        }
+
+        public static SystemMessages CreateSessionsLeagues(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var groups = ActivityGroup.Load(
+                    criterias: new Hashtable() { { "ActivityGroupTypeId", 0 } },
+                    dc: dc
+                );
+
+            groups.ForEach(group => {
+                group.ActivityGroupTypeId = ActivityGroupType.Session;
+                msgs.AddRange(group.Save(dc));
+            });
+
+            return msgs;
+        }
+
+        public static SystemMessages CreateActivitiesTeams(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var activities = Activity.Load(
+                    criterias: new Hashtable() { { "ActivityTypeId", 0 } },
+                    dc: dc
+                );
+
+            activities.ForEach(activity => {
+                activity.ActivityTypeId = ActivityType.Activity;
+                msgs.AddRange(activity.Save(dc));
+            });
 
             return msgs;
         }

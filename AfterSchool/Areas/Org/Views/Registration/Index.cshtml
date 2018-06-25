@@ -7,6 +7,7 @@
     var account = (Account)ViewBag.Account;
     var questions = (List<FormQuestion>)ViewBag.Questions;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
+    var activityGroupType = (ActivityGroupType)ViewBag.ActivityGroupType;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -54,8 +55,10 @@
 
                 <div class="col-md-5">
                     <div class="form-group">
-                        <select id="activities" class="form-control select2 hide" multiple placeholder="Select @UILabel.ActivityGroupLabel(true) or @UILabel.ActivityLabel(true)">
-                            <option value="0" @(Request["activity"].IsBlank() && Request["group"].IsBlank() ? "selected=\"selected\"" : "")>All @UILabel.ActivityGroupLabel(true) &amp; @UILabel.ActivityLabel(true)</option>
+                        <select id="activities" class="form-control select2 hide" multiple placeholder="Select @UILabel.ActivityGroupLabel(activityGroupType, true) or @UILabel.ActivityLabel(activityGroupType, true)">
+                            <option value="0" @(Request["activity"].IsBlank() && Request["group"].IsBlank() ? "selected=\"selected\"" : "")>
+                                All @UILabel.ActivityGroupLabel(activityGroupType, true) &amp; @UILabel.ActivityLabel(activityGroupType, true)
+                            </option>
                             @foreach (var group in groups)
                             {
                                 var selectedGroup = "";
@@ -66,7 +69,7 @@
 
                                 <optgroup label="@group.Name">
                                     <option value="group-@group.ID" @selectedGroup>
-                                        @group.Name - All @UILabel.ActivityLabel(true)
+                                        @group.Name - All @UILabel.ActivityLabel(group.ActivityGroupTypeId, true)
                                     </option>
 
                                     @foreach (var activity in activities.Where(x => x.ActivityGroupId == group.ID))
@@ -84,7 +87,7 @@
                             }
                             @if (activities.Where(x => !x.ActivityGroupId.HasValue).Any())
                             {
-                                <optgroup label="All @UILabel.ActivityLabel(true)">
+                                <optgroup label="All @UILabel.ActivityLabel(ActivityType.Activity, true)">
                                     @foreach (var activity in activities.Where(x => !x.ActivityGroupId.HasValue))
                                     {
                                         var selectedActivity = "";

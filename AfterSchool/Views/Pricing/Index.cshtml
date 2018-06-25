@@ -26,14 +26,14 @@
                 }
             </tr>
             <tr>
-                <th class="text-right">@UILabel.ActivityLabel(true)</th>
+                <th class="text-right">@UILabel.ActivityLabel(ActivityType.Activity, true)</th>
                 @foreach (Package package in Model)
                 {
                     <td class="text-center text-medium">@package.MaxActivities</td>
                 }
             </tr>
             <tr>
-                <th class="text-right">@UILabel.RegistrantLabel(true) / @UILabel.ActivityLabel()</th>
+                <th class="text-right">@UILabel.RegistrantLabel(true) / @UILabel.ActivityLabel(ActivityType.Activity)</th>
                 @foreach (Package package in Model)
                 {
                     <td class="text-center text-medium">@package.MaxRegistrants</td>

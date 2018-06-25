@@ -20,7 +20,7 @@
             <a href="@Url.Action("edit", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
             <a href="@Url.Action("emailcontent", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "emailcontent" ? "-active" : "")"><i class="s7-note2"></i> Content</a>
             <a href="@Url.Action("periods", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")"><i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)</a>
-            <a href="@Url.Action("activities", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")"><i class="s7-gleam"></i> @UILabel.ActivityLabel(true)</a>
+            <a href="@Url.Action("activities", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")"><i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)</a>
             @if (activityCount > 0 || Model.IsPublished)
             {
                 <a href="@Url.Action("registrations", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "registrations" ? "-active" : "")">
@@ -66,7 +66,7 @@
                 <option value="@Url.Action("edit", "group", new {id = Model.Uid})">Setup</option>
                 <option value="@Url.Action("emailcontent", "group", new {id = Model.Uid})">Content</option>
                 <option value="@Url.Action("periods", "group", new {id = Model.Uid})">@UILabel.RegistrationPeriodLabel(true)</option>
-                <option value="@Url.Action("activities", "group", new { id = Model.Uid })">@UILabel.ActivityLabel(true)</option>
+                <option value="@Url.Action("activities", "group", new { id = Model.Uid })">@UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)</option>
                 @if (activityCount > 0 || Model.IsPublished)
                 {
                     <option value="@Url.Action("registrations", "group", new { id = Model.Uid })">@UILabel.RegistrantLabel(true)</option>

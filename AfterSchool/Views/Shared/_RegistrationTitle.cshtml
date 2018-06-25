@@ -14,7 +14,7 @@
             </p>
         </div>
 
-        <p><a href="@Model.GetAccount().HomePageUrl?group=@Request["group"]&invite=@Request["invite"]" class="text-white">&laquo; View more @UILabel.ActivityLabel(true).ToLower()</a></p>
+        <p><a href="@Model.GetAccount().HomePageUrl?group=@Request["group"]&invite=@Request["invite"]" class="text-white">&laquo; View more @UILabel.ActivityLabel(Model.ActivityTypeId, true).ToLower()</a></p>
         <h2><i class="icon icon-left s7-note2"></i> @Model.Name</h2>
         <!--
         <p>@Model.Description</p>

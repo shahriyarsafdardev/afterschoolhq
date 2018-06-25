@@ -453,7 +453,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
-            ViewBag.Groups = SessionVariables.CurrentAccount.GetActivityGroups(false, null, null);
+            ViewBag.Groups = SessionVariables.CurrentAccount.GetSessions(false, null, null);
             ViewBag.Messages = new SystemMessages();
             ViewBag.PagingModel = new PagingModel()
             {

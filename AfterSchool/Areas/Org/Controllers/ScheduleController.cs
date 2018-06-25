@@ -91,7 +91,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel()), MessageType.Success);
+                msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(ActivityType.Activity)), MessageType.Success);
             }
 
             ViewBag.Messages = msgs;

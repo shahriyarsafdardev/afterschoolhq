@@ -96,6 +96,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Activities = activities;
             ViewBag.Groups = groups;
             ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.ActivityGroupType = ActivityGroupType.Session;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = totalCount,
@@ -143,7 +144,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     filename,
                     (RegistrationReportType)reporttype.ToInteger(),
                     RegistrationAssignmentType.Reserved,
-                    UILabel.ActivityLabel(false),
+                    UILabel.ActivityLabel(ActivityType.Activity, false),
                     emails,
                     null,
                     null)

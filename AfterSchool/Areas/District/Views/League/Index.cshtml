@@ -1,5 +1,8 @@
-﻿@{
+﻿@model List<ActivityGroup>
+@{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var activityGroupType = (ActivityGroupType)ViewBag.ActivityGroupType;
+    var controller = ViewBag.GroupController;
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -8,23 +11,19 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{ Html.RenderPartial("_LeagueHeader", SessionVariables.CurrentAccount); }
-
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h2><i class="s7-ball"></i> Sports</h2>
+            <div class="pull-right">
+                <a class="btn btn-primary btn-space" href="@Url.Action("edit", controller)">
+                    <i class="icon icon-left s7-plus"></i>
+                    Add @UILabel.ActivityGroupLabel(activityGroupType)
+                </a>
+            </div>
+            <i class="s7-note2"></i> @UILabel.ActivityGroupLabel(activityGroupType, true)
             <div class="clearfix"></div>
         </div>
         <div class="panel-body">
-            <div class="widget">
-                <div class="widget-head">
-                    <h1>Manage all of your sports here</h1>
-                </div>
-                <div class="widget-tile">
-                    <hr />
-                    Your sports
-                </div>
-            </div>
+            @{ Html.RenderPartial("~/Views/Shared/_ActivityGroups.cshtml", Model); }
         </div>
     </div>
 </div>

@@ -632,7 +632,7 @@ namespace AfterSchoolLibrary
             return new TimeSpan();
         }
 
-        public static ActivityGroup SaveActivityGroup(int loggedInUserId, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs)
+        internal static ActivityGroup SaveActivityGroup(int loggedInUserId, Account account, ActivityGroupType activityGroupType, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -641,6 +641,9 @@ namespace AfterSchoolLibrary
             var form = values["form"];
             var description = values["description"];
             var isinviteonly = values["isinviteonly"];
+            var maxgradeid = values["maxgrade"];
+            var mingradeid = values["mingrade"];
+            var genderrestrictions = values["genderrestrictions"];
 
             if (name.IsEmpty())
                 msgs.Add("Label is required", MessageType.UserError);
@@ -661,63 +664,88 @@ namespace AfterSchoolLibrary
                 group.CreateDate = DateTime.UtcNow;
                 group.CreatedBy = loggedInUserId;
                 group.Uid = activityGroupUid.ToGuid();
+                group.ActivityGroupTypeId = activityGroupType;
                 isNew = true;
             }
 
-            if (name.IsNotEmpty()) group.Name = name.MaxChars(50);
-            if (description.IsNotEmpty()) group.Description = description.MaxChars(400);
-            if (regmode.IsNumber()) group.RegistrationModeId = (RegistrationMode)regmode.ToInteger();
-            if (form.IsNumber()) group.FormId = form.ToInteger();
+            if (name.IsNotEmpty())
+                group.Name = name.MaxChars(50);
+
+            if (description.IsNotEmpty())
+                group.Description = description.MaxChars(400);
+
+            if (regmode.IsNumber())
+                group.RegistrationModeId = (RegistrationMode)regmode.ToInteger();
+
+            if (form.IsNumber())
+                group.FormId = form.ToInteger();
+
+            if (group.ActivityGroupTypeId == ActivityGroupType.League)
+            {
+                if (maxgradeid.IsNumber())
+                    group.MaxGradeLevelId = maxgradeid.ToInteger();
+
+                if (mingradeid.IsNumber())
+                    group.MinGradeLevelId = mingradeid.ToInteger();
+
+                if (genderrestrictions.IsNumber())
+                    group.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToInteger();
+            }
 
             group.IsInviteOnly = false;
             if (isinviteonly.IsNotEmpty()) group.IsInviteOnly = isinviteonly.ToBoolean();
 
             if (msgs.HasNoErrors())
             {
-                var dc = Database.StartTransaction();
-
-                try
-                {
-                    if (form.ToInteger() == 0)
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var defaultForm = account.GetDefaultForm(dc: dc);
-                        var newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, dc: dc);
-                        newForm.Name = (group.Name + " Form").MaxChars(100, "...");
-                        msgs.AddRange(newForm.Save(dc: dc));
+                        if (form.ToInteger() == 0)
+                        {
+                            var defaultForm = account.GetDefaultForm(adc);
+                            var newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, adc);
+                            newForm.Name = (group.Name + " Form").MaxChars(100, "...");
+                            msgs.AddRange(newForm.Save(adc));
 
-                        group.FormId = newForm.ID;
-                    }
+                            group.FormId = newForm.ID;
+                        }
 
-                    group.AccountId = account.ID;
-                    group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, dc: dc);
-                    group.LastModifiedDate = DateTime.UtcNow;
-                    group.LastModifiedBy = loggedInUserId;
-                    msgs.AddRange(group.Save(dc: dc));
+                        group.AccountId = account.ID;
+                        group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, adc);
+                        group.LastModifiedDate = DateTime.UtcNow;
+                        group.LastModifiedBy = loggedInUserId;
+                        msgs.AddRange(group.Save(adc));
+                        
+                        group.GetActivities(false, false, null, null, false, adc)
+                        .ForEach(activity => {
+                            activity.RegistrationModeId = group.RegistrationModeId;
+                            activity.GenderRestriction = group.GenderRestriction;
 
-                    var activities = group.GetActivities(false, false, null, null, false, dc: dc);
-                    foreach (var activity in activities)
+                            for (var i = group.MinGradeLevelId.Value; i <= group.MaxGradeLevelId.Value; i++)
+                                activity.AddGrade(i, loggedInUserId, msgs, dc);
+                            
+                            msgs.AddRange(activity.Save(adc));
+                        });
+
+                        if (isNew)
+                        {
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUserId, msgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUserId, msgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUserId, msgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUserId, msgs, adc);
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
                     {
-                        activity.RegistrationModeId = group.RegistrationModeId;
-                        msgs.AddRange(activity.Save(dc: dc));
-                    }
-
-                    if (isNew)
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
                     {
-                        group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUserId, msgs, dc: dc);
-                        group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUserId, msgs, dc: dc);
-                        group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUserId, msgs, dc: dc);
-                        group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUserId, msgs, dc: dc);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    msgs.Add(ex.Message, MessageType.Error, ex);
-                }
-                finally
-                {
-                    Database.EndTransaction(dc, msgs);
-                }
-
+                        msgs.AddRange(fmsgs);
+                    },
+                    dc: dc
+                );    
             }
 
             return group;
@@ -962,18 +990,27 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // copy group
-                    group = new ActivityGroup();
-                    group.AccountId = this.AccountId;
-                    group.CreateDate = group.LastModifiedDate = DateTime.UtcNow;
-                    group.CreatedBy = group.LastModifiedBy = loggedInUserId;
-                    group.Description = this.Description;
-                    group.FormId = this.FormId;
-                    group.IsArchived = this.IsArchived;
-                    group.IsInviteOnly = this.IsInviteOnly;
-                    group.IsPublished = false;
-                    group.Name = newName;
-                    group.RegistrationModeId = this.RegistrationModeId;
-                    group.UniqueName = ActivityGroup.GenerateUniqueName(this.AccountId.Value, newName, dc: adc);
+                    group = new ActivityGroup
+                    {
+                        AccountId = this.AccountId,
+                        CreateDate = DateTime.UtcNow,
+                        LastModifiedDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUserId,
+                        LastModifiedBy = loggedInUserId,
+                        Description = this.Description,
+                        FormId = this.FormId,
+                        IsArchived = this.IsArchived,
+                        IsInviteOnly = this.IsInviteOnly,
+                        IsPublished = false,
+                        Name = newName,
+                        RegistrationModeId = this.RegistrationModeId,
+                        UniqueName = ActivityGroup.GenerateUniqueName(this.AccountId.Value, newName, dc: adc),
+                        ActivityGroupTypeId = this.ActivityGroupTypeId,
+                        ActivityScheduleId = this.ActivityScheduleId,
+                        GenderRestriction = this.GenderRestriction,
+                        MaxGradeLevelId = this.MaxGradeLevelId,
+                        MinGradeLevelId = this.MinGradeLevelId
+                    };
                     msgs.AddRange(group.Save(adc));
 
                     // copy AccountProperties / Content
@@ -1008,6 +1045,16 @@ namespace AfterSchoolLibrary
             );
 
             return group;
+        }
+
+        public static ActivityGroup SaveSession(int loggedInUserId, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return SaveActivityGroup(loggedInUserId, account, ActivityGroupType.Session, activityGroupUid, values, msgs, dc);
+        }
+
+        public static ActivityGroup SaveLeague(int loggedInUserId, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return SaveActivityGroup(loggedInUserId, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
         }
 
         #endregion

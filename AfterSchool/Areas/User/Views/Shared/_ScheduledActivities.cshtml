@@ -26,7 +26,7 @@
     {
         <div class="panel panel-alt4">
             <div class="panel-heading">
-                @registrant.FirstName.ToProperCase() is on the waiting list for the following @UILabel.ActivityLabel(true).ToLower()
+                @registrant.FirstName.ToProperCase() is on the waiting list for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
             </div>
             <div class="panel-body">
                 @foreach (var ra in Model.Where(x => x.NumberOfWaitingListSeats > 0))
@@ -40,7 +40,7 @@
     {
         <div class="panel panel-alt4">
             <div class="panel-heading">
-                @registrant.FirstName.ToProperCase() applied for the following @UILabel.ActivityLabel(true).ToLower()
+                @registrant.FirstName.ToProperCase() applied for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
             </div>
             <div class="panel-body">
                 @foreach (var ra in Model.Where(x => x.NumberOfApplicationSeats > 0))

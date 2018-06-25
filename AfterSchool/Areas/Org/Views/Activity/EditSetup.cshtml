@@ -6,7 +6,7 @@
     var group = (ActivityGroup)ViewBag.Group;
     var mainColWidth = 10;
     var saveBtnWidth = 7;
-    var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel());
+    var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId));
 
     if (group.IsNotEmpty())
     {
