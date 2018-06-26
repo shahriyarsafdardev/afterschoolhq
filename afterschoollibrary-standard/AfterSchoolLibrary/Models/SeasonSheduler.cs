@@ -31,11 +31,6 @@ namespace AfterSchoolLibrary
             public int rounds { get; set; }
             public int byesPerTeam { get; set; }
 
-            public int getFraction()
-            {
-                return Math.Ceiling(byesPerTeam.ToDecimal() / rounds.ToDecimal()).ToInteger();
-            }
-
            public List<int> MiddleOutSort (int rounds)
             {
                 var frac = Math.Ceiling(byesPerTeam.ToDecimal() / rounds.ToDecimal()).ToInteger();
@@ -57,11 +52,10 @@ namespace AfterSchoolLibrary
 
             public List<int> WeeklyByeCountCalculator (int fraction, int teams)
             {
-                // int weeksOfHeavyByes = fraction - (fraction % teams);
-                // var HeavybyeGamesCount = Math.Ceiling(teams / fraction.ToDecimal()).ToInteger();
-
                 var list = new List<int> ();
 
+                if(teams %2 == 0)
+                {
                 //round up to the next even number in order to handle an extream nuber of byes in a short timeframe
                 while(teams != 0 && fraction != 0)
                 {
@@ -75,14 +69,44 @@ namespace AfterSchoolLibrary
                     fraction--;
                 }
                 return list;
+                }
+                if(teams % 2 != 0)
+                {
+                    if(teams <= fraction)
+                    {
+                        while(teams != 0)
+                        {
+                            list.Add(teams);
+                            teams--;
+                        }
+                    }
+                    if (teams > fraction)
+                    {
+                        while (teams != 0 && fraction != 0)
+                        {
+                            var WeeklyByes = Math.Ceiling(teams / fraction.ToDecimal()).ToInteger();
+                            list.Add(WeeklyByes);
+                            teams = teams - WeeklyByes;
+
+                        }
+                    }
+                }
+                return list;
             }
 
 
-            public Season GenerateShedule(ActivitySchedule shedule, ActivityGroup Leauge, int numberOfByes, DatabaseConnection dc)
+            public Season GenerateShedule(ActivitySchedule shedule, ActivityGroup Leauge, int ByesPerTeam, DatabaseConnection dc)
             {
-                for( int i = 0; i < rounds; i++)
+                var ByesInWeeks = WeeklyByeCountCalculator(rounds, Leauge.GetActivityCount(null, null, dc) * ByesPerTeam);
+                var weeksForByes = MiddleOutSort(rounds);
+                
+                var roundDates = shedule.GetInstances(false, dc);
+
+                for ( int i = 0; i < rounds; i++)
                 {
-                    Round.NewRound(ActivityGroup,)
+                    if(weeksForByes.Contains(i))
+
+                    new Round() { ActivityInstanceID = roundDates[i].ID.Value;
                 }
                 return new Season();
             }
@@ -91,6 +115,8 @@ namespace AfterSchoolLibrary
 
         public class Round //just a list of Matches
         {
+            // Number of byes in a round
+            public int ByeCount { get; set }
             // times of each round
             public int ActivityInstanceID { get; set; }
             //a list of matches for this round
@@ -102,12 +128,13 @@ namespace AfterSchoolLibrary
                 teams.Shuffle();
 
                 // will remove a team from teams if they have not had a bye yet 
-                for( int i = 0; i < byes; i++)
+                for (int i = 0; i < byes; i++)
                 {
                     GiveBye(teams);
                 }
 
                 var round = new List<TeamMatch>();
+
 
                 for (int i = 0; i < teams.Count - 1; i++)
                 {
@@ -117,12 +144,13 @@ namespace AfterSchoolLibrary
 
                         var team = teams[i];
                         if (teams[i + 1].have not played){
-                            if (team.home games > team.away games){
-                                if (teams[i + k].games) {
-                            new TeamMatch() { HomeTeamId = teams[i].AccountId, AwayTeamId= teams[i + k].AccountId };
-                                }
-                            }
+                    if (team.home games > team.away games){
+                        if (teams[i + k].games)
+                        {
+                            new TeamMatch() { HomeTeamId = teams[i].AccountId, AwayTeamId = teams[i + k].AccountId };
                         }
+                    }
+                }
 
                 return round;
 
@@ -131,7 +159,7 @@ namespace AfterSchoolLibrary
             {
                 foreach (Activity team in Teams)
                 {
-                    
+
                     if (!team.had bye){
                         Teams.Remove(team);
                         return;
