@@ -1,0 +1,33 @@
+﻿# AfterSchool HQ
+
+## Local Requirements
+
+- Windows 10
+- .NET Framework 4.6.2+
+- SQL Server Express
+- Visual Studio
+- .NET Standard SDK
+
+## SQL Server Installation and Setup
+
+- Install SQL Server Database
+- Turn on Mixed Mode Authentication - required for the local app to access the database
+- Install SQL Server Management Studio (SSMS)
+- Login to database using SSMS
+- Create new `AfterSchool` database
+- Create `AfterSchoolUser` and give it Owner access to `AfterSchool` database
+- Give it the password found in `Database.cs`
+
+## Getting up and running
+
+- Turn on the ASP.NET State Service
+- Open up the code - `AfterSchoolHQ - Darye.sln`
+- Set `after-school-hq` the start up project
+- Run the Code - `after-school-hq`
+- Run `/db/update` to create tables and create default admin account for logging in
+- Go to `/login` and use default admin credentials
+
+## Resources
+
+- Will add them at some point
+
