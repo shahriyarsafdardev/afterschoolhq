@@ -12,7 +12,13 @@ namespace AfterSchool.Areas.District.Controllers
 {
     public class LeagueController : BaseLoggedInController
     {
+        public LeagueController() : base()
+        {
+
+        }
+
         // GET: District/League
+        [HttpGet]
         public ActionResult Index(string pn, string rpp, string archive)
         {
             var groups = new List<ActivityGroup>();
