@@ -11,6 +11,7 @@
 ## SQL Server Installation and Setup
 
 - Install SQL Server Database
+- Don't do a `named instance` instead select `default instance`
 - Turn on Mixed Mode Authentication - required for the local app to access the database
 - Install SQL Server Management Studio (SSMS)
 - Login to database using SSMS
@@ -25,7 +26,7 @@
 - Set `after-school-hq` the start up project
 - Run the Code - `after-school-hq`
 - Run `/db/update` to create tables and create default admin account for logging in
-- Go to `/login` and use default admin credentials
+- Go to `/login` and use default admin credentials found in `DBController.cs`
 
 ## Resources
 
