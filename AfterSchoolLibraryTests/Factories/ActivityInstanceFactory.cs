@@ -14,7 +14,25 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static ActivityInstance Create(Activity activity, ActivitySchedule activitySchedule, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new ActivityInstance() { ActivityId = activity.ID, StartDateTime = DateTime.UtcNow, EndDateTime = DateTime.UtcNow.AddHours(2), ActivityScheduleId = activitySchedule.ID };
+            var obj = new ActivityInstance()
+            {
+                ActivityId = activity.ID,
+                StartDateTime = DateTime.UtcNow,
+                EndDateTime = DateTime.UtcNow.AddHours(2),
+                ActivityScheduleId = activitySchedule.ID
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+        public static ActivityInstance Create(Activity activity, ActivitySchedule activitySchedule, DateTime startDateTime, DateTime endDateTime, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new ActivityInstance()
+            {
+                ActivityId = activity.ID,
+                StartDateTime = startDateTime,
+                EndDateTime = endDateTime,
+                ActivityScheduleId = activitySchedule.ID
+            };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
