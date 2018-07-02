@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// Grouping activities into subgroups/sections. Especially used in sports to create divisions in a league.
+    /// </summary>
 	
     public class ActivitySection : BasicLookUpObject
     {

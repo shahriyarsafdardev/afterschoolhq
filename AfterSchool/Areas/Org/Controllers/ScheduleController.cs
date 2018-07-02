@@ -10,8 +10,12 @@ using System.Web.Script.Serialization;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
-    public class ScheduleController : Controller
+    public class ScheduleController : BaseLoggedInController
     {
+        public ScheduleController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
 
         [HttpGet]
         public ActionResult Copy(string id, string activity)

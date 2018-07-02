@@ -10,7 +10,10 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
-	
+	/// <summary>
+    /// 
+    /// </summary>
+    [Obsolete]
     public class ActivityDay : BasicObjectWithModified
     {
 		#region "ClassGenerator"

@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// Which host account locations does a visitor account have access to. Used for outside activity providers when they request access to have an activity at the host's location
+    /// </summary>
 	
     public class AccountRelationshipLocation : BasicObjectWithModified
     {

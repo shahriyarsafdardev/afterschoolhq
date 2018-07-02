@@ -15,6 +15,11 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class GroupController : BaseLoggedInController
     {
+        public GroupController() : base(new List<AccountType>() { AccountType.ActivityProvider, AccountType.School })
+        {
+
+        }
+
         [HttpGet]
         public ActionResult Index(string pn, string rpp, string archive)
         {

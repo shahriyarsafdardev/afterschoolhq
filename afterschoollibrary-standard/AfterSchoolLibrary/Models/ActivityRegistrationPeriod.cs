@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// Used to store all registration periods that are used for an activity. An activity can only have one active registration period at a time
+    /// </summary>
 	
     public class ActivityRegistrationPeriod : BasicObjectWithModified
     {

@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// A simple key value for properties stored on the account. Things that don't need to be added directly to the account object
+    /// </summary>
 	
     public class AccountProperty : BasicObjectWithModified
     {

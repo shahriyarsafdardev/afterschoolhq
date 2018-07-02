@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// Used to store a message that is sent in regards to an session/league, activity/team, or even on the whole account
+    /// </summary>
 	
     public class ActivityMessage : BasicObject
     {

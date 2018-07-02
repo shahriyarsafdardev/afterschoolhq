@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// 
+    /// </summary>
 	
     public class Registration : BasicObjectWithModified
     {

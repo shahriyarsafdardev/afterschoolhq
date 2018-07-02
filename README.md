@@ -18,6 +18,8 @@
 - Create new `AfterSchool` database
 - Create `AfterSchoolUser` and give it Owner access to `AfterSchool` database
 - Give it the password found in `Database.cs`
+- Turn off the password policy
+- Select `User Mapping` in left menu, click on AfterSchool, check the `db owner` checkbox, save the user
 
 ## Getting up and running
 

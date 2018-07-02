@@ -1,21 +1,21 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Net;
 using System.IO;
 using System.Web.Script.Serialization;
 using BasicLibrary;
 using AfterSchool.Models;
-using AfterSchoolLibrary;
 
 namespace AfterSchool.Controllers
 {
     public class OAuthController : BaseLoggedInController
     {
-        
+        public OAuthController() : base(new List<AccountType> { AccountType.SchoolDistrict, AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
+
         //
         // GET: /Stripe/
         public ActionResult Stripe(string id)

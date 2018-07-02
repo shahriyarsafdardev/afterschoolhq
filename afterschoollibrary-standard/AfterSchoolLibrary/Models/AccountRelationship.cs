@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// Used to keep track of which host has allowed which visitor access to post activities. Activity Providers can request access to a School or other host account, the host can approve of it.
+    /// </summary>
 	
     public class AccountRelationship : BasicObjectWithModified
     {

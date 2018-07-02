@@ -14,6 +14,11 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class PeriodController : BaseLoggedInController
     {
+        public PeriodController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
+
         [HttpGet]
         public ActionResult Index(string pn, string rpp)
         {

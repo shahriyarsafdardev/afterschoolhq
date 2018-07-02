@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// An actual date that an activity is occurring. So this would be 1 class at a specific date and time
+    /// </summary>
 	
     public class ActivityInstance : BasicObjectWithModified
     {

@@ -11,6 +11,11 @@ namespace AfterSchool.Areas.District.Controllers
 {
     public class UserController : BaseLoggedInController
     {
+        public UserController() : base(new List<AccountType> { AccountType.SchoolDistrict })
+        {
+
+        }
+
         // GET: User
         [HttpGet]
         public ActionResult Index(string pn, string rpp)

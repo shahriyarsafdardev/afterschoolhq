@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// An account can have one or more Locations
+    /// </summary>
 	
     public class Location : BaseLocation
     {

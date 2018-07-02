@@ -9,8 +9,11 @@ namespace AfterSchool.Models
 {
     public class BaseLoggedInController : BaseController
     {
-        public BaseLoggedInController()
+        private List<AccountType> AllowedAccountTypes { get; set; }
+
+        public BaseLoggedInController(List<AccountType> allowedAccountTypes)
         {
+            this.AllowedAccountTypes = allowedAccountTypes;
         }
 
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
@@ -56,20 +59,34 @@ namespace AfterSchool.Models
             }
         }
 
-        protected override void OnActionExecuting(System.Web.Mvc.ActionExecutingContext filterContext)
+        private bool HasAccess()
         {
             if (SessionVariables.LoggedInUser.IsEmpty())
+                return false;
+
+            if (AllowedAccountTypes.IsNotEmpty() &&
+                    AllowedAccountTypes.Any() &&
+                    !AllowedAccountTypes.Contains(SessionVariables.CurrentAccount.AccountTypeId))
+                return false;
+
+            return true;
+        }
+
+        protected override void OnActionExecuting(System.Web.Mvc.ActionExecutingContext filterContext)
+        {
+            if (!HasAccess())
             {
                 filterContext.Result = RedirectToAction(
-                                            "index",
-                                            "login",
-                                            new
-                                            {
-                                                url = filterContext.HttpContext.Server.UrlEncode(filterContext.HttpContext.Request.Url.PathAndQuery),
-                                                area = ""
-                                            }
-                                       );
+                    "index",
+                    "login",
+                    new
+                    {
+                        url = filterContext.HttpContext.Server.UrlEncode(filterContext.HttpContext.Request.Url.PathAndQuery),
+                        area = ""
+                    }
+                );
             }
+
             base.OnActionExecuting(filterContext);
         }
 

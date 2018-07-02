@@ -12,9 +12,13 @@ namespace AfterSchool.Areas.District.Controllers
 {
     public class SchoolController : BaseLoggedInController
     {
+        public SchoolController() : base(new List<AccountType> { AccountType.SchoolDistrict })
+        {
+
+        }
+
         // GET: District/School
         [HttpGet]
-
         public ActionResult Index(string pn, string rpp)
         {
             int pageNumber = 1;

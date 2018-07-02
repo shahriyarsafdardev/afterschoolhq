@@ -13,6 +13,11 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ContactController : BaseLoggedInController
     {
+        public ContactController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
+
         // GET: Org/Contact
         public ActionResult Index(string pn, string rpp)
         {

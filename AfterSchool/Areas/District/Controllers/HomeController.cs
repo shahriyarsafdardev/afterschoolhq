@@ -11,6 +11,11 @@ namespace AfterSchool.Areas.District.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
+        public HomeController() : base(new List<AccountType> { AccountType.SchoolDistrict })
+        {
+
+        }
+
         // GET: District/Home
         public ActionResult Index()
         {

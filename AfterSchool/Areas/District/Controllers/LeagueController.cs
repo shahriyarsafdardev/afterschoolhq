@@ -9,10 +9,10 @@ using AfterSchoolLibrary;
 using System.Collections.Specialized;
 
 namespace AfterSchool.Areas.District.Controllers
-{
+{   
     public class LeagueController : BaseLoggedInController
     {
-        public LeagueController() : base()
+        public LeagueController() : base(new List<AccountType> { AccountType.SchoolDistrict })
         {
 
         }

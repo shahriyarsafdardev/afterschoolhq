@@ -14,6 +14,11 @@ namespace AfterSchool.Areas.User.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
+        public HomeController() : base(null)
+        {
+
+        }
+
         // GET: User/Home
         public ActionResult Index()
         {

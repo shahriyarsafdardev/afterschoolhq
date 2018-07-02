@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// The main organization and account holder in the system
+    /// </summary>
 	[Serializable]
     public class Account : BaseCompany
     {
@@ -45,7 +48,6 @@ namespace AfterSchoolLibrary
 			this.IsActive = false;
 			this.IsAfterSchool = false;
 			this.AccountTypeId = AccountType.NotSet;
-			
         }
 
         public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap

@@ -12,6 +12,11 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class AccountController : BaseLoggedInController
     {
+        public AccountController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
+
         [HttpGet]
         public ActionResult Edit(string id)
         {
