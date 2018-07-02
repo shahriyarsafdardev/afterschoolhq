@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// 
+    /// </summary>
 	[Serializable]
     public class SubscriptionPlan : BasicObjectWithModified
     {

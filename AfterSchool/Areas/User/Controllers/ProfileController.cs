@@ -9,8 +9,13 @@ using AfterSchool.Models;
 
 namespace AfterSchool.Areas.User.Controllers
 {
-    public class ProfileController : Controller
+    public class ProfileController : BaseLoggedInController
     {
+        public ProfileController() : base(null)
+        {
+
+        }
+
         [HttpGet]
         public ActionResult Edit()
         {

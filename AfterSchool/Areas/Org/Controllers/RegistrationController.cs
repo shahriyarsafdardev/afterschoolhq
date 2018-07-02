@@ -12,6 +12,11 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class RegistrationController : BaseLoggedInController
     {
+        public RegistrationController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
+
         // GET: Org/Registrant
         public ActionResult Index(string activity, string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at)
         {

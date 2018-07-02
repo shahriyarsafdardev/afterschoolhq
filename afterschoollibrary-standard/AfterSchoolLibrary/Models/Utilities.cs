@@ -256,30 +256,9 @@ namespace AfterSchoolLibrary
                 if (WebUser.LoadByEmail(adminEmail, dc: dc) != null)
                     throw new Exception("User with the same email address already exists.");
 
-                WebUser wu = new WebUser();
-                wu.FirstName = "Admin";
-                wu.LastName = "User";
-                wu.Email = adminEmail;
-                wu.Username = "admin";
-                wu.Password = WebUserService.EncryptPassword(adminPassword);
-                wu.IsActive = true;
-                wu.CreateDate = wu.LastModifiedDate = DateTime.UtcNow;
-                wu.CreatedBy = wu.LastModifiedBy = 0;
-                msgs.AddRange(wu.Save(dc: dc));
-
-                System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.SpecialCharsRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-                Account a = new Account();
-                a.Name = groupName;
-                a.CreateDate = a.LastModifiedDate = DateTime.UtcNow;
-                a.CreatedBy = a.LastModifiedBy = 0;
-                a.UniqueName = AccountService.GenerateUniqueName(a.Name, a.ID);
-                a.IsAdminAccount = true;
-                a.IsActive = true;
-                msgs.AddRange(a.Save(dc: dc));
-
-                msgs.AddRange(a.AddUser(wu, UserType.Owner, 0, dc: dc));
-
+                var wu = WebUserService.CreateNew("admin", "user", adminEmail, adminPassword, true, true, true, 0, msgs, dc);
+                
+                wu.AddNewAccount(groupName, null, true, AccountType.AfterSchool, null, null, true, wu, msgs, dc);
             }
             catch (Exception ex)
             {

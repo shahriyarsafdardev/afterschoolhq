@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// A simple list of grades, such as Kindergarten, 1st Grade, etc.
+    /// </summary>
 	
     public class GradeLevel : BasicLookUpObject
     {

@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// A competitive match played between two teams in the same league
+    /// </summary>
 	
     public class TeamMatch : BasicObjectWithModified
     {

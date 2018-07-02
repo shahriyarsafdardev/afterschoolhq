@@ -11,6 +11,11 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
+        public HomeController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
+
         // GET: Org/Home
         [HttpGet]
         public ActionResult Index()

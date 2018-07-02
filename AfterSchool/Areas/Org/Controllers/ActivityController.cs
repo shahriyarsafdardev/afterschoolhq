@@ -16,6 +16,11 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ActivityController : BaseLoggedInController
     {
+        public ActivityController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
+
         // GET: Admin/Activity
         public ActionResult Summary(string id)
         {

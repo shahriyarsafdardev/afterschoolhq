@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// The after school activity/team that a registrant/student is registering for
+    /// </summary>
 	
     public class Activity : BaseEventWithAddress
     {

@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// Used to track registrants to an session/leage, usually from an invitation (invite only session/league) or when a student is registering for a league where there are no specific teams created
+    /// </summary>
 	
     public class RegistrantActivityGroup : BasicObjectWithModified
     {
@@ -18,6 +21,7 @@ namespace AfterSchoolLibrary
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public int? RegistrationPeriodId { get { return (int?)MDV["RegistrationPeriodId"].Value; } set { MDV["RegistrationPeriodId"].Value = value; } }
+		public int? NumberOfApplicationSeats { get { return (int?)MDV["NumberOfApplicationSeats"].Value; } set { MDV["NumberOfApplicationSeats"].Value = value; } }
 		public int? NumberOfInvitationSeats { get { return (int?)MDV["NumberOfInvitationSeats"].Value; } set { MDV["NumberOfInvitationSeats"].Value = value; } }
 		public int? NumberOfSeatsDeclined { get { return (int?)MDV["NumberOfSeatsDeclined"].Value; } set { MDV["NumberOfSeatsDeclined"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
@@ -50,6 +54,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationPeriodId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "NumberOfApplicationSeats", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfInvitationSeats", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfSeatsDeclined", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
@@ -151,6 +156,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RegistrationPeriodId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["NumberOfApplicationSeats"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

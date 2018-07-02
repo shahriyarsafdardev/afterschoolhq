@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// A single registrant for an activity, this is the main person who registered
+    /// </summary>
 	
     public class Registrant : BaseContact
     {

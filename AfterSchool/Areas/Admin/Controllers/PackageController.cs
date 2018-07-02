@@ -12,6 +12,11 @@ namespace AfterSchool.Areas.Admin.Controllers
 {
     public class PackageController : BaseLoggedInController
     {
+        public PackageController() : base(new List<AccountType> { AccountType.AfterSchool })
+        {
+
+        }
+
         // GET: Admin/Package
         [HttpGet]
         public ActionResult Index(int? start = null, int? length = null)

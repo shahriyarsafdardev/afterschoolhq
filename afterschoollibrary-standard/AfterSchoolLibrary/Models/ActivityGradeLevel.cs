@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// Which grades are accepted for a particular activity
+    /// </summary>
 	
     public class ActivityGradeLevel : BasicObject
     {

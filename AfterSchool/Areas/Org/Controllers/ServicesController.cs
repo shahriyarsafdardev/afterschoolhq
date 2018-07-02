@@ -12,6 +12,11 @@ namespace AfterSchool.Areas.Org.Controllers
 {
     public class ServicesController : BaseLoggedInController
     {
+        public ServicesController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
+
         [HttpGet]
         public ActionResult GetScheduleActivities(string id)
         {

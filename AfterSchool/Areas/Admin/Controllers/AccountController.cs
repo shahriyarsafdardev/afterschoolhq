@@ -13,6 +13,11 @@ namespace AfterSchool.Areas.Admin.Controllers
 {
     public class AccountController : BaseLoggedInController
     {
+        public AccountController() : base(new List<AccountType> { AccountType.AfterSchool })
+        {
+
+        }
+
         // GET: Account
         [HttpGet]
         public ActionResult Index(string pn, string rpp)

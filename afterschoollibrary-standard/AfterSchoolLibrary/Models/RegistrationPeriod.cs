@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// The registration time window that the registrant/student has to be able to register online
+    /// </summary>
 	
     public class RegistrationPeriod : BaseEvent
     {
@@ -19,6 +22,7 @@ namespace AfterSchoolLibrary
 		public RegistrationMode RegistrationModeId { get { return (RegistrationMode)MDV["RegistrationModeId"].Value; } set { MDV["RegistrationModeId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
+		public int? AccountActivityGroupId { get { return (int?)MDV["AccountActivityGroupId"].Value; } set { MDV["AccountActivityGroupId"].Value = value; } }
 		
 
         public RegistrationPeriod()
@@ -41,6 +45,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RegistrationModeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -134,6 +139,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ActivityGroupId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountActivityGroupId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

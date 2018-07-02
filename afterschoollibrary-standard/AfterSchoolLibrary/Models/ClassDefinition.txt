@@ -32,6 +32,7 @@ local1password: Nj8Ed$wpLfJ
 type: Class
 name: WebUser
 serializable: true
+description: A login account. A person cannot login to the system without a WebUser account.
 inherits: BaseWebUser
 property: FacebookId, string, NVarChar(100)
 property: Uid, Guid, UniqueIdentifier, required
@@ -52,6 +53,7 @@ loadmethod: FacebookId
 [begin]
 type: Class
 name: Activity
+description: The after school activity/team that a registrant/student is registering for
 inherits: BaseEventWithAddress
 property: SeatsAvailable, int?, Int, required
 property: AccountId, int?, Int, required
@@ -110,6 +112,7 @@ loadmethod: UniqueName|AccountId
 [begin]
 type: Class
 name: Location
+description: An account can have one or more Locations
 inherits: BaseLocation
 property: HostAccountId, int?, Int, required
 property: IsDefault, bool, Bit
@@ -134,6 +137,7 @@ loadmethod: ActivityRecurrenceId, List<>
 [begin]
 type: Class
 name: Tag
+description: Used to tag Activities/Teams, Sessions/Leagues in order to make it easier to categorize. Such as Chess, Science, STEM, Basketball, etc
 inherits: BasicObjectWithModified
 property: ParentTagId, int?, Int
 property: AccountId, int?, Int
@@ -160,6 +164,7 @@ loadmethod: TagId, List<>
 [begin]
 type: Class
 name: ActivitySchedule
+description: The schedule an activity/team, session/league will follow. This is the schedule definition. Actual dates are stored in the ActivityInstance
 inherits: BasicObjectWithModified
 property: Name, string, NVarChar(100)
 property: AccountId, int?, Int, required
@@ -177,6 +182,7 @@ loadmethod: ActivityGroupId, List<>
 [begin]
 type: Class
 name: ActivityInstance
+description: An actual date that an activity is occurring. So this would be 1 class at a specific date and time
 inherits: BasicObjectWithModified
 property: ActivityScheduleId, int?, Int, required
 property: ActivityId, int?, Int
@@ -192,6 +198,7 @@ loadmethod: ActivityScheduleId, List<>
 [begin]
 type: Class
 name: TeamMatch
+description: A competitive match played between two teams in the same league
 inherits: BasicObjectWithModified
 property: HomeTeamId, int?, Int, required
 property: AwayTeamId, int?, Int, required
@@ -204,6 +211,7 @@ property: ActivityInstanceId, int?, Int, required
 [begin]
 type: Class
 name: ActivitySection
+description: Grouping activities into subgroups/sections. Especially used in sports to create divisions in a league.
 inherits: BasicLookUpObject
 property: ActivityGroupId, int?, Int, required
 baseproperty: Name, required
@@ -212,6 +220,7 @@ baseproperty: Name, required
 [begin]
 type: Class
 name: ActivityGradeLevel
+description: Which grades are accepted for a particular activity
 inherits: BasicObject
 property: ActivityId, int?, Int, required
 property: GradeLevelId, int?, Int, required
@@ -226,6 +235,7 @@ loadmethod: GradeLevelId, List<>
 [begin]
 type: Class
 name: ActivityMessage
+description: Used to store a message that is sent in regards to an session/league, activity/team, or even on the whole account
 inherits: BasicObject
 property: ActivityId, int?, Int
 property: ActivityGroupId, int?, Int
@@ -246,6 +256,7 @@ loadmethod: ActivityGroupId, List<>
 [begin]
 type: Class
 name: ActivityMessageRegistrant
+description: Keeps a record of each ActivityMessage result. So we know it was sent to a particular registrant/student
 inherits: BasicObject
 property: ActivityMessageId, int?, Int, required
 property: RegistrantId, int?, Int, required
@@ -267,6 +278,7 @@ joinproperty: Registrant.Phone, string, NVarChar
 type: Class
 name: Account
 serializable: true
+description: The main organization and account holder in the system
 inherits: BaseCompany
 property: StripeAccessToken, string, NVarChar(100)
 property: StripePublishableKey, string, NVarChar(100)
@@ -298,6 +310,7 @@ loadmethod: AccountTypeId, List<>
 [begin]
 type: Class
 name: AccountRelationship
+description: Used to keep track of which host has allowed which visitor access to post activities. Activity Providers can request access to a School or other host account, the host can approve of it.
 inherits: BasicObjectWithModified
 property: HostAccountId, int?, Int, required
 property: VisitorAccountId, int?, Int, required
@@ -315,6 +328,7 @@ loadmethod: VisitorAccountId|HostPermissionTypeId, List<>
 [begin]
 type: Class
 name: AccountRelationshipLocation
+description: Which host account locations does a visitor account have access to. Used for outside activity providers when they request access to have an activity at the host's location
 inherits: BasicObjectWithModified
 property: AccountRelationshipId, int?, Int
 property: HostAccountId, int?, Int, required
@@ -334,6 +348,7 @@ loadmethod: HostAccountId|VisitorAccountId|LocationId
 [begin]
 type: Class
 name: AccountProperty
+description: A simple key value for properties stored on the account. Things that don't need to be added directly to the account object
 inherits: BasicObjectWithModified
 property: AccountId, int?, Int
 property: ActivityGroupId, int?, Int
@@ -351,6 +366,7 @@ loadmethod: ActivityId|AccountPropertyTypeId
 [begin]
 type: Class
 name: AccountWebUser
+description: The record that let's you know whether a user has access to an account. A user can have access to more than one account
 inherits: BasicObjectWithModified
 property: AccountId, int?, Int, required
 property: WebUserId, int?, Int, required
@@ -384,6 +400,7 @@ loadmethod: AccountId|IsActive, List<>
 [begin]
 type: Class
 name: GradeLevel
+description: A simple list of grades, such as Kindergarten, 1st Grade, etc.
 inherits: BasicLookUpObject
 property: Abbreviation, string, NVarChar(50)
 baseproperty: Name, required
@@ -392,11 +409,13 @@ baseproperty: Name, required
 [begin]
 type: Class
 name: RegistrationPeriod
+description: The registration time window that the registrant/student has to be able to register online
 inherits: BaseEvent
 property: AccountId, int?, Int
 property: RegistrationModeId, RegistrationMode, Int
 property: Uid, Guid, UniqueIdentifier, required
 property: ActivityGroupId, int?, Int
+property: AccountActivityGroupId, int?, Int
 baseproperty: StartDateTime, required
 baseproperty: EndDateTime, required
 loadmethod: AccountId, List<>
@@ -407,6 +426,7 @@ loadmethod: ActivityGroupId, List<>
 [begin]
 type: Class
 name: ActivityRegistrationPeriod
+description: Used to store all registration periods that are used for an activity. An activity can only have one active registration period at a time
 inherits: BasicObjectWithModified
 property: RegistrationPeriodId, int?, Int, required
 property: ActivityId, int?, Int, required
@@ -459,7 +479,24 @@ joinproperty: Account.Name, string, NVarChar
 
 [begin]
 type: Class
+name: AccountActivityGroup
+description: Used when an external account is invited to add an activity or team to another account's session or league
+inherits: BasicObjectWithModified
+property: AccountId, int?, Int, required
+property: ActivityGroupId, int?, Int, required
+property: InviteStatusId, InviteStatus, Int
+property: IsPublished, bool, Bit
+loadmethod: AccountId, List<>
+loadmethod: ActivityGroupId, List<>
+loadmethod: AccountId|IsPublished, List<>
+loadmethod: AccountId|InviteStatusId, List<>
+loadmethod: AccountId|ActivityGroupId
+[end]
+
+[begin]
+type: Class
 name: Registrant
+description: A single registrant for an activity, this is the main person who registered
 inherits: BaseContact
 property: AccountId, int?, Int
 property: WebUserId, int?, Int
@@ -520,10 +557,12 @@ loadmethod: Uid
 [begin]
 type: Class
 name: RegistrantActivityGroup
+description: Used to track registrants to an session/leage, usually from an invitation (invite only session/league) or when a student is registering for a league where there are no specific teams created
 inherits: BasicObjectWithModified
 property: ActivityGroupId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: RegistrationPeriodId, int?, Int
+property: NumberOfApplicationSeats, int?, Int
 property: NumberOfInvitationSeats, int?, Int
 property: NumberOfSeatsDeclined, int?, Int
 property: Uid, Guid, UniqueIdentifier
@@ -1235,6 +1274,12 @@ values: NotSet, ApproveOnly, Edit, Admin
 type: Enum
 name: ApprovalStatus
 values: NotSet, Requested, Approved, Denied
+[end]
+
+[begin]
+type: Enum
+name: InviteStatus
+values: NotSet, Invited, Accepted, Declined
 [end]
 
 [begin]

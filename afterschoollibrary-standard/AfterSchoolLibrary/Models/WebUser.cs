@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// A login account. A person cannot login to the system without a WebUser account.
+    /// </summary>
 	[Serializable]
     public class WebUser : BaseWebUser
     {

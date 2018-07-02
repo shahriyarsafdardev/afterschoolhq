@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// Keeps a record of each ActivityMessage result. So we know it was sent to a particular registrant/student
+    /// </summary>
 	
     public class ActivityMessageRegistrant : BasicObject
     {

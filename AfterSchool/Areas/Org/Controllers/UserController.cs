@@ -4,11 +4,16 @@ using System.Web.Mvc;
 using BasicLibrary;
 using AfterSchoolLibrary;
 using AfterSchool.Models;
+using System.Collections.Generic;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
     public class UserController : BaseLoggedInController
     {
+        public UserController() : base(new List<AccountType> { AccountType.School, AccountType.ActivityProvider })
+        {
+
+        }
 
         // GET: User
         [HttpGet]

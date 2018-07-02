@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
+	/// <summary>
+    /// The record that let's you know whether a user has access to an account. A user can have access to more than one account
+    /// </summary>
 	
     public class AccountWebUser : BasicObjectWithModified
     {
