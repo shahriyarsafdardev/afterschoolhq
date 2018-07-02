@@ -13,13 +13,13 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static Registrant Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new Registrant();
+            var obj = new Registrant() { Email = "test@test.com" };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static Registrant Create(Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new Registrant() { AccountId = account.ID };
+            var obj = new Registrant() { Email = "test@test.com", AccountId = account.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

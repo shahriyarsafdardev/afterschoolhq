@@ -617,15 +617,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetAccountTest()
         {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
 
-            var account = new Account() { };
-            account.Save(dc: dc);
-            var aid = account.ID.Value;
-
-            var a = new Activity() { AccountId = aid };
-            a.Save(dc: dc);
-
-            Assert.NotNull(a.GetAccount(dc: dc));
+            Assert.True(activity.GetAccount(dc).IsNotEmpty() && activity.GetAccount(dc).ID == account.ID);
         }
 
         [Fact]
@@ -715,23 +711,31 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void AddNewSheduleTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc);
-            activity.ActivityGroupId = activityGroup.ID.Value;
-            activity.Save(dc);
-
-            var nv = new System.Collections.Specialized.NameValueCollection() { };
+            var activity = Factories.ActivityFactory.Create(account, activityGroup, msgs, dc);
 
             var start = new DateTime(2017, 06, 06);
             var end = new DateTime(2017, 10, 10);
             var startTime = new DateTime(2018, 1, 1, 1, 1, 1);
             var endtime = new DateTime(2018, 3, 3, 3, 3, 3);
 
-            var x = activity.AddNewSchedule("newShed", "det", true, start, end, startTime, endtime, "Monday", account.ID.Value, user.ID.Value, msgs, dc);
+            var schedule = activity.AddNewSchedule(
+                "newShed", 
+                "det", 
+                true, 
+                start, 
+                end, 
+                startTime, 
+                endtime, 
+                "1/1/2019-12:39 PM", 
+                account.ID.Value, 
+                accountOwner.ID.Value, 
+                msgs, 
+                dc);
 
-            Assert.NotNull(x);
+            Assert.NotNull(schedule);
         }
 
         [Fact]
@@ -887,18 +891,14 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void AddMessageTest()
         {
-
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
 
-            List<int> iList = new List<int>();
-                iList.Add(registrant.ID.Value);
-                iList.Add(2);
-                iList.Add(3);
+            var registrantIds = new List<int>() { registrant.ID.Value };
 
-            Assert.NotNull(activity.AddMessage("subj", "Hello Class", iList, user.ID.Value, msgs, dc));
+            Assert.NotNull(activity.AddMessage("subj", "Hello Class", registrantIds, accountOwner.ID.Value, msgs, dc));
         }
 
         [Fact]
