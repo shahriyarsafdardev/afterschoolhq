@@ -2057,11 +2057,21 @@ namespace AfterSchoolLibrary
             return now > instances.Last().StartDateTime;
         }
 
+        /// <summary>
+        /// gets the first scheduled date for the activity, also gets the start time
+        /// </summary>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public DateTime? GetFirstDate(DatabaseConnection dc = null)
         {
             return this.GetSchedule(dc: dc).GetInstances(dc: dc).FirstOrDefault()?.StartDateTime;
         }
 
+        /// <summary>
+        /// gets the last scheduled date for the activity, also gets the start time
+        /// </summary>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public DateTime? GetLastDate(DatabaseConnection dc = null)
         {
             return this.GetSchedule(dc: dc).GetInstances(dc: dc).LastOrDefault()?.StartDateTime;

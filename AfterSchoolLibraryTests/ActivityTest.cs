@@ -17,9 +17,12 @@ namespace AfterSchoolLibraryTests
         {
         }
 
-        //loads an Activity from the database, in order to properly create an activity 
-        //it is dependant on having an account ID and a number of seats set, in the
-        //base method the automatic number of seats avaible is 4
+
+        /// <summary>
+        /// loads an Activity from the database, in order to properly create an activity 
+        /// it is dependant on having an account ID and a number of seats set, in the
+        /// base method the automatic number of seats avaible is 4
+        /// </summary>
         [Fact]
         public void LoadTest()
         {
@@ -28,14 +31,18 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             Assert.NotNull(Activity.Load(activity.ID.Value, dc: dc));
         }
-        //Gets the number of Activiites in the DB
+        /// <summary>
+        /// Gets the number of Activiites in the DB
+        /// </summary>
         [Fact]
         public void GetCountTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var startCount = Activity.GetCount(msgs: msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            Assert.Equal(1, Activity.GetCount(null, dc: dc));
+
+            Assert.Equal(startCount + 1, Activity.GetCount(msgs: msgs, dc: dc));
         }
         //Saves the Account in the DB, returns messages that will send errors if this is not recorded 
         // in the DB properly
@@ -45,6 +52,7 @@ namespace AfterSchoolLibraryTests
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+
             Assert.True(activity.Save(dc: dc).HasNoErrors());
         }
         //Removes the Activity from the DB, it should not be able to be loaded from the DB afterwards
@@ -1023,24 +1031,33 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(activity.GetFirstDate(dc));
         }
 
+        /// <summary>
+        /// Tests to make sure that the Activity can properly get the last scheduled date
+        /// </summary>
         [Fact]
         public void GetLastDateTest()
         {
-            var start = new DateTime(1, 1, 1, 1, 1, 1) { };
-            var end = new DateTime(2, 2, 2, 2, 2, 2) { };
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
 
+            var instances = new List<ActivityInstance>();
 
-            var act = new Activity() { StartDateTime = start, EndDateTime = end };
-            act.Save(dc: dc);
-            var actid = act.ID.Value;
+            for (var i = 0; i < 3; i++)
+                instances.Add(Factories.ActivityInstanceFactory.Create(
+                    activity, 
+                    schedule, 
+                    DateTime.UtcNow.AddDays(i),
+                    DateTime.UtcNow.AddDays(i).AddHours(2),
+                    msgs, 
+                    dc));
 
-            var user = new ActivityWebUser() { ActivityId = actid };
-            user.Save(dc: dc);
-            var id = user.ID.Value;
+            // if you don't reload from the database the micro-seconds are not the same on the start date time object
+            // which may need to be figured out later. 
+            // Otherwise it works and gets the actual last date
 
-            var x = new AccountPropertyType() { };
-
-            Assert.NotNull(act.GetLastDate(dc: dc));
+            Assert.Equal(instances.Last().StartDateTime.ToShortDateTimeString(), activity.GetLastDate(dc: dc).ToShortDateTimeString());
         }
 
         [Fact]
