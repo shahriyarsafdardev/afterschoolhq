@@ -13,7 +13,7 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static ActivityGroup Create(Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new ActivityGroup() { AccountId = account.ID };
+            var obj = new ActivityGroup() { Name = "Test Activity Group", AccountId = account.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

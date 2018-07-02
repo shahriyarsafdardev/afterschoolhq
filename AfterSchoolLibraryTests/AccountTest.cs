@@ -20,31 +20,26 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadTest()
         {
-            var a = new Account() { };
-            a.Save(dc: dc);
-            var id = a.ID.Value;
-            Assert.NotNull(Account.Load(id, dc: dc));
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            Assert.NotNull(Account.Load(account.ID.Value, msgs, dc));
         }
 
         [Fact]
         public void LoadLongTest()
         {
-            var a = new Account() { };
-            a.Save(dc: dc);
-            var id = a.ID.Value;
-            var c = new System.Collections.Hashtable();
-            Assert.NotNull(Account.Load(c, 0, c.Count, dc: dc));
+            Assert.InRange(Account.Load(null, 0, 10, msgs, dc).Count, 0, 10);
         }
 
         //Gets the Number of accounts in the DB
         [Fact]
         public void GetCountTest()
         {
-            var a = new Account() { };
-            a.Save(dc: dc);
-            var id = a.ID.Value;
+            var startCount = Account.GetCount(msgs: msgs, dc: dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
-            Assert.Equal(1,Account.GetCount(null, dc: dc));
+            Assert.Equal(startCount + 1, Account.GetCount(msgs: msgs, dc: dc));
         }
 
         //saves the account to the DB
@@ -81,42 +76,44 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ReloadTest()
         {
-            var a = new Account() { };
-            a.Save(dc: dc);
-            Assert.NotNull(a.Reload(dc: dc));
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            Assert.NotNull(account.Reload(msgs, dc));
         }
 
         [Fact]
         public void LoadByOwnerIdTest()
         {
-            var a = new Account() { OwnerId = 12 };
-            a.Save(dc: dc);
-            Assert.NotNull(Account.LoadByOwnerId(12, dc: dc));
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            Assert.NotNull(Account.LoadByOwnerId(accountOwner.ID.Value, msgs, dc));
         }
 
         [Fact]
         public void LoadByUniqueNameTest()
         {
-            var a = new Account() { UniqueName = "test"};
-            a.Save(dc: dc);
-            Assert.NotNull(Account.LoadByUniqueName("test", dc: dc));
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            account.UniqueName = AccountService.GenerateUniqueName(account.Name, account.ID, dc);
+            msgs.AddRange(account.Save(dc));
+            Assert.NotNull(Account.LoadByUniqueName(account.UniqueName, msgs, dc));
         }
-        //loads the first admin account found
+
+        /// <summary>
+        /// should already have one in the database
+        /// </summary>
         [Fact]
         public void LoadByIsAdminTest()
         {
-            var a = new Account() { IsAdminAccount = true };
-            a.Save(dc: dc);
-            Assert.NotNull(Account.LoadByIsAdminAccount(true , dc: dc));
+            Assert.NotNull(Account.LoadByIsAdminAccount(true, msgs, dc));
         }
 
         [Fact]
         public void LoadByUidTest()
         {
-            var u = new Guid() {};
-            var a = new Account() {Uid = u };
-            a.Save(dc: dc);
-            Assert.NotNull(Account.LoadByUid(u , dc: dc));
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            Assert.NotNull(Account.LoadByUid(account.Uid, msgs, dc));
         }
 
         /// <summary>
