@@ -48,6 +48,7 @@ namespace AfterSchoolLibrary
 			this.IsActive = false;
 			this.IsAfterSchool = false;
 			this.AccountTypeId = AccountType.NotSet;
+			
         }
 
         public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap

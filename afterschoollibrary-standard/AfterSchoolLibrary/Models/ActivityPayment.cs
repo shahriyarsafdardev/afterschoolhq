@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// keeps track of payments for an activity from a registrant/student
     /// </summary>
 	
     public class ActivityPayment : BasicObjectWithModified

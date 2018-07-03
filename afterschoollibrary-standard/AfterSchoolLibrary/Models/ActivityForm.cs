@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// The relationship between an Activity and a Form. An activity can have multiple forms assigned, but only one can be active at a time. Would love to deprecate this in the future and store the form id directly on the activity class.
     /// </summary>
 	
     public class ActivityForm : BasicLookUpObject

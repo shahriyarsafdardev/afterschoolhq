@@ -449,6 +449,7 @@ loadmethod: RegistrationPeriodId|ActivityId
 type: Class
 name: ActivityGroup
 inherits: BasicLookUpObject
+description: Either a Session or a League. This object has many Activities or Teams. 
 property: AccountId, int?, Int, required
 property: RegistrationModeId, RegistrationMode, Int
 property: UniqueName, string, NVarChar(100)
@@ -520,6 +521,7 @@ loadmethod: FirstRegistrantId, List<>
 [begin]
 type: Class
 name: ContactList
+description: A list of contacts. A way to group contacts together to send messages to them or invites.
 inherits: BasicLookUpObject
 property: AccountId, int?, Int, required
 loadmethod: AccountId, List<>
@@ -528,6 +530,7 @@ loadmethod: AccountId, List<>
 [begin]
 type: Class
 name: ContactListRegistrant
+description: The relationship between contacts/registrants and a contact list. This is how a contact is added to a contact list
 inherits: BasicObject
 property: ContactListId, int?, Int, required
 property: RegistrantId, int?, Int, required
@@ -544,6 +547,7 @@ joinproperty: Registrant.Uid, Guid, UniqueIdentifier
 [begin]
 type: Class
 name: ActivityPayment
+description: keeps track of payments for an activity from a registrant/student
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: ActivityId, int?, Int, required
@@ -586,6 +590,7 @@ loadmethod: Uid
 [begin]
 type: Class
 name: RegistrantActivity
+description: How a registrant is placed in an activity/team. 
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: ActivityId, int?, Int, required
@@ -646,6 +651,7 @@ loadmethod: ActivityGroupId, List<>
 [begin]
 type: Class
 name: ActivityForm
+description: The relationship between an Activity and a Form. An activity can have multiple forms assigned, but only one can be active at a time. Would love to deprecate this in the future and store the form id directly on the activity class.
 inherits: BasicLookUpObject
 property: FormId, int?, Int, required
 property: ActivityId, int?, Int, required
@@ -693,6 +699,7 @@ loadmethod: Uid|IsPublished
 [begin]
 type: Class
 name: Form
+description: A registration form object. It contains multiple Form Question Groups.
 inherits: BasicLookUpObject
 property: AccountId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier, required
@@ -706,6 +713,7 @@ loadmethod: Uid
 [begin]
 type: Class
 name: FormQuestion
+description: One question that is on a form. A form question belongs to one Form Question Group.
 inherits: BasicObjectWithModified
 property: FormQuestionGroupId, int?, Int, required
 property: FormId, int?, Int, required
@@ -738,6 +746,7 @@ loadmethod: FormQuestionGroupId|QuestionDataTypeId
 [begin]
 type: Class
 name: FormQuestionGroup
+description: Like a section of a form. A FormQuestionGroup contains many FormQuestions
 inherits: BasicLookUpObject
 property: FormId, int?, Int, required
 property: DisplayOrder, int?, Int
@@ -750,6 +759,7 @@ loadmethod: FormId|RegistrantTypeId, List<>
 [begin]
 type: Class
 name: FormQuestionAnswer
+description: Answers to a FormQuestion as submitted by a registrant/student.
 inherits: BasicObjectWithModified
 property: FormQuestionId, int?, Int, required
 property: RegistrantId, int?, Int
@@ -779,6 +789,7 @@ loadmethod: RegistrationId, List<>
 [begin]
 type: Class
 name: Registration
+description: The actual registration for a registrant. A registrant can have multiple registrations.
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: RegistrationPeriodId, int?, Int
@@ -812,6 +823,7 @@ joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
 [begin]
 type: Class
 name: RegistrationActivity
+description: Activities that were selected when a user Registered. Not sure if this class is necessary, but for right now it is used.
 inherits: BasicObject
 property: RegistrationId, int?, Int, required
 property: ActivityId, int?, Int, required
@@ -831,6 +843,7 @@ joinproperty: ActivityGroup.IsArchived, bool, Bit
 [begin]
 type: Class
 name: ActivityWebUser
+description: This is how you add a non-admin user on an account to an Activity/Team. This would be for adding volunteers, coaches, other assistants to a specific activity. A user must have a record in order to view an Activity/Team for an account.
 inherits: BasicObjectWithModified
 property: ActivityId, int?, Int, required
 property: WebUserId, int?, Int, required
@@ -854,6 +867,7 @@ loadmethod: ActivityId|WebUserId
 [begin]
 type: Class
 name: Attendance
+description: This is the record of an activity sponsor/teacher/etc taking attendance for an activity instance or basically an actual class.
 inherits: BasicObjectWithModified
 property: ActivityId, int?, Int, required
 property: ActivityInstanceId, int?, Int
@@ -874,6 +888,7 @@ loadmethod: ActivityInstanceId, List<>
 [begin]
 type: Class
 name: AttendanceRegistrant
+description: This keeps track of the attendance marking for one particular student
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: AttendanceId, int?, Int, required
@@ -901,6 +916,7 @@ loadmethod: AttendanceId|RegistrantId, List<>
 [begin]
 type: Class
 name: Package
+description: This is an actual package that an account/organization can purchase when signing up. There are multiple packages that are able to be purchased at a time. A package containts multiple Features.
 inherits: BasicLookUpObject
 property: Price, decimal?, Money, required
 property: PricePerYear, decimal?, Money, required
@@ -918,6 +934,7 @@ loadmethod: Uid
 [begin]
 type: Class
 name: AccountPackage
+description: This is how an package is assigned to an account. This is the only way an account can actually login and also have features that are accessible.
 serializable: true
 property: PackageId, int?, Int, required
 property: AccountId, int?, Int, required
@@ -945,6 +962,7 @@ loadmethod: Uid
 [begin]
 type: Class
 name: PackageFeature
+description: This is an individual feature for a package. So some packages will have a feature turned on or off or have different amounts that they are allowed to have. For instance an account may only be able to create up to 10 activities/teams.
 serializable: true
 inherits: BasicObjectWithModified
 property: PackageId, int?, Int, required
@@ -957,6 +975,7 @@ loadmethod: PackageId|FeatureTypeId
 [begin]
 type: Class
 name: AccountPackageFeature
+description: This is how a feature is added specifically to one account. This allows us to modify features just for one account and not others.
 serializable: true
 inherits: BasicObjectWithModified
 property: AccountPackageId, int?, Int, required
@@ -969,6 +988,7 @@ loadmethod: AccountPackageId|FeatureTypeId
 [begin]
 type: Class
 name: File
+description: Used to store files to an account. Such as a logo, etc. 
 inherits: BaseFile
 property: Label, string, NVarChar(50)
 property: Description, string, NVarChar(400)
@@ -980,6 +1000,7 @@ loadmethod: AccountId, List<>
 [begin]
 type: Class
 name: ActivityFile
+description: Keeps files with one specific activity. Not currently used.
 inherits: BasicObjectWithModified
 property: ActivityId, int?, Int, required
 property: FileId, int?, Int, required
@@ -998,6 +1019,7 @@ loadmethod: ActivityId|FileId
 [begin]
 type: Class
 name: Session
+description: keeps track of a user session where a user is hitting our system and taking actions, basically data analytics inside of our system. Not sure if we should keep this, but good for keeping some basic updates of what is happening in the system. 
 serializable: true
 inherits: BasicObjectWithModified
 property: IPAddress, string, NVarChar(50)
@@ -1011,6 +1033,7 @@ loadmethod: RegistrantId, List<>
 [begin]
 type: Class
 name: SessionAction
+description: An action taken during a particular user session. Not a logged in session, but a session where a user hits the site and takes action, such as registering, updating a record, etc.
 inherits: BasicObject
 property: SessionId, int?, Int, required
 property: SessionActionTypeId, SessionActionType, Int
@@ -1062,6 +1085,7 @@ loadmethod: RegistrationPeriodId|SessionActionTypeId, List<>
 [begin]
 type: Class
 name: Cart
+description: Way to keep track of a user cart. A cart contains one or more activities.
 serializable: true
 inherits: BasicObjectWithModified
 property: Uid, Guid, UniqueIdentifier
@@ -1072,6 +1096,7 @@ loadmethod: Uid
 [begin]
 type: Class
 name: CartItem
+description: An activity that is kept in a cart for when a user is trying to register for activities.
 serializable: true
 inherits: BasicObjectWithModified
 property: CartId, int?, Int, required
@@ -1086,6 +1111,7 @@ loadmethod: CartId, List<>
 [begin]
 type: Class
 name: PasswordResetToken
+description: Is created when a user wants to reset their password. It expires after a set amount of time.
 serializable: true
 inherits: BasicObjectWithModified
 property: WebUserId, int?, Int, required
@@ -1098,6 +1124,7 @@ loadmethod: Uid
 [begin]
 type: Class
 name: PaymentPlan
+description: Used to create payment options for a particular activity or activity group
 serializable: true
 inherits: BasicObjectWithModified
 property: ActivityId, int?, Int, required
@@ -1110,6 +1137,7 @@ property: IsActive, bool, Bit
 [begin]
 type: Class
 name: SubscriptionPlan
+description: Used to create subscription options for a particular activity or activity group
 serializable: true
 inherits: BasicObjectWithModified
 property: ActivityId, int?, Int, required
@@ -1122,6 +1150,7 @@ property: IsActive, bool, Bit
 [begin]
 type: Class
 name: RegistrantPaymentPlan
+description: Keeps track of which registrants are on which payment plans
 serializable: true
 inherits: BasicObjectWithModified
 property: PaymentPlanId, int?, Int, required
@@ -1132,6 +1161,7 @@ property: StartDate, DateTime?, DateTime, required
 [begin]
 type: Class
 name: RegistrantSubscriptionPlan
+description: Keeps track of which registrants are on which subscription plans
 serializable: true
 inherits: BasicObjectWithModified
 property: SubscriptionPlanId, int?, Int, required
@@ -1142,6 +1172,7 @@ property: StartDate, DateTime?, DateTime, required
 [begin]
 type: Class
 name: Transaction
+description: Used to keep track of where money is coming and going in the system. A system of record for payments.
 serializable: true
 inherits: BasicObjectWithModified
 property: Amount, decimal?, Money, required

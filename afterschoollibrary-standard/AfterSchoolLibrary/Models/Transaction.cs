@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Used to keep track of where money is coming and going in the system. A system of record for payments.
     /// </summary>
 	[Serializable]
     public class Transaction : BasicObjectWithModified

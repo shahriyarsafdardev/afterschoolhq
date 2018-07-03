@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// A list of contacts. A way to group contacts together to send messages to them or invites.
     /// </summary>
 	
     public class ContactList : BasicLookUpObject

@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// This keeps track of the attendance marking for one particular student
     /// </summary>
 	
     public class AttendanceRegistrant : BasicObjectWithModified

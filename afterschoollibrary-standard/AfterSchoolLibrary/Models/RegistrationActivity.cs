@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Activities that were selected when a user Registered. Not sure if this class is necessary, but for right now it is used.
     /// </summary>
 	
     public class RegistrationActivity : BasicObject

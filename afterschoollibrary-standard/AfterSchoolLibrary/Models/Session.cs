@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// keeps track of a user session where a user is hitting our system and taking actions, basically data analytics inside of our system. Not sure if we should keep this, but good for keeping some basic updates of what is happening in the system.
     /// </summary>
 	[Serializable]
     public class Session : BasicObjectWithModified

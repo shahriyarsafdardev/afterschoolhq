@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Like a section of a form. A FormQuestionGroup contains many FormQuestions
     /// </summary>
 	
     public class FormQuestionGroup : BasicLookUpObject

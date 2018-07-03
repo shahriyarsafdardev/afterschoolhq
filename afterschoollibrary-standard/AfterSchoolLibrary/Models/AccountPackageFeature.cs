@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// This is how a feature is added specifically to one account. This allows us to modify features just for one account and not others.
     /// </summary>
 	[Serializable]
     public class AccountPackageFeature : BasicObjectWithModified

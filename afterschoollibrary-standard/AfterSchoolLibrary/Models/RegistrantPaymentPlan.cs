@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Keeps track of which registrants are on which payment plans
     /// </summary>
 	[Serializable]
     public class RegistrantPaymentPlan : BasicObjectWithModified

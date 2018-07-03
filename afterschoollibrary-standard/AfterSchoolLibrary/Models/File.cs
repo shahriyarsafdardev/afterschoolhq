@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Used to store files to an account. Such as a logo, etc.
     /// </summary>
 	
     public class File : BaseFile

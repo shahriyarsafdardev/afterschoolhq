@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Way to keep track of a user cart. A cart contains one or more activities.
     /// </summary>
 	[Serializable]
     public class Cart : BasicObjectWithModified

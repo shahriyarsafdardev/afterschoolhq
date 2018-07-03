@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// How a registrant is placed in an activity/team.
     /// </summary>
 	
     public class RegistrantActivity : BasicObjectWithModified

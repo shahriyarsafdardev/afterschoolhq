@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// One question that is on a form. A form question belongs to one Form Question Group.
     /// </summary>
 	
     public class FormQuestion : BasicObjectWithModified

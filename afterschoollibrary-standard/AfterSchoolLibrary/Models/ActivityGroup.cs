@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Either a Session or a League. This object has many Activities or Teams.
     /// </summary>
 	
     public class ActivityGroup : BasicLookUpObject
