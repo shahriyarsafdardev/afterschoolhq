@@ -463,6 +463,7 @@ property: ActivityGroupTypeId, ActivityGroupType, Int
 property: MinGradeLevelId, int?, Int
 property: MaxGradeLevelId, int?, Int
 property: GenderRestriction, GenderRestrictionType, Int
+property: AdministratorAccountId, int?, Int
 property: ActivityScheduleId, int?, Int
 property: NumberOfMatchesPerTeam, int?, Int
 baseproperty: Name, required
@@ -474,6 +475,7 @@ loadmethod: AccountId|UniqueName
 loadmethod: Uid
 loadmethod: Uid|IsPublished
 loadmethod: Uid|IsPublished|IsInviteOnly
+loadmethod: AdministratorAccountId, List<>
 join: Account.ID, ActivityGroup.AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
 [end]
