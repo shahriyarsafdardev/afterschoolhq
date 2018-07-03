@@ -98,13 +98,14 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
-            ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule();
-            ViewBag.ShowScheduleList = false;
+            //ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule();
+            //ViewBag.ShowScheduleList = false;
+            LoadEditScheduleViewBag(league, null);
 
             return View(league);
         }
 
-        private void LoadEditScheduleViewBag(Activity activity, string scheduleId)
+        private void LoadEditScheduleViewBag(ActivityGroup activityGroup, string scheduleId)
         {
             /*
             ViewBag.Messages = new SystemMessages();
@@ -113,8 +114,9 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditSchedule";
-            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
             */
+
+            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
 
             ActivitySchedule schedule = null;
 
@@ -129,7 +131,7 @@ namespace AfterSchool.Areas.District.Controllers
             }
             if (schedule.IsEmpty())
             {
-                schedule = activity.GetSchedule();
+                schedule = activityGroup.GetSchedule();
             }
             if (schedule.IsEmpty())
             {
@@ -138,6 +140,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             ViewBag.Schedule = schedule;
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+
         }
 
         [HttpPost]
@@ -169,6 +172,8 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
+            LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
+
 
             return View(league);
         }
