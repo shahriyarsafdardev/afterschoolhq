@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// This is an actual package that an account/organization can purchase when signing up. There are multiple packages that are able to be purchased at a time. A package containts multiple Features.
     /// </summary>
 	
     public class Package : BasicLookUpObject

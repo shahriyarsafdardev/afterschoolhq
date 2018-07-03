@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// This is an individual feature for a package. So some packages will have a feature turned on or off or have different amounts that they are allowed to have. For instance an account may only be able to create up to 10 activities/teams.
     /// </summary>
 	[Serializable]
     public class PackageFeature : BasicObjectWithModified

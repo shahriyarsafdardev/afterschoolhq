@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Keeps files with one specific activity. Not currently used.
     /// </summary>
 	
     public class ActivityFile : BasicObjectWithModified

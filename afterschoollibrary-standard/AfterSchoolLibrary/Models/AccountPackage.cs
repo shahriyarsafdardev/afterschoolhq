@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// This is how an package is assigned to an account. This is the only way an account can actually login and also have features that are accessible.
     /// </summary>
 	[Serializable]
     public class AccountPackage : BasicObjectWithModified

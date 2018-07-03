@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// A registration form object. It contains multiple Form Question Groups.
     /// </summary>
 	
     public class Form : BasicLookUpObject

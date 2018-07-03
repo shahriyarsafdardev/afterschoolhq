@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// An action taken during a particular user session. Not a logged in session, but a session where a user hits the site and takes action, such as registering, updating a record, etc.
     /// </summary>
 	
     public class SessionAction : BasicObject

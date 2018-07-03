@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// The actual registration for a registrant. A registrant can have multiple registrations.
     /// </summary>
 	
     public class Registration : BasicObjectWithModified

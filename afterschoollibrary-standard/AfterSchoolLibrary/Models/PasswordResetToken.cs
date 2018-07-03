@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Is created when a user wants to reset their password. It expires after a set amount of time.
     /// </summary>
 	[Serializable]
     public class PasswordResetToken : BasicObjectWithModified

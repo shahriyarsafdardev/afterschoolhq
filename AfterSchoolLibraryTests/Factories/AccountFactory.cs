@@ -17,5 +17,11 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+        public static Account Create(WebUser user, bool isAdmin, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new Account() { OwnerId = user.ID, Name = "Test Account", IsAdminAccount = isAdmin };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
     }
 }

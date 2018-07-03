@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// An activity that is kept in a cart for when a user is trying to register for activities.
     /// </summary>
 	[Serializable]
     public class CartItem : BasicObjectWithModified

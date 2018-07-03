@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Answers to a FormQuestion as submitted by a registrant/student.
     /// </summary>
 	
     public class FormQuestionAnswer : BasicObjectWithModified

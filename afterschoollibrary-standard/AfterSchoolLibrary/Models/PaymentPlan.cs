@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// Used to create payment options for a particular activity or activity group
     /// </summary>
 	[Serializable]
     public class PaymentPlan : BasicObjectWithModified

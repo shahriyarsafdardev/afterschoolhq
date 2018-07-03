@@ -23,10 +23,11 @@ namespace AfterSchoolLibraryTests
 
             _output = output;
 
-            dc = new DatabaseConnection(Database.Credentials.ConnectionString);
+            dc = new DatabaseConnection(Database.TestCredentials.ConnectionString);
             msgs = new SystemMessages();
             dc.Open();
-            Database.AlterTables(dc: dc);
+            Database.CreateTables(dc);
+            Database.AlterTables(dc);
             dc.BeginTransaction();
         }
 

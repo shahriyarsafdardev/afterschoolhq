@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// 
+    /// The relationship between contacts/registrants and a contact list. This is how a contact is added to a contact list
     /// </summary>
 	
     public class ContactListRegistrant : BasicObject
