@@ -40,11 +40,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetCountTest()
         {
-            var a = new Account() { };
-            a.Save(dc: dc);
-            var id = a.ID.Value;
+            var user = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
 
-            Assert.Equal(1,Account.GetCount(null, dc: dc));
+            Assert.Equal(1, Account.GetCount(null, dc: dc));
         }
 
         /// <summary>

@@ -307,7 +307,6 @@ namespace AfterSchoolLibrary
             try
             {
                 msgs.AddRange(AdditionalData(dc));
-
                 //msgs.AddRange(UpdateAccountFeatures(dc: dc));
                 //msgs.AddRange(UpdateLocations(dc: dc));
                 //msgs.AddRange(UpdateQuestionGroups(dc: dc));
