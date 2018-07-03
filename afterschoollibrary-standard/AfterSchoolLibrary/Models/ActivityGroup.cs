@@ -31,6 +31,7 @@ namespace AfterSchoolLibrary
 		public int? MinGradeLevelId { get { return (int?)MDV["MinGradeLevelId"].Value; } set { MDV["MinGradeLevelId"].Value = value; } }
 		public int? MaxGradeLevelId { get { return (int?)MDV["MaxGradeLevelId"].Value; } set { MDV["MaxGradeLevelId"].Value = value; } }
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
+		public int? AdministratorAccountId { get { return (int?)MDV["AdministratorAccountId"].Value; } set { MDV["AdministratorAccountId"].Value = value; } }
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
 		public int? NumberOfMatchesPerTeam { get { return (int?)MDV["NumberOfMatchesPerTeam"].Value; } set { MDV["NumberOfMatchesPerTeam"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
@@ -71,6 +72,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "MinGradeLevelId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxGradeLevelId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AdministratorAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfMatchesPerTeam", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
@@ -207,6 +209,10 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AdministratorAccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ActivityScheduleId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -294,6 +300,14 @@ namespace AfterSchoolLibrary
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
 			dq.Criterias.Add(ObjectMap["IsInviteOnly"], IsInviteOnly);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<ActivityGroup> LoadByAdministratorAccountId(int AdministratorAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AdministratorAccountId"], AdministratorAccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		
