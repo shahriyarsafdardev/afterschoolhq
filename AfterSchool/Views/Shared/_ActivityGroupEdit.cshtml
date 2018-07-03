@@ -49,45 +49,47 @@
         </div>
     </div>
 }
-
-<div class="form-group">
-    <label class="col-sm-3 control-label">Invite Only</label>
-    <div class="col-sm-9">
-        @{
-            Html.RenderPartial(
-                "~/Views/Shared/_SwitchButton.cshtml",
-                Model.IsInviteOnly,
-                new ViewDataDictionary()
-                {
-                    { "checkboxname", "isinviteonly" },
-                    { "checkboxid", "isinviteonly" }
-                }
-            );
-        }
-    </div>
-</div>
-
-@if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
+@if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.SchoolDistrict)
 {
     <div class="form-group">
-        <label class="col-sm-3 control-label">
-            Registration Mode <span class="text-danger">*</span>
-        </label>
+        <label class="col-sm-3 control-label">Invite Only</label>
         <div class="col-sm-9">
-            <div class="am-radio inline">
-                @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
-                {
-                    <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "") />
-                    <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString().SplitByUpperCase()</label>
-                }
-            </div>
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/_SwitchButton.cshtml",
+                    Model.IsInviteOnly,
+                    new ViewDataDictionary()
+                    {
+                    { "checkboxname", "isinviteonly" },
+                    { "checkboxid", "isinviteonly" }
+                    }
+                );
+            }
         </div>
     </div>
-}
-else
-{
-    <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)" />
-}
+
+    if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
+    {
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Registration Mode <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-9">
+                <div class="am-radio inline">
+                    @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
+                    {
+                        <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "") />
+                        <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString().SplitByUpperCase()</label>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)" />
+    }
+ }
 
 @if (Model.ActivityGroupTypeId == ActivityGroupType.League)
 {
@@ -114,16 +116,16 @@ else
         </label>
         <div class="col-md-1">
             @{Html.RenderPartial
-                    (
-                        "~/Views/Shared/_SwitchButton.cshtml",
-                        Model.MinGradeLevelId.HasValue,
-                        new ViewDataDictionary()
-                        {
+                      (
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.MinGradeLevelId.HasValue,
+                          new ViewDataDictionary()
+                          {
                         { "checkboxname", "graderestrictions" },
                         { "checkboxid", "graderestrictions" },
                         { "disabled", false }
-                        }
-                    );
+                          }
+                      );
             }
         </div>
         <div class="col-md-5 hide" id="grade">

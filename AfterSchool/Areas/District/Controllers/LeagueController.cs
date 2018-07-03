@@ -98,8 +98,46 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
+            ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule();
+            ViewBag.ShowScheduleList = false;
 
             return View(league);
+        }
+
+        private void LoadEditScheduleViewBag(Activity activity, string scheduleId)
+        {
+            /*
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.ActivityId = activity.ID.Value.ToString();
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActiveMenu = "EditSchedule";
+            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
+            */
+
+            ActivitySchedule schedule = null;
+
+            // changing schedule
+            if (scheduleId.IsNumber())
+            {
+                schedule = ActivitySchedule.Load(scheduleId.ToInteger());
+                if (schedule.AccountId != SessionVariables.CurrentAccount.ID)
+                {
+                    schedule = null;
+                }
+            }
+            if (schedule.IsEmpty())
+            {
+                schedule = activity.GetSchedule();
+            }
+            if (schedule.IsEmpty())
+            {
+                schedule = ActivitySchedule.GetNewDefaultSchedule();
+            }
+
+            ViewBag.Schedule = schedule;
+            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
         }
 
         [HttpPost]
