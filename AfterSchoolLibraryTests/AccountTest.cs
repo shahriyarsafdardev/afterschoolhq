@@ -28,17 +28,17 @@ namespace AfterSchoolLibraryTests
         [Theory]
         [InlineData(8, 10)]
         [InlineData(15, 10)]
-        public void LoadPagingTest(int numberOfAccountsToCreate, int numberOfAccountsPerPage)
+        public void LoadPagingTest(int numberToCreate, int numberPerPage)
         {
-            for( var i = 0; i < numberOfAccountsToCreate; i++)
+            for( var i = 0; i < numberToCreate; i++)
             {
                 var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
                 var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             }
 
             Assert.Equal(
-                Math.Min(numberOfAccountsPerPage, numberOfAccountsToCreate), 
-                Account.Load(null, 0, numberOfAccountsPerPage, msgs, dc).Count
+                Math.Min(numberPerPage, numberToCreate), 
+                Account.Load(null, 0, numberPerPage, msgs, dc).Count
             );
         }
 
@@ -46,15 +46,15 @@ namespace AfterSchoolLibraryTests
         [Theory]
         [InlineData(8)]
         [InlineData(2)]
-        public void GetCountTest(int numberOfAccountsToCreate)
+        public void GetCountTest(int numberToCreate)
         {
-            for (var i = 0; i < numberOfAccountsToCreate; i++)
+            for (var i = 0; i < numberToCreate; i++)
             {
                 var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
                 var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             }
 
-            Assert.Equal(numberOfAccountsToCreate, Account.GetCount(msgs: msgs, dc: dc));
+            Assert.Equal(numberToCreate, Account.GetCount(msgs: msgs, dc: dc));
         }
 
         /// <summary>

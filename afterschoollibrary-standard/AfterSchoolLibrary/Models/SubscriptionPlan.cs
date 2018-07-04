@@ -18,7 +18,9 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
-		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
+		public ParticipationSourceType ParticipationSourceTypeId { get { return (ParticipationSourceType)MDV["ParticipationSourceTypeId"].Value; } set { MDV["ParticipationSourceTypeId"].Value = value; } }
+		public int? ParticipationSourceId { get { return (int?)MDV["ParticipationSourceId"].Value; } set { MDV["ParticipationSourceId"].Value = value; } }
+		public int? PlanOwnerAccountId { get { return (int?)MDV["PlanOwnerAccountId"].Value; } set { MDV["PlanOwnerAccountId"].Value = value; } }
 		public decimal? CostPerPeriod { get { return (decimal?)MDV["CostPerPeriod"].Value; } set { MDV["CostPerPeriod"].Value = value; } }
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		public bool DoesAutoRenew { get { return (bool)MDV["DoesAutoRenew"].Value; } set { MDV["DoesAutoRenew"].Value = value; } }
@@ -29,6 +31,7 @@ namespace AfterSchoolLibrary
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(SubscriptionPlan).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.ParticipationSourceTypeId = ParticipationSourceType.NotSet;
 			this.BillingPeriodTypeId = BillingPeriodType.NotSet;
 			this.DoesAutoRenew = false;
 			this.IsActive = false;
@@ -42,7 +45,9 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(SubscriptionPlan).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationSourceTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationSourceId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PlanOwnerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "CostPerPeriod", System.Data.SqlDbType.Money);
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DoesAutoRenew", System.Data.SqlDbType.Bit);
@@ -98,8 +103,12 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
-			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required on SubscriptionPlan object", MessageType.Error);
+			if (this.ParticipationSourceTypeId.IsEmpty())
+				msgs.Add("ParticipationSourceTypeId is required on SubscriptionPlan object", MessageType.Error);
+			if (this.ParticipationSourceId.IsEmpty())
+				msgs.Add("ParticipationSourceId is required on SubscriptionPlan object", MessageType.Error);
+			if (this.PlanOwnerAccountId.IsEmpty())
+				msgs.Add("PlanOwnerAccountId is required on SubscriptionPlan object", MessageType.Error);
 			if (this.CostPerPeriod.IsEmpty())
 				msgs.Add("CostPerPeriod is required on SubscriptionPlan object", MessageType.Error);
 			
@@ -125,7 +134,15 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ActivityId"]);
+			dps.Add(ObjectMap["ParticipationSourceTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ParticipationSourceId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PlanOwnerAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -154,6 +171,23 @@ namespace AfterSchoolLibrary
 			return SubscriptionPlan.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
+		public static List<SubscriptionPlan> LoadByParticipationSource(int ParticipationSourceId, ParticipationSourceType ParticipationSourceTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ParticipationSourceId"], ParticipationSourceId);
+			dq.Criterias.Add(ObjectMap["ParticipationSourceTypeId"], ParticipationSourceTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<SubscriptionPlan> LoadByPlanOwnerAccountId(int PlanOwnerAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["PlanOwnerAccountId"], PlanOwnerAccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
