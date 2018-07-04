@@ -372,9 +372,9 @@ namespace AfterSchoolLibraryTests
             var gradeLevel = Factories.GradeLevelFactory.Create(msgs, dc: dc);
             gradeLevel.ID = 12;
             gradeLevel.Save(dc: dc);
-
+            
             var activityGrade = Factories.ActivityGradeLevelFactory.Create(activity, gradeLevel, msgs, dc: dc);
-
+      
             Assert.Single(activity.GetGradeLevels(dc: dc));
         }
         //Returns a list of all WebUSers signed up for the same activityID
@@ -964,7 +964,9 @@ namespace AfterSchoolLibraryTests
 
             Assert.Equal(2,activity.GetAllowedGenders().Count);
         }
-
+        /// <summary>
+        /// Tests that an Activity is currently in session
+        /// </summary>
         [Fact]
         public void IsInSessionTest()
         {
@@ -978,13 +980,15 @@ namespace AfterSchoolLibraryTests
 
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
             activityInstance.StartDateTime = new DateTime(1, 1, 1);
-            activityInstance.StartDateTime = new DateTime(2020, 1, 1);
+            activityInstance.EndDateTime = new DateTime(2020, 1, 1);
             activityInstance.ActivityScheduleId = schedule.ID.Value;
             activityInstance.Save(dc);
 
-            Assert.True(activity.IsInSession());
+            Assert.True(activity.IsInSession(dc: dc));
         }
-
+        /// <summary>
+        ///  Tests that an activity will be in session
+        /// </summary>
         [Fact]
         public void WillBeInSessionTest()
         {
@@ -994,7 +998,7 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
 
-            var start = new DateTime(2018, 10, 10, 10, 10, 10) { };
+            var start = new DateTime(2118, 10, 10, 10, 10, 10) { };
             schedule.StartDate = start;
             msgs.AddRange(schedule.Save(dc));
 
@@ -1002,9 +1006,11 @@ namespace AfterSchoolLibraryTests
             activityInstance.StartDateTime = start;
             msgs.AddRange(activityInstance.Save(dc));
 
-            Assert.True(activity.WillBeInSession());
+            Assert.True(activity.WillBeInSession(dc));
         }
-
+        /// <summary>
+        /// Tests that an activity is no longer session
+        /// </summary>
         [Fact]
         public void IsOutOfSessionTest()
         {
@@ -1015,7 +1021,7 @@ namespace AfterSchoolLibraryTests
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
             
 
-            Assert.True(activity.IsOutOfSession(dc) && 1 == 0);
+            Assert.True(activity.IsOutOfSession(dc));
         }
 
         [Fact]
