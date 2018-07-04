@@ -13,25 +13,25 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static PaymentPlan Create(Account planOwnerAccount, Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new PaymentPlan() { ParticipationSourceId = activity.ID, ParticipationSourceTypeId = ParticipationSourceType.Activity, TotalPeriods = 5, CostPerPeriod = 30, PlanOwnerAccountId = planOwnerAccount.ID };
+            var obj = new PaymentPlan() { ParticipationObjectId = activity.ID, ParticipationObjectTypeId = ParticipationObjectType.Activity, TotalPeriods = 5, CostPerPeriod = 30, PlanOwnerAccountId = planOwnerAccount.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static PaymentPlan Create(Account planOwnerAccount, Activity activity, int totalPeriods, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new PaymentPlan() { ParticipationSourceId = activity.ID, ParticipationSourceTypeId = ParticipationSourceType.Activity, TotalPeriods = totalPeriods, CostPerPeriod = costPerPeriod, PlanOwnerAccountId = planOwnerAccount.ID };
+            var obj = new PaymentPlan() { ParticipationObjectId = activity.ID, ParticipationObjectTypeId = ParticipationObjectType.Activity, TotalPeriods = totalPeriods, CostPerPeriod = costPerPeriod, PlanOwnerAccountId = planOwnerAccount.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static PaymentPlan Create(Account planOwnerAccount, ActivityGroup activityGroup, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new PaymentPlan() { ParticipationSourceId = activityGroup.ID, ParticipationSourceTypeId = ParticipationSourceType.ActivityGroup, TotalPeriods = 5, CostPerPeriod = 30, PlanOwnerAccountId = planOwnerAccount.ID };
+            var obj = new PaymentPlan() { ParticipationObjectId = activityGroup.ID, ParticipationObjectTypeId = ParticipationObjectType.ActivityGroup, TotalPeriods = 5, CostPerPeriod = 30, PlanOwnerAccountId = planOwnerAccount.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static PaymentPlan Create(Account planOwnerAccount, ActivityGroup activityGroup, int totalPeriods, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new PaymentPlan() { ParticipationSourceId = activityGroup.ID, ParticipationSourceTypeId = ParticipationSourceType.ActivityGroup, TotalPeriods = totalPeriods, CostPerPeriod = costPerPeriod, PlanOwnerAccountId = planOwnerAccount.ID };
+            var obj = new PaymentPlan() { ParticipationObjectId = activityGroup.ID, ParticipationObjectTypeId = ParticipationObjectType.ActivityGroup, TotalPeriods = totalPeriods, CostPerPeriod = costPerPeriod, PlanOwnerAccountId = planOwnerAccount.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

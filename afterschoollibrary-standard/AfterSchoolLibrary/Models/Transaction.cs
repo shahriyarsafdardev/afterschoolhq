@@ -38,8 +38,8 @@ namespace AfterSchoolLibrary
 		/// Required
 		/// </summary>
 		public TransactionType TransactionTypeId { get { return (TransactionType)MDV["TransactionTypeId"].Value; } set { MDV["TransactionTypeId"].Value = value; } }
-		public ParticipationSourceType ParticipationSourceTypeId { get { return (ParticipationSourceType)MDV["ParticipationSourceTypeId"].Value; } set { MDV["ParticipationSourceTypeId"].Value = value; } }
-		public int? ParticipationSourceId { get { return (int?)MDV["ParticipationSourceId"].Value; } set { MDV["ParticipationSourceId"].Value = value; } }
+		public ParticipationObjectType ParticipationObjectTypeId { get { return (ParticipationObjectType)MDV["ParticipationObjectTypeId"].Value; } set { MDV["ParticipationObjectTypeId"].Value = value; } }
+		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		public BillSourceType BillSourceTypeId { get { return (BillSourceType)MDV["BillSourceTypeId"].Value; } set { MDV["BillSourceTypeId"].Value = value; } }
 		public int? BillSourceId { get { return (int?)MDV["BillSourceId"].Value; } set { MDV["BillSourceId"].Value = value; } }
 		/// <summary>
@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.PaymentTypeId = PaymentType.NotSet;
 			this.TransactionTypeId = TransactionType.NotSet;
-			this.ParticipationSourceTypeId = ParticipationSourceType.NotSet;
+			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
 			this.BillSourceTypeId = BillSourceType.NotSet;
 			this.Uid = Guid.NewGuid();
 			
@@ -73,8 +73,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "PayerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParticipationSourceTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParticipationSourceId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "BillSourceTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "BillSourceId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar, 400);
@@ -185,11 +185,11 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ParticipationSourceTypeId"]);
+			dps.Add(ObjectMap["ParticipationObjectTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ParticipationSourceId"]);
+			dps.Add(ObjectMap["ParticipationObjectId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -218,12 +218,12 @@ namespace AfterSchoolLibrary
 			return Transaction.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<Transaction> LoadByParticipationSource(int ParticipationSourceId, ParticipationSourceType ParticipationSourceTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Transaction> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ParticipationSourceId"], ParticipationSourceId);
-			dq.Criterias.Add(ObjectMap["ParticipationSourceTypeId"], ParticipationSourceTypeId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -260,11 +260,11 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         public static decimal GetTotalAmountReceivedByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

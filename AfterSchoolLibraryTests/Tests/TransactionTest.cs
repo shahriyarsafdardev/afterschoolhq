@@ -129,12 +129,12 @@ namespace AfterSchoolLibraryTests
         }
 
         [Fact]
-        public void LoadByParticipationSourceTest()
+        public void LoadByParticipationObjectTest()
         {
             var activity = Factories.ActivityFactory.Create(BillerAccount, msgs, dc);
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, activity.ID.Value, ParticipationSourceType.Activity, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
 
-            Assert.Single(Transaction.LoadByParticipationSource(activity.ID.Value, ParticipationSourceType.Activity, msgs, dc));
+            Assert.Single(Transaction.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc));
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace AfterSchoolLibraryTests
                 PaymentType.ACH, 
                 TransactionType.Credit, 
                 activity.ID.Value, 
-                ParticipationSourceType.Activity,
+                ParticipationObjectType.Activity,
                 registrantPlan.ID.Value,
                 BillSourceType.RegistrantSubscriptionPlan,
                 msgs, 

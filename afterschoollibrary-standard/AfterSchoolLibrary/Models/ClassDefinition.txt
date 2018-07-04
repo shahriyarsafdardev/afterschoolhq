@@ -153,12 +153,14 @@ loadmethod: AccountId|ParentTagId, List<>
 type: Class
 name: ObjectTag
 inherits: BasicObject
-property: ActivityId, int?, Int
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 property: TagId, int?, Int
 join: Tag.ID, TagId, InnerJoin
 joinproperty: Tag.Name, string, NVarChar
-loadmethod: ActivityId, List<>
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: TagId, List<>
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|TagId, LoadByParticipationObjectByTagId
 [end]
 
 [begin]
@@ -1129,14 +1131,14 @@ name: PaymentPlan
 description: Used to create payment options for a particular activity or activity group
 serializable: true
 inherits: BasicObjectWithModified
-property: ParticipationSourceTypeId, ParticipationSourceType, Int, required
-property: ParticipationSourceId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 property: PlanOwnerAccountId, int?, Int, required
 property: TotalPeriods, int?, Int, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: CostPerPeriod, decimal?, Money, required
 property: IsActive, bool, Bit
-loadmethod: ParticipationSourceId|ParticipationSourceTypeId, List<>, LoadByParticipationSource
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
 
@@ -1146,14 +1148,14 @@ name: SubscriptionPlan
 description: Used to create subscription options for a particular activity or activity group
 serializable: true
 inherits: BasicObjectWithModified
-property: ParticipationSourceTypeId, ParticipationSourceType, Int, required
-property: ParticipationSourceId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 property: PlanOwnerAccountId, int?, Int, required
 property: CostPerPeriod, decimal?, Money, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: DoesAutoRenew, bool, Bit
 property: IsActive, bool, Bit
-loadmethod: ParticipationSourceId|ParticipationSourceTypeId, List<>, LoadByParticipationSource
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
 
@@ -1196,13 +1198,13 @@ property: BillerAccountId, int?, Int, required
 property: PayerAccountId, int?, Int, required
 property: PaymentTypeId, PaymentType, Int, required
 property: TransactionTypeId, TransactionType, Int, required
-property: ParticipationSourceTypeId, ParticipationSourceType, Int
-property: ParticipationSourceId, int?, Int
+property: ParticipationObjectTypeId, ParticipationObjectType, Int
+property: ParticipationObjectId, int?, Int
 property: BillSourceTypeId, BillSourceType, Int
 property: BillSourceId, int?, Int
 property: Description, string, NVarChar(400), required
 property: Uid, Guid, UniqueIdentifier
-loadmethod: ParticipationSourceId|ParticipationSourceTypeId, List<>, LoadByParticipationSource
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: BillSourceId|BillSourceTypeId, List<>, LoadByBillSource
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
@@ -1230,12 +1232,12 @@ name: ProductOffering
 description: Used to associate an account product to a activity. A product offered to buy via a participation object (activity, activity group)
 serializable: true
 inherits: BasicObjectWithModified
-property: ParticipationSourceTypeId, ParticipationSourceType, Int, required
-property: ParticipationSourceId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 property: ProductId, int?, Int, required
-loadmethod: ParticipationSourceId|ParticipationSourceTypeId, List<>, LoadByParticipationSource
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: ProductId, List<>
-loadmethod: ParticipationSourceId|ParticipationSourceTypeId|ProductId, LoadByParticipationSourceByProductId
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|ProductId, LoadByParticipationObjectByProductId
 [end]
 
 [begin]
@@ -1246,14 +1248,14 @@ serializable: true
 inherits: BasicObjectWithModified
 property: ProductId, int?, Int, required
 property: RegistrantId, int?, Int, required
-property: ParticipationSourceTypeId, ParticipationSourceType, Int
-property: ParticipationSourceId, int?, Int
+property: ParticipationObjectTypeId, ParticipationObjectType, Int
+property: ParticipationObjectId, int?, Int
 property: AmountPaid, decimal?, Money, required
 property: Uid, Guid, UniqueIdentifier
 loadmethod: RegistrantId, List<>
 loadmethod: ProductId, List<>
-loadmethod: ParticipationSourceId|ParticipationSourceTypeId, List<>, LoadByParticipationSource
-loadmethod: RegistrantId|ParticipationSourceId|ParticipationSourceTypeId, List<>, LoadByRegistrantByParticipationSource
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: RegistrantId|ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByRegistrantByParticipationObject
 [end]
 
 [begin]
@@ -1408,7 +1410,7 @@ values: NotSet, Credit, Debit
 
 [begin]
 type: Enum
-name: ParticipationSourceType
+name: ParticipationObjectType
 values: NotSet, Activity, ActivityGroup
 [end]
 

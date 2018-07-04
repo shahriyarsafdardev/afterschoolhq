@@ -41,7 +41,7 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
-        public static Transaction Create(Account billerAccount, Account payerAccount, PaymentType paymentType, TransactionType transactionType, int participationSourceId, ParticipationSourceType participationSourceType, SystemMessages msgs, DatabaseConnection dc)
+        public static Transaction Create(Account billerAccount, Account payerAccount, PaymentType paymentType, TransactionType transactionType, int ParticipationObjectId, ParticipationObjectType ParticipationObjectType, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Transaction()
             {
@@ -51,14 +51,14 @@ namespace AfterSchoolLibraryTests.Factories
                 PaymentTypeId = paymentType,
                 TransactionTypeId = transactionType,
                 Description = "User purchase",
-                ParticipationSourceId = participationSourceId,
-                ParticipationSourceTypeId = participationSourceType
+                ParticipationObjectId = ParticipationObjectId,
+                ParticipationObjectTypeId = ParticipationObjectType
             };
             msgs.AddRange(obj.Save(dc));
             return obj;
         }
 
-        public static Transaction Create(Account billerAccount, Account payerAccount, PaymentType paymentType, TransactionType transactionType, int participationSourceId, ParticipationSourceType participationSourceType, int billSourceId, BillSourceType billSourceType, SystemMessages msgs, DatabaseConnection dc)
+        public static Transaction Create(Account billerAccount, Account payerAccount, PaymentType paymentType, TransactionType transactionType, int ParticipationObjectId, ParticipationObjectType ParticipationObjectType, int billSourceId, BillSourceType billSourceType, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Transaction()
             {
@@ -68,8 +68,8 @@ namespace AfterSchoolLibraryTests.Factories
                 PaymentTypeId = paymentType,
                 TransactionTypeId = transactionType,
                 Description = "User purchase",
-                ParticipationSourceId = participationSourceId,
-                ParticipationSourceTypeId = participationSourceType,
+                ParticipationObjectId = ParticipationObjectId,
+                ParticipationObjectTypeId = ParticipationObjectType,
                 BillSourceId = billSourceId,
                 BillSourceTypeId = billSourceType
             };

@@ -123,9 +123,9 @@ namespace AfterSchoolLibraryTests
         }
 
         [Theory]
-        [InlineData(ParticipationSourceType.Activity)]
-        [InlineData(ParticipationSourceType.ActivityGroup)]
-        public void LoadByParticipationSourceTest(ParticipationSourceType participationSourceType)
+        [InlineData(ParticipationObjectType.Activity)]
+        [InlineData(ParticipationObjectType.ActivityGroup)]
+        public void LoadByParticipationObjectTest(ParticipationObjectType ParticipationObjectType)
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
@@ -134,11 +134,11 @@ namespace AfterSchoolLibraryTests
             var plan1 = Factories.PaymentPlanFactory.Create(account, activity, msgs, dc);
             var plan2 = Factories.PaymentPlanFactory.Create(account, activityGroup, msgs, dc);
 
-            var participationSourceId = activity.ID;
-            if (participationSourceType == ParticipationSourceType.ActivityGroup)
-                participationSourceId = activityGroup.ID;
+            var ParticipationObjectId = activity.ID;
+            if (ParticipationObjectType == ParticipationObjectType.ActivityGroup)
+                ParticipationObjectId = activityGroup.ID;
 
-            Assert.Single(PaymentPlan.LoadByParticipationSource(participationSourceId.Value, participationSourceType, msgs, dc));
+            Assert.Single(PaymentPlan.LoadByParticipationObject(ParticipationObjectId.Value, ParticipationObjectType, msgs, dc));
         }
 
         [Theory]

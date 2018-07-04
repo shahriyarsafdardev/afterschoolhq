@@ -18,7 +18,14 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
-		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
+		public ParticipationObjectType ParticipationObjectTypeId { get { return (ParticipationObjectType)MDV["ParticipationObjectTypeId"].Value; } set { MDV["ParticipationObjectTypeId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
+		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		public int? TagId { get { return (int?)MDV["TagId"].Value; } set { MDV["TagId"].Value = value; } }
 		public string TagName { get { return (string)MDV["TagName"].Value; } }
 		
@@ -27,6 +34,7 @@ namespace AfterSchoolLibrary
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(ObjectTag).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
 			
         }
 
@@ -37,7 +45,8 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(ObjectTag).Name;
                 _dp = BasicObject.get_BaseObjectMap(className);
-				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TagId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TagName", typeof(Tag).Name, "Name", System.Data.SqlDbType.NVarChar, "Tag");
 				
@@ -92,6 +101,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
+			if (this.ParticipationObjectTypeId.IsEmpty())
+				msgs.Add("ParticipationObjectTypeId is required on ObjectTag object", MessageType.Error);
+			if (this.ParticipationObjectId.IsEmpty())
+				msgs.Add("ParticipationObjectId is required on ObjectTag object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ObjectTag).Name));
@@ -115,7 +128,11 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ActivityId"]);
+			dps.Add(ObjectMap["ParticipationObjectTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ParticipationObjectId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -132,11 +149,12 @@ namespace AfterSchoolLibrary
 			return ObjectTag.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<ObjectTag> LoadByActivityId(int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ObjectTag> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -146,6 +164,16 @@ namespace AfterSchoolLibrary
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["TagId"], TagId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static ObjectTag LoadByParticipationObjectIdByParticipationObjectTypeIdByTagId(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, int TagId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
+			dq.Criterias.Add(ObjectMap["TagId"], TagId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

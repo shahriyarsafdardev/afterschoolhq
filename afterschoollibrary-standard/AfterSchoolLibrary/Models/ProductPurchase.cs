@@ -26,8 +26,8 @@ namespace AfterSchoolLibrary
 		/// Required
 		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
-		public ParticipationSourceType ParticipationSourceTypeId { get { return (ParticipationSourceType)MDV["ParticipationSourceTypeId"].Value; } set { MDV["ParticipationSourceTypeId"].Value = value; } }
-		public int? ParticipationSourceId { get { return (int?)MDV["ParticipationSourceId"].Value; } set { MDV["ParticipationSourceId"].Value = value; } }
+		public ParticipationObjectType ParticipationObjectTypeId { get { return (ParticipationObjectType)MDV["ParticipationObjectTypeId"].Value; } set { MDV["ParticipationObjectTypeId"].Value = value; } }
+		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		/// <summary>
 		/// Required
 		/// </summary>
@@ -39,7 +39,7 @@ namespace AfterSchoolLibrary
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(ProductPurchase).Name, "ID");
             this.LoadObjectValues(ObjectMap);
-			this.ParticipationSourceTypeId = ParticipationSourceType.NotSet;
+			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
 			this.Uid = Guid.NewGuid();
 			
         }
@@ -53,8 +53,8 @@ namespace AfterSchoolLibrary
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "ProductId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParticipationSourceTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParticipationSourceId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				
@@ -145,11 +145,11 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ParticipationSourceTypeId"]);
+			dps.Add(ObjectMap["ParticipationObjectTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ParticipationSourceId"]);
+			dps.Add(ObjectMap["ParticipationObjectId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -186,22 +186,22 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ProductPurchase> LoadByParticipationSource(int ParticipationSourceId, ParticipationSourceType ParticipationSourceTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ProductPurchase> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ParticipationSourceId"], ParticipationSourceId);
-			dq.Criterias.Add(ObjectMap["ParticipationSourceTypeId"], ParticipationSourceTypeId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<ProductPurchase> LoadByRegistrantByParticipationSource(int RegistrantId, int ParticipationSourceId, ParticipationSourceType ParticipationSourceTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<ProductPurchase> LoadByRegistrantByParticipationObject(int RegistrantId, int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			dq.Criterias.Add(ObjectMap["ParticipationSourceId"], ParticipationSourceId);
-			dq.Criterias.Add(ObjectMap["ParticipationSourceTypeId"], ParticipationSourceTypeId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
