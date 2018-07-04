@@ -11,16 +11,19 @@ namespace AfterSchoolLibraryTests
 {
     public class ProductTest : BaseTest
     {
+        private WebUser AccountOwner { get; set; }
+        private Account ProductAccount { get; set; }
+
         public ProductTest(ITestOutputHelper output) : base(output)
         {
+            AccountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            ProductAccount = Factories.AccountFactory.Create(AccountOwner, msgs, dc);
         }
 
         [Fact]
         public void LoadTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var product = Factories.ProductFactory.Create(account, msgs, dc);
+            var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
 
             Assert.True(Product.Load(product.ID.Value, msgs, dc).IsNotEmpty());
         }
@@ -32,9 +35,7 @@ namespace AfterSchoolLibraryTests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-                var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-                var product = Factories.ProductFactory.Create(account, msgs, dc);
+                var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
             }
 
             Assert.Equal(
@@ -44,9 +45,9 @@ namespace AfterSchoolLibraryTests
         }
 
         /// <summary>
-        /// Gets number of payment plans in the database
+        /// Gets number of products in the database
         /// </summary>
-        /// <param name="numberOfProductsToCreate"></param>
+        /// <param name="numberToCreate"></param>
         [Theory]
         [InlineData(8)]
         [InlineData(2)]
@@ -54,9 +55,7 @@ namespace AfterSchoolLibraryTests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-                var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-                var product = Factories.ProductFactory.Create(account, msgs, dc);
+                var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
             }
 
             Assert.Equal(numberToCreate, Product.GetCount(msgs: msgs, dc: dc));
@@ -68,9 +67,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void SaveTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var product = Factories.ProductFactory.Create(account, msgs, dc);
+            var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
 
             product.LastModifiedBy = 1;
             msgs.AddRange(product.Save(dc));
@@ -84,9 +81,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DeleteTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var product = Factories.ProductFactory.Create(account, msgs, dc);
+            var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
 
             msgs.AddRange(product.Delete(dc));
 
@@ -99,9 +94,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ReloadTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var product = Factories.ProductFactory.Create(account, msgs, dc);
+            var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
 
             Assert.Equal(product.ID, product.Reload(msgs, dc).ID);
         }
@@ -109,19 +102,15 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByAccountIdTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var product = Factories.ProductFactory.Create(account, msgs, dc);
+            var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
 
-            Assert.Single(Product.LoadByAccountId(account.ID.Value, msgs, dc));
+            Assert.Single(Product.LoadByAccountId(ProductAccount.ID.Value, msgs, dc));
         }
 
         [Fact]
         public void LoadByUidTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var product = Factories.ProductFactory.Create(account, msgs, dc);
+            var product = Factories.ProductFactory.Create(ProductAccount, msgs, dc);
 
             Assert.NotNull(Product.LoadByUid(product.Uid, msgs, dc));
         }

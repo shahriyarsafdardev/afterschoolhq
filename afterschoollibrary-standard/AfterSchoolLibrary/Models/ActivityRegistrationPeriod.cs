@@ -18,7 +18,13 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? RegistrationPeriodId { get { return (int?)MDV["RegistrationPeriodId"].Value; } set { MDV["RegistrationPeriodId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		public string RegistrationPeriodName { get { return (string)MDV["RegistrationPeriodName"].Value; } }

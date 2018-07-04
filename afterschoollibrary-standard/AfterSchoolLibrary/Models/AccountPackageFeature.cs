@@ -18,6 +18,9 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? AccountPackageId { get { return (int?)MDV["AccountPackageId"].Value; } set { MDV["AccountPackageId"].Value = value; } }
 		public FeatureType FeatureTypeId { get { return (FeatureType)MDV["FeatureTypeId"].Value; } set { MDV["FeatureTypeId"].Value = value; } }
 		public int? Max { get { return (int?)MDV["Max"].Value; } set { MDV["Max"].Value = value; } }

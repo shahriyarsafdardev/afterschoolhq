@@ -18,6 +18,9 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public int? ActivityRecurrenceId { get { return (int?)MDV["ActivityRecurrenceId"].Value; } set { MDV["ActivityRecurrenceId"].Value = value; } }
 		public DayOfWeekASL Day { get { return (DayOfWeekASL)MDV["Day"].Value; } set { MDV["Day"].Value = value; } }

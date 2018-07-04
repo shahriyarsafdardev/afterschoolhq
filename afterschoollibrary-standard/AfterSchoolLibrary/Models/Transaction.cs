@@ -18,15 +18,33 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? BillerAccountId { get { return (int?)MDV["BillerAccountId"].Value; } set { MDV["BillerAccountId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? PayerAccountId { get { return (int?)MDV["PayerAccountId"].Value; } set { MDV["PayerAccountId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public TransactionType TransactionTypeId { get { return (TransactionType)MDV["TransactionTypeId"].Value; } set { MDV["TransactionTypeId"].Value = value; } }
 		public ParticipationSourceType ParticipationSourceTypeId { get { return (ParticipationSourceType)MDV["ParticipationSourceTypeId"].Value; } set { MDV["ParticipationSourceTypeId"].Value = value; } }
 		public int? ParticipationSourceId { get { return (int?)MDV["ParticipationSourceId"].Value; } set { MDV["ParticipationSourceId"].Value = value; } }
 		public BillSourceType BillSourceTypeId { get { return (BillSourceType)MDV["BillSourceTypeId"].Value; } set { MDV["BillSourceTypeId"].Value = value; } }
 		public int? BillSourceId { get { return (int?)MDV["BillSourceId"].Value; } set { MDV["BillSourceId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		
@@ -209,7 +227,7 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static List<Transaction> LoadByBillSourceIdByBillSourceTypeId(int BillSourceId, BillSourceType BillSourceTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Transaction> LoadByBillSource(int BillSourceId, BillSourceType BillSourceTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -242,11 +260,20 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
+
+        public static decimal GetTotalAmountReceivedByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByBillerAccountId(accountId, msgs, dc).Sum(transaction => transaction.Amount.Value);
+        }
+        public static decimal GetTotalAmountPaidByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByPayerAccountId(accountId, msgs, dc).Sum(transaction => transaction.Amount.Value);
+        }
 
         #endregion
     }

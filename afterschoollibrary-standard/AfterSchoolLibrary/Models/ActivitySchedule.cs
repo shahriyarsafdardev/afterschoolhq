@@ -19,13 +19,28 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		public string Name { get { return (string)MDV["Name"].Value; } set { MDV["Name"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public string ScheduleDetails { get { return (string)MDV["ScheduleDetails"].Value; } set { MDV["ScheduleDetails"].Value = value; } }
 		public bool RepeatsWeekly { get { return (bool)MDV["RepeatsWeekly"].Value; } set { MDV["RepeatsWeekly"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public DateTime? EndDate { get { return (DateTime?)MDV["EndDate"].Value; } set { MDV["EndDate"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public DateTime? DailyStartTime { get { return (DateTime?)MDV["DailyStartTime"].Value; } set { MDV["DailyStartTime"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public DateTime? DailyEndTime { get { return (DateTime?)MDV["DailyEndTime"].Value; } set { MDV["DailyEndTime"].Value = value; } }
 		
 

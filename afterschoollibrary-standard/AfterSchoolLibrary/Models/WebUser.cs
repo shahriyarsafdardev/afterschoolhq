@@ -19,6 +19,9 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		public string FacebookId { get { return (string)MDV["FacebookId"].Value; } set { MDV["FacebookId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		public DateTime? LastActivity { get { return (DateTime?)MDV["LastActivity"].Value; } set { MDV["LastActivity"].Value = value; } }

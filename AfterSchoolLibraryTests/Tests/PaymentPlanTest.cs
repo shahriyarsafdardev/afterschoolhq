@@ -11,8 +11,17 @@ namespace AfterSchoolLibraryTests
 {
     public class PaymentPlanTest : BaseTest
     {
+        private WebUser AccountOwner { get; set; }
+        private Account PlanOwnerAccount { get; set; }
+        private Activity Activity { get; set; }
+        private ActivityGroup ActivityGroup { get; set; }
+
         public PaymentPlanTest(ITestOutputHelper output) : base(output)
         {
+            AccountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            PlanOwnerAccount = Factories.AccountFactory.Create(AccountOwner, msgs, dc);
+            Activity = Factories.ActivityFactory.Create(PlanOwnerAccount, msgs, dc);
+            ActivityGroup = Factories.ActivityGroupFactory.Create(PlanOwnerAccount, msgs, dc);
         }
 
         [Fact]

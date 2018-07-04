@@ -18,7 +18,13 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? HostAccountId { get { return (int?)MDV["HostAccountId"].Value; } set { MDV["HostAccountId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? VisitorAccountId { get { return (int?)MDV["VisitorAccountId"].Value; } set { MDV["VisitorAccountId"].Value = value; } }
 		public HostPermissionType HostPermissionTypeId { get { return (HostPermissionType)MDV["HostPermissionTypeId"].Value; } set { MDV["HostPermissionTypeId"].Value = value; } }
 		public ApprovalStatus ApprovalStatusId { get { return (ApprovalStatus)MDV["ApprovalStatusId"].Value; } set { MDV["ApprovalStatusId"].Value = value; } }

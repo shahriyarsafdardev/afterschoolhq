@@ -18,9 +18,21 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public ParticipationSourceType ParticipationSourceTypeId { get { return (ParticipationSourceType)MDV["ParticipationSourceTypeId"].Value; } set { MDV["ParticipationSourceTypeId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? ParticipationSourceId { get { return (int?)MDV["ParticipationSourceId"].Value; } set { MDV["ParticipationSourceId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? PlanOwnerAccountId { get { return (int?)MDV["PlanOwnerAccountId"].Value; } set { MDV["PlanOwnerAccountId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public decimal? CostPerPeriod { get { return (decimal?)MDV["CostPerPeriod"].Value; } set { MDV["CostPerPeriod"].Value = value; } }
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		public bool DoesAutoRenew { get { return (bool)MDV["DoesAutoRenew"].Value; } set { MDV["DoesAutoRenew"].Value = value; } }

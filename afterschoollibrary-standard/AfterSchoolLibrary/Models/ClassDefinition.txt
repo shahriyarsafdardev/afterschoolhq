@@ -1203,7 +1203,7 @@ property: BillSourceId, int?, Int
 property: Description, string, NVarChar(400), required
 property: Uid, Guid, UniqueIdentifier
 loadmethod: ParticipationSourceId|ParticipationSourceTypeId, List<>, LoadByParticipationSource
-loadmethod: BillSourceId|BillSourceTypeId, List<>
+loadmethod: BillSourceId|BillSourceTypeId, List<>, LoadByBillSource
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid
@@ -1415,5 +1415,5 @@ values: NotSet, Activity, ActivityGroup
 [begin]
 type: Enum
 name: BillSourceType
-values: NotSet, PaymentPlan, SubscriptionPlan, ProductPurchase
+values: NotSet, RegistrantPaymentPlan, RegistrantSubscriptionPlan, ProductPurchase
 [end]

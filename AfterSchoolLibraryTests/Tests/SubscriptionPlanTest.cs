@@ -11,17 +11,23 @@ namespace AfterSchoolLibraryTests
 {
     public class SubscriptionPlanTest : BaseTest
     {
+        private WebUser AccountOwner { get; set; }
+        private Account PlanOwnerAccount { get; set; }
+        private Activity Activity { get; set; }
+        private ActivityGroup ActivityGroup { get; set; }
+
         public SubscriptionPlanTest(ITestOutputHelper output) : base(output)
         {
+            AccountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            PlanOwnerAccount = Factories.AccountFactory.Create(AccountOwner, msgs, dc);
+            Activity = Factories.ActivityFactory.Create(PlanOwnerAccount, msgs, dc);
+            ActivityGroup = Factories.ActivityGroupFactory.Create(PlanOwnerAccount, msgs, dc);
         }
 
         [Fact]
         public void LoadTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var plan = Factories.SubscriptionPlanFactory.Create(account, activity, msgs, dc);
+            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
 
             Assert.True(SubscriptionPlan.Load(plan.ID.Value, msgs, dc).IsNotEmpty());
         }
@@ -31,13 +37,9 @@ namespace AfterSchoolLibraryTests
         [InlineData(15, 10)]
         public void LoadPagingTest(int numberToCreate, int numberPerPage)
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-
             for (var i = 0; i < numberToCreate; i++)
             {
-                var plan = Factories.SubscriptionPlanFactory.Create(account, activity, msgs, dc);
+                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
             }
 
             Assert.Equal(
@@ -57,10 +59,7 @@ namespace AfterSchoolLibraryTests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-                var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-                var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-                var plan = Factories.SubscriptionPlanFactory.Create(account, activity, msgs, dc);
+                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
             }
 
             Assert.Equal(numberToCreate, SubscriptionPlan.GetCount(msgs: msgs, dc: dc));
@@ -72,10 +71,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void SaveTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var plan = Factories.SubscriptionPlanFactory.Create(account, activity, msgs, dc);
+            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
 
             plan.LastModifiedBy = 1;
             msgs.AddRange(plan.Save(dc));
@@ -89,10 +85,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DeleteTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var plan = Factories.SubscriptionPlanFactory.Create(account, activity, msgs, dc);
+            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
 
             msgs.AddRange(plan.Delete(dc));
 
@@ -105,10 +98,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ReloadTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var plan = Factories.SubscriptionPlanFactory.Create(account, activity, msgs, dc);
+            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
 
             Assert.Equal(plan.ID, plan.Reload(msgs, dc).ID);
         }
@@ -118,16 +108,12 @@ namespace AfterSchoolLibraryTests
         [InlineData(ParticipationSourceType.ActivityGroup)]
         public void LoadByParticipationSourceTest(ParticipationSourceType participationSourceType)
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc);
-            var plan1 = Factories.SubscriptionPlanFactory.Create(account, activity, msgs, dc);
-            var plan2 = Factories.SubscriptionPlanFactory.Create(account, activityGroup, msgs, dc);
+            var plan1 = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
+            var plan2 = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, ActivityGroup, msgs, dc);
 
-            var participationSourceId = activity.ID;
+            var participationSourceId = Activity.ID;
             if (participationSourceType == ParticipationSourceType.ActivityGroup)
-                participationSourceId = activityGroup.ID;
+                participationSourceId = ActivityGroup.ID;
 
             Assert.Single(SubscriptionPlan.LoadByParticipationSource(participationSourceId.Value, participationSourceType, msgs, dc));
         }
@@ -137,16 +123,12 @@ namespace AfterSchoolLibraryTests
         [InlineData(5)]
         public void LoadByPlanOwnerAccountIdTest(int numberToCreate)
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-
             for (var i = 0; i < numberToCreate; i++)
             {
-                var plan = Factories.SubscriptionPlanFactory.Create(account, activity, msgs, dc);
+                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
             }
 
-            Assert.Equal(numberToCreate, SubscriptionPlan.LoadByPlanOwnerAccountId(account.ID.Value, msgs, dc).Count);
+            Assert.Equal(numberToCreate, SubscriptionPlan.LoadByPlanOwnerAccountId(PlanOwnerAccount.ID.Value, msgs, dc).Count);
         }
 
     }
