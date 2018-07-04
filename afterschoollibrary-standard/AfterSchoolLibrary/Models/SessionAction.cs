@@ -18,6 +18,9 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? SessionId { get { return (int?)MDV["SessionId"].Value; } set { MDV["SessionId"].Value = value; } }
 		public SessionActionType SessionActionTypeId { get { return (SessionActionType)MDV["SessionActionTypeId"].Value; } set { MDV["SessionActionTypeId"].Value = value; } }
 		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }

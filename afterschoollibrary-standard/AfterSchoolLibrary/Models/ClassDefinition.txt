@@ -153,12 +153,14 @@ loadmethod: AccountId|ParentTagId, List<>
 type: Class
 name: ObjectTag
 inherits: BasicObject
-property: ActivityId, int?, Int
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 property: TagId, int?, Int
 join: Tag.ID, TagId, InnerJoin
 joinproperty: Tag.Name, string, NVarChar
-loadmethod: ActivityId, List<>
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: TagId, List<>
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|TagId, LoadByParticipationObjectByTagId
 [end]
 
 [begin]
@@ -1129,11 +1131,15 @@ name: PaymentPlan
 description: Used to create payment options for a particular activity or activity group
 serializable: true
 inherits: BasicObjectWithModified
-property: ActivityId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
+property: PlanOwnerAccountId, int?, Int, required
 property: TotalPeriods, int?, Int, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: CostPerPeriod, decimal?, Money, required
 property: IsActive, bool, Bit
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: PlanOwnerAccountId, List<>
 [end]
 
 [begin]
@@ -1142,11 +1148,15 @@ name: SubscriptionPlan
 description: Used to create subscription options for a particular activity or activity group
 serializable: true
 inherits: BasicObjectWithModified
-property: ActivityId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
+property: PlanOwnerAccountId, int?, Int, required
 property: CostPerPeriod, decimal?, Money, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: DoesAutoRenew, bool, Bit
 property: IsActive, bool, Bit
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: PlanOwnerAccountId, List<>
 [end]
 
 [begin]
@@ -1155,9 +1165,12 @@ name: RegistrantPaymentPlan
 description: Keeps track of which registrants are on which payment plans
 serializable: true
 inherits: BasicObjectWithModified
-property: PaymentPlanId, int?, Int, required
 property: RegistrantId, int?, Int, required
+property: PaymentPlanId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
+loadmethod: RegistrantId, List<>
+loadmethod: PaymentPlanId, List<>
+loadmethod: RegistrantId|PaymentPlanId
 [end]
 
 [begin]
@@ -1169,6 +1182,9 @@ inherits: BasicObjectWithModified
 property: SubscriptionPlanId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
+loadmethod: RegistrantId, List<>
+loadmethod: SubscriptionPlanId, List<>
+loadmethod: RegistrantId|SubscriptionPlanId
 [end]
 
 [begin]
@@ -1180,13 +1196,66 @@ inherits: BasicObjectWithModified
 property: Amount, decimal?, Money, required
 property: BillerAccountId, int?, Int, required
 property: PayerAccountId, int?, Int, required
-property: PaymentTypeId, PaymentType, Int
-property: TransactionTypeId, TransactionType, Int
-property: RegistrantSubscriptionId, int?, Int
-property: RegistrantPaymentPlanId, int?, Int
+property: PaymentTypeId, PaymentType, Int, required
+property: TransactionTypeId, TransactionType, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int
+property: ParticipationObjectId, int?, Int
+property: BillSourceTypeId, BillSourceType, Int
+property: BillSourceId, int?, Int
 property: Description, string, NVarChar(400), required
-property: ActivityId, int?, Int
-property: ActivityGroupId, int?, Int
+property: Uid, Guid, UniqueIdentifier
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: BillSourceId|BillSourceTypeId, List<>, LoadByBillSource
+loadmethod: BillerAccountId, List<>
+loadmethod: PayerAccountId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: Product
+description: Used to create a product for a particular account. Products can be T-shirts, etc.
+serializable: true
+inherits: BasicLookUpObject
+property: AccountId, int?, Int, required
+property: Uid, Guid, UniqueIdentifier
+property: Cost, decimal?, Money, required
+property: IsActive, bool, Bit
+baseproperty: Name, required
+loadmethod: AccountId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
+name: ProductOffering
+description: Used to associate an account product to a activity. A product offered to buy via a participation object (activity, activity group)
+serializable: true
+inherits: BasicObjectWithModified
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
+property: ProductId, int?, Int, required
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: ProductId, List<>
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|ProductId, LoadByParticipationObjectByProductId
+[end]
+
+[begin]
+type: Class
+name: ProductPurchase
+description: Used to associate a product to a registrant
+serializable: true
+inherits: BasicObjectWithModified
+property: ProductId, int?, Int, required
+property: RegistrantId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int
+property: ParticipationObjectId, int?, Int
+property: AmountPaid, decimal?, Money, required
+property: Uid, Guid, UniqueIdentifier
+loadmethod: RegistrantId, List<>
+loadmethod: ProductId, List<>
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: RegistrantId|ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByRegistrantByParticipationObject
 [end]
 
 [begin]
@@ -1318,7 +1387,7 @@ values: NotSet, Invited, Accepted, Declined
 [begin]
 type: Enum
 name: AccountType
-values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool
+values: NotSet, ActivityProvider, School, SchoolDistrict, AfterSchool, Registrant
 [end]
 
 [begin]
@@ -1337,4 +1406,16 @@ values: NotSet, Activity, Team
 type: Enum
 name: TransactionType
 values: NotSet, Credit, Debit
+[end]
+
+[begin]
+type: Enum
+name: ParticipationObjectType
+values: NotSet, Activity, ActivityGroup
+[end]
+
+[begin]
+type: Enum
+name: BillSourceType
+values: NotSet, RegistrantPaymentPlan, RegistrantSubscriptionPlan, ProductPurchase
 [end]

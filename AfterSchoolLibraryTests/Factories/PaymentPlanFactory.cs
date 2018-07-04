@@ -11,15 +11,27 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class PaymentPlanFactory
     {
-        public static PaymentPlan Create(Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        public static PaymentPlan Create(Account planOwnerAccount, Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new PaymentPlan() { ActivityId = activity.ID, TotalPeriods = 5, CostPerPeriod = 30 };
+            var obj = new PaymentPlan() { ParticipationObjectId = activity.ID, ParticipationObjectTypeId = ParticipationObjectType.Activity, TotalPeriods = 5, CostPerPeriod = 30, PlanOwnerAccountId = planOwnerAccount.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
-        public static PaymentPlan Create(Activity activity, int totalPeriods, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc = null)
+        public static PaymentPlan Create(Account planOwnerAccount, Activity activity, int totalPeriods, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new PaymentPlan() { ActivityId = activity.ID, TotalPeriods = totalPeriods, CostPerPeriod = costPerPeriod };
+            var obj = new PaymentPlan() { ParticipationObjectId = activity.ID, ParticipationObjectTypeId = ParticipationObjectType.Activity, TotalPeriods = totalPeriods, CostPerPeriod = costPerPeriod, PlanOwnerAccountId = planOwnerAccount.ID };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+        public static PaymentPlan Create(Account planOwnerAccount, ActivityGroup activityGroup, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new PaymentPlan() { ParticipationObjectId = activityGroup.ID, ParticipationObjectTypeId = ParticipationObjectType.ActivityGroup, TotalPeriods = 5, CostPerPeriod = 30, PlanOwnerAccountId = planOwnerAccount.ID };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+        public static PaymentPlan Create(Account planOwnerAccount, ActivityGroup activityGroup, int totalPeriods, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new PaymentPlan() { ParticipationObjectId = activityGroup.ID, ParticipationObjectTypeId = ParticipationObjectType.ActivityGroup, TotalPeriods = totalPeriods, CostPerPeriod = costPerPeriod, PlanOwnerAccountId = planOwnerAccount.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

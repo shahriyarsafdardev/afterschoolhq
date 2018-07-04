@@ -18,7 +18,13 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public decimal? Price { get { return (decimal?)MDV["Price"].Value; } set { MDV["Price"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public decimal? PricePerYear { get { return (decimal?)MDV["PricePerYear"].Value; } set { MDV["PricePerYear"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		public bool IsPopular { get { return (bool)MDV["IsPopular"].Value; } set { MDV["IsPopular"].Value = value; } }

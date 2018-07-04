@@ -18,8 +18,17 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
-		public int? PaymentPlanId { get { return (int?)MDV["PaymentPlanId"].Value; } set { MDV["PaymentPlanId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
+		public int? PaymentPlanId { get { return (int?)MDV["PaymentPlanId"].Value; } set { MDV["PaymentPlanId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
 		
 
@@ -37,8 +46,8 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(RegistrantPaymentPlan).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "PaymentPlanId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PaymentPlanId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
 				
                 return _dp;
@@ -91,10 +100,10 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
-			if (this.PaymentPlanId.IsEmpty())
-				msgs.Add("PaymentPlanId is required on RegistrantPaymentPlan object", MessageType.Error);
 			if (this.RegistrantId.IsEmpty())
 				msgs.Add("RegistrantId is required on RegistrantPaymentPlan object", MessageType.Error);
+			if (this.PaymentPlanId.IsEmpty())
+				msgs.Add("PaymentPlanId is required on RegistrantPaymentPlan object", MessageType.Error);
 			if (this.StartDate.IsEmpty())
 				msgs.Add("StartDate is required on RegistrantPaymentPlan object", MessageType.Error);
 			
@@ -120,11 +129,11 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PaymentPlanId"]);
+			dps.Add(ObjectMap["RegistrantId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["RegistrantId"]);
+			dps.Add(ObjectMap["PaymentPlanId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -141,6 +150,31 @@ namespace AfterSchoolLibrary
 			return RegistrantPaymentPlan.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
+		public static List<RegistrantPaymentPlan> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<RegistrantPaymentPlan> LoadByPaymentPlanId(int PaymentPlanId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["PaymentPlanId"], PaymentPlanId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static RegistrantPaymentPlan LoadByRegistrantIdByPaymentPlanId(int RegistrantId, int PaymentPlanId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			dq.Criterias.Add(ObjectMap["PaymentPlanId"], PaymentPlanId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		
 
         #endregion

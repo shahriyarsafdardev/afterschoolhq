@@ -20,6 +20,9 @@ namespace AfterSchoolLibrary
 
 		public int? ParentTagId { get { return (int?)MDV["ParentTagId"].Value; } set { MDV["ParentTagId"].Value = value; } }
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public string Name { get { return (string)MDV["Name"].Value; } set { MDV["Name"].Value = value; } }
 		
 

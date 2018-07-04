@@ -18,8 +18,17 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? SubscriptionPlanId { get { return (int?)MDV["SubscriptionPlanId"].Value; } set { MDV["SubscriptionPlanId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
 		
 
@@ -141,6 +150,31 @@ namespace AfterSchoolLibrary
 			return RegistrantSubscriptionPlan.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
+		public static List<RegistrantSubscriptionPlan> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<RegistrantSubscriptionPlan> LoadBySubscriptionPlanId(int SubscriptionPlanId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["SubscriptionPlanId"], SubscriptionPlanId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static RegistrantSubscriptionPlan LoadByRegistrantIdBySubscriptionPlanId(int RegistrantId, int SubscriptionPlanId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			dq.Criterias.Add(ObjectMap["SubscriptionPlanId"], SubscriptionPlanId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		
 
         #endregion

@@ -4,5 +4,6 @@ public enum AccountType
 	ActivityProvider,
 	School,
 	SchoolDistrict,
-	AfterSchool
+	AfterSchool,
+	Registrant
 }
