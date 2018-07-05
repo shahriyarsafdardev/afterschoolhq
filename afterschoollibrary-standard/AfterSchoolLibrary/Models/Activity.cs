@@ -1017,7 +1017,7 @@ namespace AfterSchoolLibrary
                         //get form and use the same form
                         var formToUse = this.GetActiveForm(adc);
                         if (formToUse.IsEmpty())
-                            formToUse = account.GetDefaultForm(adc);
+                            formToUse = account.GetDefaultForm(msgs, adc);
 
                         activity.AddFormAndActivitate(formToUse, loggedInUserId, false, amsgs, dc: adc);
                     }
@@ -1028,7 +1028,7 @@ namespace AfterSchoolLibrary
                         if (useSameForm)
                             formToCopy = this.GetActiveForm(adc);
                         else
-                            formToCopy = account.GetDefaultForm(adc);
+                            formToCopy = account.GetDefaultForm(msgs, adc);
 
                         var newForm = formToCopy.Copy(loggedInUserId, activity.AccountId.Value, amsgs, dc: adc);
                         activity.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, dc: adc);

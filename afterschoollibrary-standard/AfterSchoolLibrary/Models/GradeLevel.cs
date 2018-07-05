@@ -131,6 +131,30 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
+        public static SystemMessages CreateDefaultGradeLevels(DatabaseConnection dc  = null)
+        {
+            var msgs = new SystemMessages();
+            var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);
+            if (gradeLevels.Count == 0)
+            {
+                msgs.AddRange(new GradeLevel() { Name = "Pre-K", Abbreviation = "P" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "Kindergarten", Abbreviation = "K" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "1st", Abbreviation = "1" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "2nd", Abbreviation = "2" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "3rd", Abbreviation = "3" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "4th", Abbreviation = "4" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "5th", Abbreviation = "5" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "6th", Abbreviation = "6" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "7th", Abbreviation = "7" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "8th", Abbreviation = "8" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "9th", Abbreviation = "9" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "10th", Abbreviation = "10" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "11th", Abbreviation = "11" }.Save(dc: dc));
+                msgs.AddRange(new GradeLevel() { Name = "12th", Abbreviation = "12" }.Save(dc: dc));
+            }
+            return msgs;
+        }
+
         #endregion
     }
 }

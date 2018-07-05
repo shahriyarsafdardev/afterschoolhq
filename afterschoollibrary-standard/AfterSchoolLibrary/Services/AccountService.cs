@@ -233,20 +233,20 @@ namespace AfterSchoolLibrary
         /// <returns></returns>
         public static Form CreateDefaultForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var form = Form.Load(Form.GetLatestTemplateForm(1, dc: dc).ID.Value, dc: dc);
+            var form = Form.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
             if (form.AccountId != account.ID)
-                form = form.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, dc: dc);
+                form = form.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, dc);
             return form;
         }
 
-        public static Form GetOrCreateDefaultForm(this Account account, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static Form GetOrCreateDefaultForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetDefaultForm(dc) ?? CreateDefaultForm(account, loggedInUser, dc: dc);
+            return account.GetDefaultForm(msgs, dc) ?? CreateDefaultForm(account, loggedInUser, msgs, dc);
         }
 
-        public static Form GetDefaultForm(this Account account, DatabaseConnection dc = null)
+        public static Form GetDefaultForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, dc: dc) : null;
+            return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
         }
 
         public static List<AccountWebUser> GetMembers(this Account account, DatabaseConnection dc = null)
@@ -1247,6 +1247,24 @@ namespace AfterSchoolLibrary
                     loggedInUser,
                     msgs,
                     dc);
+
+            return msgs;
+        }
+
+        public static SystemMessages CreateAfterSchoolAccount(string adminEmail, string adminPassword, string accountName, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            adminEmail = adminEmail.IfBlank("darye@reborncode.com");
+            adminPassword = adminPassword.IfBlank("aDm1n1906");
+            accountName = accountName.IfBlank("AfterSchool Admin");
+
+            if (WebUser.LoadByEmail(adminEmail, dc: dc) != null)
+                throw new Exception("User with the same email address already exists.");
+
+            var wu = WebUserService.CreateNew("admin", "user", adminEmail, adminPassword, true, true, true, 0, msgs, dc);
+
+            wu.AddNewAccount(accountName, null, true, AccountType.AfterSchool, null, null, true, wu, msgs, dc);
 
             return msgs;
         }

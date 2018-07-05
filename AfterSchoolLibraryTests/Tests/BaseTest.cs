@@ -28,7 +28,12 @@ namespace AfterSchoolLibraryTests
             dc.Open();
             Database.CreateTables(dc);
             Database.AlterTables(dc);
+            Database.UpdateData(dc);
             dc.BeginTransaction();
+
+            // need some default data in the AfterSchool admin account in order to run certain tests
+            msgs.AddRange(AccountService.CreateAfterSchoolAccount(null, null, null, dc));
+            msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
         }
 
         public void Dispose()
