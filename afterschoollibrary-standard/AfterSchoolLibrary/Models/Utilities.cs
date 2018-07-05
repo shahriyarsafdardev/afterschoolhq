@@ -230,7 +230,7 @@ namespace AfterSchoolLibrary
             Utilities.ReCaptchaPublicKey = "6Lfk694SAAAAAIrtt3Hwiz7j4emDRlYuLp73i9VY";
         }
 
-        public static SystemMessages InitDatabase(string adminEmail = null, string adminPassword = null, bool skipTableCreation = false, string groupName = "First Group")
+        public static SystemMessages InitDatabase(string adminEmail = null, string adminPassword = null, bool skipTableCreation = false, string accountName = "First Group")
         {
             var msgs = new SystemMessages();
 
@@ -250,15 +250,7 @@ namespace AfterSchoolLibrary
 
             try
             {
-                adminEmail = adminEmail.IfEmpty("darye@reborncode.com");
-                adminPassword = adminPassword.IfEmpty("aDm1n1906");
-
-                if (WebUser.LoadByEmail(adminEmail, dc: dc) != null)
-                    throw new Exception("User with the same email address already exists.");
-
-                var wu = WebUserService.CreateNew("admin", "user", adminEmail, adminPassword, true, true, true, 0, msgs, dc);
-                
-                wu.AddNewAccount(groupName, null, true, AccountType.AfterSchool, null, null, true, wu, msgs, dc);
+                msgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, accountName, dc));
             }
             catch (Exception ex)
             {
@@ -363,266 +355,8 @@ namespace AfterSchoolLibrary
         {
             SystemMessages msgs = new SystemMessages();
 
-            var gradeLevels = GradeLevel.Load();
-            if (gradeLevels.Count == 0)
-            {
-                new GradeLevel() { Name = "Pre-K", Abbreviation = "P" }.Save(dc: dc);
-                new GradeLevel() { Name = "Kindergarten", Abbreviation = "K" }.Save(dc: dc);
-                new GradeLevel() { Name = "1st", Abbreviation = "1" }.Save(dc: dc);
-                new GradeLevel() { Name = "2nd", Abbreviation = "2" }.Save(dc: dc);
-                new GradeLevel() { Name = "3rd", Abbreviation = "3" }.Save(dc: dc);
-                new GradeLevel() { Name = "4th", Abbreviation = "4" }.Save(dc: dc);
-                new GradeLevel() { Name = "5th", Abbreviation = "5" }.Save(dc: dc);
-                new GradeLevel() { Name = "6th", Abbreviation = "6" }.Save(dc: dc);
-                new GradeLevel() { Name = "7th", Abbreviation = "7" }.Save(dc: dc);
-                new GradeLevel() { Name = "8th", Abbreviation = "8" }.Save(dc: dc);
-                new GradeLevel() { Name = "9th", Abbreviation = "9" }.Save(dc: dc);
-                new GradeLevel() { Name = "10th", Abbreviation = "10" }.Save(dc: dc);
-                new GradeLevel() { Name = "11th", Abbreviation = "11" }.Save(dc: dc);
-                new GradeLevel() { Name = "12th", Abbreviation = "12" }.Save(dc: dc);
-            }
-
-            Form f = Form.LoadByAccountId(1, dc: dc).FirstOrDefault();
-            if (f.IsEmpty())
-            {
-                f = new Form();
-                f.AccountId = 1;
-                f.LastModifiedDate = f.CreateDate = DateTime.UtcNow;
-                f.LastModifiedBy = f.CreatedBy = 0;
-                f.Name = "Default Form";
-                f.IsActive = true;
-                msgs.AddRange(f.Save(dc: dc));
-
-                var questions = new QuestionHolder[]
-                {
-                new QuestionHolder() { Text = "First Name", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox, QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation, GroupName = "Personal Information", IsLocked = true, QuestionDataTypeId = QuestionDataType.RegistrantFirstName },
-                new QuestionHolder() { Text = "Last Name", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox, QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation, GroupName = "Personal Information", IsLocked = true, QuestionDataTypeId = QuestionDataType.RegistrantLastName },
-                new QuestionHolder() { Text = "Email", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.Email, QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation, GroupName = "Personal Information", IsLocked = true, QuestionDataTypeId = QuestionDataType.RegistrantEmail },
-                new QuestionHolder() { Text = "Date of Birth", QuestionTypeId = QuestionType.Date, GroupName = "Personal Information", QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation, QuestionDataTypeId = QuestionDataType.RegistrantDateOfBirth },
-                new QuestionHolder() { Text = "Grade", QuestionTypeId = QuestionType.DropDownList, GroupName = "Personal Information", QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation, QuestionDataTypeId = QuestionDataType.RegistrantGrade, Options = "Pre-K,K,1st,2nd,3rd,4th,5th,6th,7th,8th,9th,10th,11th,12th" },
-                new QuestionHolder() { Text = "Gender", QuestionTypeId = QuestionType.RadioList, GroupName = "Personal Information", QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation, QuestionDataTypeId = QuestionDataType.RegistrantGender, Options = "Male,Female" },
-                new QuestionHolder() { Text = "Ethnicity", QuestionTypeId = QuestionType.DropDownList, GroupName = "Personal Information", QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation, QuestionDataTypeId = QuestionDataType.RegistrantEthnicity, Options = "American Indian/Alaskan Native,Asian/Pacific Islander,Black/African-American,Hispanic/Latino,White,Other" },
-                new QuestionHolder() { Text = "Organization", QuestionTypeId = QuestionType.TextBox, GroupName = "Personal Information", QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation, IsLocked = false, QuestionDataTypeId = QuestionDataType.RegistrantOrganization },
-
-                new QuestionHolder() { Text = "Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Contact Information", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.RegistrantPhone1 },
-                new QuestionHolder() { Text = "Phone Type", QuestionTypeId = QuestionType.RadioList, GroupName = "Contact Information", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.RegistrantPhoneType1, Options = "Mobile, Home, Work" },
-                new QuestionHolder() { Text = "Alternate Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Contact Information", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.RegistrantPhone2 },
-                new QuestionHolder() { Text = "Alternate Phone Type", QuestionTypeId = QuestionType.RadioList, GroupName = "Contact Information", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.RegistrantPhoneType2, Options = "Mobile, Home, Work" },
-
-                new QuestionHolder() { Text = "Street Address", QuestionTypeId = QuestionType.TextBox, GroupName = "Home Address", QuestionGroupDataTypeId = QuestionGroupDataType.HomeAddress, QuestionDataTypeId = QuestionDataType.RegistrantAddress1 },
-                new QuestionHolder() { Text = "Apt/Suite", QuestionTypeId = QuestionType.TextBox, GroupName = "Home Address", QuestionGroupDataTypeId = QuestionGroupDataType.HomeAddress, QuestionDataTypeId = QuestionDataType.RegistrantAddress2 },
-                new QuestionHolder() { Text = "City", QuestionTypeId = QuestionType.TextBox, GroupName = "Home Address", QuestionGroupDataTypeId = QuestionGroupDataType.HomeAddress, QuestionDataTypeId = QuestionDataType.RegistrantCity },
-                new QuestionHolder() { Text = "State", QuestionTypeId = QuestionType.DropDownList, GroupName = "Home Address", QuestionGroupDataTypeId = QuestionGroupDataType.HomeAddress, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.RegistrantState },
-                new QuestionHolder() { Text = "Zip Code", QuestionTypeId = QuestionType.TextBox, GroupName = "Home Address", QuestionGroupDataTypeId = QuestionGroupDataType.HomeAddress, QuestionDataTypeId = QuestionDataType.RegistrantPostalCode },
-
-                new QuestionHolder() { Text = "First Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 1 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1FirstName },
-                new QuestionHolder() { Text = "Last Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 1 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1LastName },
-                new QuestionHolder() { Text = "Email", QuestionTypeId = QuestionType.Email, GroupName = "Parent 1 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1Email },
-                new QuestionHolder() { Text = "Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 1 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1Phone1 },
-                new QuestionHolder() { Text = "Phone Type", QuestionTypeId = QuestionType.RadioList, GroupName = "Parent 1 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1PhoneType1, Options = "Mobile, Home, Work" },
-                new QuestionHolder() { Text = "Alternate Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 1 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1Phone2 },
-                new QuestionHolder() { Text = "Alternate Phone Type", QuestionTypeId = QuestionType.RadioList, GroupName = "Parent 1 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1PhoneType2, Options = "Mobile, Home, Work" },
-                new QuestionHolder() { Text = "Street Address", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 1 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1Address1 },
-                new QuestionHolder() { Text = "Apt/Suite", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 1 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1Address2 },
-                new QuestionHolder() { Text = "City", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 1 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1City },
-                new QuestionHolder() { Text = "State", QuestionTypeId = QuestionType.DropDownList, GroupName = "Parent 1 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.Parent1State },
-                new QuestionHolder() { Text = "Zip Code", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 1 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent1Information, QuestionDataTypeId = QuestionDataType.Parent1PostalCode },
-
-                new QuestionHolder() { Text = "First Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 2 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Information, QuestionDataTypeId = QuestionDataType.Parent2FirstName },
-                new QuestionHolder() { Text = "Last Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 2 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Information, QuestionDataTypeId = QuestionDataType.Parent2LastName },
-                new QuestionHolder() { Text = "Email", QuestionTypeId = QuestionType.Email, GroupName = "Parent 2 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Information, QuestionDataTypeId = QuestionDataType.Parent2Email },
-                new QuestionHolder() { Text = "Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 2 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Information, QuestionDataTypeId = QuestionDataType.Parent2Phone1 },
-                new QuestionHolder() { Text = "Phone Type", QuestionTypeId = QuestionType.RadioList, GroupName = "Parent 2 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Information, QuestionDataTypeId = QuestionDataType.Parent2PhoneType1, Options = "Mobile, Home, Work" },
-                new QuestionHolder() { Text = "Alternate Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 2 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Information, QuestionDataTypeId = QuestionDataType.Parent2Phone2 },
-                new QuestionHolder() { Text = "Alternate Phone Type", QuestionTypeId = QuestionType.RadioList, GroupName = "Parent 2 Information", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Information, QuestionDataTypeId = QuestionDataType.Parent2PhoneType2, Options = "Mobile, Home, Work" },
-                new QuestionHolder() { Text = "Street Address", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 2 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Address, QuestionDataTypeId = QuestionDataType.Parent2Address1 },
-                new QuestionHolder() { Text = "Apt/Suite", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 2 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Address, QuestionDataTypeId = QuestionDataType.Parent2Address2 },
-                new QuestionHolder() { Text = "City", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 2 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Address, QuestionDataTypeId = QuestionDataType.Parent2City },
-                new QuestionHolder() { Text = "State", QuestionTypeId = QuestionType.DropDownList, GroupName = "Parent 2 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Address, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.Parent2State },
-                new QuestionHolder() { Text = "Zip Code", QuestionTypeId = QuestionType.TextBox, GroupName = "Parent 2 Address", QuestionGroupDataTypeId = QuestionGroupDataType.Parent2Address, QuestionDataTypeId = QuestionDataType.Parent2PostalCode },
-
-                new QuestionHolder() { Text = "First Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Emergency Contact 1", QuestionGroupDataTypeId = QuestionGroupDataType.EmergencyContact1, QuestionDataTypeId = QuestionDataType.EmergencyFirstName1 },
-                new QuestionHolder() { Text = "Last Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Emergency Contact 1", QuestionGroupDataTypeId = QuestionGroupDataType.EmergencyContact1, QuestionDataTypeId = QuestionDataType.EmergencyLastName1 },
-                new QuestionHolder() { Text = "Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Emergency Contact 1", QuestionGroupDataTypeId = QuestionGroupDataType.EmergencyContact1, QuestionDataTypeId = QuestionDataType.EmergencyPhone1 },
-
-                new QuestionHolder() { Text = "First Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Emergency Contact 2", QuestionGroupDataTypeId = QuestionGroupDataType.EmergencyContact2, QuestionDataTypeId = QuestionDataType.EmergencyFirstName2 },
-                new QuestionHolder() { Text = "Last Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Emergency Contact 2", QuestionGroupDataTypeId = QuestionGroupDataType.EmergencyContact2, QuestionDataTypeId = QuestionDataType.EmergencyLastName2 },
-                new QuestionHolder() { Text = "Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Emergency Contact 2", QuestionGroupDataTypeId = QuestionGroupDataType.EmergencyContact2, QuestionDataTypeId = QuestionDataType.EmergencyPhone2 },
-
-                new QuestionHolder() { Text = "Doctor Name", QuestionTypeId = QuestionType.TextBox, GroupName = "Health Information", QuestionGroupDataTypeId = QuestionGroupDataType.HealthInformation, QuestionDataTypeId = QuestionDataType.RegistrantDoctorName },
-                new QuestionHolder() { Text = "Doctor Phone", QuestionTypeId = QuestionType.TextBox, GroupName = "Health Information", QuestionGroupDataTypeId = QuestionGroupDataType.HealthInformation, QuestionDataTypeId = QuestionDataType.RegistrantDoctorPhone },
-                new QuestionHolder() { Text = "Preferred Hospital (in case of emergency)", QuestionTypeId = QuestionType.TextBox, GroupName = "Health Information", QuestionGroupDataTypeId = QuestionGroupDataType.HealthInformation, QuestionDataTypeId = QuestionDataType.RegistrantPreferredHospital },
-                new QuestionHolder() { Text = "Allergies", QuestionTypeId = QuestionType.TextArea, GroupName = "Health Information", QuestionGroupDataTypeId = QuestionGroupDataType.HealthInformation, QuestionDataTypeId = QuestionDataType.RegistrantAllergies },
-                new QuestionHolder() { Text = "Medical Conditions", QuestionTypeId = QuestionType.TextArea, GroupName = "Health Information", QuestionGroupDataTypeId = QuestionGroupDataType.HealthInformation, QuestionDataTypeId = QuestionDataType.RegistrantMedicalConditions },
-                new QuestionHolder() { Text = "Are you up to date on Immunizations?", QuestionTypeId = QuestionType.RadioList, GroupName = "Health Information", QuestionGroupDataTypeId = QuestionGroupDataType.HealthInformation, QuestionDataTypeId = QuestionDataType.RegistrantImmunizations, Options = "Yes,No,Not Sure" },
-
-                //organization
-                new QuestionHolder() { Text = "Organization Name", IsActive = true, IsRequired = true, IsLocked = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationName, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Street Address", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationAddress1, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Suite", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationAddress2, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "City", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationCity, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "State", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.DropDownList, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, Options = QuestionHolder.StateList, QuestionDataTypeId = QuestionDataType.OrganizationState, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Zip Code", IsActive = true, IsRequired = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Information", QuestionGroupDataTypeId = QuestionGroupDataType.OrganizationInformation, QuestionDataTypeId = QuestionDataType.OrganizationPostalCode, RegistrantTypeId = RegistrantType.Organization },
-
-                new QuestionHolder() { Text = "First Name", IsActive = true, IsRequired = true, IsLocked = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactFirstName, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Last Name", IsActive = true, IsRequired = true, IsLocked = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactLastName, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Email", IsActive = true, IsRequired = true, IsLocked = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactEmail, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Phone", IsActive = true, QuestionTypeId = QuestionType.TextBox, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactPhone, RegistrantTypeId = RegistrantType.Organization },
-                new QuestionHolder() { Text = "Phone Type", IsActive = true, QuestionTypeId = QuestionType.RadioList, GroupName = "Organization Contact", QuestionGroupDataTypeId = QuestionGroupDataType.ContactInformation, QuestionDataTypeId = QuestionDataType.OrganizationContactPhoneType, Options = "Mobile, Home, Work", RegistrantTypeId = RegistrantType.Organization },
-                };
-
-                int displayOrder = 0;
-                int groupDisplayOrder = 0;
-                foreach (var question in questions)
-                {
-                    FormQuestionGroup group = FormQuestionGroup.Load(
-                        criterias: new Hashtable() { { "Name", question.GroupName }, { "FormId", f.ID.Value } },
-                        dc: dc).FirstOrDefault();
-
-                    if (group.IsEmpty())
-                    {
-                        group = new FormQuestionGroup();
-                        group.Name = question.GroupName;
-                        group.FormId = f.ID;
-                        group.DisplayOrder = groupDisplayOrder;
-                        group.RegistrantTypeId = question.RegistrantTypeId;
-                        group.LastModifiedDate = group.CreateDate = DateTime.UtcNow;
-                        group.LastModifiedBy = group.CreatedBy = 0;
-                        msgs.AddRange(group.Save(dc: dc));
-
-                        groupDisplayOrder++;
-                    }
-
-                    FormQuestion q = FormQuestion.LoadByFormQuestionGroupIdByQuestionDataTypeId(group.ID.Value, question.QuestionDataTypeId, dc: dc);
-                    if (q.IsEmpty())
-                    {
-                        q = new FormQuestion();
-                        q.Text = question.Text;
-                        q.IsActive = question.IsActive;
-                        q.IsRequired = question.IsRequired;
-                        q.FormId = f.ID;
-                        q.FormQuestionGroupId = group.ID;
-                        q.IsTemplate = true;
-                        q.IsLocked = question.IsLocked;
-                        q.DisplayOrder = displayOrder;
-                        q.QuestionTypeId = question.QuestionTypeId;
-                        q.QuestionDataTypeId = question.QuestionDataTypeId;
-                        q.Options = question.Options;
-                        q.LastModifiedDate = q.CreateDate = DateTime.UtcNow;
-                        q.LastModifiedBy = q.CreatedBy = 0;
-                        msgs.AddRange(q.Save(dc: dc));
-
-                        displayOrder++;
-                    }
-                }
-            }
-            else
-            {
-                var forms = Form.Load();
-                foreach (var form in forms)
-                {
-                    var passed = 0;
-                    //make modifications
-                    var groups = form.GetQuestionGroups(dc: dc);
-                    foreach (var group in groups)
-                    {
-                        if (passed > 1)
-                        {
-                            group.DisplayOrder = group.DisplayOrder + 2;
-                            msgs.AddRange(group.Save(dc: dc));
-                        }
-                        else if (passed > 0)
-                        {
-                            group.DisplayOrder = group.DisplayOrder + 1;
-                            msgs.AddRange(group.Save(dc: dc));
-                        }
-
-                        if (group.Name == "Parent 1 Information" || group.Name == "Parent/Guardian 1")
-                        {
-                            var hasGroup = FormQuestionGroup.Load(
-                                new Hashtable() {
-                                    { "Name", "Parent 1 Address" },
-                                    { "FormId", form.ID.Value }
-                                },
-                                null,
-                                null,
-                                dc: dc);
-
-                            if (hasGroup.Count == 0)
-                            {
-                                var newGroup = new FormQuestionGroup();
-                                newGroup.Name = "Parent 1 Address";
-                                newGroup.FormId = form.ID;
-                                newGroup.DisplayOrder = group.DisplayOrder + 1;
-                                newGroup.RegistrantTypeId = RegistrantType.Individual;
-                                newGroup.LastModifiedDate = newGroup.CreateDate = DateTime.UtcNow;
-                                newGroup.LastModifiedBy = newGroup.CreatedBy = 0;
-                                msgs.AddRange(newGroup.Save(dc: dc));
-
-                                var questions = group.GetAllQuestions(dc: dc);
-                                var i = 0;
-                                foreach (var question in questions)
-                                {
-                                    var datatypes = new QuestionDataType[] { QuestionDataType.Parent1Address1, QuestionDataType.Parent1Address2, QuestionDataType.Parent1City, QuestionDataType.Parent1State, QuestionDataType.Parent1PostalCode };
-
-                                    if (datatypes.Contains(question.QuestionDataTypeId))
-                                    {
-                                        question.FormQuestionGroupId = newGroup.ID;
-                                        question.DisplayOrder = i;
-                                        msgs.AddRange(question.Save(dc: dc));
-                                        i++;
-                                    }
-
-                                }
-                            }
-                            passed++;
-                        }
-                        else if (group.Name == "Parent 2 Information" || group.Name == "Parent/Guardian 2")
-                        {
-                            var hasGroup = FormQuestionGroup.Load(
-                                   new Hashtable() {
-                                    { "Name", "Parent 2 Address" },
-                                    { "FormId", form.ID.Value }
-                                   },
-                                   null,
-                                   null,
-                                   dc: dc);
-
-                            if (hasGroup.Count == 0)
-                            {
-                                var newGroup = new FormQuestionGroup();
-                                newGroup.Name = "Parent 2 Address";
-                                newGroup.FormId = form.ID;
-                                newGroup.DisplayOrder = group.DisplayOrder + 1;
-                                newGroup.RegistrantTypeId = RegistrantType.Individual;
-                                newGroup.LastModifiedDate = newGroup.CreateDate = DateTime.UtcNow;
-                                newGroup.LastModifiedBy = newGroup.CreatedBy = 0;
-                                msgs.AddRange(newGroup.Save(dc: dc));
-
-                                var questions = group.GetAllQuestions(dc: dc);
-                                var i = 0;
-                                foreach (var question in questions)
-                                {
-                                    var datatypes = new QuestionDataType[] { QuestionDataType.Parent2Address1, QuestionDataType.Parent2Address2, QuestionDataType.Parent2City, QuestionDataType.Parent2State, QuestionDataType.Parent2PostalCode };
-
-                                    if (datatypes.Contains(question.QuestionDataTypeId))
-                                    {
-                                        question.FormQuestionGroupId = newGroup.ID;
-                                        question.DisplayOrder = i;
-                                        msgs.AddRange(question.Save(dc: dc));
-                                        i++;
-                                    }
-
-                                }
-                            }
-                            passed++;
-                        }
-
-                    }
-
-                }
-
-            }
+            msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
+            Form.CreateAfterSchoolAccountDefaultForm(msgs, dc);
 
             return msgs;
         }
@@ -924,167 +658,167 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages AddBellecChasseCustomQuestions(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
+        //public static SystemMessages AddBellecChasseCustomQuestions(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
 
-            var questions = new QuestionHolder[]
-            {
-                new QuestionHolder()
-                {
-                    GroupName = "Personal Information",
-                    IsActive = true,
-                    IsLocked = false,
-                    IsRequired = false,
-                    Options = "Yes,No",
-                    QuestionDataTypeId = QuestionDataType.NotSet,
-                    QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation,
-                    QuestionTypeId = QuestionType.RadioList,
-                    RegistrantTypeId = RegistrantType.Individual,
-                    Text = "Individualized Education Plan (IEP)"
-                },
-                new QuestionHolder()
-                {
-                    GroupName = "Personal Information",
-                    IsActive = true,
-                    IsLocked = false,
-                    IsRequired = false,
-                    Options = "Teacher 1, Teacher 2",
-                    QuestionDataTypeId = QuestionDataType.NotSet,
-                    QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation,
-                    QuestionTypeId = QuestionType.DropDownList,
-                    RegistrantTypeId = RegistrantType.Individual,
-                    Text = "Homeroom Teacher"
-                },
-                new QuestionHolder()
-                {
-                    GroupName = "Dismissal Information",
-                    IsActive = true,
-                    IsLocked = false,
-                    IsRequired = false,
-                    Options = "Monday,Tuesday, Wednesday,Thursday;Bus,Walker,Car Rider",
-                    QuestionDataTypeId = QuestionDataType.NotSet,
-                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-                    QuestionTypeId = QuestionType.RadioMatrix,
-                    RegistrantTypeId = RegistrantType.Individual,
-                    Text = "Dismissal"
-                },
-                new QuestionHolder()
-                {
-                    GroupName = "Dismissal Information",
-                    IsActive = true,
-                    IsLocked = false,
-                    IsRequired = false,
-                    Options = "Yes,No",
-                    QuestionDataTypeId = QuestionDataType.NotSet,
-                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-                    QuestionTypeId = QuestionType.RadioList,
-                    RegistrantTypeId = RegistrantType.Individual,
-                    Text = "Does your child's transportation arrangements change during inclement weather?"
-                },
-                new QuestionHolder()
-                {
-                    GroupName = "Dismissal Information",
-                    IsActive = true,
-                    IsLocked = false,
-                    IsRequired = false,
-                    Options = "Monday,Tuesday, Wednesday,Thursday;Bus,Walker,Car Rider",
-                    QuestionDataTypeId = QuestionDataType.NotSet,
-                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-                    QuestionTypeId = QuestionType.RadioMatrix,
-                    RegistrantTypeId = RegistrantType.Individual,
-                    Text = "Dismissal Rainy Day"
-                },
-                new QuestionHolder()
-                {
-                    GroupName = "Dismissal Information",
-                    IsActive = true,
-                    IsLocked = false,
-                    IsRequired = false,
-                    Options = "N/A,1A,1,2,3,4,5,6,7,8",
-                    QuestionDataTypeId = QuestionDataType.NotSet,
-                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-                    QuestionTypeId = QuestionType.DropDownList,
-                    RegistrantTypeId = RegistrantType.Individual,
-                    Text = "Bus Number"
-                },
-                new QuestionHolder()
-                {
-                    GroupName = "Terms & Conditions",
-                    IsActive = true,
-                    IsLocked = false,
-                    IsRequired = false,
-                    Options = "",
-                    QuestionDataTypeId = QuestionDataType.NotSet,
-                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-                    QuestionTypeId = QuestionType.Checkbox,
-                    RegistrantTypeId = RegistrantType.Individual,
-                    Text = "I understand the policy and procedures for being enrolled in a 21st CCLC activity",
-                    Link = "https://rebornprojects.com/file/download/fcf9ba11-79c0-472d-a4cb-bdd67c2bf450/21ST-CCLC-Attendance-Behavior-Policy-2016-2017.docx"
-                }
-            };
+        //    var questions = new QuestionHolder[]
+        //    {
+        //        new QuestionHolder()
+        //        {
+        //            GroupName = "Personal Information",
+        //            IsActive = true,
+        //            IsLocked = false,
+        //            IsRequired = false,
+        //            Options = "Yes,No",
+        //            QuestionDataTypeId = QuestionDataType.NotSet,
+        //            QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation,
+        //            QuestionTypeId = QuestionType.RadioList,
+        //            RegistrantTypeId = RegistrantType.Individual,
+        //            Text = "Individualized Education Plan (IEP)"
+        //        },
+        //        new QuestionHolder()
+        //        {
+        //            GroupName = "Personal Information",
+        //            IsActive = true,
+        //            IsLocked = false,
+        //            IsRequired = false,
+        //            Options = "Teacher 1, Teacher 2",
+        //            QuestionDataTypeId = QuestionDataType.NotSet,
+        //            QuestionGroupDataTypeId = QuestionGroupDataType.PersonalInformation,
+        //            QuestionTypeId = QuestionType.DropDownList,
+        //            RegistrantTypeId = RegistrantType.Individual,
+        //            Text = "Homeroom Teacher"
+        //        },
+        //        new QuestionHolder()
+        //        {
+        //            GroupName = "Dismissal Information",
+        //            IsActive = true,
+        //            IsLocked = false,
+        //            IsRequired = false,
+        //            Options = "Monday,Tuesday, Wednesday,Thursday;Bus,Walker,Car Rider",
+        //            QuestionDataTypeId = QuestionDataType.NotSet,
+        //            QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+        //            QuestionTypeId = QuestionType.RadioMatrix,
+        //            RegistrantTypeId = RegistrantType.Individual,
+        //            Text = "Dismissal"
+        //        },
+        //        new QuestionHolder()
+        //        {
+        //            GroupName = "Dismissal Information",
+        //            IsActive = true,
+        //            IsLocked = false,
+        //            IsRequired = false,
+        //            Options = "Yes,No",
+        //            QuestionDataTypeId = QuestionDataType.NotSet,
+        //            QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+        //            QuestionTypeId = QuestionType.RadioList,
+        //            RegistrantTypeId = RegistrantType.Individual,
+        //            Text = "Does your child's transportation arrangements change during inclement weather?"
+        //        },
+        //        new QuestionHolder()
+        //        {
+        //            GroupName = "Dismissal Information",
+        //            IsActive = true,
+        //            IsLocked = false,
+        //            IsRequired = false,
+        //            Options = "Monday,Tuesday, Wednesday,Thursday;Bus,Walker,Car Rider",
+        //            QuestionDataTypeId = QuestionDataType.NotSet,
+        //            QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+        //            QuestionTypeId = QuestionType.RadioMatrix,
+        //            RegistrantTypeId = RegistrantType.Individual,
+        //            Text = "Dismissal Rainy Day"
+        //        },
+        //        new QuestionHolder()
+        //        {
+        //            GroupName = "Dismissal Information",
+        //            IsActive = true,
+        //            IsLocked = false,
+        //            IsRequired = false,
+        //            Options = "N/A,1A,1,2,3,4,5,6,7,8",
+        //            QuestionDataTypeId = QuestionDataType.NotSet,
+        //            QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+        //            QuestionTypeId = QuestionType.DropDownList,
+        //            RegistrantTypeId = RegistrantType.Individual,
+        //            Text = "Bus Number"
+        //        },
+        //        new QuestionHolder()
+        //        {
+        //            GroupName = "Terms & Conditions",
+        //            IsActive = true,
+        //            IsLocked = false,
+        //            IsRequired = false,
+        //            Options = "",
+        //            QuestionDataTypeId = QuestionDataType.NotSet,
+        //            QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+        //            QuestionTypeId = QuestionType.Checkbox,
+        //            RegistrantTypeId = RegistrantType.Individual,
+        //            Text = "I understand the policy and procedures for being enrolled in a 21st CCLC activity",
+        //            Link = "https://rebornprojects.com/file/download/fcf9ba11-79c0-472d-a4cb-bdd67c2bf450/21ST-CCLC-Attendance-Behavior-Policy-2016-2017.docx"
+        //        }
+        //    };
 
-            var accountId = 18;
-            if (Utilities.IsLiveServer || Utilities.IsStagingServer)
-            {
-                accountId = 6;
-            }
+        //    var accountId = 18;
+        //    if (Utilities.IsLiveServer || Utilities.IsStagingServer)
+        //    {
+        //        accountId = 6;
+        //    }
 
-            var forms = Form.Load(criterias: new Hashtable() { { "AccountId", accountId } }, dc: dc);
+        //    var forms = Form.Load(criterias: new Hashtable() { { "AccountId", accountId } }, dc: dc);
 
-            foreach (var f in forms)
-            {
-                var account = Account.Load(f.AccountId.Value, dc: dc);
+        //    foreach (var f in forms)
+        //    {
+        //        var account = Account.Load(f.AccountId.Value, dc: dc);
 
-                foreach (var question in questions)
-                {
-                    FormQuestionGroup group = FormQuestionGroup.Load(
-                        criterias: new Hashtable() { { "Name", question.GroupName }, { "FormId", f.ID.Value } },
-                        dc: dc).FirstOrDefault();
+        //        foreach (var question in questions)
+        //        {
+        //            FormQuestionGroup group = FormQuestionGroup.Load(
+        //                criterias: new Hashtable() { { "Name", question.GroupName }, { "FormId", f.ID.Value } },
+        //                dc: dc).FirstOrDefault();
 
-                    if (group.IsEmpty())
-                    {
-                        int groupDisplayOrder = f.GetQuestionGroups(dc: dc).Where(x => x.RegistrantTypeId == RegistrantType.Individual).OrderBy(x => x.DisplayOrder).Last().DisplayOrder.Value + 1;
-                        group = new FormQuestionGroup();
-                        group.Name = question.GroupName;
-                        group.FormId = f.ID;
-                        group.DisplayOrder = groupDisplayOrder;
-                        group.RegistrantTypeId = question.RegistrantTypeId;
-                        group.LastModifiedDate = group.CreateDate = DateTime.UtcNow;
-                        group.LastModifiedBy = group.CreatedBy = 0;
-                        msgs.AddRange(group.Save(dc: dc));
-                    }
+        //            if (group.IsEmpty())
+        //            {
+        //                int groupDisplayOrder = f.GetQuestionGroups(dc: dc).Where(x => x.RegistrantTypeId == RegistrantType.Individual).OrderBy(x => x.DisplayOrder).Last().DisplayOrder.Value + 1;
+        //                group = new FormQuestionGroup();
+        //                group.Name = question.GroupName;
+        //                group.FormId = f.ID;
+        //                group.DisplayOrder = groupDisplayOrder;
+        //                group.RegistrantTypeId = question.RegistrantTypeId;
+        //                group.LastModifiedDate = group.CreateDate = DateTime.UtcNow;
+        //                group.LastModifiedBy = group.CreatedBy = 0;
+        //                msgs.AddRange(group.Save(dc: dc));
+        //            }
 
-                    FormQuestion q = FormQuestion.Load(criterias: new Hashtable() { { "Text", question.Text }, { "FormId", f.ID.Value } }, dc: dc).FirstOrDefault();
-                    if (q.IsEmpty())
-                    {
-                        int displayOrder = 0;
-                        if (group.GetAllQuestions(dc: dc).Any())
-                        {
-                            displayOrder = group.GetAllQuestions(dc: dc).OrderBy(x => x.DisplayOrder).Last().DisplayOrder.Value + 1;
-                        }
-                        q = new FormQuestion();
-                        q.Text = question.Text;
-                        q.IsActive = question.IsActive;
-                        q.IsRequired = question.IsRequired;
-                        q.FormId = f.ID;
-                        q.FormQuestionGroupId = group.ID;
-                        q.IsTemplate = account.DefaultFormId == f.ID;
-                        q.IsLocked = question.IsLocked;
-                        q.DisplayOrder = displayOrder;
-                        q.QuestionTypeId = question.QuestionTypeId;
-                        q.QuestionDataTypeId = question.QuestionDataTypeId;
-                        q.Options = question.Options;
-                        q.Link = question.Link;
-                        q.LastModifiedDate = q.CreateDate = DateTime.UtcNow;
-                        q.LastModifiedBy = q.CreatedBy = 0;
-                        msgs.AddRange(q.Save(dc: dc));
-                    }
-                }
-            }
+        //            FormQuestion q = FormQuestion.Load(criterias: new Hashtable() { { "Text", question.Text }, { "FormId", f.ID.Value } }, dc: dc).FirstOrDefault();
+        //            if (q.IsEmpty())
+        //            {
+        //                int displayOrder = 0;
+        //                if (group.GetAllQuestions(dc: dc).Any())
+        //                {
+        //                    displayOrder = group.GetAllQuestions(dc: dc).OrderBy(x => x.DisplayOrder).Last().DisplayOrder.Value + 1;
+        //                }
+        //                q = new FormQuestion();
+        //                q.Text = question.Text;
+        //                q.IsActive = question.IsActive;
+        //                q.IsRequired = question.IsRequired;
+        //                q.FormId = f.ID;
+        //                q.FormQuestionGroupId = group.ID;
+        //                q.IsTemplate = account.DefaultFormId == f.ID;
+        //                q.IsLocked = question.IsLocked;
+        //                q.DisplayOrder = displayOrder;
+        //                q.QuestionTypeId = question.QuestionTypeId;
+        //                q.QuestionDataTypeId = question.QuestionDataTypeId;
+        //                q.Options = question.Options;
+        //                q.Link = question.Link;
+        //                q.LastModifiedDate = q.CreateDate = DateTime.UtcNow;
+        //                q.LastModifiedBy = q.CreatedBy = 0;
+        //                msgs.AddRange(q.Save(dc: dc));
+        //            }
+        //        }
+        //    }
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
         public static SystemMessages UpdateApplicationSeatIndexesRunOnce(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
@@ -1653,34 +1387,6 @@ namespace AfterSchoolLibrary
             }
 
             return msgs;
-        }
-
-        private class QuestionHolder
-        {
-            public string Text;
-            public bool IsLocked;
-            public bool IsActive;
-            public bool IsRequired;
-            public QuestionType QuestionTypeId;
-            public string GroupName;
-            public string Options;
-            public QuestionDataType QuestionDataTypeId;
-            public QuestionGroupDataType QuestionGroupDataTypeId;
-            public RegistrantType RegistrantTypeId;
-            public string Link;
-
-            public static string StateList
-            {
-                get
-                {
-                    return BasicLibrary.Utilities.GetStateList();
-                }
-            }
-
-            public QuestionHolder()
-            {
-                RegistrantTypeId = RegistrantType.Individual;
-            }
         }
 
         public static string AmazonBucketNameLive { get; set; }

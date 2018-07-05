@@ -250,5 +250,16 @@ namespace AfterSchoolLibraryTests
             Assert.Single(hostaccount.GetDeniedVisitorAccounts(dc));
         }
 
+        [Fact]
+        public void GetOrCreateDefaultForm()
+        {
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var form = account.GetOrCreateDefaultForm(accountOwner, msgs, dc);
+
+            Assert.NotNull(form);
+            
+        }
+
     }
 }

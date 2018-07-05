@@ -726,7 +726,7 @@ namespace AfterSchoolLibrary
                     {
                         if (form.ToInteger() == 0)
                         {
-                            var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, adc);
+                            var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, msgs, adc);
                             var newForm = defaultForm.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, adc);
                             newForm.Name = (group.Name + " Form").MaxChars(100, "...");
                             msgs.AddRange(newForm.Save(adc));
