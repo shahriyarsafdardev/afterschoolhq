@@ -119,7 +119,7 @@ namespace AfterSchool.Areas.District.Controllers
                 { "maxgrade", maxgrade }
             };
 
-            var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount, id, values, msgs);
+            var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {

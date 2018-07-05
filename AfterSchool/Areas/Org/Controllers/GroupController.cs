@@ -119,7 +119,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "isinviteonly", isinviteonly }
             };
 
-            var group = ActivityGroup.SaveSession(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount, id, values, msgs);
+            var group = ActivityGroup.SaveSession(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {

@@ -655,7 +655,7 @@ namespace AfterSchoolLibrary
             return new TimeSpan();
         }
 
-        internal static ActivityGroup SaveActivityGroup(int loggedInUserId, Account account, ActivityGroupType activityGroupType, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        internal static ActivityGroup SaveActivityGroup(WebUser loggedInUser, Account account, ActivityGroupType activityGroupType, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -679,13 +679,13 @@ namespace AfterSchoolLibrary
             if (form.IsEmpty())
                 msgs.Add("Form is required", MessageType.UserError);
 
-            var group = ActivityGroup.LoadByUid(activityGroupUid.ToGuid());
+            var group = ActivityGroup.LoadByUid(activityGroupUid.ToGuid(), msgs, dc);
             var isNew = false;
             if (group.IsEmpty())
             {
                 group = new ActivityGroup();
                 group.CreateDate = DateTime.UtcNow;
-                group.CreatedBy = loggedInUserId;
+                group.CreatedBy = loggedInUser.ID;
                 group.Uid = activityGroupUid.ToGuid();
                 group.ActivityGroupTypeId = activityGroupType;
                 isNew = true;
@@ -726,8 +726,8 @@ namespace AfterSchoolLibrary
                     {
                         if (form.ToInteger() == 0)
                         {
-                            var defaultForm = account.GetDefaultForm(adc);
-                            var newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, adc);
+                            var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, adc);
+                            var newForm = defaultForm.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, adc);
                             newForm.Name = (group.Name + " Form").MaxChars(100, "...");
                             msgs.AddRange(newForm.Save(adc));
 
@@ -737,7 +737,7 @@ namespace AfterSchoolLibrary
                         group.AccountId = account.ID;
                         group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, adc);
                         group.LastModifiedDate = DateTime.UtcNow;
-                        group.LastModifiedBy = loggedInUserId;
+                        group.LastModifiedBy = loggedInUser.ID;
                         msgs.AddRange(group.Save(adc));
                         
                         group.GetActivities(false, false, null, null, false, adc)
@@ -746,17 +746,17 @@ namespace AfterSchoolLibrary
                             activity.GenderRestriction = group.GenderRestriction;
 
                             for (var i = group.MinGradeLevelId.Value; i <= group.MaxGradeLevelId.Value; i++)
-                                activity.AddGrade(i, loggedInUserId, msgs, dc);
+                                activity.AddGrade(i, loggedInUser.ID.Value, msgs, dc);
                             
                             msgs.AddRange(activity.Save(adc));
                         });
 
                         if (isNew)
                         {
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUserId, msgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUserId, msgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUserId, msgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUserId, msgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUser.ID.Value, msgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUser.ID.Value, msgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUser.ID.Value, msgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUser.ID.Value, msgs, adc);
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>
@@ -1070,14 +1070,14 @@ namespace AfterSchoolLibrary
             return group;
         }
 
-        public static ActivityGroup SaveSession(int loggedInUserId, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityGroup SaveSession(WebUser loggedInUser, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return SaveActivityGroup(loggedInUserId, account, ActivityGroupType.Session, activityGroupUid, values, msgs, dc);
+            return SaveActivityGroup(loggedInUser, account, ActivityGroupType.Session, activityGroupUid, values, msgs, dc);
         }
 
-        public static ActivityGroup SaveLeague(int loggedInUserId, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityGroup SaveLeague(WebUser loggedInUser, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return SaveActivityGroup(loggedInUserId, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
+            return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
         }
 
         #endregion
