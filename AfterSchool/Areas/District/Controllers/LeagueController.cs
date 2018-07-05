@@ -61,7 +61,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             return View(groups);
         }
-
+        [ValidateInput(false)]
         [HttpGet]
         public ActionResult Summary(string id)
         {
@@ -82,6 +82,7 @@ namespace AfterSchool.Areas.District.Controllers
             return View(group);
         }
 
+        [ValidateInput(false)]
         [HttpGet]
         public ActionResult Edit(string id)
         {
@@ -143,6 +144,7 @@ namespace AfterSchool.Areas.District.Controllers
 
         }
 
+        [ValidateInput(false)]
         [HttpPost]
         public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade)
         {
@@ -152,9 +154,9 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 { "name", name },
                 { "description", description },
-                { "regmode", regmode },
+                { "regmode", ((int)RegistrationMode.Register).ToString() },
                 { "form", form },
-                { "isinviteonly", isinviteonly },
+                { "isinviteonly", 0.ToString() },
                 { "genderrestrictions", genderrestrictions },
                 { "mingrade", mingrade },
                 { "maxgrade", maxgrade }
