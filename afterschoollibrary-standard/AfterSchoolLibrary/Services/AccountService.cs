@@ -239,6 +239,11 @@ namespace AfterSchoolLibrary
             return form;
         }
 
+        public static Form GetOrCreateDefaultForm(this Account account, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            return account.GetDefaultForm(dc) ?? CreateDefaultForm(account, loggedInUser, dc: dc);
+        }
+
         public static Form GetDefaultForm(this Account account, DatabaseConnection dc = null)
         {
             return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, dc: dc) : null;
