@@ -1,4 +1,4 @@
-﻿ @model ActivityGroup
+﻿@model ActivityGroup
 @{
 
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
@@ -13,7 +13,7 @@
     </div>
 </div>
 
-<div class="form-group hide">
+<div class="form-group">
     <label class="col-md-3 control-label">
         About / Description
         <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Registration Description / Instructions" data-placement="top"></i>
@@ -28,29 +28,28 @@
     </div>
 </div>
 
-@if (accountPackage.HasFeature(FeatureType.ManageForms))
-{ // should ignore if from district
-    <div class="form-group">
-        <label class="col-md-3 control-label">
-            Registration Form <span class="text-danger">*</span>
-        </label>
-        <div class="col-md-6">
-            <select name="form" id="form" class="form-control" required>
-                <option value="">Select Form...</option>
-                <option value="0"> + New Form</option>
-                @foreach (var form in forms)
-                {
-                    <option value="@form.ID" @(Model.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-3">
-            <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = Model.FormId })" id="editForm" target="_blank">Edit Form</a>
-        </div>
+
+<div class="form-group">
+    <label class="col-md-3 control-label">
+        Registration Form <span class="text-danger">*</span>
+    </label>
+    <div class="col-md-6">
+        <select name="form" id="form" class="form-control" required>
+            <option value="">Select Form...</option>
+            <option value="0"> + New Form</option>
+            @foreach (var form in forms)
+            {
+                <option value="@form.ID" @(Model.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+            }
+        </select>
     </div>
-}
+    <div class="col-md-3">
+        <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = Model.FormId })" id="editForm" target="_blank">Edit Form</a>
+    </div>
+</div>
 @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.SchoolDistrict)
 {
+
     <div class="form-group">
         <label class="col-sm-3 control-label">Invite Only</label>
         <div class="col-sm-9">
@@ -89,7 +88,7 @@
     {
         <input type="hidden" name="regmode" value="@((int)RegistrationMode.Register)" />
     }
- }
+}
 
 @if (Model.ActivityGroupTypeId == ActivityGroupType.League)
 {
@@ -116,16 +115,16 @@
         </label>
         <div class="col-md-1">
             @{Html.RenderPartial
-                      (
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.MinGradeLevelId.HasValue,
-                          new ViewDataDictionary()
-                          {
+                          (
+                              "~/Views/Shared/_SwitchButton.cshtml",
+                              Model.MinGradeLevelId.HasValue,
+                              new ViewDataDictionary()
+                              {
                         { "checkboxname", "graderestrictions" },
                         { "checkboxid", "graderestrictions" },
                         { "disabled", false }
-                          }
-                      );
+                              }
+                          );
             }
         </div>
         <div class="col-md-5 hide" id="grade">

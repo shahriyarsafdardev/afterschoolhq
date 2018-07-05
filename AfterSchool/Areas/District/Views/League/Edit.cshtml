@@ -24,7 +24,8 @@
 
                 <form id="form1" method="post" action="@Url.Action("edit", "league", new { id = Model.Uid })" class="form-horizontal">
 
-                    @{ Html.RenderPartial("~/Views/Shared/_ActivityGroupEdit.cshtml", Model); }
+                    @{ Html.RenderPartial("~/Views/Shared/_ActivityGroupEdit.cshtml", Model);
+                        }
                     
 
                     @{
