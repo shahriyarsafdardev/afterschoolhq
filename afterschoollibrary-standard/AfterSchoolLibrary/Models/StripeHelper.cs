@@ -20,7 +20,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                if(Utilities.IsLiveServer)
+                if(Utilities.IsProduction)
                 {
                     return LiveSecretKey;
                 }
@@ -34,7 +34,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                if (Utilities.IsLiveServer)
+                if (Utilities.IsProduction)
                 {
                     return LivePublishableKey;
                 }
@@ -48,7 +48,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                if (Utilities.IsLiveServer)
+                if (Utilities.IsProduction)
                 {
                     return LivePlatformClientId;
                 }

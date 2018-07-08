@@ -28,60 +28,64 @@ namespace AfterSchoolLibrary
             return BaseUrl(isAfterSchool) + "/paypal/notification/";
         }
 
-        public static bool IsLiveServer
+        public static bool IsProduction
         {
             get
             {
-                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-live"))
-                {
+                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-production"))
                     return true;
-                }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
         }
-        public static bool IsStagingServer
+        public static bool IsStaging
+        {
+            get
+            {
+                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-staging"))
+                    return true;
+
+                return false;
+            }
+        }
+        public static bool IsTest
         {
             get
             {
                 if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-test"))
-                {
                     return true;
-                }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
         }
-        public static bool IsDevServer
+        public static bool IsCI
         {
             get
             {
-                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-dev"))
-                {
+                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-ci"))
                     return true;
-                }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
         }
-        public static bool isLocalHost
+        public static bool IsQA
         {
             get
             {
-                if (!IsLiveServer && !IsStagingServer && !IsDevServer)
-                {
+                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-qa"))
                     return true;
-                }
-                else
-                {
-                    return false;
-                }
+
+                return false;
+            }
+        }
+        public static bool IsLocalHost
+        {
+            get
+            {
+                if (!IsProduction && !IsStaging && !IsCI && !IsQA)
+                    return true;
+
+                return false;
             }
         }
 
@@ -89,17 +93,21 @@ namespace AfterSchoolLibrary
 
         public static string GetRollbarEnvironment()
         {
-            if (IsLiveServer)
+            if (IsProduction)
             {
                 return "production";
             }
-            else if (IsStagingServer)
+            else if (IsStaging)
             {
                 return "staging";
             }
-            else if (IsDevServer)
+            else if (IsCI)
             {
                 return "ci";
+            }
+            else if (IsQA)
+            {
+                return "qa";
             }
             else
             {
@@ -174,7 +182,7 @@ namespace AfterSchoolLibrary
 
         public static string BaseUrl(bool isAfterSchool)
         {
-            return UseSSL && !isLocalHost ? BaseUrlHttps(isAfterSchool) : BaseUrlHttp(isAfterSchool);
+            return UseSSL && !IsLocalHost ? BaseUrlHttps(isAfterSchool) : BaseUrlHttp(isAfterSchool);
         }
 
         public static string BaseUrlHttp(bool isAfterSchool)
@@ -204,26 +212,29 @@ namespace AfterSchoolLibrary
             Utilities.MasterAPIKey = ""; //at least 45 random alphanumeric characters
             Utilities.MasterAPISecret = ""; //at least 65 random alphanumeric characters
 
-            Utilities.AmazonBucketNameDev = "enrollhq.dev"; //all files are stored in amazon bucket
-            Utilities.AmazonBucketNameStaging = "enrollhq.test";
-            Utilities.AmazonBucketNameLive = "enrollhq.live";
-            Utilities.AmazonBucketNameLocal = "enrollhq.local";
+            Utilities.AmazonBucketNameCI = "afterschoolhq-ci"; //all files are stored in amazon bucket
+            Utilities.AmazonBucketNameQA = "afterschoolhq-qa"; //all files are stored in amazon bucket
+            Utilities.AmazonBucketNameStaging = "afterschoolhq-staging"; //all files are stored in amazon bucket
+            Utilities.AmazonBucketNameTest = "afterschoolhq-test"; //all files are stored in amazon bucket
+            Utilities.AmazonBucketNameProduction = "afterschoolhq-prod"; //all files are stored in amazon bucket
+            Utilities.AmazonBucketNameLocal = "afterschoolhq-local"; //all files are stored in amazon bucket
 
             Utilities.AmazonAccessKeyId = "AKIAIRWKZE6AEP57RE2Q";
             Utilities.AmazonSecretAccessKeyId = "j8rbG/g32C2f15U0xLy4os5RNkypQgFxxVqCcS9N";
 
-            Email.AppAdminEmailAddress = "support@enrollhq.com"; //all app admin emails are sent to this email address
-            Email.ReplyHostName = "enrollhq.com"; // can be modified based on live/dev/test server
-            Email.SenderHostName = "mailer.enrollhq.com"; // can be modified based on live/dev/test server
+            Email.AppAdminEmailAddress = "support@afterschoolhq.com"; //all app admin emails are sent to this email address
+            Email.ReplyHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
+            Email.SenderHostName = "mailer.afterschoolhq.com"; // can be modified based on live/dev/test server
 
             Email.HostNameLiveEnrollHQ = "enrollhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
             Email.HostNameStagingEnrollHQ = "staging.enrollhq.com";
             Email.HostNameDevEnrollHQ = "dev.enrollhq.com";
             Email.HostNameLocalEnrollHQ = "localhost:54849";
 
-            Email.HostNameLiveAfterSchoolHQ = "afterschoolhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
+            Email.HostNameProductionAfterSchoolHQ = "afterschoolhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
             Email.HostNameStagingAfterSchoolHQ = "staging.afterschoolhq.com";
-            Email.HostNameDevAfterSchoolHQ = "dev.afterschoolhq.com";
+            Email.HostNameCIAfterSchoolHQ = "ci.afterschoolhq.com";
+            Email.HostNameQAAfterSchoolHQ = "qa.afterschoolhq.com";
             Email.HostNameLocalAfterSchoolHQ = "localhost:54849";
 
             Utilities.ReCaptchaPrivateKey = "6Lfk694SAAAAAH5e3gWv3JckrYzz2scslo_rop6M"; //can be used as standard re-captcha
@@ -828,7 +839,7 @@ namespace AfterSchoolLibrary
             var activityIds = ras.Select(x => x.ActivityId.Value).ToList();
 
             var accountId = 18;
-            if (Utilities.IsLiveServer || Utilities.IsStagingServer)
+            if (Utilities.IsProduction || Utilities.IsStaging)
             {
                 accountId = 6;
             }
@@ -1389,26 +1400,36 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static string AmazonBucketNameLive { get; set; }
+        public static string AmazonBucketNameProduction { get; set; }
+        public static string AmazonBucketNameTest { get; set; }
         public static string AmazonBucketNameStaging { get; set; }
-        public static string AmazonBucketNameDev { get; set; }
+        public static string AmazonBucketNameCI { get; set; }
+        public static string AmazonBucketNameQA { get; set; }
         public static string AmazonBucketNameLocal { get; set; }
 
         public static string AmazonBucketName
         {
             get
             {
-                if (Utilities.IsLiveServer)
+                if (Utilities.IsProduction)
                 {
-                    return AmazonBucketNameLive;
+                    return AmazonBucketNameProduction;
                 }
-                else if (Utilities.IsStagingServer)
+                else if (Utilities.IsStaging)
                 {
                     return AmazonBucketNameStaging;
                 }
-                else if (Utilities.IsDevServer)
+                else if (Utilities.IsQA)
                 {
-                    return AmazonBucketNameDev;
+                    return AmazonBucketNameQA;
+                }
+                else if (Utilities.IsTest)
+                {
+                    return AmazonBucketNameTest;
+                }
+                else if (Utilities.IsCI)
+                {
+                    return AmazonBucketNameCI;
                 }
                 else
                 {
@@ -1421,39 +1442,37 @@ namespace AfterSchoolLibrary
     public class Email
     {
         public static string HostNameLiveEnrollHQ = "";
-        public static string HostNameLiveAfterSchoolHQ = "";
         public static string HostNameStagingEnrollHQ = "";
-        public static string HostNameStagingAfterSchoolHQ = "";
         public static string HostNameDevEnrollHQ = "";
-        public static string HostNameDevAfterSchoolHQ = "";
         public static string HostNameLocalEnrollHQ = "";
+
+        public static string HostNameProductionAfterSchoolHQ = "";
+        public static string HostNameStagingAfterSchoolHQ = "";
+        public static string HostNameCIAfterSchoolHQ = "";
+        public static string HostNameQAAfterSchoolHQ = "";
         public static string HostNameLocalAfterSchoolHQ = "";
 
         public static string HostName(bool isAfterSchool)
         {            
-            if (Utilities.IsLiveServer)
+            if (Utilities.IsProduction)
             {
-                if (isAfterSchool)
-                    return HostNameLiveAfterSchoolHQ;
-                return HostNameLiveEnrollHQ;
+                return HostNameProductionAfterSchoolHQ;
             }
-            else if (Utilities.IsStagingServer)
+            else if (Utilities.IsStaging)
             {
-                if (isAfterSchool)
-                    return HostNameStagingAfterSchoolHQ;
-                return HostNameStagingEnrollHQ;
+                return HostNameStagingAfterSchoolHQ;
             }
-            else if (Utilities.IsDevServer)
+            else if (Utilities.IsCI)
             {
-                if (isAfterSchool)
-                    return HostNameDevAfterSchoolHQ;
-                return HostNameDevEnrollHQ;
+                return HostNameCIAfterSchoolHQ;
+            }
+            else if (Utilities.IsQA)
+            {
+                return HostNameQAAfterSchoolHQ;
             }
             else
             {
-                if (isAfterSchool)
-                    return HostNameLocalAfterSchoolHQ;
-                return HostNameLocalEnrollHQ;
+                return HostNameLocalAfterSchoolHQ;
             }
         }
 
