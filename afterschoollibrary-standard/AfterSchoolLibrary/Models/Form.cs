@@ -10,33 +10,33 @@ using System.Collections;
 
 namespace AfterSchoolLibrary
 {
-    /// <summary>
+	/// <summary>
     /// A registration form object. It contains multiple Form Question Groups.
     /// </summary>
-
+	
     public class Form : BasicLookUpObject
     {
-        #region "ClassGenerator"
+		#region "ClassGenerator"
 
-        /// <summary>
-        /// Required
-        /// </summary>
-        public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
-        /// <summary>
-        /// Required
-        /// </summary>
-        public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
-        public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-        public string AccountName { get { return (string)MDV["AccountName"].Value; } }
-
+		/// <summary>
+		/// Required
+		/// </summary>
+		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		/// <summary>
+		/// Required
+		/// </summary>
+		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
+		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
+		
 
         public Form()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(Form).Name, "ID");
             this.LoadObjectValues(ObjectMap);
-            this.Uid = Guid.NewGuid();
-            this.IsActive = false;
-
+			this.Uid = Guid.NewGuid();
+			this.IsActive = false;
+			
         }
 
         public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
@@ -46,11 +46,11 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Form).Name;
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
-                _dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
-                _dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-                _dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
-                _dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
-
+				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
+				
                 return _dp;
             }
         }
@@ -67,8 +67,8 @@ namespace AfterSchoolLibrary
             get
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(Form).Name);
-                dq.Joins.Add(Account.ObjectMap["ID"], Form.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
-
+				dq.Joins.Add(Account.ObjectMap["ID"], Form.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
+				
                 return dq;
             }
         }
@@ -85,9 +85,9 @@ namespace AfterSchoolLibrary
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
+			dq.UseParameterizedQuery = false;
+			dq.SelectRange.Start = start;
+			dq.SelectRange.Length = length;
             return Form.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -98,19 +98,19 @@ namespace AfterSchoolLibrary
             return Form.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
-        public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+			var msgs = new SystemMessages();
 
-            if (this.AccountId.IsEmpty())
-                msgs.Add("AccountId is required on Form object", MessageType.Error);
-            if (this.Uid.IsEmpty())
-                msgs.Add("Uid is required on Form object", MessageType.Error);
+			if (this.AccountId.IsEmpty())
+				msgs.Add("AccountId is required on Form object", MessageType.Error);
+			if (this.Uid.IsEmpty())
+				msgs.Add("Uid is required on Form object", MessageType.Error);
+			
+			if (msgs.HasNoErrors())
+				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Form).Name));
 
-            if (msgs.HasNoErrors())
-                msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Form).Name));
-
-            return msgs;
+			return msgs;
         }
 
         public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -128,49 +128,49 @@ namespace AfterSchoolLibrary
             SystemMessages msgs = new SystemMessages();
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
-            dps = new BasicLibrary.DataAccess.DatabaseParameters();
-            dps.Add(ObjectMap["AccountId"]);
-            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-            dps = new BasicLibrary.DataAccess.DatabaseParameters();
-            dps.Add(ObjectMap["Uid"]);
-            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-            dps = new BasicLibrary.DataAccess.DatabaseParameters();
-            dps.Add(ObjectMap["IsActive"]);
-            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsActive"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-
+			
 
             return msgs;
         }
 
-        public Form Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return Form.Load(this.ID.Value, msgs, dc: dc);
-        }
+		public Form Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			return Form.Load(this.ID.Value, msgs, dc: dc);
+		}
+		
+		public static List<Form> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
 
-        public static List<Form> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
+		public static Form LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
 
-        public static Form LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["Uid"], Uid);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         public int GetQuestionCount(DatabaseConnection dc = null)
         {

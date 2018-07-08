@@ -2,20 +2,25 @@
 
 [begin]
 type: Database
-livename: AfterSchool
-liveserver: enrollhq.cbf5h6cofkb3.us-east-2.rds.amazonaws.com
-liveusername: AfterSchoolUser
-livepassword: Nj8Ed$wpLfJ
+productionname: AfterSchool
+productionserver: afterschool.cdyenngbc33v.us-east-2.rds.amazonaws.com
+productionusername: AfterSchoolUser
+productionpassword: Nj8Ed$wpLfJ
 
-stagingname: AfterSchoolTest
-stagingserver: enrollhq.cbf5h6cofkb3.us-east-2.rds.amazonaws.com
+stagingname: AfterSchoolStaging
+stagingserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
 stagingusername: AfterSchoolUser
 stagingpassword: Nj8Ed$wpLfJ
 
-devname: AfterSchoolDev
-devserver: enrollhq.cbf5h6cofkb3.us-east-2.rds.amazonaws.com
-devusername: AfterSchoolUser
-devpassword: Nj8Ed$wpLfJ
+qaname: AfterSchoolQA
+qaserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
+qausername: AfterSchoolUser
+qapassword: Nj8Ed$wpLfJ
+
+ciname: AfterSchoolCI
+ciserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
+ciusername: AfterSchoolUser
+cipassword: Nj8Ed$wpLfJ
 
 localname: AfterSchool
 localserver: localhost
