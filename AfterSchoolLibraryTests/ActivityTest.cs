@@ -263,7 +263,10 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetDaysOfTheWeek(dc: dc));
         }
-        // Returns a list of the registrants that have "signed up" for the activity
+
+        /// <summary>
+        /// Returns a list of the registrants that have "signed up" for the activity
+        /// </summary>
         [Fact]
         public void GetRegistrantsTest()
         {
@@ -271,10 +274,15 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
 
-            var x = activity.GetRegistrants(dc: dc);
-            Assert.Single(activity.GetRegistrants(dc: dc));
+            int registrationPeriodID = registrationPeriod.ID.Value;
+            int numberOfSeats = 12;
+            int numberOfWaitingListSeats = 1;
+            int numberOfApplicationSeats = 1;
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
+
+            Assert.Equal(registrant.ToString(), activity.GetRegistrants(dc: dc).ElementAt(0).ToString());
         }
         
         [Fact]
@@ -288,18 +296,21 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetRegistrantActivities(true, dc: dc));
         }
-        // Returns a list of all of the RegistrantActivities associated with the activity
+
+        /// <summary>
+        ///  Returns a list of all of the RegistrantActivities associated with the activity
+        /// </summary>
         [Fact]
         public void GetRegistrantsCountTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+            var activity = Factories.ActivityFactory.Create(account, seatsAvailable: 12, msgs: msgs, dc: dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
             var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-            activity.SeatsAvailable = 1;
-            activity.Save(dc: dc);
-
+         
+            // registrant activity not filling seat??
+            var debug = activity.GetRegistrantCount(dc: dc);
             Assert.NotEqual(0, activity.GetRegistrantCount(dc: dc));
         }
 
@@ -314,7 +325,7 @@ namespace AfterSchoolLibraryTests
             var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
 
             var n = new RegistrantAssignment() { RegistrantId = registrant.ID.Value };
-
+            var debug = activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc);
             Assert.Equal(1, activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc));
         }
         
@@ -329,6 +340,7 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
             var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+
             Assert.False(activity.IsFull(dc: dc));
         }
 
@@ -362,13 +374,16 @@ namespace AfterSchoolLibraryTests
             Assert.True(activity.HasGradeLevel(gradeLevel, dc: dc));
         }
 
-        //Returns a list of all of the grade levels associated with that activity
+        /// <summary>
+        /// Returns a list of all of the grade levels associated with that activity
+        /// </summary>
         [Fact]
         public void GetGradeLevelsTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+            // make new factory
             var gradeLevel = Factories.GradeLevelFactory.Create(msgs, dc: dc);
             gradeLevel.ID = 12;
             gradeLevel.Save(dc: dc);
@@ -377,17 +392,22 @@ namespace AfterSchoolLibraryTests
       
             Assert.Single(activity.GetGradeLevels(dc: dc));
         }
-        //Returns a list of all WebUSers signed up for the same activityID
+
+  
+        /// <summary>
+        /// Returns a list of all WebUSers signed up for the same activityID
+        /// </summary>
         [Fact]
         public void GetTeamMembersTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var User = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var activityWebUser = Factories.ActivityWebUserFactory.Create(activity, User, msgs, dc: dc);
+            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+            var activityWebUser = Factories.ActivityWebUserFactory.Create(activity, user, msgs, dc: dc);
+            var debug = activity.GetTeamMembers(dc: dc).ElementAt(0);
 
-            Assert.Single(activity.GetTeamMembers(dc: dc));
+            Assert.Equal(activityWebUser.ToString(), activity.GetTeamMembers(dc: dc).ElementAt(0).ToString());
         }
 
         //returns a list of all forms ascociated with that activity

@@ -59,6 +59,10 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(registrantActivity.ToActivity(true, dc: dc));
         }
 
+
+        /// <summary>
+        /// test for loading a RegistrantActivity by n Activity Id
+        /// </summary>
         [Fact]
         public void LoadByActivityIdTest()
         {
@@ -70,9 +74,12 @@ namespace AfterSchoolLibraryTests
 
             registrantActivity = registrantActivity.Reload(dc: dc);
 
-            Assert.Single(RegistrantActivity.LoadByActivityId(activity.ID.Value, dc: dc));
+            Assert.Equal(registrantActivity.ToString(), RegistrantActivity.LoadByActivityId(activity.ID.Value, dc: dc).ElementAt(0).ToString());
         }
 
+        /// <summary>
+        /// Test for getting the total seat count of a RegistrantActivity by and Activity Id
+        /// </summary>
         [Fact]
         public void GetSeatCountByActivityIdTest()
         {
@@ -83,9 +90,13 @@ namespace AfterSchoolLibraryTests
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
             registrantActivity = registrantActivity.Reload(dc: dc);
 
-            Assert.NotEqual(0, RegistrantActivity.GetSeatCountByActivityId(activity.ID.Value, dc: dc));
+            Assert.Equal(registrantActivity.TotalSeats.ToString(), RegistrantActivity.LoadByAccountId(account.ID.Value, null, null, dc: dc).ElementAt(0).TotalSeats.ToString());
         }
 
+        /// <summary>
+        /// Test for getting the total seat count of RegistrantActivity by the account id,
+        /// first load the registrant activity by account id and test the seat count
+        /// </summary>
         [Fact]
         public void GetSeatCountByAccountIdTest()
         {
@@ -97,9 +108,12 @@ namespace AfterSchoolLibraryTests
 
             registrantActivity = registrantActivity.Reload(dc: dc);
 
-            Assert.Single(RegistrantActivity.LoadByAccountId(account.ID.Value,null,null, dc: dc));
+            Assert.Equal(registrantActivity.TotalSeats.ToString(), RegistrantActivity.LoadByAccountId(account.ID.Value,null,null, dc: dc).ElementAt(0).TotalSeats.ToString());
         }
 
+        /// <summary>
+        /// Test for getting the seat count of a RegistrantActivity by the registration period id
+        /// </summary>
         [Fact]
         public void GetSeatCountByRegistrationPeriodIdTest()
         {
@@ -107,15 +121,18 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
-            registrantActivity.NumberOfSeats = 12;
-            registrantActivity.NumberOfWaitingListSeats = 1;
-            registrantActivity.NumberOfApplicationSeats = 1;
-            registrantActivity.Save(dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs,dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
+
+            int registrationPeriodID = registrationPeriod.ID.Value;
+            int numberOfSeats = 12;
+            int numberOfWaitingListSeats = 1;
+            int numberOfApplicationSeats = 1;
+
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
             registrationPeriod.AddActivity(activity, true, user.ID.Value, dc);
 
-            Assert.NotEqual(0,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrationPeriod.ID.Value, dc: dc));
+            // expect 13 seats, 12 seats + 1 waiting list seat
+            Assert.Equal(13,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrationPeriod.ID.Value, dc: dc));
         }
         /// <summary>
         /// Test for retrieving the total number of seats for an  Registrant Activity
@@ -216,6 +233,10 @@ namespace AfterSchoolLibraryTests
             Assert.Single(RegistrantActivity.GetByActivityIds(list2,list,s, dc: dc));
         }
 
+        /// <summary>
+        /// Test for retrieving registrantActivity from DB
+        /// Needs to be fixed
+        /// </summary>
         [Fact]
         public void GetRegistrationActivityTest()
         {
@@ -223,9 +244,10 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+            var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc: dc);
 
-            Assert.NotNull(registrantActivity.GetRegistrationActivity(dc: dc));
+            Assert.Equal(registrantActivity.ToString(), registrantActivity.GetRegistrationActivity(dc: dc).ToString());
         }
 
         [Fact]

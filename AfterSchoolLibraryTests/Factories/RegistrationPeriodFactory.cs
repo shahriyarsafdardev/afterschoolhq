@@ -18,6 +18,7 @@ namespace AfterSchoolLibraryTests.Factories
                 StartDateTime = DateTime.UtcNow,
                 EndDateTime = DateTime.UtcNow.AddDays(7),
             };
+
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
