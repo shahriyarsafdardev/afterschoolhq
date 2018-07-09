@@ -16,7 +16,7 @@ namespace AfterSchool.Models
         {
             if (!SessionVariables.IsAfterSchool.HasValue)
             {
-                SessionVariables.IsAfterSchool = HttpContext.Current.Request.Url.Host.Contains("afterschool");
+                SessionVariables.IsAfterSchool = true;
             }
 
             return SessionVariables.IsAfterSchool.Value;
@@ -32,7 +32,7 @@ namespace AfterSchool.Models
 
         public static void SetAfterSchool(bool isAfterSchool)
         {
-            SessionVariables.IsAfterSchool = isAfterSchool;
+            SessionVariables.IsAfterSchool = true;
         }
     }
 }
