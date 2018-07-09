@@ -111,6 +111,8 @@ namespace AfterSchoolLibrary
 				msgs.Add("Price is required on Package object", MessageType.Error);
 			if (this.PricePerYear.IsEmpty())
 				msgs.Add("PricePerYear is required on Package object", MessageType.Error);
+			if (this.Name.IsEmpty())
+				msgs.Add("Name is required on Package object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Package).Name));
@@ -269,7 +271,7 @@ namespace AfterSchoolLibrary
 
                 try
                 {
-                    product = productService.Get("", requestOptions);
+                    product = productService.Get(this.GetStripePlanId(billingPeriodType), requestOptions);
                 }
                 catch (Stripe.StripeException ex)
                 {
@@ -282,8 +284,9 @@ namespace AfterSchoolLibrary
                     options.Id = this.GetStripePlanId(billingPeriodType);
                     options.Name = this.GetStripePlanName(billingPeriodType);
                     options.StatementDescriptor = $"{Utilities.AppName(false)} - {this.Name}".MaxChars(22);
-                    options.Shippable = false;
+                    // options.Shippable = false; not used in api anymore
                     options.Active = true;
+                    options.Type = "service";
 
                     productService = new Stripe.StripeProductService(StripeHelper.SecretKey);
                     productService.Create(options, requestOptions);
@@ -361,7 +364,7 @@ namespace AfterSchoolLibrary
             }
             catch(Exception ex)
             {
-                // no existing plan/product
+                // no existing product
             }
 
             if (product.IsEmpty())
@@ -374,7 +377,7 @@ namespace AfterSchoolLibrary
 
         public string GetStripePlanId(BillingPeriodType billingPeriodType)
         {
-            return this.ID.ToString() + (billingPeriodType == BillingPeriodType.Year ? $" - {billingPeriodType.ToString()}ly" : "");
+            return this.ID.ToString() + (billingPeriodType == BillingPeriodType.Year ? $"-{billingPeriodType.ToString().ToLower()}ly" : "");
         }
 
         public string GetStripePlanName(BillingPeriodType billingPeriodType)

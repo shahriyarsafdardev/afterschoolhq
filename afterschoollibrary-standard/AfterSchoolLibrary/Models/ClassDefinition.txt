@@ -933,6 +933,7 @@ property: IsActive, bool, Bit
 property: IsPopular, bool, Bit
 property: IsAfterSchool, bool, Bit
 property: Uid, Guid, UniqueIdentifier
+baseproperty: Name, required
 loadmethod: IsActive, List<>
 loadmethod: IsActive|IsAfterSchool, List<>
 loadmethod: IsPopular, List<>
