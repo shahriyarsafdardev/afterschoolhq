@@ -13,7 +13,12 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static RegistrationPeriod Create(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var obj = new RegistrationPeriod() { };
+            var obj = new RegistrationPeriod()
+            {
+                StartDateTime = DateTime.UtcNow,
+                EndDateTime = DateTime.UtcNow.AddDays(7),
+            };
+
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

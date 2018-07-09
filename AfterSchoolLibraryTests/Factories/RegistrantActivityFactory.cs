@@ -17,5 +17,31 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static RegistrantActivity Create(Activity activity, Registrant registrant, Registration registration, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new RegistrantActivity()
+            {
+                ActivityId = activity.ID,
+                RegistrantId = registrant.ID,
+                RegistrationId = registration.ID,
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+
+        public static RegistrantActivity Create(Activity activity, Registrant registrant, int registrationPeriodID, int numberOfSeats, int numberOfWaitingListSeats, int numberOfApplicationSeats, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new RegistrantActivity() {
+                ActivityId = activity.ID,
+                RegistrantId = registrant.ID,
+                RegistrationPeriodId = registrationPeriodID,
+                NumberOfSeats = numberOfSeats,
+                NumberOfWaitingListSeats = numberOfWaitingListSeats,
+                NumberOfApplicationSeats = numberOfApplicationSeats
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
     }
 }
