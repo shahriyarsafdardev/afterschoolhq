@@ -283,7 +283,7 @@ namespace AfterSchoolLibrary
                     var options = new Stripe.StripeProductCreateOptions();
                     options.Id = this.GetStripePlanId(billingPeriodType);
                     options.Name = this.GetStripePlanName(billingPeriodType);
-                    options.StatementDescriptor = $"{Utilities.AppName(false)} - {this.Name}".MaxChars(22);
+                    options.StatementDescriptor = $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22);
                     // options.Shippable = false; not used in api anymore
                     options.Active = true;
                     options.Type = "service";
@@ -295,7 +295,7 @@ namespace AfterSchoolLibrary
                 {
                     var options = new Stripe.StripeProductUpdateOptions();
                     options.Name = this.GetStripePlanName(billingPeriodType);
-                    options.StatementDescriptor = $"{Utilities.AppName(false)} - {this.Name}".MaxChars(22);
+                    options.StatementDescriptor = $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22);
                     productService.Update(product.Id, options, requestOptions);
                 }
             }
