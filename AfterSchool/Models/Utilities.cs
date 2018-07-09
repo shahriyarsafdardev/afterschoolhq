@@ -14,11 +14,7 @@ namespace AfterSchool.Models
     {
         public static bool IsAfterSchool()
         {
-            if (!SessionVariables.IsAfterSchool.HasValue)
-            {
-                SessionVariables.IsAfterSchool = true;
-            }
-
+            SessionVariables.IsAfterSchool = true;
             return SessionVariables.IsAfterSchool.Value;
         }
 

@@ -14,10 +14,11 @@ namespace AfterSchool.Controllers
 {
     public class DbController : BaseController
     {
-        public ActionResult Update()
+        public ActionResult Update(string id)
         {
-            SystemMessages msgs = new SystemMessages();
-            msgs.AddRange(AfterSchoolLibrary.Utilities.InitDatabase("darye@reborncode.com", "aDm1n1906", false, "EnrollHQ"));
+
+            var msgs = new SystemMessages();
+            msgs.AddRange(AfterSchoolLibrary.Utilities.InitDatabase("darye@afterschool.com", "help students learn", false, "AfterSchool HQ"));
             
             Response.Clear();
             Response.Write(msgs.RenderMessageList(MessageOutputType.Text));
