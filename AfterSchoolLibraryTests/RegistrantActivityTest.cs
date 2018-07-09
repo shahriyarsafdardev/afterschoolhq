@@ -128,12 +128,13 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
-            registrantActivity.RegistrationPeriodId = registrationPeriod.ID;
-            registrantActivity.NumberOfSeats = 12;
-            registrantActivity.NumberOfWaitingListSeats = 1;
-            registrantActivity.NumberOfApplicationSeats = 1;
-            registrantActivity.Save(dc);
+
+            int registrationPeriodID = registrationPeriod.ID.Value;
+            int numberOfSeats = 12;
+            int numberOfWaitingListSeats = 1;
+            int numberOfApplicationSeats = 1;
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
+            
             //expect 13 because we added a waiting list seat
             Assert.Equal(13 ,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value, dc: dc));
         }
@@ -162,7 +163,11 @@ namespace AfterSchoolLibraryTests
             registrantActivities.Add(registrantActivity1);
             registrantActivities.Add(registrantActivity2);
 
-            Assert.Equal(registrantActivities.ToString(), RegistrantActivity.LoadByRegistrationIds(registrationIds, dc: dc).ToString());
+            Assert.Equal(
+                registrantActivities.Select(ra => ra.ID.Value).ToArray().ToStringArray().ToString(), 
+                RegistrantActivity.LoadByRegistrationIds(registrationIds, dc: dc).Select( ra => ra.ID.Value).ToArray().ToStringArray().ToString()
+
+            );
         }
         /// <summary>
         /// Test loading RegistrantActivities (list) by a registrant id from RegistrantActivity Table
@@ -177,11 +182,14 @@ namespace AfterSchoolLibraryTests
             var registrantActivity1 = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
             var registrantActivity2 = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
 
-            List<RegistrantActivity> registrationActivities = new List<RegistrantActivity>();
-            registrationActivities.Add(registrantActivity1);
-            registrationActivities.Add(registrantActivity2);
+            List<RegistrantActivity> registrantActivities = new List<RegistrantActivity>();
+            registrantActivities.Add(registrantActivity1);
+            registrantActivities.Add(registrantActivity2);
 
-            Assert.Equal(registrationActivities.ToString(), RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, dc: dc).ToString());
+            Assert.Equal(
+                registrantActivities.Select(ra => ra.ID.Value).ToArray().ToStringArray().ToString(),
+                RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, dc: dc).Select(ra => ra.ID.Value).ToArray().ToStringArray().ToString()
+            );
         }
 
         /// <summary>

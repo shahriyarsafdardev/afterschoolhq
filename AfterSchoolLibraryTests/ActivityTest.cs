@@ -972,11 +972,8 @@ namespace AfterSchoolLibraryTests
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
-            activity.ActivityScheduleId = schedule.ID.Value;
-            activity.Save(dc);
+            var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
 
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
             activityInstance.StartDateTime = new DateTime(1, 1, 1);
