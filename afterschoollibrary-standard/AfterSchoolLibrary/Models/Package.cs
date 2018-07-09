@@ -353,7 +353,17 @@ namespace AfterSchoolLibrary
         public Stripe.StripeProduct GetStripeProduct(Stripe.StripeRequestOptions requestOptions, BillingPeriodType billingPeriodType)
         {
             var productService = new Stripe.StripeProductService(StripeHelper.SecretKey);
-            var product = productService.Get(GetStripePlanId(billingPeriodType), requestOptions);
+            Stripe.StripeProduct product = null;
+
+            try
+            {
+                product = productService.Get(GetStripePlanId(billingPeriodType), requestOptions);
+            }
+            catch(Exception ex)
+            {
+                // no existing plan/product
+            }
+
             if (product.IsEmpty())
             {
                 AddOrUpdateStripeProduct(productService, requestOptions, billingPeriodType);
