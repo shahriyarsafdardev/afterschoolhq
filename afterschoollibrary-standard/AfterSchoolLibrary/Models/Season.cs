@@ -26,17 +26,20 @@ namespace AfterSchoolLibrary
             public Season GenerateSeason(ActivitySchedule shedule, ActivityGroup Leauge, int ByeCountPerTeam, DatabaseConnection dc)
             {
                 var roundDates = shedule.GetInstances(false, dc);
-                var season = new Season() { ActivityGroup = Leauge };
+                var season = new Season() { ActivityGroup = Leauge, byesPerTeam = new List<KeyValuePair<int, int>>()};
                 var ByesInWeeks = WeeklyByeCountCalculator(roundDates.Count, Leauge.GetActivityCount(null, null, dc) * ByeCountPerTeam);
                 var datesForByes = MiddleOutSort(roundDates.Count);
                 var teams = Leauge.GetActivities(dc);
                 var byeCountPerWeekOrderedList = new List<KeyValuePair<int, int>>();
-
-                //initializes the bye counter
-                foreach (Activity team in teams)
+                season.Rounds = new List<List<TeamMatch>>();
+                this.Rounds = new List<List<TeamMatch>>();
+            //initializes the bye counter
+            foreach (Activity team in teams)
                 {
-                    this.byesPerTeam.Add(new KeyValuePair<int, int>(0, team.ID.Value));
+                    season.byesPerTeam.Add(new KeyValuePair<int, int>(0, team.ID.Value));
                 }
+
+                this.byesPerTeam = season.byesPerTeam;
 
                 if (ByeCountPerTeam != 0)
                 {
@@ -56,9 +59,8 @@ namespace AfterSchoolLibrary
 
                 }
 
-                for (int i = 0; i < roundDates.Count; i++)
-                {
-                    for (int k = 0; k < roundDates.Count; i++)
+
+                    for (int i = 0; i < roundDates.Count; i++)
                     {
                         {
                             var newRound = Round.NewRound(this, teams, roundDates[i], byeCountPerWeekOrderedList[i].Value, dc);
@@ -66,7 +68,7 @@ namespace AfterSchoolLibrary
                         }
 
                     }
-                }
+                
                 return season;
             }
 
@@ -164,33 +166,44 @@ namespace AfterSchoolLibrary
                 var round = new Round() { ByeCount = byes, Teams = Teams, ActivityInstanceID = activityInstance.ID.Value  };
                 // will remove a team from teams if they have not had a bye yet 
 
+                List<Activity> byeteams =  new List<Activity>() { };
+
                 for (int i = 0; i < byes; i++)
                 {
-                    if(Teams.Count % 2 == 1)
+                    if (Teams.Count % 2 == 1)
                     {
-                        GiveBye(Teams, season);
+                        var byeTeam = GiveBye(Teams, season);
+                        byeteams.Add(byeTeam);
                     }
                     else
                     {
-                        GiveBye(Teams, season);
-                        GiveBye(Teams, season);
+                        var byeTeam1 = GiveBye(Teams, season);
+                        var byeTeam2 = GiveBye(Teams, season);
+                        byeteams.Add(byeTeam1);
+                        byeteams.Add(byeTeam2);
+
                     }
                 }
 
                 round.Matches = new List<TeamMatch>();
 
-                for (int i = 0; i < Teams.Count; i++)
+                for (int i = 0; i < (Teams.Count / 2); i++)
                 {
-                    for (int k = 0; k < Teams.Count - 1; i++)
+                    int k = i + 1; 
+                    while ( k < Teams.Count)
                     {
+                        if(round.Matches.Count == Teams.Count / 2)
+                        {
+                            break;
+                        }
                         // if all teams have played, reset
 
                         var team = Teams[i];
-                        var opponents = Teams;
-                        opponents.Remove(Teams[i]);
+                        var opponent = Teams[k];
 
+                        var x = TeamMatch.LoadByHomeAndAwayID(team.ID.Value, opponent.ID.Value, null, dc);
                         //checks if the teams have played eachother
-                        if (TeamMatch.LoadByHomeAndAwayID(team.ID.Value, opponents[k].ID.Value,null,dc).IsBlank())
+                        if (TeamMatch.LoadByHomeAndAwayID(team.ID.Value, opponent.ID.Value,null,dc).Count() == 0)
                         {
                             //checks to see if team should play at home or away
                             if (TeamMatch.LoadByHomeID(team.ID.Value, null, dc).Count <= TeamMatch.LoadByAwayID(team.ID.Value, null, dc).Count)
@@ -206,31 +219,39 @@ namespace AfterSchoolLibrary
                                 round.Matches.Add(match);
                             }
                         }
+                        k++;
                     }
+                }
+                season.Rounds.Add(round.Matches);
+
+                // adds back the teams that were removed to give a bye
+                foreach(Activity team in byeteams)
+                {
+                    Teams.Add(team);
                 }
                 return round;
             }
-            public static void GiveBye(List<Activity> Teams, Season season)
+            public static Activity GiveBye(List<Activity> Teams, Season season)
             {
                 foreach (Activity team in Teams)
                 {
                     var id = team.ID.Value;
                     foreach (KeyValuePair<int, int> pair in season.byesPerTeam)
                     {
-                        if (pair.Key == id)
+                        if (pair.Value == id)
                         {
-                            if (pair.Value == 0)
+                            if (pair.Key == 0)
                             {
-                                var newByeCount = new KeyValuePair<int, int>(pair.Key, pair.Value + 1);
+                                var newByeCount = new KeyValuePair<int, int>(pair.Key + 1, pair.Value);
                                 season.byesPerTeam.Remove(pair);
                                 Teams.Remove(team);
-                                return;
+                                return team;
                             }
                         }
                     }
 
                 }
-                return;
+                return null;
             }
         }
 

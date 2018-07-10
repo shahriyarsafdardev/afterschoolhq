@@ -100,5 +100,37 @@ namespace AfterSchoolLibraryTests
             Assert.Equal(1, Season.Round.NewRound(season, teams, round, 1, dc).Matches.Count);
         }
 
+        [Fact]
+        public void NewSeasonTest()
+        {
+            var teams = new List<Activity>();
+            var webUser = Factories.WebUserFactory.Create(true, msgs, dc);
+            var account = Factories.AccountFactory.Create(webUser, msgs, dc);
+            var League = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            var rounds = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+            var byesPerTeam = 1;
+
+            //sets up the shedule
+            for(int i = 0; i < 5; i++)
+            {
+                var start = new DateTime(1, 1, 1);
+                var end = new DateTime(2, 2, 2);
+                rounds.AddInstance(start, end, webUser.ID.Value, msgs, dc);
+            }
+            // adds teams to the shedule
+            for (int i = 0; i < 5; i++)
+            {
+                var team = Factories.ActivityFactory.Create(account, League, msgs, dc);
+                var shedule = Factories.ActivityInstanceFactory.Create(team, rounds, msgs, dc);
+            }
+
+            var season = Factories.SeasonFactory.Create(League, byesPerTeam, rounds, msgs, dc);
+            var byeCheck = season.byesPerTeam;
+            var homeCheck = season.HomeCountPerTeam;
+            var awayCheck = season.AwayCountPerTeam;
+
+            Assert.Equal(5, season.Rounds.Count);
+        }
+
     }
 }

@@ -14,8 +14,8 @@ namespace AfterSchoolLibraryTests.Factories
         
         public static Season Create(ActivityGroup League, int ByesPerTeam, ActivitySchedule Rounds, SystemMessages msgs, DatabaseConnection dc)
         {
-            //make new season and add all necciary feilds
-            var season = new Season() { ActivityGroup = League, RoundCount = Rounds.GetInstances(false, dc).Count };
+            //make new season and add all necciary
+            var season = new Season() { ActivityGroup = League, RoundCount = Rounds.GetInstances(false, dc).Count, totalByes = ByesPerTeam};
             var season2 = season.GenerateSeason(Rounds, League, ByesPerTeam, dc);
             return season2;
         }
