@@ -252,11 +252,11 @@
     <Compile Include="Areas\Admin\Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
-    <Compile Include="Areas\District\Controllers\ProviderController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
     <Compile Include="Areas\District\Controllers\LeagueController.cs" />
     <Compile Include="Areas\District\Controllers\MessageController.cs" />
     <Compile Include="Areas\District\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\District\Controllers\ProviderController.cs" />
     <Compile Include="Areas\District\Controllers\SchoolController.cs" />
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
