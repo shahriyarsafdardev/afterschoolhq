@@ -358,6 +358,14 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static List<ActivityGroup> LoadList(List<int> ids, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -1078,6 +1086,20 @@ namespace AfterSchoolLibrary
         public static ActivityGroup SaveLeague(WebUser loggedInUser, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
+        }
+
+        public SystemMessages InviteAccount(Account accountToInvite, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var aag = AccountActivityGroupService.CreateNew(accountToInvite, this, InviteStatus.Invited, loggedInUser, msgs, dc);
+
+            // send email to invited account
+            if (msgs.HasNoErrors())
+            {
+                // TODO: Write this
+            }
+
+            return msgs;
         }
 
         #endregion

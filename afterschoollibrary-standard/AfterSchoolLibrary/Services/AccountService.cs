@@ -145,6 +145,24 @@ namespace AfterSchoolLibrary
                 dc: dc);
         }
 
+        public static List<ActivityGroup> GetExternalLeagues(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var ids = AccountActivityGroup.LoadByAccountId(account.ID.Value, start, length, msgs, dc)
+                .Select(x => x.ID.Value)
+                .ToList();
+            return ActivityGroup.LoadList(ids, msgs, dc);
+        }
+
+        public static int GetExternalLeagueCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountActivityGroup.GetCount(
+                new Hashtable() {
+                    { "AccountId", account.ID.Value }
+                },
+                msgs,
+                dc);
+        }
+        
         public static List<ActivityGroup> GetSessions(this Account account, DatabaseConnection dc = null)
         {
             return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.Session, dc: dc);

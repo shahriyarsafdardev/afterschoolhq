@@ -24,9 +24,16 @@
 ## Getting up and running
 
 - Turn on the ASP.NET State Service
+	- Go to start menu
+	- Type "Services"
+	- Open Services (should be top choice)
+	- Go to ASP.NET State Service
+	- Open Properties
+	- Setup Startup Type to Automatic
+	- "Start" the service
 - Open up the code - `AfterSchoolHQ - Darye.sln`
 - Set `after-school-hq` the start up project
-- Run the Code - `after-school-hq`
+- Run the Code - `after-school-hq` (Hit IIS Express button at the top middle of the screen)
 - Run `/db/update` to create tables and create default admin account for logging in
 - Go to `/login` and use default admin credentials found in `DBController.cs`
 

@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary;
-using BasicLibrary;
-using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibraryTests
 {
@@ -259,6 +253,28 @@ namespace AfterSchoolLibraryTests
 
             Assert.NotNull(form);
             
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(5)]
+        [InlineData(10)]
+        public void GetExternalLeaguesTest(int numberToCreate)
+        {
+            var leagueAccountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var leagueAccount = Factories.AccountFactory.Create(leagueAccountOwner, msgs, dc);
+
+            var invitedAccountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var invitedAccount = Factories.AccountFactory.Create(invitedAccountOwner, msgs, dc);
+
+            for (var i = 0; i < numberToCreate; i++)
+            {
+                var activityGroup = Factories.ActivityGroupFactory.Create(leagueAccount, msgs, dc);
+                msgs.AddRange(activityGroup.InviteAccount(invitedAccount, leagueAccountOwner, dc));
+            }
+
+            Assert.Equal(numberToCreate, invitedAccount.GetExternalLeagueCount(msgs, dc));
+
         }
 
     }
