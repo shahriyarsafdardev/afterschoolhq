@@ -137,7 +137,7 @@ namespace AfterSchoolLibrary
             return user.HasAccessTo(a, dc: dc);
         }
 
-        public static string GenerateUsername(string firstName, string lastName, DatabaseConnection dc = null)
+        public static string GenerateUsername(string firstName, string lastName, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             //unique name
             var reg = new System.Text.RegularExpressions.Regex(
@@ -148,13 +148,13 @@ namespace AfterSchoolLibrary
             string username = $"{firstName} {lastName}";
             string origUniqueName = reg.Replace(username, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            var duplicate = WebUser.LoadByUsername(uniqueName, dc: dc);
+            var duplicate = WebUser.LoadByUsername(uniqueName, msgs, dc);
             int count = 1;
             while (!duplicate.IsEmpty())
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = WebUser.LoadByUsername(uniqueName, dc: dc);
+                duplicate = WebUser.LoadByUsername(uniqueName, msgs, dc);
             }
             return uniqueName;
         }
@@ -296,7 +296,7 @@ namespace AfterSchoolLibrary
 
             user.FirstName = firstName;
             user.LastName = lastName;
-            user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, dc: dc);
+            user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, msgs, dc);
             user.IsRegistered = true;
             user.IsActive = true;
             user.Password = WebUserService.EncryptPassword(password);
@@ -310,15 +310,16 @@ namespace AfterSchoolLibrary
             user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
 
             msgs.AddRange(user.Save(dc));
-            msgs.AddRange(user.ActivateForAccount(account, loggedInUser, dc));
+            msgs.AddRange(user.ActivateForAccount(account, loggedInUser, msgs, dc));
 
             return msgs;
         }
 
-        public static SystemMessages ActivateForAccount(this WebUser user, Account account, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static SystemMessages ActivateForAccount(this WebUser user, Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
 
             if (awu.IsNotEmpty())
             {
