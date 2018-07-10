@@ -106,7 +106,7 @@ namespace AfterSchool.Controllers
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
-                        msgs.AddRange(user.CompleteSignUp(account, firstname, lastname, email, password1, adc));
+                        msgs.AddRange(user.CompleteSignUp(account, firstname, lastname, email, password1, null, adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

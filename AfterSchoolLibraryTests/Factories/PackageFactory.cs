@@ -35,5 +35,17 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+        public static Package CreateWithStripe(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var obj = new Package()
+            {
+                Name = "Package Test",
+                IsActive = true,
+                Price = 0.ToDecimal(),
+                PricePerYear = 0.ToDecimal()
+            };
+            msgs.AddRange(obj.SaveWithStripe(dc: dc));
+            return obj;
+        }
     }
 }

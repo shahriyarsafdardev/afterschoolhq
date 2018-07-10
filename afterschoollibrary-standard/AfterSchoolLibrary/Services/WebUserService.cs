@@ -114,9 +114,9 @@ namespace AfterSchoolLibrary
             }
             return false;
         }
-        public static bool HasAccessTo(this WebUser user, Account a, DatabaseConnection dc = null)
+        public static bool HasAccessTo(this WebUser user, Account a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, dc: dc);
+            var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
             return awu.IsNotEmpty() && awu.IsActive;
         }
         public static bool HasAccessToActivity(this WebUser user, Activity a, DatabaseConnection dc = null)
@@ -221,7 +221,7 @@ namespace AfterSchoolLibrary
             return AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
-        public static WebUser CreateNew(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser CreateNew(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (firstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -249,9 +249,9 @@ namespace AfterSchoolLibrary
                     IsRegistered = isRegistered,
                     VerifiedAccount = isVerified,
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId,
+                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
-                    LastModifiedBy = loggedInUserId,
+                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                     Username = WebUserService.GenerateUsername(firstName, lastName)
                 };
 
@@ -280,17 +280,17 @@ namespace AfterSchoolLibrary
                 msgs: msgs, 
                 dc: dc);
 
-            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc));
+            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, dc));
 
             return account;
         }
 
-        public static SystemMessages AddAccount(this WebUser user, Account account, UserType userTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static SystemMessages AddAccount(this WebUser user, Account account, UserType userTypeId, WebUser loggedInUser, DatabaseConnection dc = null)
         {
-            return account.AddUser(user, UserType.Owner, loggedInUser.ID.Value, dc);
+            return account.AddUser(user, userTypeId, loggedInUser.ID.Value, dc);
         }
 
-        public static SystemMessages CompleteSignUp(this WebUser user, Account account, string firstName, string lastName, string email, string password, DatabaseConnection dc = null)
+        public static SystemMessages CompleteSignUp(this WebUser user, Account account, string firstName, string lastName, string email, string password, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -306,13 +306,16 @@ namespace AfterSchoolLibrary
             else
                 user.Email = email;
 
+            user.LastModifiedDate = DateTime.UtcNow;
+            user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+
             msgs.AddRange(user.Save(dc));
-            msgs.AddRange(user.ActivateForAccount(account, 0, dc));
+            msgs.AddRange(user.ActivateForAccount(account, loggedInUser, dc));
 
             return msgs;
         }
 
-        public static SystemMessages ActivateForAccount(this WebUser user, Account account, int loggedInUserId, DatabaseConnection dc = null)
+        public static SystemMessages ActivateForAccount(this WebUser user, Account account, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
@@ -321,7 +324,7 @@ namespace AfterSchoolLibrary
             {
                 awu.IsActive = true;
                 awu.LastModifiedDate = DateTime.UtcNow;
-                awu.LastModifiedBy = loggedInUserId;
+                awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
                 msgs.AddRange(awu.Save(dc));
             }
             else

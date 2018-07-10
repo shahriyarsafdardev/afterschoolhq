@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary;
 using BasicLibrary;
-using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibraryTests
 {
@@ -197,7 +195,7 @@ namespace AfterSchoolLibraryTests
             {
                 var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
                 msgs.AddRange(account.AddUser(user, UserType.Administrator, user.ID.Value, dc: dc));
-            }       
+            }
 
             Assert.Equal(numberOfAccounts, user.GetAccounts(dc: dc).Count);
         }
@@ -339,7 +337,7 @@ namespace AfterSchoolLibraryTests
             for (var i = 0; i < numberOfRegistrants; i++)
             {
                 user.CreateRegistrant(RegistrantType.Individual, true, msgs, dc: dc);
-            }            
+            }
 
             Assert.Equal(numberOfRegistrants, user.GetRegistrants(dc: dc).Count);
         }
@@ -351,7 +349,7 @@ namespace AfterSchoolLibraryTests
             var user = Factories.WebUserFactory.Create(true, msgs, dc: dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var awu = Factories.AccountWebUserFactory.Create(account, user, UserType.ActivityLeader, true, msgs, dc: dc);
-            
+
             Assert.True(user.IsActiveFor(account, dc: dc));
         }
 
@@ -443,6 +441,63 @@ namespace AfterSchoolLibraryTests
             user = WebUser.LoginByEmailHashed("notDarye", "nothisPassword", dc);
 
             Assert.NotNull(user);
+        }
+
+        [Fact]
+        public void AddAccountTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+
+            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, dc));
+
+            Assert.NotNull(AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, accountOwner.ID.Value, msgs, dc));
+        }
+
+        [Fact]
+        public void AddNewAccountTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var package = Factories.PackageFactory.Create(msgs, dc);
+
+            var account = accountOwner.AddNewAccount(
+                           orgName: "Test Org",
+                           phone: null,
+                           isActive: true,
+                           accountType: AccountType.School,
+                           packageId: package.ID,
+                           packageBillingPeriod: BillingPeriodType.Month,
+                           isAfterSchool: true,
+                           loggedInUser: loggedInUser,
+                           msgs: msgs,
+                           dc: dc);
+
+            Assert.NotNull(AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, accountOwner.ID.Value, msgs, dc));
+        }
+        [Fact]
+        public void CompleteSignUpTest()
+        {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
+            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+            var package = Factories.PackageFactory.CreateWithStripe(msgs, dc); // because adding a new account saves with stripe
+
+            var account = accountOwner.AddNewAccount(
+                           orgName: "Test Org",
+                           phone: null,
+                           isActive: true,
+                           accountType: AccountType.School,
+                           packageId: package.ID,
+                           packageBillingPeriod: BillingPeriodType.Month,
+                           isAfterSchool: true,
+                           loggedInUser: loggedInUser,
+                           msgs: msgs,
+                           dc: dc);
+
+            msgs.AddRange(accountOwner.CompleteSignUp(account, "jeff", "gordon", "jeff@gordon.com", "1234", null, dc));
+
+            Assert.True(accountOwner.HasAccessTo(account, msgs, dc));
         }
     }
 }

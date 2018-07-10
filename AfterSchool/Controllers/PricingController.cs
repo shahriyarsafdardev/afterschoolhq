@@ -98,7 +98,7 @@ namespace AfterSchool.Controllers
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
-                            loggedInUserId: 0,
+                            loggedInUser: null,
                             msgs: amsgs,
                             dc: adc);
 

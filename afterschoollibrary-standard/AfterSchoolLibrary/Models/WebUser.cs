@@ -213,7 +213,7 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public static WebUser LoadByEmail(string email, DatabaseConnection dc = null)
+        public static WebUser LoadByEmail(string email, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -221,7 +221,7 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public bool CanEmailBeUsed(string email, DatabaseConnection dc = null)
+        public bool CanEmailBeUsed(string email, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -230,7 +230,7 @@ namespace AfterSchoolLibrary
             return dq.GetCount() == 0;
         }
 
-        public static bool ExistsByEmail(string email, DatabaseConnection dc = null)
+        public static bool ExistsByEmail(string email, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetCount(
                 criterias: new Hashtable(){
@@ -240,7 +240,7 @@ namespace AfterSchoolLibrary
                 ) > 0;
         }
 
-        public static bool ExistsByUid(Guid uid, DatabaseConnection dc = null)
+        public static bool ExistsByUid(Guid uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetCount(
                 criterias: new Hashtable(){
@@ -250,7 +250,7 @@ namespace AfterSchoolLibrary
                 ) > 0;
         }
 
-        public static WebUser LoadByUsername(string username, DatabaseConnection dc = null)
+        public static WebUser LoadByUsername(string username, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -258,7 +258,7 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static WebUser LoginByUsername(string username, string password, DatabaseConnection dc = null)
+        public static WebUser LoginByUsername(string username, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -267,7 +267,7 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static WebUser LoginByEmail(string email, string password, DatabaseConnection dc = null)
+        public static WebUser LoginByEmail(string email, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;

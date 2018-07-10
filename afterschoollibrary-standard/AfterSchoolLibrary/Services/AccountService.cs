@@ -346,7 +346,7 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    if (!WebUser.ExistsByEmail(email.Trim(), adc))
+                    if (!WebUser.ExistsByEmail(email.Trim(), amsgs, adc))
                     {
                         user = new WebUser();
                         user.FirstName = firstName;
@@ -1280,7 +1280,7 @@ namespace AfterSchoolLibrary
             if (WebUser.LoadByEmail(adminEmail, dc: dc) != null)
                 throw new Exception("User with the same email address already exists.");
 
-            var wu = WebUserService.CreateNew("admin", "user", adminEmail, adminPassword, true, true, true, 0, msgs, dc);
+            var wu = WebUserService.CreateNew("admin", "user", adminEmail, adminPassword, true, true, true, null, msgs, dc);
 
             wu.AddNewAccount(accountName, null, true, AccountType.AfterSchool, null, null, true, wu, msgs, dc);
 

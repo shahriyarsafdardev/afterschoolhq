@@ -622,9 +622,9 @@ namespace AfterSchoolLibrary
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    if (WebUser.ExistsByEmail(email, adc))
+                    if (WebUser.ExistsByEmail(email, amsgs, adc))
                     {
-                        user = WebUser.LoadByEmail(email, dc: adc);
+                        user = WebUser.LoadByEmail(email, amsgs, adc);
 
                         if(this.WebUserId.HasValue && user.ID != this.WebUserId)
                             amsgs.Add("This email is already registered to another account", MessageType.UserError);

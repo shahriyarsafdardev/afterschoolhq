@@ -100,7 +100,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             isActive: false, 
                             isRegistered: false,
                             isVerified: false,
-                            loggedInUserId: SessionVariables.LoggedInUser.ID.Value, 
+                            loggedInUser: SessionVariables.LoggedInUser, 
                             msgs: amsgs, 
                             dc: adc);
 
