@@ -99,9 +99,7 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
-            //ViewBag.Schedule = ActivitySchedule.GetNewDefaultSchedule();
-            //ViewBag.ShowScheduleList = false;
-            LoadEditScheduleViewBag(league, null);
+            LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
 
             return View(league);
         }
