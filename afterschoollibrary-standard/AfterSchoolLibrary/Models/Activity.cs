@@ -909,9 +909,9 @@ namespace AfterSchoolLibrary
             return null;
         }
 
-        public Account GetAccount(DatabaseConnection dc = null)
+        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(this.AccountId.Value, dc: dc);
+            return Account.Load(this.AccountId.Value, msgs, dc);
         }
 
         private List<ActivityMessage> _ActivityMessages = null;
@@ -1001,7 +1001,7 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var account = this.GetAccount(adc);
+                    var account = this.GetAccount(amsgs, adc);
 
                     activity = this.CopyFields();
                     activity.Name = newName;
@@ -1874,11 +1874,11 @@ namespace AfterSchoolLibrary
         }
 
         private ActivitySchedule _Schedule = null;
-        public ActivitySchedule GetSchedule(bool reload = false, DatabaseConnection dc = null)
+        public ActivitySchedule GetSchedule(bool reload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ActivityScheduleId.HasValue && (reload || _Schedule.IsEmpty()))
             {
-                _Schedule = ActivitySchedule.LoadWithInstances(this.ActivityScheduleId.Value, dc: dc);
+                _Schedule = ActivitySchedule.LoadWithInstances(this.ActivityScheduleId.Value, msgs, dc);
             }
             return _Schedule;
         }
@@ -2046,11 +2046,11 @@ namespace AfterSchoolLibrary
             return new List<GenderType>();
         }
 
-        public bool IsInSession(DatabaseConnection dc = null)
+        public bool IsInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = this.GetAccount(dc: dc);
+            var account = this.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = this.GetSchedule(dc: dc).GetInstances(dc: dc);
+            var instances = this.GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc);
             return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
         }
 

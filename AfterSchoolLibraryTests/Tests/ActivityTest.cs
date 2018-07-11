@@ -64,19 +64,7 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             activity.Delete(dc: dc);
             Assert.Null(Activity.Load(activity.ID.Value, dc: dc));
-        }
-        //Creates an ----------- and returns a message regarding the status of the ------ 
-        [Fact]
-        public void CreateTest()
-        {
-            Assert.True(Activity.Create(dc: dc).HasNoErrors());
-        }
-        //
-        [Fact]
-        public void AlterTest()
-        {
-            Assert.True(Activity.Alter(dc: dc).HasNoErrors());
-        }
+        }        
 
         //Loads the activity from the DB (using it's ID) and returns it.
         [Fact]
@@ -616,11 +604,11 @@ namespace AfterSchoolLibraryTests
         public void GetCurrentOrNextRegistrationPeriodTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var form = Factories.FormFactory.Create(account, msgs, dc: dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
-            var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var form = Factories.FormFactory.Create(account, msgs, dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
+            var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc);
             registrationPeriod.StartDateTime = new DateTime(18, 10, 10);
             registrationPeriod.EndDateTime = new DateTime(2018, 10, 10);
 
@@ -649,7 +637,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
 
-            Assert.True(activity.GetAccount(dc).IsNotEmpty() && activity.GetAccount(dc).ID == account.ID);
+            Assert.True(activity.GetAccount(msgs, dc).IsNotEmpty() && activity.GetAccount(msgs, dc).ID == account.ID);
         }
 
         [Fact]
@@ -696,44 +684,16 @@ namespace AfterSchoolLibraryTests
             Assert.False(a.HasAddress);
         }
 
-        [Fact]
+        [Fact(Skip = "Need to add this test in the future")]
         public void EditExistingTest()
         {
-            var currentUser = new WebUser() { IsActive = true };
-            currentUser.Save(dc: dc);
-            var loggedInUserId = currentUser.ID.Value;
-
-            var a = new Account() { };
-            a.Save(dc: dc);
-            var aid = a.ID.Value;
-
-            var act = new Activity() { };
-            a.Save(dc: dc);
-            var actid = act.ID.ToString();
-
-            var nv = new System.Collections.Specialized.NameValueCollection() { };
-
-            Assert.NotNull(Activity.EditExisting(loggedInUserId, a, actid, nv, msgs));
+            
         }
 
-        [Fact]
+        [Fact(Skip = "Need to add this test in the future")]
         public void CreateNewTest()
         {
-            var currentUser = new WebUser() { IsActive = true };
-            currentUser.Save(dc: dc);
-            var loggedInUserId = currentUser.ID.Value;
-
-            var a = new Account() { };
-            a.Save(dc: dc);
-            var aid = a.ID.Value;
-
-            var act = new Activity() { };
-            a.Save(dc: dc);
-            var actid = act.ID.ToString();
-
-            var nv = new System.Collections.Specialized.NameValueCollection() { };
-
-            Assert.NotNull(Activity.CreateNew(loggedInUserId, a, nv, msgs, dc: dc));
+            
         }
 
         [Fact]
@@ -897,7 +857,7 @@ namespace AfterSchoolLibraryTests
             var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
 
-            Assert.NotNull(activity.GetSchedule(false, dc ));
+            Assert.NotNull(activity.GetSchedule(false, msgs, dc));
         }
 
         [Fact]
@@ -952,25 +912,50 @@ namespace AfterSchoolLibraryTests
             Assert.Single(Activity.GetActivitiesByRegistrantByDay(registrant.ID.Value, DayOfWeekASL.NotSet, schedule.StartDate.Value, dc));
         }
 
-        [Fact]
-        public void GetByActivitiesByRegistrantsTest()
+        [Theory]
+        [InlineData(3)]
+        [InlineData(8)]
+        public void GetByActivitiesByRegistrantsTest(int numberToCreate)
         {
+            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var form = Factories.FormFactory.Create(account, msgs, dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);            
 
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
-            var activityShedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
-            registrantActivity.NumberOfSeats = 1;
-            List<int> regList = new List<int>();
-            regList.Add(registrant.ID.Value);
+            var registrantIds = new List<int>();
+            var activityIds = new List<int>();
 
-            List<int> actList = new List<int>();
-            regList.Add(activity.ID.Value);
+            for (var i = 0; i < numberToCreate; i++)
+            {
+                var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
+                var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
+                var instance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
+                var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+                var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
 
-            Assert.Single(Activity.GetByActivitiesByRegistrants(actList,regList,0,RegistrationStatus.Current,null,dc));
+                var ra = registrant.AddOrUpdateActivity(
+                    registration.ID.Value,
+                    activity.ID.Value,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    loggedInUser.ID.Value,
+                    msgs,
+                    dc
+                    );
+
+                registrantIds.Add(registrant.ID.Value);
+                activityIds.Add(activity.ID.Value);
+            }
+
+            Assert.Equal(
+                numberToCreate, 
+                Activity.GetByActivitiesByRegistrants(
+                    activityIds: activityIds, 
+                    registrantIds: registrantIds, 
+                    dc: dc
+                ).Count);
         }
 
         [Fact]
@@ -995,13 +980,15 @@ namespace AfterSchoolLibraryTests
             var schedule = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
 
-            var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
-            activityInstance.StartDateTime = new DateTime(1, 1, 1);
-            activityInstance.EndDateTime = new DateTime(2020, 1, 1);
-            activityInstance.ActivityScheduleId = schedule.ID.Value;
-            activityInstance.Save(dc);
+            var activityInstance = Factories.ActivityInstanceFactory.Create(
+                activity, 
+                schedule, 
+                DateTime.UtcNow.AddWeeks(-1),
+                DateTime.UtcNow.AddWeeks(1),
+                msgs, 
+                dc);
 
-            Assert.True(activity.IsInSession(dc: dc));
+            Assert.True(activity.IsInSession(msgs, dc));
         }
         /// <summary>
         ///  Tests that an activity will be in session

@@ -220,10 +220,10 @@ namespace AfterSchoolLibrary
 		#region "UserDefined"
 
         private List<ActivityInstance> _instances;
-        public List<ActivityInstance> GetInstances(bool forceReload = false, DatabaseConnection dc = null)
+        public List<ActivityInstance> GetInstances(bool forceReload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue && (_instances.IsEmpty() || forceReload))
-                _instances = ActivityInstance.LoadByActivityScheduleId(this.ID.Value, dc: dc)
+                _instances = ActivityInstance.LoadByActivityScheduleId(this.ID.Value, msgs, dc)
                     .OrderBy(x => x.StartDateTime)
                     .ToList();
 
@@ -369,10 +369,10 @@ namespace AfterSchoolLibrary
             _instances.AddRange(list);
         }
 
-        public static ActivitySchedule LoadWithInstances(int ActivityScheduleId, DatabaseConnection dc = null)
+        public static ActivitySchedule LoadWithInstances(int ActivityScheduleId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var schedule = ActivitySchedule.Load(ActivityScheduleId, dc: dc);
-            schedule?.GetInstances(false, dc: dc);
+            var schedule = ActivitySchedule.Load(ActivityScheduleId, msgs, dc);
+            schedule?.GetInstances(false, msgs, dc);
             return schedule;
         }
 

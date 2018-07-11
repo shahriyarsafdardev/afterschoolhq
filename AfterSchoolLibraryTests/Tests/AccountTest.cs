@@ -24,6 +24,7 @@ namespace AfterSchoolLibraryTests
         [InlineData(15, 10)]
         public void LoadPagingTest(int numberToCreate, int numberPerPage)
         {
+            var originalCount = Account.GetCount(msgs: msgs, dc: dc);
             for( var i = 0; i < numberToCreate; i++)
             {
                 var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
@@ -31,7 +32,7 @@ namespace AfterSchoolLibraryTests
             }
 
             Assert.Equal(
-                Math.Min(numberPerPage, numberToCreate), 
+                Math.Min(numberPerPage, numberToCreate + originalCount), 
                 Account.Load(null, 0, numberPerPage, msgs, dc).Count
             );
         }
@@ -42,13 +43,14 @@ namespace AfterSchoolLibraryTests
         [InlineData(2)]
         public void GetCountTest(int numberToCreate)
         {
+            var originalCount = Account.GetCount(msgs: msgs, dc: dc);
             for (var i = 0; i < numberToCreate; i++)
             {
                 var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
                 var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             }
 
-            Assert.Equal(numberToCreate, Account.GetCount(msgs: msgs, dc: dc));
+            Assert.Equal(originalCount + numberToCreate, Account.GetCount(msgs: msgs, dc: dc));
         }
 
         /// <summary>
@@ -71,12 +73,13 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DeleteTest()
         {
+            var originalCount = Account.GetCount(msgs: msgs, dc: dc);
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
             msgs.AddRange(account.Delete(dc));
 
-            Assert.Equal(0, Account.GetCount(msgs: msgs, dc: dc));
+            Assert.Equal(originalCount, Account.GetCount(msgs: msgs, dc: dc));
         }
 
         /// <summary>

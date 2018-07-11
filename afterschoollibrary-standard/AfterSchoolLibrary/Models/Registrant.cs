@@ -902,7 +902,7 @@ namespace AfterSchoolLibrary
             }
 
             return msgs;
-        }
+        }        
 
         /*
         public List<Attendance> GetAttendance(int ActivityId, DatabaseConnection dc = null)

@@ -1890,8 +1890,8 @@ namespace AfterSchool.Areas.Org.Controllers
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-                    activity = Activity.Load(id.ToInteger(), dc: adc);
-                    account = activity.GetAccount(adc);
+                    activity = Activity.Load(id.ToInteger(), amsgs, adc);
+                    account = activity.GetAccount(amsgs, adc);
                     users = account.GetActiveMembers(adc).Select(x => x.ToWebUser()).ToList();
 
                     foreach (var user in users)
