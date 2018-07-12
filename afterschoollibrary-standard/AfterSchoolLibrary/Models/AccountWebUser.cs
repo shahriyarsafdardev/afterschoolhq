@@ -306,6 +306,7 @@ namespace AfterSchoolLibrary
         {
             return Permissions.HasAccessToFeature(ft, this.UserTypeId, PermissionObjectType.Account);
         }
+
         #endregion
     }
 }

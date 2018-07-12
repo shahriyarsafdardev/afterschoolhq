@@ -395,6 +395,15 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
+        /// <summary>
+        /// Change the AccountWebUser record to be active. If it's not active user can't login
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="account"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         private static SystemMessages ActivateForAccount(this WebUser user, Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -402,12 +411,7 @@ namespace AfterSchoolLibrary.Services
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
 
             if (awu.IsNotEmpty())
-            {
-                awu.IsActive = true;
-                awu.LastModifiedDate = DateTime.UtcNow;
-                awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                msgs.AddRange(awu.Save(dc));
-            }
+                msgs.AddRange(awu.Activate(loggedInUser, msgs, dc));
             else
                 msgs.Add("User not valid for account", MessageType.UserError);
 
