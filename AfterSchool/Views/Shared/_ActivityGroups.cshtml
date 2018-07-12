@@ -4,6 +4,7 @@
     var paging = (PagingModel)ViewBag.PagingModel;
     var hasArchivedGroups = (bool)ViewBag.HasArchivedGroups;
     var controller = ViewBag.GroupController;
+    var isOrgLeague = ViewBag.isOrgLeague ?? false;
 
     var previousLink = "#";
     var nextLink = "#";
@@ -33,7 +34,9 @@
     }
 }
 
-@if (Model.Count == 0 && !hasArchivedGroups)
+@if (isOrgLeague) { Html.RenderPartial("~/Areas/Org/Views/League/Invitations.cshtml", Model); }
+
+@if ((Model.Count == 0 && !hasArchivedGroups) )
 {
     <div class="widget">
         <div class="widget-head">
@@ -42,7 +45,15 @@
         <div class="widget-tile">
             <hr />
             <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
-            <p>You haven't created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action("edit", controller)">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>.</p>
+            @if (isOrgLeague)
+            {
+                <p>You haven't accepted invitations to or created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action("edit", controller)">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>. </p>
+            }
+            else
+            {
+                <p>You haven't created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action("edit", controller)">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>.</p>
+            }
+            
             <p>&nbsp;</p>
             <p>
                 <a href="@Url.Action("edit", controller)" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityGroupLabel(activityGroupType) &raquo;</a>
@@ -52,6 +63,7 @@
 }
 else
 {
+    <p>@UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() that (ask Darye) is participating in</p>
     <div class="row">
         <div class="col-md-12">
             <div class="pull-right">
@@ -176,7 +188,7 @@ else
         </div>
         <div class="modal-body form">
 
-            <p>Are you sure you want to archive <strong><span id="archive-group-name"></span></strong>? </p><p>Archived @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() are automatically unpublished and all related @UILabel.ActivityLabel(true).ToLower() are also archived and unpublished.</p>
+            <p>Are you sure you want to archive <strong><span id="archive-group-name"></span></strong>? </p><p>Archived @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() are automatically unpublished and all related @UILabel.ActivityLabel(activityGroupType, true).ToLower() are also archived and unpublished.</p>
 
         </div>
         <div class="modal-footer">
