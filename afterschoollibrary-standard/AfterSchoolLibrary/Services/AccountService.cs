@@ -874,6 +874,16 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        /// <summary>
+        /// creates the initial contact/student record for the current account, not the global registrant account, details are added later
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="loggedInUserId"></param>
+        /// <param name="registrantType"></param>
+        /// <param name="isMaster"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static Registrant AddRegistrant(this Account account, int loggedInUserId, RegistrantType registrantType, bool isMaster, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();

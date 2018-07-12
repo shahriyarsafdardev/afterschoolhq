@@ -8,6 +8,22 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RegistrantService
     {
+        //public static Registrant CreateNew(Account registrantOwner, RegistrantType registrantType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    var registrant = new Registrant
+        //    {
+        //        AccountId = registrantOwner.ID,
+        //        RegistrantTypeId = registrantType,
+        //        IsMaster = false,
+        //        CreateDate = DateTime.UtcNow,
+        //        LastModifiedDate = DateTime.UtcNow,
+        //        CreatedBy = loggedInUser?.ID.IfEmpty(0),
+        //        LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                 
+        //    };
+        //    msgs.AddRange(registrant.Save(dc: dc));
+        //}
+
         public static WebUser MatchCreateOrUpdateUser(this Registrant registrant, string firstname, string lastname, string email, string password = null, bool isAfterSchool = false, bool forceMatch = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // connecting with an existing account that has a password

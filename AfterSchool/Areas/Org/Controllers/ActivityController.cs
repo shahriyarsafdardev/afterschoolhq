@@ -1535,6 +1535,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             }
 
                             var hasSeatsAvailable = activity.GetRegistrantCount(adc) < activity.SeatsAvailable;
+
+                            // TODO: need to verify if this really should be the master account. What is master
                             var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
                             var registration = registrant.AddRegistration(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, activity.ActivityGroupId, amsgs, dc: adc);
                             var ra = registrant.AddOrUpdateActivity(registration.ID.Value, af.ActivityId.Value, seatCount, waitingListSeatCount, applicationSeatCount, invitationSeatCount, declinedSeatCount, 0, amsgs, dc: adc);
