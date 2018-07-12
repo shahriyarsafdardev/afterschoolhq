@@ -2,6 +2,7 @@
 using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests
 {

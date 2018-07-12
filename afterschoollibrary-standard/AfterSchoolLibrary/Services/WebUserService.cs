@@ -7,7 +7,7 @@ using BasicLibrary.DataAccess;
 using System.Linq;
 using SendGrid.Helpers.Mail;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Services
 {
     public static class WebUserService
     {

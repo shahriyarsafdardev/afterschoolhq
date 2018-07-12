@@ -236,40 +236,6 @@ namespace AfterSchoolLibrary
             return token;
         }
 
-        public static SystemMessages UseToken(Guid uid, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    var token = PasswordResetToken.LoadValidByUid(uid, dc: adc);
-                    token.Used = true;
-                    token.LastModifiedBy = token.WebUserId;
-                    token.LastModifiedDate = DateTime.UtcNow;
-                    amsgs.AddRange(token.Save(adc));
-
-                    amsgs.AddRange(token.GetWebUser(adc).MarkAsVerified(adc));
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                dc: dc
-            );
-
-            return msgs;
-        }
-
-        public SystemMessages Use(DatabaseConnection dc = null)
-        {
-            return PasswordResetToken.UseToken(this.Uid, dc: dc);
-        }
-
         public WebUser GetWebUser(DatabaseConnection dc = null)
         {
             return WebUserId.HasValue ? WebUser.Load(WebUserId.Value, dc: dc) : null;

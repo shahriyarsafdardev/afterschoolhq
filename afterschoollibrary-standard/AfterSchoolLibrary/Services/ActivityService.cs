@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary
 {
@@ -57,6 +58,11 @@ namespace AfterSchoolLibrary
                 rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc);
 
             return Math.Max(0, rtn);
+        }
+
+        public static PaymentPlan AddPaymentPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return PaymentPlanService.CreateNew(activity.GetAccount(msgs, dc), ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, loggedInUser, msgs, dc);
         }
     }
 }

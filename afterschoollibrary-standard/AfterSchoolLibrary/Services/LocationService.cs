@@ -5,7 +5,7 @@ using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Services
 {
     public static class LocationService
     {

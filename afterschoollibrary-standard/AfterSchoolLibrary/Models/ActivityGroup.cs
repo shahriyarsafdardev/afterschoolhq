@@ -554,10 +554,10 @@ namespace AfterSchoolLibrary
         }
 
         private Account _Account = null;
-        public Account GetAccount(DatabaseConnection dc = null)
+        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Account.IsEmpty())
-                _Account = Account.Load(this.AccountId.Value, dc: dc);
+                _Account = Account.Load(this.AccountId.Value, msgs, dc);
 
             return _Account;
         }
@@ -1086,20 +1086,6 @@ namespace AfterSchoolLibrary
         public static ActivityGroup SaveLeague(WebUser loggedInUser, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
-        }
-
-        public SystemMessages InviteAccount(Account accountToInvite, WebUser loggedInUser, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var aag = AccountActivityGroupService.CreateNew(accountToInvite, this, InviteStatus.Invited, loggedInUser, msgs, dc);
-
-            // send email to invited account
-            if (msgs.HasNoErrors())
-            {
-                // TODO: Write this
-            }
-
-            return msgs;
         }
 
         #endregion
