@@ -19,17 +19,17 @@
             <a href="@Url.Action("summary", "group", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")">
                 <i class="s7-graph2"></i> Summary
             </a>
-            <a href="@Url.Action("edit", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">
+            <a href="@Url.Action("edit", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">
                 <i class="s7-edit"></i> Setup
             </a>
-            <a href="@Url.Action("emailcontent", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "emailcontent" ? "-active" : "")">
-                <i class="s7-note2"></i> Content
+            <a href="@Url.Action("schools", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "emailcontent" ? "-active" : "")">
+                <i class="s7-study"></i> Schools
             </a>
-            <a href="@Url.Action("periods", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
-                <i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)
+            <a href="@Url.Action("teams", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
+                <i class="s7-users"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
             </a>
-            <a href="@Url.Action("activities", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
-                <i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
+            <a href="@Url.Action("schedule", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
+                <i class="s7-date"></i> Schedule
             </a>
 
             @if (activityCount > 0 || Model.IsPublished)

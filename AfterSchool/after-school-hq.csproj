@@ -857,6 +857,7 @@
     <Content Include="Areas\District\Views\Activity\Summary.cshtml" />
     <Content Include="Areas\District\Views\Activity\Team.cshtml" />
     <Content Include="Areas\District\Views\Activity\TrackAttendance.cshtml" />
+    <Content Include="Areas\District\Views\League\Schools.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
