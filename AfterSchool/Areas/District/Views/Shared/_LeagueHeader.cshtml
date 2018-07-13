@@ -26,7 +26,7 @@
                 <i class="s7-study"></i> Schools
             </a>
             <a href="@Url.Action("teams", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
-                <i class="s7-users"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)s
+                <i class="s7-users"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
             </a>
             <a href="@Url.Action("schedule", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
                 <i class="s7-date"></i> Schedule
