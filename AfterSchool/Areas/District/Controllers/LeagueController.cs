@@ -83,6 +83,38 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [ValidateInput(false)]
+        // GET: District/School
+        [HttpGet]
+        public ActionResult Schools(string pn, string rpp)
+        {
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount();
+            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(start, length);
+            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = count,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+            return View(visitorAccounts);
+        }
+
+        [ValidateInput(false)]
         [HttpGet]
         public ActionResult Edit(string id)
         {
@@ -144,9 +176,10 @@ namespace AfterSchool.Areas.District.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade)
+        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime)
         {
             var msgs = new SystemMessages();
+            var scheduleDates = new List<string>();
 
             var values = new NameValueCollection()
             {
@@ -160,7 +193,28 @@ namespace AfterSchool.Areas.District.Controllers
                 { "maxgrade", maxgrade }
             };
 
-            var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+            if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
+            {
+                values.Add("schedule", schedule);
+            }
+            else
+            {
+                var filteredParams = Request.Params.Filter("schedulerepeat-");
+                var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+                scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
+
+                values = new NameValueCollection();
+                values.Add("scheduledetails", scheduledetails);
+                values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
+                values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
+                values.Add("startdate", startdate);
+                values.Add("enddate", enddate);
+                values.Add("dailystarttime", dailystarttime);
+                values.Add("dailyendtime", dailyendtime);
+                values.Add("scheduledates", scheduleDates.ToStringList());
+                values.Add("schedule", schedule);
+            }
+                var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {

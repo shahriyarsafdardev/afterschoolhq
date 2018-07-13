@@ -698,6 +698,14 @@ namespace AfterSchoolLibrary
             var maxgradeid = values["maxgrade"];
             var mingradeid = values["mingrade"];
             var genderrestrictions = values["genderrestrictions"];
+            var daysoftheweek = values["daysoftheweek"];
+            var repeatsweekly = values["repeatsweekly"];
+            var startdate = values["startdate"];
+            var enddate = values["enddate"];
+            var dailystarttime = values["dailystarttime"];
+            var dailyendtime = values["dailyendtime"];
+            var scheduledates = values["scheduledates"];
+            var schedule = values["schedule"];
 
             if (name.IsEmpty())
                 msgs.Add("Label is required", MessageType.UserError);
@@ -789,6 +797,26 @@ namespace AfterSchoolLibrary
                             group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUser.ID.Value, msgs, adc);
                             group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUser.ID.Value, msgs, adc);
                         }
+
+                        //instances & schedule
+                        /*
+                        (amsgs.HasNoErrors())
+                        {
+                            activity.ScheduleRequiresAllDays = true;
+
+                            if (account.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0 && scheduledates.IsEmpty())
+                            {
+                                activity.ActivityScheduleId = schedule.ToInteger();
+                            }
+                            else if (scheduledates.IsNotEmpty())
+                            {
+                                amsgs.AddRange(activity.SetupSchedule(schedule, scheduledetails, repeatsweekly, startdate, enddate, dailystarttime, dailyendtime, scheduledates, account, loggedInUserId, adc));
+                            }
+
+                            amsgs.AddRange(activity.Save(adc));
+                        }
+                        */
+
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
