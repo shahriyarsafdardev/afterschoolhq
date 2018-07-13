@@ -769,7 +769,90 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Activities = group.GetActivities();
 
             return View(group);
-        }        
+        }
+
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult EditDetails(string id, string details, string scheduledetails, string cmd)
+        {
+            var msgs = new SystemMessages();
+            Activity activity = null;
+
+            if (id.IsNumber() && id.ToInteger() > 0)
+            {
+                var values = new NameValueCollection()
+                {
+                    { "details", details},
+                    { "scheduledetails", scheduledetails}
+                };
+
+                activity = Activity.EditExisting(
+                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    account: SessionVariables.CurrentAccount,
+                    activityId: id,
+                    values: values,
+                    msgs: msgs
+                );
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
+            }
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "prev":
+                        ViewBag.ActiveMenu = "EditSchedule";
+                        return View("EditSchedule", activity);
+                    case "next":
+                        ViewBag.ActiveMenu = "EditContact";
+                        return View("EditContact", activity);
+                }
+            }
+
+            ViewBag.ActiveMenu = "EditDetails";
+            return View(activity);
+        }
+
+        private void LoadEditScheduleViewBag(Activity activity, string scheduleId)
+        {
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.ActivityId = activity.ID.Value.ToString();
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActiveMenu = "EditSchedule";
+            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
+
+            ActivitySchedule schedule = null;
+
+            // changing schedule
+            if (scheduleId.IsNumber())
+            {
+                schedule = ActivitySchedule.Load(scheduleId.ToInteger());
+                if (schedule.AccountId != SessionVariables.CurrentAccount.ID)
+                {
+                    schedule = null;
+                }
+            }
+            if (schedule.IsEmpty())
+            {
+                schedule = activity.GetSchedule();
+            }
+            if (schedule.IsEmpty())
+            {
+                schedule = ActivitySchedule.GetNewDefaultSchedule();
+            }
+
+            ViewBag.Schedule = schedule;
+            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+        }
 
         [HttpPost]
         public ActionResult Copy(string id, string groupnamecopy, string usesameformcopy)

@@ -38,7 +38,8 @@
                             <th></th>
                             <th>School</th>
                             <th>Contact</th>
-                            <th></th>
+                            <th>Grades Offered</th>
+                            <th>Leagues Participating</th>
                         </tr>
                         @foreach (var account in Model)
                         {
@@ -48,7 +49,8 @@
                                 </td>
                                 <td>@account.Name</td>
                                 <td>@account.GetAccountOwner().DisplayName</td>
-                                <td></td>
+                                <td>Grades</td>
+                                <td>@account.GetLeagueCount(true)</td>
                             </tr>
                         }               
                     </table>
