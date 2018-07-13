@@ -9,11 +9,6 @@ namespace AfterSchoolLibrary.Services
 {
     public static class ActivityGroupService
     {
-        public static PaymentPlan AddPaymentPlan(this ActivityGroup activityGroup, int costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return PaymentPlanService.CreateNew(activityGroup.GetAccount(msgs, dc), ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, loggedInUser, msgs, dc);
-        }
-
         public static SystemMessages InviteAccount(this ActivityGroup activityGroup, Account accountToInvite, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -26,6 +21,32 @@ namespace AfterSchoolLibrary.Services
             }
 
             return msgs;
+        }
+
+        public static PaymentPlan AddPaymentPlan(this ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return PaymentPlanService.CreateNew(
+                activityGroup.GetAccount(msgs, dc),
+                activityGroup,
+                costPerPeriod,
+                billingPeriodType,
+                totalPeriods,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static SubscriptionPlan AddSubscriptionPlan(this ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlanService.CreateNew(
+                activityGroup.GetAccount(msgs, dc),
+                activityGroup,
+                costPerPeriod,
+                billingPeriodType,
+                doesAutoRenew,
+                loggedInUser,
+                msgs,
+                dc);
         }
     }
 }

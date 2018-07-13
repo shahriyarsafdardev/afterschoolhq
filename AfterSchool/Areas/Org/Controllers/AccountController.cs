@@ -477,10 +477,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     RestClient rc = new RestClient("https://connect.stripe.com/oauth/token");
                     rc.RequestMethod = RestClientRequestMethod.POST;
-                    rc.Parameters.Add("client_secret", AfterSchoolLibrary.StripeHelper.SecretKey);
+                    rc.Parameters.Add("client_secret", AfterSchoolLibrary.Billing.StripeHelper.SecretKey);
                     rc.Parameters.Add("code", code);
                     rc.Parameters.Add("grant_type", "authorization_code");
-                    rc.Parameters.Add("client_id", AfterSchoolLibrary.StripeHelper.PlatformClientId);
+                    rc.Parameters.Add("client_id", AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId);
                     rc.ContentType = RestClientContentTypeEnum.URLEncoded;
                     string responseFromServer = rc.DoRequest();
 

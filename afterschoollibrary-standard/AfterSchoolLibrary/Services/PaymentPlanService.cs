@@ -11,6 +11,16 @@ namespace AfterSchoolLibrary.Services
 {
     public class PaymentPlanService
     {
+        public static PaymentPlan CreateNew(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return CreateNew(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, loggedInUser, msgs, dc);
+        }
+
+        public static PaymentPlan CreateNew(Account planOwner, ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return CreateNew(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, loggedInUser, msgs, dc);
+        }
+
         public static PaymentPlan CreateNew(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -33,6 +43,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(plan.Save(dc));
 
             // TODO: Integrate Stripe
+            
 
             return plan;
         }

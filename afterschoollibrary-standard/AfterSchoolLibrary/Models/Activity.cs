@@ -1460,7 +1460,24 @@ namespace AfterSchoolLibrary
                             }
                             else if (scheduledates.IsNotEmpty())
                             {
-                                amsgs.AddRange(activity.SetupSchedule(schedule, scheduledetails, repeatsweekly, startdate, enddate, dailystarttime, dailyendtime, scheduledates, account, loggedInUserId, adc));
+                                var newSchedule = Services.ActivityScheduleService.SetupSchedule(
+                                    activity.AccountId.Value,
+                                    schedule.IfEmpty("0").ToInteger(),
+                                    $"{activity.Name} - Schedule",
+                                    scheduledetails, 
+                                    repeatsweekly, 
+                                    startdate, 
+                                    enddate, 
+                                    dailystarttime, 
+                                    dailyendtime, 
+                                    scheduledates,
+                                    account, 
+                                    activity.ActivityGroupId,
+                                    loggedInUserId, 
+                                    amsgs,
+                                    adc);
+
+                                activity.ActivityScheduleId = newSchedule.ID;
                             }
 
                             amsgs.AddRange(activity.Save(adc));
@@ -1534,54 +1551,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        private SystemMessages SetupSchedule(string schedule, string details, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string scheduledates, Account account, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            if (schedule.ToInteger() == 0)
-            {
-                var scheduleName = ActivitySchedule.GenerateUniqueName(this.AccountId.Value, string.Format("{0} - Schedule", this.Name), dc: dc);
-
-                ActivitySchedule newSchedule = this.AddNewSchedule(
-                    scheduleName,
-                    details,
-                    repeatsweekly.ToBoolean(),
-                    startdate.ToDateTime(),
-                    enddate.ToDateTime(),
-                    dailystarttime.ToDateTime(),
-                    dailyendtime.ToDateTime(),
-                    scheduledates,
-                    account.ID.Value,
-                    loggedInUserId,
-                    msgs,
-                    dc);
-            }
-            else
-            {
-                var sched = ActivitySchedule.Load(schedule.ToInteger(), dc: dc);
-
-                // if user doesn't have feature then we're updaing in the background
-                // otherwise user may have multiple activities with the same schedule so we cannot update directly on the activity
-                if (account.HasFeature(FeatureType.ManageActivityGroups, dc: dc) == false)
-                {
-                    msgs.AddRange(sched.UpdateScheduleAndInstances(
-                        repeatsweekly.ToBoolean(),
-                        startdate.ToDateTime(),
-                        enddate.ToDateTime(),
-                        dailystarttime.ToDateTime(),
-                        dailyendtime.ToDateTime(),
-                        scheduledates, 
-                        loggedInUserId, 
-                        dc));
-                }
-
-                // always be sure to associate the schedule id with the current activity
-                this.ActivityScheduleId = sched.ID.Value;
-                msgs.AddRange(this.Save(dc: dc));
-            }
-
-            return msgs;
-        }
+        
 
         private ActivityDay AddActivityDay(DayOfWeekASL day, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1728,18 +1698,6 @@ namespace AfterSchoolLibrary
             }
 
             return msgs;
-        }
-
-        public ActivitySchedule AddNewSchedule(string scheduleName, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, string scheduleDates, int accountId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var schedule = ActivitySchedule.CreateNew(scheduleName, details, repeatsWeekly, startDate, endDate, dailyStartTime, dailyEndTime, scheduleDates, accountId, loggedInUserId, this.ActivityGroupId, msgs, dc: dc);
-
-            this.ActivityScheduleId = schedule.ID;
-            msgs.AddRange(this.Save(dc: dc));
-
-            return schedule;
         }
 
         public RegistrationPeriod AddNewRegistrationPeriod(string name, DateTime startDateTime, DateTime endDateTime, int accountId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)

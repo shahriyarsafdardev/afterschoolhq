@@ -28,6 +28,8 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
 
+        public static 
+
         public static List<Activity> GetPublishedActivities(this Account account, DatabaseConnection dc = null)
         {
             var periods = account.GetOpenAndUpcomingRegistrationPeriods(dc: dc);
@@ -656,44 +658,49 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            Stripe.StripeRequestOptions requestOptions = new Stripe.StripeRequestOptions();
-            requestOptions.ApiKey = StripeHelper.SecretKey;
+            //Stripe.StripeRequestOptions requestOptions = new Stripe.StripeRequestOptions();
+            //requestOptions.ApiKey = StripeHelper.SecretKey;
 
-            Stripe.StripeCustomer customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
+            var sh = new Billing.StripeHelper();
 
-            if (!customer.IsEmpty())
+            if (customer.IsNotEmpty())
             {
-                Stripe.StripeCustomerUpdateOptions options = new Stripe.StripeCustomerUpdateOptions();
-                options.Description = account.Name;
-                options.Email = account.Email;
+                msgs.AddRange(sh.UpdateCustomer(customer.Id, account.Name, account.Email));
 
-                Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                try
-                {
-                    customer = service.Update(account.StripeCustomerId, options, requestOptions);
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
-                }
+                //Stripe.StripeCustomerUpdateOptions options = new Stripe.StripeCustomerUpdateOptions();
+                //options.Description = account.Name;
+                //options.Email = account.Email;
+
+                //Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
+                //try
+                //{
+                //    customer = service.Update(account.StripeCustomerId, options, requestOptions);
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
+                //}
             }
             else
             {
-                Stripe.StripeCustomerCreateOptions options = new Stripe.StripeCustomerCreateOptions();
-                options.Description = account.Name;
-                options.Email = account.Email;
+                customer = sh.CreateCustomer(account.Name, account.Email, msgs);
 
-                Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                try
-                {
-                    customer = service.Create(options);
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
-                }
+                //Stripe.StripeCustomerCreateOptions options = new Stripe.StripeCustomerCreateOptions();
+                //options.Description = account.Name;
+                //options.Email = account.Email;
 
-                if (!customer.IsEmpty())
+                //Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
+                //try
+                //{
+                //    customer = service.Create(options);
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
+                //}
+
+                if (customer.IsNotEmpty())
                 {
                     account.StripeCustomerId = customer.Id;
                     msgs.AddRange(account.Save(dc: dc));
@@ -708,44 +715,30 @@ namespace AfterSchoolLibrary
 
             if (account.StripeCustomerId.IsEmpty())
             {
-                msgs.AddRange(account.CreateStripeCustomer(dc: dc));
+                msgs.AddRange(account.CreateStripeCustomer(dc));
             }
 
             if (msgs.HasNoErrors())
             {
-                var options = new Stripe.StripeCardCreateOptions();
-                options.SourceCard = new Stripe.SourceCard
-                {
-                    Name = name,
-                    Number = number,
-                    ExpirationMonth = expMonth.ToInteger(),
-                    ExpirationYear = expYear.ToInteger(),
-                    Cvc = cvc
-                };
-
-                Stripe.StripeCard card = null;
-                Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
-                try
-                {
-                    card = service.Create(account.StripeCustomerId, options);
-                    if (!card.IsEmpty() && makePrimary)
+                var sh = new Billing.StripeHelper();
+                var card = sh.CreateCard(
+                    customerId: account.StripeCustomerId,
+                    sourceCard: new Stripe.SourceCard
                     {
-                        account.StripeDefaultCardId = card.Id;
-                        msgs.AddRange(account.Save(dc: dc));
-                    }
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    //error storing card
-                    msgs.Add(ex.Message, MessageType.Error, ex);
-                }
-                catch (Exception ex)
-                {
-                    msgs.Add("Error storing card", MessageType.Error, ex);
-                }
+                        Name = name,
+                        Number = number,
+                        ExpirationMonth = expMonth.ToInteger(),
+                        ExpirationYear = expYear.ToInteger(),
+                        Cvc = cvc
+                    },
+                    msgs: msgs
+                    );
 
-                if (msgs.HasNoErrors() && makePrimary)
+                if (!card.IsEmpty() && makePrimary)
                 {
+                    account.StripeDefaultCardId = card.Id;
+                    msgs.AddRange(account.Save(dc: dc));
+
                     msgs.AddRange(account.SetStripeDefaultCard(card.Id));
                 }
 
@@ -753,6 +746,42 @@ namespace AfterSchoolLibrary
                 {
                     msgs.Add("The payment card has been successfully added", MessageType.Success);
                 }
+
+                //if (msgs.HasNoErrors() && makePrimary)
+                //{
+                //    msgs.AddRange(account.SetStripeDefaultCard(card.Id));
+                //}
+
+                //var options = new Stripe.StripeCardCreateOptions();
+                //options.SourceCard = new Stripe.SourceCard
+                //{
+                //    Name = name,
+                //    Number = number,
+                //    ExpirationMonth = expMonth.ToInteger(),
+                //    ExpirationYear = expYear.ToInteger(),
+                //    Cvc = cvc
+                //};
+
+                //Stripe.StripeCard card = null;
+                //Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
+                //try
+                //{
+                //    card = service.Create(account.StripeCustomerId, options);
+                //    if (!card.IsEmpty() && makePrimary)
+                //    {
+                //        account.StripeDefaultCardId = card.Id;
+                //        msgs.AddRange(account.Save(dc: dc));
+                //    }
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    //error storing card
+                //    msgs.Add(ex.Message, MessageType.Error, ex);
+                //}
+                //catch (Exception ex)
+                //{
+                //    msgs.Add("Error storing card", MessageType.Error, ex);
+                //}
             }
 
             return msgs;
@@ -763,20 +792,23 @@ namespace AfterSchoolLibrary
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var cards = new List<Stripe.StripeCard>();
-            var customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
 
-            if (!customer.IsEmpty())
+            if (customer.IsNotEmpty())
             {
-                try
-                {
-                    Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
-                    cards.AddRange(service.List(customer.Id).ToList());
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    //error storing card
-                    msgs.Add("Error retrieving cards", MessageType.Error, ex);
-                }
+                var sh = new Billing.StripeHelper();
+                cards.AddRange(sh.GetCards(customer.Id, msgs));
+
+                //try
+                //{
+                //    Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
+                //    cards.AddRange(service.List(customer.Id).ToList());
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    //error storing card
+                //    msgs.Add("Error retrieving cards", MessageType.Error, ex);
+                //}
             }
 
             return cards;
@@ -787,23 +819,26 @@ namespace AfterSchoolLibrary
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var charges = new List<Stripe.StripeCharge>();
-            var customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
 
-            if (!customer.IsEmpty())
+            if (customer.IsNotEmpty())
             {
-                try
-                {
-                    Stripe.StripeChargeService service = new Stripe.StripeChargeService(StripeHelper.SecretKey);
-                    Stripe.StripeChargeListOptions options = new Stripe.StripeChargeListOptions();
-                    options.CustomerId = customer.Id;
-                    options.Limit = 10;
-                    charges.AddRange(service.List(options).ToList());
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    //error storing card
-                    msgs.Add("Error retrieving billing history", MessageType.Error, ex);
-                }
+                var sh = new Billing.StripeHelper();
+                charges = sh.GetCharges(customer.Id, msgs);
+
+                //try
+                //{
+                //    Stripe.StripeChargeService service = new Stripe.StripeChargeService(StripeHelper.SecretKey);
+                //    Stripe.StripeChargeListOptions options = new Stripe.StripeChargeListOptions();
+                //    options.CustomerId = customer.Id;
+                //    options.Limit = 10;
+                //    charges.AddRange(service.List(options).ToList());
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    //error storing card
+                //    msgs.Add("Error retrieving billing history", MessageType.Error, ex);
+                //}
             }
 
             return charges;
@@ -814,25 +849,32 @@ namespace AfterSchoolLibrary
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var refunds = new List<Stripe.StripeRefund>();
-            var customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
 
             if (!customer.IsEmpty())
             {
-                try
+                var sh = new Billing.StripeHelper();
+                var charges = account.GetStripeBillingHistory(msgs);
+                foreach(var item in charges)
                 {
-                    var service = new Stripe.StripeRefundService(StripeHelper.SecretKey);
-                    refunds.AddRange(service.List(null).ToList());
+                    refunds.AddRange(sh.GetRefunds(item.Id, msgs));
                 }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error retrieving refund history", MessageType.Error, ex);
-                }
+
+                //try
+                //{
+                //    var service = new Stripe.StripeRefundService(StripeHelper.SecretKey);
+                //    refunds.AddRange(service.List(null).ToList());
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    msgs.Add("Error retrieving refund history", MessageType.Error, ex);
+                //}
             }
 
             return refunds;
         }
 
-        public static Stripe.StripeCustomer GetStripeCustomer(this Account account, SystemMessages msgs = null)
+        public static Stripe.StripeCustomer GetStripeCustomer(this Account account, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -840,15 +882,8 @@ namespace AfterSchoolLibrary
 
             if (!account.StripeCustomerId.IsEmpty())
             {
-                try
-                {
-                    Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                    customer = service.Get(account.StripeCustomerId);
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error retrieving customer information", MessageType.Error, ex);
-                }
+                var sh = new Billing.StripeHelper();
+                customer = sh.GetCustomer(account.StripeCustomerId, msgs);
             }
             return customer;
         }
@@ -856,20 +891,30 @@ namespace AfterSchoolLibrary
         public static SystemMessages SetStripeDefaultCard(this Account account, string cardId)
         {
             var msgs = new SystemMessages();
-            var customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
 
-            var options = new Stripe.StripeCustomerUpdateOptions();
-            options.DefaultSource = cardId;
+            if (customer.IsNotEmpty())
+            {
+                var sh = new Billing.StripeHelper();
+                msgs.AddRange(sh.UpdateCustomerDefaultCard(customer.Id, cardId));
+            }
+            else
+            {
+                msgs.Add("Invalid stripe customer", MessageType.Error);
+            }
 
-            try
-            {
-                Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                service.Update(customer.Id, options);
-            }
-            catch (Stripe.StripeException ex)
-            {
-                msgs.Add("Error retrieving update default payment information", MessageType.Error, ex);
-            }
+            //var options = new Stripe.StripeCustomerUpdateOptions();
+            //options.DefaultSource = cardId;
+
+            //try
+            //{
+            //    Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
+            //    service.Update(customer.Id, options);
+            //}
+            //catch (Stripe.StripeException ex)
+            //{
+            //    msgs.Add("Error retrieving update default payment information", MessageType.Error, ex);
+            //}
 
             return msgs;
         }

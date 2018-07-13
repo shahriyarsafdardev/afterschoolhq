@@ -295,17 +295,10 @@ namespace AfterSchoolLibrary
         {
             var msgs = this.CancelPackage(dc: dc);
 
-            if(!this.StripeSubscriptionId.IsEmpty())
+            if(this.StripeSubscriptionId.IsNotEmpty())
             {
-                try
-                {
-                    var service = new Stripe.StripeSubscriptionService(StripeHelper.SecretKey);
-                    service.Cancel(stripeCustomerId, this.StripeSubscriptionId);
-                }
-                catch(Stripe.StripeException ex)
-                {
-                    msgs.Add("Error canceling existing package", MessageType.Error, ex);
-                }
+                var sh = new Billing.StripeHelper();
+                msgs.AddRange(sh.CancelSubscription(this.StripeSubscriptionId));
             }
 
             return msgs;
@@ -319,61 +312,88 @@ namespace AfterSchoolLibrary
 
             if (!stripeCustomerId.IsEmpty())
             {
-                try
-                {                    
-                    var service = new Stripe.StripeSubscriptionService(StripeHelper.SecretKey);
+                // var service = new Stripe.StripeSubscriptionService(StripeHelper.SecretKey);
 
-                    // first time, may have payment info
-                    if (this.StripeSubscriptionId.IsEmpty())
+                // first time, may have payment info
+                if (this.StripeSubscriptionId.IsEmpty())
+                {
+                    var sh = new Billing.StripeHelper();
+                    var subscription = sh.CreateSubscription(stripeCustomerId, this.ToPackage().GetStripePlanId(this.BillingPeriodTypeId), this.TrialEndDate, msgs);
+
+                    this.StripeSubscriptionId = subscription.Id;
+
+                    //var options = new Stripe.StripeSubscriptionCreateOptions();
+
+                    //if (this.TrialEndDate.HasValue)
+                    //{
+                    //    options.TrialEnd = this.TrialEndDate.Value;
+                    //}
+
+                    //var subscription = service.Create(stripeCustomerId, this.ToPackage().GetStripePlanId(this.BillingPeriodTypeId), options);
+                    //this.StripeSubscriptionId = subscription.Id;
+                    //msgs.AddRange(this.Save(dc: dc));
+                }
+                else
+                {
+                    var billingCycleAnchorNow = new bool?();
+                    var endTrialNow = new bool?();
+                    var prorate = new bool?();
+                    var billingCycleAnchorUnchanged = new bool?();
+
+                    if (upgradingFromTrial)
                     {
-                        var options = new Stripe.StripeSubscriptionCreateOptions();
-
-                        if (this.TrialEndDate.HasValue)
-                        {
-                            options.TrialEnd = this.TrialEndDate.Value;
-                        }
-
-                        var subscription = service.Create(stripeCustomerId, this.ToPackage().GetStripePlanId(this.BillingPeriodTypeId), options);
-                        this.StripeSubscriptionId = subscription.Id;
-                        msgs.AddRange(this.Save(dc: dc));
+                        billingCycleAnchorNow = true;
+                        endTrialNow = true;
                     }
                     else
                     {
-                        var options = new Stripe.StripeSubscriptionUpdateOptions();
-                        if (newStripePlanId.IsNotEmpty())
+                        if (this.BillingPeriodTypeId == BillingPeriodType.Year)
                         {
-                            options.PlanId = newStripePlanId;
-                        }
-                        if (upgradingFromTrial)
-                        {
-                            options.BillingCycleAnchorNow = true;
-                            options.EndTrialNow = true;
+                            prorate = false;
+                            billingCycleAnchorNow = true;
                         }
                         else
                         {
-                            if (this.BillingPeriodTypeId == BillingPeriodType.Year)
-                            {
-                                options.Prorate = false;
-                                options.BillingCycleAnchorNow = true;
-                            }
-                            else
-                            {
-                                options.Prorate = true;
-                                options.BillingCycleAnchorUnchanged = true;
-                            }
+                            prorate = true;
+                            billingCycleAnchorUnchanged = true;
                         }
-
-                        var subscription = service.Update(stripeCustomerId, this.StripeSubscriptionId, options);
                     }
 
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error saving subscription to Stripe", MessageType.Error, ex);
-                }
-                catch(Exception ex)
-                {
-                    msgs.Add("Error saving subscription", MessageType.Error, ex);
+                    var sh = new Billing.StripeHelper();
+                    msgs.AddRange(sh.UpdateSubscription(
+                        this.StripeSubscriptionId,
+                        newStripePlanId,
+                        billingCycleAnchorNow,
+                        billingCycleAnchorUnchanged,
+                        endTrialNow,
+                        prorate
+                        ));
+
+                    //var options = new Stripe.StripeSubscriptionUpdateOptions();
+                    //if (newStripePlanId.IsNotEmpty())
+                    //{
+                    //    options.PlanId = newStripePlanId;
+                    //}
+                    //if (upgradingFromTrial)
+                    //{
+                    //    options.BillingCycleAnchorNow = true;
+                    //    options.EndTrialNow = true;
+                    //}
+                    //else
+                    //{
+                    //    if (this.BillingPeriodTypeId == BillingPeriodType.Year)
+                    //    {
+                    //        options.Prorate = false;
+                    //        options.BillingCycleAnchorNow = true;
+                    //    }
+                    //    else
+                    //    {
+                    //        options.Prorate = true;
+                    //        options.BillingCycleAnchorUnchanged = true;
+                    //    }
+                    //}
+
+                    //var subscription = service.Update(stripeCustomerId, this.StripeSubscriptionId, options);
                 }
             }
 

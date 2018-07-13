@@ -62,7 +62,28 @@ namespace AfterSchoolLibrary
 
         public static PaymentPlan AddPaymentPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return PaymentPlanService.CreateNew(activity.GetAccount(msgs, dc), ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, totalPeriods, loggedInUser, msgs, dc);
+            return PaymentPlanService.CreateNew(
+                activity.GetAccount(msgs, dc),
+                activity,
+                costPerPeriod, 
+                billingPeriodType, 
+                totalPeriods, 
+                loggedInUser, 
+                msgs, 
+                dc);
+        }
+
+        public static SubscriptionPlan AddSubscriptionPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlanService.CreateNew(
+                activity.GetAccount(msgs, dc), 
+                activity,
+                costPerPeriod, 
+                billingPeriodType,
+                doesAutoRenew, 
+                loggedInUser, 
+                msgs, 
+                dc);
         }
     }
 }

@@ -250,130 +250,189 @@ namespace AfterSchoolLibrary
             //add to stripe plan, should do on every save
             if (msgs.HasNoErrors())
             {
-                var planService = new Stripe.StripePlanService(StripeHelper.SecretKey);
-                var requestOptions = new Stripe.StripeRequestOptions();
-                requestOptions.ApiKey = StripeHelper.SecretKey;
+                var monthlyProduct = AddOrUpdateStripeProduct(BillingPeriodType.Month, msgs);
+                var yearlyProduct = AddOrUpdateStripeProduct(BillingPeriodType.Year, msgs);
 
-                msgs.AddRange(AddOrUpdateStripePlan(planService, requestOptions, BillingPeriodType.Month, this.Price.Value));
-                msgs.AddRange(AddOrUpdateStripePlan(planService, requestOptions, BillingPeriodType.Year, this.PricePerYear.Value));
+                var monthlyPlan = AddOrUpdateStripePlan(monthlyProduct, this.Price.Value, BillingPeriodType.Month, msgs);
+                var yearlyPlan = AddOrUpdateStripePlan(yearlyProduct, this.PricePerYear.Value, BillingPeriodType.Year, msgs);
+
+                //var planService = new Stripe.StripePlanService(StripeHelper.SecretKey);
+                //var requestOptions = new Stripe.StripeRequestOptions();
+                //requestOptions.ApiKey = StripeHelper.SecretKey;
+
+                //msgs.AddRange(AddOrUpdateStripePlan(planService, requestOptions, BillingPeriodType.Month, this.Price.Value));
+                //msgs.AddRange(AddOrUpdateStripePlan(planService, requestOptions, BillingPeriodType.Year, this.PricePerYear.Value));
             }
 
             return msgs;
         }
 
-        private SystemMessages AddOrUpdateStripeProduct(Stripe.StripeProductService productService, Stripe.StripeRequestOptions requestOptions, BillingPeriodType billingPeriodType)
+        private Stripe.StripeProduct AddOrUpdateStripeProduct(BillingPeriodType billingPeriodType, SystemMessages msgs)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            try
-            {
-                Stripe.StripeProduct product = null;
-
-                try
-                {
-                    product = productService.Get(this.GetStripePlanId(billingPeriodType), requestOptions);
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    //no product found
-                }
-
-                if (product.IsEmpty())
-                {
-                    var options = new Stripe.StripeProductCreateOptions();
-                    options.Id = this.GetStripePlanId(billingPeriodType);
-                    options.Name = this.GetStripePlanName(billingPeriodType);
-                    options.StatementDescriptor = $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22);
-                    // options.Shippable = false; not used in api anymore
-                    options.Active = true;
-                    options.Type = "service";
-
-                    productService = new Stripe.StripeProductService(StripeHelper.SecretKey);
-                    productService.Create(options, requestOptions);
-                }
-                else
-                {
-                    var options = new Stripe.StripeProductUpdateOptions();
-                    options.Name = this.GetStripePlanName(billingPeriodType);
-                    options.StatementDescriptor = $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22);
-                    productService.Update(product.Id, options, requestOptions);
-                }
-            }
-            catch (Exception ex)
-            {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-            }
-
-            return msgs;
-        }
-
-        private SystemMessages AddOrUpdateStripePlan(Stripe.StripePlanService planService, Stripe.StripeRequestOptions requestOptions, BillingPeriodType billingPeriodType, decimal price)
-        {
-            var msgs = new SystemMessages();
-            try
-            {
-                var product = GetStripeProduct(requestOptions, billingPeriodType);
-                Stripe.StripePlan plan = null;
-
-                try
-                {
-                    plan = planService.Get(this.GetStripePlanId(billingPeriodType), requestOptions);
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    //no plan found
-                }
-
-                if (plan.IsEmpty())
-                {
-                    var options = new Stripe.StripePlanCreateOptions();
-                    options.Id = this.GetStripePlanId(billingPeriodType);
-                    options.Amount = Convert.ToInt32(price * 100);
-                    options.Currency = "usd";
-                    options.IntervalCount = 1;
-                    options.Interval = billingPeriodType.ToString().ToLower();
-                    options.Nickname = this.GetStripePlanName(billingPeriodType);
-                    options.ProductId = product.Id;
-
-                    planService = new Stripe.StripePlanService(StripeHelper.SecretKey);
-                    planService.Create(options, requestOptions);
-                }
-                else
-                {
-                    var options = new Stripe.StripePlanUpdateOptions();
-                    // TODO: does the product need to be updated?
-                    planService.Update(plan.Id, options, requestOptions);
-                }
-            }
-            catch(Exception ex)
-            {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-            }
-            
-            return msgs;
-        }
-
-        public Stripe.StripeProduct GetStripeProduct(Stripe.StripeRequestOptions requestOptions, BillingPeriodType billingPeriodType)
-        {
-            var productService = new Stripe.StripeProductService(StripeHelper.SecretKey);
-            Stripe.StripeProduct product = null;
-
-            try
-            {
-                product = productService.Get(GetStripePlanId(billingPeriodType), requestOptions);
-            }
-            catch(Exception ex)
-            {
-                // no existing product
-            }
+            var sh = new Billing.StripeHelper();
+            var product = sh.GetProduct(this.GetStripePlanId(billingPeriodType), msgs);
 
             if (product.IsEmpty())
             {
-                AddOrUpdateStripeProduct(productService, requestOptions, billingPeriodType);
-                product = productService.Get(GetStripePlanId(billingPeriodType), requestOptions);
+                product = sh.CreateProduct(
+                    this.GetStripePlanId(billingPeriodType),
+                    this.GetStripePlanName(billingPeriodType),
+                    $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
+                    true,
+                    msgs);
             }
+            else
+            {
+                msgs.AddRange(sh.UpdateProduct(
+                    this.GetStripePlanId(billingPeriodType),
+                    this.GetStripePlanName(billingPeriodType),
+                    $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
+                    true));
+            }
+
             return product;
         }
+
+        private Stripe.StripePlan AddOrUpdateStripePlan(Stripe.StripeProduct product, decimal price, BillingPeriodType billingPeriodType, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var sh = new Billing.StripeHelper();
+            var plan = sh.GetPlan(this.GetStripePlanId(billingPeriodType), msgs);
+
+            if (plan.IsEmpty())
+            {
+                plan = sh.CreatePlan(
+                    product,
+                    this.GetStripePlanId(billingPeriodType),
+                    price,
+                    billingPeriodType,
+                    this.GetStripePlanName(billingPeriodType),
+                    msgs);
+            }
+            else
+            {
+                // TODO: Need to update anything?
+            }
+
+            return plan;
+        }
+
+        //private SystemMessages AddOrUpdateStripeProduct(Stripe.StripeProductService productService, Stripe.StripeRequestOptions requestOptions, BillingPeriodType billingPeriodType)
+        //{
+        //    var msgs = new SystemMessages();
+
+        //    try
+        //    {
+        //        Stripe.StripeProduct product = null;
+
+        //        try
+        //        {
+        //            product = productService.Get(this.GetStripePlanId(billingPeriodType), requestOptions);
+        //        }
+        //        catch (Stripe.StripeException ex)
+        //        {
+        //            //no product found
+        //        }
+
+        //        if (product.IsEmpty())
+        //        {
+        //            var options = new Stripe.StripeProductCreateOptions();
+        //            options.Id = this.GetStripePlanId(billingPeriodType);
+        //            options.Name = this.GetStripePlanName(billingPeriodType);
+        //            options.StatementDescriptor = $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22);
+        //            // options.Shippable = false; not used in api anymore
+        //            options.Active = true;
+        //            options.Type = "service";
+
+        //            productService = new Stripe.StripeProductService(StripeHelper.SecretKey);
+        //            productService.Create(options, requestOptions);
+        //        }
+        //        else
+        //        {
+        //            var options = new Stripe.StripeProductUpdateOptions();
+        //            options.Name = this.GetStripePlanName(billingPeriodType);
+        //            options.StatementDescriptor = $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22);
+        //            productService.Update(product.Id, options, requestOptions);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        msgs.Add(ex.Message, MessageType.Error, ex);
+        //    }
+
+        //    return msgs;
+        //}
+
+        //private SystemMessages AddOrUpdateStripePlan(Stripe.StripePlanService planService, Stripe.StripeRequestOptions requestOptions, BillingPeriodType billingPeriodType, decimal price)
+        //{
+        //    var msgs = new SystemMessages();
+        //    try
+        //    {
+        //        var product = GetStripeProduct(requestOptions, billingPeriodType);
+        //        Stripe.StripePlan plan = null;
+
+        //        try
+        //        {
+        //            plan = planService.Get(this.GetStripePlanId(billingPeriodType), requestOptions);
+        //        }
+        //        catch (Stripe.StripeException ex)
+        //        {
+        //            //no plan found
+        //        }
+
+        //        if (plan.IsEmpty())
+        //        {
+        //            var options = new Stripe.StripePlanCreateOptions();
+        //            options.Id = this.GetStripePlanId(billingPeriodType);
+        //            options.Amount = Convert.ToInt32(price * 100);
+        //            options.Currency = "usd";
+        //            options.IntervalCount = 1;
+        //            options.Interval = billingPeriodType.ToString().ToLower();
+        //            options.Nickname = this.GetStripePlanName(billingPeriodType);
+        //            options.ProductId = product.Id;
+
+        //            planService = new Stripe.StripePlanService(StripeHelper.SecretKey);
+        //            planService.Create(options, requestOptions);
+        //        }
+        //        else
+        //        {
+        //            var options = new Stripe.StripePlanUpdateOptions();
+        //            // TODO: does the product need to be updated?
+        //            planService.Update(plan.Id, options, requestOptions);
+        //        }
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        msgs.Add(ex.Message, MessageType.Error, ex);
+        //    }
+            
+        //    return msgs;
+        //}
+
+        //public Stripe.StripeProduct GetStripeProduct(Stripe.StripeRequestOptions requestOptions, BillingPeriodType billingPeriodType)
+        //{
+        //    var productService = new Stripe.StripeProductService(StripeHelper.SecretKey);
+        //    Stripe.StripeProduct product = null;
+
+        //    try
+        //    {
+        //        product = productService.Get(GetStripePlanId(billingPeriodType), requestOptions);
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        // no existing product
+        //    }
+
+        //    if (product.IsEmpty())
+        //    {
+        //        AddOrUpdateStripeProduct(productService, requestOptions, billingPeriodType);
+        //        product = productService.Get(GetStripePlanId(billingPeriodType), requestOptions);
+        //    }
+        //    return product;
+        //}
 
         public string GetStripePlanId(BillingPeriodType billingPeriodType)
         {

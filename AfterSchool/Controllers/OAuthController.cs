@@ -30,10 +30,10 @@ namespace AfterSchool.Controllers
                     string code = Request["code"];
                     string state = Request["state"];
 
-                    string postVariables = "client_secret=" + AfterSchoolLibrary.StripeHelper.SecretKey;
+                    string postVariables = "client_secret=" + AfterSchoolLibrary.Billing.StripeHelper.SecretKey;
                     postVariables += "&code=" + code;
                     postVariables += "&grant_type=authorization_code";
-                    postVariables += "&client_id=" + AfterSchoolLibrary.StripeHelper.PlatformClientId;
+                    postVariables += "&client_id=" + AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId;
 
                     WebRequest request = WebRequest.Create("https://connect.stripe.com/oauth/token");
                     request.Method = "POST";
