@@ -230,13 +230,13 @@ namespace AfterSchoolLibrary
             return _instances;
         }
         
-        public static ActivitySchedule LoadByAccountIdByName(int AccountId, string Name, DatabaseConnection dc = null)
+        public static ActivitySchedule LoadByAccountIdByName(int AccountId, string Name, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["Name"], Name);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
         public static bool ExistsByAccountIdByName(int AccountId, string Name, int existingId, DatabaseConnection dc = null)
@@ -249,17 +249,17 @@ namespace AfterSchoolLibrary
             return dq.GetCount() > 0;
         }
 
-        public static string GenerateUniqueName(int accountId, string name, DatabaseConnection dc = null)
+        public static string GenerateUniqueName(int accountId, string name, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var rtnName = name;
-            var period = ActivitySchedule.LoadByAccountIdByName(accountId, name, dc: dc);
+            var schedule = ActivitySchedule.LoadByAccountIdByName(accountId, name, msgs, dc);
             var counter = 1;
 
-            while (period.IsNotEmpty())
+            while (schedule.IsNotEmpty())
             {
                 counter++;
                 rtnName = $"{name} {counter.ToString()}";
-                period = ActivitySchedule.LoadByAccountIdByName(accountId, rtnName, dc: dc);
+                schedule = ActivitySchedule.LoadByAccountIdByName(accountId, rtnName, msgs, dc);
             }
 
             return rtnName;

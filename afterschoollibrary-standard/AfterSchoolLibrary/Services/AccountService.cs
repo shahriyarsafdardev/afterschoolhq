@@ -28,8 +28,6 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
 
-        public static 
-
         public static List<Activity> GetPublishedActivities(this Account account, DatabaseConnection dc = null)
         {
             var periods = account.GetOpenAndUpcomingRegistrationPeriods(dc: dc);

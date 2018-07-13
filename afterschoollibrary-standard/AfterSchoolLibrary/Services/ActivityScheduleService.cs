@@ -16,9 +16,7 @@ namespace AfterSchoolLibrary.Services
             // create new schedule
             if (scheduleId == 0)
             {
-                // string.Format("{0} - Schedule", activity.Name)
-
-                scheduleName = ActivitySchedule.GenerateUniqueName(accountId, scheduleName, dc: dc);
+                scheduleName = ActivitySchedule.GenerateUniqueName(accountId, scheduleName, msgs, dc);
 
                 schedule = CreateNew(
                     scheduleName,

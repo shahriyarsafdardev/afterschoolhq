@@ -22,7 +22,8 @@ namespace AfterSchool.Controllers
         public ActionResult AccountHome(string accountName)
         {
             var account = Account.LoadByUniqueName(accountName);
-            var activities = account.GetPublishedActivities()
+            var activities = account.GetPublishedActivities();
+            return View();
         }
 
         //public ActionResult AccountHome(string accountName, string activityGroupName)
