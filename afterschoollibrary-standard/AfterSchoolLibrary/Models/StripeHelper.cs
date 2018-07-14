@@ -498,16 +498,19 @@ namespace AfterSchoolLibrary.Billing
             {
                 CustomerId = customerId,
                 Billing = StripeBilling.ChargeAutomatically,
-                TrialEnd = trialEndDate,
-                Items = new List<StripeSubscriptionItemOption>()
-                {
-                    new StripeSubscriptionItemOption()
-                    {
-                        PlanId = planId,
-                        Quantity = 1
-                    }
-                }
+                TrialEnd = trialEndDate
             };
+
+            // not using this in sdk even though it's recommended
+            // because the planid is passed in the create below
+            //Items = new List<StripeSubscriptionItemOption>()
+            //{
+            //    new StripeSubscriptionItemOption()
+            //    {
+            //        PlanId = planId,
+            //        Quantity = 1
+            //    }
+            //}
 
             try
             {
@@ -515,7 +518,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe subscription was not created", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Stripe subscription was not created", MessageType.Error);
             }
 
             return subscription;

@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class ActivityGroupService
     {
+        /// <summary>
+        /// Invite an account to an external league or session
+        /// </summary>
+        /// <param name="activityGroup"></param>
+        /// <param name="accountToInvite"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static SystemMessages InviteAccount(this ActivityGroup activityGroup, Account accountToInvite, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -18,11 +25,23 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 // TODO: Write this
+                msgs.Add("No email sent", MessageType.Error);
             }
 
             return msgs;
         }
 
+        /// <summary>
+        /// Create a payment plan plan to allow a registrant to subscribe to when signing up
+        /// </summary>
+        /// <param name="activityGroup"></param>
+        /// <param name="costPerPeriod"></param>
+        /// <param name="billingPeriodType"></param>
+        /// <param name="totalPeriods"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static PaymentPlan AddPaymentPlan(this ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return PaymentPlanService.CreateNew(
@@ -36,6 +55,17 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
+        /// <summary>
+        /// Create a subscription plan to allow a registrant to subscribe to when signing up
+        /// </summary>
+        /// <param name="activityGroup"></param>
+        /// <param name="costPerPeriod"></param>
+        /// <param name="billingPeriodType"></param>
+        /// <param name="doesAutoRenew"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static SubscriptionPlan AddSubscriptionPlan(this ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return SubscriptionPlanService.CreateNew(
@@ -47,6 +77,28 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
+        }
+        
+        /// <summary>
+        /// Convert to the universal participation object, something a registrant participates in once registered
+        /// </summary>
+        /// <param name="activityGroup"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static ParticipationObject ToParticipationObject(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ParticipationObject(activityGroup, msgs, dc);
+        }
+
+        public static List<PaymentPlan> GetPaymentPlans(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return PaymentPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, msgs, dc);
+        }
+
+        public static List<SubscriptionPlan> GetSubscriptionPlans(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, msgs, dc);
         }
     }
 }

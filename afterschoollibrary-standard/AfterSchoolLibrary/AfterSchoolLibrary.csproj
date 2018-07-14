@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Services\AccountActivityGroupService.cs~RF2aa463b.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Rollbar" Version="1.4.0" />
     <PackageReference Include="Sendgrid" Version="9.9.0" />

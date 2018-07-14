@@ -11,7 +11,7 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class ActivityFormWebUserFactory
     {
-        public static ActivityForm Create(Account account, Activity activity, Form form, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityForm Create(Account account, Activity activity, Form form, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new ActivityForm() { AccountId = account.ID, ActivityId = activity.ID, FormId = form.ID };
             msgs.AddRange(obj.Save(dc: dc));

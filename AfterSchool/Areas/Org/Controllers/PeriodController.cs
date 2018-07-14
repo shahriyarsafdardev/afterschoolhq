@@ -155,7 +155,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         period.LastModifiedBy = SessionVariables.LoggedInUser.ID;
                         amsgs.AddRange(period.Save(adc));
 
-                        var activities = period.GetActivities(adc);
+                        var activities = period.GetActivities(amsgs, adc);
                         foreach (var activity in activities)
                         {
                             activity.RegistrationModeId = period.RegistrationModeId;

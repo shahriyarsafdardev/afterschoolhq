@@ -9,6 +9,17 @@ namespace AfterSchool.Models
 {
     public class SessionVariables
     {
+        public static Registrant CurrentRegistrant
+        {
+            get
+            {
+                return (Registrant)HttpContext.Current.Session["CurrentRegistrant"];
+            }
+            set
+            {
+                HttpContext.Current.Session["CurrentRegistrant"] = value;
+            }
+        }
         public static WebUser LoggedInUser
         {
             get

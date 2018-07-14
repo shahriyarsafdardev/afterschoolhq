@@ -11,5 +11,6 @@ public enum QuestionType
 	Date,
 	Number,
 	RadioMatrix,
-	TextBlock
+	TextBlock,
+	FileUpload
 }

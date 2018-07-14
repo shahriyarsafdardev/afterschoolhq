@@ -453,11 +453,21 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
+        public string GetHomePageUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return $"/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
+        }
+
+        public string GetRegistrationPageUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return $"{this.GetHomePageUrl(msgs, dc)}/register";
+        }
+
         public string HomePageUrl
         {
             get
             {
-                return string.Format("{0}/{1}", this.GetAccount().HomePageUrl, this.Uid.ToString());
+                return GetHomePageUrl();
             }
         }
 
@@ -477,12 +487,12 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static List<Activity> LoadList(List<int> ids, DatabaseConnection dc = null)
+        public static List<Activity> LoadList(List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], ids, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         private static DatabaseQuery LoadByAccountIdQuery(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
@@ -536,13 +546,13 @@ namespace AfterSchoolLibrary
             return LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc: dc).GetCount();
         }
 
-        public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, int? start, int? length, DatabaseConnection dc = null)
+        public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc: dc);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             dq.OrderBys.Add("Name", OrderByDirectionEnum.Ascending);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static List<Activity> LoadByAccountIdByDate(int AccountId, DateTime? startDate = null, DateTime? endDate = null, DatabaseConnection dc = null)
@@ -780,9 +790,9 @@ namespace AfterSchoolLibrary
             return RegistrantActivity.GetSeatCountByActivityId(this.ID.Value, dc: dc);
         }
 
-        public int GetRegistrantCountByApplicationType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
+        public int GetRegistrantCountByApplicationType(RegistrationAssignmentType rat, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, activityId: this.ID, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, activityId: this.ID, msgs: msgs, dc: dc);
         }
 
         public bool IsFull(DatabaseConnection dc = null)
@@ -801,10 +811,13 @@ namespace AfterSchoolLibrary
         }
 
         private List<GradeLevel> _GradeLevels = null;
-        public List<GradeLevel> GetGradeLevels(DatabaseConnection dc = null)
+        public List<GradeLevel> GetGradeLevels(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_GradeLevels.IsEmpty())
-                _GradeLevels = ActivityGradeLevel.LoadByActivityId(this.ID.Value, dc: dc).Select(x => x.ToGradeLevel()).ToList();
+                _GradeLevels = ActivityGradeLevel.LoadByActivityId(this.ID.Value, msgs, dc: dc)
+                    .Select(x => x.ToGradeLevel())
+                    .OrderBy(x => x.ID)
+                    .ToList();
 
             return _GradeLevels;
         }
@@ -828,10 +841,10 @@ namespace AfterSchoolLibrary
             return af.ToForm();
         }
 
-        public ActivityForm GetActiveActivityForm(DatabaseConnection dc = null)
+        public ActivityForm GetActiveActivityForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return ActivityForm.LoadByActivityIdByIsActive(this.ID.Value, true, dc: dc);
+                return ActivityForm.LoadByActivityIdByIsActive(this.ID.Value, true, msgs, dc);
 
             return null;
         }
@@ -898,11 +911,11 @@ namespace AfterSchoolLibrary
             return period;
         }
 
-        public RegistrationPeriod GetActiveRegistrationPeriod(DatabaseConnection dc = null)
+        public RegistrationPeriod GetActiveRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
             {
-                var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(this.ID.Value, true, dc: dc);
+                var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(this.ID.Value, true, msgs, dc: dc);
                 if (item.IsNotEmpty())
                     return item.ToRegistrationPeriod(true, dc: dc);
             }
@@ -1012,7 +1025,7 @@ namespace AfterSchoolLibrary
                     amsgs.AddRange(activity.Save(adc));
 
                     //don't copy the whole form is the account can manage forms
-                    if (account.HasFeature(FeatureType.ManageForms, adc))
+                    if (account.HasFeature(FeatureType.ManageForms, amsgs, adc))
                     {
                         //get form and use the same form
                         var formToUse = this.GetActiveForm(adc);
@@ -1037,14 +1050,14 @@ namespace AfterSchoolLibrary
                     // copy team and permissions
                     this.GetTeamMembers(adc).ForEach(member => member.Copy(activity.ID.Value, loggedInUserId, amsgs, adc));
 
-                    var activePeriod = this.GetActiveRegistrationPeriod(adc);
+                    var activePeriod = this.GetActiveRegistrationPeriod(amsgs, adc);
                     if (activePeriod.IsNotEmpty())
                     {
                         //copy registration period if doesn't have activity groups
-                        if (!account.HasFeature(FeatureType.ManageActivityGroups, adc))
+                        if (!account.HasFeature(FeatureType.ManageActivityGroups, amsgs, adc))
                         {
-                            var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, string.Format("{0} - Reg Window", activity.Name), dc: adc);
-                            RegistrationPeriod newPeriod = activePeriod.Copy(periodName, loggedInUserId, amsgs, dc: adc);
+                            var periodName = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{activity.Name} - Reg Window", amsgs, adc);
+                            var newPeriod = activePeriod.Copy(periodName, loggedInUserId, amsgs, dc: adc);
                             amsgs.AddRange(newPeriod.AddActivity(activity, true, loggedInUserId, adc));
                         }
                         else
@@ -1053,30 +1066,38 @@ namespace AfterSchoolLibrary
 
                     // copy Activity Properties
                     this.GetActivityProperties(adc).ForEach(property => {
-                        var newProperty = new AccountProperty();
-                        newProperty.ActivityId = activity.ID;
-                        newProperty.Value = property.Value;
-                        newProperty.AccountPropertyTypeId = property.AccountPropertyTypeId;
-                        newProperty.LastModifiedDate = newProperty.CreateDate = DateTime.UtcNow;
-                        newProperty.LastModifiedBy = newProperty.CreatedBy = loggedInUserId;
+                        var newProperty = new AccountProperty
+                        {
+                            ActivityId = activity.ID,
+                            Value = property.Value,
+                            AccountPropertyTypeId = property.AccountPropertyTypeId,
+                            LastModifiedDate = DateTime.UtcNow,
+                            CreateDate = DateTime.UtcNow,
+                            LastModifiedBy = loggedInUserId,
+                            CreatedBy = loggedInUserId
+                        };
                         amsgs.AddRange(newProperty.Save(adc));
                     });
 
                     // copy days
                     this.GetDays(adc).ForEach(day => {
-                        var newDay = new ActivityDay();
-                        newDay.ActivityId = activity.ID;
-                        newDay.ActivityRecurrenceId = day.ActivityRecurrenceId;
-                        newDay.Day = day.Day;
-                        newDay.EndTime = day.EndTime;
-                        newDay.StartTime = day.StartTime;
-                        newDay.CreateDate = newDay.LastModifiedDate = DateTime.UtcNow;
-                        newDay.CreatedBy = newDay.LastModifiedBy = loggedInUserId;
+                        var newDay = new ActivityDay
+                        {
+                            ActivityId = activity.ID,
+                            ActivityRecurrenceId = day.ActivityRecurrenceId,
+                            Day = day.Day,
+                            EndTime = day.EndTime,
+                            StartTime = day.StartTime,
+                            CreateDate = DateTime.UtcNow,
+                            LastModifiedDate = DateTime.UtcNow,
+                            CreatedBy = loggedInUserId,
+                            LastModifiedBy = loggedInUserId
+                        };
                         amsgs.AddRange(newDay.Save(adc));
                     });
 
                     // copy grades
-                    this.GetGradeLevels(adc).ForEach(grade => {
+                    this.GetGradeLevels(amsgs, adc).ForEach(grade => {
                         activity.AddGrade(grade.ID.Value, loggedInUserId, amsgs, dc: adc);
                     });
 
@@ -1228,29 +1249,23 @@ namespace AfterSchoolLibrary
                 }
                 else
                 {
-                    AccountPackage ap = account.GetActiveAccountPackage();
-                    var maxParticipants = ap.GetFeature(FeatureType.Participants).Max.Value;
+                    AccountPackage ap = account.GetActiveAccountPackage(msgs, dc);
+                    var maxParticipants = ap.GetFeature(FeatureType.Participants, msgs, dc).Max.Value;
                     if (maxParticipants < seatsavailable.ToInteger())
-                    {
                         msgs.Add(string.Format("Total Available Seats is required and must be less than or equal to {0}", maxParticipants), MessageType.UserError);
-                    }
+
                 }
                 if (registrationperiod.ToInteger() > 0 && group.IsEmpty())
                 {
-                    if (!string.Format("{0} {1}", registrationopendate, registrationopentime).IsDateTime())
-                    {
+                    if (!$"{registrationopendate} {registrationopentime}".IsDateTime())
                         msgs.Add("Registration Open Date & Time is required", MessageType.UserError);
-                    }
-                    if (!string.Format("{0} {1}", registrationclosedate, registrationclosetime).IsDateTime())
-                    {
+
+                    if (!$"{registrationclosedate} {registrationclosetime}".IsDateTime())
                         msgs.Add("Registration Close Date & Time is required", MessageType.UserError);
-                    }
                 }   
 
                 if (!waitinglistseats.IsNumber())
-                {
                     waitinglistseats = "0";
-                }
 
                 //pre-load account info
                 if (contactphone.IsBlank())
@@ -1288,12 +1303,14 @@ namespace AfterSchoolLibrary
 
             if (activityId.IsNotEmpty())
             {
-                activity = Activity.Load(activityId.ToInteger());
-                if (seatsavailable.IsNumber() && activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc) <= seatsavailable.ToInteger())
+                activity = Activity.Load(activityId.ToInteger(), msgs, dc);
+                if (seatsavailable.IsNumber() && 
+                    activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, msgs, dc) <= seatsavailable.ToInteger())
                 {
                     activity.SeatsAvailable = seatsavailable.ToInteger();
                 }
-                if (waitinglistseats.IsNumber() && activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc) <= waitinglistseats.ToInteger())
+                if (waitinglistseats.IsNumber() && 
+                    activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, msgs, dc) <= waitinglistseats.ToInteger())
                 {
                     activity.WaitingListSeats = waitinglistseats.ToInteger();
                 }
@@ -1301,6 +1318,7 @@ namespace AfterSchoolLibrary
             else
             {
                 activity = new Activity();
+                activity.ActivityTypeId = ActivityType.Activity;
                 activity.CreateDate = DateTime.UtcNow;
                 activity.CreatedBy = loggedInUserId;
                 activity.SeatsAvailable = seatsavailable.ToInteger();
@@ -1316,7 +1334,11 @@ namespace AfterSchoolLibrary
             activity.LastModifiedDate = DateTime.UtcNow;
             activity.LastModifiedBy = loggedInUserId;
 
-            if (name.IsNotBlank()) activity.Name = name;
+            if (name.IsNotBlank())
+            {
+                activity.Name = name;
+                activity.UniqueName = ActivityService.GenerateUniqueName(name, activity.ID, activity.AccountId, msgs, dc);
+            }
 
             if (agestart.IsNumber())
             {
@@ -1404,7 +1426,7 @@ namespace AfterSchoolLibrary
 
                             if (contactname.IsEmpty())
                             {
-                                activity.ContactName = account.GetAccountOwner(adc).DisplayName;
+                                activity.ContactName = account.GetAccountOwner(amsgs, adc).DisplayName;
                             }
                             if (contactemail.IsEmpty())
                             {
@@ -1417,8 +1439,9 @@ namespace AfterSchoolLibrary
                         }
                         if (group.IsGuid())
                         {
-                            activity.ActivityGroupId = ActivityGroup.LoadByUid(group.ToGuid(), dc: adc).ID.Value;
+                            activity.ActivityGroupId = ActivityGroup.LoadByUid(group.ToGuid(), amsgs, adc).ID.Value;
                         }
+
                         amsgs.AddRange(activity.Save(adc));
 
                         //skip if it is attached to a activity group
@@ -1454,7 +1477,10 @@ namespace AfterSchoolLibrary
                         {
                             activity.ScheduleRequiresAllDays = true;
 
-                            if (account.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0 && scheduledates.IsEmpty())
+                            if (account.HasFeature(FeatureType.ManageActivityGroups, amsgs, adc) && 
+                                schedule.IsNumber() && 
+                                schedule.ToInteger() > 0 && 
+                                scheduledates.IsEmpty())
                             {
                                 activity.ActivityScheduleId = schedule.ToInteger();
                             }
@@ -1550,8 +1576,6 @@ namespace AfterSchoolLibrary
             this._GradeLevels = null;
             return msgs;
         }
-
-        
 
         private ActivityDay AddActivityDay(DayOfWeekASL day, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

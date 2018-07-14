@@ -12,13 +12,13 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class ActivityWebUserFactory
     {
-        public static ActivityWebUser Create(Activity activity, WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityWebUser Create(Activity activity, WebUser user, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new ActivityWebUser() { ActivityId = activity.ID, WebUserId = user.ID };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
-        public static ActivityWebUser Create(Activity activity, WebUser user, bool isLeader, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityWebUser Create(Activity activity, WebUser user, bool isLeader, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new ActivityWebUser() { ActivityId = activity.ID, WebUserId = user.ID, IsLeader = isLeader };
             msgs.AddRange(obj.Save(dc: dc));

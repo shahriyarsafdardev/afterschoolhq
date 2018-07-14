@@ -64,5 +64,6 @@ public enum QuestionDataType
 	OrganizationContactLastName,
 	OrganizationContactEmail,
 	OrganizationContactPhone,
-	OrganizationContactPhoneType
+	OrganizationContactPhoneType,
+	RegistrantTShirtSize
 }

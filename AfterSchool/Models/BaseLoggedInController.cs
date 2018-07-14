@@ -5,6 +5,7 @@ using System.Web;
 using BasicLibrary;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
+using System.Web.Mvc;
 
 namespace AfterSchool.Models
 {
@@ -56,7 +57,13 @@ namespace AfterSchool.Models
             if (SessionVariables.LoggedInUser.IsNotEmpty())
             {
                 SessionVariables.LoggedInUser.UpdateLastActivity();
-                BaseLoggedInController.CheckAccount(requestContext.HttpContext.Request);
+
+                if (SessionVariables.CurrentAccount.IsEmpty())
+                {
+                    BaseLoggedInController.CheckAccount(requestContext.HttpContext.Request);
+                }
+                
+                // BaseLoggedInController.CheckAccount(requestContext.HttpContext.Request);
             }
         }
 
@@ -89,6 +96,11 @@ namespace AfterSchool.Models
             }
 
             base.OnActionExecuting(filterContext);
+        }
+
+        protected override void OnActionExecuted(ActionExecutedContext filterContext)
+        {
+            base.OnActionExecuted(filterContext);
         }
 
         protected static SystemMessages CheckAccount(HttpRequestBase Request)

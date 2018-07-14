@@ -4,30 +4,39 @@ using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Services;
+using System.Text.RegularExpressions;
 
 namespace AfterSchoolLibrary
 {
     public static class ActivityService
     {
-        public static Location GetLocation(this Activity activity, DatabaseConnection dc)
+        public static Location GetLocation(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Location.Load(activity.LocationId.Value, dc: dc);
+            if (activity.LocationId.HasValue)
+                return Location.Load(activity.LocationId.Value, msgs, dc);
+
+            return null;
         }
 
-        public static string GenerateUniqueName(string name, int? activityId, int? accountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static ParticipationObject ToParticipationObject(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ParticipationObject(activity, msgs, dc);
+        }
+
+        public static string GenerateUniqueName(string name, int? activityId, int? accountId, SystemMessages msgs, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             //unique name
-            var reg = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+            var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
             string origUniqueName = reg.Replace(name, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            var duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc: dc);
+            var duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, msgs, dc);
             int count = 1;
-            while (duplicate?.ID != activityId)
+            while (duplicate.IsNotEmpty() && duplicate.ID != activityId)
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, dc: dc);
+                duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, msgs, dc);
             }
             return uniqueName;
         }
@@ -84,6 +93,16 @@ namespace AfterSchoolLibrary
                 loggedInUser, 
                 msgs, 
                 dc);
+        }
+
+        public static List<PaymentPlan> GetPaymentPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return PaymentPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
+        }
+
+        public static List<SubscriptionPlan> GetSubscriptionPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
         }
     }
 }

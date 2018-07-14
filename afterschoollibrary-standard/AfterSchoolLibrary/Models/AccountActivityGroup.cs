@@ -28,6 +28,8 @@ namespace AfterSchoolLibrary
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public InviteStatus InviteStatusId { get { return (InviteStatus)MDV["InviteStatusId"].Value; } set { MDV["InviteStatusId"].Value = value; } }
 		public bool IsPublished { get { return (bool)MDV["IsPublished"].Value; } set { MDV["IsPublished"].Value = value; } }
+		public decimal? Cost { get { return (decimal?)MDV["Cost"].Value; } set { MDV["Cost"].Value = value; } }
+		public CostUnitType CostUnitTypeId { get { return (CostUnitType)MDV["CostUnitTypeId"].Value; } set { MDV["CostUnitTypeId"].Value = value; } }
 		
 
         public AccountActivityGroup()
@@ -36,6 +38,7 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.InviteStatusId = InviteStatus.NotSet;
 			this.IsPublished = false;
+			this.CostUnitTypeId = CostUnitType.NotSet;
 			
         }
 
@@ -50,6 +53,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "InviteStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsPublished", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "Cost", System.Data.SqlDbType.Money);
+				_dp.Add(className, "CostUnitTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -143,6 +148,14 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["IsPublished"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["Cost"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CostUnitTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -196,12 +209,11 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
-
+		#region "UserDefined"
 
         public static List<AccountActivityGroup> LoadByAccountId(int AccountId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
@@ -211,7 +223,16 @@ namespace AfterSchoolLibrary
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }        
+        }
+
+        private List<RegistrationPeriod> _RegistrationPeriods = null;
+        public List<RegistrationPeriod> GetRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (_RegistrationPeriods.IsEmpty())
+                _RegistrationPeriods = RegistrationPeriod.LoadByAccountActivityGroupId(this.ID.Value, msgs, dc);
+
+            return _RegistrationPeriods;
+        }
 
         #endregion
     }

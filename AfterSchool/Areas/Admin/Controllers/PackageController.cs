@@ -84,8 +84,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                         }
                         else
                         {
-                            package = Package.Load(id.ToInteger(), dc: adc);
-                            features = package.GetFeatures(adc);
+                            package = Package.Load(id.ToInteger(), msgs: amsgs, dc: adc);
+                            features = package.GetFeatures(amsgs, adc);
                         }
 
                         package.Price = price.ToDecimal();
@@ -107,7 +107,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             {
                                 if (Request[type.ToString()].IsNotEmpty())
                                 {
-                                    var feature = PackageFeature.LoadByPackageIdByFeatureTypeId(package.ID.Value, type, dc: adc);
+                                    var feature = PackageFeature.LoadByPackageIdByFeatureTypeId(package.ID.Value, type, amsgs, adc);
                                     if (feature.IsEmpty())
                                     {
                                         feature = new PackageFeature();

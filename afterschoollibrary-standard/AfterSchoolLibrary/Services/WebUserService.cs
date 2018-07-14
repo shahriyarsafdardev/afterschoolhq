@@ -119,9 +119,9 @@ namespace AfterSchoolLibrary.Services
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
             return awu.IsNotEmpty() && awu.IsActive;
         }
-        public static bool HasAccessToActivity(this WebUser user, Activity a, DatabaseConnection dc = null)
+        public static bool HasAccessToActivity(this WebUser user, Activity a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, user.ID.Value, dc: dc).IsNotEmpty();
+            return ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc).IsNotEmpty();
         }
         public static bool IsActivityLeader(this WebUser user, Activity a, DatabaseConnection dc = null)
         {

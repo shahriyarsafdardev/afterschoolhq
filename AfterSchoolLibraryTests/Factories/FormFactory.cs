@@ -11,7 +11,7 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class FormFactory
     {
-        public static Form Create(Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Form Create(Account account, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Form() { AccountId = account.ID };
             msgs.AddRange(obj.Save(dc: dc));

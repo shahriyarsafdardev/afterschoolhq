@@ -428,6 +428,7 @@ baseproperty: EndDateTime, required
 loadmethod: AccountId, List<>
 loadmethod: Uid
 loadmethod: ActivityGroupId, List<>
+loadmethod: AccountActivityGroupId, List<>
 [end]
 
 [begin]
@@ -472,7 +473,8 @@ property: MaxGradeLevelId, int?, Int
 property: GenderRestriction, GenderRestrictionType, Int
 property: AdministratorAccountId, int?, Int
 property: ActivityScheduleId, int?, Int
-property: NumberOfMatchesPerTeam, int?, Int
+property: Cost, decimal?, Money
+property: CostUnitTypeId, CostUnitType, Int 
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|ActivityGroupTypeId, List<>
@@ -496,6 +498,8 @@ property: AccountId, int?, Int, required
 property: ActivityGroupId, int?, Int, required
 property: InviteStatusId, InviteStatus, Int
 property: IsPublished, bool, Bit
+property: Cost, decimal?, Money
+property: CostUnitTypeId, CostUnitType, Int
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsPublished, List<>
@@ -1111,7 +1115,8 @@ serializable: true
 inherits: BasicObjectWithModified
 property: CartId, int?, Int, required
 property: Uid, Guid, UniqueIdentifier
-property: ActivityId, int?, Int
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 property: Day, DayOfWeekASL, Int
 property: RegistrantActivityId, int?, Int
 loadmethod: Uid
@@ -1273,7 +1278,7 @@ values: NotSet, OrganizationHomeView, RegistrationFormView, RegistrationComplete
 [begin]
 type: Enum
 name: QuestionType
-values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownList, Email, Date, Number, RadioMatrix, TextBlock
+values: NotSet, TextBox, TextArea, RadioList, CheckboxList, Checkbox, DropDownList, Email, Date, Number, RadioMatrix, TextBlock, FileUpload
 [end]
 
 [begin]
@@ -1285,7 +1290,7 @@ values: NotSet, Custom, PersonalInformation, ContactInformation, HomeAddress, Pa
 [begin]
 type: Enum
 name: QuestionDataType
-values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyFirstName1, EmergencyLastName1, EmergencyPhone1, EmergencyFirstName2, EmergencyLastName2, EmergencyPhone2, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType
+values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyFirstName1, EmergencyLastName1, EmergencyPhone1, EmergencyFirstName2, EmergencyLastName2, EmergencyPhone2, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType, RegistrantTShirtSize
 [end]
 
 [begin]
@@ -1424,4 +1429,10 @@ values: NotSet, Activity, ActivityGroup
 type: Enum
 name: BillSourceType
 values: NotSet, RegistrantPaymentPlan, RegistrantSubscriptionPlan, ProductPurchase
+[end]
+
+[begin]
+type: Enum
+name: CostUnitType
+values: NotSet, PerRegistrant, PerActivity
 [end]

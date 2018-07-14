@@ -258,6 +258,7 @@
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
     <Compile Include="Areas\User\Controllers\ProfileController.cs" />
     <Compile Include="Areas\User\UserAreaRegistration.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AfterSchoolController.cs" />
     <Compile Include="Controllers\FaqController.cs" />
     <Compile Include="Controllers\LegalController.cs" />
@@ -299,6 +300,7 @@
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\ParticipationObjectUI.cs" />
     <Compile Include="Models\RebornImage.cs" />
     <Compile Include="Models\RegistrantImportField.cs" />
     <Compile Include="Models\RollbarExceptionFilter.cs" />
@@ -1082,6 +1084,13 @@
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="Views\Shared\_ActivityGroupEdit.cshtml" />
     <Content Include="Views\Shared\_ActivityGroups.cshtml" />
+    <Content Include="Views\R\Home.cshtml" />
+    <Content Include="Views\R\Browse.cshtml" />
+    <Content Include="Views\R\Activity.cshtml" />
+    <Content Include="Views\Account\GetStarted.cshtml" />
+    <Content Include="Views\Shared\_RegFormQuestionGroup.cshtml" />
+    <Content Include="Views\Account\Select.cshtml" />
+    <Content Include="Views\R\Register.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1090,7 +1099,6 @@
     <Folder Include="Areas\District\Models\" />
     <Folder Include="Areas\Org\Models\" />
     <Folder Include="Areas\User\Models\" />
-    <Folder Include="Views\R\" />
     <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>

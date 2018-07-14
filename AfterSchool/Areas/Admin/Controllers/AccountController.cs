@@ -23,8 +23,9 @@ namespace AfterSchool.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Index(string pn, string rpp)
         {
-            int pageNumber = 1;
-            int recordsPerPage = 10;
+            var msgs = new SystemMessages();
+            var pageNumber = 1;
+            var recordsPerPage = 10;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();
@@ -34,15 +35,19 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
+            var accountTypes = new List<AccountType>()
+            {
+                AccountType.ActivityProvider,
+                AccountType.Registrant,
+                AccountType.School,
+                AccountType.SchoolDistrict
+            };
 
-            int count = Account.GetCount(criterias: new Hashtable() { { "IsAdminAccount", false } });
-            var accounts = Account.Load(
-                criterias: new Hashtable() { { "IsAdminAccount", false } },
-                start: start,
-                length: length);
+            var count = Account.GetCount(accountTypes, msgs);
+            var accounts = Account.LoadByAccountTypeIds(accountTypes, start, length, msgs);
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = count,

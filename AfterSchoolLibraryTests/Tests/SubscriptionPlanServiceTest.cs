@@ -46,7 +46,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void CreateNewActivityGroupTest()
         {
-            var activityGroup = ActivityGroupFactory.Create(PlanOwner, msgs, dc);
+            var activityGroup = ActivityGroupFactory.Create(PlanOwner, ActivityGroupType.Session, msgs, dc);
 
             var plan = SubscriptionPlanService.CreateNew(
                 PlanOwner,

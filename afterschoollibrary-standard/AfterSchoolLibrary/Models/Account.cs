@@ -312,7 +312,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return string.Format("{0}/{1}", Utilities.BaseUrl(this.IsAfterSchool), this.UniqueName);
+                return $"/{this.UniqueName.ToLower()}";
             }
 
         }
@@ -339,6 +339,25 @@ namespace AfterSchoolLibrary
                 }
             }
         }
+
+        public static int GetCount(List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            return dq.GetCount(msgs);
+        }
+
+        public static List<Account> LoadByAccountTypeIds(List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         /*
         public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
@@ -1376,7 +1395,7 @@ namespace AfterSchoolLibrary
             return account;
         }
         */
-        
+
         #endregion
     }
 }
