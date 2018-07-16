@@ -1,0 +1,75 @@
+﻿@model List<AfterSchoolLibrary.Account>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var inviteUrl = Url.Action("invite", "provider");
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a href="@Url.Action("invite", "provider")" class="btn btn-default"><i class="s7-plus"></i> Invite Provider</a>
+            </div>
+            <h2><i class="s7-rocket"></i> Providers</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+
+            @if (Model.Any())
+            {
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="widget widget-tile widget-bordered">
+                            <div class="data-info">
+                                <div data-toggle="counter" data-end="@Model.Count" data-decimals="0" data-suffix="" class="value">@Model.Count</div>
+                                <div class="desc">Providers Registered</div>
+                            </div>
+                            <div class="icon"><span class="s7-rocket"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th></th>
+                            <th>School</th>
+                            <th>Contact</th>
+                            <th>Leagues</th>
+                        </tr>
+                        @foreach (var account in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="#" class="btn btn-default">View</a>
+                                </td>
+                                <td>@account.Name</td>
+                                <td>@account.GetAccountOwner().DisplayName</td>
+                                <td>@account.GetLeagueCount(true)</td>
+                            </tr>
+                        }               
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="widget">
+                    <div class="widget-head">
+                        <h1>Manage all of your providers here</h1>
+                    </div>
+                    <div class="widget-tile">
+                        <hr />
+                        <p>You haven't invited any providers yet. In order to get started, <a href="@inviteUrl">invite your first provider</a>.</p>
+                        <p>&nbsp;</p>
+                        <p>
+                            <a href="@inviteUrl" class="btn btn-primary btn-lg">Invite Your First Provider &raquo;</a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
