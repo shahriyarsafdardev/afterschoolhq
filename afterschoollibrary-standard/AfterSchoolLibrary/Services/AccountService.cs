@@ -1359,12 +1359,28 @@ namespace AfterSchoolLibrary
             adminPassword = adminPassword.IfBlank("aDm1n1906");
             accountName = accountName.IfBlank("AfterSchool Admin");
 
-            if (WebUser.LoadByEmail(adminEmail, dc: dc) != null)
+            if (WebUser.LoadByEmail(adminEmail, msgs, dc) != null)
                 throw new Exception("User with the same email address already exists.");
 
-            var wu = WebUserService.CreateNew("admin", "user", adminEmail, adminPassword, true, true, true, null, msgs, dc);
+            var user = WebUserService.CreateNew("Admin", "User", adminEmail, adminPassword, true, true, true, null, msgs, dc);
+            var account = user.AddNewAccount(accountName, null, true, AccountType.AfterSchool, null, null, true, user, msgs, dc);
 
-            wu.AddNewAccount(accountName, null, true, AccountType.AfterSchool, null, null, true, wu, msgs, dc);
+            return msgs;
+        }
+
+        public static SystemMessages CreateSampleAccount(AccountType accountType, int packageId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var email = "sample@afterschoolhq.com";
+            var firstName = "Sample";
+            var lastName = "User";
+            var password = "the best sample account ever";
+
+            if (WebUser.LoadByEmail(email, msgs, dc) != null)
+                throw new Exception("User with the same email address already exists.");
+
+            var user = WebUserService.CreateNew(firstName, lastName, email, password, true, true, true, null, msgs, dc);
+            var account = user.AddNewAccount("Sample Account", "317-899-9189", true, accountType, packageId, BillingPeriodType.Month, true, user, msgs, dc);
 
             return msgs;
         }

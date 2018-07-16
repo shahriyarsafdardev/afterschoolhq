@@ -119,9 +119,14 @@ type: Class
 name: Location
 description: An account can have one or more Locations
 inherits: BaseLocation
-property: HostAccountId, int?, Int, required
+property: HostAccountId, int?, Int
 property: IsDefault, bool, Bit
 property: Details, string, NVarChar(4000)
+baseproperty: Name, required
+baseproperty: Address1, required
+baseproperty: City, required
+baseproperty: State, required
+baseproperty: PostalCode, required
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
 [end]
@@ -1290,7 +1295,7 @@ values: NotSet, Custom, PersonalInformation, ContactInformation, HomeAddress, Pa
 [begin]
 type: Enum
 name: QuestionDataType
-values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyFirstName1, EmergencyLastName1, EmergencyPhone1, EmergencyFirstName2, EmergencyLastName2, EmergencyPhone2, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType, RegistrantTShirtSize
+values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, RegistrantDateOfBirth, RegistrantPhone1, RegistrantPhoneType1, RegistrantPhone2, RegistrantPhoneType2, RegistrantAddress1, RegistrantAddress2, RegistrantCity, RegistrantState, RegistrantPostalCode, Parent1FirstName, Parent1LastName, Parent1Email, Parent1Phone1, Parent1PhoneType1, Parent1Phone2, Parent1PhoneType2, Parent1Address1, Parent1Address2, Parent1City, Parent1State, Parent1PostalCode, Parent2FirstName, Parent2LastName, Parent2Email, Parent2Phone1, Parent2PhoneType1, Parent2Phone2, Parent2PhoneType2, Parent2Address1, Parent2Address2, Parent2City, Parent2State, Parent2PostalCode, EmergencyContact1FirstName, EmergencyContact1LastName, EmergencyContact1Phone, EmergencyContact2FirstName, EmergencyContact2LastName, EmergencyContact2Phone, RegistrantGrade, RegistrantGender, RegistrantEthnicity, RegistrantOrganization, RegistrantDoctorName, RegistrantDoctorPhone, RegistrantAllergies, RegistrantMedicalConditions, RegistrantImmunizations, RegistrantPreferredHospital, OrganizationName, OrganizationAddress1, OrganizationAddress2, OrganizationCity, OrganizationState, OrganizationPostalCode, OrganizationContactFirstName, OrganizationContactLastName, OrganizationContactEmail, OrganizationContactPhone, OrganizationContactPhoneType, RegistrantTShirtSize, RegistrantMobilePhone, RegistrantWorkPhone, RegistrantHomePhone, Parent1MobilePhone, Parent1WorkPhone, Parent1HomePhone, Parent2MobilePhone, Parent2WorkPhone, Parent2HomePhone, RegistrantMedications
 [end]
 
 [begin]

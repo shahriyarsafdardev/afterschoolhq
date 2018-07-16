@@ -207,21 +207,21 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public List<FormQuestion> GetAllQuestions(DatabaseConnection dc = null)
+        public List<FormQuestion> GetAllQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.LoadByFormQuestionGroupId(this.ID.Value, dc: dc).OrderBy(x => x.DisplayOrder).ToList();
+            return FormQuestion.LoadByFormQuestionGroupId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
         }
-        public List<FormQuestion> GetActiveQuestions(DatabaseConnection dc = null)
+        public List<FormQuestion> GetActiveQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.LoadByFormQuestionGroupIdByIsActive(this.ID.Value, true, dc: dc).OrderBy(x => x.DisplayOrder).ToList();
+            return FormQuestion.LoadByFormQuestionGroupIdByIsActive(this.ID.Value, true, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
         }
-        public int GetActiveQuestionCount(DatabaseConnection dc = null)
+        public int GetActiveQuestionCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.GetCount(new Hashtable() { { "FormQuestionGroupId", this.ID.Value }, { "IsActive", true } }, dc: dc);
+            return FormQuestion.GetCount(new Hashtable() { { "FormQuestionGroupId", this.ID.Value }, { "IsActive", true } }, msgs, dc);
         }
-        public int GetQuestionCount(DatabaseConnection dc = null)
+        public int GetQuestionCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.GetCount(new Hashtable() { { "FormQuestionGroupId", this.ID.Value } }, dc: dc);
+            return FormQuestion.GetCount(new Hashtable() { { "FormQuestionGroupId", this.ID.Value } }, msgs, dc);
         }
 
         public FormQuestionGroup Copy()

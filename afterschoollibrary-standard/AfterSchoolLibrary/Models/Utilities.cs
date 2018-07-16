@@ -392,10 +392,14 @@ namespace AfterSchoolLibrary
 
         public static SystemMessages AdditionalData(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
 
             msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
-            Form.CreateAfterSchoolAccountDefaultForm(msgs, dc);
+
+            var form = FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
+            var package = PackageService.CreateDefaultPackage(null, msgs, dc);
+
+            msgs.AddRange(AccountService.CreateSampleAccount(AccountType.School, package.ID.Value, dc));
 
             return msgs;
         }
