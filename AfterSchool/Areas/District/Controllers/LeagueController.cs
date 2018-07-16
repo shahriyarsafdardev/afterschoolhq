@@ -442,6 +442,7 @@ namespace AfterSchool.Areas.District.Controllers
                 { "registrationopentime", registrationopentime },
                 { "registrationclosedate", registrationclosedate },
                 { "registrationclosetime", registrationclosetime },
+                { "registrationmodeid" , RegistrationMode.Register },
                 { "timezone", timezone },
                 { "form", form },
                 { "regmode", regmode },
@@ -667,8 +668,6 @@ namespace AfterSchool.Areas.District.Controllers
 
             return View(league);
         }
-
-
 
         private List<Account> LoadInviteSchoolViewBag(string pn, string rpp, string uid)
         {
