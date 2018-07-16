@@ -1,0 +1,86 @@
+﻿@model List<AfterSchoolLibrary.Account>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var inviteUrl = Url.Action("inviteschool", "league");
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2><i class="s7-study"></i> Schools</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+
+            @if (Model.Any())
+            {
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="widget widget-tile widget-bordered">
+                            <div class="data-info">
+                                <div data-toggle="counter" data-end="@Model.Count" data-decimals="0" data-suffix="" class="value">@Model.Count</div>
+                                <div class="desc">Schools In District</div>
+                            </div>
+                            <div class="icon"><span class="s7-study"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th></th>
+                            <th>School</th>
+                            <th>Status</th>
+                            <th>Teams</th>
+                        </tr>
+                        @foreach (var account in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="#" class="btn btn-default">Invite</a>
+                                </td>
+                                <td>@account.Name</td>
+                                @if (AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).Count() != 0)
+                                {
+                                    if (AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).First().IsNotEmpty())
+                                    {
+                                        <td>@AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).First().InviteStatusId</td>
+                                    }
+                                    foreach (var AccountActivity in AccountActivityGroup.LoadByActivityGroupId(account.ID.Value))
+                                    {
+                                        <td>@AccountActivity.InviteStatusId</td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td>Not yet invited</td>
+                                }
+                                <td>@account.GetActivityCount(UserType.ActivityLeader, account.GetAccountOwner(), null, null, null)</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="widget">
+                    <div class="widget-head">
+                        <h1>Manage all of your schools here</h1>
+                    </div>
+                    <div class="widget-tile">
+                        <hr />
+                        <p>You haven't invited any schools yet. In order to get started, <a href="@inviteUrl">invite your first school</a>.</p>
+                        <p>&nbsp;</p>
+                        <p>
+                            <a href="@inviteUrl" class="btn btn-primary btn-lg">Invite Your First School &raquo;</a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

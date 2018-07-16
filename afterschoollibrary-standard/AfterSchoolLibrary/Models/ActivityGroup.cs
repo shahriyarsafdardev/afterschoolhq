@@ -358,6 +358,8 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public bool ScheduleRequiresAllDays { get; private set; }
+
         public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -694,6 +696,7 @@ namespace AfterSchoolLibrary
             var enddate = values.GetValueOrDefault("enddate");
             var dailystarttime = values.GetValueOrDefault("dailystarttime");
             var dailyendtime = values.GetValueOrDefault("dailyendtime");
+            var scheduledetails = values.GetValueOrDefault("scheduledetails");
             var scheduledates = values.GetValueOrDefault("scheduledates");
             var schedule = values.GetValueOrDefault("schedule");
 
@@ -789,6 +792,23 @@ namespace AfterSchoolLibrary
                             group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUser.ID.Value, msgs, adc);
                         }
 
+                        // setup schedule
+                        if (amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduledates.IsNotEmpty()))
+                        {
+                            amsgs.AddRange(group.SetupSchedule(
+                                account,
+                                schedule.ToString(),
+                                (List<DateRange>)scheduledates,
+                                scheduledetails.ToString(),
+                                repeatsweekly.ToString(),
+                                startdate.ToString(),
+                                enddate.ToString(),
+                                dailystarttime.ToString(),
+                                dailyendtime.ToString(),
+                                loggedInUser.ID.Value,
+                                dc));
+                        }
+
                         //instances & schedule
                         /*
                         (amsgs.HasNoErrors())
@@ -822,6 +842,46 @@ namespace AfterSchoolLibrary
             }
 
             return group;
+        }
+
+         private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            this.ScheduleRequiresAllDays = true;
+
+            if (account.HasFeature(FeatureType.ManageActivityGroups, msgs, dc) &&
+                schedule.IsNumber() &&
+                schedule.ToString().ToInteger() > 0 &&
+                scheduledates.IsEmpty())
+            {
+                this.ActivityScheduleId = schedule.ToString().ToInteger();
+            }
+            else if (scheduledates.IsNotEmpty())
+            {
+                var newSchedule = Services.ActivityScheduleService.SetupSchedule(
+                    this.AccountId.Value,
+                    schedule.IfEmpty("0").ToInteger(),
+                    $"{this.Name} - Schedule",
+                    scheduledetails.ToString(),
+                    repeatsweekly.ToString(),
+                    startdate.ToString(),
+                    enddate.ToString(),
+                    dailystarttime.ToString(),
+                    dailyendtime.ToString(),
+                    (List<DateRange>)scheduledates,
+                    account,
+                    this.ID.Value,
+                    loggedInUserId,
+                    msgs,
+                    dc);
+
+                this.ActivityScheduleId = newSchedule.ID;
+            }
+
+            msgs.AddRange(this.Save(dc));
+
+            return msgs;
         }
 
         public AccountProperty AddOrUpdateGroupProperty(AccountPropertyType type, string value, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
