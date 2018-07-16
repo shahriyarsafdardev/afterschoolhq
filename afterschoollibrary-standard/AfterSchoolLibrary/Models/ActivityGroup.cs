@@ -676,30 +676,30 @@ namespace AfterSchoolLibrary
             return new TimeSpan();
         }
 
-        internal static ActivityGroup SaveActivityGroup(WebUser loggedInUser, Account account, ActivityGroupType activityGroupType, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        internal static ActivityGroup SaveActivityGroup(WebUser loggedInUser, Account account, ActivityGroupType activityGroupType, string activityGroupUid, Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var name = values["name"];
-            var regmode = values["regmode"];
-            var form = values["form"];
-            var description = values["description"];
-            var isinviteonly = values["isinviteonly"];
-            var maxgradeid = values["maxgrade"];
-            var mingradeid = values["mingrade"];
-            var genderrestrictions = values["genderrestrictions"];
-            var daysoftheweek = values["daysoftheweek"];
-            var repeatsweekly = values["repeatsweekly"];
-            var startdate = values["startdate"];
-            var enddate = values["enddate"];
-            var dailystarttime = values["dailystarttime"];
-            var dailyendtime = values["dailyendtime"];
-            var scheduledates = values["scheduledates"];
-            var schedule = values["schedule"];
+            var name = values.GetValueOrDefault("name");
+            var regmode = values.GetValueOrDefault("regmode");
+            var form = values.GetValueOrDefault("form");
+            var description = values.GetValueOrDefault("description");
+            var isinviteonly = values.GetValueOrDefault("isinviteonly");
+            var maxgradeid = values.GetValueOrDefault("maxgrade");
+            var mingradeid = values.GetValueOrDefault("mingrade");
+            var genderrestrictions = values.GetValueOrDefault("genderrestrictions");
+            var daysoftheweek = values.GetValueOrDefault("daysoftheweek");
+            var repeatsweekly = values.GetValueOrDefault("repeatsweekly");
+            var startdate = values.GetValueOrDefault("startdate");
+            var enddate = values.GetValueOrDefault("enddate");
+            var dailystarttime = values.GetValueOrDefault("dailystarttime");
+            var dailyendtime = values.GetValueOrDefault("dailyendtime");
+            var scheduledates = values.GetValueOrDefault("scheduledates");
+            var schedule = values.GetValueOrDefault("schedule");
 
             if (name.IsEmpty())
                 msgs.Add("Label is required", MessageType.UserError);
-            else if (ActivityGroup.ExistsByAccountIdByName(account.ID.Value, name, activityGroupUid.ToGuid()))
+            else if (ActivityGroup.ExistsByAccountIdByName(account.ID.Value, name.ToString(), activityGroupUid.ToGuid()))
                 msgs.Add("Label is already in use", MessageType.UserError);
 
             if (regmode.IsEmpty())
@@ -721,31 +721,32 @@ namespace AfterSchoolLibrary
             }
 
             if (name.IsNotEmpty())
-                group.Name = name.MaxChars(50);
+                group.Name = name.ToString().MaxChars(50);
 
             if (description.IsNotEmpty())
-                group.Description = description.MaxChars(400);
+                group.Description = description.ToString().MaxChars(400);
 
             if (regmode.IsNumber())
-                group.RegistrationModeId = (RegistrationMode)regmode.ToInteger();
+                group.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
 
             if (form.IsNumber())
-                group.FormId = form.ToInteger();
+                group.FormId = form.ToString().ToInteger();
 
             if (group.ActivityGroupTypeId == ActivityGroupType.League)
             {
                 if (maxgradeid.IsNumber())
-                    group.MaxGradeLevelId = maxgradeid.ToInteger();
+                    group.MaxGradeLevelId = maxgradeid.ToString().ToInteger();
 
                 if (mingradeid.IsNumber())
-                    group.MinGradeLevelId = mingradeid.ToInteger();
+                    group.MinGradeLevelId = mingradeid.ToString().ToInteger();
 
                 if (genderrestrictions.IsNumber())
-                    group.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToInteger();
+                    group.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
             }
 
             group.IsInviteOnly = false;
-            if (isinviteonly.IsNotEmpty()) group.IsInviteOnly = isinviteonly.ToBoolean();
+            if (isinviteonly.IsNotEmpty())
+                group.IsInviteOnly = isinviteonly.ToString().ToBoolean();
 
             if (msgs.HasNoErrors())
             {
@@ -753,7 +754,7 @@ namespace AfterSchoolLibrary
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        if (form.ToInteger() == 0)
+                        if (form.ToString().ToInteger() == 0)
                         {
                             var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, msgs, adc);
                             var newForm = defaultForm.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, adc);
@@ -1119,12 +1120,12 @@ namespace AfterSchoolLibrary
             return group;
         }
 
-        public static ActivityGroup SaveSession(WebUser loggedInUser, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityGroup SaveSession(WebUser loggedInUser, Account account, string activityGroupUid, Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.Session, activityGroupUid, values, msgs, dc);
         }
 
-        public static ActivityGroup SaveLeague(WebUser loggedInUser, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityGroup SaveLeague(WebUser loggedInUser, Account account, string activityGroupUid, Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
         }

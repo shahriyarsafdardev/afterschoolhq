@@ -23,9 +23,9 @@ namespace AfterSchoolLibrary
             public List<List<TeamMatch>> Rounds { get; set; }
 
 
-            public Season GenerateSeason(ActivitySchedule shedule, ActivityGroup Leauge, int ByeCountPerTeam, DatabaseConnection dc)
+            public Season GenerateSeason(ActivitySchedule shedule, ActivityGroup Leauge, int ByeCountPerTeam, SystemMessages msgs, DatabaseConnection dc)
             {
-                var roundDates = shedule.GetInstances(false, dc);
+                var roundDates = shedule.GetInstances(false, msgs, dc);
                 var season = new Season() { ActivityGroup = Leauge, byesPerTeam = new List<KeyValuePair<int, int>>()};
                 var ByesInWeeks = WeeklyByeCountCalculator(roundDates.Count, Leauge.GetActivityCount(null, null, dc) * ByeCountPerTeam);
                 var datesForByes = MiddleOutSort(roundDates.Count);
