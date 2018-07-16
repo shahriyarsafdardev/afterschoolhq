@@ -1,0 +1,60 @@
+﻿@model ParticipationObject
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = Model.Name;
+    var account = (Account)ViewBag.Account;
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+<div>
+    <h1>@Model.Name</h1>
+    <div>
+        @Html.Raw(Model.Details)
+    </div>
+</div>
+
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+                <p>
+                    @ParticipationObjectUI.PrintDaysOfWeek(Model)
+                </p>
+                <p>
+                    @ParticipationObjectUI.PrintGradeLevels(Model)
+                </p>
+                <p>
+                    @Html.Raw(ParticipationObjectUI.PrintLocation(Model).Replace("\n", "<br />"))
+                </p>
+                <p>
+                    @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                </p>
+                <div>
+                    <p>
+                        @ParticipationObjectUI.PrintRegistrationFee(Model)
+                    </p>
+                    @if (Model.SubscriptionPlans.Any())
+                    {
+                        <p>
+                            @Html.Raw(ParticipationObjectUI.PrintSubscriptions(Model).ToStringList("<br />"))
+                        </p>
+                    }
+                    @if (Model.PaymentPlans.Any())
+                    {
+                        <p>
+                            @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(Model).ToStringList("<br />"))
+                        </p>
+                    }
+                </div>
+                <p>
+                    @ParticipationObjectUI.PrintRegistrationPeriod(Model)
+                </p>
+                <div>
+                    <a href="@Model.GetRegistrationPageUrl()" class="btn btn-primary btn-block">
+                        @Model.RegistrationMode.ToString() &raquo;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

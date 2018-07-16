@@ -1,0 +1,11 @@
+﻿@model FormQuestionViewModel
+
+<textarea id="@Model.Id" 
+          name="@Model.Name" 
+          class="form-control" 
+          onfocus="this.select()" 
+          @Model.RequiredProperty 
+          @Html.Raw(Model.ToolTip) 
+          @Html.Raw(Model.ToolTipId)>
+    @Model.Value
+</textarea>

@@ -1,0 +1,35 @@
+﻿@model List<FormQuestionViewModel>
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Get Started";
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+<div>
+    <h1>Get Started</h1>
+    <div>
+        Please enter you information below
+    </div>
+</div>
+
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+
+                <div>
+                    <p>Already have an account? <a href="/login">Login</a></p>
+                </div>
+                <div>
+                    <p>Enter your parent info below</p>
+                    <form class="form-horizontal" method="post" action="@Url.Action("getstarted2", "account")">
+                        @foreach(var qvm in Model)
+                        {
+                            Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

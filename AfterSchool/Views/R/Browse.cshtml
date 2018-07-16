@@ -1,0 +1,68 @@
+﻿@model Account
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = Model.Name;
+    var objects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
+}
+
+<div>
+    <h1>@Model.Name</h1>
+    <p>@Model.LandingPageText</p>
+</div>
+
+<div>
+    <h3>Filters</h3>
+</div>
+
+<div>
+    @foreach(var item in objects)
+    {
+        <div class="col-md-4">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3>@item.Name</h3>
+                </div>
+                <div class="panel-body">
+                    <p>@Html.Raw(item.Details)</p>
+                    <p>
+                        @ParticipationObjectUI.PrintDaysOfWeek(item)
+                    </p>
+                    <p>
+                        @ParticipationObjectUI.PrintGradeLevels(item)
+                    </p>
+                    <p>
+                        @Html.Raw(ParticipationObjectUI.PrintLocation(item).Replace("\n", "<br />"))
+                    </p>
+                    <p>
+                        @ParticipationObjectUI.PrintGenderRestrictions(item)
+                    </p>
+                    <div>
+                        <p>
+                            @ParticipationObjectUI.PrintRegistrationFee(item)
+                        </p>
+                        @if (item.SubscriptionPlans.Any())
+                        {
+                            <p>
+                                @Html.Raw(ParticipationObjectUI.PrintSubscriptions(item).ToStringList("<br />"))
+                            </p>
+                        }
+                        @if (item.PaymentPlans.Any())
+                        {
+                            <p>
+                                @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(item).ToStringList("<br />"))
+                            </p>
+                        }
+                    </div>
+                    <p>
+                        @ParticipationObjectUI.PrintRegistrationPeriod(item)
+                    </p>
+                    <div>
+                        <a href="@item.GetHomePageUrl()" class="btn btn-primary btn-block">
+                            @item.RegistrationMode.ToString() &raquo;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

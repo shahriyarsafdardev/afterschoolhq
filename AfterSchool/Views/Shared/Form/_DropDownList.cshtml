@@ -1,0 +1,12 @@
+﻿@model FormQuestionViewModel
+
+<div @Html.Raw(Model.ToolTip) @Html.Raw(Model.ToolTipId))>
+    <select id="@Model.Id" name="@Model.Name" class="form-control" @Model.RequiredProperty>
+        <option value="">Select...</option>
+        @foreach (var option in Model.Question.Options.Split(','))
+        {
+            var selected = Model.Value.Trim() == option.Trim() ? " selected=\"selected\" " : "";
+            <option value="@option.Trim()" @selected>@option.Trim()</option>
+        }
+    </select>
+</div>

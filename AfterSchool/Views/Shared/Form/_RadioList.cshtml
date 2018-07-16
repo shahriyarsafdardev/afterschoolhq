@@ -1,0 +1,13 @@
+﻿@model FormQuestionViewModel
+
+<div @Html.Raw(Model.ToolTip) @Html.Raw(Model.ToolTipId)>
+    @foreach (var option in Model.Question.Options.Split(','))
+    {
+        var optionNoSpaces = option.ToLower().Replace(" ", "");
+        var selected = Model.Value.IfBlank("").Trim() == option.Trim() ? " checked=\"checked\" " : "";
+        <div class="am-radio inline">
+            <input type="radio" id="@Model.Id-@optionNoSpaces" name="@Model.Name" class="form-control" @Model.RequiredProperty value="@option.Trim()" @selected />
+            <label for="@Model.Id-@optionNoSpaces">@option.Trim()</label>
+        </div>
+    }
+</div>
