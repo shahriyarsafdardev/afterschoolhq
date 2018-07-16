@@ -1,0 +1,14 @@
+﻿@model FormQuestionViewModel
+
+<label for="@Model.Id">
+    @if (Model.Question.Link.IsNotBlank())
+    {
+        <a href="@Model.Question.Link" target="_blank">@Model.Question.Text.Trim()</a>
+    }
+    else
+    {
+        @:@Model.Question.Text.IfBlank("").Trim()
+    }
+    @Html.Raw(Model.RequiredStar)
+</label>
+

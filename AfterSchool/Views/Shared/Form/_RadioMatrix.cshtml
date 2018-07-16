@@ -1,0 +1,88 @@
+﻿@model FormQuestionViewModel
+
+@{
+    var cols = Model.Question.Options.Split(';')[0].Split(',');
+    var rows = Model.Question.Options.Split(';')[1].Split(',');
+
+    var radioAnswer = Model.Value;
+
+    if (radioAnswer.IsBlank())
+    {
+        foreach (var col in cols)
+        {
+            if (radioAnswer.IsNotEmpty())
+            {
+                radioAnswer += ";";
+            }
+
+            radioAnswer += col.Trim() + "=";
+        }
+    }
+}
+
+<div @Html.Raw(Model.ToolTip) @Html.Raw(Model.ToolTipId)>
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                @foreach (var col in cols.Select(x => x.Trim()))
+                {
+                    <th class="text-center">@col</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in rows.Select(x => x.Trim()))
+            {
+                <tr>
+                    <td>@row</td>
+                    @foreach (var col in cols.Select(x => x.Trim()))
+                    {
+                        var radioid = Model.Id + "-" + col + "-" + row;
+                        var radioname = Model.Name + "-" + col;
+                        var selected = Model.Values[radioname] == row ? " checked=\"checked\" " : "";
+
+                        <td class="text-center">
+                            <div class="am-radio inline" @Html.Raw(Model.ToolTip) @Html.Raw(Model.ToolTipId)>
+                                <input type="radio" id="@radioid" name="@radioname" value="@row.Trim()" class="form-control radio-matrix-@Model.Id" @Model.RequiredProperty @selected />
+                                <label for="@radioid">&nbsp;</label>
+                            </div>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<input type="hidden" id="@Model.Id" name="@Model.Name" value="@radioAnswer" />
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $('.radio-matrix-@Model.Id').click(function () {
+            console.log('checking radio matrix');
+
+            var radiocol = $(this).attr('name').split('-')[2];
+            var questionid = $(this).attr('id').split('-')[0] + '-' + $(this).attr('id').split('-')[1];
+            var questionvalue = $('#' + questionid).val();
+
+            //remove value
+            var qvArr = questionvalue.split(';');
+            var toReplace = '';
+            for (var i = 0; i < qvArr.length; i++) {
+                var col = qvArr[i].split('=')[0];
+                console.log(col);
+                console.log(radiocol);
+                if (col == radiocol) {
+                    toReplace = qvArr[i];
+                    break;
+                }
+            }
+
+            questionvalue = questionvalue.replace(toReplace, radiocol + '=' + $(this).val());
+            $('#' + questionid).val(questionvalue);
+
+        });
+
+    });
+</script>

@@ -1,0 +1,8 @@
+﻿@model FormQuestionViewModel
+
+<div @Html.Raw(Model.ToolTip) @Html.Raw(Model.ToolTipId)>
+    <div class="switch-button switch-button-yesno">
+        <input type="checkbox" id="@Model.Id" name="@Model.Name" class="form-control" value="@Model.DefaultValue" @Model.RequiredProperty @Model.CheckedProperty />
+        <span><label for="@Model.Id"></label></span>
+    </div>
+</div>
