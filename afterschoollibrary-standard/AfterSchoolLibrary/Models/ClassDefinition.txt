@@ -328,6 +328,8 @@ property: HostAccountId, int?, Int, required
 property: VisitorAccountId, int?, Int, required
 property: HostPermissionTypeId, HostPermissionType, Int
 property: ApprovalStatusId, ApprovalStatus, Int
+join: Account.ID, VisitorAccountId, InnerJoin
+joinproperty: Account.AccountTypeId, AccountType, Int
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|ApprovalStatusId, List<>
 loadmethod: VisitorAccountId, List<>

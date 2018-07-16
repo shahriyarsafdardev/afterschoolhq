@@ -1137,23 +1137,23 @@ namespace AfterSchoolLibrary
             return account;
         }
 
-        public static List<Account> GetVisitorAccounts(this Account hostAccount, DatabaseConnection dc = null)
+        public static List<Account> GetVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByHostAccountId(hostAccount.ID.Value, dc: dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
+            return AccountRelationship.LoadByHostAccountIdByAccountType(hostAccount.ID.Value, accountType, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
 
-        public static List<Account> GetVisitorAccounts(this Account hostAccount, int? start, int? length, DatabaseConnection dc = null)
+        public static List<Account> GetVisitorAccounts(this Account hostAccount, AccountType accountType, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByHostAccountId(hostAccount.ID.Value, dc: dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
+            return AccountRelationship.LoadByHostAccountIdByAccountType(hostAccount.ID.Value, accountType, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
 
-        public static int GetVisitorAccountsCount(this Account hostAccount, DatabaseConnection dc = null)
+        public static int GetVisitorAccountsCount(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value } }, dc: dc);
+            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountTypeId", (int)accountType } }, msgs, dc);
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
@@ -1164,42 +1164,42 @@ namespace AfterSchoolLibrary
         }
 
         //Gets the accounts that are requesting the host's approval
-        public static List<Account> GetRequestedVisitorAccounts(this Account hostAccount, DatabaseConnection dc = null)
+        public static List<Account> GetRequestedVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByRequested(hostAccount.ID.Value,dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
+            return AccountRelationship.LoadByRequested(hostAccount.ID.Value, accountType, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
 
         //Gets the accounts that the host has approved
-        public static List<Account> GetApprovedVisitorAccounts(this Account hostAccount, DatabaseConnection dc = null)
+        public static List<Account> GetApprovedVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByApproved(hostAccount.ID.Value,dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
+            return AccountRelationship.LoadByApproved(hostAccount.ID.Value, accountType, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
         //Gets the accounts that the host has Denied
-        public static List<Account> GetDeniedVisitorAccounts(this Account hostAccount, DatabaseConnection dc = null)
+        public static List<Account> GetDeniedVisitorAccounts(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByDenied(hostAccount.ID.Value, dc: dc)
+            return AccountRelationship.LoadByDenied(hostAccount.ID.Value, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
                 .ToList();
         }
 
         
-        public static List<Account> GetApprovedHostAccounts(this Account hostAccount, DatabaseConnection dc = null)
-        {
-            return AccountRelationship.LoadByApproved(hostAccount.ID.Value, dc: dc)
-                .Select(accountRelationship => accountRelationship.GetHostAccount(dc: dc))
-                .ToList();
-        }
+        //public static List<Account> GetApprovedHostAccounts(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    return AccountRelationship.LoadByApproved(hostAccount.ID.Value, msgs, dc)
+        //        .Select(accountRelationship => accountRelationship.GetHostAccount(dc: dc))
+        //        .ToList();
+        //}
 
-        public static List<Account> GetDeniedHostAccounts(this Account hostAccount, DatabaseConnection dc = null)
-        {
-            return AccountRelationship.LoadByDenied(hostAccount.ID.Value, dc: dc)
-                .Select(accountRelationship => accountRelationship.GetHostAccount(dc: dc))
-                .ToList();
-        }
+        //public static List<Account> GetDeniedHostAccounts(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    return AccountRelationship.LoadByDenied(hostAccount.ID.Value, msgs, dc)
+        //        .Select(accountRelationship => accountRelationship.GetHostAccount(dc: dc))
+        //        .ToList();
+        //}
         
 
         public static List<Location> GetVisitorLocations(this Account visitorAccount, DatabaseConnection dc = null)
