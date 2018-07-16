@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using AfterSchoolLibrary;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Areas.District.Controllers
 {
@@ -90,7 +91,7 @@ namespace AfterSchool.Areas.District.Controllers
                             isActive: false,
                             isRegistered: false,
                             isVerified: false,
-                            loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                            loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);
 
