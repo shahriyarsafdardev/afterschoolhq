@@ -432,7 +432,7 @@ namespace AfterSchool.Areas.District.Controllers
             Activity activity = null;
             ActivityGroup activityGroup = null;
 
-            var values = new NameValueCollection()
+            var values = new Dictionary<string, object>()
             {
                 { "name", name },
                 { "seatsavailable", seatsavailable },
@@ -617,8 +617,6 @@ namespace AfterSchool.Areas.District.Controllers
         {
             var msgs = new SystemMessages();
             var scheduleDates = new List<DateRange>();
-
-            
 
             var values = new Dictionary<string, object>()
             {
