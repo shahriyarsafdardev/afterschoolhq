@@ -110,7 +110,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            var values = new NameValueCollection()
+            var values = new Dictionary<string, object>()
             {
                 { "name", name },
                 { "description", description },
@@ -780,7 +780,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsNumber() && id.ToInteger() > 0)
             {
-                var values = new NameValueCollection()
+                var values = new Dictionary<string, object>()
                 {
                     { "details", details},
                     { "scheduledetails", scheduledetails}

@@ -164,7 +164,7 @@ namespace AfterSchool.Areas.District.Controllers
             Activity activity = null;
             ActivityGroup activityGroup = null;
 
-            var values = new NameValueCollection()
+            var values = new Dictionary<string, object>()
             {
                 { "name", name },
                 { "seatsavailable", seatsavailable },
@@ -348,9 +348,9 @@ namespace AfterSchool.Areas.District.Controllers
         public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime)
         {
             var msgs = new SystemMessages();
-            var scheduleDates = new List<string>();
+            var scheduleDates = new List<DateRange>();
 
-            var values = new NameValueCollection()
+            var values = new Dictionary<string, object>()
             {
                 { "name", name },
                 { "description", description },
@@ -372,7 +372,7 @@ namespace AfterSchool.Areas.District.Controllers
                 var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
                 scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
 
-                values = new NameValueCollection();
+                values = new Dictionary<string, object>();
                 values.Add("scheduledetails", scheduledetails);
                 values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
                 values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
@@ -380,7 +380,7 @@ namespace AfterSchool.Areas.District.Controllers
                 values.Add("enddate", enddate);
                 values.Add("dailystarttime", dailystarttime);
                 values.Add("dailyendtime", dailyendtime);
-                values.Add("scheduledates", scheduleDates.ToStringList());
+                values.Add("scheduledates", scheduleDates);
                 values.Add("schedule", schedule);
             }
                 var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);

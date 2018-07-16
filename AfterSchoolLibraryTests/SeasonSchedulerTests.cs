@@ -79,7 +79,7 @@ namespace AfterSchoolLibraryTests
             var teams = new List<Activity>();
             var webUser = Factories.WebUserFactory.Create(true, msgs, dc);
             var account = Factories.AccountFactory.Create(webUser, msgs, dc);
-            var League = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            var League = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.League, msgs, dc);
             var rounds = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
 
 
@@ -94,10 +94,10 @@ namespace AfterSchoolLibraryTests
                 rounds.AddInstance(start, end, webUser.ID.Value, msgs, dc);
             }
 
-            var roundInstances = rounds.GetInstances(false, dc);
+            var roundInstances = rounds.GetInstances(false, msgs, dc);
             var round = roundInstances[0];
 
-            Assert.Equal(1, Season.Round.NewRound(season, teams, round, 1, dc).Matches.Count);
+            Assert.Single(Season.Round.NewRound(season, teams, round, 1, dc).Matches);
         }
 
         [Fact]
@@ -106,7 +106,7 @@ namespace AfterSchoolLibraryTests
             var teams = new List<Activity>();
             var webUser = Factories.WebUserFactory.Create(true, msgs, dc);
             var account = Factories.AccountFactory.Create(webUser, msgs, dc);
-            var League = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            var League = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.League, msgs, dc);
             var rounds = Factories.ActivityScheduleFactory.Create(account, msgs, dc);
             var byesPerTeam = 1;
 
