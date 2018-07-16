@@ -1,0 +1,171 @@
+﻿@model List<ActivityGroup>
+@{
+    var activityGroupType = (ActivityGroupType)ViewBag.ActivityGroupType;
+    var paging = (PagingModel)ViewBag.PagingModel;
+    var hasArchivedGroups = (bool)ViewBag.HasArchivedGroups;
+    var controller = ViewBag.GroupController;
+    var isOrgLeague = (bool)ViewBag.isOrgLeague;
+   
+    var pendingInvites = (List<ActivityGroup>)ViewBag.pendingInvites;
+
+    var previousLink = "#";
+    var nextLink = "#";
+    if (paging.IsNotEmpty())
+    {
+        if (paging.PageNumber > 1)
+        {
+            previousLink = Url.Action("index", controller, new { pn = paging.PageNumber - 1, rpp = Request["rpp"], archive = Request["archive"] });
+        }
+        if (paging.PageNumber < paging.TotalPages)
+        {
+            nextLink = Url.Action("index", controller, new { pn = paging.PageNumber + 1, rpp = Request["rpp"], archive = Request["archive"] });
+        }
+    }
+
+
+}
+ 
+    <p>League Invitations</p>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        @(activityGroupType == ActivityGroupType.Session ? "Session" : "League")
+                    </th>
+                    <th class="text-center">
+                        @(activityGroupType == ActivityGroupType.Session ? "Activities" : "Sports")
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (pendingInvites.Count > 0)
+                {
+                    foreach (var pendingInvite in pendingInvites)
+                    {
+                        <tr>
+                            <td>
+                                <a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})" class="btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
+                            </td>
+                            <td><a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})">@pendingInvite.Name</a></td>
+                    
+                            <td>
+                                <div class="btn-group pull-right">
+                                    <button class="btn btn-default btn-sm md-trigger"
+                                            data-modal="modal-copy"
+                                            onclick="setCopyGroup('@pendingInvite.Name', '@Url.Action("copy", controller, new { id = pendingInvite.Uid.ToString() })')">
+                                        <i class="s7-copy-file"></i> Accept
+                                    </button>
+                                    <button class="btn btn-default btn-sm md-trigger"
+                                            data-modal="modal-archive"
+                                            onclick="archiveGroup('@pendingInvite.Name', '@Url.Action("archive", controller, new { id = pendingInvite.Uid.ToString() })')">
+                                        <i class="s7-albums"></i> Decline
+                                    </button>  
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4">
+                            You currently have no League invitations. 
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @*@Html.RenderPartial(
+        "~/Views/Shared/_Paging.cshtml",
+        paging,
+        new ViewDataDictionary()
+        {
+{ "id", "" },
+{ "querystring", string.Format("archive={0}", Request["archive"]) },
+{ "action", "index" },
+{ "controller", controller }
+        }
+    );*@
+
+
+
+<div id="modal-copy" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-copy" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Repeat @UILabel.ActivityGroupLabel(activityGroupType)</h3>
+            </div>
+            <div class="modal-body form">
+
+                <p>This is used to create an copy of the existing @UILabel.ActivityGroupLabel(activityGroupType).ToLower(). Once copied you can make any modifications as needed.</p>
+
+                <div class="form-group">
+                    <label>@UILabel.ActivityGroupLabel(activityGroupType) Name</label>
+                    <input type="text" placeholder="Your @UILabel.ActivityGroupLabel(activityGroupType) Name" class="form-control" id="groupnamecopy" name="groupnamecopy" onfocus="this.select()">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Repeat @UILabel.ActivityGroupLabel(activityGroupType) &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-archive" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Archive @UILabel.ActivityGroupLabel(activityGroupType)</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to archive <strong><span id="archive-group-name"></span></strong>? </p><p>Archived @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() are automatically unpublished and all related @UILabel.ActivityLabel(activityGroupType, true).ToLower() are also archived and unpublished.</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="archive-group-button">Archive &raquo;</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-restore" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Restore @UILabel.ActivityGroupLabel(activityGroupType)</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to restore <strong><span id="restore-group-name"></span></strong>? </p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="restore-group-button">Restore &raquo;</a>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function setCopyGroup(name, url) {
+        $('#groupnamecopy').val(name + ' [copy]');
+        $('#form-copy').attr('action', url);
+    }
+    function archiveGroup(name, url) {
+        $('#archive-group-name').html(name);
+        $('#archive-group-button').attr('href', url);
+    }
+    function restoreGroup(name, url) {
+        $('#restore-group-name').html(name);
+        $('#restore-group-button').attr('href', url);
+    }
+</script>
