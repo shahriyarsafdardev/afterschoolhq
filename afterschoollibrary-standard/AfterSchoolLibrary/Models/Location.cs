@@ -18,9 +18,6 @@ namespace AfterSchoolLibrary
     {
 		#region "ClassGenerator"
 
-		/// <summary>
-		/// Required
-		/// </summary>
 		public int? HostAccountId { get { return (int?)MDV["HostAccountId"].Value; } set { MDV["HostAccountId"].Value = value; } }
 		public bool IsDefault { get { return (bool)MDV["IsDefault"].Value; } set { MDV["IsDefault"].Value = value; } }
 		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
@@ -95,8 +92,16 @@ namespace AfterSchoolLibrary
         {
 			var msgs = new SystemMessages();
 
-			if (this.HostAccountId.IsEmpty())
-				msgs.Add("HostAccountId is required on Location object", MessageType.Error);
+			if (this.Name.IsEmpty())
+				msgs.Add("Name is required on Location object", MessageType.Error);
+			if (this.Address1.IsEmpty())
+				msgs.Add("Address1 is required on Location object", MessageType.Error);
+			if (this.City.IsEmpty())
+				msgs.Add("City is required on Location object", MessageType.Error);
+			if (this.State.IsEmpty())
+				msgs.Add("State is required on Location object", MessageType.Error);
+			if (this.PostalCode.IsEmpty())
+				msgs.Add("PostalCode is required on Location object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Location).Name));
@@ -163,6 +168,17 @@ namespace AfterSchoolLibrary
         #endregion
 
 		#region "UserDefined"
+
+
+        public static List<Location> Search(string query, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.LogicalOperator = LogicalOperatorType.Or;
+            dq.Criterias.Add(ObjectMap["Name"], query, DatabaseCriteriaOperatorEnum.LikeRight);
+            dq.Criterias.Add(ObjectMap["Address1"], query, DatabaseCriteriaOperatorEnum.LikeRight);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
         #endregion
     }

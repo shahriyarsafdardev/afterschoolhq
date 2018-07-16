@@ -200,11 +200,11 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
         
-        public RegistrationPeriod ToRegistrationPeriod(bool loadFromDb = false, DatabaseConnection dc = null)
+        public RegistrationPeriod ToRegistrationPeriod(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (loadFromDb)
             {
-                return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc: dc);
+                return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, msgs, dc: dc);
             }
             else
             {
@@ -244,9 +244,9 @@ namespace AfterSchoolLibrary
             return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc: dc);
         }
 
-        public Activity GetActivity(DatabaseConnection dc = null)
+        public Activity GetActivity(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Activity.Load(this.ActivityId.Value, dc: dc);
+            return Activity.Load(this.ActivityId.Value, msgs, dc);
         }
 
         #endregion

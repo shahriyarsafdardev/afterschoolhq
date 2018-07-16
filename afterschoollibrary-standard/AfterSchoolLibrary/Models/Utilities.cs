@@ -10,6 +10,7 @@ using BasicLibrary;
 using SendGrid.Helpers.Mail;
 using SendGrid;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary
 {
@@ -171,18 +172,47 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public static string HostNameProductionAfterSchoolHQ = "";
+        public static string HostNameStagingAfterSchoolHQ = "";
+        public static string HostNameCIAfterSchoolHQ = "";
+        public static string HostNameQAAfterSchoolHQ = "";
+        public static string HostNameLocalAfterSchoolHQ = "";
+
         public static string HostName(bool isAfterSchool)
         {
-            if (isAfterSchool)
-                return "afterschoolhq.com";
-            return "enrollhq.com";
+            if (Utilities.IsProduction)
+            {
+                return HostNameProductionAfterSchoolHQ;
+            }
+            else if (Utilities.IsStaging)
+            {
+                return HostNameStagingAfterSchoolHQ;
+            }
+            else if (Utilities.IsCI)
+            {
+                return HostNameCIAfterSchoolHQ;
+            }
+            else if (Utilities.IsQA)
+            {
+                return HostNameQAAfterSchoolHQ;
+            }
+            else
+            {
+                return HostNameLocalAfterSchoolHQ;
+            }
         }
-
-        public static bool UseSSL { get; set; }
 
         public static string BaseUrl(bool isAfterSchool)
         {
-            return UseSSL && !IsLocalHost ? BaseUrlHttps(isAfterSchool) : BaseUrlHttp(isAfterSchool);
+            return "http" + (Utilities.UseSSL() ? "s" : "") + "://" + HostName(isAfterSchool);
+        }
+
+        public static bool UseSSL()
+        {
+            if (IsLocalHost)
+                return false;
+
+            return true;
         }
 
         public static string BaseUrlHttp(bool isAfterSchool)
@@ -194,8 +224,8 @@ namespace AfterSchoolLibrary
             return "https://" + HostName(isAfterSchool);
         }
         
-        public static string AppNameEnrollHQ { get { return "Enroll HQ"; } }
-        public static string AppNameAfterSchoolHQ { get { return "After School HQ"; } }
+        public static string AppNameEnrollHQ { get; set; }
+        public static string AppNameAfterSchoolHQ { get; set;  }
         public static string AppName(bool isAfterSchool)
         {
             if (isAfterSchool)
@@ -205,7 +235,7 @@ namespace AfterSchoolLibrary
 
         public static void InitializeApp()
         {
-            Utilities.UseSSL = true; //can put in a if statement depending on if is live, etc.
+            // Utilities.UseSSL = true; //can put in a if statement depending on if is live, etc.
             // AfterSchoolLibrary.Utilities.AppName = "Enroll HQ"; //used in email signatures, etc
             Utilities.AppAESKey = System.Text.Encoding.UTF8.GetBytes("9dj3nshcnshf73heydsg1nshdyciefh7"); //32 alphanumeric chars - only set once per app, never changed afterwards, required
 
@@ -224,18 +254,16 @@ namespace AfterSchoolLibrary
 
             Email.AppAdminEmailAddress = "support@afterschoolhq.com"; //all app admin emails are sent to this email address
             Email.ReplyHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
-            Email.SenderHostName = "mailer.afterschoolhq.com"; // can be modified based on live/dev/test server
+            Email.SenderHostName = "mailer.afterschoolhq.com"; // can be modified based on live/dev/test server            
 
-            Email.HostNameLiveEnrollHQ = "enrollhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
-            Email.HostNameStagingEnrollHQ = "staging.enrollhq.com";
-            Email.HostNameDevEnrollHQ = "dev.enrollhq.com";
-            Email.HostNameLocalEnrollHQ = "localhost:54849";
+            Utilities.HostNameProductionAfterSchoolHQ = "afterschoolhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
+            Utilities.HostNameStagingAfterSchoolHQ = "staging.afterschoolhq.com";
+            Utilities.HostNameCIAfterSchoolHQ = "ci.afterschoolhq.com";
+            Utilities.HostNameQAAfterSchoolHQ = "qa.afterschoolhq.com";
+            Utilities.HostNameLocalAfterSchoolHQ = "localhost:54849";
 
-            Email.HostNameProductionAfterSchoolHQ = "afterschoolhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
-            Email.HostNameStagingAfterSchoolHQ = "staging.afterschoolhq.com";
-            Email.HostNameCIAfterSchoolHQ = "ci.afterschoolhq.com";
-            Email.HostNameQAAfterSchoolHQ = "qa.afterschoolhq.com";
-            Email.HostNameLocalAfterSchoolHQ = "localhost:54849";
+            Utilities.AppNameAfterSchoolHQ = "AfterSchool HQ";
+            Utilities.AppNameEnrollHQ = "Enroll HQ";
 
             Utilities.ReCaptchaPrivateKey = "6Lfk694SAAAAAH5e3gWv3JckrYzz2scslo_rop6M"; //can be used as standard re-captcha
             Utilities.ReCaptchaPublicKey = "6Lfk694SAAAAAIrtt3Hwiz7j4emDRlYuLp73i9VY";
@@ -364,10 +392,14 @@ namespace AfterSchoolLibrary
 
         public static SystemMessages AdditionalData(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
 
             msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
-            Form.CreateAfterSchoolAccountDefaultForm(msgs, dc);
+
+            var form = FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
+            var package = PackageService.CreateDefaultPackage(null, msgs, dc);
+
+            msgs.AddRange(AccountService.CreateSampleAccount(AccountType.School, package.ID.Value, dc));
 
             return msgs;
         }
@@ -1441,44 +1473,14 @@ namespace AfterSchoolLibrary
 
     public class Email
     {
-        public static string HostNameLiveEnrollHQ = "";
-        public static string HostNameStagingEnrollHQ = "";
-        public static string HostNameDevEnrollHQ = "";
-        public static string HostNameLocalEnrollHQ = "";
-
-        public static string HostNameProductionAfterSchoolHQ = "";
-        public static string HostNameStagingAfterSchoolHQ = "";
-        public static string HostNameCIAfterSchoolHQ = "";
-        public static string HostNameQAAfterSchoolHQ = "";
-        public static string HostNameLocalAfterSchoolHQ = "";
-
-        public static string HostName(bool isAfterSchool)
-        {            
-            if (Utilities.IsProduction)
-            {
-                return HostNameProductionAfterSchoolHQ;
-            }
-            else if (Utilities.IsStaging)
-            {
-                return HostNameStagingAfterSchoolHQ;
-            }
-            else if (Utilities.IsCI)
-            {
-                return HostNameCIAfterSchoolHQ;
-            }
-            else if (Utilities.IsQA)
-            {
-                return HostNameQAAfterSchoolHQ;
-            }
-            else
-            {
-                return HostNameLocalAfterSchoolHQ;
-            }
-        }
-
         public static string BaseUrl(bool isAfterSchool)
         {
-            return "http" + (Utilities.UseSSL ? "s" : "") + "://" + HostName(isAfterSchool) + "/";
+            return $"{Utilities.BaseUrl(isAfterSchool)}/";
+        }
+
+        public static string HostName(bool isAfterSchool)
+        {
+            return Utilities.HostName(isAfterSchool);
         }
 
         public static System.Net.Mail.MailAddress AppFromAddress(bool isAfterSchool)

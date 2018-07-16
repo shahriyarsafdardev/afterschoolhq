@@ -8,6 +8,7 @@ using System.Web.Script.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Models

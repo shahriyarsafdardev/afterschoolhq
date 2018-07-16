@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Services;
+using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests
 {
@@ -14,8 +17,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
             Assert.NotNull(Account.Load(account.ID.Value, msgs, dc));
         }
 
@@ -27,8 +30,8 @@ namespace AfterSchoolLibraryTests
             var originalCount = Account.GetCount(msgs: msgs, dc: dc);
             for( var i = 0; i < numberToCreate; i++)
             {
-                var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-                var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
             }
 
             Assert.Equal(
@@ -46,8 +49,8 @@ namespace AfterSchoolLibraryTests
             var originalCount = Account.GetCount(msgs: msgs, dc: dc);
             for (var i = 0; i < numberToCreate; i++)
             {
-                var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-                var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+                var accountOwner = WebUserFactory.Create(msgs, dc);
+                var account = AccountFactory.Create(accountOwner, msgs, dc);
             }
 
             Assert.Equal(originalCount + numberToCreate, Account.GetCount(msgs: msgs, dc: dc));
@@ -59,8 +62,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void SaveTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
             account.AccountTypeId = AccountType.ActivityProvider;
             msgs.AddRange(account.Save(dc));
 
@@ -74,8 +77,8 @@ namespace AfterSchoolLibraryTests
         public void DeleteTest()
         {
             var originalCount = Account.GetCount(msgs: msgs, dc: dc);
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
 
             msgs.AddRange(account.Delete(dc));
 
@@ -88,16 +91,16 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ReloadTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
             Assert.Equal(account.ID, account.Reload(msgs, dc).ID);
         }
 
         [Fact]
         public void LoadByOwnerIdTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
 
             Assert.Single(Account.LoadByOwnerId(accountOwner.ID.Value, msgs, dc));
         }
@@ -105,9 +108,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByUniqueNameTest()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            account.UniqueName = AccountService.GenerateUniqueName(account.Name, account.ID, dc);
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            account.UniqueName = AccountService.GenerateUniqueName(account.Name, account.ID, msgs, dc);
             msgs.AddRange(account.Save(dc));
 
             Assert.Equal(account.ID, Account.LoadByUniqueName(account.UniqueName, msgs, dc).ID);
@@ -117,21 +120,21 @@ namespace AfterSchoolLibraryTests
         /// testing for admin account which is changing to use AccountType in the future
         /// </summary>
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void LoadByIsAdminTest(bool isAdmin)
+        [InlineData(AccountType.ActivityProvider)]
+        [InlineData(AccountType.School)]
+        public void LoadByAccountTypeId(AccountType accountType)
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, isAdmin, msgs, dc);
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, accountType, msgs, dc);
 
-            Assert.NotNull(Account.LoadByIsAdminAccount(isAdmin, msgs, dc));
+            Assert.NotNull(Account.LoadByAccountTypeId(accountType, msgs, dc));
         }
 
         [Fact]
         public void LoadByUidTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var user = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(user, msgs, dc);
             Assert.NotNull(Account.LoadByUid(account.Uid, msgs, dc));
         }
 
@@ -142,11 +145,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void RequestAccessToAccountTest()
         {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var webuser = Factories.WebUserFactory.CreateWithEmail("test@test.com", msgs, dc);
-            var webuser2 = Factories.WebUserFactory.CreateWithEmail("tes2t@test.com", msgs, dc);
-            var hostaccount = Factories.AccountFactory.Create(webuser, msgs, dc);
-            var visitoraccount = Factories.AccountFactory.Create(webuser2, msgs, dc);
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var webuser = WebUserFactory.CreateWithEmail("test@test.com", msgs, dc);
+            var webuser2 = WebUserFactory.CreateWithEmail("tes2t@test.com", msgs, dc);
+            var hostaccount = AccountFactory.Create(webuser, msgs, dc);
+            var visitoraccount = AccountFactory.Create(webuser2, msgs, dc);
 
             Assert.True(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc: dc).HasNoErrors());
         }
@@ -158,11 +161,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ApproveAccessToAccountTest()
         {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var hostUser = Factories.WebUserFactory.CreateWithEmail("test@test.com", msgs, dc);
-            var visitorUser = Factories.WebUserFactory.CreateWithEmail("test2@test.com", msgs, dc);
-            var hostaccount = Factories.AccountFactory.Create(hostUser, msgs, dc);
-            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var hostUser = WebUserFactory.CreateWithEmail("test@test.com", msgs, dc);
+            var visitorUser = WebUserFactory.CreateWithEmail("test2@test.com", msgs, dc);
+            var hostaccount = AccountFactory.Create(hostUser, msgs, dc);
+            var visitoraccount = AccountFactory.Create(visitorUser, msgs, dc);
             msgs.AddRange(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc));
             msgs.AddRange(hostaccount.ApproveAccessToAccount(visitoraccount, loggedInUser, dc));
 
@@ -178,11 +181,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetApprovedVisitorAccountsTest()
         {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
-            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
-            var hostaccount = Factories.AccountFactory.Create(hostuser, msgs, dc);
-            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var hostuser = WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = WebUserFactory.Create(true, msgs, dc);
+            var hostaccount = AccountFactory.Create(hostuser, msgs, dc);
+            var visitoraccount = AccountFactory.Create(visitorUser, msgs, dc);
             
             visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc: dc);
             hostaccount.ApproveAccessToAccount(visitoraccount, loggedInUser, dc: dc);
@@ -197,11 +200,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetRequestedVisitorAccountsTest()
         {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
-            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
-            var hostaccount = Factories.AccountFactory.Create(hostuser, msgs, dc);
-            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var hostuser = WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = WebUserFactory.Create(true, msgs, dc);
+            var hostaccount = AccountFactory.Create(hostuser, msgs, dc);
+            var visitoraccount = AccountFactory.Create(visitorUser, msgs, dc);
 
             visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc: dc);
 
@@ -214,11 +217,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DenyAccessToAccountTest()
         {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var hostuser = Factories.WebUserFactory.CreateWithEmail("test@test", msgs, dc);
-            var visitorUser = Factories.WebUserFactory.CreateWithEmail("test2@test", msgs, dc);
-            var hostaccount = Factories.AccountFactory.Create(hostuser, msgs, dc);
-            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var hostuser = WebUserFactory.CreateWithEmail("test@test", msgs, dc);
+            var visitorUser = WebUserFactory.CreateWithEmail("test2@test", msgs, dc);
+            var hostaccount = AccountFactory.Create(hostuser, msgs, dc);
+            var visitoraccount = AccountFactory.Create(visitorUser, msgs, dc);
 
             msgs.AddRange(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc));
             msgs.AddRange(hostaccount.DenyAccessToAccount(visitoraccount, loggedInUser, dc));
@@ -235,11 +238,11 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetDeniedVisitorAccountsTest()
         {
-            var loggedInUser = Factories.WebUserFactory.Create(msgs, dc);
-            var hostuser = Factories.WebUserFactory.Create(true, msgs, dc);
-            var visitorUser = Factories.WebUserFactory.Create(true, msgs, dc);
-            var hostaccount = Factories.AccountFactory.Create(hostuser, msgs, dc);
-            var visitoraccount = Factories.AccountFactory.Create(visitorUser, msgs, dc);
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var hostuser = WebUserFactory.Create(true, msgs, dc);
+            var visitorUser = WebUserFactory.Create(true, msgs, dc);
+            var hostaccount = AccountFactory.Create(hostuser, msgs, dc);
+            var visitoraccount = AccountFactory.Create(visitorUser, msgs, dc);
 
             visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc);
             hostaccount.DenyAccessToAccount(visitoraccount, loggedInUser, dc);
@@ -250,8 +253,8 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void GetOrCreateDefaultForm()
         {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
             var form = account.GetOrCreateDefaultForm(accountOwner, msgs, dc);
 
             Assert.NotNull(form);
@@ -264,19 +267,37 @@ namespace AfterSchoolLibraryTests
         [InlineData(10)]
         public void GetExternalLeaguesTest(int numberToCreate)
         {
-            var leagueAccountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var leagueAccount = Factories.AccountFactory.Create(leagueAccountOwner, msgs, dc);
+            var leagueAccountOwner = WebUserFactory.Create(msgs, dc);
+            var leagueAccount = AccountFactory.Create(leagueAccountOwner, msgs, dc);
 
-            var invitedAccountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var invitedAccount = Factories.AccountFactory.Create(invitedAccountOwner, msgs, dc);
+            var invitedAccountOwner = WebUserFactory.Create(msgs, dc);
+            var invitedAccount = AccountFactory.Create(invitedAccountOwner, msgs, dc);
 
             for (var i = 0; i < numberToCreate; i++)
             {
-                var activityGroup = Factories.ActivityGroupFactory.Create(leagueAccount, msgs, dc);
+                var activityGroup = ActivityGroupFactory.Create(leagueAccount, ActivityGroupType.League, msgs, dc);
                 msgs.AddRange(activityGroup.InviteAccount(invitedAccount, leagueAccountOwner, dc));
             }
 
             Assert.Equal(numberToCreate, invitedAccount.GetExternalLeagueCount(msgs, dc));
+
+        }
+
+        [Theory]
+        [InlineData(AccountType.School)]
+        public void LoadByAccountTypeIdsTest(AccountType accountType)
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, accountType, msgs, dc);
+            var accountTypes = new List<AccountType>()
+            {
+                AccountType.ActivityProvider,
+                AccountType.Registrant,
+                AccountType.School,
+                AccountType.SchoolDistrict
+            };
+
+            Assert.Single(Account.LoadByAccountTypeIds(accountTypes, null, null, msgs, dc));
 
         }
 

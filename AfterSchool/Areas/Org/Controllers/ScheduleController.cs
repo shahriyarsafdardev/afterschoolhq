@@ -7,6 +7,7 @@ using BasicLibrary;
 using AfterSchoolLibrary;
 using AfterSchool.Models;
 using System.Web.Script.Serialization;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -84,13 +85,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.ToInteger() > 0)
             {
-                schedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() ? repeatsweekly.ToBoolean() : false, startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates.ToStringList(), SessionVariables.LoggedInUser.ID.Value, msgs);
+                schedule = ActivitySchedule.EditExisting(id, name, scheduledetails, repeatsweekly.IsBoolean() ? repeatsweekly.ToBoolean() : false, startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, SessionVariables.LoggedInUser.ID.Value, msgs);
             }
             else
             {
                 var groupId = group.IsGuid() ? ActivityGroup.LoadByUid(group.ToGuid()).ID : null;
 
-                schedule = ActivitySchedule.CreateNew(name, scheduledetails, repeatsweekly.IsBoolean() ? repeatsweekly.ToBoolean() : false, startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates.ToStringList(), SessionVariables.CurrentAccount.ID.Value, SessionVariables.LoggedInUser.ID.Value, groupId, msgs);
+                schedule = ActivityScheduleService.CreateNew(name, scheduledetails, repeatsweekly.IsBoolean() ? repeatsweekly.ToBoolean() : false, startdate.ToDateTime(), enddate.ToDateTime(), dailystarttime.ToDateTime(), dailyendtime.ToDateTime(), scheduleDates, SessionVariables.CurrentAccount.ID.Value, groupId, SessionVariables.LoggedInUser.ID.Value, msgs);
             }
 
             if (msgs.HasNoErrors())

@@ -182,6 +182,14 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<RegistrationPeriod> LoadByAccountActivityGroupId(int AccountActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
@@ -200,36 +208,52 @@ namespace AfterSchoolLibrary
             return "N/A";
         }
 
-        public static List<RegistrationPeriod> LoadByAccountId(int AccountId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> LoadByActivityGroupIds(List<int> ActivityGroupIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupIds, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<RegistrationPeriod> LoadByAccountActivityGroupIds(List<int> AccountActivityGroupIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupIds, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<RegistrationPeriod> LoadByAccountId(int AccountId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static RegistrationPeriod LoadByAccountIdByName(int AccountId, string Name, DatabaseConnection dc = null)
+        public static RegistrationPeriod LoadByAccountIdByName(int AccountId, string Name, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["Name"], Name);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static bool ExistsByAccountIdByName(int AccountId, string Name, int existingId, DatabaseConnection dc = null)
+        public static bool ExistsByAccountIdByName(int AccountId, string Name, int existingId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["Name"], Name);
             dq.Criterias.Add(ObjectMap["ID"], existingId, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.NotEqualTo);
-            return dq.GetCount() > 0;
+            return dq.GetCount(msgs) > 0;
         }
 
-        public static List<RegistrationPeriod> LoadByAccountIdByDate(int AccountId, DateTime? startDate = null, DateTime? endDate = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> LoadByAccountIdByDate(int AccountId, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -240,66 +264,69 @@ namespace AfterSchoolLibrary
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["EndDateTime"], endDate, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static string GenerateUniqueName(int accountId, string name, DatabaseConnection dc = null)
+        public static string GenerateUniqueName(int accountId, string name, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var rtnName = name;
-            var period = RegistrationPeriod.LoadByAccountIdByName(accountId, name, dc: dc);
+            var period = RegistrationPeriod.LoadByAccountIdByName(accountId, name, msgs, dc);
             var counter = 1;
 
             while (period.IsNotEmpty())
             {
                 counter++;
                 rtnName = name + " " + counter.ToString();
-                period = RegistrationPeriod.LoadByAccountIdByName(accountId, rtnName, dc: dc);
+                period = RegistrationPeriod.LoadByAccountIdByName(accountId, rtnName, msgs, dc);
             }
 
             return rtnName;
         }
 
-        public bool IsOpen(DatabaseConnection dc = null)
+        public bool IsOpen(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.StartDateTime.Value <= now && this.EndDateTime.Value >= now;
         }
 
-        public bool IsClosed(DatabaseConnection dc = null)
+        public bool IsClosed(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return this.EndDateTime.Value < now;
+            return !IsOpen(msgs, dc);
+            //var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            //return this.EndDateTime.Value < now;
         }
 
-        public bool WillOpen(DatabaseConnection dc = null)
+        public bool WillOpen(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.StartDateTime.Value > now;
         }
 
-        public TimeSpan WillOpenIn(DatabaseConnection dc = null)
+        public TimeSpan WillOpenIn(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.StartDateTime.Value - now;
         }
 
-        public TimeSpan WillCloseIn(DatabaseConnection dc = null)
+        public TimeSpan WillCloseIn(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
             return this.EndDateTime.Value - now;
         }
 
-        public List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(DatabaseConnection dc = null)
+        public List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityRegistrationPeriod.LoadByRegistrationPeriodId(this.ID.Value, dc: dc);
+            return ActivityRegistrationPeriod.LoadByRegistrationPeriodId(this.ID.Value, msgs, dc);
         }
 
-        public List<Activity> GetActivities(DatabaseConnection dc = null)
+        public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.LoadList(
-                GetActivityRegistrationPeriods(dc: dc)
+                GetActivityRegistrationPeriods(msgs, dc)
                     .Select(x => x.ActivityId.Value)
-                    .ToList(), dc: dc)
+                    .ToList(), 
+                msgs, 
+                dc)
                 .Where(x => x.IsDeleted == false)
                 .ToList();
         }
@@ -454,19 +481,19 @@ namespace AfterSchoolLibrary
         }
 
         private Account _Account = null;
-        public Account GetAccount(DatabaseConnection dc = null)
+        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Account.IsEmpty())
             {
                 if (this.AccountId.HasValue)
                 {
-                    _Account = Account.Load(this.AccountId.Value, dc: dc);
+                    _Account = Account.Load(this.AccountId.Value, msgs, dc);
                 }
                 else
                 {
-                    var arps = this.GetActivityRegistrationPeriods(dc: dc).Where(x => x.IsActive).ToList();
+                    var arps = this.GetActivityRegistrationPeriods(msgs, dc).Where(x => x.IsActive).ToList();
                     if (arps.Any())
-                        _Account = arps.First().GetActivity(dc: dc).GetAccount(dc: dc);
+                        _Account = arps.First().GetActivity(msgs, dc).GetAccount(msgs, dc);
                 }
             }
             return _Account;

@@ -11,7 +11,7 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class PackageFactory
     {
-        public static Package Create(SystemMessages msgs, DatabaseConnection dc = null)
+        public static Package Create(SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Package()
             {
@@ -23,7 +23,7 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
-        public static Package Create(decimal pricePerMonth, decimal pricePerYear, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Package Create(decimal pricePerMonth, decimal pricePerYear, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Package()
             {
@@ -35,7 +35,7 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
-        public static Package CreateWithStripe(SystemMessages msgs, DatabaseConnection dc = null)
+        public static Package CreateWithStripe(SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Package()
             {

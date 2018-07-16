@@ -530,7 +530,7 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, int? accountId = null, int? activityGroupId = null, int? activityId = null, int? registrationPeriodId = null, DatabaseConnection dc = null)
+        public static int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, int? accountId = null, int? activityGroupId = null, int? activityId = null, int? registrationPeriodId = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -569,14 +569,14 @@ namespace AfterSchoolLibrary
             if (registrationPeriodId.HasValue)
                 dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], registrationPeriodId.Value);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
 
-        public static int GetSeatCountByActivityId(int activityId, DatabaseConnection dc = null)
+        public static int GetSeatCountByActivityId(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -597,14 +597,14 @@ namespace AfterSchoolLibrary
 
             dq.Criterias.Add(ObjectMap["activityId"], activityId);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if(results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger() + results.Rows[0][2].ToString().ToInteger();
 
             return 0;
         }
 
-        public static int GetSeatCountByAccountId(int accountId, DatabaseConnection dc = null)
+        public static int GetSeatCountByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -625,14 +625,14 @@ namespace AfterSchoolLibrary
 
             dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
 
             return 0;
         }
 
-        public static int GetSeatCountByRegistrationPeriodId(int RegistrationPeriodId, DatabaseConnection dc = null)
+        public static int GetSeatCountByRegistrationPeriodId(int RegistrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -653,14 +653,14 @@ namespace AfterSchoolLibrary
 
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
 
             return 0;
         }
 
-        public static int GetSeatCountByActivityGroupId(int ActivityGroupId, DatabaseConnection dc = null)
+        public static int GetSeatCountByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -681,30 +681,30 @@ namespace AfterSchoolLibrary
 
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
 
             return 0;
         }
 
-        public static List<RegistrantActivity> LoadByRegistrationIds(List<int> RegistrationIds, DatabaseConnection dc = null)
+        public static List<RegistrantActivity> LoadByRegistrationIds(List<int> RegistrationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationIds, DatabaseCriteriaOperatorEnum.In);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<RegistrantActivity> LoadByRegistrantIds(List<int> registrantIds, DatabaseConnection dc = null)
+        public static List<RegistrantActivity> LoadByRegistrantIds(List<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<RegistrantActivity> GetByActivityIds(List<int> activityIds, List<int> registrantIds, DateTime startDate, DatabaseConnection dc = null)
+        public static List<RegistrantActivity> GetByActivityIds(List<int> activityIds, List<int> registrantIds, DateTime startDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -716,28 +716,28 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["NumberOfSeats"], 1, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             dq.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public RegistrationActivity GetRegistrationActivity(DatabaseConnection dc = null)
+        public RegistrationActivity GetRegistrationActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrationActivity.LoadByActivityIdByRegistrationId(this.ActivityId.Value, this.RegistrationId.Value, dc: dc);
+            return RegistrationActivity.LoadByActivityIdByRegistrationId(this.ActivityId.Value, this.RegistrationId.Value, msgs, dc);
         }
 
         public SystemMessages DeleteRegistrationActivity(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var ra = this.GetRegistrationActivity(dc: dc);
+            var ra = this.GetRegistrationActivity(msgs, dc);
 
             if (ra.IsNotEmpty())
-                msgs.AddRange(ra.Delete(dc: dc));
+                msgs.AddRange(ra.Delete(dc));
 
             return msgs;
         }
 
-        public SystemMessages CancelRegistration(DatabaseConnection dc = null)
+        public SystemMessages CancelRegistration(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Database.ExecuteTransaction
             (

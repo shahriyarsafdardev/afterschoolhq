@@ -23,28 +23,11 @@ namespace AfterSchool.Models
             return days;
         }
 
-        public static List<string> PrepScheduleDates(string repeatsweekly, List<DayOfWeekASL> days, string startdate, string enddate, string dailystarttime, string dailyendtime, NameValueCollection meetingDates)
+        public static List<DateRange> PrepScheduleDates(string repeatsweekly, List<DayOfWeekASL> days, string startdate, string enddate, string dailystarttime, string dailyendtime, NameValueCollection meetingDates)
         {
-            var scheduleDates = new List<string>();
+            var scheduleDates = new List<DateRange>();
 
-            if (repeatsweekly.IsNotEmpty())
-            {
-                foreach (var day in days)
-                {
-                    var currentDate = startdate.ToDateTime().AddWeeks(0).NextDayOfWeek(day.ToDayOfWeek());
-                    while (currentDate <= enddate.ToDateTime())
-                    {
-                        var temp = String.Concat(currentDate.ToShortDateString(), " ", dailystarttime);
-                        temp += "-";
-                        temp += String.Concat(currentDate.ToShortDateString(), " ", dailyendtime);
-
-                        scheduleDates.Add(temp);
-
-                        currentDate = currentDate.AddWeeks(1);
-                    }
-                }
-            }
-            else
+            if (repeatsweekly.IsEmpty())
             {
                 for (var i = 1; i <= 50; i++)
                 {
@@ -56,17 +39,22 @@ namespace AfterSchool.Models
 
                     if (meetingInUse.IsBoolean() && meetingInUse.ToBoolean() && meetingStartDate.IsDateTime())
                     {
-                        var meetingStartDateTime = String.Concat(meetingStartDate, " ", meetingStartTime);
-                        var meetingEndDateTime = String.Concat(meetingEndDate, " ", meetingEndTime);
+                        var meetingStart = $"{meetingStartDate} {meetingStartTime}".ToDateTime();
+                        var meetingEnd = $"{meetingEndDate} {meetingEndTime}".ToDateTime();
 
-                        var temp = meetingStartDateTime;
-                        temp += "-";
+                        var dateAlreadyExists = scheduleDates.Where(dateRange => 
+                                dateRange.StartDate == meetingStart && 
+                                dateRange.EndDate == meetingEnd
+                            )
+                            .Any();
 
-                        temp += meetingEndDateTime;
-
-                        if (!scheduleDates.Contains(temp))
+                        if (!dateAlreadyExists)
                         {
-                            scheduleDates.Add(temp);
+                            scheduleDates.Add(new DateRange()
+                            {
+                                StartDate = $"{meetingStart.ToShortDateString()} {dailystarttime}".ToDateTime(),
+                                EndDate = $"{meetingEnd.ToShortDateString()} {dailyendtime}".ToDateTime(),
+                            });
                         }
                     }
                 }

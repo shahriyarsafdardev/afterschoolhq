@@ -60,32 +60,13 @@
 
                 @foreach (var group in groups)
                 {
-                    <div class="panel panel-default question-group">
-                        <div class="panel-heading">
-                            @group.Name
-                        </div>
-                        <div class="panel-body">
-                            @foreach (var question in group.GetActiveQuestions())
-                            {
-                                Html.RenderPartial(
-                                    "_RegFormQuestions",
-                                    question,
-                                    new ViewDataDictionary() {
-                                        { "id", "question-" + ((int)question.ID).ToString() },
-                                        { "FieldValues", fieldValues }
-                                    }
-                                    );
-                            }
-                        </div>
-                        @*
-                        @if (groups.Count > 1)
-                        {
-                            <div class="panel-footer">
-                                <button type="button" class="btn btn-primary btn-lg btn-block" disabled="disabled" id="btnNext">Next &raquo;</button>
-                            </div>
-                        }
-                        *@
-                    </div>
+                    @{ 
+                        Html.RenderPartial(
+                           "_RegFormQuestionGroup",
+                           group,
+                           new ViewDataDictionary() { { "FieldValues", fieldValues } }
+                           );
+                    }
                 }
 
                 @if (registrantType == RegistrantType.Organization)

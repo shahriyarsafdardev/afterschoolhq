@@ -81,13 +81,16 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
             {
                 if (copyfrom.IsNumber())
-                    form = Form.Load(copyfrom.ToInteger()).Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value);
+                    form = Form.Load(copyfrom.ToInteger(), msgs)
+                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
                 else
-                    form = SessionVariables.CurrentAccount.GetDefaultForm().Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value);
+                    form = SessionVariables.CurrentAccount
+                        .GetDefaultForm(msgs)
+                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
             }
             else
             {
-                form = Form.Load(id.ToInteger());
+                form = Form.Load(id.ToInteger(), msgs);
             }
 
 
@@ -105,8 +108,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (qg.IsNumber())
                         {
-                            questionGroup = FormQuestionGroup.Load(qg.ToInteger(), dc: adc);
-                            questions = questionGroup.GetAllQuestions(adc);
+                            questionGroup = FormQuestionGroup.Load(qg.ToInteger(), amsgs, adc);
+                            questions = questionGroup.GetAllQuestions(amsgs, adc);
                         }
 
                         if (questionGroup.IsNotEmpty())

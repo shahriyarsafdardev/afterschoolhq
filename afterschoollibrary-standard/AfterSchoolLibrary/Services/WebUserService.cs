@@ -7,7 +7,7 @@ using BasicLibrary.DataAccess;
 using System.Linq;
 using SendGrid.Helpers.Mail;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Services
 {
     public static class WebUserService
     {
@@ -119,9 +119,9 @@ namespace AfterSchoolLibrary
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc);
             return awu.IsNotEmpty() && awu.IsActive;
         }
-        public static bool HasAccessToActivity(this WebUser user, Activity a, DatabaseConnection dc = null)
+        public static bool HasAccessToActivity(this WebUser user, Activity a, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, user.ID.Value, dc: dc).IsNotEmpty();
+            return ActivityWebUser.LoadByActivityIdByWebUserId(a.ID.Value, user.ID.Value, msgs, dc).IsNotEmpty();
         }
         public static bool IsActivityLeader(this WebUser user, Activity a, DatabaseConnection dc = null)
         {
@@ -183,7 +183,7 @@ namespace AfterSchoolLibrary
         public static SystemMessages SendPasswordResetToken(this WebUser user, bool isAfterSchool, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var token = PasswordResetToken.AddOrUpdateToken(user, msgs, dc: dc);
+            var token = PasswordResetToken.AddOrUpdateToken(user, msgs, dc);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(EmailHelper.SendPasswordReset(user, token, isAfterSchool));
@@ -191,6 +191,15 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        /// <summary>
+        /// Create basic registrant/student record for a user, not attached to an account, so it's attached to the user record, data can be added later
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="registrantType"></param>
+        /// <param name="isMaster"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static Registrant CreateRegistrant(this WebUser user, RegistrantType registrantType, bool isMaster, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -264,6 +273,56 @@ namespace AfterSchoolLibrary
             return null;
         }
 
+        /// <summary>
+        /// For adding a payment account to a student/registrant/participant account
+        /// </summary>
+        /// <param name="accountOwner"></param>
+        /// <param name="phone"></param>
+        /// <param name="isActive"></param>
+        /// <param name="packageId"></param>
+        /// <param name="packageBillingPeriod"></param>
+        /// <param name="isAfterSchool"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static Account AddNewRegistrantAccount(this WebUser accountOwner, string phone, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = AccountService.CreateNew(
+                orgName: accountOwner.DisplayName,
+                email: accountOwner.Email,
+                phone: phone,
+                isActive: isActive,
+                accountType: AccountType.Registrant,
+                accountOwner: accountOwner,
+                packageId: null,
+                packageBillingPeriod: null,
+                loggedInUser: loggedInUser,
+                isAfterSchool: isAfterSchool,
+                msgs: msgs,
+                dc: dc);
+
+            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, dc));
+
+            return account;
+        }
+
+        /// <summary>
+        /// typically used when sending an invite to an email, 
+        /// but in general gives a user a newly created account attached to their webuser account
+        /// </summary>
+        /// <param name="accountOwner"></param>
+        /// <param name="orgName"></param>
+        /// <param name="phone"></param>
+        /// <param name="isActive"></param>
+        /// <param name="accountType"></param>
+        /// <param name="packageId"></param>
+        /// <param name="packageBillingPeriod"></param>
+        /// <param name="isAfterSchool"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
@@ -285,11 +344,32 @@ namespace AfterSchoolLibrary
             return account;
         }
 
+        /// <summary>
+        /// Give a user permissions to an existing account
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="account"></param>
+        /// <param name="userTypeId"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static SystemMessages AddAccount(this WebUser user, Account account, UserType userTypeId, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             return account.AddUser(user, userTypeId, loggedInUser.ID.Value, dc);
         }
 
+        /// <summary>
+        /// User has been invited so the user needs to confirm their information and by adding a password
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="account"></param>
+        /// <param name="firstName"></param>
+        /// <param name="lastName"></param>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static SystemMessages CompleteSignUp(this WebUser user, Account account, string firstName, string lastName, string email, string password, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -315,19 +395,23 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages ActivateForAccount(this WebUser user, Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        /// <summary>
+        /// Change the AccountWebUser record to be active. If it's not active user can't login
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="account"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        private static SystemMessages ActivateForAccount(this WebUser user, Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
 
             if (awu.IsNotEmpty())
-            {
-                awu.IsActive = true;
-                awu.LastModifiedDate = DateTime.UtcNow;
-                awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                msgs.AddRange(awu.Save(dc));
-            }
+                msgs.AddRange(awu.Activate(loggedInUser, msgs, dc));
             else
                 msgs.Add("User not valid for account", MessageType.UserError);
 

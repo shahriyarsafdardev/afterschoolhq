@@ -17,7 +17,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             AccountOwner = Factories.WebUserFactory.Create(msgs, dc);
             ActivityGroupOwner = Factories.AccountFactory.Create(AccountOwner, msgs, dc);
-            ActivityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, msgs, dc);
+            ActivityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
 
             InvitedAccountOwner = Factories.WebUserFactory.Create(msgs, dc);
             InvitedAccount = Factories.AccountFactory.Create(AccountOwner, msgs, dc);

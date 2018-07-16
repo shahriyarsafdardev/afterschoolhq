@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using BasicLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -327,6 +328,34 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.Clear();
             WriteOutput(new { status = "ok", messages = msgs }, ResponseType.JSON);
             Response.End();
+
+            return View();
+        }
+
+        public ActionResult SearchLocations(string search)
+        {
+            var msgs = new SystemMessages();
+            var locations = Location.Search(search, 0, 10, msgs);
+
+            Response.Clear();
+            WriteOutput(new
+            {
+                status = "ok",
+                locations = locations.Select(location => new
+                {
+                    location.ID,
+                    location.Name,
+                    location.Address1,
+                    location.Address2,
+                    location.City,
+                    location.State,
+                    location.PostalCode,
+                    FullAddress = location.FormatAddress(useLineBreaks: false),
+                    location.HostAccountId
+                })
+            }, 
+            ResponseType.JSON);
+            Response.End();           
 
             return View();
         }

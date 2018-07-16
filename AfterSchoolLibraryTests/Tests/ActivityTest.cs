@@ -126,7 +126,7 @@ namespace AfterSchoolLibraryTests
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc: dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc: dc);
             activity.ActivityGroupId = activityGroup.ID.Value;
             activity.Save(dc: dc);
             Assert.Single(Activity.LoadByActivityGroupId(activity.ActivityGroupId.Value, dc: dc));
@@ -177,7 +177,7 @@ namespace AfterSchoolLibraryTests
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc: dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc: dc);
             activity.ActivityGroupId = activityGroup.ID.Value;
             activity.Save(dc: dc);
             Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, null, null, dc: dc));
@@ -262,7 +262,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc);
 
             int registrationPeriodID = registrationPeriod.ID.Value;
             int numberOfSeats = 12;
@@ -545,7 +545,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
             var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
 
             Assert.Single(activity.GetActivityRegistrationPeriods(dc: dc));
@@ -558,7 +558,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
             var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
 
             Assert.Single(activity.GetRegistrationPeriods(dc: dc));
@@ -573,7 +573,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
             var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
             registrationPeriod.StartDateTime = date;
             registrationPeriod.Save(dc: dc);
@@ -592,7 +592,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
             var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
             registrationPeriod.StartDateTime = new DateTime(18, 10, 10);
             registrationPeriod.EndDateTime = new DateTime(2018, 10, 10);
@@ -607,7 +607,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var form = Factories.FormFactory.Create(account, msgs, dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc);
             var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc);
             registrationPeriod.StartDateTime = new DateTime(18, 10, 10);
             registrationPeriod.EndDateTime = new DateTime(2018, 10, 10);
@@ -622,7 +622,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
             var form = Factories.FormFactory.Create(account, msgs, dc: dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc: dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc: dc);
             var activityRegistrationPeriod = Factories.ActivityRegistrationPeriodFactory.Create(activity, registrationPeriod, msgs, dc: dc);
             activityRegistrationPeriod.IsActive = true;
             activityRegistrationPeriod.Save(dc: dc);
@@ -696,12 +696,12 @@ namespace AfterSchoolLibraryTests
             
         }
 
-        [Fact]
+        [Fact(Skip = "Moved to ActivityScheduleService, need to rewrite test")]
         public void AddNewSheduleTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, activityGroup, msgs, dc);
 
             var start = new DateTime(2017, 06, 06);
@@ -709,21 +709,21 @@ namespace AfterSchoolLibraryTests
             var startTime = new DateTime(2018, 1, 1, 1, 1, 1);
             var endtime = new DateTime(2018, 3, 3, 3, 3, 3);
 
-            var schedule = activity.AddNewSchedule(
-                "newShed", 
-                "det", 
-                true, 
-                start, 
-                end, 
-                startTime, 
-                endtime, 
-                "1/1/2019-12:39 PM", 
-                account.ID.Value, 
-                accountOwner.ID.Value, 
-                msgs, 
-                dc);
+            //var schedule = activity.AddNewSchedule(
+            //    "newShed", 
+            //    "det", 
+            //    true, 
+            //    start, 
+            //    end, 
+            //    startTime, 
+            //    endtime, 
+            //    "1/1/2019-12:39 PM", 
+            //    account.ID.Value, 
+            //    accountOwner.ID.Value, 
+            //    msgs, 
+            //    dc);
 
-            Assert.NotNull(schedule);
+            // Assert.NotNull(schedule);
         }
 
         [Fact]
@@ -818,7 +818,7 @@ namespace AfterSchoolLibraryTests
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var form = Factories.FormFactory.Create(account, msgs, dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, activityGroup, msgs, dc);
 
             Assert.NotNull(activity.GetActivityGroup(dc));
@@ -832,7 +832,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var form = Factories.FormFactory.Create(account, msgs, dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
 
             Assert.NotNull(activity.AddOrUpdateActivityProperty(AccountPropertyType.LandingPageText, "value", user.ID.Value, msgs, dc));
         }
@@ -867,7 +867,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var form = Factories.FormFactory.Create(account, msgs, dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
             var accountProperty = Factories.AccountPropertyFactory.Create(account, AccountPropertyType.ApplicationThankYouEmail, msgs, dc);
             accountProperty.ActivityId = activity.ID.Value;
             accountProperty.Save(dc);

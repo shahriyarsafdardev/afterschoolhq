@@ -2,6 +2,7 @@
 using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -19,7 +20,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void LoadTest()
         {
-            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
 
             Assert.NotNull(ActivityGroup.Load(activityGroup.ID.Value, msgs, dc));
         }
@@ -31,7 +32,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, msgs, dc);
+                var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
             }
 
             Assert.Equal(
@@ -47,7 +48,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, msgs, dc);
+                var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
             }
 
             Assert.Equal(numberToCreate, ActivityGroup.GetCount(msgs: msgs, dc: dc));
@@ -56,7 +57,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void SaveTest()
         {
-            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
             activityGroup.ActivityGroupTypeId = ActivityGroupType.League;
             msgs.AddRange(activityGroup.Save(dc));
 
@@ -66,7 +67,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void DeleteTest()
         {
-            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
 
             msgs.AddRange(activityGroup.Delete(dc));
 
@@ -76,7 +77,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void ReloadTest()
         {
-            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
 
             Assert.Equal(activityGroup.ID, activityGroup.Reload(msgs, dc).ID);
         }
@@ -84,7 +85,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void InviteAccountTest()
         {
-            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
             var accountToInviteOwner = Factories.WebUserFactory.Create(msgs, dc);
             var accountToInvite = Factories.AccountFactory.Create(accountToInviteOwner, msgs, dc);
 

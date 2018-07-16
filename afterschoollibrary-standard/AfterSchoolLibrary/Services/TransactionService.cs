@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Services
 {
     public class TransactionService
     {

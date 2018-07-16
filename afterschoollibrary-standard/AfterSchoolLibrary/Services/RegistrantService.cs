@@ -1,0 +1,171 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+
+namespace AfterSchoolLibrary.Services
+{
+    public static class RegistrantService
+    {
+        //public static Registrant CreateNew(Account registrantOwner, RegistrantType registrantType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    var registrant = new Registrant
+        //    {
+        //        AccountId = registrantOwner.ID,
+        //        RegistrantTypeId = registrantType,
+        //        IsMaster = false,
+        //        CreateDate = DateTime.UtcNow,
+        //        LastModifiedDate = DateTime.UtcNow,
+        //        CreatedBy = loggedInUser?.ID.IfEmpty(0),
+        //        LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                 
+        //    };
+        //    msgs.AddRange(registrant.Save(dc: dc));
+        //}
+
+        public static WebUser MatchCreateOrUpdateUser(this Registrant registrant, string firstname, string lastname, string email, string password = null, bool isAfterSchool = false, bool forceMatch = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // connecting with an existing account that has a password
+            // connecting with an existing account that doesn't have a password
+            //  and you aren't trying to create an official account
+            //  and you are trying to create an official account
+            // creating a new account
+
+            var creatingNewAccount = password.IsNotEmpty();
+
+            if (WebUser.ExistsByEmail(email, dc: dc))
+            {
+                var user = WebUser.LoadByEmail(email, dc: dc);
+                if (!creatingNewAccount)
+                {
+                    // not creating an account, current account has no password
+                    if (user.Password.IsEmpty() || forceMatch)
+                        return user;
+
+                    msgs.Add("You already have an account with this email. Login to register.", MessageType.UserError);
+                    return null;
+                }
+
+                // if user already has a password and user is trying to create a new account.
+                if (user.Password.IsNotEmpty())
+                {
+                    msgs.Add("You already have an account with this email. Login to register.", MessageType.UserError);
+                    return null;
+                }
+            }
+
+            return CreateOrUpdateUser(registrant, firstname, lastname, email, password, isAfterSchool, msgs, dc: dc);
+        }
+
+        /// <summary>
+        /// TODO: Refactor and simplify
+        /// </summary>
+        /// <param name="registrant"></param>
+        /// <param name="firstname"></param>
+        /// <param name="lastname"></param>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <param name="isAfterSchool"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        private static WebUser CreateOrUpdateUser(Registrant registrant, string firstname, string lastname, string email, string password = null, bool isAfterSchool = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            WebUser user = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    if (WebUser.ExistsByEmail(email, amsgs, adc))
+                    {
+                        user = WebUser.LoadByEmail(email, amsgs, adc);
+
+                        if (registrant.WebUserId.HasValue && user.ID != registrant.WebUserId)
+                            amsgs.Add("This email is already registered to another account", MessageType.UserError);
+                    }
+
+                    if (amsgs.HasNoErrors())
+                    {
+                        if (user.IsEmpty())
+                        {                            
+                            user = new WebUser
+                            {
+                                CreateDate = DateTime.UtcNow,
+                                CreatedBy = 0,
+                                Email = email.MaxChars(150),
+                                VerifiedAccount = false,
+                                IsActive = false,
+                                IsRegistered = false
+                            };
+
+                            user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
+                        }
+
+                        user.FirstName = firstname.MaxChars(50);
+                        user.LastName = lastname.MaxChars(50);
+                        user.LastModifiedDate = DateTime.UtcNow;
+                        user.LastModifiedBy = registrant.WebUserId;
+
+                        if (password.IsNotBlank())
+                        {
+                            user.IsActive = true;
+                            user.IsRegistered = true;
+                            user.Password = WebUserService.EncryptPassword(password);
+                        }
+
+                        msgs.AddRange(user.Save(adc));
+
+                        registrant.WebUserId = user.ID;
+                        msgs.AddRange(registrant.Save(adc));
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.Add("Your account has been created", MessageType.Success);
+
+                    // verify if there is a password and the user hasn't changed their email
+                    if (password.IsNotBlank() && user.Email.ToLower() != registrant.Email.ToLower())
+                        user.SendVerificationEmail(isAfterSchool);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.Add("Error creating account", MessageType.Error);
+                },
+                dc: dc
+            );
+
+            return user;
+        }
+
+        public static SystemMessages StartPaymentPlan(this Registrant registrant, PaymentPlan paymentPlan, WebUser loggedInUser, DateTime? startDateTime = null, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var rpp = RegistrantPaymentPlanService.CreateNew(
+                registrant,
+                paymentPlan,
+                startDateTime.IfEmpty(DateTime.UtcNow),
+                loggedInUser,
+                msgs,
+                dc);
+
+            return msgs;
+        }
+
+        public static SystemMessages StartSubscriptionPlan(this Registrant registrant, SubscriptionPlan subscriptionPlan, WebUser loggedInUser, DateTime? startDateTime = null, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var rpp = RegistrantSubscriptionPlanService.CreateNew(
+                registrant,
+                subscriptionPlan,
+                startDateTime.IfEmpty(DateTime.UtcNow),
+                loggedInUser,
+                msgs,
+                dc);
+
+            return msgs;
+        }
+    }
+}

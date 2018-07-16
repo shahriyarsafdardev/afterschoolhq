@@ -263,7 +263,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["username"], username);
-            dq.Criterias.Add(ObjectMap["password"], WebUserService.EncryptPassword(password));
+            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
@@ -272,7 +272,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["email"], email);
-            dq.Criterias.Add(ObjectMap["password"], WebUserService.EncryptPassword(password));
+            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
@@ -281,7 +281,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["email"], email);
-            dq.Criterias.Add(ObjectMap["password"], WebUserService.SaltandHashPassword(password));
+            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.SaltandHashPassword(password));
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 

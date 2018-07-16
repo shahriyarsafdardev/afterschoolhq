@@ -2,58 +2,57 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary
 {
     public static class AccountService
     {
-        public static bool HasFeature(this Account account, FeatureType featureType, DatabaseConnection dc = null)
+        public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActiveAccountPackage(dc: dc).HasFeature(featureType);
+            return account.GetActiveAccountPackage(msgs, dc).HasFeature(featureType);
         }
 
-        public static WebUser GetAccountOwner(this Account account, DatabaseConnection dc = null)
+        public static WebUser GetAccountOwner(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return WebUser.Load(account.OwnerId.Value, dc: dc);
+            return WebUser.Load(account.OwnerId.Value, msgs, dc);
         }
 
-        public static List<WebUser> GetAccountOwnersAndAdmins(this Account account, DatabaseConnection dc = null)
+        public static List<WebUser> GetAccountOwnersAndAdmins(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc: dc)
+            return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc)
                 .Where(x => x.UserTypeId == UserType.Administrator || x.UserTypeId == UserType.Owner)
                 .Select(x => x.ToWebUser())
                 .ToList();
         }
 
-        public static List<Activity> GetPublishedActivities(this Account account, DatabaseConnection dc = null)
+        public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenAndUpcomingRegistrationPeriods(dc: dc);
+            var periods = account.GetOpenAndUpcomingRegistrationPeriods(msgs, dc);
             var activities = new List<Activity>();
 
-            periods.ForEach(period => activities.AddRange(period.GetActivities(dc: dc).Where(x => x.IsPubliclyViewable)));
+            periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
 
-            return activities.Where(activity => activity.GetActiveActivityForm(dc: dc).IsNotEmpty()).ToList();
+            return activities.Where(activity => activity.GetActiveActivityForm(msgs, dc).IsNotEmpty()).ToList();
         }
 
-        public static List<ActivityForm> GetActivityForms(this Account account, DatabaseConnection dc = null)
+        public static List<ActivityForm> GetActivityForms(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityForm.LoadByAccountId(account.ID.Value, dc: dc);
+            return ActivityForm.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, bool? isArchived, bool? isDeleted, int? start = null, int? length = null, DatabaseConnection dc = null)
+        public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, bool? isArchived, bool? isDeleted, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (user.IsEmpty() || new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }.Contains(userType))
             {
-                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, dc: dc).ToList();
+                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, msgs, dc).ToList();
             }
             else
             {
-                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, dc: dc)
-                    .Where(activity => user.HasAccessToActivity(activity, dc: dc))
+                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, msgs, dc)
+                    .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
                     .ToList();
             }
         }
@@ -145,12 +144,30 @@ namespace AfterSchoolLibrary
                 dc: dc);
         }
 
-        public static List<ActivityGroup> GetExternalLeagues(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AccountActivityGroup> GetExternalLeagues(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {            
+            return AccountActivityGroup.LoadByAccountId(account.ID.Value, start, length, msgs, dc);
+        }
+
+        /// <summary>
+        /// return AccountActivityGroups where it is published 
+        /// and is in a currently open registration period or upcoming registration period
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static List<AccountActivityGroup> GetPublishedExternalLeagues(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var ids = AccountActivityGroup.LoadByAccountId(account.ID.Value, start, length, msgs, dc)
-                .Select(x => x.ID.Value)
+            var aags = AccountActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
+            var periods = RegistrationPeriod.LoadByAccountActivityGroupIds(
+                aags.Select(x => x.ID.Value).ToList(), 
+                msgs, 
+                dc)
+                .Where(period => period.IsOpen() || period.WillOpen())
                 .ToList();
-            return ActivityGroup.LoadList(ids, msgs, dc);
+                       
+            return aags.Where(aag => periods.Select(period => period.AccountActivityGroupId.Value).Contains(aag.ID.Value)).ToList();
         }
 
         public static int GetExternalLeagueCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -189,35 +206,35 @@ namespace AfterSchoolLibrary
                 dc: dc);
         }
 
-        public static List<ActivitySchedule> GetActivitySchedules(this Account account, DatabaseConnection dc = null)
+        public static List<ActivitySchedule> GetActivitySchedules(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivitySchedule.LoadByAccountId(account.ID.Value, dc: dc);
+            return ActivitySchedule.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static List<RegistrationPeriod> GetRegistrationPeriods(this Account account, DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> GetRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.LoadByAccountId(account.ID.Value, dc: dc);
+            return RegistrationPeriod.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static List<RegistrationPeriod> GetRegistrationPeriods(this Account account, int? start, int? length, DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> GetRegistrationPeriods(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.LoadByAccountId(account.ID.Value, start, length, dc: dc);
+            return RegistrationPeriod.LoadByAccountId(account.ID.Value, start, length, msgs, dc);
         }
 
-        public static int GetRegistrationPeriodCount(this Account account, DatabaseConnection dc = null)
+        public static int GetRegistrationPeriodCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, dc: dc);
+            return RegistrationPeriod.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
         }
 
-        public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Account account, DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetRegistrationPeriods()
+            return account.GetRegistrationPeriods(msgs, dc)
                 .Where(x => x.StartDateTime.Value > account.ConvertToAccountTimeZone(DateTime.UtcNow))
                 .OrderBy(x => x.StartDateTime.Value)
                 .ToList();
         }
 
-        public static List<RegistrationPeriod> GetOpenRegistrationPeriods(this Account account, DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> GetOpenRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.GetRegistrationPeriods()
                 .Where(x => 
@@ -234,10 +251,10 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
 
-        public static List<RegistrationPeriod> GetOpenAndUpcomingRegistrationPeriods(this Account account, DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> GetOpenAndUpcomingRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenRegistrationPeriods(dc: dc);
-            periods.AddRange(account.GetUpcomingRegistrationPeriods(dc: dc));
+            var periods = account.GetOpenRegistrationPeriods(msgs, dc);
+            periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
             return periods;
         }
 
@@ -252,9 +269,21 @@ namespace AfterSchoolLibrary
         public static Form CreateDefaultForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var form = Form.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
+
+            msgs.AddRange(account.SetDefaultForm(form, loggedInUser, dc));
+
             if (form.AccountId != account.ID)
                 form = form.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, dc);
+
             return form;
+        }
+
+        public static SystemMessages SetDefaultForm(this Account account, Form form, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            account.DefaultFormId = form.ID;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            account.LastModifiedDate = DateTime.UtcNow;
+            return account.Save(dc);
         }
 
         public static Form GetOrCreateDefaultForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -277,14 +306,14 @@ namespace AfterSchoolLibrary
             return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc: dc);
         }
 
-        public static AccountPackage GetActiveAccountPackage(this Account account, DatabaseConnection dc = null)
+        public static AccountPackage GetActiveAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountPackage.LoadByAccountIdByIsActive(account.ID.Value, true, dc: dc);
+            return AccountPackage.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc);
         }
 
-        public static List<AccountPackage> GetAccountPackages(this Account account, DatabaseConnection dc = null)
+        public static List<AccountPackage> GetAccountPackages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountPackage.LoadByAccountId(account.ID.Value, dc: dc);
+            return AccountPackage.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
         public static SystemMessages AddUser(this Account account, WebUser user, UserType ut, int loggedInUserId, DatabaseConnection dc = null)
@@ -414,20 +443,20 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static string GenerateUniqueName(string name, int? accountId, DatabaseConnection dc = null)
+        public static string GenerateUniqueName(string name, int? accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             //unique name
             var reg = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
 
             string origUniqueName = reg.Replace(name, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            Account duplicate = Account.LoadByUniqueName(uniqueName, dc: dc);
+            Account duplicate = Account.LoadByUniqueName(uniqueName, msgs, dc);
             int count = 1;
             while (duplicate.IsNotEmpty() && duplicate.ID != accountId)
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = Account.LoadByUniqueName(uniqueName, dc: dc);
+                duplicate = Account.LoadByUniqueName(uniqueName, msgs, dc);
             }
             return uniqueName;
         }
@@ -443,7 +472,7 @@ namespace AfterSchoolLibrary
             ChangeBillingPeriodType
         }
 
-        private static SignUpType GetSignUpType(this Account account, Package p, AccountPackage activePackage, BillingPeriodType billingPeriodType, ref int trialDayCount, DatabaseConnection dc = null)
+        private static SignUpType GetSignUpType(this Account account, Package p, AccountPackage activePackage, BillingPeriodType billingPeriodType, ref int trialDayCount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var signupType = SignUpType.NotSet;
 
@@ -488,11 +517,11 @@ namespace AfterSchoolLibrary
             {
                 if (activePackage.IsEmpty())
                 {
-                    trialDayCount = p.HasFeature(FeatureType.TrialDays) ? p.GetFeature(FeatureType.TrialDays, dc: dc).GetMaxValue() : 0;
+                    trialDayCount = p.HasFeature(FeatureType.TrialDays, msgs, dc) ? p.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() : 0;
                 }
-                else if (activePackage.HasFeature(FeatureType.TrialDays))
+                else if (activePackage.HasFeature(FeatureType.TrialDays, msgs, dc))
                 {
-                    trialDayCount = account.GetTrialDaysRemaining(activePackage, dc: dc);
+                    trialDayCount = account.GetTrialDaysRemaining(activePackage, msgs, dc);
                 }
 
                 if (trialDayCount > 0)
@@ -524,8 +553,8 @@ namespace AfterSchoolLibrary
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
-                    package = Package.Load(packageId, dc: adc);
-                    currentPackage = account.GetActiveAccountPackage(adc);
+                    package = Package.Load(packageId, amsgs, adc);
+                    currentPackage = account.GetActiveAccountPackage(amsgs, adc);
 
                     var trialDayCount = 0;
 
@@ -534,7 +563,7 @@ namespace AfterSchoolLibrary
                     //      upgrading to a different package
                     //      paying for a new package with no trial account
 
-                    var signupType = account.GetSignUpType(package, currentPackage, billingPeriodType, ref trialDayCount, dc: adc);
+                    var signupType = account.GetSignUpType(package, currentPackage, billingPeriodType, ref trialDayCount, amsgs, adc);
 
                     if (signupType != SignUpType.NotSet)
                     {
@@ -627,14 +656,14 @@ namespace AfterSchoolLibrary
             return newap;
         }
 
-        public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, DatabaseConnection dc = null)
+        public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var daysRemaining = 0;
-            var firstAccountPackage = account.GetAccountPackages(dc: dc).OrderBy(x => x.StartDate.Value).First();
+            var firstAccountPackage = account.GetAccountPackages(msgs, dc).OrderBy(x => x.StartDate.Value).First();
             var daysSinceSignUp = (DateTime.UtcNow - firstAccountPackage.StartDate.Value).Days;
-            if (daysSinceSignUp < currentPackage.GetFeature(FeatureType.TrialDays).GetMaxValue() + 1) // they get the full last day
+            if (daysSinceSignUp < currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() + 1) // they get the full last day
             {
-                daysRemaining = currentPackage.GetFeature(FeatureType.TrialDays).GetMaxValue() - daysSinceSignUp;
+                daysRemaining = currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() - daysSinceSignUp;
             }
             return daysRemaining;
         }
@@ -657,44 +686,49 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            Stripe.StripeRequestOptions requestOptions = new Stripe.StripeRequestOptions();
-            requestOptions.ApiKey = StripeHelper.SecretKey;
+            //Stripe.StripeRequestOptions requestOptions = new Stripe.StripeRequestOptions();
+            //requestOptions.ApiKey = StripeHelper.SecretKey;
 
-            Stripe.StripeCustomer customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
+            var sh = new Billing.StripeHelper();
 
-            if (!customer.IsEmpty())
+            if (customer.IsNotEmpty())
             {
-                Stripe.StripeCustomerUpdateOptions options = new Stripe.StripeCustomerUpdateOptions();
-                options.Description = account.Name;
-                options.Email = account.Email;
+                msgs.AddRange(sh.UpdateCustomer(customer.Id, account.Name, account.Email));
 
-                Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                try
-                {
-                    customer = service.Update(account.StripeCustomerId, options, requestOptions);
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
-                }
+                //Stripe.StripeCustomerUpdateOptions options = new Stripe.StripeCustomerUpdateOptions();
+                //options.Description = account.Name;
+                //options.Email = account.Email;
+
+                //Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
+                //try
+                //{
+                //    customer = service.Update(account.StripeCustomerId, options, requestOptions);
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
+                //}
             }
             else
             {
-                Stripe.StripeCustomerCreateOptions options = new Stripe.StripeCustomerCreateOptions();
-                options.Description = account.Name;
-                options.Email = account.Email;
+                customer = sh.CreateCustomer(account.Name, account.Email, msgs);
 
-                Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                try
-                {
-                    customer = service.Create(options);
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
-                }
+                //Stripe.StripeCustomerCreateOptions options = new Stripe.StripeCustomerCreateOptions();
+                //options.Description = account.Name;
+                //options.Email = account.Email;
 
-                if (!customer.IsEmpty())
+                //Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
+                //try
+                //{
+                //    customer = service.Create(options);
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
+                //}
+
+                if (customer.IsNotEmpty())
                 {
                     account.StripeCustomerId = customer.Id;
                     msgs.AddRange(account.Save(dc: dc));
@@ -709,44 +743,30 @@ namespace AfterSchoolLibrary
 
             if (account.StripeCustomerId.IsEmpty())
             {
-                msgs.AddRange(account.CreateStripeCustomer(dc: dc));
+                msgs.AddRange(account.CreateStripeCustomer(dc));
             }
 
             if (msgs.HasNoErrors())
             {
-                var options = new Stripe.StripeCardCreateOptions();
-                options.SourceCard = new Stripe.SourceCard
-                {
-                    Name = name,
-                    Number = number,
-                    ExpirationMonth = expMonth.ToInteger(),
-                    ExpirationYear = expYear.ToInteger(),
-                    Cvc = cvc
-                };
-
-                Stripe.StripeCard card = null;
-                Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
-                try
-                {
-                    card = service.Create(account.StripeCustomerId, options);
-                    if (!card.IsEmpty() && makePrimary)
+                var sh = new Billing.StripeHelper();
+                var card = sh.CreateCard(
+                    customerId: account.StripeCustomerId,
+                    sourceCard: new Stripe.SourceCard
                     {
-                        account.StripeDefaultCardId = card.Id;
-                        msgs.AddRange(account.Save(dc: dc));
-                    }
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    //error storing card
-                    msgs.Add(ex.Message, MessageType.Error, ex);
-                }
-                catch (Exception ex)
-                {
-                    msgs.Add("Error storing card", MessageType.Error, ex);
-                }
+                        Name = name,
+                        Number = number,
+                        ExpirationMonth = expMonth.ToInteger(),
+                        ExpirationYear = expYear.ToInteger(),
+                        Cvc = cvc
+                    },
+                    msgs: msgs
+                    );
 
-                if (msgs.HasNoErrors() && makePrimary)
+                if (!card.IsEmpty() && makePrimary)
                 {
+                    account.StripeDefaultCardId = card.Id;
+                    msgs.AddRange(account.Save(dc: dc));
+
                     msgs.AddRange(account.SetStripeDefaultCard(card.Id));
                 }
 
@@ -754,6 +774,42 @@ namespace AfterSchoolLibrary
                 {
                     msgs.Add("The payment card has been successfully added", MessageType.Success);
                 }
+
+                //if (msgs.HasNoErrors() && makePrimary)
+                //{
+                //    msgs.AddRange(account.SetStripeDefaultCard(card.Id));
+                //}
+
+                //var options = new Stripe.StripeCardCreateOptions();
+                //options.SourceCard = new Stripe.SourceCard
+                //{
+                //    Name = name,
+                //    Number = number,
+                //    ExpirationMonth = expMonth.ToInteger(),
+                //    ExpirationYear = expYear.ToInteger(),
+                //    Cvc = cvc
+                //};
+
+                //Stripe.StripeCard card = null;
+                //Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
+                //try
+                //{
+                //    card = service.Create(account.StripeCustomerId, options);
+                //    if (!card.IsEmpty() && makePrimary)
+                //    {
+                //        account.StripeDefaultCardId = card.Id;
+                //        msgs.AddRange(account.Save(dc: dc));
+                //    }
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    //error storing card
+                //    msgs.Add(ex.Message, MessageType.Error, ex);
+                //}
+                //catch (Exception ex)
+                //{
+                //    msgs.Add("Error storing card", MessageType.Error, ex);
+                //}
             }
 
             return msgs;
@@ -764,20 +820,23 @@ namespace AfterSchoolLibrary
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var cards = new List<Stripe.StripeCard>();
-            var customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
 
-            if (!customer.IsEmpty())
+            if (customer.IsNotEmpty())
             {
-                try
-                {
-                    Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
-                    cards.AddRange(service.List(customer.Id).ToList());
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    //error storing card
-                    msgs.Add("Error retrieving cards", MessageType.Error, ex);
-                }
+                var sh = new Billing.StripeHelper();
+                cards.AddRange(sh.GetCards(customer.Id, msgs));
+
+                //try
+                //{
+                //    Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
+                //    cards.AddRange(service.List(customer.Id).ToList());
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    //error storing card
+                //    msgs.Add("Error retrieving cards", MessageType.Error, ex);
+                //}
             }
 
             return cards;
@@ -788,23 +847,26 @@ namespace AfterSchoolLibrary
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var charges = new List<Stripe.StripeCharge>();
-            var customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
 
-            if (!customer.IsEmpty())
+            if (customer.IsNotEmpty())
             {
-                try
-                {
-                    Stripe.StripeChargeService service = new Stripe.StripeChargeService(StripeHelper.SecretKey);
-                    Stripe.StripeChargeListOptions options = new Stripe.StripeChargeListOptions();
-                    options.CustomerId = customer.Id;
-                    options.Limit = 10;
-                    charges.AddRange(service.List(options).ToList());
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    //error storing card
-                    msgs.Add("Error retrieving billing history", MessageType.Error, ex);
-                }
+                var sh = new Billing.StripeHelper();
+                charges = sh.GetCharges(customer.Id, msgs);
+
+                //try
+                //{
+                //    Stripe.StripeChargeService service = new Stripe.StripeChargeService(StripeHelper.SecretKey);
+                //    Stripe.StripeChargeListOptions options = new Stripe.StripeChargeListOptions();
+                //    options.CustomerId = customer.Id;
+                //    options.Limit = 10;
+                //    charges.AddRange(service.List(options).ToList());
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    //error storing card
+                //    msgs.Add("Error retrieving billing history", MessageType.Error, ex);
+                //}
             }
 
             return charges;
@@ -815,25 +877,32 @@ namespace AfterSchoolLibrary
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var refunds = new List<Stripe.StripeRefund>();
-            var customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
 
             if (!customer.IsEmpty())
             {
-                try
+                var sh = new Billing.StripeHelper();
+                var charges = account.GetStripeBillingHistory(msgs);
+                foreach(var item in charges)
                 {
-                    var service = new Stripe.StripeRefundService(StripeHelper.SecretKey);
-                    refunds.AddRange(service.List(null).ToList());
+                    refunds.AddRange(sh.GetRefunds(item.Id, msgs));
                 }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error retrieving refund history", MessageType.Error, ex);
-                }
+
+                //try
+                //{
+                //    var service = new Stripe.StripeRefundService(StripeHelper.SecretKey);
+                //    refunds.AddRange(service.List(null).ToList());
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    msgs.Add("Error retrieving refund history", MessageType.Error, ex);
+                //}
             }
 
             return refunds;
         }
 
-        public static Stripe.StripeCustomer GetStripeCustomer(this Account account, SystemMessages msgs = null)
+        public static Stripe.StripeCustomer GetStripeCustomer(this Account account, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -841,15 +910,8 @@ namespace AfterSchoolLibrary
 
             if (!account.StripeCustomerId.IsEmpty())
             {
-                try
-                {
-                    Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                    customer = service.Get(account.StripeCustomerId);
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add("Error retrieving customer information", MessageType.Error, ex);
-                }
+                var sh = new Billing.StripeHelper();
+                customer = sh.GetCustomer(account.StripeCustomerId, msgs);
             }
             return customer;
         }
@@ -857,24 +919,44 @@ namespace AfterSchoolLibrary
         public static SystemMessages SetStripeDefaultCard(this Account account, string cardId)
         {
             var msgs = new SystemMessages();
-            var customer = account.GetStripeCustomer();
+            var customer = account.GetStripeCustomer(msgs);
 
-            var options = new Stripe.StripeCustomerUpdateOptions();
-            options.DefaultSource = cardId;
+            if (customer.IsNotEmpty())
+            {
+                var sh = new Billing.StripeHelper();
+                msgs.AddRange(sh.UpdateCustomerDefaultCard(customer.Id, cardId));
+            }
+            else
+            {
+                msgs.Add("Invalid stripe customer", MessageType.Error);
+            }
 
-            try
-            {
-                Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                service.Update(customer.Id, options);
-            }
-            catch (Stripe.StripeException ex)
-            {
-                msgs.Add("Error retrieving update default payment information", MessageType.Error, ex);
-            }
+            //var options = new Stripe.StripeCustomerUpdateOptions();
+            //options.DefaultSource = cardId;
+
+            //try
+            //{
+            //    Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
+            //    service.Update(customer.Id, options);
+            //}
+            //catch (Stripe.StripeException ex)
+            //{
+            //    msgs.Add("Error retrieving update default payment information", MessageType.Error, ex);
+            //}
 
             return msgs;
         }
 
+        /// <summary>
+        /// creates the initial contact/student record for the current account, not the global registrant account, details are added later
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="loggedInUserId"></param>
+        /// <param name="registrantType"></param>
+        /// <param name="isMaster"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
         public static Registrant AddRegistrant(this Account account, int loggedInUserId, RegistrantType registrantType, bool isMaster, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1277,12 +1359,28 @@ namespace AfterSchoolLibrary
             adminPassword = adminPassword.IfBlank("aDm1n1906");
             accountName = accountName.IfBlank("AfterSchool Admin");
 
-            if (WebUser.LoadByEmail(adminEmail, dc: dc) != null)
+            if (WebUser.LoadByEmail(adminEmail, msgs, dc) != null)
                 throw new Exception("User with the same email address already exists.");
 
-            var wu = WebUserService.CreateNew("admin", "user", adminEmail, adminPassword, true, true, true, null, msgs, dc);
+            var user = WebUserService.CreateNew("Admin", "User", adminEmail, adminPassword, true, true, true, null, msgs, dc);
+            var account = user.AddNewAccount(accountName, null, true, AccountType.AfterSchool, null, null, true, user, msgs, dc);
 
-            wu.AddNewAccount(accountName, null, true, AccountType.AfterSchool, null, null, true, wu, msgs, dc);
+            return msgs;
+        }
+
+        public static SystemMessages CreateSampleAccount(AccountType accountType, int packageId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var email = "sample@afterschoolhq.com";
+            var firstName = "Sample";
+            var lastName = "User";
+            var password = "the best sample account ever";
+
+            if (WebUser.LoadByEmail(email, msgs, dc) != null)
+                throw new Exception("User with the same email address already exists.");
+
+            var user = WebUserService.CreateNew(firstName, lastName, email, password, true, true, true, null, msgs, dc);
+            var account = user.AddNewAccount("Sample Account", "317-899-9189", true, accountType, packageId, BillingPeriodType.Month, true, user, msgs, dc);
 
             return msgs;
         }

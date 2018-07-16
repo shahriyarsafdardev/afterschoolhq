@@ -300,17 +300,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
+
                     var selectedPackageArr = selectedpackage.Split('_');
                     var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
 
-                    package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), dc: adc);
+                    package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
                     amsgs.AddRange(a.AddCreditCard(name, number, expmonth, expyear, cvc, true, adc));
                     if (amsgs.HasNoErrors())
-                    {
-                        a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, dc: adc);
-                    }
-                    SessionVariables.AccountPackage = a.GetActiveAccountPackage(adc);
+                        a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+
+                    SessionVariables.AccountPackage = a.GetActiveAccountPackage(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => {
                     msgs.AddRange(smsgs);
@@ -477,10 +477,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     RestClient rc = new RestClient("https://connect.stripe.com/oauth/token");
                     rc.RequestMethod = RestClientRequestMethod.POST;
-                    rc.Parameters.Add("client_secret", AfterSchoolLibrary.StripeHelper.SecretKey);
+                    rc.Parameters.Add("client_secret", AfterSchoolLibrary.Billing.StripeHelper.SecretKey);
                     rc.Parameters.Add("code", code);
                     rc.Parameters.Add("grant_type", "authorization_code");
-                    rc.Parameters.Add("client_id", AfterSchoolLibrary.StripeHelper.PlatformClientId);
+                    rc.Parameters.Add("client_id", AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId);
                     rc.ContentType = RestClientContentTypeEnum.URLEncoded;
                     string responseFromServer = rc.DoRequest();
 

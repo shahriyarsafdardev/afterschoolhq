@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace AfterSchool
@@ -78,9 +74,44 @@ namespace AfterSchool
                 new { controller = "db", action = "index", id = UrlParameter.Optional });
 
             routes.MapRoute(
-                "OrgPage",
-                "{id}/{activity}",
-                new { controller = "reg", action = "org", id = UrlParameter.Optional, activity = UrlParameter.Optional });
+                "RegistrantAccount",
+                "account/{action}/{id}",
+                new { controller = "account", action = "getstarted", id = UrlParameter.Optional },
+                new string[] { "AfterSchool.Controllers" });
+
+            routes.MapRoute(
+                "ActivityRegister",
+                "{accountname}/{activitytype}/{activityname}/register",
+                new
+                {
+                    controller = "r",
+                    action = "register",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
+                "AccountHome",
+                "{accountname}",
+                new { controller = "r", action = "account", accountname = UrlParameter.Optional });
+
+            routes.MapRoute(
+                "ActivityHome",
+                "{accountname}/{activitytype}/{activityname}",
+                new
+                {
+                    controller = "r",
+                    action = "activity",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
+                "AccountBrowse",
+                "{id}/browse",
+                new { controller = "r", action = "browse", id = UrlParameter.Optional });
 
             routes.MapRoute(
                 "Standard",

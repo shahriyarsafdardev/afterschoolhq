@@ -770,42 +770,67 @@ namespace AfterSchoolLibrary
             var account = Account.Load(this.AccountId.Value, dc: dc);
             if (account.IsNotEmpty())
             {
-                Stripe.StripeChargeCreateOptions options = new Stripe.StripeChargeCreateOptions();
-                options.Amount = (costPerRegistrant * totalSeats * 100).ToInteger();
-                options.Currency = "usd";
-                options.Description = $"{account.Name} Registration for {registrant.Name}";
+                var sh = new Billing.StripeHelper();
+                var charge = sh.CreateChargeWithSource(
+                    totalAmount: costPerRegistrant * totalSeats,
+                    description: $"{account.Name} Registration for {registrant.Name}",
+                    destinationAccount: account,
+                    sourceCard: new Stripe.SourceCard()
+                    {
+                        Name = ccname,
+                        Number = ccnumber,
+                        Cvc = cccvc,
+                        ExpirationMonth = ccexpmonth.ToInteger(),
+                        ExpirationYear = ccexpyear.ToInteger(),
+                    },
+                    statementDescriptor: $"Reg: {account.Name} - {registrant.Name}".MaxChars(22),
+                    msgs: msgs);
 
-                options.Destination = account.StripeUserId;
-
-                options.SourceCard = new Stripe.SourceCard();
-                options.SourceCard.Name = ccname;
-                options.SourceCard.Number = ccnumber;
-                options.SourceCard.Cvc = cccvc;
-                options.SourceCard.ExpirationMonth = ccexpmonth.ToInteger();
-                options.SourceCard.ExpirationYear = ccexpyear.ToInteger();
-
-                options.StatementDescriptor = $"Reg: {account.Name} - {registrant.Name}";
-
-                try
+                if (msgs.HasNoErrors())
                 {
-                    var service = new Stripe.StripeChargeService(AfterSchoolLibrary.StripeHelper.SecretKey);
-                    var charge = service.Create(options);
-
                     this.StripeChargeId = charge.Id;
                     this.DatePaid = DateTime.UtcNow;
                     this.AmountPaid = costPerRegistrant;
                     this.PaymentTypeId = PaymentType.CreditCard;
                     msgs.AddRange(this.Save(dc: dc));
+                }
 
-                }
-                catch (Stripe.StripeException ex)
-                {
-                    msgs.Add(ex.Message, MessageType.Error, ex);
-                }
-                catch (Exception ex)
-                {
-                    msgs.Add("Error charging credit card", MessageType.Error, ex);
-                }
+                //Stripe.StripeChargeCreateOptions options = new Stripe.StripeChargeCreateOptions();
+                //options.Amount = (costPerRegistrant * totalSeats * 100).ToInteger();
+                //options.Currency = "usd";
+                //options.Description = $"{account.Name} Registration for {registrant.Name}";
+
+                //options.Destination = account.StripeUserId;
+
+                //options.SourceCard = new Stripe.SourceCard();
+                //options.SourceCard.Name = ccname;
+                //options.SourceCard.Number = ccnumber;
+                //options.SourceCard.Cvc = cccvc;
+                //options.SourceCard.ExpirationMonth = ccexpmonth.ToInteger();
+                //options.SourceCard.ExpirationYear = ccexpyear.ToInteger();
+
+                //options.StatementDescriptor = $"Reg: {account.Name} - {registrant.Name}";
+
+                //try
+                //{
+                //    var service = new Stripe.StripeChargeService(Billing.StripeHelper.SecretKey);
+                //    var charge = service.Create(options);
+
+                //    this.StripeChargeId = charge.Id;
+                //    this.DatePaid = DateTime.UtcNow;
+                //    this.AmountPaid = costPerRegistrant;
+                //    this.PaymentTypeId = PaymentType.CreditCard;
+                //    msgs.AddRange(this.Save(dc: dc));
+
+                //}
+                //catch (Stripe.StripeException ex)
+                //{
+                //    msgs.Add(ex.Message, MessageType.Error, ex);
+                //}
+                //catch (Exception ex)
+                //{
+                //    msgs.Add("Error charging credit card", MessageType.Error, ex);
+                //}
 
             }
             return msgs;

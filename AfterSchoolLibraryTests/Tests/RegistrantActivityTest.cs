@@ -121,7 +121,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc);
 
             int registrationPeriodID = registrationPeriod.ID.Value;
             int numberOfSeats = 12;
@@ -144,7 +144,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
-            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(msgs, dc);
+            var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc);
 
             int registrationPeriodID = registrationPeriod.ID.Value;
             int numberOfSeats = 12;
