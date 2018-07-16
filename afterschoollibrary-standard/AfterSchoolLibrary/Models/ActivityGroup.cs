@@ -513,16 +513,6 @@ namespace AfterSchoolLibrary
             return this.GetActivities(false, false, null, null, false, dc: dc).Sum(x => x.SeatsAvailable.Value) - this.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved, dc: dc);
         }
 
-        private ActivitySchedule _Schedule = null;
-        public ActivitySchedule GetSchedule(bool reload = false, DatabaseConnection dc = null)
-        {
-            if (this.ActivityScheduleId.HasValue && (reload || _Schedule.IsEmpty()))
-            {
-                _Schedule = ActivitySchedule.LoadWithInstances(this.ActivityScheduleId.Value, dc: dc);
-            }
-            return _Schedule;
-        }
-
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
             return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, activityGroupId: this.ID.Value, dc: dc);
