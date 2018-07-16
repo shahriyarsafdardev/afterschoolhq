@@ -382,6 +382,175 @@ namespace AfterSchool.Areas.District.Controllers
             return View(visitorAccounts);
         }
 
+        [HttpGet]
+        public ActionResult EditSetup(string id, string group)
+        {
+            var activity = new Activity();
+            var isLeader = true;
+            var activePeriod = new RegistrationPeriod();
+            ActivityGroup activityGroup = null;
+
+            if (id.IsNumber() && id.ToInteger() > 0)
+            {
+                activity = Activity.Load(id.ToInteger());
+                activePeriod = activity.GetActiveRegistrationPeriod();
+                activityGroup = activity.GetActivityGroup();
+            }
+            else
+            {
+                activity = SessionVariables.CurrentAccount.GetDefaultNewActivity();
+
+                //this means a new activity is not being added to an existing enrollment group
+                if (!group.IsGuid())
+                {
+                    activePeriod = SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+                }
+                else
+                {
+                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
+                }
+            }
+
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsActivityLeader = isLeader;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActiveMenu = "EditSetup";
+            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
+            ViewBag.ActiveForm = activity.GetActiveActivityForm();
+            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
+            ViewBag.ActivePeriod = activePeriod;
+            ViewBag.Group = activityGroup;
+
+            return View(activity);
+        }
+
+        [HttpPost]
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
+        {
+            var msgs = new SystemMessages();
+            Activity activity = null;
+            ActivityGroup activityGroup = null;
+
+            var values = new NameValueCollection()
+            {
+                { "name", name },
+                { "seatsavailable", seatsavailable },
+                { "waitinglistseats", waitinglistseats },
+                { "registrationperiod", registrationperiod },
+                { "registrationopendate", registrationopendate },
+                { "registrationopentime", registrationopentime },
+                { "registrationclosedate", registrationclosedate },
+                { "registrationclosetime", registrationclosetime },
+                { "timezone", timezone },
+                { "form", form },
+                { "regmode", regmode },
+                { "group", group }
+            };
+
+            if (id.IsNumber() && id.ToInteger() > 0)
+            {
+                activity = Activity.EditExisting(
+                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    account: SessionVariables.CurrentAccount,
+                    activityId: id,
+                    values: values,
+                    msgs: msgs
+                );
+                activityGroup = activity.GetActivityGroup();
+            }
+            else
+            {
+                //create initial form for account
+                if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
+                {
+                    var defaultForm = SessionVariables.CurrentAccount.GetDefaultForm();
+                    var newForm = defaultForm.Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
+                    if (msgs.HasNoErrors())
+                    {
+                        newForm.Name = (name + " form").MaxChars(100, "...");
+                        msgs.AddRange(newForm.Save());
+                        values.Add("form", newForm.ID.Value.ToString());
+                        //activity.AddFormAndActivitate(newForm, SessionVariables.LoggedInUser.ID.Value, false, msgs);
+                    }
+                }
+
+                activity = Activity.CreateNew(
+                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    account: SessionVariables.CurrentAccount,
+                    values: values,
+                    msgs: msgs
+                );
+
+                if (msgs.HasNoErrors())
+                {
+                    UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
+                }
+            }
+
+            if (group.IsGuid())
+            {
+                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
+            }
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
+            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
+            ViewBag.Group = activityGroup;
+            ViewBag.ActivePeriod = activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+            ViewBag.ActiveForm = activity.GetActiveActivityForm();
+
+            if (msgs.HasNoErrors())
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "next":
+                        ViewBag.ActiveMenu = "EditRestrictions";
+                        return View("EditRestrictions", activity);
+                }
+            }
+
+            ViewBag.ActiveMenu = "EditSetup";
+            return View(activity);
+        }
+
+        // GET: User
+        [HttpGet]
+        public ActionResult Teams(string pn, string rpp)
+        {
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            int userCount = SessionVariables.CurrentAccount.GetUserCount();
+            var teams = SessionVariables.CurrentAccount.GetActivities(UserType.ActivityLeader, WebUser.Load(SessionVariables.CurrentAccount.OwnerId.Value), null, null, null, null,null);
+            var totalPages = Math.Ceiling(userCount.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = userCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
+            return View(teams);
+        }
+
         [ValidateInput(false)]
         [HttpGet]
         public ActionResult Edit(string id)
