@@ -14,16 +14,19 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var accountId = 1;
-            var account = Account.Load(accountId, msgs, dc);
-            var formCount = Form.GetCount(new Hashtable() { { "AccountId", accountId } }, msgs, dc);
+            var account = AccountService.GetAfterSchoolAccount(msgs, dc);
+            var formCount = Form.GetCount(new Hashtable() { { "AccountId", account.ID } }, msgs, dc);
 
-            var f = new Form();
-            f.AccountId = accountId;
-            f.LastModifiedDate = f.CreateDate = DateTime.UtcNow;
-            f.LastModifiedBy = f.CreatedBy = 0;
-            f.Name = $"Default Form {(formCount + 1)}";
-            f.IsActive = true;
+            var f = new Form
+            {
+                AccountId = account.ID,
+                LastModifiedDate = DateTime.UtcNow,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedBy = 0,
+                CreatedBy = 0,
+                Name = $"Default Form {(formCount + 1)}",
+                IsActive = true
+            };
             msgs.AddRange(f.Save(dc));
 
             msgs.AddRange(account.SetDefaultForm(f, null, dc));

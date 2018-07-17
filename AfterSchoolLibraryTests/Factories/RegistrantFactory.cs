@@ -23,5 +23,17 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+        public static Registrant Create(WebUser user, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Registrant() { Email = "test@test.com", WebUserId = user.ID };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+        public static Registrant Create(WebUser user, bool isMaster, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Registrant() { Email = "test@test.com", WebUserId = user.ID, IsMaster = isMaster };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
     }
 }

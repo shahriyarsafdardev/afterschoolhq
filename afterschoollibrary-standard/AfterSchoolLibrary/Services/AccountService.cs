@@ -1356,14 +1356,37 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             adminEmail = adminEmail.IfBlank("darye@reborncode.com");
-            adminPassword = adminPassword.IfBlank("aDm1n1906");
+            adminPassword = adminPassword.IfBlank("aDm1n1906");            
             accountName = accountName.IfBlank("AfterSchool Admin");
+            adminPhone = adminPhone.IfBlank("317-316-0596");
 
             if (WebUser.LoadByEmail(adminEmail, msgs, dc) != null)
                 throw new Exception("User with the same email address already exists.");
 
-            var user = WebUserService.CreateNew("Admin", "User", adminEmail, adminPhone, adminPassword, true, true, true, null, msgs, dc);
-            var account = user.AddNewAccount(accountName, null, true, AccountType.AfterSchool, null, null, true, user, msgs, dc);
+            var user = WebUserService.CreateNew(
+                firstName: "Admin", 
+                lastName: "User", 
+                email: adminEmail, 
+                phone: adminPhone, 
+                password: adminPassword, 
+                isActive: true, 
+                isRegistered: true, 
+                isVerified: true, 
+                loggedInUser: null, 
+                msgs: msgs, 
+                dc: dc);
+
+            var account = user.AddNewAccount(
+                orgName: accountName,
+                phone: null,
+                isActive: true,
+                accountType: AccountType.AfterSchool,
+                packageId: null,
+                packageBillingPeriod: null,
+                isAfterSchool: true,
+                loggedInUser: user, 
+                msgs: msgs, 
+                dc: dc);
 
             return msgs;
         }
@@ -1392,6 +1415,11 @@ namespace AfterSchoolLibrary
             account.LastModifiedBy = loggedInUserId;
             account.LastModifiedDate = DateTime.UtcNow;
             return account.Save(dc);
+        }
+
+        public static Account GetAfterSchoolAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {            
+            return Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).FirstOrDefault();
         }
 
     }

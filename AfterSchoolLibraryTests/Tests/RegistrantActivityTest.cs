@@ -268,14 +268,14 @@ namespace AfterSchoolLibraryTests
         public void CancelRegistrationTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-            var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc: dc);
-            var registrationActivity = Factories.RegistrationActivityFactory.Create(activity, registration, msgs, dc: dc);
+            var account = Factories.AccountFactory.Create(user, msgs, dc);
+            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
+            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
+            var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
+            var registrationActivity = Factories.RegistrationActivityFactory.Create(activity, registration, msgs, dc);
 
-            Assert.True(registrantActivity.CancelRegistration(dc: dc).HasNoErrors());
+            Assert.True(registrantActivity.CancelRegistration(msgs, dc).HasNoErrors());
         }
 
 

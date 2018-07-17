@@ -1269,7 +1269,7 @@ namespace AfterSchoolLibrary
                         msgs.Add(string.Format("Total Available Seats is required and must be less than or equal to {0}", maxParticipants), MessageType.UserError);
 
                 }
-                if (registrationperiod.ToString().ToInteger() > 0 && group.IsEmpty())
+                if (group.IsEmpty() && registrationperiod.ToString().ToInteger() > 0)
                 {
                     if (!$"{registrationopendate} {registrationopentime}".IsDateTime())
                         msgs.Add("Registration Open Date & Time is required", MessageType.UserError);
@@ -1339,7 +1339,7 @@ namespace AfterSchoolLibrary
                 activity.WaitingListSeats = waitinglistseats.ToString().ToInteger();
                 activity.AccountId = account.ID;
 
-                if (!form.IsNumber() && group.IsEmpty())
+                if (group.IsEmpty() && !form.IsNumber())
                 {
                     msgs.Add("Registration Form is required", MessageType.UserError);
                 }

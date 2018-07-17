@@ -721,7 +721,10 @@ namespace AfterSchoolLibrary
 
         public RegistrationActivity GetRegistrationActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrationActivity.LoadByActivityIdByRegistrationId(this.ActivityId.Value, this.RegistrationId.Value, msgs, dc);
+            if (this.RegistrationId.HasValue && this.ActivityId.HasValue)
+                return RegistrationActivity.LoadByActivityIdByRegistrationId(this.ActivityId.Value, this.RegistrationId.Value, msgs, dc);
+
+            return null;
         }
 
         public SystemMessages DeleteRegistrationActivity(DatabaseConnection dc = null)
@@ -948,14 +951,11 @@ namespace AfterSchoolLibrary
             // UPDATE: No longer the same day because registration is now according to a schedule, not a day
             // I think they need to be in the same registration period if it exists   
             // TODO: Review if I need to check the same registration period, probably more related to the activity group if anything?
-
-            if (registrant.IsEmpty())
-                registrant = this.ToRegistrant();
-
+            
             var msgs = new SystemMessages();
 
             var otherPeoplesActivities = RegistrantActivity.LoadByActivityId(this.ActivityId.Value, dc: dc)
-                .Where(x => x.RegistrantId != registrant.ID)
+                .Where(registrantActivity => registrantActivity.RegistrantId != this.RegistrantId)
                 .ToList();
 
             AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Reserved, -1, dc: dc);

@@ -216,14 +216,14 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = user.ID,
                 LastModifiedBy = user.ID
             };
-            msgs.AddRange(registrant.Save(dc: dc));
+            msgs.AddRange(registrant.Save(dc));
 
             return registrant;
         }
 
-        public static List<Registrant> GetRegistrants(this WebUser user, DatabaseConnection dc = null)
+        public static List<Registrant> GetRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByWebUserIdByIsMaster(user.ID.Value, true, dc: dc);
+            return Registrant.LoadByWebUserIdByIsMaster(user.ID.Value, true, msgs, dc);
         }
 
         public static string GetInviteUrl(this WebUser user, Account account)
