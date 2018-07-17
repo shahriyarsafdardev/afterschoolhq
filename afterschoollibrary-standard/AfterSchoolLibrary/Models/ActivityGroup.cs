@@ -1110,6 +1110,18 @@ namespace AfterSchoolLibrary
             return _Schedule;
         }
 
+        /// <summary>
+        /// Convert to the universal participation object, something a registrant participates in once registered
+        /// </summary>
+        /// <param name="activityGroup"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public ParticipationObject ToParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ParticipationObject(this, msgs, dc);
+        }
+
         #endregion
     }
 }

@@ -203,6 +203,31 @@ namespace AfterSchoolLibrary
             return _Activity;
         }
 
+        [NonSerialized]
+        private ActivityGroup _ActivityGroup = null;
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (_ActivityGroup.IsEmpty())
+                _ActivityGroup = ActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
+
+            return _ActivityGroup;
+        }
+
+        [NonSerialized]
+        private ParticipationObject _ParticipationObject = null;
+        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (_ParticipationObject.IsEmpty())
+            {
+                if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                    _ParticipationObject = this.GetActivity(msgs, dc).ToParticipationObject(msgs, dc);
+                else if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
+                    _ParticipationObject = this.GetActivityGroup(msgs, dc).ToParticipationObject(msgs, dc);
+            }
+
+            return _ParticipationObject;
+        }
+
         #endregion
     }
 }

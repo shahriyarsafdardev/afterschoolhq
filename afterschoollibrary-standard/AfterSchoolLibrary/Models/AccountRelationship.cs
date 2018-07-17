@@ -28,6 +28,7 @@ namespace AfterSchoolLibrary
 		public int? VisitorAccountId { get { return (int?)MDV["VisitorAccountId"].Value; } set { MDV["VisitorAccountId"].Value = value; } }
 		public HostPermissionType HostPermissionTypeId { get { return (HostPermissionType)MDV["HostPermissionTypeId"].Value; } set { MDV["HostPermissionTypeId"].Value = value; } }
 		public ApprovalStatus ApprovalStatusId { get { return (ApprovalStatus)MDV["ApprovalStatusId"].Value; } set { MDV["ApprovalStatusId"].Value = value; } }
+		public AccountType AccountAccountTypeId { get { return (AccountType)MDV["AccountAccountTypeId"].Value; } }
 		
 
         public AccountRelationship()
@@ -50,6 +51,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "VisitorAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "HostPermissionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ApprovalStatusId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountAccountTypeId", typeof(Account).Name, "AccountTypeId", System.Data.SqlDbType.Int, "Account");
 				
                 return _dp;
             }
@@ -67,6 +69,7 @@ namespace AfterSchoolLibrary
             get
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(AccountRelationship).Name);
+				dq.Joins.Add(Account.ObjectMap["ID"], AccountRelationship.ObjectMap["VisitorAccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
 				
                 return dq;
             }
@@ -220,31 +223,43 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public static List<AccountRelationship> LoadByRequested(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountRelationship> LoadByRequested(int HostAccountId, AccountType accountType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
             dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Requested);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<AccountRelationship> LoadByApproved(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountRelationship> LoadByApproved(int HostAccountId, AccountType accountType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
             dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Approved);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<AccountRelationship> LoadByDenied(int HostAccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountRelationship> LoadByDenied(int HostAccountId, AccountType accountType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
             dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Denied);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<AccountRelationship> LoadByHostAccountIdByAccountType(int HostAccountId, AccountType accountType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         #endregion

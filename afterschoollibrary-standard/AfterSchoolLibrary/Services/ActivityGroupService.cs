@@ -78,18 +78,6 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
         }
-        
-        /// <summary>
-        /// Convert to the universal participation object, something a registrant participates in once registered
-        /// </summary>
-        /// <param name="activityGroup"></param>
-        /// <param name="msgs"></param>
-        /// <param name="dc"></param>
-        /// <returns></returns>
-        public static ParticipationObject ToParticipationObject(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return new ParticipationObject(activityGroup, msgs, dc);
-        }
 
         public static List<PaymentPlan> GetPaymentPlans(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

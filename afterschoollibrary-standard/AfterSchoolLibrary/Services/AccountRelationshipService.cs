@@ -8,14 +8,14 @@ namespace AfterSchoolLibrary.Services
 {
     public static class AccountRelationshipService
     {
-        public static Account GetHostAccount(this AccountRelationship ar, DatabaseConnection dc = null)
+        public static Account GetHostAccount(this AccountRelationship ar, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(ar.HostAccountId.Value, dc: dc);
+            return Account.Load(ar.HostAccountId.Value, msgs, dc);
         }
 
-        public static Account GetVisitorAccount(this AccountRelationship ar, DatabaseConnection dc = null)
+        public static Account GetVisitorAccount(this AccountRelationship ar, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(ar.VisitorAccountId.Value, dc: dc);
+            return Account.Load(ar.VisitorAccountId.Value, msgs, dc);
         }
 
         public static AccountRelationship CreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

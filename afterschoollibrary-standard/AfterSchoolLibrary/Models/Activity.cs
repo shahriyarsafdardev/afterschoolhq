@@ -1223,6 +1223,7 @@ namespace AfterSchoolLibrary
             var city = values.GetValueOrDefault("city");
             var state = values.GetValueOrDefault("state");
             var postalcode = values.GetValueOrDefault("postalcode");
+            var ismylocation = values.GetValueOrDefault("mylocation");
             var cost = values.GetValueOrDefault("cost");
             var costdescription = values.GetValueOrDefault("costdescription");
             var acceptpaypal = values.GetValueOrDefault("acceptpaypal");
@@ -1268,7 +1269,7 @@ namespace AfterSchoolLibrary
                         msgs.Add(string.Format("Total Available Seats is required and must be less than or equal to {0}", maxParticipants), MessageType.UserError);
 
                 }
-                if (registrationperiod.ToString().ToInteger() > 0 && group.IsEmpty())
+                if (group.IsEmpty() && registrationperiod.ToString().ToInteger() > 0)
                 {
                     if (!$"{registrationopendate} {registrationopentime}".IsDateTime())
                         msgs.Add("Registration Open Date & Time is required", MessageType.UserError);
@@ -1338,7 +1339,7 @@ namespace AfterSchoolLibrary
                 activity.WaitingListSeats = waitinglistseats.ToString().ToInteger();
                 activity.AccountId = account.ID;
 
-                if (!form.IsNumber() && group.IsEmpty())
+                if (group.IsEmpty() && !form.IsNumber())
                 {
                     msgs.Add("Registration Form is required", MessageType.UserError);
                 }
@@ -1523,6 +1524,8 @@ namespace AfterSchoolLibrary
                         //setup location
                         if (amsgs.HasNoErrors() && (location.IsNotEmpty() || locationname.IsNotEmpty()))
                         {
+                            var hostAccountId = ismylocation.IfEmpty("").ToBoolean() ? account.ID : new int?();
+
                             amsgs.AddRange(activity.SetupLocation(
                                 location.IfEmpty(""),
                                 locationname.IfEmpty(""),
@@ -1532,10 +1535,13 @@ namespace AfterSchoolLibrary
                                 state.IfEmpty(""),
                                 postalcode.IfEmpty(""),
                                 locationdetails.IfEmpty(""),
+                                hostAccountId,
                                 loggedInUserId,
-                                amsgs,
                                 adc
                                 ));
+
+                            if (!account.DefaultLocationId.HasValue)
+                                msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
                         }
                                               
                     },
@@ -1595,8 +1601,10 @@ namespace AfterSchoolLibrary
         }
         
 
-        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, int? hostaccountid, int loggedInUserId, DatabaseConnection dc = null)
         {
+            var msgs = new SystemMessages();
+
             // just switching locations
             if (location.IsNumber())
             {
@@ -1618,6 +1626,7 @@ namespace AfterSchoolLibrary
 
                 if (!doesExist)
                 {
+
                     var activityLocation = new Location()
                     {
                         CreateDate = DateTime.UtcNow,
@@ -1629,7 +1638,8 @@ namespace AfterSchoolLibrary
                         City = city,
                         State = state,
                         PostalCode = postalcode.MaxChars(5),
-                        Name = locationname
+                        Name = locationname,
+                        HostAccountId = hostaccountid,
                     };
                     msgs.AddRange(activityLocation.Save(dc));
 

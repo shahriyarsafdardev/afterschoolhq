@@ -102,6 +102,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             firstName: firstname, 
                             lastName: lastname, 
                             email: email, 
+                            phone: null,
                             password: null,
                             isActive: false, 
                             isRegistered: false,

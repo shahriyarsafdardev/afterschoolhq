@@ -3,22 +3,27 @@ using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary;
 using BasicLibrary;
+using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests.Tests
 {
     public class LocationTest : BaseTest
     {
+        private WebUser AccountOwner { get; set; }
+        private Account HostAccount { get; set; }
+
         public LocationTest(ITestOutputHelper output) : base(output)
         {
-
+            AccountOwner = WebUserFactory.Create(msgs, dc);
+            HostAccount = AccountFactory.Create(AccountOwner, msgs, dc);
         }
 
         [Fact]
         public void LoadTest()
         {
-            var package = Factories.PackageFactory.Create(msgs, dc);
+            var location = LocationFactory.Create(HostAccount, msgs, dc);
 
-            Assert.True(Package.Load(package.ID.Value, msgs, dc).IsNotEmpty());
+            Assert.True(Location.Load(location.ID.Value, msgs, dc).IsNotEmpty());
         }
 
         [Theory]
@@ -28,12 +33,12 @@ namespace AfterSchoolLibraryTests.Tests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var package = Factories.PackageFactory.Create(msgs, dc);
+                var location = LocationFactory.Create(HostAccount, msgs, dc);
             }
 
             Assert.Equal(
                 Math.Min(numberPerPage, numberToCreate),
-                Package.Load(null, 0, numberPerPage, msgs, dc).Count
+                Location.Load(null, 0, numberPerPage, msgs, dc).Count
             );
         }
 
@@ -44,37 +49,39 @@ namespace AfterSchoolLibraryTests.Tests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var package = Factories.PackageFactory.Create(msgs, dc);
+                var location = LocationFactory.Create(HostAccount, msgs, dc);
             }
 
-            Assert.Equal(numberToCreate, Package.GetCount(msgs: msgs, dc: dc));
+            Assert.Equal(numberToCreate, Location.GetCount(msgs: msgs, dc: dc));
         }
 
         [Fact]
         public void SaveTest()
         {
-            var package = Factories.PackageFactory.Create(msgs, dc);
+            var location = LocationFactory.Create(HostAccount, msgs, dc);
 
-            package.LastModifiedBy = 1;
-            msgs.AddRange(package.Save(dc));
+            location.LastModifiedBy = 1;
+            msgs.AddRange(location.Save(dc));
 
             Assert.True(msgs.HasNoErrors());
         }
+
         [Fact]
         public void DeleteTest()
         {
-            var package = Factories.PackageFactory.Create(msgs, dc);
+            var location = LocationFactory.Create(HostAccount, msgs, dc);
 
-            msgs.AddRange(package.Delete(dc));
+            msgs.AddRange(location.Delete(dc));
 
-            Assert.Equal(0, Package.GetCount(msgs: msgs, dc: dc));
+            Assert.Equal(0, Location.GetCount(msgs: msgs, dc: dc));
         }
+
         [Fact]
         public void ReloadTest()
         {
-            var package = Factories.PackageFactory.Create(msgs, dc);
+            var location = LocationFactory.Create(HostAccount, msgs, dc);
 
-            Assert.Equal(package.ID, package.Reload(msgs, dc).ID);
+            Assert.Equal(location.ID, location.Reload(msgs, dc).ID);
         }
     }
 }

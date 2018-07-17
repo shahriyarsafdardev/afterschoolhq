@@ -43,6 +43,9 @@ namespace AfterSchoolLibrary
 		public string LogoUrl { get { return (string)MDV["LogoUrl"].Value; } set { MDV["LogoUrl"].Value = value; } }
 		public string LandingPageText { get { return (string)MDV["LandingPageText"].Value; } set { MDV["LandingPageText"].Value = value; } }
 		public AccountType AccountTypeId { get { return (AccountType)MDV["AccountTypeId"].Value; } set { MDV["AccountTypeId"].Value = value; } }
+		public int? DefaultLocationId { get { return (int?)MDV["DefaultLocationId"].Value; } set { MDV["DefaultLocationId"].Value = value; } }
+		public int? MinGradeLevelOffered { get { return (int?)MDV["MinGradeLevelOffered"].Value; } set { MDV["MinGradeLevelOffered"].Value = value; } }
+		public int? MaxGradeLevelOffered { get { return (int?)MDV["MaxGradeLevelOffered"].Value; } set { MDV["MaxGradeLevelOffered"].Value = value; } }
 		
 
         public Account()
@@ -83,6 +86,9 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "LogoUrl", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "LandingPageText", System.Data.SqlDbType.NVarChar, 4000);
 				_dp.Add(className, "AccountTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "DefaultLocationId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "MinGradeLevelOffered", System.Data.SqlDbType.Int);
+				_dp.Add(className, "MaxGradeLevelOffered", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -236,6 +242,18 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AccountTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["DefaultLocationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MinGradeLevelOffered"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MaxGradeLevelOffered"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

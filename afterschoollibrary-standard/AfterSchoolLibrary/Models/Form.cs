@@ -190,7 +190,9 @@ namespace AfterSchoolLibrary
         /// <returns></returns>
         public static Form GetOrCreateAfterSchoolAccountTemplateForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Form.GetLatestTemplateForm(accountId: 1, msgs: msgs, dc: dc) ?? Services.FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
+            var account = AccountService.GetAfterSchoolAccount(msgs, dc);
+            return Form.GetLatestTemplateForm(accountId: account.ID.Value, msgs: msgs, dc: dc) ?? 
+                Services.FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
         }
 
         public static Form GetLatestTemplateForm(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)

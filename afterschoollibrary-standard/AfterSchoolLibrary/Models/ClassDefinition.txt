@@ -311,6 +311,9 @@ property: TimeZone, string, NVarChar(30)
 property: LogoUrl, string, NVarChar(400)
 property: LandingPageText, string, NVarChar(4000)
 property: AccountTypeId, AccountType, Int
+property: DefaultLocationId, int?, Int
+property: MinGradeLevelOffered, int?, Int
+property: MaxGradeLevelOffered, int?, Int
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
@@ -328,6 +331,8 @@ property: HostAccountId, int?, Int, required
 property: VisitorAccountId, int?, Int, required
 property: HostPermissionTypeId, HostPermissionType, Int
 property: ApprovalStatusId, ApprovalStatus, Int
+join: Account.ID, VisitorAccountId, InnerJoin
+joinproperty: Account.AccountTypeId, AccountType, Int
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|ApprovalStatusId, List<>
 loadmethod: VisitorAccountId, List<>
@@ -525,7 +530,7 @@ property: ParentRegistrantId, int?, Int
 property: IsMaster, bool, Bit
 property: IsContactOnly, bool, Bit
 property: FirstRegistrantId, int?, Int
-baseproperty: Email, required
+property: IsParentOrGuardian, bool, Bit
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId, List<>

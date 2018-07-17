@@ -269,13 +269,13 @@ namespace AfterSchoolLibrary
             Utilities.ReCaptchaPublicKey = "6Lfk694SAAAAAIrtt3Hwiz7j4emDRlYuLp73i9VY";
         }
 
-        public static SystemMessages InitDatabase(string adminEmail = null, string adminPassword = null, bool skipTableCreation = false, string accountName = "First Group")
+        public static SystemMessages InitDatabase(string adminEmail = null, string adminPassword = null, string adminPhone = null, bool skipTableCreation = false, string accountName = "First Group")
         {
             var msgs = new SystemMessages();
 
             if (!skipTableCreation)
             {
-                var dc2 = new BasicLibrary.DataAccess.DatabaseConnection(AfterSchoolLibrary.Utilities.ConnectionString);
+                var dc2 = new DatabaseConnection(Utilities.ConnectionString);
 
                 msgs.AddRange(Database.CreateTables(dc2));
                 msgs.AddRange(Database.AlterTables(dc2));
@@ -289,7 +289,7 @@ namespace AfterSchoolLibrary
 
             try
             {
-                msgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, accountName, dc));
+                msgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, dc));
             }
             catch (Exception ex)
             {
@@ -305,7 +305,8 @@ namespace AfterSchoolLibrary
 
             try
             {
-                msgs.AddRange(AdditionalData(dc: dc));
+                msgs.AddRange(AdditionalData(dc));
+
                 //msgs.AddRange(UpdateAccountFeatures(dc: dc));
                 //msgs.AddRange(UpdateLocations(dc: dc));
                 //msgs.AddRange(UpdateQuestionGroups(dc: dc));
@@ -397,9 +398,13 @@ namespace AfterSchoolLibrary
             msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
 
             var form = FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
-            var package = PackageService.CreateDefaultPackage(null, msgs, dc);
 
-            msgs.AddRange(AccountService.CreateSampleAccount(AccountType.School, package.ID.Value, dc));
+            var packageCount = Package.GetCount(null, msgs, dc);
+            if (packageCount == 0)
+            {
+                var package = PackageService.CreateDefaultPackage(null, msgs, dc);
+                msgs.AddRange(AccountService.CreateSampleAccount(AccountType.School, package.ID.Value, dc));
+            }
 
             return msgs;
         }
