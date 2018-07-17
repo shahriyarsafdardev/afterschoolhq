@@ -134,8 +134,8 @@ namespace AfterSchoolLibrary
         public static SystemMessages CreateDefaultGradeLevels(DatabaseConnection dc  = null)
         {
             var msgs = new SystemMessages();
-            var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);
-            if (gradeLevels.Count == 0)
+            var gradeLevelCount = GradeLevel.GetCount(msgs: msgs, dc: dc);
+            if (gradeLevelCount == 0)
             {
                 msgs.AddRange(new GradeLevel() { Name = "Pre-K", Abbreviation = "P" }.Save(dc: dc));
                 msgs.AddRange(new GradeLevel() { Name = "Kindergarten", Abbreviation = "K" }.Save(dc: dc));

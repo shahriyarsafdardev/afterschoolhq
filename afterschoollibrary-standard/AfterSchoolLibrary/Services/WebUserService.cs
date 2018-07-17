@@ -200,7 +200,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Registrant CreateRegistrant(this WebUser user, RegistrantType registrantType, bool isMaster, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant CreateRegistrant(this WebUser user, RegistrantType registrantType, bool isMaster, bool isContactOnly, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -208,7 +208,7 @@ namespace AfterSchoolLibrary.Services
             {
                 RegistrantTypeId = registrantType,
                 IsMaster = isMaster,
-                IsContactOnly = true,
+                IsContactOnly = isContactOnly,
                 WebUserId = user.ID,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
@@ -227,10 +227,10 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetInviteUrl(this WebUser user, Account account)
         {
-            return AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
+            return Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
-        public static WebUser CreateNew(string firstName, string lastName, string email, string password, bool isActive, bool isRegistered, bool isVerified, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser CreateNew(string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (firstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -243,6 +243,13 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Email must valid", MessageType.UserError);
             else if (WebUser.ExistsByEmail(email))
                 msgs.Add("Email is already in use by another user", MessageType.UserError);
+
+            if (phone.IsEmpty())
+                msgs.Add("Phone is required", MessageType.UserError);
+            else if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                msgs.Add("Phone must valid", MessageType.UserError);
+            else if (WebUser.ExistsByPhone(phone))
+                msgs.Add("Phone is already in use by another user", MessageType.UserError);
 
             if (password.IsNotEmpty() && password.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
@@ -286,12 +293,12 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Account AddNewRegistrantAccount(this WebUser accountOwner, string phone, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewRegistrantAccount(this WebUser accountOwner, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
                 orgName: accountOwner.DisplayName,
                 email: accountOwner.Email,
-                phone: phone,
+                phone: accountOwner.Phone,
                 isActive: isActive,
                 accountType: AccountType.Registrant,
                 accountOwner: accountOwner,
@@ -305,6 +312,11 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, dc));
 
             return account;
+        }
+
+        public static Account AddNewRegistrantAccount(this WebUser accountOwner, bool isActive, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AddNewRegistrantAccount(accountOwner, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
         }
 
         /// <summary>

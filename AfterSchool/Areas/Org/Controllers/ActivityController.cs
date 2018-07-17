@@ -603,7 +603,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string cmd)
+        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string mylocation, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -620,6 +620,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "city", city},
                     { "state", state},
                     { "postalcode", postalcode},
+                    { "mylocation", mylocation }
                 };
 
                 activity = Activity.EditExisting(

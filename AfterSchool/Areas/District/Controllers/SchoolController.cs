@@ -86,6 +86,7 @@ namespace AfterSchool.Areas.District.Controllers
                             firstName: firstname,
                             lastName: lastname,
                             email: email,
+                            phone: null,
                             password: null,
                             isActive: false,
                             isRegistered: false,

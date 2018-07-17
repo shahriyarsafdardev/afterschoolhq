@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Data;
 using System.Collections;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary
 {
-	/// <summary>
+    /// <summary>
     /// An activity that is kept in a cart for when a user is trying to register for activities.
     /// </summary>
-	[Serializable]
+    [Serializable]
     public class CartItem : BasicObjectWithModified
     {
 		#region "ClassGenerator"
@@ -187,11 +185,11 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         [NonSerialized]
         private Activity _Activity = null;
@@ -201,6 +199,31 @@ namespace AfterSchoolLibrary
                 _Activity = Activity.Load(this.ParticipationObjectId.Value, msgs, dc);
 
             return _Activity;
+        }
+
+        [NonSerialized]
+        private ActivityGroup _ActivityGroup = null;
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (_ActivityGroup.IsEmpty())
+                _ActivityGroup = ActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
+
+            return _ActivityGroup;
+        }
+
+        [NonSerialized]
+        private ParticipationObject _ParticipationObject = null;
+        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (_ParticipationObject.IsEmpty())
+            {
+                if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                    _ParticipationObject = this.GetActivity(msgs, dc).ToParticipationObject(msgs, dc);
+                else if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
+                    _ParticipationObject = this.GetActivityGroup(msgs, dc).ToParticipationObject(msgs, dc);
+            }
+
+            return _ParticipationObject;
         }
 
         #endregion

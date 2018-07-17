@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Get Started";
     var msgs = (SystemMessages)ViewBag.Messages;
+    var cart = (Cart)ViewBag.Cart;
 }
 
 <div>
@@ -20,13 +21,70 @@
                 <div>
                     <p>Already have an account? <a href="/login">Login</a></p>
                 </div>
+
                 <div>
                     <p>Enter your parent info below</p>
-                    <form class="form-horizontal" method="post" action="@Url.Action("getstarted2", "account")">
+                    <div>
+                        @foreach(var item in cart.GetCartItems())
+                        {
+                            <div>
+                                You are registering for: @item.GetParticipationObject().Name
+                            </div>
+                        }
+                    </div>
+                    <form class="form-horizontal" method="post" action="@Url.Action("addstudent", "account")">
                         @foreach(var qvm in Model)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+
+                            if (qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone)
+                            {
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox text-center">
+                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" checked="checked" />
+                                            <label for="allow-text">
+                                                I want to be notified if I've forgotten my child at school
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         }
+                        
+                        <div class="row">
+                            <label for="password1" class="control-label col-md-3">
+                                Password
+                            </label>
+                            <div class="col-md-6">
+                                <input type="password" class="form-control" id="password1" name="password1" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label for="password1" class="control-label col-md-3">
+                                Verify Password
+                            </label>
+                            <div class="col-md-6">
+                                <input type="password" class="form-control" id="password2" name="password2" />
+                            </div>
+                        </div>
+
+                        <div class="row padding-v-20">
+                            <div class="col-md-6 col-md-offset-3">
+                                <div class="am-checkbox text-center">
+                                    <input type="checkbox" id="agree" name="agree" value="1" />
+                                    <label for="agree">
+                                        I agree to the <a href="">terms and services</a> of using @UILabel.ProductName()
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="padding-v-20">
+                            <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                        </div>
+
                     </form>
                 </div>
             </div>

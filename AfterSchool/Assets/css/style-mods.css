@@ -381,6 +381,13 @@ a.white:hover{
     background-color: #ccc;
 }
 
+.btn-xl, .btn-group-xl > .btn {
+    padding: 12px 54px;
+    font-size: 16px;
+    line-height: 2;
+    border-radius: 0;
+}
+
 .badge-gray {
     background-color: #bcbcbc;
 }

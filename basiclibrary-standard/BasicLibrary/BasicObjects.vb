@@ -972,7 +972,7 @@ Public MustInherit Class BaseLocation
             If useLineBreaks Then
                 rtn &= vbCrLf
             Else
-                rtn &= " "
+                rtn &= ", "
             End If
         End If
 

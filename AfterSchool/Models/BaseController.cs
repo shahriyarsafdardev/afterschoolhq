@@ -148,7 +148,7 @@ namespace AfterSchool.Models
                         return RedirectToAction("index", "home", new { area = "org" });
                 }
 
-            return RedirectToAction("index", "login");
+            return RedirectToAction("index", "login", new { area = "" });
         }
 
         protected SystemMessages LoadSessionInfo(WebUser user, bool doRememberMe = false)

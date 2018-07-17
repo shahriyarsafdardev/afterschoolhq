@@ -311,6 +311,9 @@ property: TimeZone, string, NVarChar(30)
 property: LogoUrl, string, NVarChar(400)
 property: LandingPageText, string, NVarChar(4000)
 property: AccountTypeId, AccountType, Int
+property: DefaultLocationId, int?, Int
+property: MinGradeLevelOffered, int?, Int
+property: MaxGradeLevelOffered, int?, Int
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName

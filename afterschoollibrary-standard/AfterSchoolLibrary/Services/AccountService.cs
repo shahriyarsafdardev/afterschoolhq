@@ -1351,7 +1351,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages CreateAfterSchoolAccount(string adminEmail, string adminPassword, string accountName, DatabaseConnection dc = null)
+        public static SystemMessages CreateAfterSchoolAccount(string adminEmail, string adminPassword, string adminPhone, string accountName, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1362,7 +1362,7 @@ namespace AfterSchoolLibrary
             if (WebUser.LoadByEmail(adminEmail, msgs, dc) != null)
                 throw new Exception("User with the same email address already exists.");
 
-            var user = WebUserService.CreateNew("Admin", "User", adminEmail, adminPassword, true, true, true, null, msgs, dc);
+            var user = WebUserService.CreateNew("Admin", "User", adminEmail, adminPhone, adminPassword, true, true, true, null, msgs, dc);
             var account = user.AddNewAccount(accountName, null, true, AccountType.AfterSchool, null, null, true, user, msgs, dc);
 
             return msgs;
@@ -1372,6 +1372,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var email = "sample@afterschoolhq.com";
+            var phone = "(317) 316-0596";
             var firstName = "Sample";
             var lastName = "User";
             var password = "the best sample account ever";
@@ -1379,10 +1380,18 @@ namespace AfterSchoolLibrary
             if (WebUser.LoadByEmail(email, msgs, dc) != null)
                 throw new Exception("User with the same email address already exists.");
 
-            var user = WebUserService.CreateNew(firstName, lastName, email, password, true, true, true, null, msgs, dc);
+            var user = WebUserService.CreateNew(firstName, lastName, email, phone, password, true, true, true, null, msgs, dc);
             var account = user.AddNewAccount("Sample Account", "317-899-9189", true, accountType, packageId, BillingPeriodType.Month, true, user, msgs, dc);
 
             return msgs;
+        }
+
+        public static SystemMessages SetDefaultLocation(this Account account, int locationId, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            account.DefaultLocationId = account.ID.Value;
+            account.LastModifiedBy = loggedInUserId;
+            account.LastModifiedDate = DateTime.UtcNow;
+            return account.Save(dc);
         }
 
     }

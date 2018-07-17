@@ -15,6 +15,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var accountId = 1;
+            var account = Account.Load(accountId, msgs, dc);
             var formCount = Form.GetCount(new Hashtable() { { "AccountId", accountId } }, msgs, dc);
 
             var f = new Form();
@@ -24,6 +25,8 @@ namespace AfterSchoolLibrary.Services
             f.Name = $"Default Form {(formCount + 1)}";
             f.IsActive = true;
             msgs.AddRange(f.Save(dc));
+
+            msgs.AddRange(account.SetDefaultForm(f, null, dc));
 
             var questions = new List<QuestionHolder>();
             questions.AddRange(CreateStudentInformationGroup());
