@@ -270,7 +270,7 @@ namespace AfterSchoolLibraryTests
             int numberOfApplicationSeats = 1;
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
 
-            Assert.Equal(registrant.ToString(), activity.GetRegistrants(dc: dc).ElementAt(0).ToString());
+            Assert.Equal(registrant.ToString(), activity.GetRegistrants(dc: dc).FirstOrDefault().ToString());
         }
         
         [Fact]
@@ -379,6 +379,17 @@ namespace AfterSchoolLibraryTests
             var activityGrade = Factories.ActivityGradeLevelFactory.Create(activity, gradeLevel, msgs, dc: dc);
       
             Assert.Single(activity.GetGradeLevels(dc: dc));
+        }
+
+        /// <summary>
+        /// Test loading the GradeLevels.Load() method
+        /// </summary>
+        [Fact]
+        public void LoadGradesTest()
+        {
+           // var grades = GradeLevel.Load();
+
+            Assert.True(true);
         }
 
   

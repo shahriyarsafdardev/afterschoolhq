@@ -57,7 +57,7 @@
         </div>
         <div class="panel-body">
 
-            @*@{ Html.RenderPartial(
+            @{ Html.RenderPartial(
                        "~/Views/Shared/_Activities.cshtml",
                        activities,
                        new ViewDataDictionary() {
@@ -69,7 +69,7 @@
                             { "NeedToUpgrade", needToUpgrade },
                             { "HasArchivedActivities", hasArchivedActivities }
                            }
-                       ); }*@
+                       ); }
         </div>
     </div>
 </div>

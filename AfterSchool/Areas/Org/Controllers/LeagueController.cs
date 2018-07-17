@@ -7,6 +7,7 @@ using AfterSchool.Models;
 using BasicLibrary;
 using AfterSchoolLibrary;
 using System.Collections.Specialized;
+using Hangfire;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -96,6 +97,202 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.Actions = actions;
             ViewBag.Registrations = registrations;
+            return View(group);
+        }
+
+        public void PeriodViewBag(ActivityGroup group, SystemMessages msgs)
+        {
+            var defaultOpenDateTime = string.Format("{0} {1}", SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString(), "8:00 AM").ToDateTime();
+            var defaultCloseDateTime = string.Format("{0} {1}", SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString(), "12:00 AM").ToDateTime();
+
+            ViewBag.Periods = RegistrationPeriod.LoadByActivityGroupId(group.ID.Value).OrderBy(x => x.StartDateTime.Value).ToList();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.DefaultOpenDateTime = defaultOpenDateTime;
+            ViewBag.DefaultCloseDateTime = defaultCloseDateTime;
+            ViewBag.Messages = msgs;
+        }
+
+        /// <summary>
+        /// Controller for the " Reg Windows" view
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult Periods(string id)
+        {
+            var account = SessionVariables.CurrentAccount;
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            PeriodViewBag(group, new SystemMessages());
+            return View(group);
+        }
+
+        [HttpPost]
+        public ActionResult PeriodEdit(string id, string period, string opendate, string opentime, string closedate, string closetime)
+        {
+            var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var regperiod = new RegistrationPeriod();
+
+            if (period.IsInteger())
+            {
+                regperiod = RegistrationPeriod.Load(period.ToInteger());
+            }
+            else
+            {
+                regperiod.CreatedBy = SessionVariables.LoggedInUser.ID.Value;
+                regperiod.CreateDate = DateTime.UtcNow;
+                regperiod.ActivityGroupId = group.ID;
+                regperiod.AccountId = SessionVariables.CurrentAccount.ID;
+            }
+
+            regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
+            regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
+            regperiod.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            regperiod.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(regperiod.Save());
+
+            PeriodViewBag(group, msgs);
+
+            return View("periods", group);
+        }
+
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult PeriodNotify(string id, string period, string emailmessage)
+        {
+            var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var regperiod = RegistrationPeriod.Load(period.ToInteger());
+            var registrations = group.GetRegistrations(null, null, null);
+
+            BackgroundJob.Enqueue(() =>
+                RegistrationPeriod.NotifyRegistrants(
+                    regperiod.ID.Value,
+                    emailmessage,
+                    registrations.Select(x => x.ID.Value).ToList(),
+                    null)
+            );
+
+            msgs.Add("Your emails will be sent shortly", MessageType.Success);
+
+            PeriodViewBag(group, msgs);
+
+            return View("periods", group);
+        }
+
+
+        /// <summary>
+        ///  Controller for the "Students" registrations tab 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="pn"></param>
+        /// <param name="rpp"></param>
+        /// <param name="emailed"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult Registrations(string id, string pn, string rpp, string emailed)
+        {
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var registrations = new List<Registration>();
+            var msgs = new SystemMessages();
+
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+            {
+                pageNumber = pn.ToInteger();
+            }
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+            {
+                recordsPerPage = rpp.ToInteger();
+            }
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            var totalCount = 0;
+
+            registrations = group.GetRegistrations(start, length);
+            totalCount = group.GetRegistrationCount();
+
+            var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
+
+            if (emailed.IsBoolean() && emailed.ToBoolean())
+            {
+                msgs.Add("An email will be sent shortly", MessageType.Success);
+            }
+
+            ViewBag.Messages = msgs;
+            LoadRegistrationsViewBag(group, registrations);
+
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
+            return View(group);
+        }
+
+        private void LoadRegistrationsViewBag(ActivityGroup group, List<Registration> registrations)
+        {
+            ViewBag.Registrations = registrations;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Registrations = registrations;
+            ViewBag.RegistrantActivities = group.GetRegistrantActivities(registrations);
+            ViewBag.ReservedSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
+            ViewBag.WaitingListSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
+            ViewBag.ApplicationSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Application);
+            ViewBag.ReturnUrl = Url.Action("registrations", "league", new { id = group.Uid });
+        }
+
+        [HttpGet]
+        public ActionResult LeagueActivities(string id, string pn, string rpp, string archive)
+        {
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var isArchived = group.IsArchived;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+            {
+                pageNumber = pn.ToInteger();
+            }
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+            {
+                recordsPerPage = rpp.ToInteger();
+            }
+            if (archive.IsBoolean())
+            {
+                isArchived = archive.ToInteger().ToBoolean();
+            }
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            var account = SessionVariables.CurrentAccount;
+            var activities = group.GetActivities(isArchived, false, start, length);
+            var totalCount = group.GetActivityCount(isArchived, false);
+            var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
+            var finalActivities = activities.OrderBy(x => x.Name).ToList();
+
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Activities = finalActivities;
+            ViewBag.NeedToUpgrade = finalActivities.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.HasArchivedActivities = group.GetActivityCount(true, false) > 0;
+
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
             return View(group);
         }
 
