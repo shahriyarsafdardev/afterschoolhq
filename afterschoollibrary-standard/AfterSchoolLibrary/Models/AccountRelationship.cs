@@ -243,11 +243,12 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<AccountRelationship> LoadByDenied(int HostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountRelationship> LoadByDenied(int HostAccountId, AccountType accountType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
             dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Denied);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }

@@ -247,7 +247,7 @@ namespace AfterSchoolLibraryTests
             visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc);
             hostaccount.DenyAccessToAccount(visitoraccount, loggedInUser, dc);
 
-            Assert.Single(hostaccount.GetDeniedVisitorAccounts(msgs, dc));
+            Assert.Single(hostaccount.GetDeniedVisitorAccounts(visitoraccount.AccountTypeId, msgs, dc));
         }
 
         [Fact]

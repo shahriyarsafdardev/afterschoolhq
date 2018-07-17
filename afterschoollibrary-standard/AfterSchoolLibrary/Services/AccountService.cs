@@ -1179,10 +1179,10 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
         //Gets the accounts that the host has Denied
-        public static List<Account> GetDeniedVisitorAccounts(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Account> GetDeniedVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.LoadByDenied(hostAccount.ID.Value, msgs, dc)
-                .Select(accountRelationship => accountRelationship.GetVisitorAccount(dc: dc))
+            return AccountRelationship.LoadByDenied(hostAccount.ID.Value, accountType, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
 
@@ -1229,7 +1229,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             // Makes sure that the visitor has not been previously denied by the host
-            if (!GetDeniedVisitorAccounts(hostAccount, dc: dc).Contains(visitorAccount))
+            if (!GetDeniedVisitorAccounts(hostAccount, visitorAccount.AccountTypeId, dc: dc).Contains(visitorAccount))
             {
                 msgs.AddRange(visitorAccount.AddHostAccount(
                     hostAccount,

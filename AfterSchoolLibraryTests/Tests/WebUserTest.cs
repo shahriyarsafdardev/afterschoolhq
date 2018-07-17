@@ -323,7 +323,7 @@ namespace AfterSchoolLibraryTests
         public void CreateRegistrantTest(RegistrantType rt, bool isMaster)
         {
             var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var registrant = user.CreateRegistrant(rt, isMaster, msgs, dc: dc);
+            var registrant = user.CreateRegistrant(rt, isMaster, false, msgs, dc);
 
             Assert.NotNull(registrant);
         }
@@ -337,7 +337,7 @@ namespace AfterSchoolLibraryTests
 
             for (var i = 0; i < numberOfRegistrants; i++)
             {
-                user.CreateRegistrant(RegistrantType.Individual, true, msgs, dc: dc);
+                user.CreateRegistrant(RegistrantType.Individual, true, false, msgs, dc);
             }
 
             Assert.Equal(numberOfRegistrants, user.GetRegistrants(dc: dc).Count);
