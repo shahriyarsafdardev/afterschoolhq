@@ -213,8 +213,8 @@ namespace AfterSchoolLibraryTests
 
             Assert.Equal(ut, user.GetUserType(account, dc: dc));
         }
-
-        [Fact]
+        
+        [Fact(DisplayName = "Updates the last activity date for the user")]
         public void UpdateLastActivityTest()
         {
             var testdate = new DateTime();
@@ -229,7 +229,7 @@ namespace AfterSchoolLibraryTests
             Assert.NotEqual(pre, post);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Updates the last login date for the user")]
         public void UpdateLastLoginTest()
         {
             var testdate = new DateTime();
@@ -278,7 +278,7 @@ namespace AfterSchoolLibraryTests
             Assert.Equal(username, WebUserService.GenerateUsername(f, l, dc: dc));
         }
 
-        [Theory]
+        [Theory(DisplayName = "Sends email to verify user email")]
         [InlineData("test@test.com", true)]
         [InlineData("test@test.com@test.com", false)]
         public void SendVerificationEmailTest(string email, bool result)
