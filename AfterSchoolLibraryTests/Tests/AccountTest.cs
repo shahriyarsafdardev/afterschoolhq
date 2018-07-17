@@ -214,7 +214,7 @@ namespace AfterSchoolLibraryTests
         /// <summary>
         /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
         /// </summary>
-        [Fact(DisplayName = "Host account denies request to visitor account"]
+        [Fact(DisplayName = "Host account denies request to visitor account")]
         public void DenyAccessToAccountTest()
         {
             var loggedInUser = WebUserFactory.Create(msgs, dc);
