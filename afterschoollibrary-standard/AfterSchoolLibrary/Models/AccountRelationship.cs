@@ -228,7 +228,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
-            dq.Criterias.Add(ObjectMap["AccountTypeId"], (int)accountType);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
             dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Requested);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
@@ -238,7 +238,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
-            dq.Criterias.Add(ObjectMap["AccountTypeId"], (int)accountType);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
             dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Approved);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
@@ -257,7 +257,7 @@ namespace AfterSchoolLibrary
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
-            dq.Criterias.Add(ObjectMap["AccountTypeId"], (int)accountType);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
