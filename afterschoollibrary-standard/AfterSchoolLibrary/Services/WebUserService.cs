@@ -200,7 +200,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Registrant CreateRegistrant(this WebUser user, RegistrantType registrantType, bool isMaster, bool isContactOnly, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant CreateRegistrant(this WebUser user, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -208,7 +208,8 @@ namespace AfterSchoolLibrary.Services
             {
                 RegistrantTypeId = registrantType,
                 IsMaster = isMaster,
-                IsContactOnly = isContactOnly,
+                IsContactOnly = isParentOrGuardian,
+                IsParentOrGuardian = isParentOrGuardian,
                 WebUserId = user.ID,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,

@@ -530,6 +530,7 @@ property: ParentRegistrantId, int?, Int
 property: IsMaster, bool, Bit
 property: IsContactOnly, bool, Bit
 property: FirstRegistrantId, int?, Int
+property: IsParentOrGuardian, bool, Bit
 baseproperty: Email, required
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>

@@ -32,6 +32,7 @@ namespace AfterSchoolLibrary
 		public bool IsMaster { get { return (bool)MDV["IsMaster"].Value; } set { MDV["IsMaster"].Value = value; } }
 		public bool IsContactOnly { get { return (bool)MDV["IsContactOnly"].Value; } set { MDV["IsContactOnly"].Value = value; } }
 		public int? FirstRegistrantId { get { return (int?)MDV["FirstRegistrantId"].Value; } set { MDV["FirstRegistrantId"].Value = value; } }
+		public bool IsParentOrGuardian { get { return (bool)MDV["IsParentOrGuardian"].Value; } set { MDV["IsParentOrGuardian"].Value = value; } }
 		
 
         public Registrant()
@@ -42,6 +43,7 @@ namespace AfterSchoolLibrary
 			this.RegistrantTypeId = RegistrantType.NotSet;
 			this.IsMaster = false;
 			this.IsContactOnly = false;
+			this.IsParentOrGuardian = false;
 			
         }
 
@@ -60,6 +62,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsMaster", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsContactOnly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "FirstRegistrantId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -169,6 +172,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FirstRegistrantId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsParentOrGuardian"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -518,25 +525,27 @@ namespace AfterSchoolLibrary
             return FormQuestionAnswer.LoadByRegistrantId(this.ID.Value, dc: dc);
         }
 
-        public FormQuestionAnswer AddAnswer(string answerText, QuestionDataType qt, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public FormQuestionAnswer AddAnswer(string answerText, QuestionDataType questionDataType, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             //check if answer for this one already exists, and where formquestion is null
-            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, qt, dc: dc);
+            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, questionDataType, dc: dc);
 
             if (answer.IsEmpty())
             {
-                answer = new FormQuestionAnswer();
-                answer.RegistrantId = this.ID;
-                answer.QuestionDataTypeId = qt;
-                answer.CreateDate = DateTime.UtcNow;
-                answer.CreatedBy = loggedInUserId;
+                answer = new FormQuestionAnswer
+                {
+                    RegistrantId = this.ID,
+                    QuestionDataTypeId = questionDataType,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId
+                };
             }
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
             answer.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(answer.Save(dc: dc));
+            msgs.AddRange(answer.Save(dc));
 
             msgs.AddRange(answer.UpdateRegistrantInfo(this, dc: dc));
 

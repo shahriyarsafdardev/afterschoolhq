@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using System.Data;
 using System.Collections;
-using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary
 {
-    /// <summary>
+	/// <summary>
     /// An activity that is kept in a cart for when a user is trying to register for activities.
     /// </summary>
-    [Serializable]
+	[Serializable]
     public class CartItem : BasicObjectWithModified
     {
 		#region "ClassGenerator"
@@ -185,11 +187,11 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         [NonSerialized]
         private Activity _Activity = null;

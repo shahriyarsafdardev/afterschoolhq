@@ -109,13 +109,21 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        var registrant = user.CreateRegistrant(RegistrantType.Individual, true, true, amsgs, adc);
+                        // create parent registrant record
+                        var registrant = user.CreateRegistrant(
+                            registrantType: RegistrantType.Individual, 
+                            isMaster: true, 
+                            isParentOrGuardian: true, 
+                            msgs: amsgs, 
+                            dc: adc);
 
+                        // add answers to parent registrant record
+                        // will be used later to copy information over to student records
                         questions.ForEach(question =>
                         {
                             registrant.AddAnswer(
                                 answerText: Request[question.ToFormQuestionViewModel().Name], 
-                                qt: question.QuestionDataTypeId, 
+                                questionDataType: question.QuestionDataTypeId, 
                                 loggedInUserId: user.ID.Value, 
                                 msgs: amsgs, 
                                 dc: adc);
