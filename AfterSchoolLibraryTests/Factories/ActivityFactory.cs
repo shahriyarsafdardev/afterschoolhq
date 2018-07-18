@@ -18,6 +18,12 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+        public static Activity Create(Account account, Location location, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new Activity() { AccountId = account.ID, SeatsAvailable = 4, LocationId = location.ID };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
         public static Activity Create(Account account, ActivitySchedule schedule, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new Activity() { AccountId = account.ID, SeatsAvailable = 4, ActivityScheduleId = schedule.ID };

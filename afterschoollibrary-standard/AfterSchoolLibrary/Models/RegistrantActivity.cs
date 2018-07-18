@@ -1053,7 +1053,10 @@ namespace AfterSchoolLibrary
             activity = activity ?? this.ToActivity(true, dc: dc);
             account = account ?? activity.GetAccount(dc: dc);
 
-            if (account.Email.IsSameAs(activity.ContactEmail))
+            if (account.Email.IsEmpty())
+                return new SystemMessages();
+
+            if (activity.ContactEmail.IsNotBlank() && account.Email.IsSameAs(activity.ContactEmail))
                 return new SystemMessages();
 
             var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{activity.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Application, dc: dc)}</strong> applications</li></ul></p>";
