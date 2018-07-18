@@ -100,6 +100,7 @@ namespace AfterSchool.Controllers
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
+                            allowTextMessages: false,
                             loggedInUser: null,
                             msgs: amsgs,
                             dc: adc);

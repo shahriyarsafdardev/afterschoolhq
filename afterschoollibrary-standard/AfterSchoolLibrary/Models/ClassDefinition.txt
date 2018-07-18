@@ -46,6 +46,7 @@ property: LastActivity, DateTime?, DateTime
 property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
+property: AllowTextMessages, bool, Bit
 baseproperty: FirstName, required
 baseproperty: LastName, required
 baseproperty: Email, required
@@ -96,6 +97,7 @@ property: UniqueName, string, NVarChar(100)
 property: IsTemplate, bool, Bit
 property: ActivitySectionId, int?, Int
 property: ActivityTypeId, ActivityType, Int, required
+property: DateSubmittedToActivityGroup, DateTime?, DateTime
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
@@ -532,6 +534,7 @@ property: IsMaster, bool, Bit
 property: IsContactOnly, bool, Bit
 property: FirstRegistrantId, int?, Int
 property: IsParentOrGuardian, bool, Bit
+property: AllowTextMessages, bool, Bit
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId, List<>
@@ -758,6 +761,7 @@ join: FormQuestionGroup.ID, FormQuestionGroupId, InnerJoin
 joinproperty: FormQuestionGroup.Name, string, NVarChar
 joinproperty: FormQuestionGroup.DisplayOrder, int?, Int
 joinproperty: FormQuestionGroup.RegistrantTypeId, RegistrantType, Int
+joinproperty: FormQuestionGroup.QuestionGroupDataTypeId, QuestionGroupDataType, Int
 loadmethod: FormId, List<>
 loadmethod: FormId|IsActive, List<>
 loadmethod: FormQuestionGroupId, List<>

@@ -91,6 +91,7 @@ namespace AfterSchool.Areas.District.Controllers
                             isActive: false,
                             isRegistered: false,
                             isVerified: false,
+                            allowTextMessages: false,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);

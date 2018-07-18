@@ -112,6 +112,7 @@ namespace AfterSchool.Controllers
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
+                            allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
                             loggedInUser: null,
                             msgs: amsgs,
                             dc: adc);
@@ -125,10 +126,13 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         // create parent registrant record
-                        var registrant = user.CreateRegistrant(
+                        var registrant = account.CreateRegistrant(
+                            associatedUser: user,
                             registrantType: RegistrantType.Individual, 
                             isMaster: true, 
-                            isParentOrGuardian: true, 
+                            isParentOrGuardian: true,
+                            allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
+                            loggedInUser: user,
                             msgs: amsgs, 
                             dc: adc);
 
@@ -150,6 +154,185 @@ namespace AfterSchool.Controllers
                         SessionVariables.LoggedInUser = user;
                         SessionVariables.CurrentAccount = account;
                         SessionVariables.AccountUserType = user.GetUserType(account);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("addhomeaddress");
+
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        private List<FormQuestion> AddHomeAddressViewBag(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var homeAddressQuestionGroup = form.GetQuestionGroups(msgs)
+                .Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress)
+                .First();
+            var questions = homeAddressQuestionGroup.GetAllQuestions(msgs);
+
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantAddress2:
+                        question.IsRequired = false;
+                        break;
+                    default:
+                        question.IsRequired = true;
+                        break;
+                }
+            });
+
+            ViewBag.Cart = SessionVariables.Cart;
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult AddHomeAddress()
+        {
+            if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+                return RedirectToAction("");
+
+            if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                return RedirectToAction("");
+
+            var msgs = new SystemMessages();
+            var questions = AddHomeAddressViewBag(msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(questions.Select(question => question.ToFormQuestionViewModel()).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult AddHomeAddress(string id)
+        {
+            var msgs = new SystemMessages();
+            var questions = AddHomeAddressViewBag(msgs);
+            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+
+            questions.ForEach(question => {
+                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+            });
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // add answers to parent registrant record
+                        // will be used later to copy information over to student records
+                        qvms.ForEach(qvm =>
+                        {
+                            parentRegistrant.AddAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Question,
+                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("addemergencycontacts");
+
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        private List<FormQuestion> AddEmergencyContactsViewBag(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var emergencyContactsQuestionGroup = form.GetQuestionGroups(msgs)
+                .Where(group => 
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 || 
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
+                .First();
+            var questions = emergencyContactsQuestionGroup.GetAllQuestions(msgs);
+
+            questions.ForEach(question => { question.IsRequired = true; });
+
+            ViewBag.Cart = SessionVariables.Cart;
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult AddEmergencyContacts()
+        {
+            if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+                return RedirectToAction("");
+
+            if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                return RedirectToAction("");
+
+            var msgs = new SystemMessages();
+            var questions = AddEmergencyContactsViewBag(msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(questions.Select(question => question.ToFormQuestionViewModel()).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult AddEmergencyContacts(string id)
+        {
+            var msgs = new SystemMessages();
+            var questions = AddEmergencyContactsViewBag(msgs);
+            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+
+            questions.ForEach(question => {
+                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+            });
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // add answers to parent registrant record
+                        // will be used later to copy information over to student records
+                        qvms.ForEach(qvm =>
+                        {
+                            parentRegistrant.AddAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Question,
+                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
                     },
                     onFailure: (SystemMessages fmsgs) =>
                     {
@@ -211,7 +394,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("");
 
             var msgs = new SystemMessages();
-            var parentOrGuardian = SessionVariables.LoggedInUser.GetParentOrGuardianRegistrant();
+            var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
             var questions = AddStudentViewBag(msgs);
             var values = new NameValueCollection();
 
@@ -235,7 +418,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddStudent(string id)
+        public ActionResult AddStudent(string id, string samehomeaddress)
         {
             if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
                 return RedirectToAction("");
@@ -294,7 +477,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("AddHealth");
+                return RedirectToAction("addhealth");
 
             ViewBag.Messages = msgs;
 
@@ -394,6 +577,9 @@ namespace AfterSchool.Controllers
                 );
             }
 
+            if (msgs.HasNoErrors())
+                return RedirectToAction("select");
+
             ViewBag.Messages = msgs;
 
             return View(qvms);
@@ -402,8 +588,18 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Select()
         {
+            if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+                return RedirectToAction("");
 
-            return View();
+            if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                return RedirectToAction("");
+
+            var msgs = new SystemMessages();
+            var students = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(students);
         }
     }
 }

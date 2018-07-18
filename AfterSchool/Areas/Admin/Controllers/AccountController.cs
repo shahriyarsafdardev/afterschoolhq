@@ -107,6 +107,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             isActive: false, 
                             isRegistered: false,
                             isVerified: false,
+                            allowTextMessages: true,
                             loggedInUser: SessionVariables.LoggedInUser, 
                             msgs: amsgs, 
                             dc: adc);

@@ -33,6 +33,7 @@ namespace AfterSchoolLibrary
 		public bool IsContactOnly { get { return (bool)MDV["IsContactOnly"].Value; } set { MDV["IsContactOnly"].Value = value; } }
 		public int? FirstRegistrantId { get { return (int?)MDV["FirstRegistrantId"].Value; } set { MDV["FirstRegistrantId"].Value = value; } }
 		public bool IsParentOrGuardian { get { return (bool)MDV["IsParentOrGuardian"].Value; } set { MDV["IsParentOrGuardian"].Value = value; } }
+		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
 		
 
         public Registrant()
@@ -44,6 +45,7 @@ namespace AfterSchoolLibrary
 			this.IsMaster = false;
 			this.IsContactOnly = false;
 			this.IsParentOrGuardian = false;
+			this.AllowTextMessages = false;
 			
         }
 
@@ -63,6 +65,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsContactOnly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "FirstRegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -174,6 +177,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsParentOrGuardian"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowTextMessages"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
