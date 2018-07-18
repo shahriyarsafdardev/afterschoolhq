@@ -592,12 +592,13 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditLocation(string id)
         {
             var activity = Activity.Load(id.ToInteger());
-
+            
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditLocation";
+        //    ViewBag.accountId = activity.GetAccount().ID;
             return View(activity);
         }
 

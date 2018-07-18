@@ -2,7 +2,7 @@
 
 @{ 
     var location = Model.GetLocation();
-    var isOwnedLocation = Model.AccountId == location.HostAccountId;
+    var isOwnedLocation = Model.AccountId == location?.HostAccountId.GetValueOrDefault(0);
     var addressViewModel = isOwnedLocation ? location.ToAddressViewModel() : new AddressViewModel();
 
 }

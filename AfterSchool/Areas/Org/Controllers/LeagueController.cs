@@ -251,6 +251,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ReturnUrl = Url.Action("registrations", "league", new { id = group.Uid });
         }
 
+        // Teams in a league
         [HttpGet]
         public ActionResult LeagueActivities(string id, string pn, string rpp, string archive)
         {
@@ -293,6 +294,21 @@ namespace AfterSchool.Areas.Org.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
+            return View(group);
+        }
+
+        [HttpGet]
+        public ActionResult Schedules(string id)
+        {
+
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            ViewBag.Messages = msgs;
+            ViewBag.Schedules = group.GetSchedules();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Activities = group.GetActivities();
+
             return View(group);
         }
 

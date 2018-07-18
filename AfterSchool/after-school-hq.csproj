@@ -244,6 +244,7 @@
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
     <Compile Include="Areas\Org\Controllers\AccountController.cs" />
+    <Compile Include="Areas\Org\Controllers\LeagueActivityController.cs" />
     <Compile Include="Areas\Org\Controllers\ActivityController.cs" />
     <Compile Include="Areas\Org\Controllers\ContactController.cs" />
     <Compile Include="Areas\Org\Controllers\FormController.cs" />
@@ -713,6 +714,30 @@
     <Content Include="Areas\Org\Views\League\Periods.cshtml" />
     <Content Include="Areas\Org\Views\League\LeagueActivities.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_LeagueActivities.cshtml" />
+    <Content Include="Areas\Org\Views\League\Schedules.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Add.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Attendance.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Edit.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditConfirmation.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditContact.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditCost.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditDetails.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditLocation.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditRestrictions.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditSchedule.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditSetup.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Form.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Index.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\MessageAdd.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\MessageDetail.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Messages.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\PublishDetail.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\RegistrantDetail.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\RegistrantImport.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Registrants.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Summary.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\Team.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\TrackAttendance.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1114,6 +1139,10 @@
     <Content Include="Views\Shared\Form\_TextArea.cshtml" />
     <Content Include="Views\Shared\Form\_RadioMatrix.cshtml" />
     <Content Include="Views\Shared\_LocationEdit.cshtml" />
+    <Content Include="Views\Shared\_LeagueActivities.cshtml" />
+    <Content Include="Views\Shared\_LeagueActivityEditNav.cshtml" />
+    <Content Include="Views\Shared\_LeagueActivityHeader.cshtml" />
+    <Content Include="Views\Shared\_LeagueActivityFormSetup.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
