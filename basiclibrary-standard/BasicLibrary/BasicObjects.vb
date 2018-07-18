@@ -1219,7 +1219,7 @@ Public MustInherit Class BasePerson
         Return DisplayName.IfEmpty(Email)
     End Function
 End Class
-<Serializable()> _
+<Serializable()>
 Public MustInherit Class BaseWebUser
     Inherits BasePerson
 
@@ -1311,13 +1311,15 @@ Public MustInherit Class BaseWebUser
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenId", tableName, SqlDbType.NVarChar, 400))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenIdProviderUrl", tableName, SqlDbType.NVarChar, 400))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "LastLogin", tableName, SqlDbType.DateTime))
-			_databaseParameters.Add(New DataAccess.DatabaseParameter(className, "TimeZoneId", tableName, SqlDbType.Float))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "TimeZoneId", tableName, SqlDbType.Float))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "ProfileUrl", tableName, SqlDbType.NVarChar, 400))
             Return _databaseParameters
         End Get
     End Property
 
 End Class
+
+<Serializable()>
 Public MustInherit Class BaseContact
     Inherits BasePerson
 
@@ -1405,6 +1407,7 @@ Public MustInherit Class BaseContact
     End Property
 End Class
 
+<Serializable()>
 Public MustInherit Class BaseContactWithAddress
     Inherits BaseContact
 
@@ -1494,7 +1497,7 @@ Public MustInherit Class BaseContactWithAddress
     End Function
 End Class
 
-
+<Serializable()>
 Public MustInherit Class BaseFile
     Inherits BasicObjectWithModified
 

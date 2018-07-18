@@ -1104,6 +1104,8 @@
     <Content Include="Views\Shared\Form\_TextArea.cshtml" />
     <Content Include="Views\Shared\Form\_RadioMatrix.cshtml" />
     <Content Include="Views\Shared\_LocationEdit.cshtml" />
+    <Content Include="Views\Account\AddStudent.cshtml" />
+    <Content Include="Views\Account\AddHealth.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

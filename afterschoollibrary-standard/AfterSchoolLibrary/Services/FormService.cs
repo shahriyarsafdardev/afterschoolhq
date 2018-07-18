@@ -308,6 +308,15 @@ namespace AfterSchoolLibrary.Services
             });
             qhs.Add(new QuestionHolder()
             {
+                Text = "Work Phone",
+                QuestionTypeId = QuestionType.TextBox,
+                GroupName = groupLabel,
+                QuestionGroupDataTypeId = groupType,
+                QuestionDataTypeId = QuestionDataType.RegistrantWorkPhone,
+                IsActive = false
+            });
+            qhs.Add(new QuestionHolder()
+            {
                 Text = "Date of Birth",
                 IsActive = true,
                 QuestionTypeId = QuestionType.Date,

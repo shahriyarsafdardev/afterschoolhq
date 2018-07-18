@@ -262,6 +262,7 @@ namespace AfterSchoolLibrary.Services
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
+                    Phone = phone,
                     IsActive = isActive,
                     IsRegistered = isRegistered,
                     VerifiedAccount = isVerified,
@@ -431,5 +432,9 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
+        public static Registrant GetParentOrGuardianRegistrant(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserId(user.ID.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).FirstOrDefault();
+        }
     }
 }

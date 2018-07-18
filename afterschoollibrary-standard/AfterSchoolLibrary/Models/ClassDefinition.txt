@@ -520,6 +520,7 @@ loadmethod: AccountId|ActivityGroupId
 [begin]
 type: Class
 name: Registrant
+serializable: true
 description: A single registrant for an activity, this is the main person who registered
 inherits: BaseContact
 property: AccountId, int?, Int

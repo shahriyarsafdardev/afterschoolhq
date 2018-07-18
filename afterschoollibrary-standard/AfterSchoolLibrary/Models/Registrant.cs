@@ -13,7 +13,7 @@ namespace AfterSchoolLibrary
 	/// <summary>
     /// A single registrant for an activity, this is the main person who registered
     /// </summary>
-	
+	[Serializable]
     public class Registrant : BaseContact
     {
 		#region "ClassGenerator"
@@ -523,19 +523,20 @@ namespace AfterSchoolLibrary
             return FormQuestionAnswer.LoadByRegistrantId(this.ID.Value, dc: dc);
         }
 
-        public FormQuestionAnswer AddAnswer(string answerText, QuestionDataType questionDataType, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             //check if answer for this one already exists, and where formquestion is null
-            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, questionDataType, dc: dc);
+            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, dc: dc);
 
             if (answer.IsEmpty())
             {
                 answer = new FormQuestionAnswer
                 {
                     RegistrantId = this.ID,
-                    QuestionDataTypeId = questionDataType,
+                    FormQuestionId = question.ID,
+                    QuestionDataTypeId = question.QuestionDataTypeId,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId
                 };
@@ -614,7 +615,7 @@ namespace AfterSchoolLibrary
             msgs.AddRange(copy.Save(dc: dc));
 
             questions.ForEach(question => 
-                copy.AddAnswer(question.GetAnswer(this.ID.Value, dc: dc).Text, question.QuestionDataTypeId, loggedInUserId, msgs, dc: dc)
+                copy.AddAnswer(question.GetAnswer(this.ID.Value, dc: dc).Text, question, loggedInUserId, msgs, dc: dc)
             );
 
             return copy;
@@ -807,6 +808,11 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }        
+
+        public Registrant GetParentOrGuardian(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
+        }
 
         /*
         public List<Attendance> GetAttendance(int ActivityId, DatabaseConnection dc = null)

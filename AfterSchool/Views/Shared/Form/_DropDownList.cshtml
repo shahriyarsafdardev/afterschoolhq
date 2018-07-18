@@ -5,7 +5,7 @@
         <option value="">Select...</option>
         @foreach (var option in Model.Question.Options.Split(','))
         {
-            var selected = Model.Value.Trim() == option.Trim() ? " selected=\"selected\" " : "";
+            var selected = Model.Value.IfEmpty("").Trim() == option.Trim() ? " selected=\"selected\" " : "";
             <option value="@option.Trim()" @selected>@option.Trim()</option>
         }
     </select>

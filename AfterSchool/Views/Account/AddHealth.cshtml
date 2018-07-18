@@ -1,0 +1,48 @@
+﻿@model List<FormQuestionViewModel>
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Add Student";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var cart = (Cart)ViewBag.Cart;
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+<div>
+    <h1>Get Started</h1>
+    <div>
+        Please enter you student health information below
+    </div>
+</div>
+
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+
+                <div>
+                    <h3>Add a student</h3>
+                    <div>
+                        @foreach (var item in cart.GetCartItems())
+                        {
+                            <div>
+                                You are registering for: @item.GetParticipationObject().Name
+                            </div>
+                        }
+                    </div>
+                    <form class="form-horizontal" method="post" action="@Url.Action("addhealth", "account")">
+                        @foreach (var qvm in Model)
+                        {
+                            Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                        }
+
+                        <div class="padding-v-20">
+                            <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
