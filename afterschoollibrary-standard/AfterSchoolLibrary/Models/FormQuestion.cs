@@ -42,6 +42,7 @@ namespace AfterSchoolLibrary
 		public string FormQuestionGroupName { get { return (string)MDV["FormQuestionGroupName"].Value; } }
 		public int? FormQuestionGroupDisplayOrder { get { return (int?)MDV["FormQuestionGroupDisplayOrder"].Value; } }
 		public RegistrantType FormQuestionGroupRegistrantTypeId { get { return (RegistrantType)MDV["FormQuestionGroupRegistrantTypeId"].Value; } }
+		public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get { return (QuestionGroupDataType)MDV["FormQuestionGroupQuestionGroupDataTypeId"].Value; } }
 		
 
         public FormQuestion()
@@ -82,6 +83,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "FormQuestionGroupName", typeof(FormQuestionGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "FormQuestionGroup");
 				_dp.Add(className, "FormQuestionGroupDisplayOrder", typeof(FormQuestionGroup).Name, "DisplayOrder", System.Data.SqlDbType.Int, "FormQuestionGroup");
 				_dp.Add(className, "FormQuestionGroupRegistrantTypeId", typeof(FormQuestionGroup).Name, "RegistrantTypeId", System.Data.SqlDbType.Int, "FormQuestionGroup");
+				_dp.Add(className, "FormQuestionGroupQuestionGroupDataTypeId", typeof(FormQuestionGroup).Name, "QuestionGroupDataTypeId", System.Data.SqlDbType.Int, "FormQuestionGroup");
 				
                 return _dp;
             }

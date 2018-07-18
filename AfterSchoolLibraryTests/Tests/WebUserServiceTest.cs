@@ -26,6 +26,7 @@ namespace AfterSchoolLibraryTests.Tests
                             isActive: false,
                             isRegistered: false,
                             isVerified: false,
+                            allowTextMessages: true,
                             loggedInUser: null,
                             msgs: msgs,
                             dc: dc);

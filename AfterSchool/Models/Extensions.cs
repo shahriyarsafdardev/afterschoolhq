@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
 using AfterSchoolLibrary;
+using System.Collections.Specialized;
 
 namespace AfterSchool.Models
 {
@@ -17,6 +18,11 @@ namespace AfterSchool.Models
         public static string Link(this Activity a)
         {
             return string.Format("<a href=\"/org/activity/summary/{0}\">{1}</a>", a.ID, a.Name);
+        }
+
+        public static FormQuestionViewModel ToFormQuestionViewModel(this FormQuestion question, NameValueCollection values)
+        {
+            return new FormQuestionViewModel(question, values);
         }
 
         public static FormQuestionViewModel ToFormQuestionViewModel(this FormQuestion question)

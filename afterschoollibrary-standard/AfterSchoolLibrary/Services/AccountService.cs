@@ -1372,6 +1372,7 @@ namespace AfterSchoolLibrary
                 isActive: true, 
                 isRegistered: true, 
                 isVerified: true, 
+                allowTextMessages: true,
                 loggedInUser: null, 
                 msgs: msgs, 
                 dc: dc);
@@ -1403,7 +1404,7 @@ namespace AfterSchoolLibrary
             if (WebUser.LoadByEmail(email, msgs, dc) != null)
                 throw new Exception("User with the same email address already exists.");
 
-            var user = WebUserService.CreateNew(firstName, lastName, email, phone, password, true, true, true, null, msgs, dc);
+            var user = WebUserService.CreateNew(firstName, lastName, email, phone, password, true, true, true, true, null, msgs, dc);
             var account = user.AddNewAccount("Sample Account", "317-899-9189", true, accountType, packageId, BillingPeriodType.Month, true, user, msgs, dc);
 
             return msgs;
@@ -1422,5 +1423,55 @@ namespace AfterSchoolLibrary
             return Account.LoadByAccountTypeId(AccountType.AfterSchool, msgs, dc).FirstOrDefault();
         }
 
+        public static Registrant GetFirstParentOrGuardianRegistrant(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAccountId(account.ID.Value, msgs, dc)
+                .Where(registrant => registrant.IsParentOrGuardian)
+                .OrderBy(registrant => registrant.ID)
+                .FirstOrDefault();
+        }
+
+        public static List<Registrant> GetChildrenRegistrants(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAccountId(account.ID.Value, msgs, dc)
+                .Where(registrant => !registrant.IsParentOrGuardian)
+                .OrderBy(registrant => registrant.DisplayName)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Create basic registrant/student record for an account user, not attached to an account, so it's attached to the user record, data can be added later
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="registrantThatIsTheUser"></param>
+        /// <param name="registrantType"></param>
+        /// <param name="isMaster"></param>
+        /// <param name="isParentOrGuardian"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static Registrant CreateRegistrant(this Account account, WebUser associatedUser, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian, bool allowTextMessages, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var registrant = new Registrant
+            {
+                RegistrantTypeId = registrantType,
+                IsMaster = isMaster,
+                IsContactOnly = isParentOrGuardian,
+                IsParentOrGuardian = isParentOrGuardian,
+                WebUserId = associatedUser.ID,
+                AccountId = account.ID,
+                AllowTextMessages = allowTextMessages,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+            };
+            msgs.AddRange(registrant.Save(dc));
+
+            return registrant;
+        }
     }
 }

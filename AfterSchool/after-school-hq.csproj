@@ -1143,6 +1143,10 @@
     <Content Include="Views\Shared\_LeagueActivityEditNav.cshtml" />
     <Content Include="Views\Shared\_LeagueActivityHeader.cshtml" />
     <Content Include="Views\Shared\_LeagueActivityFormSetup.cshtml" />
+    <Content Include="Views\Account\AddStudent.cshtml" />
+    <Content Include="Views\Account\AddHealth.cshtml" />
+    <Content Include="Views\Account\AddEmergencyContacts.cshtml" />
+    <Content Include="Views\Account\AddHomeAddress.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -231,7 +231,7 @@ namespace AfterSchoolLibrary.Services
             return Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
-        public static WebUser CreateNew(string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser CreateNew(string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, bool allowTextMessages, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (firstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -255,6 +255,9 @@ namespace AfterSchoolLibrary.Services
             if (password.IsNotEmpty() && password.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
+            if (allowTextMessages && phone.IsEmpty())
+                msgs.Add("Mobile Phone is required to accept text messages", MessageType.UserError);
+
             if (msgs.HasNoErrors())
             {
                 var user = new WebUser()
@@ -262,9 +265,11 @@ namespace AfterSchoolLibrary.Services
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
+                    Phone = phone,
                     IsActive = isActive,
                     IsRegistered = isRegistered,
                     VerifiedAccount = isVerified,
+                    AllowTextMessages = allowTextMessages,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
@@ -430,6 +435,5 @@ namespace AfterSchoolLibrary.Services
 
             return msgs;
         }
-
     }
 }

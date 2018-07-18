@@ -28,6 +28,7 @@ namespace AfterSchoolLibrary
 		public bool VerifiedAccount { get { return (bool)MDV["VerifiedAccount"].Value; } set { MDV["VerifiedAccount"].Value = value; } }
 		public bool IsRegistered { get { return (bool)MDV["IsRegistered"].Value; } set { MDV["IsRegistered"].Value = value; } }
 		public int? DefaultAccountId { get { return (int?)MDV["DefaultAccountId"].Value; } set { MDV["DefaultAccountId"].Value = value; } }
+		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
 		
 
         public WebUser()
@@ -38,6 +39,7 @@ namespace AfterSchoolLibrary
 			this.IsActive = false;
 			this.VerifiedAccount = false;
 			this.IsRegistered = false;
+			this.AllowTextMessages = false;
 			
         }
 
@@ -55,6 +57,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "VerifiedAccount", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsRegistered", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "DefaultAccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -162,6 +165,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["DefaultAccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowTextMessages"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

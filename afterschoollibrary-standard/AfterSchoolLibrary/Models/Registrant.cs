@@ -13,7 +13,7 @@ namespace AfterSchoolLibrary
 	/// <summary>
     /// A single registrant for an activity, this is the main person who registered
     /// </summary>
-	
+	[Serializable]
     public class Registrant : BaseContact
     {
 		#region "ClassGenerator"
@@ -33,6 +33,7 @@ namespace AfterSchoolLibrary
 		public bool IsContactOnly { get { return (bool)MDV["IsContactOnly"].Value; } set { MDV["IsContactOnly"].Value = value; } }
 		public int? FirstRegistrantId { get { return (int?)MDV["FirstRegistrantId"].Value; } set { MDV["FirstRegistrantId"].Value = value; } }
 		public bool IsParentOrGuardian { get { return (bool)MDV["IsParentOrGuardian"].Value; } set { MDV["IsParentOrGuardian"].Value = value; } }
+		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
 		
 
         public Registrant()
@@ -44,6 +45,7 @@ namespace AfterSchoolLibrary
 			this.IsMaster = false;
 			this.IsContactOnly = false;
 			this.IsParentOrGuardian = false;
+			this.AllowTextMessages = false;
 			
         }
 
@@ -63,6 +65,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsContactOnly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "FirstRegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -174,6 +177,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsParentOrGuardian"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowTextMessages"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -523,19 +530,20 @@ namespace AfterSchoolLibrary
             return FormQuestionAnswer.LoadByRegistrantId(this.ID.Value, dc: dc);
         }
 
-        public FormQuestionAnswer AddAnswer(string answerText, QuestionDataType questionDataType, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             //check if answer for this one already exists, and where formquestion is null
-            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, questionDataType, dc: dc);
+            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, dc: dc);
 
             if (answer.IsEmpty())
             {
                 answer = new FormQuestionAnswer
                 {
                     RegistrantId = this.ID,
-                    QuestionDataTypeId = questionDataType,
+                    FormQuestionId = question.ID,
+                    QuestionDataTypeId = question.QuestionDataTypeId,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId
                 };
@@ -614,7 +622,7 @@ namespace AfterSchoolLibrary
             msgs.AddRange(copy.Save(dc: dc));
 
             questions.ForEach(question => 
-                copy.AddAnswer(question.GetAnswer(this.ID.Value, dc: dc).Text, question.QuestionDataTypeId, loggedInUserId, msgs, dc: dc)
+                copy.AddAnswer(question.GetAnswer(this.ID.Value, dc: dc).Text, question, loggedInUserId, msgs, dc: dc)
             );
 
             return copy;
@@ -807,6 +815,11 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }        
+
+        public Registrant GetParentOrGuardian(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
+        }
 
         /*
         public List<Attendance> GetAttendance(int ActivityId, DatabaseConnection dc = null)
