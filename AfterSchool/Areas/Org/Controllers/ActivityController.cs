@@ -1537,7 +1537,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 waitingListSeatCount = 0;
                             }
 
-                            var hasSeatsAvailable = activity.GetRegistrantCount(adc) < activity.SeatsAvailable;
+                            var hasSeatsAvailable = activity.GetRegistrantCount(amsgs, adc) < activity.SeatsAvailable;
 
                             // TODO: need to verify if this really should be the master account. What is master
                             var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);

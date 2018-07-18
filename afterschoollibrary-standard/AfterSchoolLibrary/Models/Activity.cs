@@ -785,9 +785,9 @@ namespace AfterSchoolLibrary
             return ras;
         }
 
-        public int GetRegistrantCount(DatabaseConnection dc = null)
+        public int GetRegistrantCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByActivityId(this.ID.Value, dc: dc);
+            return RegistrantActivity.GetSeatCountByActivityId(this.ID.Value, msgs, dc);
         }
 
         public int GetRegistrantCountByApplicationType(RegistrationAssignmentType rat, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -882,31 +882,38 @@ namespace AfterSchoolLibrary
             return Attendance.LoadByActivityIdByDate(this.ID.Value, date, dc: dc);
         }
 
-        public List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(DatabaseConnection dc = null)
+        public List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityRegistrationPeriod.LoadByActivityId(this.ID.Value, dc: dc);
+            return ActivityRegistrationPeriod.LoadByActivityId(this.ID.Value, msgs, dc);
         }
 
-        public List<RegistrationPeriod> GetRegistrationPeriods(DatabaseConnection dc = null)
+        public List<RegistrationPeriod> GetRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetActivityRegistrationPeriods(dc: dc).Select(x => x.ToRegistrationPeriod()).ToList();
+            return GetActivityRegistrationPeriods(msgs, dc)
+                .Select(x => x.ToRegistrationPeriod())
+                .ToList();
         }
 
-        public List<RegistrationPeriod> GetUpcomingRegistrationPeriods(DatabaseConnection dc = null)
+        public List<RegistrationPeriod> GetUpcomingRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrationPeriods().Where(x => x.StartDateTime.Value > DateTime.UtcNow).OrderBy(x => x.StartDateTime.Value).ToList();
+            return GetRegistrationPeriods(msgs, dc)
+                .Where(x => x.StartDateTime.Value > DateTime.UtcNow)
+                .OrderBy(x => x.StartDateTime.Value)
+                .ToList();
         }
 
-        public RegistrationPeriod GetCurrentRegistrationPeriod(DatabaseConnection dc = null)
+        public RegistrationPeriod GetCurrentRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrationPeriods().Where(x => x.StartDateTime.Value <= DateTime.UtcNow && x.EndDateTime.Value >= DateTime.UtcNow).FirstOrDefault();
+            return GetRegistrationPeriods(msgs, dc)
+                .Where(x => x.StartDateTime.Value <= DateTime.UtcNow && x.EndDateTime.Value >= DateTime.UtcNow)
+                .FirstOrDefault();
         }
 
-        public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(DatabaseConnection dc = null)
+        public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var period = this.GetCurrentRegistrationPeriod(dc: dc);
+            var period = this.GetCurrentRegistrationPeriod(msgs, dc);
             if (period.IsEmpty())
-                return GetUpcomingRegistrationPeriods(dc: dc).FirstOrDefault();
+                return GetUpcomingRegistrationPeriods(msgs, dc).FirstOrDefault();
 
             return period;
         }
@@ -915,9 +922,9 @@ namespace AfterSchoolLibrary
         {
             if (this.ID.HasValue)
             {
-                var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(this.ID.Value, true, msgs, dc: dc);
+                var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(this.ID.Value, true, msgs, dc);
                 if (item.IsNotEmpty())
-                    return item.ToRegistrationPeriod(true, dc: dc);
+                    return item.ToRegistrationPeriod(true, msgs, dc);
             }
             return null;
         }
@@ -1465,11 +1472,11 @@ namespace AfterSchoolLibrary
                             if (amsgs.HasNoErrors() && registrationperiod.IsNumber())
                             {
                                 amsgs.AddRange(activity.SetupRegistrationPeriods(
-                                    registrationperiod.ToString(), 
-                                    registrationopendate.ToString(), 
-                                    registrationopentime.ToString(), 
-                                    registrationclosedate.ToString(), 
-                                    registrationclosetime.ToString(), 
+                                    registrationperiod.IfEmpty(""), 
+                                    registrationopendate.IfEmpty(""), 
+                                    registrationopentime.IfEmpty(""), 
+                                    registrationclosedate.IfEmpty(""), 
+                                    registrationclosetime.IfEmpty(""), 
                                     account, 
                                     loggedInUserId, 
                                     adc));
@@ -1492,15 +1499,15 @@ namespace AfterSchoolLibrary
                         if(amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduledates.IsNotEmpty()))
                         {
                             amsgs.AddRange(activity.SetupSchedule(
-                                account, 
-                                schedule.ToString(), 
-                                (List<DateRange>)scheduledates, 
-                                scheduledetails.ToString(), 
-                                repeatsweekly.ToString(), 
-                                startdate.ToString(), 
-                                enddate.ToString(), 
-                                dailystarttime.ToString(), 
-                                dailyendtime.ToString(), 
+                                account,
+                                schedule.IfEmpty(""), 
+                                (List<DateRange>)scheduledates,
+                                scheduledetails.IfEmpty(""),
+                                repeatsweekly.IfEmpty(""), 
+                                startdate.IfEmpty(""), 
+                                enddate.IfEmpty(""), 
+                                dailystarttime.IfEmpty(""), 
+                                dailyendtime.IfEmpty(""), 
                                 loggedInUserId, 
                                 adc));
                         }
