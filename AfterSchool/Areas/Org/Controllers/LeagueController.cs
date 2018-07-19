@@ -255,9 +255,16 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult LeagueActivities(string id, string pn, string rpp, string archive)
         {
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            LoadLeagueActivityViewBag(group, id, pn, rpp, archive);
+            return View(group);
+        }
+
+        private void LoadLeagueActivityViewBag(ActivityGroup group, string id, string pn, string rpp, string archive)
+        {
             int pageNumber = 1;
             int recordsPerPage = 10;
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
             var isArchived = group.IsArchived;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
@@ -294,7 +301,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-            return View(group);
         }
 
         [HttpGet]
@@ -363,6 +369,25 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Grades = GradeLevel.Load();
 
             return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult SubmitToDistrict(string id, string pn, string rpp, string archive)
+        {
+            var msgs = new SystemMessages();
+
+            var activity = Activity.Load(id.ToInteger());
+            var timeSubmitted = DateTime.UtcNow;
+
+
+            activity.DateSubmittedToActivityGroup = DateTime.UtcNow;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            msgs.AddRange(activity.Save());
+
+            var group = activity.GetActivityGroup();
+            LoadLeagueActivityViewBag(group, id, pn, rpp, archive);
+            return View("LeagueActivities", group);
         }
     }
 }

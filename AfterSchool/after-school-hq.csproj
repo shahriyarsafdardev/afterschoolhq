@@ -738,6 +738,7 @@
     <Content Include="Areas\Org\Views\LeagueActivity\Summary.cshtml" />
     <Content Include="Areas\Org\Views\LeagueActivity\Team.cshtml" />
     <Content Include="Areas\Org\Views\LeagueActivity\TrackAttendance.cshtml" />
+    <Content Include="Areas\Org\Views\LeagueActivity\EditStudents.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

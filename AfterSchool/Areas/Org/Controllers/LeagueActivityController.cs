@@ -459,6 +459,62 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
+        [HttpPost]
+        public ActionResult EditStudents(string id,  List<int> selectedRegistrants)
+        {
+            var msgs = new SystemMessages();
+            Activity activity = Activity.Load(id.ToInteger());
+
+            var currentRegistrants = activity.GetRegistrants();
+            var currentRegistrantsIds = currentRegistrants.Select(c => c.ID).ToList();
+            var removedRegistrants = currentRegistrants.Where(i => !selectedRegistrants.Contains(i.ID.Value));
+            var addedRegistrants = selectedRegistrants.Where(i => !currentRegistrantsIds.Contains(i));
+
+            if (id.IsNumber() && id.ToInteger() > 0)
+            {
+              
+                foreach (var regId in addedRegistrants)
+                {
+                    RegistrantActivity newRegistrantActivity = new RegistrantActivity();
+                    newRegistrantActivity.ActivityId = id.ToInteger();
+                    newRegistrantActivity.RegistrantId = regId;
+
+                    msgs.AddRange(newRegistrantActivity.Save());  
+                }
+
+
+                
+            }
+
+            
+            
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
+            }
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "prev":
+                        ViewBag.ActiveMenu = "EditSchedule";
+                        LoadEditScheduleViewBag(activity, null);
+                        return View("EditSchedule", activity);
+                    case "next":
+                        ViewBag.ActiveMenu = "EditStudents";
+                        return View("EditStudents", activity);
+                }
+            }
+
+            ViewBag.ActiveMenu = "EditContact";
+            return View(activity);
+        }
+
         [HttpGet]
         public ActionResult EditDetails(string id)
         {
