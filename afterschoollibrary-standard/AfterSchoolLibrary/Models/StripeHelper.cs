@@ -30,7 +30,7 @@ namespace AfterSchoolLibrary.Billing
                 }
             }
         }
-        private static string PublishableKey
+        public static string PublishableKey
         {
             get
             {

@@ -1443,7 +1443,7 @@ namespace AfterSchoolLibrary
         /// Create basic registrant/student record for an account user, not attached to an account, so it's attached to the user record, data can be added later
         /// </summary>
         /// <param name="account"></param>
-        /// <param name="registrantThatIsTheUser"></param>
+        /// <param name="associatedUser">Can be null, should only be linked if the logged in user is the same as the registrant</param>
         /// <param name="registrantType"></param>
         /// <param name="isMaster"></param>
         /// <param name="isParentOrGuardian"></param>
@@ -1461,7 +1461,7 @@ namespace AfterSchoolLibrary
                 IsMaster = isMaster,
                 IsContactOnly = isParentOrGuardian,
                 IsParentOrGuardian = isParentOrGuardian,
-                WebUserId = associatedUser.ID,
+                WebUserId = associatedUser?.ID,
                 AccountId = account.ID,
                 AllowTextMessages = allowTextMessages,
                 CreateDate = DateTime.UtcNow,

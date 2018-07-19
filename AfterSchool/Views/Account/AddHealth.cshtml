@@ -4,6 +4,7 @@
     ViewBag.Title = "Add Student";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
+    var student = (Registrant)ViewBag.Student;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -21,7 +22,7 @@
             <div class="panel-body">
 
                 <div>
-                    <h3>Add a student</h3>
+                    <h3>Add health information for: @student.DisplayName</h3>
                     <div>
                         @foreach (var item in cart.GetCartItems())
                         {

@@ -212,9 +212,9 @@ namespace AfterSchoolLibrary
             return FormQuestion.LoadByFormId(this.ID.Value, msgs, dc);
         }
 
-        public List<FormQuestion> GetActiveQuestions(DatabaseConnection dc = null)
+        public List<FormQuestion> GetActiveQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.LoadByFormIdByIsActive(this.ID.Value, true, dc: dc);
+            return FormQuestion.LoadByFormIdByIsActive(this.ID.Value, true, msgs, dc);
         }
 
         public List<FormQuestionGroup> GetQuestionGroups(SystemMessages msgs = null, DatabaseConnection dc = null)

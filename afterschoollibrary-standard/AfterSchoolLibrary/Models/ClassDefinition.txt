@@ -806,6 +806,7 @@ joinproperty: FormQuestion.DisplayOrder, int?, Int
 joinproperty: FormQuestion.Text, string, NVarChar
 joinproperty: FormQuestionGroup.Name, string, NVarChar
 joinproperty: FormQuestionGroup.DisplayOrder, int?, Int
+joinproperty: FormQuestionGroup.QuestionGroupDataTypeId, QuestionGroupDataType, Int
 joinproperty: Registration.AccountId, int?, Int
 loadmethod: RegistrantId, List<>
 loadmethod: RegistrantId|ActivityId, List<>
@@ -831,6 +832,7 @@ property: PaymentTypeId, PaymentType, Int
 property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
+property: ESignature, string, NVarChar(50)
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>

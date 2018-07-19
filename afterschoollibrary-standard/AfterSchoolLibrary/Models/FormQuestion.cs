@@ -339,9 +339,9 @@ namespace AfterSchoolLibrary
             return FormQuestionGroup.Load(this.FormQuestionGroupId.Value, dc: dc);
         }
 
-        public FormQuestionAnswer GetAnswer(int RegistrantId, DatabaseConnection dc = null)
+        public FormQuestionAnswer GetAnswer(int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(this.ID.Value, RegistrantId, dc: dc);
+            return FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(this.ID.Value, RegistrantId, msgs, dc);
         }
 
         public FormQuestion Copy()

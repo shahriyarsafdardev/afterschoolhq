@@ -200,6 +200,8 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
+        /// 
+        [Obsolete]
         public static Registrant CreateRegistrant(this WebUser user, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -221,6 +223,7 @@ namespace AfterSchoolLibrary.Services
             return registrant;
         }
 
+        [Obsolete]
         public static List<Registrant> GetRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByWebUserIdByIsMaster(user.ID.Value, true, msgs, dc);

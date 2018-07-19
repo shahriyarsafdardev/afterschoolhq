@@ -280,9 +280,16 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public List<FormQuestionAnswer> GetAnswers(int activityId, DatabaseConnection dc = null)
+        public List<FormQuestionAnswer> GetAnswers(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionAnswer.LoadByRegistrantIdByActivityId(this.ID.Value, activityId, dc: dc)
+                .OrderBy(x => x.FormQuestionDisplayOrder)
+                .ToList();
+        }
+
+        public List<FormQuestionAnswer> GetAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionAnswer.LoadByRegistrantId(this.ID.Value, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
         }
@@ -437,18 +444,44 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public Registration AddRegistration(int loggedInUserId, int? accountId, int? groupId, SystemMessages msgs, DatabaseConnection dc = null)
+        [Obsolete]
+        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var reg = new Registration();
-            reg.AccountId = accountId;
-            reg.RegistrantId = this.ID;
-            reg.ActivityGroupId = groupId;
-            reg.CreateDate = reg.LastModifiedDate = DateTime.UtcNow;
-            reg.CreatedBy = reg.LastModifiedBy = loggedInUserId;
-            reg.LastUpdated = DateTime.UtcNow;
-            msgs.AddRange(reg.Save(dc: dc));
+            var reg = new Registration
+            {
+                AccountId = ownerAccountId,
+                RegistrantId = this.ID,
+                ActivityGroupId = activityGroupId,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedBy = loggedInUserId,
+                LastUpdated = DateTime.UtcNow
+            };
+            msgs.AddRange(reg.Save(dc));
+
+            return reg;
+        }
+
+        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, string esignature, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var reg = new Registration
+            {
+                AccountId = ownerAccountId,
+                RegistrantId = this.ID,
+                ActivityGroupId = activityGroupId,
+                ESignature = esignature,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedBy = loggedInUserId,
+                LastUpdated = DateTime.UtcNow
+            };
+            msgs.AddRange(reg.Save(dc));
 
             return reg;
         }
@@ -467,6 +500,7 @@ namespace AfterSchoolLibrary
         {
             return AddOrUpdateActivity(registrationId, activityId, DayOfWeekASL.NotSet, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, 1, null, null, loggedInUserId, msgs, dc: dc);
         }
+
         public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, DayOfWeekASL day, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -598,11 +632,11 @@ namespace AfterSchoolLibrary
         public Registrant CreateMasterCopy(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var master = this.Copy(questions, loggedInUserId, msgs, dc: dc);
+            var master = this.Copy(questions, loggedInUserId, msgs, dc);
             master.IsMaster = true;
             master.IsContactOnly = true;
             master.AccountId = null;
-            msgs.AddRange(master.Save(dc: dc));
+            msgs.AddRange(master.Save(dc));
 
             this.ParentRegistrantId = master.ID;
             msgs.AddRange(this.Save(dc: dc));
@@ -613,6 +647,7 @@ namespace AfterSchoolLibrary
         public Registrant Copy(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             var copy = new Registrant();
             copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
             copy.CreateDate = copy.LastModifiedDate = DateTime.UtcNow;
@@ -621,9 +656,37 @@ namespace AfterSchoolLibrary
             copy.ResetID();
             msgs.AddRange(copy.Save(dc: dc));
 
+            if (questions.IsEmpty())
             questions.ForEach(question => 
-                copy.AddAnswer(question.GetAnswer(this.ID.Value, dc: dc).Text, question, loggedInUserId, msgs, dc: dc)
+                copy.AddAnswer(question.GetAnswer(this.ID.Value, msgs, dc).Text, question, loggedInUserId, msgs, dc)
             );
+
+            return copy;
+        }
+
+        public Registrant CopyToAccount(Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var copy = new Registrant
+            {
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                Uid = Guid.NewGuid(),
+                AccountId = ownerAccount.ID,
+                FirstRegistrantId = null,
+                ParentRegistrantId = this.ID,
+                IsContactOnly = false,
+                IsMaster = false
+            };
+            copy.ResetID();
+            copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
+            msgs.AddRange(copy.Save(dc));
+
+            // need to relate registrants within the same account, specifically provider or school accounts
+            msgs.AddRange(copy.FindAndSetFirstRegistrant(loggedInUser, dc));
 
             return copy;
         }
@@ -685,8 +748,15 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public SystemMessages FindAndSetFirstRegistrant(string firstName, string lastName, string email, DatabaseConnection dc = null)
+        public SystemMessages FindAndSetFirstRegistrant(WebUser loggedInUser, DatabaseConnection dc = null)
         {
+            return FindAndSetFirstRegistrant(this.FirstName, this.LastName, this.Email, loggedInUser, dc);
+        }
+
+        public SystemMessages FindAndSetFirstRegistrant(string firstName, string lastName, string email, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
@@ -698,17 +768,17 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
             dq.OrderBys.Add(ObjectMap["Id"], OrderByDirectionEnum.Ascending);
 
-            var firstRegistrant = dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            var firstRegistrant = dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 
             if (firstRegistrant.IsNotEmpty())
             {
                 this.FirstRegistrantId = firstRegistrant.ID;
-                this.LastModifiedBy = 0;
+                this.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
                 this.LastModifiedDate = DateTime.UtcNow;
-                return this.Save(dc: dc);
+                msgs.AddRange(this.Save(dc));
             }
 
-            return new SystemMessages();
+            return msgs;
         }
 
         public static List<Registrant> FindRelatedRegistrants(int AccountId, string firstName, string lastName, string email, DatabaseConnection dc = null)
