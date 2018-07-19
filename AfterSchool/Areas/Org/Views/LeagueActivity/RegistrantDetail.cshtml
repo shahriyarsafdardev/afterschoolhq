@@ -1,0 +1,35 @@
+﻿@model AfterSchoolLibrary.RegistrantActivity
+@{
+    ViewBag.Title = Model.AccountName;
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ActivityAccountId.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("~/Views/Shared/_LeagueActivityHeader.cshtml", Model.ToActivity(true));}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.ActivityName + " - " + UILabel.RegistrantLabel() +  " Detail"); }
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-10 col-md-offset-1">
+
+                @{Html.RenderPartial("~/Views/Shared/_RegistrantDetail.cshtml", Model,
+                                new ViewDataDictionary() {
+                                  { "BackToListAction", "Registrants" },
+                                  { "BackToListController", "Activity" },
+                                  { "ShowPaymentForm", true },
+                                  { "IsActivityLeader", ViewBag.IsActivityLeader }
+                                }
+                                );}
+
+            </div>
+        </div>
+    </div>
+</div>
