@@ -821,6 +821,17 @@ namespace AfterSchoolLibrary
             return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
         }
 
+        public SystemMessages DeleteRegistrantActivity(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrantAcitivity = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
+            msgs.AddRange(registrantAcitivity.Delete(dc));
+            return msgs;
+        }
+
+        
+
+        
+
         /*
         public List<Attendance> GetAttendance(int ActivityId, DatabaseConnection dc = null)
         {

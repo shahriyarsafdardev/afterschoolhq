@@ -8,6 +8,7 @@
     var editrestrictionsactive = activeMenu == "editrestrictions" ? "active" : "";
     var editdetailsactive = activeMenu == "editdetails" ? "active" : "";
     var editcontactactive = activeMenu == "editcontact" ? "active" : "";
+    var editstudentsactive = activeMenu == "editstudents" ? "active" : "";
     var editscheduleactive = activeMenu == "editschedule" ? "active" : "";
     var editlocationactive = activeMenu == "editlocation" ? "active" : "";
     var editcostactive = activeMenu == "editcost" ? "active" : "";
@@ -61,7 +62,7 @@
             </div>
         </li>
         <li data-id="3" class="dd-item">
-            <div class="dd-handle @editcontactactive">
+            <div class="dd-handle @editstudentsactive">
                 @{Html.RenderPartial(
                       "~/Views/Shared/_ActiveLink.cshtml",
                       new ViewDataDictionary {

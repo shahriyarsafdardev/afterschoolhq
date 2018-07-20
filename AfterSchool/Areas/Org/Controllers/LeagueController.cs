@@ -18,9 +18,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
-        // GET: District/League
-        [HttpGet]
-        public ActionResult Index(string pn, string rpp, string archive)
+        private List<ActivityGroup> LoadIndexViewBag(string pn = "1", string rpp = "10" , string archive = "0")
         {
             var groups = new List<ActivityGroup>();
             var accountActivityGroups = new List<AccountActivityGroup>();
@@ -47,9 +45,9 @@ namespace AfterSchool.Areas.Org.Controllers
             groups = SessionVariables.CurrentAccount.GetLeagues(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
             accountActivityGroups = AccountActivityGroup.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value);
 
-            foreach( var accountActivityGroup in accountActivityGroups )
+            foreach (var accountActivityGroup in accountActivityGroups)
             {
-                if( accountActivityGroup.InviteStatusId > 0)
+                if (accountActivityGroup.InviteStatusId == InviteStatus.Invited)
                 {
                     var pendingInvite = groups.FirstOrDefault(i => i.ID == accountActivityGroup.ActivityGroupId);
                     pendingInvites.Add(pendingInvite);
@@ -59,7 +57,7 @@ namespace AfterSchool.Areas.Org.Controllers
             hasArchivedGroups = SessionVariables.CurrentAccount.GetLeagueCount(true) > 0;
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
-            
+
 
             ViewBag.GroupController = "League";
             ViewBag.Messages = new SystemMessages();
@@ -75,6 +73,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.isOrgLeague = true;
             ViewBag.pendingInvites = pendingInvites;
+
+            return groups;
+        }
+
+        // GET: District/League
+        [HttpGet]
+        public ActionResult Index(string pn, string rpp, string archive)
+        {
+            var groups = LoadIndexViewBag(pn, rpp, archive);
 
             return View(groups);
         }
@@ -388,6 +395,19 @@ namespace AfterSchool.Areas.Org.Controllers
             var group = activity.GetActivityGroup();
             LoadLeagueActivityViewBag(group, id, pn, rpp, archive);
             return View("LeagueActivities", group);
+        }
+
+        [HttpGet]
+        public ActionResult UpdateInvitation(string id, InviteStatus inviteStatus)
+        {
+            var msgs = new SystemMessages();
+
+            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, id.ToInteger());
+            msgs.AddRange(accountActivityGroup.updateInvitationStatus(inviteStatus, SessionVariables.CurrentAccount.ID.Value));
+
+            var groups = LoadIndexViewBag();
+
+            return View("Index",groups);
         }
     }
 }

@@ -37,6 +37,15 @@
                     <th class="text-center">
                         @(activityGroupType == ActivityGroupType.Session ? "Activities" : "Sports")
                     </th>
+                    <th class="text-center">
+                        Schools
+                    </th>
+                    <th class="text-center">
+                        Start Date
+                    </th>
+                    <th class="text-center">
+                        Accept/Decline
+                    </th>
                     <th></th>
                 </tr>
             </thead>
@@ -45,27 +54,29 @@
                 {
                     foreach (var pendingInvite in pendingInvites)
                     {
-                        <tr>
-                            <td>
-                                <a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})" class="btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
-                            </td>
-                            <td><a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})">@pendingInvite.Name</a></td>
-                    
-                            <td>
-                                <div class="btn-group pull-right">
-                                    <button class="btn btn-default btn-sm md-trigger"
-                                            data-modal="modal-copy"
-                                            onclick="setCopyGroup('@pendingInvite.Name', '@Url.Action("copy", controller, new { id = pendingInvite.Uid.ToString() })')">
-                                        <i class="s7-copy-file"></i> Accept
-                                    </button>
-                                    <button class="btn btn-default btn-sm md-trigger"
-                                            data-modal="modal-archive"
-                                            onclick="archiveGroup('@pendingInvite.Name', '@Url.Action("archive", controller, new { id = pendingInvite.Uid.ToString() })')">
-                                        <i class="s7-albums"></i> Decline
-                                    </button>  
-                                </div>
-                            </td>
-                        </tr>
+                <tr>
+                    <td>
+                        <a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})" class="btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
+                    </td>
+                    <td><a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})">@pendingInvite.Name</a></td>
+                    <td class="text-center">@pendingInvite.GetActivityCount(false,false)</td>
+                    <td class="text-center">@pendingInvite.GetGroupProperties().Count</td>
+                    <td class="text-center">@( DateTime.Now.Add(pendingInvite.WillOpenIn()).ToLongDateString() )</td>
+                    <td>
+                        <div class="btn-group pull-right">
+                            <button class="btn btn-default btn-sm md-trigger"
+                                    data-modal="modal-accept"
+                                    onclick="acceptInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Accepted })')">
+                                <i class="s7-copy-file"></i> Accept
+                            </button>
+                            <button class="btn btn-default btn-sm md-trigger"
+                                    data-modal="modal-decline"
+                                    onclick="declineInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Declined })')">
+                                <i class="s7-albums"></i> Decline
+                            </button>
+                        </div>
+                    </td>
+                </tr>
                     }
                 }
                 else
@@ -80,13 +91,13 @@
         </table>
     </div>
 
-    @*@Html.RenderPartial(
-        "~/Views/Shared/_Paging.cshtml",
+    @*@html.renderpartial(
+        "~/views/shared/_paging.cshtml",
         paging,
         new ViewDataDictionary()
         {
 { "id", "" },
-{ "querystring", string.Format("archive={0}", Request["archive"]) },
+{ "querystring", string.format("archive={0}", request["archive"]) },
 { "action", "index" },
 { "controller", controller }
         }
@@ -154,6 +165,42 @@
     </div>
 </div>
 
+<div id="modal-accept" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Accept @UILabel.ActivityGroupLabel(activityGroupType)</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to accept the invitation to <strong><span id="accept-group-name"></span></strong>? </p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="accept-group-button">Accept &raquo;</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-decline" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Decline @UILabel.ActivityGroupLabel(activityGroupType)</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to decline the invitation to <strong><span id="decline-group-name"></span></strong>? </p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="decline-group-button">Decline &raquo;</a>
+        </div>
+    </div>
+</div>
+
 
 <script>
     function setCopyGroup(name, url) {
@@ -167,5 +214,15 @@
     function restoreGroup(name, url) {
         $('#restore-group-name').html(name);
         $('#restore-group-button').attr('href', url);
+    }
+
+    function acceptInvitation(name, url) {
+        $('#accept-group-name').html(name);
+        $('#accept-group-button').attr('href', url);
+    }
+
+    function declineInvitation(name, url) {
+        $('#decline-group-name').html(name);
+        $('#decline-group-button').attr('href', url);
     }
 </script>

@@ -198,7 +198,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
+        public ActionResult EditSetup(string id, string description, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -217,7 +217,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "timezone", timezone },
                 { "form", form },
                 { "regmode", regmode },
-                { "group", group }
+                { "group", group },
+                { "description", description }
             };
 
             if (id.IsNumber() && id.ToInteger() > 0)
@@ -441,51 +442,79 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditStudents(string id)
         {
             var activity = Activity.Load(id.ToInteger());
-            var activityRegistrants = activity.GetRegistrants();
-            var league = activity.GetActivityGroup();
-            var otherActivities = league.GetActivities();
-            var registrantsOfOtherTeams = new List<Registrant>();
-            foreach ( var team in otherActivities )
+
+            
+            var group = activity.GetActivityGroup();
+            var otherActiviesInGroup = group.GetActivities();
+            otherActiviesInGroup.Remove(activity);
+            var fullListOfRegistrants = group.GetRegistrants();
+            var registrantsOfSchool = fullListOfRegistrants.Where(r => r.AccountId == activity.AccountId);
+            var availableRegistrants = new List<Registrant>();
+            var currentRegistrants = activity.GetRegistrants();
+
+            availableRegistrants.AddRange(currentRegistrants);
+
+            foreach ( var registrant in registrantsOfSchool )
             {
-                registrantsOfOtherTeams.AddRange(team.GetRegistrants());
-                
-                
+                var activities = registrant.GetActivities();
+               
+                if ( !activities.Any( a => otherActiviesInGroup.Any(oa => a.ID == oa.ID)))
+                {
+                    availableRegistrants.Add(registrant);
+                }
+                  
             }
-    
-            ViewBag.AvailableRegistrants = activityRegistrants.Where(registrant => registrantsOfOtherTeams.Any(rOOT => rOOT.ID == registrant.ID ));
+
+          
+
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.AvailableRegistrants = availableRegistrants;
+            ViewBag.CurrentRegistrants = currentRegistrants;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Group = activity.GetActivityGroup();
+            ViewBag.ActiveMenu = "EditStudents";
 
             return View(activity);
         }
 
         [HttpPost]
-        public ActionResult EditStudents(string id,  List<int> selectedRegistrants)
+        public ActionResult EditStudents(string id,  List<int> selectedRegistrants,string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.Load(id.ToInteger());
+            var updatedRegistrants = new List<Registrant>();
 
             var currentRegistrants = activity.GetRegistrants();
+            var updatedRegistrantIds = currentRegistrants.Select(cr => cr.ID.Value).ToList();
             var currentRegistrantsIds = currentRegistrants.Select(c => c.ID).ToList();
             var removedRegistrants = currentRegistrants.Where(i => !selectedRegistrants.Contains(i.ID.Value));
             var addedRegistrants = selectedRegistrants.Where(i => !currentRegistrantsIds.Contains(i));
+            
 
             if (id.IsNumber() && id.ToInteger() > 0)
-            {
-              
+            {     
                 foreach (var regId in addedRegistrants)
                 {
-                    RegistrantActivity newRegistrantActivity = new RegistrantActivity();
-                    newRegistrantActivity.ActivityId = id.ToInteger();
-                    newRegistrantActivity.RegistrantId = regId;
+                    Registrant registrant = Registrant.Load(regId);
 
-                    msgs.AddRange(newRegistrantActivity.Save());  
+                    var registrantActivity = registrant.AddOrUpdateActivity(regId, activity.ID.Value, activity.SeatsAvailable.Value, activity.WaitingListSeats.Value, activity.SeatsAvailable.Value, 0, 0, SessionVariables.LoggedInUser.ID.Value, msgs);
+
+                    updatedRegistrantIds.Add(registrantActivity.RegistrantId.Value);
                 }
 
+                foreach( var registrant in removedRegistrants)
+                {
+                    msgs.AddRange(registrant.DeleteRegistrantActivity(activity.ID.Value, msgs));
+                    updatedRegistrantIds.Remove(registrant.ID.Value);
+                }
 
-                
+                foreach( var regId in updatedRegistrantIds)
+                {
+                    updatedRegistrants.Add(Registrant.Load(regId));
+                }
             }
 
+            
             
             
             if (msgs.HasNoErrors())
@@ -496,6 +525,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.SelectedRegistrants = updatedRegistrants;
 
             if (msgs.HasNoErrors())
             {
@@ -511,7 +541,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            ViewBag.ActiveMenu = "EditContact";
+            ViewBag.ActiveMenu = "EditStudents";
             return View(activity);
         }
 

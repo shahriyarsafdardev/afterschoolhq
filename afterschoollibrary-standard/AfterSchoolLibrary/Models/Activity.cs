@@ -1263,6 +1263,7 @@ namespace AfterSchoolLibrary
             var dailyendtime = values.GetValueOrDefault("dailyendtime");
             var scheduledates = values.GetValueOrDefault("scheduledates");
             var schedule = values.GetValueOrDefault("schedule");
+            var description = values.GetValueOrDefault("description");
 
             if (activityId.IsNumber() == false || activityId.ToInteger() == 0)
             {
@@ -1398,7 +1399,9 @@ namespace AfterSchoolLibrary
             if (contactname.IsNotEmpty()) activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);
             if (contactphone.IsNotEmpty()) activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
             if (contactemail.IsNotEmpty()) activity.ContactEmail = contactemail.ToString().IfBlank("").MaxChars(100);
-            if (details.IsNotEmpty()) activity.Details = details.ToString().IfBlank("").MaxChars(4000);            
+            if (details.IsNotEmpty()) activity.Details = details.ToString().IfBlank("").MaxChars(4000);
+            if (description.IsNotEmpty()) activity.Description = description.ToString().IfBlank("").MaxChars(1000);
+
 
             if (cost.IsNumber())
             {

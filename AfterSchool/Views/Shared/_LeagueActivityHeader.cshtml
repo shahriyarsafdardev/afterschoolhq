@@ -62,10 +62,10 @@
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="location.href=this.value;">
                 <option value="">Navigation</option>
-                <option value="@Url.Action("summary", "leagueactivity", new { id = Model.ID })">Trace Summary</option>
+                <option value="@Url.Action("summary", "leagueactivity", new { id = Model.ID })">Summary</option>
                 @if (isActivityLeader)
                 {
-                    <option value="@Url.Action("editsetup", "leagueactivity", new { id = Model.ID })"> Trace Setup</option>
+                    <option value="@Url.Action("editsetup", "leagueactivity", new { id = Model.ID })">Setup</option>
                     if (!Model.IsChildActivity && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                     {
                         <option value="@Url.Action("form", "leagueactivity", new { id = Model.ID })">Reg Form</option>

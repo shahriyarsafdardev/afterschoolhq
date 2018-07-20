@@ -7,13 +7,15 @@
     var mainColWidth = 10;
     var saveBtnWidth = 7;
     var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId));
-    var registrants = ViewBag.AvailableRegistrants;
+    var availableRegistrants = ViewBag.AvailableRegistrants;
+    var currentRegistrants = ViewBag.CurrentRegistrants;
     var registrantsPerColumn = 2;
-
+    var count = availableRegistrants.Count;
     if (group.IsNotEmpty())
     {
         title = group.Name + " - " + title;
     }
+
 
 }
 
@@ -34,7 +36,7 @@
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editsetup", "leagueactivity", new { id = Model.ID })" class="form-horizontal">
 
-                    @if (registrants == null)
+                    @if (availableRegistrants.Count == 0)
                     {
                         <p> No one has registered for this activity yet. </p>
                     } else
@@ -48,10 +50,10 @@
                                 @for (int i = 0; i < 3; i++)
                                 {
                                     <div class="col-md-4">
-                                        @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                                        @foreach (var registrant in availableRegistrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                         {
                                             <div class="am-checkbox">
-                                                <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" checked="checked" />
+                                                <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" @(currentRegistrants?.Contains(registrant) ? " checked=\"checked\" " : "") />
                                                 <label for="registrant-@registrant.ID">@registrant.DisplayName.MaxChars(20, "...")</label>
                                             </div>
                                         }
@@ -91,9 +93,12 @@
 
 <script>
 
+    
     function navigateActivity(url) {
         $('#form1').attr('action', url);
     }
+
+    
 
 </script>
 

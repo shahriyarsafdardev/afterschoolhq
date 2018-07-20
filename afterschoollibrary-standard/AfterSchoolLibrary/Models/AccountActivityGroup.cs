@@ -234,6 +234,15 @@ namespace AfterSchoolLibrary
             return _RegistrationPeriods;
         }
 
+        public SystemMessages updateInvitationStatus(InviteStatus inviteStatus, int currentAccountId, DatabaseConnection dc = null)
+        {
+            this.InviteStatusId = inviteStatus;
+            this.LastModifiedBy = currentAccountId;
+            this.LastModifiedDate = DateTime.UtcNow;
+
+            return this.Save(dc);
+        }
+
         #endregion
     }
 }
