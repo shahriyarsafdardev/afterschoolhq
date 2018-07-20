@@ -28,6 +28,7 @@ namespace AfterSchoolLibrary
         public RegistrationMode RegistrationMode { get; set; }
         public Form Form { get; set; }
         public Account OwnerAccount { get; set; }
+        public bool PayLater { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -59,6 +60,7 @@ namespace AfterSchoolLibrary
 
             Cost = activity.CostPerRegistrant;
             CostUnitType = global::CostUnitType.PerRegistrant;
+            PayLater = activity.AllowToPayLater;
             RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
             Form = activity.GetActiveActivityForm(msgs, dc)?.ToForm();
             OwnerAccount = activity.GetAccount(msgs, dc);
@@ -86,6 +88,7 @@ namespace AfterSchoolLibrary
             RegistrationMode = activityGroup.RegistrationModeId;
             Form = activityGroup.GetForm(msgs, dc);
             OwnerAccount = activityGroup.GetAccount(msgs, dc);
+            // TODO: PayLater = activityGroup.AllowToPayLater;
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -105,6 +108,7 @@ namespace AfterSchoolLibrary
             MaxGradeId = activityGroup.MaxGradeLevelId;
             Cost = aag.Cost;
             CostUnitType = aag.CostUnitTypeId;
+            // TODO: PayLater = activityGroup.AllowToPayLater;
             ActivityGroupType = activityGroup.ActivityGroupTypeId;
             RegistrationPeriod = aag.GetCurrentOrNextRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;

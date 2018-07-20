@@ -647,6 +647,7 @@ namespace AfterSchoolLibrary.Billing
         {
             return CreateCard(customer.Id, sourceCard, msgs);
         }
+
         public StripeCard CreateCard(string customerId, SourceCard sourceCard, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -680,10 +681,26 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe source card was not created", MessageType.Error, ex);
+                msgs.Add($"Cannot get list of cards", MessageType.Error, ex);
             }
 
             return cards;
+        }
+
+        public StripeCard GetCard(string customerId, string cardId, SystemMessages msgs)
+        {
+            var card = new StripeCard();
+
+            try
+            {
+                card = GetCardService().Get(customerId, cardId);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"Card id ({cardId}) not found", MessageType.Error, ex);
+            }
+
+            return card;
         }
 
         public SystemMessages DeleteCard(string customerId, string cardId)
@@ -763,7 +780,7 @@ namespace AfterSchoolLibrary.Billing
             return new StripeChargeService(StripeAccessToken);
         }
 
-        public StripeCharge CreateChargeWithSource(decimal totalAmount, string description, Account destinationAccount, SourceCard sourceCard, string statementDescriptor, SystemMessages msgs)
+        public StripeCharge CreateChargeWithSource(decimal totalAmount, string description, Account toAccount, SourceCard sourceCard, string statementDescriptor, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -772,8 +789,37 @@ namespace AfterSchoolLibrary.Billing
                 Amount = (totalAmount * 100).ToInteger(),
                 Currency = "usd",
                 Description = description,
-                Destination = destinationAccount.StripeUserId,
+                Destination = toAccount.StripeUserId,
                 SourceCard = sourceCard,
+                StatementDescriptor = statementDescriptor
+            };
+
+            StripeCharge charge = null;
+
+            try
+            {
+                charge = GetChargeService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add("Error charging payment source", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.Error, ex);
+            }
+
+            return charge;
+        }
+
+        public StripeCharge CreateCharge(decimal totalAmount, string description, Account toAccount, string tokenOrCardId, string statementDescriptor, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new StripeChargeCreateOptions
+            {
+                Amount = (totalAmount * 100).ToInteger(),
+                Currency = "usd",
+                Description = description,
+                Destination = toAccount.StripeUserId,
+                SourceTokenOrExistingSourceId = tokenOrCardId,
                 StatementDescriptor = statementDescriptor
             };
 

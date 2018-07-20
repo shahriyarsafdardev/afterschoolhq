@@ -686,47 +686,16 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            //Stripe.StripeRequestOptions requestOptions = new Stripe.StripeRequestOptions();
-            //requestOptions.ApiKey = StripeHelper.SecretKey;
-
             var customer = account.GetStripeCustomer(msgs);
             var sh = new Billing.StripeHelper();
 
             if (customer.IsNotEmpty())
             {
                 msgs.AddRange(sh.UpdateCustomer(customer.Id, account.Name, account.Email));
-
-                //Stripe.StripeCustomerUpdateOptions options = new Stripe.StripeCustomerUpdateOptions();
-                //options.Description = account.Name;
-                //options.Email = account.Email;
-
-                //Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                //try
-                //{
-                //    customer = service.Update(account.StripeCustomerId, options, requestOptions);
-                //}
-                //catch (Stripe.StripeException ex)
-                //{
-                //    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
-                //}
             }
             else
             {
                 customer = sh.CreateCustomer(account.Name, account.Email, msgs);
-
-                //Stripe.StripeCustomerCreateOptions options = new Stripe.StripeCustomerCreateOptions();
-                //options.Description = account.Name;
-                //options.Email = account.Email;
-
-                //Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-                //try
-                //{
-                //    customer = service.Create(options);
-                //}
-                //catch (Stripe.StripeException ex)
-                //{
-                //    msgs.Add("Error connecting to billing service", MessageType.Warning, ex);
-                //}
 
                 if (customer.IsNotEmpty())
                 {
@@ -765,8 +734,7 @@ namespace AfterSchoolLibrary
                 if (!card.IsEmpty() && makePrimary)
                 {
                     account.StripeDefaultCardId = card.Id;
-                    msgs.AddRange(account.Save(dc: dc));
-
+                    msgs.AddRange(account.Save(dc));
                     msgs.AddRange(account.SetStripeDefaultCard(card.Id));
                 }
 
@@ -774,45 +742,25 @@ namespace AfterSchoolLibrary
                 {
                     msgs.Add("The payment card has been successfully added", MessageType.Success);
                 }
-
-                //if (msgs.HasNoErrors() && makePrimary)
-                //{
-                //    msgs.AddRange(account.SetStripeDefaultCard(card.Id));
-                //}
-
-                //var options = new Stripe.StripeCardCreateOptions();
-                //options.SourceCard = new Stripe.SourceCard
-                //{
-                //    Name = name,
-                //    Number = number,
-                //    ExpirationMonth = expMonth.ToInteger(),
-                //    ExpirationYear = expYear.ToInteger(),
-                //    Cvc = cvc
-                //};
-
-                //Stripe.StripeCard card = null;
-                //Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
-                //try
-                //{
-                //    card = service.Create(account.StripeCustomerId, options);
-                //    if (!card.IsEmpty() && makePrimary)
-                //    {
-                //        account.StripeDefaultCardId = card.Id;
-                //        msgs.AddRange(account.Save(dc: dc));
-                //    }
-                //}
-                //catch (Stripe.StripeException ex)
-                //{
-                //    //error storing card
-                //    msgs.Add(ex.Message, MessageType.Error, ex);
-                //}
-                //catch (Exception ex)
-                //{
-                //    msgs.Add("Error storing card", MessageType.Error, ex);
-                //}
             }
 
             return msgs;
+        }
+
+        public static Stripe.StripeCard GetStripeCard(this Account account, string cardId, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var card = new Stripe.StripeCard();
+            var customer = account.GetStripeCustomer(msgs);
+
+            if (customer.IsNotEmpty())
+            {
+                var sh = new Billing.StripeHelper();
+                card = sh.GetCard(customer.Id, cardId, msgs);
+            }
+
+            return card;
         }
 
         public static List<Stripe.StripeCard> GetStripeCards(this Account account, SystemMessages msgs = null)
@@ -826,17 +774,6 @@ namespace AfterSchoolLibrary
             {
                 var sh = new Billing.StripeHelper();
                 cards.AddRange(sh.GetCards(customer.Id, msgs));
-
-                //try
-                //{
-                //    Stripe.StripeCardService service = new Stripe.StripeCardService(StripeHelper.SecretKey);
-                //    cards.AddRange(service.List(customer.Id).ToList());
-                //}
-                //catch (Stripe.StripeException ex)
-                //{
-                //    //error storing card
-                //    msgs.Add("Error retrieving cards", MessageType.Error, ex);
-                //}
             }
 
             return cards;
@@ -1472,6 +1409,28 @@ namespace AfterSchoolLibrary
             msgs.AddRange(registrant.Save(dc));
 
             return registrant;
+        }
+
+        public static object ProcessPaymentWithStripe(this Account fromAccount, Account toAccount, PurchaseObject purchase, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+                        
+
+            var sh = new Billing.StripeHelper(toAccount.StripeAccessToken);
+            var charge = sh.CreateCharge(
+                totalAmount: purchase.TotalCostToPurchase,
+                description: $"{purchase.ParticipationObject.Name} registration",
+                toAccount: toAccount,
+                tokenOrCardId: purchase.StripeTokenOrCardId,
+                statementDescriptor: $"AfterSchool.com - {toAccount.Name}",
+                msgs: msgs
+                );
+
+            if (charge.IsNotEmpty())
+            {
+
+            }
+
+            return null;
         }
     }
 }

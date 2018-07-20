@@ -21,11 +21,11 @@ namespace AfterSchoolLibrary
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public RegistrantType RegistrantTypeId { get { return (RegistrantType)MDV["RegistrantTypeId"].Value; } set { MDV["RegistrantTypeId"].Value = value; } }
 		public int? ParentRegistrantId { get { return (int?)MDV["ParentRegistrantId"].Value; } set { MDV["ParentRegistrantId"].Value = value; } }

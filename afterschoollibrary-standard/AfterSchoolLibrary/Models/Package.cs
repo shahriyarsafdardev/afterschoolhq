@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public decimal? Price { get { return (decimal?)MDV["Price"].Value; } set { MDV["Price"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public decimal? PricePerYear { get { return (decimal?)MDV["PricePerYear"].Value; } set { MDV["PricePerYear"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }

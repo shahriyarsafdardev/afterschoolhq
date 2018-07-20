@@ -20,15 +20,15 @@ namespace AfterSchoolLibrary
 
 		public int? AccountRelationshipId { get { return (int?)MDV["AccountRelationshipId"].Value; } set { MDV["AccountRelationshipId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? HostAccountId { get { return (int?)MDV["HostAccountId"].Value; } set { MDV["HostAccountId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? VisitorAccountId { get { return (int?)MDV["VisitorAccountId"].Value; } set { MDV["VisitorAccountId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? LocationId { get { return (int?)MDV["LocationId"].Value; } set { MDV["LocationId"].Value = value; } }
 		public DateTime? ApprovedDate { get { return (DateTime?)MDV["ApprovedDate"].Value; } set { MDV["ApprovedDate"].Value = value; } }

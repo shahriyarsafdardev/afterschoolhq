@@ -19,24 +19,24 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public ParticipationObjectType ParticipationObjectTypeId { get { return (ParticipationObjectType)MDV["ParticipationObjectTypeId"].Value; } set { MDV["ParticipationObjectTypeId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? PlanOwnerAccountId { get { return (int?)MDV["PlanOwnerAccountId"].Value; } set { MDV["PlanOwnerAccountId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? TotalPeriods { get { return (int?)MDV["TotalPeriods"].Value; } set { MDV["TotalPeriods"].Value = value; } }
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public decimal? CostPerPeriod { get { return (decimal?)MDV["CostPerPeriod"].Value; } set { MDV["CostPerPeriod"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }

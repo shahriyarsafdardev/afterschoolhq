@@ -1287,6 +1287,43 @@ loadmethod: RegistrantId|ParticipationObjectId|ParticipationObjectTypeId, List<>
 [end]
 
 [begin]
+type: Class
+name: Coupon
+description: Used to give discounts to parents during the purchase of a registration, product, etc
+inherits: BasicLookUpObject
+property: Amount, decimal?, Money, required, Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
+property: AmountTypeId, AmountType, Int, required, Either a percentage or a flat amount
+property: AccountId, int?, Int
+property: ExpirationDate, DateTime?, DateTime
+property: AppliesTo, CouponApplyType, Int, , Determines what type of object the coupon will apply to during a purchase, All items, or only one type of item
+baseproperty: Name, required
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: AssignedCoupon
+description: Used to assign a coupon to an activity/activitygroup
+inherits: BasicObjectWithModified
+property: ParticipationObjectId, int?, Int
+property: ParticipationObjectTypeId, ParticipationObjectType, Int
+property: CouponId, int?, Int
+loadmethod: CouponId|ParticipationObjectId|ParticipationObjectTypeId, , LoadByCouponByParticipationObject
+[end]
+
+[begin]
+type: Enum
+name: AmountType
+values: NotSet, Percentage, FlatAmount
+[end]
+
+[begin]
+type: Enum
+name: CouponApplyType
+values: NotSet, All, SubscriptionPlan, PaymentPlan, RegistrationFee, Product
+[end]
+
+[begin]
 type: Enum
 name: SessionActionType
 values: NotSet, OrganizationHomeView, RegistrationFormView, RegistrationCompletedView, ActivityCreate, ActivityPublish, ActivityUnpublish, ActivityRegistrationCompleted, ActivityRegistrationUpdated, RegistrationUpdated, RegistrationAddActivity, RegistrationRemoveActivity, ActivityMoveToReserved, ActivityMoveToApplication, ActivityMoveToWaitingList, ActivityGroupCreate, ActivityGroupPublish, ActivityGroupUnpublish

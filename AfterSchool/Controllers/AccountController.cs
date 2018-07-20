@@ -725,7 +725,6 @@ namespace AfterSchool.Controllers
                 return RedirectToAction(""); // TODO: Should return to school homepage, they don't have an item in the cart
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-
             var questions = RegisterViewBag(participationObject, msgs);
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
@@ -736,6 +735,8 @@ namespace AfterSchool.Controllers
 
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);
+
+            Registration registration = null;
 
             if (msgs.HasNoErrors())
             {
@@ -752,7 +753,7 @@ namespace AfterSchool.Controllers
                             );
 
                         // create registration
-                        var registration = SessionVariables.CurrentRegistrant.AddRegistrationWithESignature(
+                        registration = accountRegistrantCopy.AddRegistrationWithESignature(
                             ownerAccountId: participationObject.OwnerAccount.ID.Value,
                             activityGroupId: participationObject.ObjectType == ParticipationObjectType.Activity ? ((Activity)participationObject.Object).ActivityGroupId : null,
                             esignature: signature,
@@ -772,7 +773,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("payment");
+                return RedirectToAction("payment", new { id = registration.Uid });
 
             ViewBag.QuestionViewModels = qvms;
             ViewBag.Messages = msgs;
@@ -781,16 +782,29 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Register(string id)
+        public ActionResult Register(string signature)
         {
-            return HandleIsLoggedIn() ?? RegisterActionPost(id);
+            return HandleIsLoggedIn() ?? RegisterActionPost(signature);
         }
 
         #endregion
 
         #region Payment
 
-        private ActionResult PaymentActionGet()
+        private Registration PaymentViewBag(string id, ParticipationObject participationObject, SystemMessages msgs)
+        {
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+
+            ViewBag.Registration = registration;
+            ViewBag.Cards = SessionVariables.CurrentAccount.GetStripeCards(msgs);
+            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = participationObject;
+            ViewBag.Messages = msgs;
+
+            return registration;
+        }
+
+        private ActionResult PaymentActionGet(string id)
         {
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
@@ -798,31 +812,87 @@ namespace AfterSchool.Controllers
             if (participationObject.IsEmpty())
                 return RedirectToAction(""); // TODO: Should return to school homepage, they don't have an item in the cart
 
-            ViewBag.Cards = SessionVariables.CurrentAccount.GetStripeCards(msgs);
-            ViewBag.Cart = SessionVariables.Cart;
-            ViewBag.ParticipationObject = participationObject;
-            ViewBag.Messages = msgs;
+            PaymentViewBag(id, participationObject, msgs);
 
             return View();
         }
 
         [HttpGet]
-        public ActionResult Payment()
+        public ActionResult Payment(string id)
         {
-            return HandleIsLoggedIn() ?? PaymentActionGet();
+            return HandleIsLoggedIn() ?? PaymentActionGet(id);
         }
 
-        private ActionResult PaymentActionPost(string card, string stripeToken)
+        private ActionResult PaymentActionPost(string id, string stripetoken, string cardId, string savepaymentinfo)
         {
             var msgs = new SystemMessages();
+            var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+
+            if (participationObject.IsEmpty())
+                return RedirectToAction(""); // TODO: Should return to school homepage, they don't have an item in the cart
+
+            if (cardId.IsEmpty() && stripetoken.IsEmpty())
+                msgs.Add("Please enter your payment information", MessageType.UserError);
+
+            var registration = PaymentViewBag(id, participationObject, msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        if (cardId.IsNotEmpty())
+                        {
+                            // pay with existing card
+                        }
+                        else if (stripetoken.IsEmpty())
+                        {
+                            // pay with new card
+                            if (savepaymentinfo.IsBoolean())
+                            {
+                                SessionVariables.CurrentAccount.ProcessPaymentWithStripe(
+                                    toAccount: participationObject.OwnerAccount,
+                                    purchase: new PurchaseObject()
+                                    {
+                                        Coupon = null,
+                                        LoggedInUser = SessionVariables.LoggedInUser,
+                                        NumberOfSeats = 1,
+                                        ParticipationObject = participationObject,
+                                        PaymentPlan = null,
+                                        Products = null,
+                                        Purchaser = SessionVariables.CurrentAccount,
+                                        Registration = registration,
+                                        StripeTokenOrCardId = stripetoken,
+                                        SubscriptionPlan = null
+                                    },
+                                    msgs: amsgs,
+                                    dc: adc);
+                                    
+                            }
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+
+            
 
             return View();
         }
 
         [HttpPost]
-        public ActionResult Payment(string card, string stripeToken)
+        public ActionResult Payment(string id, string card, string stripetoken, string savepaymentinfo)
         {
-            return HandleIsLoggedIn() ?? PaymentActionPost(card, stripeToken);
+            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, card, savepaymentinfo);
         }
 
         #endregion

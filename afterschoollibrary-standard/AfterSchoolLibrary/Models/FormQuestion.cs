@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? FormQuestionGroupId { get { return (int?)MDV["FormQuestionGroupId"].Value; } set { MDV["FormQuestionGroupId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
 		public bool IsTemplate { get { return (bool)MDV["IsTemplate"].Value; } set { MDV["IsTemplate"].Value = value; } }

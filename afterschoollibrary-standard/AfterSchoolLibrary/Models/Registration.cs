@@ -19,13 +19,13 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public int? RegistrationPeriodId { get { return (int?)MDV["RegistrationPeriodId"].Value; } set { MDV["RegistrationPeriodId"].Value = value; } }
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public DateTime? DatePaid { get { return (DateTime?)MDV["DatePaid"].Value; } set { MDV["DatePaid"].Value = value; } }
@@ -770,6 +770,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        [Obsolete]
         public SystemMessages ProcessStripePayment(Registrant registrant, decimal costPerRegistrant, int totalSeats, string ccname, string ccnumber, string cccvc, string ccexpmonth, string ccexpyear, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -780,7 +781,7 @@ namespace AfterSchoolLibrary
                 var charge = sh.CreateChargeWithSource(
                     totalAmount: costPerRegistrant * totalSeats,
                     description: $"{account.Name} Registration for {registrant.Name}",
-                    destinationAccount: account,
+                    toAccount: account,
                     sourceCard: new Stripe.SourceCard()
                     {
                         Name = ccname,
