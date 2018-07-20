@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public decimal? Price { get { return (decimal?)MDV["Price"].Value; } set { MDV["Price"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public decimal? PricePerYear { get { return (decimal?)MDV["PricePerYear"].Value; } set { MDV["PricePerYear"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
@@ -217,14 +217,14 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
+        public bool HasFeature(FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc: dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Any();
+            return this.GetFeatures(msgs, dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Any();
         }
 
-        public PackageFeature GetFeature(FeatureType featureType, DatabaseConnection dc = null)
+        public PackageFeature GetFeature(FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc: dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
+            return this.GetFeatures(msgs, dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
         }
 
         public void ResetFeatureList()
@@ -233,10 +233,10 @@ namespace AfterSchoolLibrary
         }
 
         private List<PackageFeature> _Features;
-        public List<PackageFeature> GetFeatures(DatabaseConnection dc = null)
+        public List<PackageFeature> GetFeatures(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Features.IsEmpty())
-                _Features = PackageFeature.LoadByPackageId(this.ID.Value, dc: dc);
+                _Features = PackageFeature.LoadByPackageId(this.ID.Value, msgs, dc);
 
             return _Features;
         }

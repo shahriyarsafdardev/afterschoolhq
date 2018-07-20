@@ -11,7 +11,7 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class GradeLevelFactory
     {
-        public static GradeLevel Create(SystemMessages msgs, DatabaseConnection dc = null)
+        public static GradeLevel Create(SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new GradeLevel() { Name = "whatever" };
             msgs.AddRange(obj.Save(dc: dc));

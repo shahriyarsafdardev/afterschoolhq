@@ -24,7 +24,6 @@
         id = group.Uid.ToString();
         currentListUrl = Url.Action("activities", "group", new { archive = 0 });
         archivedListUrl = Url.Action("activities", "group", new { archive = 1 });
-        activityType = group.ActivityGroupTypeId;
     }
 
     var currentClass = "";

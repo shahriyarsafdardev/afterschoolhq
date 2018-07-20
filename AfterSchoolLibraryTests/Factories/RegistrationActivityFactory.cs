@@ -11,7 +11,7 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class RegistrationActivityFactory
     {
-        public static RegistrationActivity Create(Activity activity, Registration registration, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RegistrationActivity Create(Activity activity, Registration registration, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new RegistrationActivity() { ActivityId = activity.ID, RegistrationId = registration.ID };
             msgs.AddRange(obj.Save(dc: dc));

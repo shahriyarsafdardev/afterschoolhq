@@ -80,15 +80,14 @@
                     <div class="col-sm-6">
                         <select name="billingperiod" id="billingperiod" class="form-control">
                             <option value="">Select...</option>
-                            @foreach (var item in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().OrderBy(x => x.ToString()))
-                            {
-                                if (item != BillingPeriodType.NotSet)
-                                {
-                                    <option value="@((int)item)" @(Request["package"] == ((int)item).ToString() ? "selected=\"selected\"" : "")>
-                                        Per @item.ToString().SplitByUpperCase()
-                                    </option>
-                                }
-                            }
+                            <option value="@((int)BillingPeriodType.Month)"
+                                    @(Request["billingperiod"] == ((int)BillingPeriodType.Month).ToString() ? "selected=\" selected\"" : "" )>
+                                Per @BillingPeriodType.Month.ToString().SplitByUpperCase()
+                            </option>
+                            <option value="@((int)BillingPeriodType.Year)"
+                                    @(Request["billingperiod"] == ((int)BillingPeriodType.Year).ToString() ? "selected=\"selected\"" : "")>
+                                Per @BillingPeriodType.Year.ToString().SplitByUpperCase()
+                            </option>
                         </select>
                     </div>
                 </div>

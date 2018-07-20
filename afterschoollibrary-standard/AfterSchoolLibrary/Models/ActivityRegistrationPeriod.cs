@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? RegistrationPeriodId { get { return (int?)MDV["RegistrationPeriodId"].Value; } set { MDV["RegistrationPeriodId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
@@ -200,11 +200,11 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
         
-        public RegistrationPeriod ToRegistrationPeriod(bool loadFromDb = false, DatabaseConnection dc = null)
+        public RegistrationPeriod ToRegistrationPeriod(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (loadFromDb)
             {
-                return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc: dc);
+                return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, msgs, dc: dc);
             }
             else
             {
@@ -244,9 +244,9 @@ namespace AfterSchoolLibrary
             return RegistrationPeriod.Load(this.RegistrationPeriodId.Value, dc: dc);
         }
 
-        public Activity GetActivity(DatabaseConnection dc = null)
+        public Activity GetActivity(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Activity.Load(this.ActivityId.Value, dc: dc);
+            return Activity.Load(this.ActivityId.Value, msgs, dc);
         }
 
         #endregion

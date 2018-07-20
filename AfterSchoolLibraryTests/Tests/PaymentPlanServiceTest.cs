@@ -43,7 +43,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CreateNewActivityGroupObjectTest()
         {
-            var activityGroup = ActivityGroupFactory.Create(PlanOwner, msgs, dc);
+            var activityGroup = ActivityGroupFactory.Create(PlanOwner, ActivityGroupType.Session, msgs, dc);
 
             var plan = PaymentPlanService.CreateNew(
                 PlanOwner,

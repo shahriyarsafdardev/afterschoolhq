@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
 using AfterSchoolLibrary;
+using System.Collections.Specialized;
 
 namespace AfterSchool.Models
 {
@@ -19,8 +20,29 @@ namespace AfterSchool.Models
             return string.Format("<a href=\"/org/activity/summary/{0}\">{1}</a>", a.ID, a.Name);
         }
 
+        public static FormQuestionViewModel ToFormQuestionViewModel(this FormQuestion question, NameValueCollection values)
+        {
+            return new FormQuestionViewModel(question, values);
+        }
+
+        public static FormQuestionViewModel ToFormQuestionViewModel(this FormQuestion question)
+        {
+            return new FormQuestionViewModel(question);
+        }
+
         public static AddressViewModel ToAddressViewModel(this Activity activity)
         {
+            var location = activity.GetLocation();
+            if (location.IsNotEmpty())
+                return new AddressViewModel()
+                {
+                    Address1 = location.Address1,
+                    Address2 = location.Address2,
+                    City = location.City,
+                    State = location.State,
+                    PostalCode = location.PostalCode
+                };
+
             return new AddressViewModel()
             {
                 Address1 = activity.Address1,
@@ -30,6 +52,19 @@ namespace AfterSchool.Models
                 PostalCode = activity.PostalCode
             };
         }
+
+        public static AddressViewModel ToAddressViewModel(this Location location)
+        {
+            return new AddressViewModel()
+            {
+                Address1 = location.Address1,
+                Address2 = location.Address2,
+                City = location.City,
+                State = location.State,
+                PostalCode = location.PostalCode
+            };
+        }
+
         public static AddressViewModel ToAddressViewModel(this Account account)
         {
             return new AddressViewModel()

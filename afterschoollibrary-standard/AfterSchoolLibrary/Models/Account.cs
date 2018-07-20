@@ -22,12 +22,12 @@ namespace AfterSchoolLibrary
 		public string StripePublishableKey { get { return (string)MDV["StripePublishableKey"].Value; } set { MDV["StripePublishableKey"].Value = value; } }
 		public string StripeSecretKey { get { return (string)MDV["StripeSecretKey"].Value; } set { MDV["StripeSecretKey"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? OwnerId { get { return (int?)MDV["OwnerId"].Value; } set { MDV["OwnerId"].Value = value; } }
 		public bool IsAdminAccount { get { return (bool)MDV["IsAdminAccount"].Value; } set { MDV["IsAdminAccount"].Value = value; } }
@@ -43,6 +43,9 @@ namespace AfterSchoolLibrary
 		public string LogoUrl { get { return (string)MDV["LogoUrl"].Value; } set { MDV["LogoUrl"].Value = value; } }
 		public string LandingPageText { get { return (string)MDV["LandingPageText"].Value; } set { MDV["LandingPageText"].Value = value; } }
 		public AccountType AccountTypeId { get { return (AccountType)MDV["AccountTypeId"].Value; } set { MDV["AccountTypeId"].Value = value; } }
+		public int? DefaultLocationId { get { return (int?)MDV["DefaultLocationId"].Value; } set { MDV["DefaultLocationId"].Value = value; } }
+		public int? MinGradeLevelOffered { get { return (int?)MDV["MinGradeLevelOffered"].Value; } set { MDV["MinGradeLevelOffered"].Value = value; } }
+		public int? MaxGradeLevelOffered { get { return (int?)MDV["MaxGradeLevelOffered"].Value; } set { MDV["MaxGradeLevelOffered"].Value = value; } }
 		
 
         public Account()
@@ -83,6 +86,9 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "LogoUrl", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "LandingPageText", System.Data.SqlDbType.NVarChar, 4000);
 				_dp.Add(className, "AccountTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "DefaultLocationId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "MinGradeLevelOffered", System.Data.SqlDbType.Int);
+				_dp.Add(className, "MaxGradeLevelOffered", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -238,6 +244,18 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["AccountTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["DefaultLocationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MinGradeLevelOffered"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MaxGradeLevelOffered"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -312,7 +330,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return string.Format("{0}/{1}", Utilities.BaseUrl(this.IsAfterSchool), this.UniqueName);
+                return $"/{this.UniqueName.ToLower()}";
             }
 
         }
@@ -339,6 +357,25 @@ namespace AfterSchoolLibrary
                 }
             }
         }
+
+        public static int GetCount(List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            return dq.GetCount(msgs);
+        }
+
+        public static List<Account> LoadByAccountTypeIds(List<AccountType> accountTypes, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountTypeId"], accountTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         /*
         public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
         {
@@ -1376,7 +1413,7 @@ namespace AfterSchoolLibrary
             return account;
         }
         */
-        
+
         #endregion
     }
 }

@@ -852,11 +852,11 @@ Public MustInherit Class BaseAddress
         Return FormatAddress()
     End Function
 
-    Public Overridable Function FormatAddress() As String
-        Return BaseAddress.FormatAddress(Address1, Address2, City, State, PostalCode, Country)
+    Public Overridable Function FormatAddress(Optional ByVal useLineBreaks As Boolean = True) As String
+        Return BaseAddress.FormatAddress(Address1, Address2, City, State, PostalCode, Country, useLineBreaks)
     End Function
 
-    Public Shared Function FormatAddress(ByVal address1 As String, ByVal address2 As String, ByVal city As String, ByVal state As String, ByVal postalCode As String, ByVal country As String) As String
+    Public Shared Function FormatAddress(ByVal address1 As String, ByVal address2 As String, ByVal city As String, ByVal state As String, ByVal postalCode As String, ByVal country As String, Optional ByVal useLineBreaks As Boolean = True) As String
 
         Dim address As String = ""
 
@@ -866,7 +866,11 @@ Public MustInherit Class BaseAddress
 
         If address2.IsEmpty() = False Then
             If address.IsEmpty() = False Then
-                address &= vbCrLf
+                If useLineBreaks Then
+                    address &= vbCrLf
+                Else
+                    address &= " "
+                End If
             End If
             address &= address2
         End If
@@ -874,7 +878,11 @@ Public MustInherit Class BaseAddress
 
         If city.IsEmpty() = False Or state.IsEmpty() = False Or postalCode.IsEmpty = False Then
             If address.IsEmpty() = False Then
-                address &= vbCrLf
+                If useLineBreaks Then
+                    address &= vbCrLf
+                Else
+                    address &= " "
+                End If
             End If
 
             Dim cityLine As String = ""
@@ -903,7 +911,11 @@ Public MustInherit Class BaseAddress
 
         If country.IsEmpty = False Then
             If address.IsEmpty = False Then
-                address &= vbCrLf
+                If useLineBreaks Then
+                    address &= vbCrLf
+                Else
+                    address &= " "
+                End If
             End If
             address &= country
         End If
@@ -951,19 +963,24 @@ Public MustInherit Class BaseLocation
         End Get
     End Property
 
-    Public Overrides Function FormatAddress() As String
+    Public Overrides Function FormatAddress(Optional ByVal useLineBreaks As Boolean = True) As String
 
         Dim rtn As String = ""
 
         If Name.IsEmpty = False Then
-            rtn &= Name & vbCrLf
+            rtn &= Name
+            If useLineBreaks Then
+                rtn &= vbCrLf
+            Else
+                rtn &= ", "
+            End If
         End If
 
-        Return rtn & MyBase.FormatAddress()
+        Return rtn & MyBase.FormatAddress(useLineBreaks)
     End Function
 
-    Public Function FormatAddressWithoutName() As String
-        Return MyBase.FormatAddress()
+    Public Function FormatAddressWithoutName(Optional ByVal useLineBreaks As Boolean = True) As String
+        Return MyBase.FormatAddress(useLineBreaks)
     End Function
 
 End Class
@@ -1031,19 +1048,24 @@ Public MustInherit Class BaseCompany
         End Get
     End Property
 
-    Public Overrides Function FormatAddress() As String
+    Public Overrides Function FormatAddress(Optional ByVal useLineBreaks As Boolean = True) As String
 
         Dim rtn As String = ""
 
         If Name.IsEmpty = False Then
-            rtn &= Name & vbCrLf
+            rtn &= Name
+            If useLineBreaks Then
+                rtn &= vbCrLf
+            Else
+                rtn &= " "
+            End If
         End If
 
-        Return rtn & MyBase.FormatAddress()
+        Return rtn & MyBase.FormatAddress(useLineBreaks)
     End Function
 
-    Public Function FormatAddressWithoutName() As String
-        Return MyBase.FormatAddress()
+    Public Function FormatAddressWithoutName(Optional ByVal useLineBreaks As Boolean = True) As String
+        Return MyBase.FormatAddress(useLineBreaks)
     End Function
 
 End Class
@@ -1197,7 +1219,7 @@ Public MustInherit Class BasePerson
         Return DisplayName.IfEmpty(Email)
     End Function
 End Class
-<Serializable()> _
+<Serializable()>
 Public MustInherit Class BaseWebUser
     Inherits BasePerson
 
@@ -1289,13 +1311,15 @@ Public MustInherit Class BaseWebUser
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenId", tableName, SqlDbType.NVarChar, 400))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenIdProviderUrl", tableName, SqlDbType.NVarChar, 400))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "LastLogin", tableName, SqlDbType.DateTime))
-			_databaseParameters.Add(New DataAccess.DatabaseParameter(className, "TimeZoneId", tableName, SqlDbType.Float))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "TimeZoneId", tableName, SqlDbType.Float))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "ProfileUrl", tableName, SqlDbType.NVarChar, 400))
             Return _databaseParameters
         End Get
     End Property
 
 End Class
+
+<Serializable()>
 Public MustInherit Class BaseContact
     Inherits BasePerson
 
@@ -1383,6 +1407,7 @@ Public MustInherit Class BaseContact
     End Property
 End Class
 
+<Serializable()>
 Public MustInherit Class BaseContactWithAddress
     Inherits BaseContact
 
@@ -1472,7 +1497,7 @@ Public MustInherit Class BaseContactWithAddress
     End Function
 End Class
 
-
+<Serializable()>
 Public MustInherit Class BaseFile
     Inherits BasicObjectWithModified
 

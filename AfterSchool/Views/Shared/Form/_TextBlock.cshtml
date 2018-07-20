@@ -1,0 +1,3 @@
+﻿@model FormQuestionViewModel
+
+@Html.Raw(Model.Question.Description.IfEmpty("").Replace("\n", "<br />"))

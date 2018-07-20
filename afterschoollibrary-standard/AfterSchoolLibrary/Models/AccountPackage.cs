@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? PackageId { get { return (int?)MDV["PackageId"].Value; } set { MDV["PackageId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
@@ -244,14 +244,14 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public bool HasFeature(FeatureType featureType, DatabaseConnection dc = null)
+        public bool HasFeature(FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc: dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Count() > 0;
+            return this.GetFeatures(msgs, dc).Where(x => x.FeatureTypeId == featureType && x.Max.HasValue && x.Max > 0).Any();
         }
 
-        public AccountPackageFeature GetFeature(FeatureType featureType, DatabaseConnection dc = null)
+        public AccountPackageFeature GetFeature(FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetFeatures(dc: dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
+            return this.GetFeatures(msgs, dc).Where(x => x.FeatureTypeId == featureType).FirstOrDefault();
         }
         
         public SystemMessages AddPackageFeature(PackageFeature pf, int loggedInUserId, DatabaseConnection dc = null)
@@ -320,7 +320,11 @@ namespace AfterSchoolLibrary
                     var sh = new Billing.StripeHelper();
                     var subscription = sh.CreateSubscription(stripeCustomerId, this.ToPackage().GetStripePlanId(this.BillingPeriodTypeId), this.TrialEndDate, msgs);
 
-                    this.StripeSubscriptionId = subscription.Id;
+                    if (subscription.IsNotEmpty())
+                    {
+                        this.StripeSubscriptionId = subscription.Id;
+                        msgs.AddRange(this.Save(dc: dc));
+                    }
 
                     //var options = new Stripe.StripeSubscriptionCreateOptions();
 
@@ -446,11 +450,11 @@ namespace AfterSchoolLibrary
         }
 
         private List<AccountPackageFeature> _Features;
-        public List<AccountPackageFeature> GetFeatures(DatabaseConnection dc = null)
+        public List<AccountPackageFeature> GetFeatures(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if(_Features.IsEmpty())
             {
-                _Features = AccountPackageFeature.LoadByAccountPackageId(this.ID.Value, dc: dc);
+                _Features = AccountPackageFeature.LoadByAccountPackageId(this.ID.Value, msgs, dc);
             }
             return _Features;
         }
@@ -460,7 +464,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             this.TrialEndDate = TrialStartDate.Value.AddDays(trialDays);
-            msgs.AddRange(this.Save(dc: dc));
+            msgs.AddRange(this.Save(dc));
 
             return msgs;
         }

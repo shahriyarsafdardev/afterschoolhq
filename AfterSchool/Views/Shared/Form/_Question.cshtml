@@ -1,0 +1,57 @@
+﻿
+@using System.Collections.Specialized;
+@model FormQuestionViewModel
+
+<div class="form-group">
+    @if (Model.Question.QuestionTypeId == QuestionType.Checkbox)
+    {
+        <div class="col-md-1 col-md-offset-2">
+            @{ Html.RenderPartial("~/Views/Shared/Form/_Checkbox.cshtml", Model); }
+        </div>
+        
+        <div class="col-md-6">
+            @{ Html.RenderPartial("~/Views/Shared/Form/_Label.cshtml", Model); }
+        </div>
+    }
+    else
+    {
+        <div class="col-md-3 control-label">
+            @{ Html.RenderPartial("~/Views/Shared/Form/_Label.cshtml", Model); }
+        </div>
+
+        <div class="col-md-6">
+            @switch (Model.Question.QuestionTypeId)
+            {
+                case QuestionType.TextBlock:
+                    Html.RenderPartial("~/Views/Shared/Form/_TextBlock.cshtml", Model);
+                    break;
+                case QuestionType.TextBox:
+                case QuestionType.Email:
+                case QuestionType.Number:
+                    Html.RenderPartial("~/Views/Shared/Form/_Textbox.cshtml", Model);
+                    break;
+                case QuestionType.Date:
+                    Html.RenderPartial("~/Views/Shared/Form/_Date.cshtml", Model);
+                    break;
+                case QuestionType.DropDownList:
+                    Html.RenderPartial("~/Views/Shared/Form/_DropDownList.cshtml", Model);
+                    break;
+                case QuestionType.RadioList:
+                    Html.RenderPartial("~/Views/Shared/Form/_RadioList.cshtml", Model);
+                    break;
+                case QuestionType.TextArea:
+                    Html.RenderPartial("~/Views/Shared/Form/_TextArea.cshtml", Model);
+                    break;
+                case QuestionType.RadioMatrix:
+                    Html.RenderPartial("~/Views/Shared/Form/_RadioMatrix.cshtml", Model);
+                    break;
+                case QuestionType.CheckboxList:
+                    Html.RenderPartial("~/Views/Shared/Form/_CheckboxList.cshtml", Model);
+                    break;
+                default:
+                    break;
+            }
+        </div>
+
+    }
+</div>

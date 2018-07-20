@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests
 {
@@ -135,35 +136,27 @@ namespace AfterSchoolLibraryTests
             Assert.NotNull(Registrant.LoadByUid(g, dc: dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "Loads registrant by web user id")]
         public void LoadByWebUserIdTest()
         {
-            var u = new WebUser() { };
-            u.Save(dc: dc);
-            var wid = u.ID.Value;
+            var user = WebUserFactory.Create(msgs, dc);
+            var registrant = RegistrantFactory.Create(user, true, msgs, dc);
 
-            var a = new Registrant() { WebUserId = wid };
-            a.Save(dc: dc);
-            var id = a.ID.Value;
-
-            Assert.NotNull(Registrant.LoadByWebUserId(wid, dc: dc));
+            Assert.NotNull(Registrant.LoadByWebUserId(user.ID.Value, msgs, dc));
         }
 
-        [Fact]
-        public void LoadByWebUserIdByIsMasterTest()
+        [Theory(DisplayName = "Loads registrant by user id by is master")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void LoadByWebUserIdByIsMasterTest(bool isMaster)
         {
-            var u = new WebUser() { };
-            u.Save(dc: dc);
-            var wid = u.ID.Value;
+            var user = WebUserFactory.Create(msgs, dc);
+            var registrant = RegistrantFactory.Create(user, isMaster, msgs, dc);
 
-            var a = new Registrant() {WebUserId = wid ,IsMaster= true};
-            a.Save(dc: dc);
-            var id = a.ID.Value;
-
-            Assert.NotNull(Registrant.LoadByWebUserIdByIsMaster(wid,true, dc: dc));
+            Assert.NotNull(Registrant.LoadByWebUserIdByIsMaster(user.ID.Value, isMaster, msgs, dc));
         }
 
-        [Fact]
+        [Fact(Skip = "Need to finish")]
         public void LoadByFirstRegistrantIdTest()
         {
             var a = new Registrant() {  FirstRegistrantId =12 };

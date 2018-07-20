@@ -207,7 +207,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 ViewBag.Messages = msgs;
 
                 if (id.IsNotEmpty())
-                    return RedirectToAction("Team", "Account", new { id = id });
+                    return RedirectToAction("Team", "Account", new { id });
                 else
                     return RedirectToAction("Index", "User");
             }

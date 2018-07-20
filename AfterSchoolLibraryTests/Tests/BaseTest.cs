@@ -32,7 +32,7 @@ namespace AfterSchoolLibraryTests
             dc.BeginTransaction();
 
             // need some default data in the AfterSchool admin account in order to run certain tests
-            msgs.AddRange(AccountService.CreateAfterSchoolAccount(null, null, null, dc));
+            msgs.AddRange(AccountService.CreateAfterSchoolAccount(null, null, null, null, dc));
             msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
         }
 

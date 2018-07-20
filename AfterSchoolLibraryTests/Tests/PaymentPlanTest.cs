@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests
             AccountOwner = Factories.WebUserFactory.Create(msgs, dc);
             PlanOwnerAccount = Factories.AccountFactory.Create(AccountOwner, msgs, dc);
             Activity = Factories.ActivityFactory.Create(PlanOwnerAccount, msgs, dc);
-            ActivityGroup = Factories.ActivityGroupFactory.Create(PlanOwnerAccount, msgs, dc);
+            ActivityGroup = Factories.ActivityGroupFactory.Create(PlanOwnerAccount, ActivityGroupType.Session, msgs, dc);
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace AfterSchoolLibraryTests
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var activityGroup = Factories.ActivityGroupFactory.Create(account, msgs, dc);
+            var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
             var plan1 = Factories.PaymentPlanFactory.Create(account, activity, msgs, dc);
             var plan2 = Factories.PaymentPlanFactory.Create(account, activityGroup, msgs, dc);
 

@@ -1,0 +1,128 @@
+﻿@model Location
+
+@{ 
+    var accountId = (int)ViewData["accountId"];
+}
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+        Enter your location <span class="text-danger">*</span>
+    </label>
+    <div class="col-sm-9" style="position:relative;">
+        <input type="text" class="form-control" id="location-search" name="location-search" value="@Model.FormatAddress(false)" placeholder="Search Locations..." />
+        <input type="hidden" name="location" id="location" value="@(Model?.ID)" />
+        <input type="hidden" name="hostaccount" id="hostaccount" value="" />
+        <div id="location-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;">
+
+        </div>
+    </div>
+</div>
+
+<script>
+    var locationList;
+    var locationSearch;
+    var isSearching = false;
+    var listItemClass = "text-small padding-10";
+    var listItemStyle = "";
+    var listItemOnMouseOver = "locationMouseOver";
+    var listItemOnMouseOut = "locationMouseOut";
+    var listItemOnClick = "locationMouseClick";
+
+    function locationMouseOver(id) {
+        $(`#location-${id}`).addClass('bg-warning');
+    }
+
+    function locationMouseOut(id) {
+        $(`#location-${id}`).removeClass('bg-warning');
+    }
+
+    function locationMouseClick(id, fullAddress, hostAccount) {
+        locationList.addClass('hide');
+
+        if (id > 0) {
+            $('#add-location').addClass('hide');
+            $('#location').val(id);
+            locationSearch.val(fullAddress);
+            $('#hostaccount').val(hostAccount);
+
+            if (hostAccount.length > 0 && hostAccount != @accountId) {
+                $('#hostaccount-div').addClass('hide');
+            } else {
+                $('#hostaccount-div').removeClass('hide');
+            }
+        } else {
+            $('#add-location').removeClass('hide');
+            $('#location').val('');
+            locationSearch.val('');
+            $('#hostaccount').val('');
+            $('#hostaccount-div').removeClass('hide');
+        }
+    }
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        locationList = $('#location-list');
+        locationSearch = $('#location-search');
+
+        locationSearch.keyup(function () {
+            if (locationSearch.val().length > 1 && !isSearching) {
+                isSearching = true;
+                
+                $.get(
+                    `@Url.Action("searchlocations", "services")?search=${$(this).val()}`,
+                    function (data) {
+                        isSearching = false;
+                        if (data && data.status == 'ok') {
+
+                            locationList.html('');
+
+                            for (let location of data.locations) {
+                                locationList.append(`
+                                    <div class="${listItemClass}" 
+                                        style="${listItemStyle}" 
+                                        id="location-${location.ID}" 
+                                        onmouseover="${listItemOnMouseOver}(${location.ID})" 
+                                        onmouseout="${listItemOnMouseOut}(${location.ID})" 
+                                        onclick="${listItemOnClick}(${location.ID},'${location.FullAddress}','${location.HostAccountId}')">
+                                        <strong>${location.FullAddress}</strong>
+                                    </div>`);
+                            }
+
+                            if (locationSearch.val().length > 8) {
+                                locationList.append(`
+                                <div class="${listItemClass}" 
+                                    style="${listItemStyle}" 
+                                    id="location-0"
+                                    onmouseover="${listItemOnMouseOver}(0)" 
+                                    onmouseout="${listItemOnMouseOut}(0)" 
+                                    onclick="${listItemOnClick}(0)">
+                                    <strong>Location not found. Add a new location?</strong>
+                                </div>`);
+                            } else if (data.locations.length == 0) {
+                                locationList.append(`
+                                <div class="${listItemClass}" 
+                                    style="${listItemStyle}" 
+                                    id="location-0">
+                                    <strong>Searching...</strong>
+                                </div>`);
+                            }
+
+                            locationList.removeClass('hide');
+
+                        } else {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: 'Error loading locations',
+                                success: false
+                            });
+                        }
+                    }
+                );
+            } else {
+                locationList.html('');
+                locationList.addClass('hide');
+            }
+        });
+
+    });
+</script>

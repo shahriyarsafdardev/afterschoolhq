@@ -162,7 +162,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Activity activity = null;
             ActivityGroup activityGroup = null;
 
-            var values = new NameValueCollection()
+            var values = new Dictionary<string, object>()
             {
                 { "name", name },
                 { "seatsavailable", seatsavailable },
@@ -280,7 +280,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                 }
 
-                var values = new NameValueCollection()
+                var values = new Dictionary<string, object>()
                 {
                     { "alloworganization", alloworganization.IfBlank("0")},
                     { "agestart", agerestrictions.IsNumber() ? agestart : "-1"},
@@ -348,7 +348,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = null;
 
-            var values = new NameValueCollection()
+            var values = new Dictionary<string, object>()
             {
                 { "contactname", contactname},
                 { "contactphone", contactphone},
@@ -414,7 +414,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsNumber() && id.ToInteger() > 0)
             {
-                var values = new NameValueCollection()
+                var values = new Dictionary<string, object>()
                 {
                     { "details", details},
                     { "scheduledetails", scheduledetails}
@@ -505,15 +505,15 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             Activity activity = null;
-            var scheduleDates = new List<string>();
+            var scheduleDates = new List<DateRange>();
 
             if (id.IsNumber() && id.ToInteger() > 0)
             {
-                var values = new NameValueCollection();
+                var values = new Dictionary<string, object>();
 
                 if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
                 {
-                    values = new NameValueCollection()
+                    values = new Dictionary<string, object>()
                     {
                         { "schedule", schedule }
                     };
@@ -524,7 +524,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
                     scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
 
-                    values = new NameValueCollection()
+                    values = new Dictionary<string, object>()
                     {
                         { "scheduledetails", scheduledetails},
                         { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
@@ -533,7 +533,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         { "enddate", enddate },
                         { "dailystarttime", dailystarttime },
                         { "dailyendtime", dailyendtime },
-                        { "scheduledates", scheduleDates.ToStringList() },
+                        { "scheduledates", scheduleDates },
                         { "schedule", schedule }
                     };
                     
@@ -603,21 +603,24 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditLocation(string id, string locationdetails, string address1, string address2, string city, string state, string postalcode, string cmd)
+        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string mylocation, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
 
             if (id.IsNumber() && id.ToInteger() > 0)
             {
-                var values = new NameValueCollection()
+                var values = new Dictionary<string, object>()
                 {
+                    { "location", location},
+                    { "locationname", locationname},
                     { "locationdetails", locationdetails},
                     { "address1", address1},
                     { "address2", address2},
                     { "city", city},
                     { "state", state},
                     { "postalcode", postalcode},
+                    { "mylocation", mylocation }
                 };
 
                 activity = Activity.EditExisting(
@@ -684,7 +687,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsNumber() && id.ToInteger() > 0)
             {
-                var values = new NameValueCollection()
+                var values = new Dictionary<string, object>()
                 {
                     { "cost", cost},
                     { "costdescription", costdescription},
@@ -750,7 +753,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsNumber() && id.ToInteger() > 0)
             {
-                var values = new NameValueCollection()
+                var values = new Dictionary<string, object>()
                 {
                     { "registrationthankyouemail", registrationthankyouemail },
                     { "applicationthankyouemail", applicationthankyouemail }
@@ -1534,11 +1537,16 @@ namespace AfterSchool.Areas.Org.Controllers
                                 waitingListSeatCount = 0;
                             }
 
-                            var hasSeatsAvailable = activity.GetRegistrantCount(adc) < activity.SeatsAvailable;
+                            var hasSeatsAvailable = activity.GetRegistrantCount(amsgs, adc) < activity.SeatsAvailable;
 
                             // TODO: need to verify if this really should be the master account. What is master
                             var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
-                            var registration = registrant.AddRegistration(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, activity.ActivityGroupId, amsgs, dc: adc);
+                            var registration = registrant.AddRegistration(
+                                SessionVariables.CurrentAccount.ID.Value,
+                                activity.ActivityGroupId,
+                                SessionVariables.LoggedInUser.ID.Value,
+                                amsgs, 
+                                dc: adc);
                             var ra = registrant.AddOrUpdateActivity(registration.ID.Value, af.ActivityId.Value, seatCount, waitingListSeatCount, applicationSeatCount, invitationSeatCount, declinedSeatCount, 0, amsgs, dc: adc);
 
                             for (var i = 0; i < headers.Count; i++)

@@ -13,7 +13,7 @@ namespace AfterSchoolLibrary
 	/// <summary>
     /// A single registrant for an activity, this is the main person who registered
     /// </summary>
-	
+	[Serializable]
     public class Registrant : BaseContact
     {
 		#region "ClassGenerator"
@@ -21,17 +21,19 @@ namespace AfterSchoolLibrary
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public RegistrantType RegistrantTypeId { get { return (RegistrantType)MDV["RegistrantTypeId"].Value; } set { MDV["RegistrantTypeId"].Value = value; } }
 		public int? ParentRegistrantId { get { return (int?)MDV["ParentRegistrantId"].Value; } set { MDV["ParentRegistrantId"].Value = value; } }
 		public bool IsMaster { get { return (bool)MDV["IsMaster"].Value; } set { MDV["IsMaster"].Value = value; } }
 		public bool IsContactOnly { get { return (bool)MDV["IsContactOnly"].Value; } set { MDV["IsContactOnly"].Value = value; } }
 		public int? FirstRegistrantId { get { return (int?)MDV["FirstRegistrantId"].Value; } set { MDV["FirstRegistrantId"].Value = value; } }
+		public bool IsParentOrGuardian { get { return (bool)MDV["IsParentOrGuardian"].Value; } set { MDV["IsParentOrGuardian"].Value = value; } }
+		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
 		
 
         public Registrant()
@@ -42,6 +44,8 @@ namespace AfterSchoolLibrary
 			this.RegistrantTypeId = RegistrantType.NotSet;
 			this.IsMaster = false;
 			this.IsContactOnly = false;
+			this.IsParentOrGuardian = false;
+			this.AllowTextMessages = false;
 			
         }
 
@@ -60,6 +64,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsMaster", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsContactOnly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "FirstRegistrantId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -115,8 +121,6 @@ namespace AfterSchoolLibrary
 				msgs.Add("Uid is required on Registrant object", MessageType.Error);
 			if (this.RegistrantTypeId.IsEmpty())
 				msgs.Add("RegistrantTypeId is required on Registrant object", MessageType.Error);
-			if (this.Email.IsEmpty())
-				msgs.Add("Email is required on Registrant object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Registrant).Name));
@@ -169,6 +173,14 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FirstRegistrantId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsParentOrGuardian"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowTextMessages"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -268,9 +280,16 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public List<FormQuestionAnswer> GetAnswers(int activityId, DatabaseConnection dc = null)
+        public List<FormQuestionAnswer> GetAnswers(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionAnswer.LoadByRegistrantIdByActivityId(this.ID.Value, activityId, dc: dc)
+                .OrderBy(x => x.FormQuestionDisplayOrder)
+                .ToList();
+        }
+
+        public List<FormQuestionAnswer> GetAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionAnswer.LoadByRegistrantId(this.ID.Value, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
         }
@@ -425,18 +444,44 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public Registration AddRegistration(int loggedInUserId, int? accountId, int? groupId, SystemMessages msgs, DatabaseConnection dc = null)
+        [Obsolete]
+        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var reg = new Registration();
-            reg.AccountId = accountId;
-            reg.RegistrantId = this.ID;
-            reg.ActivityGroupId = groupId;
-            reg.CreateDate = reg.LastModifiedDate = DateTime.UtcNow;
-            reg.CreatedBy = reg.LastModifiedBy = loggedInUserId;
-            reg.LastUpdated = DateTime.UtcNow;
-            msgs.AddRange(reg.Save(dc: dc));
+            var reg = new Registration
+            {
+                AccountId = ownerAccountId,
+                RegistrantId = this.ID,
+                ActivityGroupId = activityGroupId,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedBy = loggedInUserId,
+                LastUpdated = DateTime.UtcNow
+            };
+            msgs.AddRange(reg.Save(dc));
+
+            return reg;
+        }
+
+        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, string esignature, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var reg = new Registration
+            {
+                AccountId = ownerAccountId,
+                RegistrantId = this.ID,
+                ActivityGroupId = activityGroupId,
+                ESignature = esignature,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedBy = loggedInUserId,
+                LastUpdated = DateTime.UtcNow
+            };
+            msgs.AddRange(reg.Save(dc));
 
             return reg;
         }
@@ -455,6 +500,7 @@ namespace AfterSchoolLibrary
         {
             return AddOrUpdateActivity(registrationId, activityId, DayOfWeekASL.NotSet, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, 1, null, null, loggedInUserId, msgs, dc: dc);
         }
+
         public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, DayOfWeekASL day, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -518,25 +564,28 @@ namespace AfterSchoolLibrary
             return FormQuestionAnswer.LoadByRegistrantId(this.ID.Value, dc: dc);
         }
 
-        public FormQuestionAnswer AddAnswer(string answerText, QuestionDataType qt, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             //check if answer for this one already exists, and where formquestion is null
-            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, qt, dc: dc);
+            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, dc: dc);
 
             if (answer.IsEmpty())
             {
-                answer = new FormQuestionAnswer();
-                answer.RegistrantId = this.ID;
-                answer.QuestionDataTypeId = qt;
-                answer.CreateDate = DateTime.UtcNow;
-                answer.CreatedBy = loggedInUserId;
+                answer = new FormQuestionAnswer
+                {
+                    RegistrantId = this.ID,
+                    FormQuestionId = question.ID,
+                    QuestionDataTypeId = question.QuestionDataTypeId,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId
+                };
             }
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
             answer.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(answer.Save(dc: dc));
+            msgs.AddRange(answer.Save(dc));
 
             msgs.AddRange(answer.UpdateRegistrantInfo(this, dc: dc));
 
@@ -583,11 +632,11 @@ namespace AfterSchoolLibrary
         public Registrant CreateMasterCopy(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var master = this.Copy(questions, loggedInUserId, msgs, dc: dc);
+            var master = this.Copy(questions, loggedInUserId, msgs, dc);
             master.IsMaster = true;
             master.IsContactOnly = true;
             master.AccountId = null;
-            msgs.AddRange(master.Save(dc: dc));
+            msgs.AddRange(master.Save(dc));
 
             this.ParentRegistrantId = master.ID;
             msgs.AddRange(this.Save(dc: dc));
@@ -598,6 +647,7 @@ namespace AfterSchoolLibrary
         public Registrant Copy(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             var copy = new Registrant();
             copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
             copy.CreateDate = copy.LastModifiedDate = DateTime.UtcNow;
@@ -606,9 +656,37 @@ namespace AfterSchoolLibrary
             copy.ResetID();
             msgs.AddRange(copy.Save(dc: dc));
 
+            if (questions.IsEmpty())
             questions.ForEach(question => 
-                copy.AddAnswer(question.GetAnswer(this.ID.Value, dc: dc).Text, question.QuestionDataTypeId, loggedInUserId, msgs, dc: dc)
+                copy.AddAnswer(question.GetAnswer(this.ID.Value, msgs, dc).Text, question, loggedInUserId, msgs, dc)
             );
+
+            return copy;
+        }
+
+        public Registrant CopyToAccount(Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var copy = new Registrant
+            {
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                Uid = Guid.NewGuid(),
+                AccountId = ownerAccount.ID,
+                FirstRegistrantId = null,
+                ParentRegistrantId = this.ID,
+                IsContactOnly = false,
+                IsMaster = false
+            };
+            copy.ResetID();
+            copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
+            msgs.AddRange(copy.Save(dc));
+
+            // need to relate registrants within the same account, specifically provider or school accounts
+            msgs.AddRange(copy.FindAndSetFirstRegistrant(loggedInUser, dc));
 
             return copy;
         }
@@ -670,8 +748,15 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public SystemMessages FindAndSetFirstRegistrant(string firstName, string lastName, string email, DatabaseConnection dc = null)
+        public SystemMessages FindAndSetFirstRegistrant(WebUser loggedInUser, DatabaseConnection dc = null)
         {
+            return FindAndSetFirstRegistrant(this.FirstName, this.LastName, this.Email, loggedInUser, dc);
+        }
+
+        public SystemMessages FindAndSetFirstRegistrant(string firstName, string lastName, string email, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
@@ -683,17 +768,17 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
             dq.OrderBys.Add(ObjectMap["Id"], OrderByDirectionEnum.Ascending);
 
-            var firstRegistrant = dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            var firstRegistrant = dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 
             if (firstRegistrant.IsNotEmpty())
             {
                 this.FirstRegistrantId = firstRegistrant.ID;
-                this.LastModifiedBy = 0;
+                this.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
                 this.LastModifiedDate = DateTime.UtcNow;
-                return this.Save(dc: dc);
+                msgs.AddRange(this.Save(dc));
             }
 
-            return new SystemMessages();
+            return msgs;
         }
 
         public static List<Registrant> FindRelatedRegistrants(int AccountId, string firstName, string lastName, string email, DatabaseConnection dc = null)
@@ -800,6 +885,11 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }        
+
+        public Registrant GetParentOrGuardian(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
+        }
 
         /*
         public List<Attendance> GetAttendance(int ActivityId, DatabaseConnection dc = null)

@@ -28,5 +28,8 @@ namespace AfterSchoolLibrary
             }
             return rows.AsEnumerable();
         }
+
+        public static TValue GetValueOrDefault<TKey,TValue> (this IDictionary<TKey, TValue> dictionary, TKey key) =>
+            dictionary.TryGetValue(key, out var ret) ? ret : default;
     }
 }

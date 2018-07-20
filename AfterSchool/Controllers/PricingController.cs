@@ -95,10 +95,12 @@ namespace AfterSchool.Controllers
                             firstName: firstname,
                             lastName: lastname,
                             email: email,
+                            phone: phone,
                             password: password1,
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
+                            allowTextMessages: false,
                             loggedInUser: null,
                             msgs: amsgs,
                             dc: adc);

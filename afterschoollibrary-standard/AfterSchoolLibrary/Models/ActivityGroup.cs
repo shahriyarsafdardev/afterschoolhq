@@ -19,13 +19,13 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public RegistrationMode RegistrationModeId { get { return (RegistrationMode)MDV["RegistrationModeId"].Value; } set { MDV["RegistrationModeId"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
@@ -39,7 +39,8 @@ namespace AfterSchoolLibrary
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
 		public int? AdministratorAccountId { get { return (int?)MDV["AdministratorAccountId"].Value; } set { MDV["AdministratorAccountId"].Value = value; } }
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
-		public int? NumberOfMatchesPerTeam { get { return (int?)MDV["NumberOfMatchesPerTeam"].Value; } set { MDV["NumberOfMatchesPerTeam"].Value = value; } }
+		public decimal? Cost { get { return (decimal?)MDV["Cost"].Value; } set { MDV["Cost"].Value = value; } }
+		public CostUnitType CostUnitTypeId { get { return (CostUnitType)MDV["CostUnitTypeId"].Value; } set { MDV["CostUnitTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -55,6 +56,7 @@ namespace AfterSchoolLibrary
 			this.HasLotteryRun = false;
 			this.ActivityGroupTypeId = ActivityGroupType.NotSet;
 			this.GenderRestriction = GenderRestrictionType.None;
+			this.CostUnitTypeId = CostUnitType.NotSet;
 			
         }
 
@@ -80,7 +82,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AdministratorAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "NumberOfMatchesPerTeam", System.Data.SqlDbType.Int);
+				_dp.Add(className, "Cost", System.Data.SqlDbType.Money);
+				_dp.Add(className, "CostUnitTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -223,7 +226,11 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["NumberOfMatchesPerTeam"]);
+			dps.Add(ObjectMap["Cost"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CostUnitTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -322,11 +329,16 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
+        public string GetHomePageUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return $"{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName}";
+        }
+
         public string HomePageUrl
         {
             get
             {
-                return $"{this.GetAccount().HomePageUrl}?group={this.Uid.ToString()}";
+                return this.GetHomePageUrl();
             }
         }
 
@@ -408,7 +420,7 @@ namespace AfterSchoolLibrary
             return dq.GetCount() > 0;
         }
 
-        public static string GenerateUniqueName(int accountId, string name, DatabaseConnection dc = null)
+        public static string GenerateUniqueName(int accountId, string name, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var reg = new System.Text.RegularExpressions.Regex(
                 BasicLibrary.Utilities.UrlFriendlyRegEx, 
@@ -417,22 +429,22 @@ namespace AfterSchoolLibrary
 
             string origUniqueName = reg.Replace(name, "").MaxChars(25);
             string uniqueName = origUniqueName;
-            var duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, dc: dc);
+            var duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, msgs, dc);
             int count = 1;
             while (!duplicate.IsEmpty() && duplicate.ID != accountId)
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, dc: dc);
+                duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, msgs, dc);
             }
             return uniqueName;            
         }
 
         private List<RegistrationPeriod> _RegistrationPeriods = null;
-        public List<RegistrationPeriod> GetRegistrationPeriods(DatabaseConnection dc = null)
+        public List<RegistrationPeriod> GetRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_RegistrationPeriods.IsEmpty())
-                _RegistrationPeriods = RegistrationPeriod.LoadByActivityGroupId(this.ID.Value, dc: dc);
+                _RegistrationPeriods = RegistrationPeriod.LoadByActivityGroupId(this.ID.Value, msgs, dc);
 
             return _RegistrationPeriods;
         }
@@ -461,10 +473,10 @@ namespace AfterSchoolLibrary
         }
 
         private Form _Form = null;
-        public Form GetForm(DatabaseConnection dc = null)
+        public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Form.IsEmpty())
-                _Form = Form.Load(this.FormId.Value, dc: dc);
+                _Form = Form.Load(this.FormId.Value, msgs, dc);
 
             return _Form;
         }
@@ -562,30 +574,30 @@ namespace AfterSchoolLibrary
             return _Account;
         }
 
-        public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(DatabaseConnection dc = null)
+        public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var period = this.GetCurrentRegistrationPeriod(dc: dc);
+            var period = this.GetCurrentRegistrationPeriod(msgs, dc: dc);
             if (period.IsEmpty())
-                return GetNextRegistrationPeriod(dc: dc);
+                return GetNextRegistrationPeriod(msgs, dc: dc);
 
             return period;
         }
 
-        public RegistrationPeriod GetNextRegistrationPeriod(DatabaseConnection dc = null)
+        public RegistrationPeriod GetNextRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return this.GetRegistrationPeriods(dc: dc)
+            return this.GetRegistrationPeriods(msgs, dc)
                 .Where(x => now < x.StartDateTime.Value)
                 .OrderBy(x => x.StartDateTime.Value)
                 .FirstOrDefault();
         }
 
-        public RegistrationPeriod GetCurrentRegistrationPeriod(DatabaseConnection dc = null)
+        public RegistrationPeriod GetCurrentRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return this.GetRegistrationPeriods(dc: dc)
+            return this.GetRegistrationPeriods(msgs, dc)
                 .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
                 .FirstOrDefault();
         }
@@ -743,7 +755,7 @@ namespace AfterSchoolLibrary
                         }
 
                         group.AccountId = account.ID;
-                        group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, adc);
+                        group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, amsgs, adc);
                         group.LastModifiedDate = DateTime.UtcNow;
                         group.LastModifiedBy = loggedInUser.ID;
                         msgs.AddRange(group.Save(adc));
@@ -1035,7 +1047,7 @@ namespace AfterSchoolLibrary
                         IsPublished = false,
                         Name = newName,
                         RegistrationModeId = this.RegistrationModeId,
-                        UniqueName = ActivityGroup.GenerateUniqueName(this.AccountId.Value, newName, dc: adc),
+                        UniqueName = ActivityGroup.GenerateUniqueName(this.AccountId.Value, newName, amsgs, adc),
                         ActivityGroupTypeId = this.ActivityGroupTypeId,
                         ActivityScheduleId = this.ActivityScheduleId,
                         GenderRestriction = this.GenderRestriction,
@@ -1086,6 +1098,28 @@ namespace AfterSchoolLibrary
         public static ActivityGroup SaveLeague(WebUser loggedInUser, Account account, string activityGroupUid, System.Collections.Specialized.NameValueCollection values, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
+        }
+
+        private ActivitySchedule _Schedule = null;
+        public ActivitySchedule GetSchedule(bool reload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.ActivityScheduleId.HasValue && (reload || _Schedule.IsEmpty()))
+            {
+                _Schedule = ActivitySchedule.LoadWithInstances(this.ActivityScheduleId.Value, msgs, dc);
+            }
+            return _Schedule;
+        }
+
+        /// <summary>
+        /// Convert to the universal participation object, something a registrant participates in once registered
+        /// </summary>
+        /// <param name="activityGroup"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public ParticipationObject ToParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ParticipationObject(this, msgs, dc);
         }
 
         #endregion

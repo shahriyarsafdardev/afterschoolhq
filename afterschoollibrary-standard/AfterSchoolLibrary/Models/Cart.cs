@@ -154,7 +154,7 @@ namespace AfterSchoolLibrary
             this._CartItems = null;
         }
 
-        public static Cart GetNewCart(int? registrationId = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Cart GetNewCart(int? registrationId = null, WebUser loggedInUser = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -163,8 +163,8 @@ namespace AfterSchoolLibrary
                 RegistrationId = registrationId,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
-                CreatedBy = 0,
-                LastModifiedBy = 0
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
             };
             msgs.AddRange(cart.Save());
 
@@ -173,20 +173,49 @@ namespace AfterSchoolLibrary
 
         public CartItem AddCartItem(RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddCartItem(ra.ActivityId.Value, ra.Day, ra.ID.Value, msgs, dc: dc);
+            return AddCartItem(ra.ActivityId.Value, ParticipationObjectType.Activity, ra.ID.Value, msgs, dc: dc);
         }
 
-        public CartItem AddCartItem(int activityId, DayOfWeekASL day, int? registrantActivityId, SystemMessages msgs, DatabaseConnection dc = null)
+        public CartItem AddCartItem(Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AddCartItem(
+                activity.ID.Value,
+                ParticipationObjectType.Activity,
+                null,
+                msgs,
+                dc
+                );
+        }
+
+        public CartItem AddCartItem(ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AddCartItem(
+                participationObject.ObjectID.Value,
+                participationObject.ObjectType,
+                null,
+                msgs,
+                dc
+                );
+        }
+
+        public CartItem AddCartItem(int participationObjectId, ParticipationObjectType participationObjectType, int? registrantActivityId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
-            if (this.GetCartItems(dc: dc).Where(x => x.ActivityId == activityId && x.Day == day).Count() == 0)
+            var alreadyExistsInCart = this.GetCartItems(msgs, dc)
+                .Where(x => 
+                    x.ParticipationObjectId == participationObjectId && 
+                    x.ParticipationObjectTypeId == participationObjectType
+                )
+                .Any();
+
+            if (!alreadyExistsInCart)
             {
                 var item = new CartItem
                 {
                     CartId = this.ID,
-                    ActivityId = activityId,
-                    Day = day,
+                    ParticipationObjectId = participationObjectId,
+                    ParticipationObjectTypeId = participationObjectType,
                     RegistrantActivityId = registrantActivityId,
                     CreateDate = DateTime.UtcNow,
                     LastModifiedDate = DateTime.UtcNow,
@@ -200,17 +229,18 @@ namespace AfterSchoolLibrary
                 return item;
             }
 
-            return this.GetCartItems(dc: dc)
-                .Where(x => x.ActivityId == activityId && x.Day == day)
-                .First();
+            return this.GetCartItems(dc: dc).Where(x =>
+                    x.ParticipationObjectId == participationObjectId &&
+                    x.ParticipationObjectTypeId == participationObjectType
+                ).First();
 
         }
 
         private List<CartItem> _CartItems = null;
-        public List<CartItem> GetCartItems(DatabaseConnection dc = null)
+        public List<CartItem> GetCartItems(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_CartItems.IsEmpty())
-                _CartItems = CartItem.LoadByCartId(this.ID.Value, dc: dc);
+                _CartItems = CartItem.LoadByCartId(this.ID.Value, msgs, dc);
 
             return _CartItems;
         }

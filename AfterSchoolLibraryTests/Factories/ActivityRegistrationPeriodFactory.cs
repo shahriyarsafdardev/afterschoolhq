@@ -11,9 +11,14 @@ namespace AfterSchoolLibraryTests.Factories
 {
     public class ActivityRegistrationPeriodFactory
     {
-        public static ActivityRegistrationPeriod Create(Activity activity, RegistrationPeriod registrationPeriod, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityRegistrationPeriod Create(Activity activity, RegistrationPeriod registrationPeriod, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new ActivityRegistrationPeriod() { ActivityId = activity.ID, RegistrationPeriodId = registrationPeriod.ID };
+            var obj = new ActivityRegistrationPeriod()
+            {
+                ActivityId = activity.ID,
+                RegistrationPeriodId = registrationPeriod.ID,
+                IsActive = true
+            };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }

@@ -20,7 +20,7 @@ namespace AfterSchoolLibrary
 
 		public string FacebookId { get { return (string)MDV["FacebookId"].Value; } set { MDV["FacebookId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required,
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
@@ -28,6 +28,7 @@ namespace AfterSchoolLibrary
 		public bool VerifiedAccount { get { return (bool)MDV["VerifiedAccount"].Value; } set { MDV["VerifiedAccount"].Value = value; } }
 		public bool IsRegistered { get { return (bool)MDV["IsRegistered"].Value; } set { MDV["IsRegistered"].Value = value; } }
 		public int? DefaultAccountId { get { return (int?)MDV["DefaultAccountId"].Value; } set { MDV["DefaultAccountId"].Value = value; } }
+		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
 		
 
         public WebUser()
@@ -38,6 +39,7 @@ namespace AfterSchoolLibrary
 			this.IsActive = false;
 			this.VerifiedAccount = false;
 			this.IsRegistered = false;
+			this.AllowTextMessages = false;
 			
         }
 
@@ -55,6 +57,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "VerifiedAccount", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsRegistered", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "DefaultAccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -164,6 +167,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["DefaultAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowTextMessages"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -240,6 +247,51 @@ namespace AfterSchoolLibrary
                 ) > 0;
         }
 
+        public static WebUser LoginByEmail(string email, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["email"], email);
+            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static WebUser LoadByPhone(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["phone"], phone);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public bool CanPhoneBeUsed(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["phone"], phone);
+            dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
+            return dq.GetCount() == 0;
+        }
+
+        public static bool ExistsByPhone(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetCount(
+                criterias: new Hashtable(){
+                    {"phone", phone}
+                },
+                dc: dc
+                ) > 0;
+        }
+
+        public static WebUser LoginByPhone(string phone, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["phone"], phone);
+            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static bool ExistsByUid(Guid uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetCount(
@@ -263,15 +315,6 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["username"], username);
-            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-
-        public static WebUser LoginByEmail(string email, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["email"], email);
             dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }

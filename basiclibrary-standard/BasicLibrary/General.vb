@@ -879,6 +879,7 @@ End Class
 Public Class Utilities
 
     Public Const EmailRegEx As String = "^([a-zA-Z0-9_\-\.\+]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
+    Public Const PhoneRegEx As String = "^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$"
     Public Const DomainRegEx As String = "^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
     Public Const SpecialCharsRegEx As String = "[^\w-\.]+"
     Public Const SpecialCharsRegExAllowWhiteSpace As String = "[^\w^\s-\.]+"

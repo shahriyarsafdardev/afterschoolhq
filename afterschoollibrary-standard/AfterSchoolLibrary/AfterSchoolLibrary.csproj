@@ -4,12 +4,24 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="ActivityLeader.cs" />
     <Compile Remove="ActivityRecurrence.cs" />
     <Compile Remove="Archive.cs" />
     <Compile Remove="Leader.cs" />
     <Compile Remove="RecurrenceType.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Services\AccountActivityGroupService.cs~RF2aa463b.TMP" />
   </ItemGroup>
 
   <ItemGroup>

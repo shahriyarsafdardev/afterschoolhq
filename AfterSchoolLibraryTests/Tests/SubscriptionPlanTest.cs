@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests
             AccountOwner = Factories.WebUserFactory.Create(msgs, dc);
             PlanOwnerAccount = Factories.AccountFactory.Create(AccountOwner, msgs, dc);
             Activity = Factories.ActivityFactory.Create(PlanOwnerAccount, msgs, dc);
-            ActivityGroup = Factories.ActivityGroupFactory.Create(PlanOwnerAccount, msgs, dc);
+            ActivityGroup = Factories.ActivityGroupFactory.Create(PlanOwnerAccount, ActivityGroupType.Session, msgs, dc);
         }
 
         [Fact]
