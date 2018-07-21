@@ -28,7 +28,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadTest()
         {
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
             Assert.True(Transaction.Load(transaction.ID.Value, msgs, dc).IsNotEmpty());
         }
@@ -40,7 +40,7 @@ namespace AfterSchoolLibraryTests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+                var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
             }
 
             Assert.Equal(
@@ -60,7 +60,7 @@ namespace AfterSchoolLibraryTests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+                var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
             }
 
             Assert.Equal(numberToCreate, Transaction.GetCount(msgs: msgs, dc: dc));
@@ -72,7 +72,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void SaveTest()
         {
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
             transaction.LastModifiedBy = 1;
             msgs.AddRange(transaction.Save(dc));
@@ -86,7 +86,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DeleteTest()
         {
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
             msgs.AddRange(transaction.Delete(dc));
 
@@ -99,7 +99,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ReloadTest()
         {
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
             Assert.Equal(transaction.ID, transaction.Reload(msgs, dc).ID);
         }
@@ -107,7 +107,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByBillerAccountIdTest()
         {
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
             Assert.Single(Transaction.LoadByBillerAccountId(BillerAccount.ID.Value, msgs, dc));
         }
@@ -115,7 +115,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByPayerAccountIdTest()
         {
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
             Assert.Single(Transaction.LoadByPayerAccountId(PayerAccount.ID.Value, msgs, dc));
         }
@@ -123,40 +123,9 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadByUidTest()
         {
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, msgs, dc);
+            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
 
             Assert.NotNull(Transaction.LoadByUid(transaction.Uid, msgs, dc));
-        }
-
-        [Fact]
-        public void LoadByParticipationObjectTest()
-        {
-            var activity = Factories.ActivityFactory.Create(BillerAccount, msgs, dc);
-            var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
-
-            Assert.Single(Transaction.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc));
-        }
-
-        [Fact]
-        public void LoadByBillSourceTest()
-        {
-            var activity = Factories.ActivityFactory.Create(BillerAccount, msgs, dc);
-            var plan = Factories.SubscriptionPlanFactory.Create(BillerAccount, activity, msgs, dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc);
-            var registrantPlan = Factories.RegistrantSubscriptionPlanFactory.Create(registrant, plan, msgs, dc);
-            var transaction = Factories.TransactionFactory.Create(
-                BillerAccount, 
-                PayerAccount, 
-                PaymentType.ACH, 
-                TransactionType.Credit, 
-                activity.ID.Value, 
-                ParticipationObjectType.Activity,
-                registrantPlan.ID.Value,
-                BillSourceType.RegistrantSubscriptionPlan,
-                msgs, 
-                dc);
-
-            Assert.Single(Transaction.LoadByBillSource(registrantPlan.ID.Value, BillSourceType.RegistrantSubscriptionPlan, msgs, dc));
         }
 
         [Fact]
@@ -172,7 +141,7 @@ namespace AfterSchoolLibraryTests
 
             foreach (var amount in amounts)
             {
-                var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, amount, msgs, dc);
+                var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
             Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountReceivedByAccountId(BillerAccount.ID.Value, msgs, dc));
@@ -191,7 +160,7 @@ namespace AfterSchoolLibraryTests
 
             foreach (var amount in amounts)
             {
-                var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, TransactionType.Credit, amount, msgs, dc);
+                var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
             Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidByAccountId(PayerAccount.ID.Value, msgs, dc));

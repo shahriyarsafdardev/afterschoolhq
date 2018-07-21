@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? PackageId { get { return (int?)MDV["PackageId"].Value; } set { MDV["PackageId"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
@@ -297,11 +297,15 @@ namespace AfterSchoolLibrary
 
             if(this.StripeSubscriptionId.IsNotEmpty())
             {
-                var sh = new Billing.StripeHelper();
-                msgs.AddRange(sh.CancelSubscription(this.StripeSubscriptionId));
+                msgs.AddRange(Billing.StripeHelper.CancelSubscription(this.StripeSubscriptionId));
             }
 
             return msgs;
+        }
+
+        public Package GetPackage(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Package.Load(this.PackageId.Value, msgs, dc);
         }
 
         public SystemMessages SaveWithStripe(string stripeCustomerId, bool upgradingFromTrial, string newStripePlanId = null, DatabaseConnection dc = null)
@@ -317,8 +321,7 @@ namespace AfterSchoolLibrary
                 // first time, may have payment info
                 if (this.StripeSubscriptionId.IsEmpty())
                 {
-                    var sh = new Billing.StripeHelper();
-                    var subscription = sh.CreateSubscription(stripeCustomerId, this.ToPackage().GetStripePlanId(this.BillingPeriodTypeId), this.TrialEndDate, msgs);
+                    var subscription = Billing.StripeHelper.CreateSubscription(stripeCustomerId, this.GetPackage(msgs, dc).GetStripePlanId(this.BillingPeriodTypeId), this.TrialEndDate, msgs);
 
                     if (subscription.IsNotEmpty())
                     {
@@ -362,9 +365,8 @@ namespace AfterSchoolLibrary
                             billingCycleAnchorUnchanged = true;
                         }
                     }
-
-                    var sh = new Billing.StripeHelper();
-                    msgs.AddRange(sh.UpdateSubscription(
+                    
+                    msgs.AddRange(Billing.StripeHelper.UpdateSubscription(
                         this.StripeSubscriptionId,
                         newStripePlanId,
                         billingCycleAnchorNow,

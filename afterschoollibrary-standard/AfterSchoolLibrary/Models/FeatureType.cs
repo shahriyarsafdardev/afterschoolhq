@@ -16,5 +16,7 @@ public enum FeatureType
 	Lottery,
 	TrialDays,
 	ManageContacts,
-	ViewInsights
+	ViewInsights,
+	PaymentsPercentageFee,
+	PaymentsPercentageFlatFee
 }

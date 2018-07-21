@@ -79,10 +79,12 @@
                             <button type="button" id="btn-paywitnewcard" class="btn btn-xl center-block btn-primary">Review Purchase &raquo;</button>
                         </div>
                     </form>
-                    @if (participationObject)
-                    <div class="padding-v-30">
-                        <a href="#">Pay Later</a>
-                    </div>
+                    @if (participationObject.AllowToPayLater)
+                    {
+                        <div class="padding-v-30">
+                            <a href="#">Pay Later</a>
+                        </div>
+                    }
                 </div>
 
             </div>

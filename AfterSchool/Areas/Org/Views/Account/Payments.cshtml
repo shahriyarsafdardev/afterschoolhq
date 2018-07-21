@@ -2,7 +2,7 @@
 @{
     ViewBag.Title = Model.Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
-    var clientId = AfterSchoolLibrary.StripeHelper.PlatformClientId;
+    var clientId = AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
@@ -18,7 +18,7 @@
         <div class="panel-body">
 
             <div class="col-md-8 col-lg-9">
-                <div class="panel panel-default">
+                <div class="panel panel-default hide">
                     <div class="panel-heading">
                         PayPal
                     </div>
@@ -51,9 +51,9 @@
                         @if (Model.StripeAccessToken.IsBlank())
                         {
                             var redirectUri = "";
-                            if (AfterSchoolLibrary.Utilities.isLocalHost)
+                            if (AfterSchoolLibrary.Utilities.IsLocalHost)
                             {
-                                redirectUri = string.Format("&redirect_uri={0}/org/account/oauthstripe/", AfterSchoolLibrary.Utilities.BaseUrl);
+                                redirectUri = string.Format("&redirect_uri={0}/org/account/oauthstripe/", AfterSchoolLibrary.Utilities.BaseUrl(SessionVariables.IsAfterSchool.Value));
                             }
 
                             <a href="https://connect.stripe.com/oauth/authorize?response_type=code&client_id=@clientId&scope=read_write@(redirectUri)" class="stripe-connect"><span>Connect with Stripe</span></a>

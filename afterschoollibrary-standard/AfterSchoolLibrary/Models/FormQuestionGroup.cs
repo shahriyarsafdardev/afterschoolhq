@@ -19,7 +19,7 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
 		public int? DisplayOrder { get { return (int?)MDV["DisplayOrder"].Value; } set { MDV["DisplayOrder"].Value = value; } }

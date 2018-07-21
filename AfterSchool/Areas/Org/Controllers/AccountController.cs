@@ -290,7 +290,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult NewPayment(string selectedpackage, string name, string number, string cvc, string expmonth, string expyear)
+        public ActionResult NewPayment(string selectedpackage, string stripetoken)
         {
             var msgs = new SystemMessages();
 
@@ -306,7 +306,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-                    amsgs.AddRange(a.AddCreditCard(name, number, expmonth, expyear, cvc, true, adc));
+                    amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
                     if (amsgs.HasNoErrors())
                         a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
 
@@ -344,12 +344,12 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddCard(string id, string name, string number, string cvc, string expmonth, string expyear, string makeprimary)
+        public ActionResult AddCard(string id, string stripetoken, string makeprimary)
         {
             SystemMessages msgs = new SystemMessages();
 
             var a = SessionVariables.CurrentAccount;
-            msgs.AddRange(a.AddCreditCard(name, number, expmonth, expyear, cvc, !makeprimary.IsEmpty()));
+            msgs.AddRange(a.AddCreditCard(stripetoken, !makeprimary.IsEmpty(), SessionVariables.LoggedInUser));
             ViewBag.Cards = a.GetStripeCards();
             ViewBag.Messages = msgs;
             return View("Billing", a);
@@ -443,7 +443,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             msgs.AddRange(accountFeature.Save(adc));
 
                             if (accountFeature.FeatureTypeId == FeatureType.TrialDays && accountPackage.TrialStartDate.HasValue)
-                                amsgs.AddRange(accountPackage.UpdateTrialDays(accountFeature.Max.Value, adc));
+                                amsgs.AddRange(accountPackage.UpdateTrialDays(accountFeature.Max.Value.ToInteger(), adc));
                         }
                     }
                 },

@@ -19,12 +19,12 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
 		/// </summary>
 		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// Either a percentage or a flat amount
 		/// </summary>
 		public AmountType AmountTypeId { get { return (AmountType)MDV["AmountTypeId"].Value; } set { MDV["AmountTypeId"].Value = value; } }
@@ -34,6 +34,11 @@ namespace AfterSchoolLibrary
 		/// Determines what type of object the coupon will apply to during a purchase
 		/// </summary>
 		public CouponApplyType AppliesTo { get { return (CouponApplyType)MDV["AppliesTo"].Value; } set { MDV["AppliesTo"].Value = value; } }
+		public int? MaxNumberOfUsesPerPerson { get { return (int?)MDV["MaxNumberOfUsesPerPerson"].Value; } set { MDV["MaxNumberOfUsesPerPerson"].Value = value; } }
+		/// <summary>
+		/// The amount of uses that a coupon can have across all users
+		/// </summary>
+		public int? MaxNumberOfUsesAll { get { return (int?)MDV["MaxNumberOfUsesAll"].Value; } set { MDV["MaxNumberOfUsesAll"].Value = value; } }
 		
 
         public Coupon()
@@ -57,6 +62,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ExpirationDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "AppliesTo", System.Data.SqlDbType.Int);
+				_dp.Add(className, "MaxNumberOfUsesPerPerson", System.Data.SqlDbType.Int);
+				_dp.Add(className, "MaxNumberOfUsesAll", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -154,6 +161,14 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AppliesTo"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MaxNumberOfUsesPerPerson"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["MaxNumberOfUsesAll"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

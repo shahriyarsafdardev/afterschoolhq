@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? SeatsAvailable { get { return (int?)MDV["SeatsAvailable"].Value; } set { MDV["SeatsAvailable"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public int? AgeStart { get { return (int?)MDV["AgeStart"].Value; } set { MDV["AgeStart"].Value = value; } }
@@ -34,7 +34,7 @@ namespace AfterSchoolLibrary
 		public string CostDescription { get { return (string)MDV["CostDescription"].Value; } set { MDV["CostDescription"].Value = value; } }
 		public bool AllowPreRegistration { get { return (bool)MDV["AllowPreRegistration"].Value; } set { MDV["AllowPreRegistration"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
@@ -63,7 +63,7 @@ namespace AfterSchoolLibrary
 		public bool IsTemplate { get { return (bool)MDV["IsTemplate"].Value; } set { MDV["IsTemplate"].Value = value; } }
 		public int? ActivitySectionId { get { return (int?)MDV["ActivitySectionId"].Value; } set { MDV["ActivitySectionId"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public ActivityType ActivityTypeId { get { return (ActivityType)MDV["ActivityTypeId"].Value; } set { MDV["ActivityTypeId"].Value = value; } }
 		public DateTime? DateSubmittedToActivityGroup { get { return (DateTime?)MDV["DateSubmittedToActivityGroup"].Value; } set { MDV["DateSubmittedToActivityGroup"].Value = value; } }
@@ -1495,7 +1495,7 @@ namespace AfterSchoolLibrary
                             amsgs.AddRange(activity.SetupTeam(account, loggedInUserId, adc));
                         }
 
-                        //days
+                        //days // deprecated
                         if (amsgs.HasNoErrors() && days.IsNotEmpty())
                         {
                             amsgs.AddRange(activity.SetupActivityDays(days.ToString(), account, loggedInUserId, adc));
@@ -1555,7 +1555,7 @@ namespace AfterSchoolLibrary
 
                             if (!account.DefaultLocationId.HasValue)
                                 msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
-                        }
+                        }                        
                                               
                     },
                     onSuccess: (SystemMessages smsgs) =>
@@ -2232,7 +2232,7 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }
-
+       
         #endregion
     }
 }

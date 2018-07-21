@@ -21,11 +21,11 @@ namespace AfterSchoolLibrary
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public RegistrantType RegistrantTypeId { get { return (RegistrantType)MDV["RegistrantTypeId"].Value; } set { MDV["RegistrantTypeId"].Value = value; } }
 		public int? ParentRegistrantId { get { return (int?)MDV["ParentRegistrantId"].Value; } set { MDV["ParentRegistrantId"].Value = value; } }
@@ -498,15 +498,15 @@ namespace AfterSchoolLibrary
 
         public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddOrUpdateActivity(registrationId, activityId, DayOfWeekASL.NotSet, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, 1, null, null, loggedInUserId, msgs, dc: dc);
+            return AddOrUpdateActivity(registrationId, activityId, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, 1, null, null, loggedInUserId, msgs, dc);
         }
 
-        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, DayOfWeekASL day, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var changingDays = false;
+            // var changingDays = false;
 
-            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, dc: dc);
+            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
 
             if (ra.IsEmpty())
             {
@@ -518,41 +518,55 @@ namespace AfterSchoolLibrary
                 ra.RegistrationPeriodId = registrationPeriodId;
                 ra.CreateDate = DateTime.UtcNow;
                 ra.CreatedBy = loggedInUserId;
-                changingDays = true;
+                // changingDays = true;
             }
             else
             {
+                /*
                 if (day != ra.Day)
                     changingDays = true;
+                */
             }
 
-            ra.Day = day;
+            // ra.Day = day;
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
             ra.PreferenceNumber = preferenceNumber;
 
             //set indexes
-            if (changingDays)
-            {
+            //if (changingDays)
+            //{
                 ra.NumberOfSeats = seats;
                 ra.NumberOfWaitingListSeats = waitingListSeats;
                 ra.NumberOfApplicationSeats = applicationSeats;
                 ra.NumberOfInvitationSeats = invitationSeats;
                 ra.NumberOfSeatsDeclined = declinedSeats;
 
-                var days = new List<DayOfWeekASL>();
-                if (day != DayOfWeekASL.NotSet)
-                    days.Add(day);
+                //var days = new List<DayOfWeekASL>();
+                //if (day != DayOfWeekASL.NotSet)
+                //    days.Add(day);
 
                 if (seats > 0)
-                    ra.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: RegistrationAssignmentType.Reserved, activityId: activityId, dc: dc) + 1;
+                    ra.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
+                        rat: RegistrationAssignmentType.Reserved, 
+                        activityId: activityId, 
+                        msgs: msgs, 
+                        dc: dc) + 1;
 
                 if (waitingListSeats > 0)
-                    ra.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: RegistrationAssignmentType.WaitingList, activityId: activityId, dc: dc) + 1;
+                    ra.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
+                        rat: RegistrationAssignmentType.WaitingList, 
+                        activityId: activityId, 
+                        msgs: msgs, 
+                        dc: dc) + 1;
 
                 if (applicationSeats > 0)
-                    ra.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: RegistrationAssignmentType.Application, activityId: activityId, dc: dc) + 1;
-            }
+                    ra.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
+                        rat: RegistrationAssignmentType.Application, 
+                        activityId: activityId, 
+                        msgs: msgs, 
+                        dc: dc) + 1;
+            // }
 
             msgs.AddRange(ra.Save(dc: dc));
 

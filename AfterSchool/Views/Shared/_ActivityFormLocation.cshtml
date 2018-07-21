@@ -1,8 +1,8 @@
 ﻿@model AfterSchoolLibrary.Activity
 
 @{ 
-    var location = Model.GetLocation();
-    var isOwnedLocation = Model.AccountId == location.HostAccountId;
+    var location = Model.GetLocation() ?? new Location();
+    var isOwnedLocation = Model.AccountId == location?.HostAccountId;
     var addressViewModel = isOwnedLocation ? location.ToAddressViewModel() : new AddressViewModel();
 
 }
