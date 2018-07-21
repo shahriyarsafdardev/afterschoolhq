@@ -42,30 +42,30 @@ namespace AfterSchoolLibrary
             return uniqueName;
         }
 
-        public static int GetSeatsTaken(this Activity activity, DatabaseConnection dc = null)
+        public static int GetSeatsTaken(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc);
+            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, msgs, dc);
         }
 
-        public static int GetWaitingListSeatsTaken(this Activity activity, DatabaseConnection dc = null)
+        public static int GetWaitingListSeatsTaken(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc);
+            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, msgs, dc);
         }
 
-        public static int GetSeatsRemaining(this Activity activity, DatabaseConnection dc = null)
+        public static int GetSeatsRemaining(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var rtn = 0;
             if (activity.SeatsAvailable.HasValue)
-                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc);
+                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, msgs, dc);
 
             return Math.Max(0, rtn);
         }
 
-        public static int GetWaitingListSeatsRemaining(this Activity activity, DatabaseConnection dc = null)
+        public static int GetWaitingListSeatsRemaining(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var rtn = 0;
             if (activity.WaitingListSeats.HasValue)
-                rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc);
+                rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, msgs, dc);
 
             return Math.Max(0, rtn);
         }
@@ -229,6 +229,48 @@ namespace AfterSchoolLibrary
             return activity;
         }
 
+        public static void ProcessRegistration(this Activity activity, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var seatsAvailable = activity.GetSeatsRemaining(msgs, dc);
+            var waitingListSeatsAvailable = activity.GetWaitingListSeatsRemaining(msgs, dc);
+
+            var reservedSeats = 0;
+            var waitingListSeats = 0;
+            var applicationSeats = 0;
+
+            if (activity.RegistrationModeId == RegistrationMode.Apply)
+                applicationSeats = purchaseObject.NumberOfSeats;
+            else if (seatsAvailable >= purchaseObject.NumberOfSeats)
+                reservedSeats = purchaseObject.NumberOfSeats;
+            else if (waitingListSeatsAvailable >= purchaseObject.NumberOfSeats)
+                waitingListSeats = purchaseObject.NumberOfSeats;
+
+            if (reservedSeats == 0 && waitingListSeats == 0 && applicationSeats == 0)
+            {
+                msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
+                return;
+            }
+
+            var period = activity.GetCurrentRegistrationPeriod(msgs, dc);
+
+            var ra = purchaseObject.Registrant.AddOrUpdateActivity(
+                registrationId: purchaseObject.Registration.ID.Value,
+                activityId: purchaseObject.ParticipationObject.ObjectID.Value,
+                seats: reservedSeats,
+                waitingListSeats: waitingListSeats,
+                applicationSeats: applicationSeats,
+                invitationSeats: 0,
+                declinedSeats: 0,
+                preferenceNumber: 1,
+                registrationPeriodId: period?.ID.IfEmpty(0),
+                activityGroupId: activity.ActivityGroupId,
+                loggedInUserId: loggedInUser.ID.Value,
+                msgs: msgs,
+                dc: dc);
+
+            // add registration activity
+            purchaseObject.Registration.AddActivity(activity, loggedInUser.ID.Value, msgs, dc);
+        }
         //public static SystemMessages UpdateValues(this Activity activity, string activityName, string activityDetails, int seatsAvailable, int? waitingListSeatsAvailable, string contactName, string contactPhone, string contactEmail, decimal? costPerRegistrant, string costDescription, bool acceptCreditCard, bool allowToPayLater, RegistrationMode registrationMode, int? accountId, int? scheduleId, int? locationId, int? groupId, int? minGradeLevelId, int? maxGradeLevelId, WebUser loggedInUser, DatabaseConnection dc = null)
         //{
         //    var msgs = new SystemMessages();

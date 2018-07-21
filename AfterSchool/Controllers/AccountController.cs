@@ -838,53 +838,28 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                SessionVariables.CurrentAccount.ProcessRegistrationWithPayment(
+                    toAccount: participationObject.OwnerAccount,
+                    purchaseObject: new PurchaseObject()
                     {
-                        if (cardId.IsNotEmpty())
-                        {
-                            // pay with existing card
-                        }
-                        else if (stripetoken.IsEmpty())
-                        {
-                            // pay with new card
-                            if (savepaymentinfo.IsBoolean())
-                            {
-                                SessionVariables.CurrentAccount.ProcessPaymentWithStripe(
-                                    toAccount: participationObject.OwnerAccount,
-                                    purchase: new PurchaseObject()
-                                    {
-                                        Coupon = null,
-                                        LoggedInUser = SessionVariables.LoggedInUser,
-                                        NumberOfSeats = 1,
-                                        ParticipationObject = participationObject,
-                                        PaymentPlan = null,
-                                        Products = null,
-                                        Purchaser = SessionVariables.CurrentAccount,
-                                        Registration = registration,
-                                        StripeTokenOrCardId = stripetoken,
-                                        SubscriptionPlan = null
-                                    },
-                                    msgs: amsgs,
-                                    dc: adc);
-                                    
-                            }
-                        }
+                        Coupon = null,
+                        NumberOfSeats = 1,
+                        ParticipationObject = participationObject,
+                        PaymentPlan = null,
+                        Products = new List<Product>(),
+                        Purchaser = SessionVariables.CurrentAccount,
+                        Registration = registration,
+                        StripeTokenOrSourceId = stripetoken.IfEmpty(cardId),
+                        SubscriptionPlan = null,
+                        SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
+                        Registrant = SessionVariables.CurrentRegistrant
                     },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs);
             }
 
-
-            
+            if (msgs.HasNoErrors())
+                return RedirectToAction("thankyou");
 
             return View();
         }
@@ -893,6 +868,39 @@ namespace AfterSchool.Controllers
         public ActionResult Payment(string id, string card, string stripetoken, string savepaymentinfo)
         {
             return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, card, savepaymentinfo);
+        }
+
+        #endregion
+
+        #region ThankYou
+
+        private Registration ThankYouViewBag(string registrationUid, ParticipationObject participationObject, SystemMessages msgs)
+        {
+            var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
+
+            ViewBag.Registration = registration;
+            ViewBag.Cards = SessionVariables.CurrentAccount.GetStripeCards(msgs);
+            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ParticipationObject = participationObject;
+            ViewBag.Messages = msgs;
+
+            return registration;
+        }
+
+        private ActionResult ThankYouActionGet(string registrationUid)
+        {
+            var msgs = new SystemMessages();
+            var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+
+            ThankYouViewBag(registrationUid, participationObject, msgs);
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult ThankYou(string id)
+        {
+            return HandleIsLoggedIn() ?? ThankYouActionGet(id);
         }
 
         #endregion

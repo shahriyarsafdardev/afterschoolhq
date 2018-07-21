@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? ActivityMessageId { get { return (int?)MDV["ActivityMessageId"].Value; } set { MDV["ActivityMessageId"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public DateTime? DateSent { get { return (DateTime?)MDV["DateSent"].Value; } set { MDV["DateSent"].Value = value; } }

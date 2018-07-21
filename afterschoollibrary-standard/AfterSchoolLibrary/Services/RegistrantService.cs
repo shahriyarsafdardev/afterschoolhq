@@ -140,9 +140,10 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
-        public static SystemMessages StartPaymentPlan(this Registrant registrant, PaymentPlan paymentPlan, WebUser loggedInUser, DateTime? startDateTime = null, DatabaseConnection dc = null)
+        public static RegistrantPaymentPlan StartPaymentPlan(this Registrant registrant, PaymentPlan paymentPlan, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             var rpp = RegistrantPaymentPlanService.CreateNew(
                 registrant,
                 paymentPlan,
@@ -151,12 +152,13 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
 
-            return msgs;
+            return rpp;
         }
 
-        public static SystemMessages StartSubscriptionPlan(this Registrant registrant, SubscriptionPlan subscriptionPlan, WebUser loggedInUser, DateTime? startDateTime = null, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, SubscriptionPlan subscriptionPlan, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             var rpp = RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
                 subscriptionPlan,
@@ -165,7 +167,7 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
 
-            return msgs;
+            return rpp;
         }
     }
 }

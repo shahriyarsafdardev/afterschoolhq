@@ -517,7 +517,7 @@ namespace AfterSchoolLibrary
             {
                 if (activePackage.IsEmpty())
                 {
-                    trialDayCount = p.HasFeature(FeatureType.TrialDays, msgs, dc) ? p.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() : 0;
+                    trialDayCount = (p.HasFeature(FeatureType.TrialDays, msgs, dc) ? p.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() : 0).ToInteger();
                 }
                 else if (activePackage.HasFeature(FeatureType.TrialDays, msgs, dc))
                 {
@@ -663,7 +663,7 @@ namespace AfterSchoolLibrary
             var daysSinceSignUp = (DateTime.UtcNow - firstAccountPackage.StartDate.Value).Days;
             if (daysSinceSignUp < currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() + 1) // they get the full last day
             {
-                daysRemaining = currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() - daysSinceSignUp;
+                daysRemaining = (currentPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue() - daysSinceSignUp).ToInteger();
             }
             return daysRemaining;
         }
@@ -676,7 +676,7 @@ namespace AfterSchoolLibrary
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(account.CreateStripeCustomer(dc: dc));
+                msgs.AddRange(account.CreateStripeCustomer(dc));
             }
 
             return msgs;
@@ -687,15 +687,14 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             var customer = account.GetStripeCustomer(msgs);
-            var sh = new Billing.StripeHelper();
 
             if (customer.IsNotEmpty())
             {
-                msgs.AddRange(sh.UpdateCustomer(customer.Id, account.Name, account.Email));
+                msgs.AddRange(Billing.StripeHelper.UpdateCustomer(customer.Id, account.Name, account.Email));
             }
             else
             {
-                customer = sh.CreateCustomer(account.Name, account.Email, msgs);
+                customer = Billing.StripeHelper.CreateCustomer(account.Name, account.Email, msgs);
 
                 if (customer.IsNotEmpty())
                 {
@@ -706,7 +705,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages AddCreditCard(this Account account, string name, string number, string expMonth, string expYear, string cvc, bool makePrimary, DatabaseConnection dc = null)
+        public static SystemMessages AddCreditCard(this Account account, string stripeToken, bool makePrimary, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -717,23 +716,17 @@ namespace AfterSchoolLibrary
 
             if (msgs.HasNoErrors())
             {
-                var sh = new Billing.StripeHelper();
-                var card = sh.CreateCard(
+                var card = Billing.StripeHelper.CreateCard(
                     customerId: account.StripeCustomerId,
-                    sourceCard: new Stripe.SourceCard
-                    {
-                        Name = name,
-                        Number = number,
-                        ExpirationMonth = expMonth.ToInteger(),
-                        ExpirationYear = expYear.ToInteger(),
-                        Cvc = cvc
-                    },
+                    token: stripeToken,
                     msgs: msgs
                     );
 
                 if (!card.IsEmpty() && makePrimary)
                 {
                     account.StripeDefaultCardId = card.Id;
+                    account.LastModifiedDate = DateTime.UtcNow;
+                    account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
                     msgs.AddRange(account.Save(dc));
                     msgs.AddRange(account.SetStripeDefaultCard(card.Id));
                 }
@@ -745,7 +738,7 @@ namespace AfterSchoolLibrary
             }
 
             return msgs;
-        }
+        }       
 
         public static Stripe.StripeCard GetStripeCard(this Account account, string cardId, SystemMessages msgs = null)
         {
@@ -756,8 +749,7 @@ namespace AfterSchoolLibrary
 
             if (customer.IsNotEmpty())
             {
-                var sh = new Billing.StripeHelper();
-                card = sh.GetCard(customer.Id, cardId, msgs);
+                card = Billing.StripeHelper.GetCard(customer.Id, cardId, msgs);
             }
 
             return card;
@@ -772,8 +764,7 @@ namespace AfterSchoolLibrary
 
             if (customer.IsNotEmpty())
             {
-                var sh = new Billing.StripeHelper();
-                cards.AddRange(sh.GetCards(customer.Id, msgs));
+                cards.AddRange(Billing.StripeHelper.GetCards(customer.Id, msgs));
             }
 
             return cards;
@@ -788,8 +779,7 @@ namespace AfterSchoolLibrary
 
             if (customer.IsNotEmpty())
             {
-                var sh = new Billing.StripeHelper();
-                charges = sh.GetCharges(customer.Id, msgs);
+                charges = Billing.StripeHelper.GetCharges(customer.Id, msgs);
 
                 //try
                 //{
@@ -818,11 +808,10 @@ namespace AfterSchoolLibrary
 
             if (!customer.IsEmpty())
             {
-                var sh = new Billing.StripeHelper();
                 var charges = account.GetStripeBillingHistory(msgs);
                 foreach(var item in charges)
                 {
-                    refunds.AddRange(sh.GetRefunds(item.Id, msgs));
+                    refunds.AddRange(Billing.StripeHelper.GetRefunds(item.Id, msgs));
                 }
 
                 //try
@@ -847,8 +836,7 @@ namespace AfterSchoolLibrary
 
             if (!account.StripeCustomerId.IsEmpty())
             {
-                var sh = new Billing.StripeHelper();
-                customer = sh.GetCustomer(account.StripeCustomerId, msgs);
+                customer = Billing.StripeHelper.GetCustomer(account.StripeCustomerId, msgs);
             }
             return customer;
         }
@@ -860,8 +848,7 @@ namespace AfterSchoolLibrary
 
             if (customer.IsNotEmpty())
             {
-                var sh = new Billing.StripeHelper();
-                msgs.AddRange(sh.UpdateCustomerDefaultCard(customer.Id, cardId));
+                msgs.AddRange(Billing.StripeHelper.UpdateCustomerDefaultCard(customer.Id, cardId));
             }
             else
             {
@@ -974,9 +961,14 @@ namespace AfterSchoolLibrary
             return Attendance.LoadByAccountIdByDate(account.ID.Value, date, dc: dc);
         }
 
-        public static List<AccountPackageFeature> GetAccountPackageFeatures(this Account account, DatabaseConnection dc = null)
+        public static List<AccountPackageFeature> GetAccountPackageFeatures(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountPackageFeature.LoadByAccountPackageId(account.GetActiveAccountPackage(dc: dc).ID.Value, dc: dc);
+            return AccountPackageFeature.LoadByAccountPackageId(account.GetActiveAccountPackage(msgs, dc).ID.Value, msgs, dc);
+        }
+
+        public static AccountPackageFeature GetAccountPackageFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(account.GetActiveAccountPackage(msgs, dc).ID.Value, featureType, msgs, dc);
         }
 
         public static AccountProperty GetAccountProperty(this Account account, AccountPropertyType propertyType, DatabaseConnection dc = null)
@@ -1020,7 +1012,7 @@ namespace AfterSchoolLibrary
             {
                 ID = 0,
                 WaitingListSeats = 0,
-                SeatsAvailable = Math.Min(20, account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value),
+                SeatsAvailable = Math.Min(20, account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
                 CostPerRegistrant = 0,
                 AccountId = account.ID,
                 RegistrationModeId = RegistrationMode.Register,
@@ -1059,7 +1051,7 @@ namespace AfterSchoolLibrary
                 AccountTypeId = accountType,
                 UniqueName = uniqueName
             };
-            msgs.AddRange(account.SaveWithStripe(dc: dc));
+            msgs.AddRange(account.SaveWithStripe(dc));
 
             if (msgs.HasNoErrors())
             {
@@ -1411,26 +1403,147 @@ namespace AfterSchoolLibrary
             return registrant;
         }
 
-        public static object ProcessPaymentWithStripe(this Account fromAccount, Account toAccount, PurchaseObject purchase, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static decimal CalculatePlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
         {
-                        
+            var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+            var flatFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
 
-            var sh = new Billing.StripeHelper(toAccount.StripeAccessToken);
-            var charge = sh.CreateCharge(
-                totalAmount: purchase.TotalCostToPurchase,
-                description: $"{purchase.ParticipationObject.Name} registration",
-                toAccount: toAccount,
-                tokenOrCardId: purchase.StripeTokenOrCardId,
-                statementDescriptor: $"AfterSchool.com - {toAccount.Name}",
-                msgs: msgs
-                );
+            return (totalAmountToCharge * percentageFee.ToDecimal()) + flatFee.ToDecimal();
+        }
 
-            if (charge.IsNotEmpty())
+        private static void ProcessPayment(this Account toAccount, Account fromAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // if user wants to save payment info, do it before you charge the card
+            // can't use a token twice
+            if (msgs.HasNoErrors() && purchaseObject.SavePaymentInfo)
             {
-
+                var source = Billing.StripeHelper.CreateSource(purchaseObject.StripeTokenOrSourceId, msgs);
+                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id));
+                purchaseObject.StripeTokenOrSourceId = source.Id;
             }
 
-            return null;
+            // if everything goes right then bill the person, 
+            // if any errors it'll just rollback the transaction anyway :)
+            if (msgs.HasNoErrors())
+            {
+                var charge = Billing.StripeHelper.CreateCharge(
+                    fromCustomerId: fromAccount.StripeCustomerId,
+                    destinationUserId: toAccount.StripeUserId,
+                    tokenOrSourceId: purchaseObject.StripeTokenOrSourceId,
+                    totalAmount: purchaseObject.TotalCostToPurchase,
+                    platformFee: toAccount.CalculatePlatformFeeAmount(purchaseObject.TotalCostToPurchase, msgs, dc),
+                    description: $"{purchaseObject.ParticipationObject.Name} registration",
+                    statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
+                    msgs: msgs
+                    );
+            }
+
+            // must wait until after charges happen to know what card id is charged for sure
+            // add purchase
+            if (msgs.HasNoErrors())
+            {
+                var purchase = new Purchase()
+                {
+                    AmountPaid = purchaseObject.TotalCostToPurchase,
+                    CouponId = purchaseObject.Coupon?.ID,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                    LastModifiedDate = DateTime.UtcNow,
+                    LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
+                    NumberOfSeats = purchaseObject.NumberOfSeats,
+                    PurchaserAccountId = fromAccount.ID,
+                    RegistrantId = purchaseObject.Registrant.ID,
+                    RegistrationId = purchaseObject.Registration.ID,
+                    StripeTokenOrCardId = purchaseObject.StripeTokenOrSourceId
+                };
+                msgs.AddRange(purchase.Save(dc));
+
+                // charge successful so I need to create a transaction
+                var transaction = new Transaction()
+                {
+                    Amount = purchaseObject.TotalCostToPurchase,
+                    BillerAccountId = toAccount.ID.Value,
+                    Description = $"{purchaseObject.ParticipationObject.Name} registration",
+                    PayerAccountId = fromAccount.ID,
+                    PaymentTypeId = PaymentType.CreditCard,
+                    PurchaseId = purchase.ID,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                };
+                msgs.AddRange(transaction.Save(dc));
+            }
+        }
+
+        public static void ProcessRegistrationWithPayment(this Account fromAccount, Account toAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // TODO: Allow user to register for multiple activities in one session at once
+
+                    // add them to the activity
+                    if (purchaseObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
+                    {
+                        ((Activity)purchaseObject.ParticipationObject.Object).ProcessRegistration(
+                            purchaseObject: purchaseObject,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+                    }
+
+                    // TODO: Add to an activity group if they are registering for a session
+
+                    // if they have a subscription plan
+                    if (purchaseObject.SubscriptionPlan.IsNotEmpty())
+                    {
+                        purchaseObject.Registrant.StartSubscriptionPlan(
+                            subscriptionPlan: purchaseObject.SubscriptionPlan,
+                            startDateTime: DateTime.UtcNow,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc
+                            );
+                    }
+
+                    // if they have a payment plan
+                    if (purchaseObject.PaymentPlan.IsNotEmpty())
+                    {
+                        purchaseObject.Registrant.StartPaymentPlan(
+                            paymentPlan: purchaseObject.PaymentPlan,
+                            startDateTime: DateTime.UtcNow,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc
+                            );
+                    }
+
+                    // TODO: Add Products
+                    // if they have products
+                    //foreach (var product in purchaseObject.Products)
+                    //{
+                    //    purchaseObject.Registrant.PurchaseProduct();
+                    //}
+
+                    // process payment by to account
+                    toAccount.ProcessPayment(fromAccount, purchaseObject, loggedInUser, msgs, dc);
+
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages amsgs) =>
+                {
+                    msgs.AddRange(amsgs);
+                },
+                dc: dc
+            );
+            
         }
     }
 }

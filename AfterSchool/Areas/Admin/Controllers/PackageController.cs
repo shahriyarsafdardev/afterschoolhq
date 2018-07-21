@@ -117,7 +117,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                         feature.FeatureTypeId = type;
                                     }
 
-                                    feature.Max = Request[type.ToString()].ToInteger();
+                                    feature.Max = Request[type.ToString()].ToFloat();
                                     feature.LastModifiedBy = SessionVariables.LoggedInUser.ID;
                                     feature.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(feature.Save(adc));

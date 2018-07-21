@@ -7,16 +7,17 @@ namespace AfterSchoolLibrary
 {
     public class PurchaseObject
     {
+        public Registrant Registrant { get; set; }
         public Registration Registration { get; set; }
         public Coupon Coupon { get; set; }
         public SubscriptionPlan SubscriptionPlan { get; set; }
         public PaymentPlan PaymentPlan { get; set; }
-        public string StripeTokenOrCardId { get; set; }
+        public string StripeTokenOrSourceId { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
         public Account Purchaser { get; set; }
-        public WebUser LoggedInUser { get; set; }
         public int NumberOfSeats { get; set; }
         public List<Product> Products { get; set; }
+        public bool SavePaymentInfo { get; set; }
 
         public PurchaseObject()
         {
@@ -59,7 +60,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return Products.Sum(Product => Product.Cost.IfEmpty(0));
+                return Products.Any() ? Products.Sum(Product => Product.Cost.IfEmpty(0)) : 0;
             }
         }
 

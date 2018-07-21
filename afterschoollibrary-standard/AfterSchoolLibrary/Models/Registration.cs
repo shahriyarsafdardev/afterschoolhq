@@ -19,13 +19,13 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public int? RegistrationPeriodId { get { return (int?)MDV["RegistrationPeriodId"].Value; } set { MDV["RegistrationPeriodId"].Value = value; } }
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public DateTime? DatePaid { get { return (DateTime?)MDV["DatePaid"].Value; } set { MDV["DatePaid"].Value = value; } }
@@ -551,32 +551,34 @@ namespace AfterSchoolLibrary
 
             // add to this registration record 
             // TODO: hopefully will remove this in the future, the whole registration activity object :(
-            msgs.AddRange(this.AddActivity(ra.ActivityId.Value, loggedInUserId, dc: dc));
+            this.AddActivity(ra.ActivityId.Value, loggedInUserId, msgs, dc);
 
             return msgs;
         }
 
-        public SystemMessages AddActivity(int activityId, int loggedInUserId, DatabaseConnection dc = null)
+        public RegistrationActivity AddActivity(int activityId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var ra = RegistrationActivity.LoadByActivityIdByRegistrationId(activityId, this.ID.Value, dc: dc);
             if (ra.IsEmpty())
             {
-                ra = new RegistrationActivity();
-                ra.ActivityId = activityId;
-                ra.RegistrationId = this.ID;
-                ra.CreateDate = DateTime.UtcNow;
-                ra.CreatedBy = loggedInUserId;
-                msgs.AddRange(ra.Save(dc: dc));
+                ra = new RegistrationActivity
+                {
+                    ActivityId = activityId,
+                    RegistrationId = this.ID,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId
+                };
+                msgs.AddRange(ra.Save(dc));
             }
 
-            return msgs;
+            return ra;
         }
 
-        public SystemMessages AddActivity(Activity activity, int loggedInUserId, DatabaseConnection dc = null)
+        public RegistrationActivity AddActivity(Activity activity, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AddActivity(activity.ID.Value, loggedInUserId, dc: dc);
+            return AddActivity(activity.ID.Value, loggedInUserId, msgs, dc);
         }
 
         public Account GetAccount(DatabaseConnection dc = null)
@@ -777,8 +779,7 @@ namespace AfterSchoolLibrary
             var account = Account.Load(this.AccountId.Value, dc: dc);
             if (account.IsNotEmpty())
             {
-                var sh = new Billing.StripeHelper();
-                var charge = sh.CreateChargeWithSource(
+                var charge = Billing.StripeHelper.CreateChargeWithSource(
                     totalAmount: costPerRegistrant * totalSeats,
                     description: $"{account.Name} Registration for {registrant.Name}",
                     toAccount: account,

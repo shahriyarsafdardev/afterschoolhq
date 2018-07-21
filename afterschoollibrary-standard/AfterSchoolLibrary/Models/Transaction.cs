@@ -19,34 +19,27 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? BillerAccountId { get { return (int?)MDV["BillerAccountId"].Value; } set { MDV["BillerAccountId"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? PayerAccountId { get { return (int?)MDV["PayerAccountId"].Value; } set { MDV["PayerAccountId"].Value = value; } }
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
 		/// <summary>
-		/// Required,
-		/// </summary>
-		public TransactionType TransactionTypeId { get { return (TransactionType)MDV["TransactionTypeId"].Value; } set { MDV["TransactionTypeId"].Value = value; } }
-		public ParticipationObjectType ParticipationObjectTypeId { get { return (ParticipationObjectType)MDV["ParticipationObjectTypeId"].Value; } set { MDV["ParticipationObjectTypeId"].Value = value; } }
-		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
-		public BillSourceType BillSourceTypeId { get { return (BillSourceType)MDV["BillSourceTypeId"].Value; } set { MDV["BillSourceTypeId"].Value = value; } }
-		public int? BillSourceId { get { return (int?)MDV["BillSourceId"].Value; } set { MDV["BillSourceId"].Value = value; } }
-		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
+		public int? PurchaseId { get { return (int?)MDV["PurchaseId"].Value; } set { MDV["PurchaseId"].Value = value; } }
 		
 
         public Transaction()
@@ -54,9 +47,6 @@ namespace AfterSchoolLibrary
             this.Config(ObjectMap, DatabaseQuery, typeof(Transaction).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.PaymentTypeId = PaymentType.NotSet;
-			this.TransactionTypeId = TransactionType.NotSet;
-			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
-			this.BillSourceTypeId = BillSourceType.NotSet;
 			this.Uid = Guid.NewGuid();
 			
         }
@@ -72,13 +62,9 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "BillerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PayerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "BillSourceTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "BillSourceId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "PurchaseId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -138,8 +124,6 @@ namespace AfterSchoolLibrary
 				msgs.Add("PayerAccountId is required on Transaction object", MessageType.Error);
 			if (this.PaymentTypeId.IsEmpty())
 				msgs.Add("PaymentTypeId is required on Transaction object", MessageType.Error);
-			if (this.TransactionTypeId.IsEmpty())
-				msgs.Add("TransactionTypeId is required on Transaction object", MessageType.Error);
 			if (this.Description.IsEmpty())
 				msgs.Add("Description is required on Transaction object", MessageType.Error);
 			
@@ -181,31 +165,15 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["TransactionTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ParticipationObjectTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ParticipationObjectId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["BillSourceTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["BillSourceId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Description"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PurchaseId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -218,24 +186,6 @@ namespace AfterSchoolLibrary
 			return Transaction.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<Transaction> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
-			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
-		public static List<Transaction> LoadByBillSource(int BillSourceId, BillSourceType BillSourceTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["BillSourceId"], BillSourceId);
-			dq.Criterias.Add(ObjectMap["BillSourceTypeId"], BillSourceTypeId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
-
 		public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;

@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required,
+		/// Required.
 		/// </summary>
 		public int? PackageId { get { return (int?)MDV["PackageId"].Value; } set { MDV["PackageId"].Value = value; } }
 		public FeatureType FeatureTypeId { get { return (FeatureType)MDV["FeatureTypeId"].Value; } set { MDV["FeatureTypeId"].Value = value; } }
-		public int? Max { get { return (int?)MDV["Max"].Value; } set { MDV["Max"].Value = value; } }
+		public double? Max { get { return (double?)MDV["Max"].Value; } set { MDV["Max"].Value = value; } }
 		
 
         public PackageFeature()
@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "PackageId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FeatureTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Max", System.Data.SqlDbType.Int);
+				_dp.Add(className, "Max", System.Data.SqlDbType.Float);
 				
                 return _dp;
             }
@@ -164,7 +164,7 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public int GetMaxValue()
+        public double GetMaxValue()
         {
             return this.Max.HasValue ? this.Max.Value : 0;
         }

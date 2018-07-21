@@ -28,7 +28,7 @@ namespace AfterSchoolLibrary
         public RegistrationMode RegistrationMode { get; set; }
         public Form Form { get; set; }
         public Account OwnerAccount { get; set; }
-        public bool PayLater { get; set; }
+        public bool AllowToPayLater { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary
 
             Cost = activity.CostPerRegistrant;
             CostUnitType = global::CostUnitType.PerRegistrant;
-            PayLater = activity.AllowToPayLater;
+            AllowToPayLater = activity.AllowToPayLater;
             RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
             Form = activity.GetActiveActivityForm(msgs, dc)?.ToForm();
             OwnerAccount = activity.GetAccount(msgs, dc);
