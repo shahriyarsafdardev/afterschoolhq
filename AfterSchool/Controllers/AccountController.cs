@@ -16,7 +16,7 @@ namespace AfterSchool.Controllers
 
         #region GetStarted
 
-        private List<FormQuestion> GetStartedViewBag(SystemMessages msgs)
+        private List<FormQuestion> GetStartedViewBag(string regaccount, SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First();
@@ -46,29 +46,33 @@ namespace AfterSchool.Controllers
             });
 
             ViewBag.Cart = SessionVariables.Cart;
+            
 
             return questions;
         }
         
         [HttpGet]
-        public ActionResult GetStarted()
+        public ActionResult GetStarted(string regaccount)
         {
             if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
                 return RedirectToAction("select");
 
             var msgs = new SystemMessages();
-            var questions = GetStartedViewBag(msgs);
+            var questions = GetStartedViewBag(regaccount, msgs);
 
             ViewBag.Messages = msgs;
+
+            if (regaccount.IsGuid())
+                ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
 
             return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
         }
 
         [HttpPost]
-        public ActionResult GetStarted(string password1, string password2, string agree, string textnotifications)
+        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications)
         {
             var msgs = new SystemMessages();
-            var questions = GetStartedViewBag(msgs);
+            var questions = GetStartedViewBag(regaccount, msgs);
 
             questions.ForEach(question => {
                 if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
@@ -879,6 +883,7 @@ namespace AfterSchool.Controllers
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
 
             ViewBag.Registration = registration;
+            ViewBag.Account = registration.GetAccount();
             ViewBag.Cards = SessionVariables.CurrentAccount.GetStripeCards(msgs);
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;

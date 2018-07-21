@@ -1443,8 +1443,11 @@ namespace AfterSchoolLibrary
             // if any errors it'll just rollback the transaction anyway :)
             if (msgs.HasNoErrors())
             {
+                // if stripe token then don't send customer id
+                var customerId = purchaseObject.SavePaymentInfo ? fromAccount.StripeCustomerId : null;
+
                 var charge = Billing.StripeHelper.CreateCharge(
-                    fromCustomerId: fromAccount.StripeCustomerId,
+                    fromCustomerId: customerId,
                     destinationUserId: toAccount.StripeUserId,
                     tokenOrSourceId: purchaseObject.StripeTokenOrSourceId,
                     totalAmount: purchaseObject.TotalCostToPurchase,
