@@ -859,7 +859,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("thankyou");
+                return RedirectToAction("thankyou", new { id = registration.Uid });
 
             return View();
         }

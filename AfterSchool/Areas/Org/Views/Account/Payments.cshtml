@@ -18,58 +18,14 @@
         <div class="panel-body">
 
             <div class="col-md-8 col-lg-9">
-                <div class="panel panel-default hide">
-                    <div class="panel-heading">
-                        PayPal
-                    </div>
-                    <div class="panel-body">
-                        <form method="post" action="@Url.Action("payments", "account")" class="form-horizontal">
-                            <div class="form-group">
-                                <div class="col-sm-3 control-label">PayPal Email Address</div>
-                                <div class="col-sm-6">
-                                    <input type="text" name="paypalemail" id="paypalemail" value="@Model.PayPalEmailAddress" class="form-control" />
-                                </div>
-                            </div>
 
-                            <div class="form-group">
-                                <div class="col-sm-3 control-label"></div>
-                                <div class="col-sm-6">
-                                    <button type="submit" class="btn btn-primary">Update PayPal Info</button>
-                                </div>
-                            </div>
-
-                        </form>
+                <div role="alert" class="alert alert-info alert-icon">
+                    <div class="icon"><span class="s7-check-circle"></span></div>
+                    <div class="message">
+                        Your account is connect to stripe. Start accepting payments for your activities now :)
                     </div>
                 </div>
 
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Stripe
-                    </div>
-                    <div class="panel-body">
-
-                        @if (Model.StripeAccessToken.IsBlank())
-                        {
-                            var redirectUri = "";
-                            if (AfterSchoolLibrary.Utilities.IsLocalHost)
-                            {
-                                redirectUri = string.Format("&redirect_uri={0}/org/account/oauthstripe/", AfterSchoolLibrary.Utilities.BaseUrl(SessionVariables.IsAfterSchool.Value));
-                            }
-
-                            <a href="https://connect.stripe.com/oauth/authorize?response_type=code&client_id=@clientId&scope=read_write@(redirectUri)" class="stripe-connect"><span>Connect with Stripe</span></a>
-                        }
-                        else
-                        {
-                            <div role="alert" class="alert alert-info alert-icon">
-                                <div class="icon"><span class="s7-check-circle"></span></div>
-                                <div class="message">
-                                    Your account is connect to stripe. Start accepting payments for your activities now :)
-                                </div>
-                            </div>
-                        }
-
-                    </div>
-                </div>
             </div>
 
             <div class="col-md-4 col-lg-3">

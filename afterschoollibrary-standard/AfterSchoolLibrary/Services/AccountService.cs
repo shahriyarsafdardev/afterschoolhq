@@ -682,6 +682,19 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static void CreateStripeCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var stripeAccount = Billing.StripeHelper.CreateCustomAccount(account.Name, account.Email, msgs);
+
+            if(account.IsNotEmpty())
+            {
+                account.StripePublishableKey = stripeAccount.CustomAccountKeys.Publishable;
+                account.StripeSecretKey = stripeAccount.CustomAccountKeys.Secret;
+                account.StripeUserId = stripeAccount.Id;
+                msgs.AddRange(account.Save(dc));
+            }
+        }
+
         public static SystemMessages CreateStripeCustomer(this Account account, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -1058,6 +1071,10 @@ namespace AfterSchoolLibrary
                 // need to add a package
                 if (packageId.HasValue && packageBillingPeriod.HasValue)
                     account.AddPackage(packageId.Value, packageBillingPeriod.Value, loggedInUser, msgs, dc);
+
+                // create stripe custom account to allow account to receive payments
+                if (accountType != AccountType.AfterSchool && accountType != AccountType.Registrant)
+                    account.CreateStripeCustomAccount(msgs, dc);
 
                 //create default form for account to use for registration
                 account.CreateDefaultForm(loggedInUser, msgs, dc);

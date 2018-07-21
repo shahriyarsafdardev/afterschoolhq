@@ -65,18 +65,43 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeAccounts
 
-        //public static StripeAccountService GetAccountService()
-        //{
-        //    return new StripeAccountService(StripeAccessToken);
-        //}
+        public static StripeAccountService GetAccountService()
+        {
+            return new StripeAccountService(StripeAccessToken);
+        }
 
-        //public static StripeAccount CreateAccount(SystemMessages msgs)
-        //{
-        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
+        public static StripeAccount CreateCustomAccount(string businessName, string email, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-        //    var options = new StripeAccountCreateOptions()
-        //    {
-        //        BusinessName = "",
+            var options = new StripeAccountCreateOptions()
+            {
+                Type = "custom",
+                Country = "US",
+                DefaultCurrency = "usd",
+                BusinessName = businessName,
+                Email = email,
+                DebitNegativeBalances = true,
+                PayoutStatementDescriptor = "AfterSchool transfer".MaxChars(22),
+                TransferScheduleInterval = "manual"
+            };
+
+            StripeAccount account = null;
+
+            try
+            {
+                account = GetAccountService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add("Error creating stripe account", MessageType.Error);
+            }
+
+            return account;
+        }
+
+        //BusinessName = "",
         //        BusinessUrl = "",
         //        Country = "US",
         //        DefaultCurrency = "usd",
@@ -95,8 +120,8 @@ namespace AfterSchoolLibrary.Billing
         //        DeclineChargeOnCvcFailure = true,
         //        TransferScheduleInterval = "",
         //        ExternalBankAccount = new StripeAccountBankAccountOptions()
-        //        {
-        //            AccountHolderName = "",
+        //{
+        //    AccountHolderName = "",
         //            AccountHolderType = "",
         //            AccountNumber = "",
         //            Country = "US",
@@ -104,43 +129,31 @@ namespace AfterSchoolLibrary.Billing
         //            RoutingNumber = ""
         //        },
         //        LegalEntity = new StripeAccountLegalEntityOptions()
-        //        {
-        //            AddressCity = "",
+        //{
+        //    AddressCity = "",
         //            AddressLine1 = "",
         //            AddressLine2 = "",
-        //             AddressPostalCode = "",
-        //             AddressState = "",
-        //             AddressTwoLetterCountry = "US",
-        //             BusinessName = "",
-        //             BusinessTaxId = "",
-        //             BirthDay = "",
-        //             BirthMonth = "",
-        //             BirthYear = "",
-        //              FirstName = "",
-        //              LastName = "",
-        //              PersonalAddressCity = "",
-        //              PersonalAddressLine1 = "",
-        //              PersonalAddressLine2 = "",
-        //              PersonalAddressState = "",
-        //              PersonalAddressPostalCode = "",
-        //               PersonalAddressTwoLetterCountry = "US",
-        //               PersonalIdNumber = "",
-        //               PhoneNumber = "",
-        //               SSNLast4 = "",
+        //            AddressPostalCode = "",
+        //            AddressState = "",
+        //            AddressTwoLetterCountry = "US",
+        //            BusinessName = "",
+        //            BusinessTaxId = "",
+        //            BirthDay = "",
+        //            BirthMonth = "",
+        //            BirthYear = "",
+        //            FirstName = "",
+        //            LastName = "",
+        //            PersonalAddressCity = "",
+        //            PersonalAddressLine1 = "",
+        //            PersonalAddressLine2 = "",
+        //            PersonalAddressState = "",
+        //            PersonalAddressPostalCode = "",
+        //            PersonalAddressTwoLetterCountry = "US",
+        //            PersonalIdNumber = "",
+        //            PhoneNumber = "",
+        //            SSNLast4 = "",
 
         //        },
-
-        //    };
-
-        //    try
-        //    {
-
-        //    }
-        //    catch(StripeException ex)
-        //    {
-
-        //    }
-        //}
 
         #endregion
 
@@ -504,17 +517,6 @@ namespace AfterSchoolLibrary.Billing
                 TrialEnd = trialEndDate
             };
 
-            // not using this in sdk even though it's recommended
-            // because the planid is passed in the create below
-            //Items = new List<StripeSubscriptionItemOption>()
-            //{
-            //    new StripeSubscriptionItemOption()
-            //    {
-            //        PlanId = planId,
-            //        Quantity = 1
-            //    }
-            //}
-
             try
             {
                 subscription = GetSubscriptionService().Create(customerId, planId, options, RequestOptions);
@@ -776,7 +778,6 @@ namespace AfterSchoolLibrary.Billing
         }
 
         #endregion
-
 
         #region StripeSource
 
