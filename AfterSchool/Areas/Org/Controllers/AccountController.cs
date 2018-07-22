@@ -382,7 +382,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Payments()
+        public ActionResult EntityPayments()
         {
             Account a = SessionVariables.CurrentAccount;
             ViewBag.Messages = new SystemMessages();
@@ -390,7 +390,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Payments(string paypalemail)
+        public ActionResult EntityPayments(string paypalemail)
         {
             var msgs = new SystemMessages();
 
@@ -398,6 +398,29 @@ namespace AfterSchool.Areas.Org.Controllers
             msgs.AddRange(SessionVariables.CurrentAccount.Save());
 
             if(msgs.HasNoErrors())
+                msgs.Add("PayPal information saved", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+            return View(SessionVariables.CurrentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult BankInformationPayments()
+        {
+            Account a = SessionVariables.CurrentAccount;
+            ViewBag.Messages = new SystemMessages();
+            return View(a);
+        }
+
+        [HttpPost]
+        public ActionResult BankInformationPayments(string paypalemail)
+        {
+            var msgs = new SystemMessages();
+
+            SessionVariables.CurrentAccount.PayPalEmailAddress = paypalemail;
+            msgs.AddRange(SessionVariables.CurrentAccount.Save());
+
+            if (msgs.HasNoErrors())
                 msgs.Add("PayPal information saved", MessageType.Success);
 
             ViewBag.Messages = msgs;
