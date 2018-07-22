@@ -243,6 +243,11 @@ namespace AfterSchoolLibrary
             return this.Save(dc);
         }
 
+        public ActivityGroup GetActivityGroup()
+        {
+            return ActivityGroup.Load(this.ActivityGroupId.Value);
+        }
+
         #endregion
     }
 }

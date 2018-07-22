@@ -20,9 +20,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private List<ActivityGroup> LoadIndexViewBag(string pn = "1", string rpp = "10" , string archive = "0")
         {
-            var groups = new List<ActivityGroup>();
-            var accountActivityGroups = new List<AccountActivityGroup>();
+            var groups = new List<ActivityGroup>();  //internal Leagues
+            var extAccountActivityGroups = new List<AccountActivityGroup>();
+            var acceptedInvites = new List<ActivityGroup>();
             var pendingInvites = new List<ActivityGroup>();
+            var internalGroups = new List<ActivityGroup>();
+            var externalGroups = new List<ActivityGroup>();
             int pageNumber = 1;
             int recordsPerPage = 10;
             bool isArchived = false;
@@ -43,16 +46,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             totalCount = SessionVariables.CurrentAccount.GetLeagueCount(isArchived);
             groups = SessionVariables.CurrentAccount.GetLeagues(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
-            accountActivityGroups = AccountActivityGroup.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value);
+            extAccountActivityGroups = AccountActivityGroup.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value);
 
-            foreach (var accountActivityGroup in accountActivityGroups)
-            {
-                if (accountActivityGroup.InviteStatusId == InviteStatus.Invited)
-                {
-                    var pendingInvite = groups.FirstOrDefault(i => i.ID == accountActivityGroup.ActivityGroupId);
-                    pendingInvites.Add(pendingInvite);
-                }
-            }
+            acceptedInvites = extAccountActivityGroups.Where(aag => aag.InviteStatusId == InviteStatus.Accepted).Select(aag => aag.GetActivityGroup()).ToList();
+            pendingInvites = extAccountActivityGroups.Where(aag => aag.InviteStatusId == InviteStatus.Invited).Select(aag => aag.GetActivityGroup()).ToList();
 
             hasArchivedGroups = SessionVariables.CurrentAccount.GetLeagueCount(true) > 0;
 
@@ -71,9 +68,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalPages = totalPages
             };
 
-            ViewBag.isOrgLeague = true;
+            
             ViewBag.pendingInvites = pendingInvites;
-
+            ViewBag.acceptedInvites = acceptedInvites;
+            ViewBag.ExternalGroups = externalGroups;
+            ViewBag.InternalGroups = internalGroups;
+            
             return groups;
         }
 
@@ -83,6 +83,14 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var groups = LoadIndexViewBag(pn, rpp, archive);
 
+            return View(groups);
+        }
+
+        [HttpGet]
+        public ActionResult IndexExternal(string pn, string rpp, string archive)
+        {
+            var groups = LoadIndexViewBag(pn, rpp, archive);
+            ViewBag.isExternalGroupsView = true;
             return View(groups);
         }
 

@@ -1,0 +1,26 @@
+﻿@model List<ActivityGroup>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var activityGroupType = (ActivityGroupType)ViewBag.ActivityGroupType;
+    var controller = ViewBag.GroupController;
+    var externalGroups = ViewBag.ExternalGroups;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityGroupHeader.cshtml");}
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-note2"></i> @UILabel.ActivityGroupLabel(activityGroupType, true)
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+            @{ Html.RenderPartial("~/Views/Shared/_ActivityGroups.cshtml", (List<ActivityGroup>)externalGroups); }
+        </div>
+    </div>
+</div>

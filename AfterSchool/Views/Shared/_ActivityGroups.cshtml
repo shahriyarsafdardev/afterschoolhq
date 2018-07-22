@@ -1,10 +1,11 @@
 ﻿@model List<ActivityGroup>
-@{ 
+@{
     var activityGroupType = (ActivityGroupType)ViewBag.ActivityGroupType;
     var paging = (PagingModel)ViewBag.PagingModel;
     var hasArchivedGroups = (bool)ViewBag.HasArchivedGroups;
     var controller = ViewBag.GroupController;
-    var isOrgLeague = ViewBag.isOrgLeague ?? false;
+    var isExternalGroupsView = ViewBag.isExternalGroupsView ?? false;
+    var pendingInvites = (List<ActivityGroup>)ViewBag.pendingInvites;
 
     var previousLink = "#";
     var nextLink = "#";
@@ -34,9 +35,17 @@
     }
 }
 
-@if (isOrgLeague) { Html.RenderPartial("~/Areas/Org/Views/League/Invitations.cshtml", Model); }
+@if (isExternalGroupsView && pendingInvites.Count > 0)
+{
+    Html.RenderPartial("~/Areas/Org/Views/League/Invitations.cshtml", pendingInvites);
+}
+else if (isExternalGroupsView && Model.Count == 0)
+{
+    <p>You don't have any pending  @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower().TrimEnd('s') invitations. </p>
 
-@if ((Model.Count == 0 && !hasArchivedGroups) )
+}
+
+@if ((Model.Count == 0 && !hasArchivedGroups))
 {
     <div class="widget">
         <div class="widget-head">
@@ -45,33 +54,39 @@
         <div class="widget-tile">
             <hr />
             <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
-            @if (isOrgLeague)
+            @if (isExternalGroupsView)
             {
-                <p>You haven't accepted invitations to or created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action("edit", controller)">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>. </p>
+                <p>You haven't accepted invitations to or created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. </p>
             }
             else
             {
                 <p>You haven't created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. In order to get started, <a href="@Url.Action("edit", controller)">create your first @UILabel.ActivityGroupLabel(activityGroupType).ToLower()</a>.</p>
+
+                <p>&nbsp;</p>
+                <p>
+                    <a href="@Url.Action("edit", controller)" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityGroupLabel(activityGroupType) &raquo;</a>
+                </p>
             }
-            
-            <p>&nbsp;</p>
-            <p>
-                <a href="@Url.Action("edit", controller)" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityGroupLabel(activityGroupType) &raquo;</a>
-            </p>
+
         </div>
     </div>
 }
 else
 {
-    <p>@UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() that (ask Darye) is participating in</p>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="pull-right">
-                <a href="@Url.Action("index", controller, new { archive = 0 })" class="@currentClass">Current</a> |
-                <a href="@Url.Action("index", controller, new { archive = 1 })" class="@archiveClass">Archived</a>
+    <p>@UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() that @SessionVariables.CurrentAccount.Name is participating in</p>
+
+    if (!isExternalGroupsView)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pull-right">
+                    <a href="@Url.Action("index", controller, new { archive = 0 })" class="@currentClass">Current</a> |
+                    <a href="@Url.Action("index", controller, new { archive = 1 })" class="@archiveClass">Archived</a>
+                </div>
             </div>
         </div>
-    </div>
+    }
+
 
     <div class="table-responsive">
         <table class="table table-hover">
@@ -98,33 +113,37 @@ else
                             </td>
                             <td><a href="@Url.Action("summary", controller, new {id = group.Uid})">@group.Name</a></td>
                             <td class="text-center">@group.GetActivityCount(isArchive, false)</td>
-                            <td>
-                                <div class="btn-group pull-right">
+                            @if (!isExternalGroupsView)
+                            {
+                                <td>
+                                    <div class="btn-group pull-right">
 
-                                    <button class="btn btn-default btn-sm md-trigger"
-                                            data-modal="modal-copy"
-                                            onclick="setCopyGroup('@group.Name', '@Url.Action("copy", controller, new { id = group.Uid.ToString() })')">
-                                        <i class="s7-copy-file"></i> Repeat
-                                    </button>
+                                        <button class="btn btn-default btn-sm md-trigger"
+                                                data-modal="modal-copy"
+                                                onclick="setCopyGroup('@group.Name', '@Url.Action("copy", controller, new { id = group.Uid.ToString() })')">
+                                            <i class="s7-copy-file"></i> Repeat
+                                        </button>
 
-                                    @if (!group.IsArchived)
-                                    {
-                                        <button class="btn btn-default btn-sm md-trigger"
-                                                data-modal="modal-archive"
-                                                onclick="archiveGroup('@group.Name', '@Url.Action("archive", controller, new { id = group.Uid.ToString() })')">
-                                            <i class="s7-albums"></i> Archive
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-default btn-sm md-trigger"
-                                                data-modal="modal-restore"
-                                                onclick="restoreGroup('@group.Name', '@Url.Action("restore", controller, new { id = group.Uid.ToString() })')">
-                                            <i class="s7-albums"></i> Restore
-                                        </button>
-                                    }
-                                </div>
-                            </td>
+                                        @if (!group.IsArchived )
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger"
+                                                    data-modal="modal-archive"
+                                                    onclick="archiveGroup('@group.Name', '@Url.Action("archive", controller, new { id = group.Uid.ToString() })')">
+                                                <i class="s7-albums"></i> Archive
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger"
+                                                    data-modal="modal-restore"
+                                                    onclick="restoreGroup('@group.Name', '@Url.Action("restore", controller, new { id = group.Uid.ToString() })')">
+                                                <i class="s7-albums"></i> Restore
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            }
+                            
                         </tr>
                     }
                 }
@@ -145,10 +164,10 @@ else
         paging,
         new ViewDataDictionary()
         {
-            { "id", "" },
-            { "querystring", string.Format("archive={0}", Request["archive"]) },
-            { "action", "index" },
-            { "controller", controller }
+{ "id", "" },
+{ "querystring", string.Format("archive={0}", Request["archive"]) },
+{ "action", "index" },
+{ "controller", controller }
         }
     );
 
