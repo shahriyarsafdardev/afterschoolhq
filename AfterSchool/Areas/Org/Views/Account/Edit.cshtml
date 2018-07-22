@@ -12,6 +12,8 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
+    @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model);}
+
     <div class="panel panel-default">
         <div class="panel-heading">
             <i class="s7-edit"></i> Account - Details
@@ -98,11 +100,6 @@
                 </form>
 
             </div>
-
-            <div class="col-md-4 col-lg-3">
-                @{Html.RenderPartial("~/Views/Shared/_AccountEditNav.cshtml", Model); }
-            </div>
-
         </div>
     </div>
 </div>

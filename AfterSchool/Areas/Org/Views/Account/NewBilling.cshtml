@@ -12,6 +12,7 @@
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model);}
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -20,7 +21,7 @@
         <div class="panel-body">
 
             <form method="post" id="new-billing-form" action="@Url.Action("newpayment", "account")" class="form-horizontal">
-                
+
                 <div class="row">
                     <div class="col-md-7 col-md-offset-2">
                         <h3>Select Your Plan</h3>
@@ -40,9 +41,9 @@
                                 var monthlySelected = "";
                                 var yearlySelected = "";
 
-                                if(package.IsNotEmpty() && currentPackage.IsNotEmpty() && package.ID == currentPackage.ID)
+                                if (package.IsNotEmpty() && currentPackage.IsNotEmpty() && package.ID == currentPackage.ID)
                                 {
-                                    if(currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
+                                    if (currentPackage.BillingPeriodTypeId == BillingPeriodType.Month)
                                     {
                                         monthlySelected = " checked=\"checked\" ";
                                     }
@@ -71,7 +72,7 @@
                         </table>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-7 col-md-offset-2">
                         <h3>Add Payment Details</h3>
@@ -79,14 +80,14 @@
                 </div>
 
                 @{Html.RenderPartial(
-                    "~/Views/Shared/_CreditCardPaymentForm.cshtml",
-                    null,
-                    new ViewDataDictionary()
-                    {
-                        { "required", true },
-                        { "prefix", "" }
-                    }
-                    );}               
+                      "~/Views/Shared/_CreditCardPaymentForm.cshtml",
+                      null,
+                      new ViewDataDictionary()
+                      {
+                                { "required", true },
+                                { "prefix", "" }
+                      }
+                      );}
 
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
