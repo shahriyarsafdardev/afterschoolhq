@@ -11,6 +11,7 @@
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model);}
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -33,15 +34,15 @@
                         <label class="col-sm-3 control-label">Landing Page Text</label>
                         <div class="col-sm-9">
                             @{Html.RenderPartial
-                                (
-                                    "~/Views/Shared/_TextEditor.cshtml",
-                                    landingPage.IsNotEmpty() ? landingPage.Value : "",
-                                    new ViewDataDictionary()
-                                    {
-                                                    { "name", "landingpagetext" },
-                                                    { "id", "landingpagetext" }
-                                    }
-                                );
+                                  (
+                                      "~/Views/Shared/_TextEditor.cshtml",
+                                      landingPage.IsNotEmpty() ? landingPage.Value : "",
+                                      new ViewDataDictionary()
+                                      {
+                                                                        { "name", "landingpagetext" },
+                                                                        { "id", "landingpagetext" }
+                                      }
+                                  );
                             }
                         </div>
                     </div>
@@ -50,15 +51,15 @@
                         <label class="col-sm-3 control-label">Registration Thank You Email</label>
                         <div class="col-sm-9">
                             @{Html.RenderPartial
-                                (
-                                    "~/Views/Shared/_TextEditor.cshtml",
-                                    regthankyou.IsNotEmpty() ? regthankyou.Value : "",
-                                    new ViewDataDictionary()
-                                    {
-                                        { "name", "regthankyoutext" },
-                                        { "id", "regthankyoutext" }
-                                    }
-                                );
+                                  (
+                                      "~/Views/Shared/_TextEditor.cshtml",
+                                      regthankyou.IsNotEmpty() ? regthankyou.Value : "",
+                                      new ViewDataDictionary()
+                                      {
+                                                            { "name", "regthankyoutext" },
+                                                            { "id", "regthankyoutext" }
+                                      }
+                                  );
                             }
                         </div>
                     </div>
@@ -73,11 +74,6 @@
                 </form>
 
             </div>
-
-            <div class="col-md-4 col-lg-3">
-                @{Html.RenderPartial("~/Views/Shared/_AccountEditNav.cshtml", Model); }
-            </div>
-
         </div>
     </div>
 </div>
