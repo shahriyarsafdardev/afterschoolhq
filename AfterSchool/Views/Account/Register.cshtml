@@ -5,13 +5,13 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
-
+    var registrant = (Registrant)ViewBag.Registrant;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 <div>
-    <h1>Register for @Model.Name</h1>
+    <h1>Register for @SessionVariables.CurrentRegistrant.DisplayName for @Model.Name</h1>
     <div>
         @Html.Raw(Model.Details)
     </div>

@@ -229,7 +229,7 @@ namespace AfterSchoolLibrary
             return activity;
         }
 
-        private static Tuple<int, int, int> ProcessRegistrationSeats(this Activity activity, PurchaseObject purchaseObject, SystemMessages msgs, DatabaseConnection dc = null)
+        private static Tuple<int, int, int> ProcessRegistrationSeats(this Activity activity, CheckoutObject purchaseObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var seatsAvailable = activity.GetSeatsRemaining(msgs, dc);
             var waitingListSeatsAvailable = activity.GetWaitingListSeatsRemaining(msgs, dc);
@@ -254,7 +254,7 @@ namespace AfterSchoolLibrary
             return new Tuple<int, int, int>(reservedSeats, waitingListSeats, applicationSeats);
         }
 
-        public static void ProcessRegistration(this Activity activity, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistration(this Activity activity, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var seats = activity.ProcessRegistrationSeats(purchaseObject, msgs, dc);
 

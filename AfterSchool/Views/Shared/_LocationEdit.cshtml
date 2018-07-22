@@ -9,7 +9,7 @@
         Enter your location <span class="text-danger">*</span>
     </label>
     <div class="col-sm-9" style="position:relative;">
-        <input type="text" class="form-control" id="location-search" name="location-search" value="@Model.FormatAddress(false)" placeholder="Search Locations..." />
+        <input type="text" class="form-control" id="location-search" name="location-search" value="@Model.FormatAddress(false)" placeholder="Search Locations..." autocomplete="off" />
         <input type="hidden" name="location" id="location" value="@(Model?.ID)" />
         <input type="hidden" name="hostaccount" id="hostaccount" value="" />
         <div id="location-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;">
@@ -47,8 +47,10 @@
 
             if (hostAccount.length > 0 && hostAccount != @accountId) {
                 $('#hostaccount-div').addClass('hide');
+                $('#isschool-div').addClass('hide');
             } else {
                 $('#hostaccount-div').removeClass('hide');
+                $('#isschool-div').removeClass('hide');
             }
         } else {
             $('#add-location').removeClass('hide');
@@ -56,6 +58,7 @@
             locationSearch.val('');
             $('#hostaccount').val('');
             $('#hostaccount-div').removeClass('hide');
+            $('#isschool-div').removeClass('hide');
         }
     }
 

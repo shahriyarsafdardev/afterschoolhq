@@ -29,6 +29,7 @@ namespace AfterSchoolLibrary
         public Form Form { get; set; }
         public Account OwnerAccount { get; set; }
         public bool AllowToPayLater { get; set; }
+        public bool IsFree { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -67,6 +68,7 @@ namespace AfterSchoolLibrary
 
             PaymentPlans = activity.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activity.GetSubscriptionPlans(msgs, dc);
+            IsFree = !activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal();
         }
 
         public ParticipationObject(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -92,6 +94,7 @@ namespace AfterSchoolLibrary
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
+            IsFree = !activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal();
         }
 
         public ParticipationObject(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -118,6 +121,8 @@ namespace AfterSchoolLibrary
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
+
+            IsFree = !aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal();
         }
 
         public string GetHomePageUrl()

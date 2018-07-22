@@ -1,7 +1,7 @@
 ﻿@model AfterSchoolLibrary.Account
 @{
     ViewBag.Title = Model.Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
@@ -25,11 +25,13 @@
                         </p>
                     </div>
 
-                    @{ Html.RenderPartial(
-                           "~/Views/Shared/_Address.cshtml",
-                           Model.ToAddressViewModel(),
-                           new ViewDataDictionary() { { "address1Required", true }, { "address2Required", false }, { "cityRequired", true }, { "stateRequired", true }, { "postalCodeRequired", true } }
-                       ); }
+                    @{ 
+                        Html.RenderPartial(
+                           "~/Views/Shared/_AccountLocation.cshtml",
+                           (Location)ViewBag.Location,
+                           new ViewDataDictionary() { { "accountId", Model.ID.Value } }
+                       );
+                    }
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>

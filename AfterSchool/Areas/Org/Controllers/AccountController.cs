@@ -73,6 +73,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = new SystemMessages();
+            ViewBag.Location = SessionVariables.CurrentAccount.GetDefaultLocation();
             return View(SessionVariables.CurrentAccount);
         }
 
