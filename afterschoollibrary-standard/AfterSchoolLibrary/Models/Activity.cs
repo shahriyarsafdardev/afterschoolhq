@@ -1802,7 +1802,6 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-
         private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string locationisaschool, int? hostaccountid, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
