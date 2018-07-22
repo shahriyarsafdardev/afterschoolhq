@@ -587,11 +587,11 @@ namespace AfterSchoolLibrary
         }
 
         private ActivityGroup _ActivityGroup = null;
-        public ActivityGroup GetActivityGroup(DatabaseConnection dc = null)
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ActivityGroupId.HasValue && _ActivityGroup.IsEmpty())
             {
-                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
+                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
             }
             return _ActivityGroup;
         }
@@ -656,17 +656,20 @@ namespace AfterSchoolLibrary
             return activities;
         }
 
-        public static SystemMessages SendConfirmation(int id, bool sendBcc, DatabaseConnection dc = null)
+        public static string GetRegistrationConfirmationHtml(Registration registration, Account account, Registrant registrant, List<RegistrantActivity> registrantActivities, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var reg = Registration.Load(id, dc: dc);
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var registrantActivities = RegistrantActivity.LoadByRegistrationId(reg.ID.Value, dc: dc)
-                .OrderBy(x => x.PreferenceNumber)
-                .ToList();
-            var account = reg.GetAccount(dc: dc);
-            var group = reg.GetActivityGroup(dc: dc);
-            var registrant = reg.GetRegistrant(dc: dc);
+            var group = registration.GetActivityGroup(msgs, dc);
+
+            if (registrant.IsEmpty())
+                registrant = registration.GetRegistrant(msgs, dc);
+
+            if (registrantActivities.IsEmpty())
+                registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
+                    .OrderBy(x => x.PreferenceNumber)
+                    .ToList();
+
             AccountProperty thankyou = null;
 
             var reservedRas = registrantActivities.Where(x => x.NumberOfSeats > 0)
@@ -702,8 +705,8 @@ namespace AfterSchoolLibrary
             // have any reserved activities
             if (reservedRas.Any())
                 activities += PrintRegisteredActivities(
-                    reservedRas, 
-                    hasLotteryRan ? "You have been selected for" : "You have registered for", 
+                    reservedRas,
+                    hasLotteryRan ? "You have been selected for" : "You have registered for",
                     dc);
 
             // if the lottery has been run and the registrant didn't make it in some of the desired activities
@@ -716,7 +719,7 @@ namespace AfterSchoolLibrary
             if (applicationRas.Any())
                 activities += PrintRegisteredActivities(
                     applicationRas,
-                    hasLotteryRan ? "You were <u>not</u> placed on the waiting list for" : "You have applied for", 
+                    hasLotteryRan ? "You were <u>not</u> placed on the waiting list for" : "You have applied for",
                     dc);
 
             var custommessage = "";
@@ -724,31 +727,45 @@ namespace AfterSchoolLibrary
                 custommessage = thankyou.Value;
 
             var accountInformation = "";
-            if (registrant.WebUserId.HasValue)
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+            if (masterRegistrant.IsNotEmpty())
             {
                 accountInformation = "<p>";
-                var user = WebUser.Load(registrant.WebUserId.Value, dc: dc);
+                var masterRegistrantAccount = masterRegistrant.GetAccount(msgs, dc);
 
-                if (user.Password.IsNotBlank())
-                    accountInformation += $"<a href=\"{Email.BaseUrl(account.IsAfterSchool)}login\">Login to view your {Utilities.AppName(account.IsAfterSchool)} account</a>";
-                else
-                    accountInformation += $"Want to avoid filling in a long form again? <a href=\"{Email.BaseUrl(account.IsAfterSchool)}signup/confirm/{user.Uid.ToString()}\">Create your {Utilities.AppName(account.IsAfterSchool)} account</a>";
+                if (masterRegistrantAccount?.AccountTypeId == AccountType.Registrant)
+                    accountInformation += $"<a href=\"{Email.BaseUrl(masterRegistrantAccount.IsAfterSchool)}login\">Login to view your {Utilities.AppName(masterRegistrantAccount.IsAfterSchool)} account</a>";
 
                 accountInformation += "</p>";
             }
 
-            string standardmessage = $"<p>Hello {registrant.Name},</p>{custommessage}{activities}{accountInformation}<p>{account.Name}</p>";
+            
+
+            return $"{custommessage}{activities}{accountInformation}";
+        }
+
+        public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var registration = Registration.Load(registrationId, dc: dc);
+            var registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
+                .OrderBy(x => x.PreferenceNumber)
+                .ToList();
+            var account = registration.GetAccount(dc: dc);
+            var registrant = registration.GetRegistrant(dc: dc);
+
+            var message = GetRegistrationConfirmationHtml(registration, account, registrant, registrantActivities, msgs, dc);
+            var fullmessage = $"<p>Hello {registrant.Name},</p>{message}<p>{account.Name}</p>";
 
             // send message to registrant
             SendGridHelper.SendMail(
                 fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                                 Email.AppEmailAddress, 
-                                string.Format("{0} via {1}", account.Name, 
-                                Email.AppEmailFromName(account.IsAfterSchool))
+                                $"{account.Name} via {Email.AppEmailFromName(account.IsAfterSchool)}"
                             ),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.Name),
                 subject: $"Your {account.Name} registration",
-                body: $"{standardmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
+                body: $"{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
             );
@@ -758,11 +775,11 @@ namespace AfterSchoolLibrary
                 SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                                     Email.AppEmailAddress, 
-                                    string.Format("{0} via {1}", account.Name, Utilities.AppName(account.IsAfterSchool))
+                                    $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
                                ),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                     subject: $"CC: Your {account.Name} registration",
-                    body: $"{"A CC of the email is below: <br />-------------------<br />"}{standardmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
+                    body: $"{"A CC of the email is below: <br />-------------------<br />"}{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
             }

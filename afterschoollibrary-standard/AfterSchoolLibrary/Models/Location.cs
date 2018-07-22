@@ -21,6 +21,7 @@ namespace AfterSchoolLibrary
 		public int? HostAccountId { get { return (int?)MDV["HostAccountId"].Value; } set { MDV["HostAccountId"].Value = value; } }
 		public bool IsDefault { get { return (bool)MDV["IsDefault"].Value; } set { MDV["IsDefault"].Value = value; } }
 		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
+		public LocationType LocationTypeId { get { return (LocationType)MDV["LocationTypeId"].Value; } set { MDV["LocationTypeId"].Value = value; } }
 		
 
         public Location()
@@ -28,6 +29,7 @@ namespace AfterSchoolLibrary
             this.Config(ObjectMap, DatabaseQuery, typeof(Location).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.IsDefault = false;
+			this.LocationTypeId = LocationType.NotSet;
 			
         }
 
@@ -41,6 +43,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "HostAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDefault", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "LocationTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -136,6 +139,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["Details"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["LocationTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -163,6 +170,14 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static List<Location> LoadByLocationTypeId(LocationType LocationTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["LocationTypeId"], LocationTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
@@ -175,7 +190,7 @@ namespace AfterSchoolLibrary
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.LogicalOperator = LogicalOperatorType.Or;
-            dq.Criterias.Add(ObjectMap["Name"], query, DatabaseCriteriaOperatorEnum.LikeRight);
+            dq.Criterias.Add(ObjectMap["Name"], query, DatabaseCriteriaOperatorEnum.Like);
             dq.Criterias.Add(ObjectMap["Address1"], query, DatabaseCriteriaOperatorEnum.LikeRight);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }

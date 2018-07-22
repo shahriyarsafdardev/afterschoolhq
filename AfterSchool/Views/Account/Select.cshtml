@@ -4,6 +4,7 @@
     ViewBag.Title = "Select Student";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -22,12 +23,28 @@
 
                 @foreach(var registrant in Model)
                 {
-                    <div>
+                    var isRegistered = registrant.IsRegisteredFor(participationObject);
+                    var btnText = isRegistered ? "Already Registered" : "Register";
+                    var disabledText = isRegistered ? " disabled=\"disabled\" " : "";
+
+                    <div class="col-md-3">
                         <p>@registrant.DisplayName</p>
                         <p>@registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade</p>
-                        <p><a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })" class="btn btn-primary btn-lg">Select</a></p>
+                        <p>
+                            <a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })" 
+                               class="btn btn-primary btn-lg"
+                               @disabledText>
+                               @btnText
+                            </a>
+                        </p>
                     </div>
                 }
+
+                <div class="col-md-3">
+                    <p>New Child</p>
+                    <p>-</p>
+                    <p><a href="@Url.Action("addstudent", "account")" class="btn btn-primary btn-lg">Add Child</a></p>
+                </div>
 
             </div>
         </div>
