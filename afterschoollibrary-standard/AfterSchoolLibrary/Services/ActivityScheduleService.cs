@@ -42,6 +42,8 @@ namespace AfterSchoolLibrary.Services
                 if (account.HasFeature(FeatureType.ManageActivityGroups, dc: dc) == false)
                 {
                     msgs.AddRange(schedule.UpdateScheduleAndInstances(
+                        schedule.Name,
+                        schedule.ScheduleDetails,
                         repeatsweekly.ToBoolean(),
                         startdate.ToDateTime(),
                         enddate.ToDateTime(),
@@ -63,28 +65,27 @@ namespace AfterSchoolLibrary.Services
             ActivitySchedule schedule = null;            
 
             Database.ExecuteTransaction(
-               action: (SystemMessages actionMsgs, DatabaseConnection adc) =>
+               action: (SystemMessages amsgs, DatabaseConnection adc) =>
                {
-                   schedule = new ActivitySchedule();
-                   schedule.Name = scheduleName;
-                   schedule.ScheduleDetails = details.IfBlank("").MaxChars(4000);
-                   schedule.AccountId = accountId;
-                   schedule.RepeatsWeekly = repeatsWeekly;
-                   schedule.StartDate = startDate;
-                   schedule.EndDate = endDate;
-                   schedule.DailyStartTime = dailyStartTime;
-                   schedule.DailyEndTime = dailyEndTime;
-                   schedule.CreateDate = schedule.LastModifiedDate = DateTime.UtcNow;
-                   schedule.CreatedBy = schedule.LastModifiedBy = loggedInUserId;
-                   schedule.ActivityGroupId = activityGroupId;
-                   actionMsgs.AddRange(schedule.Save(adc));
-
-                   if ((scheduleDates.IsEmpty() || !scheduleDates.Any()) && schedule.RepeatsWeekly)
+                   schedule = new ActivitySchedule
                    {
-                       scheduleDates = ActivityInstance.CreateDateRangesFromSchedule(schedule, msgs, dc);
-                   }
+                       Name = scheduleName,
+                       ScheduleDetails = details.IfBlank("").MaxChars(4000),
+                       AccountId = accountId,
+                       RepeatsWeekly = repeatsWeekly,
+                       StartDate = startDate,
+                       EndDate = endDate,
+                       DailyStartTime = dailyStartTime,
+                       DailyEndTime = dailyEndTime,
+                       CreateDate = DateTime.UtcNow,
+                       LastModifiedDate = DateTime.UtcNow,
+                       CreatedBy = loggedInUserId,
+                       LastModifiedBy = loggedInUserId,
+                       ActivityGroupId = activityGroupId
+                   };
+                   amsgs.AddRange(schedule.Save(adc));
 
-                   actionMsgs.AddRange(schedule.UpdateInstances(scheduleDates, loggedInUserId, adc));                   
+                   amsgs.AddRange(schedule.UpdateInstances(scheduleDates, loggedInUserId, adc));                   
                },
                onSuccess: (SystemMessages successMsgs) =>
                {

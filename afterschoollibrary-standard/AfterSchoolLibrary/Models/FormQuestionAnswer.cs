@@ -19,7 +19,7 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public int? FormQuestionId { get { return (int?)MDV["FormQuestionId"].Value; } set { MDV["FormQuestionId"].Value = value; } }
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
@@ -27,6 +27,10 @@ namespace AfterSchoolLibrary
 		public int? RegistrationId { get { return (int?)MDV["RegistrationId"].Value; } set { MDV["RegistrationId"].Value = value; } }
 		public string Text { get { return (string)MDV["Text"].Value; } set { MDV["Text"].Value = value; } }
 		public QuestionDataType QuestionDataTypeId { get { return (QuestionDataType)MDV["QuestionDataTypeId"].Value; } set { MDV["QuestionDataTypeId"].Value = value; } }
+		/// <summary>
+		/// Used to keep the question text just in case the question text changes on the original
+		/// </summary>
+		public string QuestionText { get { return (string)MDV["QuestionText"].Value; } set { MDV["QuestionText"].Value = value; } }
 		public QuestionDataType FormQuestionQuestionDataTypeId { get { return (QuestionDataType)MDV["FormQuestionQuestionDataTypeId"].Value; } }
 		public QuestionType FormQuestionQuestionTypeId { get { return (QuestionType)MDV["FormQuestionQuestionTypeId"].Value; } }
 		public int? FormQuestionFormId { get { return (int?)MDV["FormQuestionFormId"].Value; } }
@@ -35,6 +39,7 @@ namespace AfterSchoolLibrary
 		public string FormQuestionText { get { return (string)MDV["FormQuestionText"].Value; } }
 		public string FormQuestionGroupName { get { return (string)MDV["FormQuestionGroupName"].Value; } }
 		public int? FormQuestionGroupDisplayOrder { get { return (int?)MDV["FormQuestionGroupDisplayOrder"].Value; } }
+		public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get { return (QuestionGroupDataType)MDV["FormQuestionGroupQuestionGroupDataTypeId"].Value; } }
 		public int? RegistrationAccountId { get { return (int?)MDV["RegistrationAccountId"].Value; } }
 		
 
@@ -59,6 +64,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "QuestionText", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "FormQuestionQuestionDataTypeId", typeof(FormQuestion).Name, "QuestionDataTypeId", System.Data.SqlDbType.Int, "FormQuestion");
 				_dp.Add(className, "FormQuestionQuestionTypeId", typeof(FormQuestion).Name, "QuestionTypeId", System.Data.SqlDbType.Int, "FormQuestion");
 				_dp.Add(className, "FormQuestionFormId", typeof(FormQuestion).Name, "FormId", System.Data.SqlDbType.Int, "FormQuestion");
@@ -67,6 +73,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "FormQuestionText", typeof(FormQuestion).Name, "Text", System.Data.SqlDbType.NVarChar, "FormQuestion");
 				_dp.Add(className, "FormQuestionGroupName", typeof(FormQuestionGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "FormQuestionGroup");
 				_dp.Add(className, "FormQuestionGroupDisplayOrder", typeof(FormQuestionGroup).Name, "DisplayOrder", System.Data.SqlDbType.Int, "FormQuestionGroup");
+				_dp.Add(className, "FormQuestionGroupQuestionGroupDataTypeId", typeof(FormQuestionGroup).Name, "QuestionGroupDataTypeId", System.Data.SqlDbType.Int, "FormQuestionGroup");
 				_dp.Add(className, "RegistrationAccountId", typeof(Registration).Name, "AccountId", System.Data.SqlDbType.Int, "Registration");
 				
                 return _dp;
@@ -170,6 +177,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["QuestionDataTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["QuestionText"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -238,11 +249,11 @@ namespace AfterSchoolLibrary
             };
         }
 
-        public FormQuestion ToFormQuestion(bool loadFromDb = false, DatabaseConnection dc = null)
+        public FormQuestion ToFormQuestion(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (loadFromDb)
             {
-                return FormQuestion.Load(this.FormQuestionId.Value, dc: dc);
+                return FormQuestion.Load(this.FormQuestionId.Value, msgs, dc);
             }
             else
             {

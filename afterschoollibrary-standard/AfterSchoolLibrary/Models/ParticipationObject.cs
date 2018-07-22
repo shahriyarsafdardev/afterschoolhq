@@ -26,6 +26,10 @@ namespace AfterSchoolLibrary
         public List<SubscriptionPlan> SubscriptionPlans { get; set; }
         public string UniqueName { get; set; }
         public RegistrationMode RegistrationMode { get; set; }
+        public Form Form { get; set; }
+        public Account OwnerAccount { get; set; }
+        public bool AllowToPayLater { get; set; }
+        public bool IsFree { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -57,10 +61,14 @@ namespace AfterSchoolLibrary
 
             Cost = activity.CostPerRegistrant;
             CostUnitType = global::CostUnitType.PerRegistrant;
+            AllowToPayLater = activity.AllowToPayLater;
             RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
+            Form = activity.GetActiveActivityForm(msgs, dc)?.ToForm();
+            OwnerAccount = activity.GetAccount(msgs, dc);
 
             PaymentPlans = activity.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activity.GetSubscriptionPlans(msgs, dc);
+            IsFree = !activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal();
         }
 
         public ParticipationObject(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -80,9 +88,13 @@ namespace AfterSchoolLibrary
             RegistrationPeriod = activityGroup.GetCurrentOrNextRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;
             RegistrationMode = activityGroup.RegistrationModeId;
+            Form = activityGroup.GetForm(msgs, dc);
+            OwnerAccount = activityGroup.GetAccount(msgs, dc);
+            // TODO: PayLater = activityGroup.AllowToPayLater;
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
+            IsFree = !activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal();
         }
 
         public ParticipationObject(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -99,13 +111,18 @@ namespace AfterSchoolLibrary
             MaxGradeId = activityGroup.MaxGradeLevelId;
             Cost = aag.Cost;
             CostUnitType = aag.CostUnitTypeId;
+            // TODO: PayLater = activityGroup.AllowToPayLater;
             ActivityGroupType = activityGroup.ActivityGroupTypeId;
             RegistrationPeriod = aag.GetCurrentOrNextRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;
             RegistrationMode = activityGroup.RegistrationModeId;
+            Form = activityGroup.GetForm(msgs, dc);
+            OwnerAccount = aag.GetAccount(msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
+
+            IsFree = !aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal();
         }
 
         public string GetHomePageUrl()

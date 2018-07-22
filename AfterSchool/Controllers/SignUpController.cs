@@ -100,7 +100,7 @@ namespace AfterSchool.Controllers
             else if (password1.Length < 8)
             {
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
-            }
+            }           
 
             if (msgs.HasNoErrors())
             {

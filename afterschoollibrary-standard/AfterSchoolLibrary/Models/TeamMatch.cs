@@ -19,18 +19,18 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public int? HomeTeamId { get { return (int?)MDV["HomeTeamId"].Value; } set { MDV["HomeTeamId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public int? AwayTeamId { get { return (int?)MDV["AwayTeamId"].Value; } set { MDV["AwayTeamId"].Value = value; } }
 		public int? LocationId { get { return (int?)MDV["LocationId"].Value; } set { MDV["LocationId"].Value = value; } }
 		public int? HomeTeamScore { get { return (int?)MDV["HomeTeamScore"].Value; } set { MDV["HomeTeamScore"].Value = value; } }
 		public int? AwayTeamScore { get { return (int?)MDV["AwayTeamScore"].Value; } set { MDV["AwayTeamScore"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public int? ActivityInstanceId { get { return (int?)MDV["ActivityInstanceId"].Value; } set { MDV["ActivityInstanceId"].Value = value; } }
 		

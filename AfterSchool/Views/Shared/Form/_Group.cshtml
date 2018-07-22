@@ -1,0 +1,24 @@
+﻿@model FormQuestionGroup
+
+@{ 
+    var qvms = (List<FormQuestionViewModel>)ViewData["QuestionViewModels"];
+
+    if (qvms.IsEmpty())
+    {
+        qvms = Model.GetActiveQuestions()
+            .Select(question => question.ToFormQuestionViewModel())
+            .ToList();
+    }
+}
+
+<div class="panel panel-default question-group">
+    <div class="panel-heading">
+        @Model.Name
+    </div>
+    <div class="panel-body">
+        @foreach (var qvm in qvms)
+        {
+            Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+        }
+    </div>
+</div>

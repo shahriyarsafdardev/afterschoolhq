@@ -1,7 +1,35 @@
-﻿
+﻿@model List<Registrant>
 @{
-    ViewBag.Title = "Select";
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Select Student";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var cart = (Cart)ViewBag.Cart;
 }
 
-<h2>Select</h2>
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
+<div>
+    <h1>Select Student</h1>
+    <div>
+        Please select your student below
+    </div>
+</div>
+
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+
+                @foreach(var registrant in Model)
+                {
+                    <div>
+                        <p>@registrant.DisplayName</p>
+                        <p>@registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade</p>
+                        <p><a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })" class="btn btn-primary btn-lg">Select</a></p>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>

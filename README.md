@@ -15,11 +15,11 @@
 - Turn on Mixed Mode Authentication - required for the local app to access the database
 - Install SQL Server Management Studio (SSMS)
 - Login to database using SSMS
-- Create new `AfterSchool` database
-- Create `AfterSchoolUser` and give it Owner access to `AfterSchool` database
-- Give it the password found in `Database.cs`
+- Create new `AfterSchool` and `AfterSchoolTest` database
+- Create `AfterSchoolUser` and give it Owner access to `AfterSchool` and `AfterSchoolTest` database
+- Give it the password found in `Database.cs` for the local and test environments
 - Turn off the password policy
-- Select `User Mapping` in left menu, click on AfterSchool, check the `db owner` checkbox, save the user
+- Select `User Mapping` in left menu, click on `AfterSchool` and `AfterSchoolTest`, check the `db owner` checkbox, save the user
 
 ## Getting up and running
 

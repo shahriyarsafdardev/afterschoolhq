@@ -19,11 +19,11 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
@@ -212,9 +212,9 @@ namespace AfterSchoolLibrary
             return FormQuestion.LoadByFormId(this.ID.Value, msgs, dc);
         }
 
-        public List<FormQuestion> GetActiveQuestions(DatabaseConnection dc = null)
+        public List<FormQuestion> GetActiveQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.LoadByFormIdByIsActive(this.ID.Value, true, dc: dc);
+            return FormQuestion.LoadByFormIdByIsActive(this.ID.Value, true, msgs, dc);
         }
 
         public List<FormQuestionGroup> GetQuestionGroups(SystemMessages msgs = null, DatabaseConnection dc = null)

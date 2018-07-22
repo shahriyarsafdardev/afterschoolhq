@@ -314,7 +314,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrationPeriodId = regperiod.ID;
             }
 
-            registrant.AddOrUpdateActivity(selectedRegistration.ID.Value, activity.ToInteger(), day, seats, wlseats, aseats, iseats, dseats, choiceNumber, registrationPeriodId, act.ActivityGroupId, SessionVariables.LoggedInUser.ID.Value, msgs);
+            registrant.AddOrUpdateActivity(selectedRegistration.ID.Value, activity.ToInteger(), seats, wlseats, aseats, iseats, dseats, choiceNumber, registrationPeriodId, act.ActivityGroupId, SessionVariables.LoggedInUser.ID.Value, msgs);
 
             if (msgs.HasNoErrors())
             {

@@ -19,13 +19,13 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public RegistrationMode RegistrationModeId { get { return (RegistrationMode)MDV["RegistrationModeId"].Value; } set { MDV["RegistrationModeId"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
@@ -473,10 +473,10 @@ namespace AfterSchoolLibrary
         }
 
         private Form _Form = null;
-        public Form GetForm(DatabaseConnection dc = null)
+        public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Form.IsEmpty())
-                _Form = Form.Load(this.FormId.Value, dc: dc);
+                _Form = Form.Load(this.FormId.Value, msgs, dc);
 
             return _Form;
         }

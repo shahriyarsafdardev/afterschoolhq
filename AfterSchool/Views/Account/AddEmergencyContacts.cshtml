@@ -31,9 +31,15 @@
                         }
                     </div>
                     <form class="form-horizontal" method="post" action="@Url.Action("addemergencycontacts", "account")">
-                       
+
                         <h4>Contact 1</h4>
-                        @foreach (var qvm in Model.Where(qvm => qvm.Question.Formquestion)
+                        @foreach (var qvm in Model.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
+                        {
+                            Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                        }
+
+                        <h4>Contact 2</h4>
+                        @foreach (var qvm in Model.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }

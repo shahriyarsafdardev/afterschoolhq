@@ -91,6 +91,15 @@ $(document).ready(function () {
 
     //$('[data-tooltip-id]').tooltip();
 
+    // may need to uncomment
+    // formValidation();
+
+    //$('[data-tooltip-id]').tooltip();
+    //$('[data-tooltip-id]').tooltip('show');
+
+})
+
+function formValidation() {
     var forms = document.getElementsByTagName('form');
     for (var i = 0; i < forms.length; i++) {
         forms[i].noValidate = true;
@@ -136,11 +145,7 @@ $(document).ready(function () {
             } else { console.log('checkValidity==true'); }
         }, false);
     }
-
-    //$('[data-tooltip-id]').tooltip();
-    //$('[data-tooltip-id]').tooltip('show');
-
-})
+}
 
 function clearValidationCSS(id) {
 

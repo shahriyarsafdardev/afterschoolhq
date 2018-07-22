@@ -14,7 +14,7 @@ namespace AfterSchool.Areas.User.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(null)
+        public HomeController() : base(new List<AccountType>() { AccountType.Registrant })
         {
 
         }
@@ -22,9 +22,14 @@ namespace AfterSchool.Areas.User.Controllers
         // GET: User/Home
         public ActionResult Index()
         {
-            var registrants = Registrant.LoadByWebUserIdByIsMaster(SessionVariables.LoggedInUser.ID.Value, true)
+            var msgs = new SystemMessages();
+            var registrants = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs)
                                 .OrderBy(x => x.FirstName)
-                                .ThenBy(x => x.LastName).ToList();
+                                .ThenBy(x => x.LastName)
+                                .ToList();
+
+            ViewBag.Messages = msgs;
+
             return View(registrants);
         }
     }

@@ -223,7 +223,7 @@ namespace AfterSchoolLibrary.Services
         {
             var qhs = new List<QuestionHolder>();
             var groupLabel = "Student Home Address";
-            var groupType = QuestionGroupDataType.ContactInformation;
+            var groupType = QuestionGroupDataType.HomeAddress;
 
             qhs.Add(new QuestionHolder() { Text = "Street Address", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantAddress1 });
             qhs.Add(new QuestionHolder() { Text = "Apt/Suite", QuestionTypeId = QuestionType.TextBox, GroupName = groupLabel, QuestionGroupDataTypeId = groupType, QuestionDataTypeId = QuestionDataType.RegistrantAddress2 });

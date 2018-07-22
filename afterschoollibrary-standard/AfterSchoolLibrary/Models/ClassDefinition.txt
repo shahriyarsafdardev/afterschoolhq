@@ -577,18 +577,21 @@ name: ActivityPayment
 description: keeps track of payments for an activity from a registrant/student
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
-property: ActivityId, int?, Int, required
+property: ActivityId, int?, Int
 property: Uid, Guid, UniqueIdentifier, required
 property: Amount, decimal?, Money
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 loadmethod: ActivityId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: Uid
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 [end]
 
 [begin]
 type: Class
 name: RegistrantActivityGroup
-description: Used to track registrants to an session/leage, usually from an invitation (invite only session/league) or when a student is registering for a league where there are no specific teams created
+description: Used to track registrants to an session/league, usually from an invitation (invite only session/league) or when a student is registering for a league where there are no specific teams created
 inherits: BasicObjectWithModified
 property: ActivityGroupId, int?, Int, required
 property: RegistrantId, int?, Int, required
@@ -795,6 +798,7 @@ property: ActivityId, int?, Int
 property: RegistrationId, int?, Int
 property: Text, string, NVarChar(400)
 property: QuestionDataTypeId, QuestionDataType, Int
+property: QuestionText, string, NVarChar(400), , Used to keep the question text just in case the question text changes on the original
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
 join: FormQuestionGroup.ID, FormQuestion.FormQuestionGroupId, LeftOuterJoin
@@ -806,6 +810,7 @@ joinproperty: FormQuestion.DisplayOrder, int?, Int
 joinproperty: FormQuestion.Text, string, NVarChar
 joinproperty: FormQuestionGroup.Name, string, NVarChar
 joinproperty: FormQuestionGroup.DisplayOrder, int?, Int
+joinproperty: FormQuestionGroup.QuestionGroupDataTypeId, QuestionGroupDataType, Int
 joinproperty: Registration.AccountId, int?, Int
 loadmethod: RegistrantId, List<>
 loadmethod: RegistrantId|ActivityId, List<>
@@ -831,6 +836,7 @@ property: PaymentTypeId, PaymentType, Int
 property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
+property: ESignature, string, NVarChar(50)
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -996,7 +1002,7 @@ serializable: true
 inherits: BasicObjectWithModified
 property: PackageId, int?, Int, required
 property: FeatureTypeId, FeatureType, Int
-property: Max, int?, Int
+property: Max, double?, Float
 loadmethod: PackageId, List<>
 loadmethod: PackageId|FeatureTypeId
 [end]
@@ -1009,7 +1015,7 @@ serializable: true
 inherits: BasicObjectWithModified
 property: AccountPackageId, int?, Int, required
 property: FeatureTypeId, FeatureType, Int
-property: Max, int?, Int
+property: Max, double?, Float
 loadmethod: AccountPackageId, List<>
 loadmethod: AccountPackageId|FeatureTypeId
 [end]
@@ -1164,6 +1170,7 @@ property: TotalPeriods, int?, Int, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: CostPerPeriod, decimal?, Money, required
 property: IsActive, bool, Bit
+property: StripeSubscriptionId, string, NVarChar(50)
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
@@ -1181,6 +1188,7 @@ property: CostPerPeriod, decimal?, Money, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: DoesAutoRenew, bool, Bit
 property: IsActive, bool, Bit
+property: StripeSubscriptionId, string, NVarChar(50)
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
@@ -1191,9 +1199,11 @@ name: RegistrantPaymentPlan
 description: Keeps track of which registrants are on which payment plans
 serializable: true
 inherits: BasicObjectWithModified
+property: PurchaseId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: PaymentPlanId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
+loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: PaymentPlanId, List<>
 loadmethod: RegistrantId|PaymentPlanId
@@ -1205,9 +1215,11 @@ name: RegistrantSubscriptionPlan
 description: Keeps track of which registrants are on which subscription plans
 serializable: true
 inherits: BasicObjectWithModified
+property: PurchaseId, int?, Int, required
 property: SubscriptionPlanId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
+loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>
 loadmethod: RegistrantId|SubscriptionPlanId
@@ -1223,15 +1235,9 @@ property: Amount, decimal?, Money, required
 property: BillerAccountId, int?, Int, required
 property: PayerAccountId, int?, Int, required
 property: PaymentTypeId, PaymentType, Int, required
-property: TransactionTypeId, TransactionType, Int, required
-property: ParticipationObjectTypeId, ParticipationObjectType, Int
-property: ParticipationObjectId, int?, Int
-property: BillSourceTypeId, BillSourceType, Int
-property: BillSourceId, int?, Int
 property: Description, string, NVarChar(400), required
 property: Uid, Guid, UniqueIdentifier
-loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
-loadmethod: BillSourceId|BillSourceTypeId, List<>, LoadByBillSource
+property: PurchaseId, int?, Int
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid
@@ -1274,6 +1280,7 @@ serializable: true
 inherits: BasicObjectWithModified
 property: ProductId, int?, Int, required
 property: RegistrantId, int?, Int, required
+property: PurchaseId, int?, Int, required
 property: ParticipationObjectTypeId, ParticipationObjectType, Int
 property: ParticipationObjectId, int?, Int
 property: AmountPaid, decimal?, Money, required
@@ -1282,6 +1289,63 @@ loadmethod: RegistrantId, List<>
 loadmethod: ProductId, List<>
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: RegistrantId|ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByRegistrantByParticipationObject
+[end]
+
+[begin]
+type: Class
+name: Coupon
+description: Used to give discounts to parents during the purchase of a registration, product, etc
+inherits: BasicLookUpObject
+property: Amount, decimal?, Money, required, Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
+property: AmountTypeId, AmountType, Int, required, Either a percentage or a flat amount
+property: AccountId, int?, Int
+property: ExpirationDate, DateTime?, DateTime
+property: AppliesTo, CouponApplyType, Int, , Determines what type of object the coupon will apply to during a purchase, All types of items in cart, or only one type of item
+property: MaxNumberOfUsesPerPerson, int?, Int
+property: MaxNumberOfUsesAll, int?, Int, , The amount of uses that a coupon can have across all users
+baseproperty: Name, required
+loadmethod: AccountId, List<>
+[end]
+
+[begin]
+type: Class
+name: AssignedCoupon
+description: Used to assign a coupon to an activity/activitygroup
+inherits: BasicObjectWithModified
+property: ParticipationObjectId, int?, Int
+property: ParticipationObjectTypeId, ParticipationObjectType, Int
+property: CouponId, int?, Int
+loadmethod: CouponId|ParticipationObjectId|ParticipationObjectTypeId, , LoadByCouponByParticipationObject
+[end]
+
+[begin]
+type: Class
+name: Purchase
+description: Store all information on a purchase
+inherits: BasicObjectWithModified
+property: RegistrationId, int?, Int
+property: RegistrantId, int?, Int
+property: CouponId, int?, Int
+property: StripeTokenOrCardId, string, NVarChar(50)
+property: PurchaserAccountId, int?, Int
+property: NumberOfSeats, int?, Int
+property: LoggedInUserId, int?, Int
+property: AmountPaid, decimal?, Money
+loadmethod: RegistrationId, List<>
+loadmethod: RegistrantId, List<>
+loadmethod: CouponId, List<>
+[end]
+
+[begin]
+type: Enum
+name: AmountType
+values: NotSet, Percentage, FlatAmount
+[end]
+
+[begin]
+type: Enum
+name: CouponApplyType
+values: NotSet, All, SubscriptionPlan, PaymentPlan, RegistrationFee, Product
 [end]
 
 [begin]
@@ -1341,7 +1405,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee
 [end]
 
 [begin]

@@ -19,18 +19,18 @@ namespace AfterSchoolLibrary
 		#region "ClassGenerator"
 
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public DayOfWeekASL Day { get { return (DayOfWeekASL)MDV["Day"].Value; } set { MDV["Day"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public DateTime? StartDateTime { get { return (DateTime?)MDV["StartDateTime"].Value; } set { MDV["StartDateTime"].Value = value; } }
 		/// <summary>
-		/// Required
+		/// Required.
 		/// </summary>
 		public DateTime? EndDateTime { get { return (DateTime?)MDV["EndDateTime"].Value; } set { MDV["EndDateTime"].Value = value; } }
 		
@@ -207,30 +207,30 @@ namespace AfterSchoolLibrary
             return null;
         }
 
-        public static List<DateRange> CreateDateRangesFromSchedule(ActivitySchedule schedule, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var ranges = new List<DateRange>();
+        //public static List<DateRange> CreateDateRangesFromSchedule(ActivitySchedule schedule, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    var ranges = new List<DateRange>();
 
-            if (schedule.IsNotEmpty())
-            {
-                foreach (var day in schedule.GetDaysOfTheWeek(msgs, dc))
-                {
-                    var currentDate = schedule.StartDate.Value.AddWeeks(0).NextDayOfWeek(day.ToDayOfWeek());
+        //    if (schedule.IsNotEmpty())
+        //    {
+        //        foreach (var day in schedule.GetDaysOfTheWeek(msgs, dc))
+        //        {
+        //            var currentDate = schedule.StartDate.Value.AddWeeks(0).NextDayOfWeek(day.ToDayOfWeek());
 
-                    while (currentDate <= schedule.StartDate.Value)
-                    {
-                        ranges.Add(new DateRange()
-                        {
-                            StartDate = $"{currentDate.ToShortDateString()} {schedule.DailyStartTime.Value}".ToDateTime(),
-                            EndDate = $"{currentDate.ToShortDateString()} {schedule.DailyEndTime.Value}".ToDateTime(),
-                        });
-                        currentDate = currentDate.AddWeeks(1);
-                    }
-                }
-            }
+        //            while (currentDate <= schedule.StartDate.Value)
+        //            {
+        //                ranges.Add(new DateRange()
+        //                {
+        //                    StartDate = $"{currentDate.ToShortDateString()} {schedule.DailyStartTime.Value}".ToDateTime(),
+        //                    EndDate = $"{currentDate.ToShortDateString()} {schedule.DailyEndTime.Value}".ToDateTime(),
+        //                });
+        //                currentDate = currentDate.AddWeeks(1);
+        //            }
+        //        }
+        //    }
 
-            return ranges;
-        }
+        //    return ranges;
+        //}
 
         #endregion
     }
