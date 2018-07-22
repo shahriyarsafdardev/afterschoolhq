@@ -1430,6 +1430,13 @@ namespace AfterSchoolLibrary
 
         private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            // TODO: Add Products
+            // if they have products
+            //foreach (var product in purchaseObject.Products)
+            //{
+            //    purchaseObject.Registrant.PurchaseProduct();
+            //}
+
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
             if (msgs.HasNoErrors() && purchaseObject.SavePaymentInfo)
@@ -1511,6 +1518,25 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // TODO: Allow user to register for multiple activities in one session at once
+
+            // add them to the activity
+            if (purchaseObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
+            {
+                var activity = ((Activity)purchaseObject.ParticipationObject.Object);
+                activity.ProcessRegistration(
+                    purchaseObject: purchaseObject,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+            }
+
+            // TODO: Add to an activity group if they are registering for a session
+
+        }
+
         public static void ProcessRegistrationWithPayment(this Account fromAccount, Account toAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
@@ -1518,28 +1544,8 @@ namespace AfterSchoolLibrary
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    // TODO: Allow user to register for multiple activities in one session at once
 
-                    // add them to the activity
-                    if (purchaseObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
-                    {
-                        var activity = ((Activity)purchaseObject.ParticipationObject.Object);
-                        activity.ProcessRegistration(
-                            purchaseObject: purchaseObject,
-                            loggedInUser: loggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
-                    }
-
-                    // TODO: Add to an activity group if they are registering for a session
-
-
-                    // TODO: Add Products
-                    // if they have products
-                    //foreach (var product in purchaseObject.Products)
-                    //{
-                    //    purchaseObject.Registrant.PurchaseProduct();
-                    //}
+                    fromAccount.ProcessRegistrationWithoutPayment(toAccount, purchaseObject, loggedInUser, msgs, dc);                    
 
                     // process payment by to account, includes registration fee and product purchases
                     toAccount.ProcessRegistrationFeeAndProducts(fromAccount, purchaseObject, loggedInUser, msgs, dc);
