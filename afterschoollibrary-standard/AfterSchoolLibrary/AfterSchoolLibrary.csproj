@@ -35,11 +35,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\basiclibrary-standard\BasicLibrary\BasicLibrary.vbproj" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <ProjectReference Include="..\..\basiclibrary-standard\BasicLibrary\BasicLibrary.vbproj" />
   </ItemGroup>
 
   <ItemGroup>
