@@ -789,7 +789,12 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("payment", new { id = registration.Uid });
+            {
+                if (participationObject.IsFree)
+                    return RedirectToAction("thankyou", new { id = registration.Uid });
+                else
+                    return RedirectToAction("payment", new { id = registration.Uid });
+            }
 
             ViewBag.QuestionViewModels = qvms;
             ViewBag.Messages = msgs;
@@ -801,6 +806,52 @@ namespace AfterSchool.Controllers
         public ActionResult Register(string signature)
         {
             return HandleIsLoggedIn() ?? RegisterActionPost(signature);
+        }
+
+        private ActionResult FinalizeActionGet(string registrationUid)
+        {
+            var msgs = new SystemMessages();
+            var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+
+            if (participationObject.IsEmpty())
+                return RedirectToAction(""); // TODO: Should return to school homepage, they don't have an item in the cart
+
+            // if not free and no option to pay later, redirect to payment screen
+            if (!participationObject.IsFree && !participationObject.AllowToPayLater)
+                return RedirectToAction("payment", new { id = registrationUid });
+
+            // need to actually register first :)
+            if (!registrationUid.IsGuid())
+                return RedirectToAction("register");
+
+            var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);            
+
+            if (msgs.HasNoErrors())
+            {
+                SessionVariables.CurrentAccount.ProcessRegistrationWithoutPayment(
+                    toAccount: participationObject.OwnerAccount,
+                    purchaseObject: new PurchaseObject()
+                    {
+                        NumberOfSeats = 1,
+                        ParticipationObject = participationObject,
+                        Purchaser = SessionVariables.CurrentAccount,
+                        Registration = registration,
+                        Registrant = SessionVariables.CurrentRegistrant
+                    },
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs);
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("thankyou", new { id = registration.Uid });
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult Finalize(string id)
+        {
+            return HandleIsLoggedIn() ?? FinalizeActionGet(id);
         }
 
         #endregion
@@ -897,6 +948,7 @@ namespace AfterSchool.Controllers
             BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
 
             ViewBag.Registration = registration;
+            ViewBag.RegistrantActivities = registration.GetRegistrantActivities();
             ViewBag.Account = registration.GetAccount();
             ViewBag.Cards = SessionVariables.CurrentAccount.GetStripeCards(msgs);
             ViewBag.Cart = SessionVariables.Cart;
@@ -912,7 +964,6 @@ namespace AfterSchool.Controllers
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
 
             ThankYouViewBag(registrationUid, participationObject, msgs);
-
 
             return View();
         }
