@@ -268,26 +268,24 @@ namespace AfterSchoolLibrary
         public static ActivitySchedule EditExisting(string scheduleId, string scheduleName, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            ActivitySchedule rtn = null;
+            ActivitySchedule schedule = null;
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-                    var schedule = ActivitySchedule.Load(scheduleId.ToInteger(), dc: adc);
-                    schedule.Name = scheduleName;
-                    schedule.ScheduleDetails = details.IfBlank("").MaxChars(4000);
-                    schedule.RepeatsWeekly = repeatsWeekly;
-                    schedule.StartDate = startDate;
-                    schedule.EndDate = endDate;
-                    schedule.DailyStartTime = dailyStartTime;
-                    schedule.DailyEndTime = dailyEndTime;
-                    schedule.LastModifiedDate = DateTime.UtcNow;
-                    schedule.LastModifiedBy = loggedInUserId;
-                    amsgs.AddRange(schedule.Save(adc));
+                    schedule = ActivitySchedule.Load(scheduleId.ToInteger(), amsgs, adc);
 
-                    amsgs.AddRange(schedule.UpdateInstances(scheduleDates, loggedInUserId, adc));
-
-                    rtn = schedule;
+                    amsgs.AddRange(schedule.UpdateScheduleAndInstances(
+                        name: scheduleName,
+                        details: details,
+                        repeatsWeekly: repeatsWeekly,
+                        startDate: startDate,
+                        endDate: endDate,
+                        dailyStartTime: dailyStartTime,
+                        dailyEndTime: dailyEndTime,
+                        scheduleDates: scheduleDates,
+                        loggedInUserId: loggedInUserId,
+                        dc: adc)); 
                 },
                 onSuccess: (SystemMessages smsgs) => {
                     msgs.AddRange(smsgs);
@@ -298,7 +296,7 @@ namespace AfterSchoolLibrary
                 dc: dc
             );
 
-            return rtn;
+            return schedule;
         }
 
         public static ActivitySchedule GetNewDefaultSchedule(List<DateRange> scheduleDates = null)
@@ -355,10 +353,12 @@ namespace AfterSchoolLibrary
             return instance;
         }
 
-        public SystemMessages UpdateScheduleAndInstances(bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages UpdateScheduleAndInstances(string name, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
+            this.Name = name;
+            this.ScheduleDetails = details;
             this.RepeatsWeekly = repeatsWeekly;
             this.StartDate = startDate;
             this.EndDate = endDate;
@@ -368,7 +368,7 @@ namespace AfterSchoolLibrary
             this.CreatedBy = this.LastModifiedBy = loggedInUserId;
             msgs.AddRange(this.Save(dc: dc));
 
-            msgs.AddRange(UpdateInstances(scheduleDates, loggedInUserId, dc: dc));
+            msgs.AddRange(UpdateInstances(scheduleDates, loggedInUserId, dc));
 
             return msgs;
         }

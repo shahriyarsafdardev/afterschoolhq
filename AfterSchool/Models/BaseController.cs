@@ -126,21 +126,28 @@ namespace AfterSchool.Models
             }
         }
 
-        protected RedirectToRouteResult LoginRedirect()
+        protected ActionResult LoginRedirect(Account registrationAccount = null)
         {
-            if (SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction("index", "home", new { area = "user" });   
-            
-            else if (SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
+            if (SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
                         return RedirectToAction("index", "account", new { area = "admin" });
+
                     case AccountType.SchoolDistrict:
                         if (SessionVariables.AccountPackage.IsEmpty())
                             return RedirectToAction("newbilling", "account", new { area = "district" });
 
                         return RedirectToAction("index", "home", new { area = "district" });
+
+                    case AccountType.Registrant:
+                        if (SessionVariables.Cart.IsNotEmpty())
+                            return RedirectToAction("select", "account");
+                        else if (registrationAccount.IsNotEmpty())
+                            return Redirect(registrationAccount.HomePageUrl);
+                        else
+                            return RedirectToAction("index", "home", new { area = "user" });
+
                     default:
                         if (SessionVariables.AccountPackage.IsEmpty())
                             return RedirectToAction("newbilling", "account", new { area = "org" });

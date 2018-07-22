@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using System.Collections.Specialized;
 using BasicLibrary;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
-using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Controllers
 {
-    public class RController : Controller
+    public class RController : BaseController
     {
         // GET: R
         public ActionResult Index()
@@ -20,9 +16,17 @@ namespace AfterSchool.Controllers
             return View();
         }
 
+        private void RestartRegistrationSession()
+        {
+            SessionVariables.CurrentRegistrant = null;
+            SessionVariables.Cart = null;
+        }
+
         [HttpGet]
         public ActionResult Account(string accountname)
         {
+            RestartRegistrationSession();
+
             var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname);
             var participationObjects = new List<ParticipationObject>();
             var sessions = new List<ActivityGroup>();
@@ -49,6 +53,8 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Browse(string accountname)
         {
+            RestartRegistrationSession();
+
             var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname);
             var participationObjects = new List<ParticipationObject>();
             var sessions = new List<ActivityGroup>();
@@ -74,6 +80,8 @@ namespace AfterSchool.Controllers
 
         public ActionResult Activity(string accountname, string activitytype, string activityname)
         {
+            RestartRegistrationSession();
+
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
             var activity = AfterSchoolLibrary.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
@@ -95,47 +103,10 @@ namespace AfterSchool.Controllers
             SessionVariables.Cart.AddCartItem(participationObject, msgs);
 
             if (SessionVariables.CurrentRegistrant.IsEmpty())
-                return RedirectToAction("getstarted", "account", new { area = "" });
-
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = account;
-            ViewBag.Form = activity.GetActiveActivityForm(msgs);
-
-            return View(participationObject);
+                return RedirectToAction("getstarted", "account", new { area = "", regaccount = account.Uid });
+            else
+                return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
+            
         }
-
-        //public ActionResult AccountHome(string accountName, string activityGroupName)
-        //{
-        //    var account = Account.LoadByUniqueName(accountName);
-        //    var activityGroups = account.GetPublishedActivityGroups();
-        //    var activities = account.GetPublishedActivities();
-        //    return View();
-        //}
-
-        //public ActionResult ActivityGroupHome(string accountName, string activityGroupName)
-        //{
-        //    var account = Account.LoadByUniqueName(accountName);
-        //    var activityGroup = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, activityGroupName);
-        //    var activities = activityGroup.GetActivities();
-
-        //    return View();
-        //}
-
-        //public ActionResult ActivityHome(string accountName, string activityName)
-        //{
-        //    var account = Account.LoadByUniqueName(accountName);
-        //    var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value);
-
-        //    return View();
-        //}
-
-        //public ActionResult ActivityRegistration(string accountName, string activityName)
-        //{
-        //    var account = Account.LoadByUniqueName(accountName);
-        //    var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value);
-
-        //    return View();
-        //}
     }
 }

@@ -207,30 +207,30 @@ namespace AfterSchoolLibrary
             return null;
         }
 
-        public static List<DateRange> CreateDateRangesFromSchedule(ActivitySchedule schedule, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var ranges = new List<DateRange>();
+        //public static List<DateRange> CreateDateRangesFromSchedule(ActivitySchedule schedule, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    var ranges = new List<DateRange>();
 
-            if (schedule.IsNotEmpty())
-            {
-                foreach (var day in schedule.GetDaysOfTheWeek(msgs, dc))
-                {
-                    var currentDate = schedule.StartDate.Value.AddWeeks(0).NextDayOfWeek(day.ToDayOfWeek());
+        //    if (schedule.IsNotEmpty())
+        //    {
+        //        foreach (var day in schedule.GetDaysOfTheWeek(msgs, dc))
+        //        {
+        //            var currentDate = schedule.StartDate.Value.AddWeeks(0).NextDayOfWeek(day.ToDayOfWeek());
 
-                    while (currentDate <= schedule.StartDate.Value)
-                    {
-                        ranges.Add(new DateRange()
-                        {
-                            StartDate = $"{currentDate.ToShortDateString()} {schedule.DailyStartTime.Value}".ToDateTime(),
-                            EndDate = $"{currentDate.ToShortDateString()} {schedule.DailyEndTime.Value}".ToDateTime(),
-                        });
-                        currentDate = currentDate.AddWeeks(1);
-                    }
-                }
-            }
+        //            while (currentDate <= schedule.StartDate.Value)
+        //            {
+        //                ranges.Add(new DateRange()
+        //                {
+        //                    StartDate = $"{currentDate.ToShortDateString()} {schedule.DailyStartTime.Value}".ToDateTime(),
+        //                    EndDate = $"{currentDate.ToShortDateString()} {schedule.DailyEndTime.Value}".ToDateTime(),
+        //                });
+        //                currentDate = currentDate.AddWeeks(1);
+        //            }
+        //        }
+        //    }
 
-            return ranges;
-        }
+        //    return ranges;
+        //}
 
         #endregion
     }

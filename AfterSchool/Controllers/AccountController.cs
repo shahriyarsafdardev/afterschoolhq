@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using System;
+using Hangfire;
 
 namespace AfterSchool.Controllers
 {
@@ -16,7 +17,7 @@ namespace AfterSchool.Controllers
 
         #region GetStarted
 
-        private List<FormQuestion> GetStartedViewBag(SystemMessages msgs)
+        private List<FormQuestion> GetStartedViewBag(string regaccount, SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First();
@@ -46,29 +47,33 @@ namespace AfterSchool.Controllers
             });
 
             ViewBag.Cart = SessionVariables.Cart;
+            
 
             return questions;
         }
         
         [HttpGet]
-        public ActionResult GetStarted()
+        public ActionResult GetStarted(string regaccount)
         {
             if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
                 return RedirectToAction("select");
 
             var msgs = new SystemMessages();
-            var questions = GetStartedViewBag(msgs);
+            var questions = GetStartedViewBag(regaccount, msgs);
 
             ViewBag.Messages = msgs;
+
+            if (regaccount.IsGuid())
+                ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
 
             return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
         }
 
         [HttpPost]
-        public ActionResult GetStarted(string password1, string password2, string agree, string textnotifications)
+        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications)
         {
             var msgs = new SystemMessages();
-            var questions = GetStartedViewBag(msgs);
+            var questions = GetStartedViewBag(regaccount, msgs);
 
             questions.ForEach(question => {
                 if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
@@ -273,13 +278,14 @@ namespace AfterSchool.Controllers
         private List<FormQuestion> AddEmergencyContactsViewBag(SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
-            var emergencyContactsQuestionGroup = form.GetQuestionGroups(msgs)
+            var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
                 .Where(group => 
                     group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 || 
                     group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
-                .First();
-            var questions = emergencyContactsQuestionGroup.GetAllQuestions(msgs);
+                .ToList();
+            var questions = new List<FormQuestion>();
 
+            emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
             questions.ForEach(question => { question.IsRequired = true; });
 
             ViewBag.Cart = SessionVariables.Cart;
@@ -744,7 +750,8 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        // account gets copy of master registrant record
+                        // account gets copy / snapshot of master registrant record
+                        // required in order to make sure registration data doesn't change as registrant changes information in master record.
                         var accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
                             ownerAccount: participationObject.OwnerAccount,
                             loggedInUser: SessionVariables.LoggedInUser,
@@ -760,6 +767,15 @@ namespace AfterSchool.Controllers
                             loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                             msgs: amsgs,
                             dc: adc);
+
+                        //copy all answers from the main account to the registrant & registration :)
+                        SessionVariables.CurrentRegistrant.CopyAnswers(
+                            copyingRegistrant: accountRegistrantCopy, 
+                            registration: registration, 
+                            loggedInUser: SessionVariables.LoggedInUser, 
+                            msgs: amsgs, 
+                            dc: adc);
+
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -859,7 +875,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("thankyou");
+                return RedirectToAction("thankyou", new { id = registration.Uid });
 
             return View();
         }
@@ -878,7 +894,10 @@ namespace AfterSchool.Controllers
         {
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
 
+            BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
+
             ViewBag.Registration = registration;
+            ViewBag.Account = registration.GetAccount();
             ViewBag.Cards = SessionVariables.CurrentAccount.GetStripeCards(msgs);
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
@@ -893,6 +912,7 @@ namespace AfterSchool.Controllers
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
 
             ThankYouViewBag(registrationUid, participationObject, msgs);
+
 
             return View();
         }

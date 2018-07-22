@@ -1,0 +1,21 @@
+﻿@model List<Registrant>
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Login";
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+
+                @{ Html.RenderPartial("_Login"); }
+
+            </div>
+        </div>
+    </div>
+</div>

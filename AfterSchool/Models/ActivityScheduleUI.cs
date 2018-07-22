@@ -27,7 +27,23 @@ namespace AfterSchool.Models
         {
             var scheduleDates = new List<DateRange>();
 
-            if (repeatsweekly.IsEmpty())
+            if (repeatsweekly.IsNotEmpty())
+            {
+                foreach (var day in days)
+                {
+                    var currentDate = startdate.ToDateTime().AddWeeks(0).NextDayOfWeek(day.ToDayOfWeek());
+                    while (currentDate <= enddate.ToDateTime())
+                    {
+                        var meetingStartDate = String.Concat(currentDate.ToShortDateString(), " ", dailystarttime).ToDateTime();
+                        var meetingEndDate = String.Concat(currentDate.ToShortDateString(), " ", dailyendtime).ToDateTime();
+
+                        scheduleDates.Add(new DateRange(meetingStartDate, meetingEndDate));
+
+                        currentDate = currentDate.AddWeeks(1);
+                    }
+                }
+            }
+            else
             {
                 for (var i = 1; i <= 50; i++)
                 {

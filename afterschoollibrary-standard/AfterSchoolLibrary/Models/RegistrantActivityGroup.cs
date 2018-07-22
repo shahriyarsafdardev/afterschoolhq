@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// Used to track registrants to an session/leage, usually from an invitation (invite only session/league) or when a student is registering for a league where there are no specific teams created
+    /// Used to track registrants to an session/league, usually from an invitation (invite only session/league) or when a student is registering for a league where there are no specific teams created
     /// </summary>
 	
     public class RegistrantActivityGroup : BasicObjectWithModified

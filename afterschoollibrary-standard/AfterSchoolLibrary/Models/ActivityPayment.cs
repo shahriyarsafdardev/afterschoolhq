@@ -22,15 +22,20 @@ namespace AfterSchoolLibrary
 		/// Required.
 		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public decimal? Amount { get { return (decimal?)MDV["Amount"].Value; } set { MDV["Amount"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public ParticipationObjectType ParticipationObjectTypeId { get { return (ParticipationObjectType)MDV["ParticipationObjectTypeId"].Value; } set { MDV["ParticipationObjectTypeId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		
 
         public ActivityPayment()
@@ -38,6 +43,7 @@ namespace AfterSchoolLibrary
             this.Config(ObjectMap, DatabaseQuery, typeof(ActivityPayment).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
+			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
 			
         }
 
@@ -52,6 +58,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
+				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -105,10 +113,12 @@ namespace AfterSchoolLibrary
 
 			if (this.RegistrantId.IsEmpty())
 				msgs.Add("RegistrantId is required on ActivityPayment object", MessageType.Error);
-			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required on ActivityPayment object", MessageType.Error);
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on ActivityPayment object", MessageType.Error);
+			if (this.ParticipationObjectTypeId.IsEmpty())
+				msgs.Add("ParticipationObjectTypeId is required on ActivityPayment object", MessageType.Error);
+			if (this.ParticipationObjectId.IsEmpty())
+				msgs.Add("ParticipationObjectId is required on ActivityPayment object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(ActivityPayment).Name));
@@ -147,6 +157,14 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["Amount"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ParticipationObjectTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ParticipationObjectId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -179,6 +197,15 @@ namespace AfterSchoolLibrary
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<ActivityPayment> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		

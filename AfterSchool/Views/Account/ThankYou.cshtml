@@ -4,6 +4,7 @@
     ViewBag.Title = "Thank you";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
+    var account = (Account)ViewBag.Account;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -22,6 +23,9 @@
                     You have been registered
                 </div>
 
+                <div>
+                    <a href="@account.HomePageUrl" class="btn btn-xl btn-primary center-block">Register for another activity</a>
+                </div>
 
             </div>
         </div>

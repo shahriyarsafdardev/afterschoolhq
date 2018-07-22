@@ -1,21 +1,16 @@
 ﻿@model AfterSchoolLibrary.Activity
 @{
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
 
-    var registrants = (List<RegistrantActivity>)ViewBag.Registrants;
+    var ras = (List<RegistrantActivity>)ViewBag.Registrants;
     var account = SessionVariables.CurrentAccount;
-    decimal totalPaid = 0;
-    int registrantCount = registrants.Sum(x => x.NumberOfSeats.Value);
-    int waitingListCount = registrants.Sum(x => x.NumberOfWaitingListSeats.Value);
-    int applicationCount = registrants.Sum(x => x.NumberOfApplicationSeats.Value);
-    int invitationCount = registrants.Sum(x => x.NumberOfInvitationSeats.Value);
-    int declinedCount = registrants.Sum(x => x.NumberOfSeatsDeclined.Value);
-    var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
-
-    if (registrants.Where(x => x.DatePaid.HasValue).Count() > 0)
-    {
-        totalPaid = registrants.Where(x => x.DatePaid.HasValue).Sum(x => x.AmountPaid.Value);
-    }
+    var totalPaid = Model.GetTotalPaid();
+    var registrantCount = ras.Sum(x => x.NumberOfSeats.Value);
+    var waitingListCount = ras.Sum(x => x.NumberOfWaitingListSeats.Value);
+    var applicationCount = ras.Sum(x => x.NumberOfApplicationSeats.Value);
+    var invitationCount = ras.Sum(x => x.NumberOfInvitationSeats.Value);
+    var declinedCount = ras.Sum(x => x.NumberOfSeatsDeclined.Value);
+    var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;    
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -131,17 +126,17 @@
             </div>
 
             @{Html.RenderPartial(
-                  "~/Views/Shared/_ActivityRegistrants.cshtml", 
-                  registrants,
-                  new ViewDataDictionary()
-                  {
+                    "~/Views/Shared/_ActivityRegistrants.cshtml",
+                    ras,
+                    new ViewDataDictionary()
+                    {
                     { "Activity", Model },
                     { "Account", account },
                     { "EditAction", "registrantdetail" },
                     { "EditController", "activity" },
                     { "AssignmentType", assignmentType }
-                  }
-             );}
+                    }
+               );}
 
         </div>
     </div>

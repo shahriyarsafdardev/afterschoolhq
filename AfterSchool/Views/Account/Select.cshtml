@@ -24,7 +24,7 @@
                 {
                     <div>
                         <p>@registrant.DisplayName</p>
-                        <p>@registrant.GetAnswer(QuestionDataType.RegistrantGrade)</p>
+                        <p>@registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade</p>
                         <p><a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })" class="btn btn-primary btn-lg">Select</a></p>
                     </div>
                 }

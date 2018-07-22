@@ -4,6 +4,7 @@
     ViewBag.Title = "Get Started";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
+    var registrationAccount = (Account)ViewBag.RegistrationAccount;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -21,7 +22,7 @@
             <div class="panel-body">
 
                 <div>
-                    <p>Already have an account? <a href="/login">Login</a></p>
+                    <p>Already have an account? <a href="@Url.Action("index", "login", new { regaccount = registrationAccount?.Uid })">Login</a></p>
                 </div>
 
                 <div>

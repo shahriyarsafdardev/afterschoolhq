@@ -1,9 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.Mvc.Ajax;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchool.Models;
@@ -17,9 +13,9 @@ namespace AfterSchool.Controllers
         //
         // GET: /Login/
         [HttpGet]
-        public ActionResult Index()
+        public ActionResult Index(string regaccount)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
             if (!SessionVariables.LoggedInUser.IsEmpty())
             {
                 LoginRedirect();
@@ -35,11 +31,12 @@ namespace AfterSchool.Controllers
 
             ViewBag.LoginType = "Internal";
             ViewBag.Messages = msgs;
+            ViewBag.RegistrationAccount = regaccount;
             return View();
         }
 
         [HttpPost]
-        public ActionResult Index(string username, string password)
+        public ActionResult Index(string username, string password, string regaccount)
         {
             var msgs = new SystemMessages();
 
@@ -47,7 +44,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Username is required", MessageType.UserError);
 
             if (password.IsEmpty())
-                msgs.Add("Password is required", MessageType.UserError);
+                msgs.Add("Password is required", MessageType.UserError);            
 
             if (msgs.HasNoErrors())
             {
@@ -55,6 +52,8 @@ namespace AfterSchool.Controllers
 
                 if (username.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                     user = WebUser.LoginByEmail(username, password);
+                else if (username.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    user = WebUser.LoginByPhone(username, password);
                 else
                     user = WebUser.LoginByUsername(username, password);
 
@@ -67,7 +66,10 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-                return LoginRedirect();
+            {
+                var registrationAccount = regaccount.IsGuid() ? Account.LoadByUid(regaccount.ToGuid()) : null;
+                return LoginRedirect(registrationAccount);
+            }
             else
                 return View();
         }        
@@ -167,28 +169,28 @@ namespace AfterSchool.Controllers
             return View(user);
         }
 
-        public ActionResult Account(string id)
-        {
-            string url = ControllerContext.RouteData.Values["url"].ToString();
-            if (url != "favicon.ico")
-            {
-                bool redirectToLogin = true;
-                if (SessionVariables.LoggedInUser.IsEmpty() && !url.ToString().Contains("/"))
-                {
-                    SessionVariables.CurrentAccount = AfterSchoolLibrary.Account.LoadByUniqueName(url);
-                    if (!SessionVariables.CurrentAccount.IsEmpty())
-                    {
-                        redirectToLogin = false;
-                    }
-                }
-                if(redirectToLogin) 
-                {
-                    Response.Redirect("/");
-                }
-            }
+        //public ActionResult Account(string id)
+        //{
+        //    string url = ControllerContext.RouteData.Values["url"].ToString();
+        //    if (url != "favicon.ico")
+        //    {
+        //        bool redirectToLogin = true;
+        //        if (SessionVariables.LoggedInUser.IsEmpty() && !url.ToString().Contains("/"))
+        //        {
+        //            SessionVariables.CurrentAccount = AfterSchoolLibrary.Account.LoadByUniqueName(url);
+        //            if (!SessionVariables.CurrentAccount.IsEmpty())
+        //            {
+        //                redirectToLogin = false;
+        //            }
+        //        }
+        //        if(redirectToLogin) 
+        //        {
+        //            Response.Redirect("/");
+        //        }
+        //    }
 
-            return View();
-        }
+        //    return View();
+        //}
 
     }
 }

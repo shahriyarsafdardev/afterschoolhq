@@ -50,34 +50,6 @@
             </div>
             
             <div class="form-group">
-                <label class="col-sm-3 control-label">Accept PayPal</label>
-                <div class="col-sm-1">
-                    @{Html.RenderPartial
-                        (
-                            "~/Views/Shared/_SwitchButton.cshtml",
-                            Model.AcceptPayPal,
-                            new ViewDataDictionary()
-                            {
-                                { "checkboxname", "acceptpaypal" },
-                                { "checkboxid", "acceptpaypal" },
-                                { "disabled", !accountPackage.HasFeature(FeatureType.AcceptPayments) || paypal.IsBlank() }
-                            }
-                        );
-                    }
-                </div>
-                <div class="col-sm-3">
-                    @if (!accountPackage.HasFeature(FeatureType.AcceptPayments))
-                    {
-                        <a href="@Url.Action("newbilling", "account")" target="_blank">Upgrade your account to accept payments <i class="s7-link"></i></a>
-                    }
-                    else if (paypal.IsBlank())
-                    {
-                        <a href="@Url.Action("payments", "account")" target="_blank">Connect PayPal <i class="s7-link"></i></a>
-                    }
-                </div>
-            </div>
-            
-            <div class="form-group">
                 <label class="col-sm-3 control-label">Accept Credit Cards</label>
                 <div class="col-sm-1">
                     @{Html.RenderPartial
