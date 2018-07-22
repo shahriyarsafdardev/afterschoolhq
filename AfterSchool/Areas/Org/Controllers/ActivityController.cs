@@ -681,7 +681,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -694,7 +694,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "costdescription", costdescription},
                     { "acceptpaypal", acceptpaypal.IfBlank("0")},
                     { "acceptcreditcard", acceptcreditcard.IfBlank("0")},
-                    { "allowtopaylater", allowtopaylater.IfBlank("0")}
+                    { "allowtopaylater", allowtopaylater.IfBlank("0")},
+                    { "hassubscriptionplan", hassubscriptionplan.IfBlank("0") },
+                    { "subscriptionplancost", subscriptionplancost },
+                    { "subscriptionplanperiod", subscriptionplanperiod },
+                    { "haspaymentplan", haspaymentplan.IfBlank("0") },
+                    { "paymentplancost", paymentplancost },
+                    { "paymentplanperiod", paymentplanperiod },
+                    { "paymentplanperiodnumber", paymentplanperiodnumber }
                 };
 
                 activity = Activity.EditExisting(
