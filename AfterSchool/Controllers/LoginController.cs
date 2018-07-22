@@ -16,16 +16,16 @@ namespace AfterSchool.Controllers
         public ActionResult Index(string regaccount)
         {
             var msgs = new SystemMessages();
-            if (!SessionVariables.LoggedInUser.IsEmpty())
+            if (SessionVariables.LoggedInUser.IsNotEmpty())
             {
-                LoginRedirect();
+                return LoginRedirect();
             }
             else if (!Request["Account"].IsEmpty())
             {
                 Account Account = AfterSchoolLibrary.Account.Load(Request["Account"].ToInteger());
                 if (!Account.IsEmpty() && !Account.UniqueName.IsEmpty())
                 {
-                    Response.Redirect(Account.UniqueName);
+                    return Redirect($"/{Account.UniqueName}");
                 }
             }
 

@@ -1275,6 +1275,7 @@ namespace AfterSchoolLibrary
             var state = values.GetValueOrDefault("state");
             var postalcode = values.GetValueOrDefault("postalcode");
             var ismylocation = values.GetValueOrDefault("mylocation");
+            var locationisaschool = values.GetValueOrDefault("isschool");
             var cost = values.GetValueOrDefault("cost");
             var costdescription = values.GetValueOrDefault("costdescription");
             var acceptpaypal = values.GetValueOrDefault("acceptpaypal");
@@ -1593,6 +1594,7 @@ namespace AfterSchoolLibrary
                                 state.IfEmpty(""),
                                 postalcode.IfEmpty(""),
                                 locationdetails.IfEmpty(""),
+                                locationisaschool.IfEmpty(""),
                                 hostAccountId,
                                 loggedInUserId,
                                 adc
@@ -1801,7 +1803,7 @@ namespace AfterSchoolLibrary
         }
 
 
-        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, int? hostaccountid, int loggedInUserId, DatabaseConnection dc = null)
+        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string locationisaschool, int? hostaccountid, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1826,6 +1828,7 @@ namespace AfterSchoolLibrary
 
                 if (!doesExist)
                 {
+                    var locationType = locationisaschool.IsBoolean() ? LocationType.School : LocationType.NotSet;
 
                     var activityLocation = new Location()
                     {
@@ -1840,6 +1843,7 @@ namespace AfterSchoolLibrary
                         PostalCode = postalcode.MaxChars(5),
                         Name = locationname,
                         HostAccountId = hostaccountid,
+                        LocationTypeId = locationType
                     };
                     msgs.AddRange(activityLocation.Save(dc));
 

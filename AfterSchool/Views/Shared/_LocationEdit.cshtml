@@ -47,8 +47,10 @@
 
             if (hostAccount.length > 0 && hostAccount != @accountId) {
                 $('#hostaccount-div').addClass('hide');
+                $('#isschool-div').addClass('hide');
             } else {
                 $('#hostaccount-div').removeClass('hide');
+                $('#isschool-div').removeClass('hide');
             }
         } else {
             $('#add-location').removeClass('hide');
@@ -56,6 +58,7 @@
             locationSearch.val('');
             $('#hostaccount').val('');
             $('#hostaccount-div').removeClass('hide');
+            $('#isschool-div').removeClass('hide');
         }
     }
 
