@@ -821,10 +821,13 @@ namespace AfterSchoolLibrary
             return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
         }
 
-        public SystemMessages DeleteRegistrantActivity(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public SystemMessages DeleteRegistrantActivity(int activityId, DatabaseConnection dc = null)
         {
+            var msgs = new SystemMessages();
             var registrantAcitivity = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
+
             msgs.AddRange(registrantAcitivity.Delete(dc));
+
             return msgs;
         }
 

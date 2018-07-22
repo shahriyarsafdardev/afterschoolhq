@@ -411,7 +411,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, id.ToInteger());
-            msgs.AddRange(accountActivityGroup.updateInvitationStatus(inviteStatus, SessionVariables.CurrentAccount.ID.Value));
+            msgs.AddRange(accountActivityGroup.UpdateInvitationStatus(inviteStatus, SessionVariables.CurrentAccount.ID.Value));
 
             var groups = LoadIndexViewBag();
 

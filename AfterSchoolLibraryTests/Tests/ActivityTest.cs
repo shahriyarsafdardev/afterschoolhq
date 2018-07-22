@@ -268,7 +268,7 @@ namespace AfterSchoolLibraryTests
             int numberOfApplicationSeats = 1;
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
 
-            Assert.Equal(registrant.ToString(), activity.GetRegistrants(dc: dc).FirstOrDefault().ToString());
+            Assert.Single(activity.GetRegistrants(dc: dc));
         }
         
         [Fact]

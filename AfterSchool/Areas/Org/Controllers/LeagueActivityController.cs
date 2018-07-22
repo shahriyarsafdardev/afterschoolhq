@@ -504,7 +504,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 foreach( var registrant in removedRegistrants)
                 {
-                    msgs.AddRange(registrant.DeleteRegistrantActivity(activity.ID.Value, msgs));
+                    msgs.AddRange(registrant.DeleteRegistrantActivity(activity.ID.Value));
                     updatedRegistrantIds.Remove(registrant.ID.Value);
                 }
 

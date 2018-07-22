@@ -598,7 +598,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditLocation";
-        //    ViewBag.accountId = activity.GetAccount().ID;
+
             return View(activity);
         }
 
