@@ -1075,6 +1075,11 @@ namespace AfterSchoolLibrary
                 );
         }
 
+        public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.LoadByRegistrantId(this.RegistrantId.Value, msgs, dc).Sum(payment => payment.Amount.Value);
+        }
+
         #endregion
     }
 }

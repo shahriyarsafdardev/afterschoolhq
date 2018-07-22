@@ -596,9 +596,9 @@ namespace AfterSchoolLibrary
             return _ActivityGroup;
         }
 
-        public Registrant GetRegistrant(DatabaseConnection dc = null)
+        public Registrant GetRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.Load(this.RegistrantId.Value, dc: dc);
+            return Registrant.Load(this.RegistrantId.Value, msgs, dc);
         }
 
         public List<RegistrationActivity> GetRegistrationActivities(DatabaseConnection dc = null)
@@ -1687,7 +1687,7 @@ namespace AfterSchoolLibrary
                     // so we can know that it's okay to delete the registrant
                     // TODO: Notice that this may be a dangerous assumption one day
                     // Registration activities are deleted with the registrant
-                    amsgs.AddRange(this.GetRegistrant(adc).DeleteWithRelatedRecords(adc));
+                    amsgs.AddRange(this.GetRegistrant(amsgs, adc).DeleteWithRelatedRecords(adc));
                     amsgs.AddRange(this.DeleteSessionActions(adc));
                     amsgs.AddRange(this.DeleteAnswers(adc));
                     amsgs.AddRange(this.Delete(adc));

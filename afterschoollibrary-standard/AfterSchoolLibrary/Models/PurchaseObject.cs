@@ -28,7 +28,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return RegistrationFee + SubscriptionCostToday + PaymentPlanCostToday + ProductCost;
+                return RegistrationFee + ProductCost;
             }
         }
 

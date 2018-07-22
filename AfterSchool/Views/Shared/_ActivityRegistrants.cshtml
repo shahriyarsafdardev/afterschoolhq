@@ -35,7 +35,7 @@
                 <th>Status</th>
                 <th class="text-center">Seat Index</th>
                 <th>Date Registered</th>
-                <th>Paid?</th>
+                <th>Amount Paid</th>
                 @if (activity.IsNotEmpty())
                 {
                     <th></th>
@@ -45,39 +45,43 @@
         <tbody>
             @if (Model.Count > 0)
             {
-                foreach (var registrant in Model)
+                foreach (var ra in Model)
                 {
                     <tr>
                         <td>
-                            @if (registrant.RegistrationId.HasValue && registrant.RegistrationAssignmentTypeId != RegistrationAssignmentType.Invited)
+                            @if (ra.RegistrationId.HasValue && ra.RegistrationAssignmentTypeId != RegistrationAssignmentType.Invited)
                             {
-                                <a href="@Url.Action(editaction, editcontroller, new { id = registrant.ID })" class="btn btn-default btn-sm">
+                                <a href="@Url.Action(editaction, editcontroller, new { id = ra.ID })" class="btn btn-default btn-sm">
                                     <i class="icon icon-left s7-user"></i> View Details
                                 </a>
                             }
                         </td>
-                        <td>@registrant.RegistrantName.IfBlank(registrant.RegistrantEmail)</td>
+                        <td>@ra.RegistrantName.IfBlank(ra.RegistrantEmail)</td>
                         @if (activity.IsEmpty())
                         {
-                            <td>@registrant.ActivityName</td>
+                            <td>@ra.ActivityName</td>
                         }
-                        <td>@registrant.RegistrationAssignmentTypeId.ToString()</td>
-                        <td class="text-center">@registrant.AssignmentSeatIndex</td>
-                        <td>@account.ConvertToAccountTimeZone(registrant.CreateDate.Value).ToLongDateTimeString()</td>
+                        <td>@ra.RegistrationAssignmentTypeId.ToString()</td>
+                        <td class="text-center">@ra.AssignmentSeatIndex</td>
+                        <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         <td>
-                            @if (registrant.ActivityCostPerRegistrant == 0)
+                            @if (ra.ActivityCostPerRegistrant == 0)
                             {
                                 @:FREE
                             }
                             else
                             {
-                                Html.RenderPartial("~/Views/Shared/_BooleanToHtml.cshtml", registrant.DatePaid.HasValue);
+                                @ra.GetAmountPaid().ToCurrency()
                             }
                         </td>
                         @if (activity.IsNotEmpty())
                         {
                             <td>
-                                <button class="btn btn-primary btn-xs md-trigger btn-space hide" data-modal="modal-waitinglist" onclick="setWaitingListRegistrant('@registrant.RegistrantName', '@Url.Action("waitinglist", "activity", new { id = registrant.ID })', '@registrant.TotalSeats')"><i class="s7-edit"></i> Waiting List</button>
+                                <button class="btn btn-primary btn-xs md-trigger btn-space hide" 
+                                        data-modal="modal-waitinglist" 
+                                        onclick="setWaitingListRegistrant('@ra.RegistrantName', '@Url.Action("waitinglist", "activity", new { id = ra.ID })', '@ra.TotalSeats')">
+                                    <i class="s7-edit"></i> Waiting List
+                                </button>
                             </td>
                         }
                     </tr>

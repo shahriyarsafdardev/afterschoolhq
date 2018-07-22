@@ -47,6 +47,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Actions = actions;
+            ViewBag.Schedule = activity.GetSchedule();
             return View(activity);
         }
 

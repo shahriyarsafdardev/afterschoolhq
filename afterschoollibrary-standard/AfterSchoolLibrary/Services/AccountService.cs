@@ -1428,7 +1428,7 @@ namespace AfterSchoolLibrary
             return (totalAmountToCharge * percentageFee.ToDecimal()) + flatFee.ToDecimal();
         }
 
-        private static void ProcessPayment(this Account toAccount, Account fromAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
@@ -1462,6 +1462,7 @@ namespace AfterSchoolLibrary
             // add purchase
             if (msgs.HasNoErrors())
             {
+                // tracks the whole purchase, could contain multiple activities/activity groups
                 var purchase = new Purchase()
                 {
                     AmountPaid = purchaseObject.TotalCostToPurchase,
@@ -1494,6 +1495,19 @@ namespace AfterSchoolLibrary
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 };
                 msgs.AddRange(transaction.Save(dc));
+
+                // need to track a payment for each activity/activitygroup
+                if (purchaseObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
+                {
+                    // TODO: How much does a user pay for an activity if a coupon is used to purchase multiple activities at once?
+                    var activity = (Activity)purchaseObject.ParticipationObject.Object;
+                    var payment = activity.AddPayment(
+                        amount: activity.CostPerRegistrant.Value * purchaseObject.NumberOfSeats, 
+                        registrant: purchaseObject.Registration.GetRegistrant(msgs, dc), 
+                        loggedInUser: loggedInUser, 
+                        msgs: msgs, 
+                        dc: dc);
+                }
             }
         }
 
@@ -1509,7 +1523,8 @@ namespace AfterSchoolLibrary
                     // add them to the activity
                     if (purchaseObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
                     {
-                        ((Activity)purchaseObject.ParticipationObject.Object).ProcessRegistration(
+                        var activity = ((Activity)purchaseObject.ParticipationObject.Object);
+                        activity.ProcessRegistration(
                             purchaseObject: purchaseObject,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
@@ -1518,10 +1533,27 @@ namespace AfterSchoolLibrary
 
                     // TODO: Add to an activity group if they are registering for a session
 
+
+                    // TODO: Add Products
+                    // if they have products
+                    //foreach (var product in purchaseObject.Products)
+                    //{
+                    //    purchaseObject.Registrant.PurchaseProduct();
+                    //}
+
+                    // process payment by to account, includes registration fee and product purchases
+                    toAccount.ProcessRegistrationFeeAndProducts(fromAccount, purchaseObject, loggedInUser, msgs, dc);
+
+                    // Process Subscriptions separately, don't charge all at once for the Registration Fee
+
+                    // TODO: Decide if master account registrant should be added to plans or the account copy
+                    // get the registrant record that was created just for the account
+                    var accountRegistrant = purchaseObject.Registration.GetRegistrant(msgs, dc);
+
                     // if they have a subscription plan
                     if (purchaseObject.SubscriptionPlan.IsNotEmpty())
                     {
-                        purchaseObject.Registrant.StartSubscriptionPlan(
+                        accountRegistrant.StartSubscriptionPlan(
                             subscriptionPlan: purchaseObject.SubscriptionPlan,
                             startDateTime: DateTime.UtcNow,
                             loggedInUser: loggedInUser,
@@ -1533,7 +1565,7 @@ namespace AfterSchoolLibrary
                     // if they have a payment plan
                     if (purchaseObject.PaymentPlan.IsNotEmpty())
                     {
-                        purchaseObject.Registrant.StartPaymentPlan(
+                        accountRegistrant.StartPaymentPlan(
                             paymentPlan: purchaseObject.PaymentPlan,
                             startDateTime: DateTime.UtcNow,
                             loggedInUser: loggedInUser,
@@ -1541,16 +1573,6 @@ namespace AfterSchoolLibrary
                             dc: adc
                             );
                     }
-
-                    // TODO: Add Products
-                    // if they have products
-                    //foreach (var product in purchaseObject.Products)
-                    //{
-                    //    purchaseObject.Registrant.PurchaseProduct();
-                    //}
-
-                    // process payment by to account
-                    toAccount.ProcessPayment(fromAccount, purchaseObject, loggedInUser, msgs, dc);
 
                 },
                 onSuccess: (SystemMessages smsgs) =>

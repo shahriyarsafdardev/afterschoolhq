@@ -24,7 +24,7 @@
 
     @foreach (var registrant in Model)
     {
-        var answers = registrant.GetAnswers().Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).ToList();
+        var answers = registrant.GetAnswers(msgs).Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).ToList();
         var children = registrant.GetChildren();
         var ras = new List<RegistrantActivity>();
 

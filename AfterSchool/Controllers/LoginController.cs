@@ -44,7 +44,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Username is required", MessageType.UserError);
 
             if (password.IsEmpty())
-                msgs.Add("Password is required", MessageType.UserError);
+                msgs.Add("Password is required", MessageType.UserError);            
 
             if (msgs.HasNoErrors())
             {
@@ -66,7 +66,10 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-                return LoginRedirect(Account.LoadByUid(regaccount.ToGuid(), msgs));
+            {
+                var registrationAccount = regaccount.IsGuid() ? Account.LoadByUid(regaccount.ToGuid()) : null;
+                return LoginRedirect(registrationAccount);
+            }
             else
                 return View();
         }        

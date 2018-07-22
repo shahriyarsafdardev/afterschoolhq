@@ -573,12 +573,11 @@ namespace AfterSchoolLibrary
             return ra;
         }
 
-        public List<FormQuestionAnswer> GetAnswers(DatabaseConnection dc = null)
-        {
-            return FormQuestionAnswer.LoadByRegistrantId(this.ID.Value, dc: dc);
-        }
-
         public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AddAnswer(answerText, question, null, loggedInUserId, msgs, dc);
+        }
+        public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -592,10 +591,12 @@ namespace AfterSchoolLibrary
                     RegistrantId = this.ID,
                     FormQuestionId = question.ID,
                     QuestionDataTypeId = question.QuestionDataTypeId,
+                    QuestionText = question.Text,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId
                 };
             }
+            answer.RegistrationId = registrationId;
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
             answer.LastModifiedBy = loggedInUserId;
@@ -646,7 +647,7 @@ namespace AfterSchoolLibrary
         public Registrant CreateMasterCopy(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var master = this.Copy(questions, loggedInUserId, msgs, dc);
+            var master = this.CopyWithAnswers(questions, loggedInUserId, msgs, dc);
             master.IsMaster = true;
             master.IsContactOnly = true;
             master.AccountId = null;
@@ -658,7 +659,7 @@ namespace AfterSchoolLibrary
             return master;
         }
 
-        public Registrant Copy(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public Registrant Copy(int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -670,37 +671,86 @@ namespace AfterSchoolLibrary
             copy.ResetID();
             msgs.AddRange(copy.Save(dc: dc));
 
+            return copy;
+        }
+
+        public Registrant CopyWithAnswers(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var copy = this.Copy(loggedInUserId, msgs, dc);
+
             if (questions.IsEmpty())
-            questions.ForEach(question => 
-                copy.AddAnswer(question.GetAnswer(this.ID.Value, msgs, dc).Text, question, loggedInUserId, msgs, dc)
-            );
+                questions.ForEach(question => 
+                    copy.AddAnswer(question.GetAnswer(this.ID.Value, msgs, dc).Text, question, null, loggedInUserId, msgs, dc)
+                );
 
             return copy;
         }
 
+        public void CopyAnswers(Registrant copyingRegistrant, Registration registration, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+              (
+                  action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                  {
+                      // copy all answers
+                      var answers = this.GetAnswers(amsgs, adc);
+                      answers.ForEach(answer =>
+                      {
+                          copyingRegistrant.AddAnswer(
+                              answerText: answer.Text,
+                              question: answer.ToFormQuestion(true, amsgs, adc),
+                              registrationId: registration?.ID,
+                              loggedInUserId: loggedInUser?.ID ?? 0,
+                              msgs: amsgs,
+                              dc: adc);
+                      });
+                  },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                dc: dc
+            );
+        }
+
         public Registrant CopyToAccount(Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Registrant copy = null;
 
-            var copy = new Registrant
-            {
-                CreateDate = DateTime.UtcNow,
-                LastModifiedDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                Uid = Guid.NewGuid(),
-                AccountId = ownerAccount.ID,
-                FirstRegistrantId = null,
-                ParentRegistrantId = this.ID,
-                IsContactOnly = false,
-                IsMaster = false
-            };
-            copy.ResetID();
-            copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
-            msgs.AddRange(copy.Save(dc));
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    copy = this.Copy(loggedInUser?.ID ?? 0, msgs, dc);
+                    copy.AccountId = ownerAccount.ID;
+                    copy.FirstRegistrantId = null;
+                    copy.ParentRegistrantId = this.ID;
+                    copy.IsContactOnly = false;
+                    copy.IsMaster = false;
+                    amsgs.AddRange(copy.Save(adc));
 
-            // need to relate registrants within the same account, specifically provider or school accounts
-            msgs.AddRange(copy.FindAndSetFirstRegistrant(loggedInUser, dc));
+                    // need to relate registrants within the same account, specifically provider or school accounts
+                    amsgs.AddRange(copy.FindAndSetFirstRegistrant(loggedInUser, adc));
+                   
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                dc: dc
+            );
+
+            
 
             return copy;
         }
@@ -903,6 +953,11 @@ namespace AfterSchoolLibrary
         public Registrant GetParentOrGuardian(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
+        }
+
+        public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.LoadByRegistrantId(this.ID.Value, msgs, dc).Sum(payment => payment.Amount.Value);
         }
 
         /*
