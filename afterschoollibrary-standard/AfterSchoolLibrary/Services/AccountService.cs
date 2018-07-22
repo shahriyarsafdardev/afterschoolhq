@@ -296,6 +296,11 @@ namespace AfterSchoolLibrary
             return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
         }
 
+        public static Location GetDefaultLocation(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.DefaultLocationId.HasValue ? Location.Load(account.DefaultLocationId.Value, msgs, dc) : null;
+        }
+
         public static List<AccountWebUser> GetMembers(this Account account, DatabaseConnection dc = null)
         {
             return AccountWebUser.LoadByAccountId(account.ID.Value, dc: dc);
@@ -751,8 +756,9 @@ namespace AfterSchoolLibrary
             }
 
             return msgs;
-        }       
+        }
 
+        [Obsolete]
         public static Stripe.StripeCard GetStripeCard(this Account account, string cardId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -768,6 +774,7 @@ namespace AfterSchoolLibrary
             return card;
         }
 
+        [Obsolete]
         public static List<Stripe.StripeCard> GetStripeCards(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -781,6 +788,36 @@ namespace AfterSchoolLibrary
             }
 
             return cards;
+        }
+
+        public static Stripe.StripeSource GetStripeSource(this Account account, string sourceId, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.StripeSource source = null;
+            var customer = account.GetStripeCustomer(msgs);
+
+            if (customer.IsNotEmpty())
+            {
+                source = Billing.StripeHelper.GetSource(sourceId, msgs);
+            }
+
+            return source;
+        }
+
+        public static List<Stripe.StripeSource> GetStripeSources(this Account account, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var sources = new List<Stripe.StripeSource>();
+            var customer = account.GetStripeCustomer(msgs);
+
+            if (customer.IsNotEmpty())
+            {
+                sources.AddRange(Billing.StripeHelper.GetSources(customer.Id, msgs));
+            }
+
+            return sources;
         }
 
         public static List<Stripe.StripeCharge> GetStripeBillingHistory(this Account account, SystemMessages msgs = null)
@@ -1428,7 +1465,7 @@ namespace AfterSchoolLibrary
             return (totalAmountToCharge * percentageFee.ToDecimal()) + flatFee.ToDecimal();
         }
 
-        private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Add Products
             // if they have products
@@ -1441,9 +1478,9 @@ namespace AfterSchoolLibrary
             // can't use a token twice
             if (msgs.HasNoErrors() && purchaseObject.SavePaymentInfo)
             {
-                var source = Billing.StripeHelper.CreateSource(purchaseObject.StripeTokenOrSourceId, msgs);
+                var source = Billing.StripeHelper.CreateSource(purchaseObject.StripeToken, msgs);
                 msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id));
-                purchaseObject.StripeTokenOrSourceId = source.Id;
+                purchaseObject.SourceId = source.Id;
             }
 
             // if everything goes right then bill the person, 
@@ -1451,12 +1488,15 @@ namespace AfterSchoolLibrary
             if (msgs.HasNoErrors())
             {
                 // if stripe token then don't send customer id
-                var customerId = purchaseObject.SavePaymentInfo ? fromAccount.StripeCustomerId : null;
+                string customerId = null;
+
+                if (purchaseObject.SavePaymentInfo || purchaseObject.SourceId.IsNotEmpty())
+                    customerId = fromAccount.StripeCustomerId;
 
                 var charge = Billing.StripeHelper.CreateCharge(
                     fromCustomerId: customerId,
                     destinationUserId: toAccount.StripeUserId,
-                    tokenOrSourceId: purchaseObject.StripeTokenOrSourceId,
+                    tokenOrSourceId: purchaseObject.SourceId.IfEmpty(purchaseObject.StripeToken),
                     totalAmount: purchaseObject.TotalCostToPurchase,
                     platformFee: toAccount.CalculatePlatformFeeAmount(purchaseObject.TotalCostToPurchase, msgs, dc),
                     description: $"{purchaseObject.ParticipationObject.Name} registration",
@@ -1483,7 +1523,8 @@ namespace AfterSchoolLibrary
                     PurchaserAccountId = fromAccount.ID,
                     RegistrantId = purchaseObject.Registrant.ID,
                     RegistrationId = purchaseObject.Registration.ID,
-                    StripeTokenOrCardId = purchaseObject.StripeTokenOrSourceId
+                    StripeToken = purchaseObject.StripeToken,
+                    StripeSourceId = purchaseObject.SourceId
                 };
                 msgs.AddRange(purchase.Save(dc));
 
@@ -1518,7 +1559,7 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // TODO: Allow user to register for multiple activities in one session at once
 
@@ -1537,7 +1578,7 @@ namespace AfterSchoolLibrary
 
         }
 
-        public static void ProcessRegistrationWithPayment(this Account fromAccount, Account toAccount, PurchaseObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessRegistrationWithPayment(this Account fromAccount, Account toAccount, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
             Database.ExecuteTransaction

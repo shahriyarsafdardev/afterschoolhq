@@ -335,7 +335,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult SearchLocations(string search)
         {
             var msgs = new SystemMessages();
-            var locations = Location.Search(search, 0, 10, msgs);
+            var locations = Location.Search(search.Trim(), 0, 10, msgs);
 
             Response.Clear();
             WriteOutput(new

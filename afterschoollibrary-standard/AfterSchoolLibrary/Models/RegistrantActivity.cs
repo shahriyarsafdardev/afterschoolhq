@@ -506,6 +506,24 @@ namespace AfterSchoolLibrary
             return dq.GetCount();
         }
 
+        public static bool ExistsByActivityIdByRegistrantId(int activityId, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityId"], activityId);
+            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantId);
+            return dq.GetCount(msgs) > 0;
+        }
+
+        public static bool ExistsByActivityIdByRegistrantIds(int activityId, List<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityId"], activityId);
+            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+            return dq.GetCount(msgs) > 0;
+        }
+
         private Registration _Registration = null;
         public Registration GetRegistration(DatabaseConnection dc = null)
         {

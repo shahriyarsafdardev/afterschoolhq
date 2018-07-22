@@ -646,13 +646,14 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
                 return RedirectToAction("");
 
-            if (SessionVariables.CurrentRegistrant.IsNotEmpty())
-                return RedirectToAction("register", "account");
+            //if (SessionVariables.CurrentRegistrant.IsNotEmpty())
+            //    return RedirectToAction("register", "account");
 
             var msgs = new SystemMessages();
             var students = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs);
             
             ViewBag.Messages = msgs;
+            ViewBag.ParticipationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
 
             return View(students);
         }
@@ -694,6 +695,7 @@ namespace AfterSchool.Controllers
                 .ToList();
 
             ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.Registrant = SessionVariables.CurrentRegistrant;
 
             return questions;
         }
@@ -705,6 +707,10 @@ namespace AfterSchool.Controllers
 
             if (participationObject.IsEmpty())
                 return RedirectToAction(""); // TODO: Should return to school homepage, they don't have an item in the cart
+
+            // current registrant is already registered
+            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
+                return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
 
@@ -791,7 +797,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 if (participationObject.IsFree)
-                    return RedirectToAction("thankyou", new { id = registration.Uid });
+                    return RedirectToAction("finalizeregistration", new { id = registration.Uid });
                 else
                     return RedirectToAction("payment", new { id = registration.Uid });
             }
@@ -808,7 +814,7 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? RegisterActionPost(signature);
         }
 
-        private ActionResult FinalizeActionGet(string registrationUid)
+        private ActionResult FinalizeRegistrationGet(string registrationUid)
         {
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
@@ -824,13 +830,17 @@ namespace AfterSchool.Controllers
             if (!registrationUid.IsGuid())
                 return RedirectToAction("register");
 
+            // current registrant is already registered
+            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
+                return RedirectToAction("select");
+
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);            
 
             if (msgs.HasNoErrors())
             {
                 SessionVariables.CurrentAccount.ProcessRegistrationWithoutPayment(
                     toAccount: participationObject.OwnerAccount,
-                    purchaseObject: new PurchaseObject()
+                    purchaseObject: new CheckoutObject()
                     {
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
@@ -849,9 +859,9 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Finalize(string id)
+        public ActionResult FinalizeRegistration(string id)
         {
-            return HandleIsLoggedIn() ?? FinalizeActionGet(id);
+            return HandleIsLoggedIn() ?? FinalizeRegistrationGet(id);
         }
 
         #endregion
@@ -863,7 +873,7 @@ namespace AfterSchool.Controllers
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
 
             ViewBag.Registration = registration;
-            ViewBag.Cards = SessionVariables.CurrentAccount.GetStripeCards(msgs);
+            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
@@ -875,6 +885,10 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+
+            // current registrant is already registered
+            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
+                return RedirectToAction("select");
 
             if (participationObject.IsEmpty())
                 return RedirectToAction(""); // TODO: Should return to school homepage, they don't have an item in the cart
@@ -890,7 +904,7 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? PaymentActionGet(id);
         }
 
-        private ActionResult PaymentActionPost(string id, string stripetoken, string cardId, string savepaymentinfo)
+        private ActionResult PaymentActionPost(string id, string stripetoken, string sourceId, string savepaymentinfo)
         {
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
@@ -898,7 +912,7 @@ namespace AfterSchool.Controllers
             if (participationObject.IsEmpty())
                 return RedirectToAction(""); // TODO: Should return to school homepage, they don't have an item in the cart
 
-            if (cardId.IsEmpty() && stripetoken.IsEmpty())
+            if (sourceId.IsEmpty() && stripetoken.IsEmpty())
                 msgs.Add("Please enter your payment information", MessageType.UserError);
 
             var registration = PaymentViewBag(id, participationObject, msgs);
@@ -907,7 +921,7 @@ namespace AfterSchool.Controllers
             {
                 SessionVariables.CurrentAccount.ProcessRegistrationWithPayment(
                     toAccount: participationObject.OwnerAccount,
-                    purchaseObject: new PurchaseObject()
+                    purchaseObject: new CheckoutObject()
                     {
                         Coupon = null,
                         NumberOfSeats = 1,
@@ -916,7 +930,8 @@ namespace AfterSchool.Controllers
                         Products = new List<Product>(),
                         Purchaser = SessionVariables.CurrentAccount,
                         Registration = registration,
-                        StripeTokenOrSourceId = stripetoken.IfEmpty(cardId),
+                        StripeToken = stripetoken,
+                        SourceId = sourceId,
                         SubscriptionPlan = null,
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
                         Registrant = SessionVariables.CurrentRegistrant
@@ -932,27 +947,28 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Payment(string id, string card, string stripetoken, string savepaymentinfo)
+        public ActionResult Payment(string id, string source, string stripetoken, string savepaymentinfo)
         {
-            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, card, savepaymentinfo);
+            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo);
         }
 
         #endregion
 
         #region ThankYou
 
-        private Registration ThankYouViewBag(string registrationUid, ParticipationObject participationObject, SystemMessages msgs)
+        private Registration ThankYouViewBag(string registrationUid, SystemMessages msgs)
         {
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
 
-            BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
+            // this should be moved into the library
+            if (SessionVariables.Cart.IsNotEmpty())
+                BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
+
+            // clear out session stuff after it sends confirmation, don't want to send on refresh
+            ResetRegistrationSession();
 
             ViewBag.Registration = registration;
-            ViewBag.RegistrantActivities = registration.GetRegistrantActivities();
             ViewBag.Account = registration.GetAccount();
-            ViewBag.Cards = SessionVariables.CurrentAccount.GetStripeCards(msgs);
-            ViewBag.Cart = SessionVariables.Cart;
-            ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
 
             return registration;
@@ -961,9 +977,8 @@ namespace AfterSchool.Controllers
         private ActionResult ThankYouActionGet(string registrationUid)
         {
             var msgs = new SystemMessages();
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
 
-            ThankYouViewBag(registrationUid, participationObject, msgs);
+            ThankYouViewBag(registrationUid, msgs);
 
             return View();
         }
@@ -977,6 +992,12 @@ namespace AfterSchool.Controllers
         #endregion
 
         #region Helpers
+
+        private void ResetRegistrationSession()
+        {
+            SessionVariables.CurrentRegistrant = null;
+            SessionVariables.Cart = null;
+        }
 
         private ActionResult HandleIsLoggedIn()
         {

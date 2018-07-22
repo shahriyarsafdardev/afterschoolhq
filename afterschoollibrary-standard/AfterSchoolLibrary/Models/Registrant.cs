@@ -260,6 +260,15 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<Registrant> LoadByParentRegistrantIdByAccountId(int ParentRegistrantId, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ParentRegistrantId"], ParentRegistrantId);
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
@@ -719,6 +728,34 @@ namespace AfterSchoolLibrary
             );
         }
 
+        public bool IsRegisteredFor(ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (participationObject.ObjectType == ParticipationObjectType.Activity)
+            {
+                var childrenRegistrants = this.GetChildren(participationObject.OwnerAccount.ID.Value, msgs, dc);
+
+                return childrenRegistrants.Any() && RegistrantActivity.ExistsByActivityIdByRegistrantIds(
+                    activityId: participationObject.ObjectID.Value,
+                    registrantIds: childrenRegistrants.Select(registrant => registrant.ID.Value).ToList(),
+                    msgs: msgs,
+                    dc: dc);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return this.AccountId.HasValue ? Account.Load(this.AccountId.Value, msgs, dc) : null;
+        }
+
+        public Registrant GetMasterRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return this.ParentRegistrantId.HasValue ? Registrant.Load(this.ParentRegistrantId.Value, msgs, dc) : null;
+        }
+
         public Registrant CopyToAccount(Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Registrant copy = null;
@@ -755,9 +792,14 @@ namespace AfterSchoolLibrary
             return copy;
         }
 
-        public List<Registrant> GetChildren(DatabaseConnection dc = null)
+        public List<Registrant> GetChildren(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByParentRegistrantId(this.ID.Value, dc: dc);
+            return Registrant.LoadByParentRegistrantId(this.ID.Value, msgs, dc);
+        }
+
+        public List<Registrant> GetChildren(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByParentRegistrantIdByAccountId(this.ID.Value, accountId, msgs, dc);
         }
 
         public static Registrant LoadByNameByEmail(int accountId, string firstName, string lastName, string email, DatabaseConnection dc = null)

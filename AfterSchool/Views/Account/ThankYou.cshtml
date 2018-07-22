@@ -3,8 +3,8 @@
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Thank you";
     var msgs = (SystemMessages)ViewBag.Messages;
-    var cart = (Cart)ViewBag.Cart;
     var account = (Account)ViewBag.Account;
+    var registration = (Registration)ViewBag.Registration;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -19,8 +19,12 @@
             <div class="panel-body">
 
                 <h1>Thank You</h1>
-                <div>
+                <p>
                     You have been registered
+                </p>
+
+                <div>
+                    @Html.Raw(Registration.GetRegistrationConfirmationHtml(registration, account, null, null, null))
                 </div>
 
                 <div>

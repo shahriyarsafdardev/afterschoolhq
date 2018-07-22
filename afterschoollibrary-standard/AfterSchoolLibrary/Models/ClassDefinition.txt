@@ -124,6 +124,7 @@ inherits: BaseLocation
 property: HostAccountId, int?, Int
 property: IsDefault, bool, Bit
 property: Details, string, NVarChar(4000)
+property: LocationTypeId, LocationType, Int
 baseproperty: Name, required
 baseproperty: Address1, required
 baseproperty: City, required
@@ -131,6 +132,7 @@ baseproperty: State, required
 baseproperty: PostalCode, required
 loadmethod: HostAccountId, List<>
 loadmethod: HostAccountId|IsDefault
+loadmethod: LocationTypeId, List<>
 [end]
 
 [begin]
@@ -535,6 +537,7 @@ property: IsContactOnly, bool, Bit
 property: FirstRegistrantId, int?, Int
 property: IsParentOrGuardian, bool, Bit
 property: AllowTextMessages, bool, Bit
+property: SchoolId, int?, Int, , The location id of the school the registrant is attending
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId, List<>
@@ -543,6 +546,7 @@ loadmethod: Uid
 loadmethod: WebUserId, List<>
 loadmethod: WebUserId|IsMaster, List<>
 loadmethod: FirstRegistrantId, List<>
+loadmethod: ParentRegistrantId|AccountId, List<>
 [end]
 
 [begin]
@@ -1326,7 +1330,8 @@ inherits: BasicObjectWithModified
 property: RegistrationId, int?, Int
 property: RegistrantId, int?, Int
 property: CouponId, int?, Int
-property: StripeTokenOrCardId, string, NVarChar(50)
+property: StripeToken, string, NVarChar(50)
+property: StripeSourceId, string, NVarChar(50)
 property: PurchaserAccountId, int?, Int
 property: NumberOfSeats, int?, Int
 property: LoggedInUserId, int?, Int
@@ -1514,4 +1519,10 @@ values: NotSet, RegistrantPaymentPlan, RegistrantSubscriptionPlan, ProductPurcha
 type: Enum
 name: CostUnitType
 values: NotSet, PerRegistrant, PerActivity
+[end]
+
+[begin]
+type: Enum
+name: LocationType
+values: NotSet, School
 [end]
