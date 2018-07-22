@@ -137,9 +137,9 @@ namespace AfterSchool.Controllers
                 {
                     msgs.Add("Passwords are required and must match", MessageType.UserError);
                 }
-                else if (password1.Length < 6)
+                else if (password1.Length < 8)
                 {
-                    msgs.Add("Password must be at least 6 characters", MessageType.UserError);
+                    msgs.Add("Password must be at least 8 characters", MessageType.UserError);
                 }
             }
 
