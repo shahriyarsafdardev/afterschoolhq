@@ -968,7 +968,6 @@ namespace AfterSchool.Controllers
             ResetRegistrationSession();
 
             ViewBag.Registration = registration;
-            ViewBag.RegistrantActivities = registration.GetRegistrantActivities();
             ViewBag.Account = registration.GetAccount();
             ViewBag.Messages = msgs;
 
