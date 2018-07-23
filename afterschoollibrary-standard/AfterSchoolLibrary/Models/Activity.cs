@@ -1698,7 +1698,7 @@ namespace AfterSchoolLibrary
                  // let's create a new one
                 if (!activity.HasSubscriptionPlan())
                 {
-                    var subscriptionPlan = SubscriptionPlanService.CreateNew(
+                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNew(
                             account,
                             ParticipationObjectType.Activity,
                             activity.ID.Value,
@@ -1721,7 +1721,7 @@ namespace AfterSchoolLibrary
                         subscriptionPlan.Deactivate(loggedInUserId, dc);
 
                         // second: create a new plan
-                        var newSubscriptionPlan = SubscriptionPlanService.CreateNew(
+                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNew(
                                 account,
                                 ParticipationObjectType.Activity,
                                 activity.ID.Value,
@@ -1766,7 +1766,7 @@ namespace AfterSchoolLibrary
                 // let's create a new one
                 if (!activity.HasPaymentPlan())
                 {
-                    var paymentPlan = PaymentPlanService.CreateNew(
+                    var paymentPlan = Services.PaymentPlanService.CreateNew(
                         account,
                         ParticipationObjectType.Activity,
                         activity.ID.Value,
