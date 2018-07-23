@@ -10,6 +10,7 @@
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model);}
 
     <div class="panel panel-default">
         <div class="panel-heading">

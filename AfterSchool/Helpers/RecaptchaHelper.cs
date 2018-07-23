@@ -23,7 +23,7 @@ namespace AfterSchool.Helpers
             string results = rc.DoRequest();
             dynamic json = results.FromJSON();
 
-            if (json["success"] == null || !json["success"])
+            if (json["success"] == null || json["success"] == false)
             {
                 msgs.Add("You just may be a robot :-/", MessageType.UserError);
             }

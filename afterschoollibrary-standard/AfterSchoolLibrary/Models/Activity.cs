@@ -459,6 +459,43 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
+        public SubscriptionPlan GetSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var list = SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc);
+            SubscriptionPlan subscriptionPlan = null;
+
+            if (list.Any())
+            {
+                subscriptionPlan = list.First();
+            }
+
+            return subscriptionPlan;
+        }
+
+        public bool HasSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).Any();
+        }
+
+        public PaymentPlan GetPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var list = PaymentPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc);
+            PaymentPlan paymentPlan = null;
+
+            if (list.Any())
+            {
+                paymentPlan = list.First();
+            }
+
+            return paymentPlan;
+        }
+
+        public bool HasPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return PaymentPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).Any();
+        }
+
+
         public string GetHomePageUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return $"/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
@@ -1238,6 +1275,7 @@ namespace AfterSchoolLibrary
             var state = values.GetValueOrDefault("state");
             var postalcode = values.GetValueOrDefault("postalcode");
             var ismylocation = values.GetValueOrDefault("mylocation");
+            var locationisaschool = values.GetValueOrDefault("isschool");
             var cost = values.GetValueOrDefault("cost");
             var costdescription = values.GetValueOrDefault("costdescription");
             var acceptpaypal = values.GetValueOrDefault("acceptpaypal");
@@ -1265,6 +1303,13 @@ namespace AfterSchoolLibrary
             var scheduledates = values.GetValueOrDefault("scheduledates");
             var schedule = values.GetValueOrDefault("schedule");
             var description = values.GetValueOrDefault("description");
+            var hassubscriptionplan = values.GetValueOrDefault("hassubscriptionplan");
+            var subscriptionplancost = values.GetValueOrDefault("subscriptionplancost");
+            var subscriptionplanperiod = values.GetValueOrDefault("subscriptionplanperiod");
+            var haspaymentplan = values.GetValueOrDefault("haspaymentplan");
+            var paymentplancost = values.GetValueOrDefault("paymentplancost");
+            var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
+            var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
 
             if (activityId.IsNumber() == false || activityId.ToInteger() == 0)
             {
@@ -1552,6 +1597,7 @@ namespace AfterSchoolLibrary
                                 state.IfEmpty(""),
                                 postalcode.IfEmpty(""),
                                 locationdetails.IfEmpty(""),
+                                locationisaschool.IfEmpty(""),
                                 hostAccountId,
                                 loggedInUserId,
                                 adc
@@ -1559,8 +1605,36 @@ namespace AfterSchoolLibrary
 
                             if (!account.DefaultLocationId.HasValue)
                                 msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
-                        }                        
-                                              
+                        }
+
+                        //setup SubscriptionPlan
+                        if (amsgs.HasNoErrors())
+                        {
+                            amsgs.AddRange(activity.SetupSubscriptionPlan(
+                                account,
+                                activity,
+                                hassubscriptionplan.IfEmpty(""),
+                                subscriptionplancost.IfEmpty(""),
+                                subscriptionplanperiod.IfEmpty(""),
+                                loggedInUserId,
+                                adc
+                            ));
+                        }
+
+                        //setup PaymentPlan
+                        if (amsgs.HasNoErrors())
+                        {
+                            amsgs.AddRange(activity.SetupPaymentPlan(
+                                account,
+                                activity,
+                                haspaymentplan.IfEmpty(""),
+                                paymentplancost.IfEmpty(""),
+                                paymentplanperiod.IfEmpty(""),
+                                paymentplanperiodnumber.IfEmpty(""),
+                                loggedInUserId,
+                                adc
+                            ));
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1616,9 +1690,122 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }
-        
 
-        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, int? hostaccountid, int loggedInUserId, DatabaseConnection dc = null)
+        private SystemMessages SetupSubscriptionPlan(Account account, Activity activity, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            // if the subscription plan option(UI) is activated
+            if (hassubscriptionplan.ToBoolean())
+            {
+                 // if there is no subscription plan active in the DB
+                 // let's create a new one
+                if (!activity.HasSubscriptionPlan())
+                {
+                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNew(
+                            account,
+                            ParticipationObjectType.Activity,
+                            activity.ID.Value,
+                            subscriptionplancost.ToDecimal(),
+                            (BillingPeriodType)subscriptionplanperiod.ToInteger(),
+                            true,
+                            loggedInUserId,
+                            msgs,
+                            dc
+                        );
+                }
+                else
+                {
+                    SubscriptionPlan subscriptionPlan = activity.GetSubscriptionPlan();
+
+                    // if the plan is purchased and begin edited
+                    if (subscriptionPlan.IsPurchased() && (subscriptionPlan.CostPerPeriod != Convert.ToDecimal(subscriptionplancost)))// || subscriptionPlan.BillingPeriodTypeId != Convert.ToInt32(subscriptionplanperiod))
+                    {
+                        // first: desactivate the current plan
+                        subscriptionPlan.Deactivate(loggedInUserId, dc);
+
+                        // second: create a new plan
+                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNew(
+                                account,
+                                ParticipationObjectType.Activity,
+                                activity.ID.Value,
+                                subscriptionplancost.ToDecimal(),
+                                (BillingPeriodType)subscriptionplanperiod.ToInteger(),
+                                true,
+                                loggedInUserId,
+                                msgs,
+                                dc
+                            );
+                    }
+                    else
+                    {
+                        // update the current plan
+                        subscriptionPlan.LastModifiedBy = loggedInUserId;
+                        subscriptionPlan.LastModifiedDate = DateTime.UtcNow;
+                        subscriptionPlan.CostPerPeriod = Convert.ToDecimal(subscriptionplancost);
+                        subscriptionPlan.BillingPeriodTypeId = (BillingPeriodType)Convert.ToInt32(subscriptionplanperiod);
+                        msgs.AddRange(subscriptionPlan.Save(dc));
+                    }
+                }
+
+            }
+            else if (activity.HasSubscriptionPlan())
+            {
+                SubscriptionPlan subscriptionPlan = activity.GetSubscriptionPlan();
+
+                subscriptionPlan.Deactivate(loggedInUserId, dc);
+            }
+
+            return msgs;
+        }
+
+        private SystemMessages SetupPaymentPlan(Account account, Activity activity, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            // if the payment plan option(UI) is activated
+            if (haspaymentplan.ToBoolean())
+            {
+                // if there is no payment plan active in the DB
+                // let's create a new one
+                if (!activity.HasPaymentPlan())
+                {
+                    var paymentPlan = Services.PaymentPlanService.CreateNew(
+                        account,
+                        ParticipationObjectType.Activity,
+                        activity.ID.Value,
+                        paymentplancost.ToDecimal(),
+                        (BillingPeriodType)paymentplanperiod.ToInteger(),
+                        paymentplanperiodnumber.ToInteger(),
+                        loggedInUserId,
+                        msgs,
+                        dc);
+                    msgs.AddRange(paymentPlan.Save(dc));
+                }
+                else
+                {
+                    PaymentPlan subscriptionPlan = activity.GetPaymentPlan();
+                    // update the current plan
+                    subscriptionPlan.LastModifiedBy = loggedInUserId;
+                    subscriptionPlan.LastModifiedDate = DateTime.UtcNow;
+                    subscriptionPlan.CostPerPeriod = paymentplancost.ToDecimal();
+                    subscriptionPlan.TotalPeriods = paymentplanperiodnumber.ToInteger();
+                    subscriptionPlan.BillingPeriodTypeId = (BillingPeriodType)paymentplanperiod.ToInteger();
+                    msgs.AddRange(subscriptionPlan.Save(dc));
+                }
+
+            }
+            else if (activity.HasPaymentPlan())
+            {
+                PaymentPlan paymentPlan = activity.GetPaymentPlan();
+
+                paymentPlan.Deactivate(loggedInUserId, dc);
+            }
+
+            return msgs;
+        }
+
+        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string locationisaschool, int? hostaccountid, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1643,6 +1830,7 @@ namespace AfterSchoolLibrary
 
                 if (!doesExist)
                 {
+                    var locationType = locationisaschool.IsBoolean() ? LocationType.School : LocationType.NotSet;
 
                     var activityLocation = new Location()
                     {
@@ -1657,6 +1845,7 @@ namespace AfterSchoolLibrary
                         PostalCode = postalcode.MaxChars(5),
                         Name = locationname,
                         HostAccountId = hostaccountid,
+                        LocationTypeId = locationType
                     };
                     msgs.AddRange(activityLocation.Save(dc));
 

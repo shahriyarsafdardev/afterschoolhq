@@ -25,19 +25,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Core" Version="3.3.24.3" />
+    <PackageReference Include="AWSSDK.S3" Version="3.3.19" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Rollbar" Version="1.4.0" />
+    <PackageReference Include="Rollbar" Version="1.5.4" />
     <PackageReference Include="Sendgrid" Version="9.9.0" />
     <PackageReference Include="Stripe.net" Version="16.10.0" />
     <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\basiclibrary-standard\BasicLibrary\BasicLibrary.vbproj" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <ProjectReference Include="..\..\basiclibrary-standard\BasicLibrary\BasicLibrary.vbproj" />
   </ItemGroup>
 
   <ItemGroup>

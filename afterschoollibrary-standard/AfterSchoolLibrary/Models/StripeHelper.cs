@@ -70,7 +70,7 @@ namespace AfterSchoolLibrary.Billing
             return new StripeAccountService(StripeAccessToken);
         }
 
-        public static StripeAccount CreateCustomAccount(string businessName, string email, SystemMessages msgs)
+        public static Stripe.StripeAccount CreateCustomAccount(string businessName, string email, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -86,7 +86,7 @@ namespace AfterSchoolLibrary.Billing
                 TransferScheduleInterval = "manual"
             };
 
-            StripeAccount account = null;
+            Stripe.StripeAccount account = null;
 
             try
             {

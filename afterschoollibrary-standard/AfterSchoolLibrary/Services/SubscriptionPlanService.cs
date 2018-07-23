@@ -13,15 +13,15 @@ namespace AfterSchoolLibrary.Services
     {
         public static SubscriptionPlan CreateNew(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return CreateNew(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, doesAutoRenew, loggedInUser, msgs, dc);
+            return CreateNew(planOwner, ParticipationObjectType.Activity, activity.ID.Value, costPerPeriod, billingPeriodType, doesAutoRenew, loggedInUser?.ID.IfEmpty(0), msgs, dc);
         }
 
         public static SubscriptionPlan CreateNew(Account planOwner, ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return CreateNew(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, doesAutoRenew, loggedInUser, msgs, dc);
+            return CreateNew(planOwner, ParticipationObjectType.ActivityGroup, activityGroup.ID.Value, costPerPeriod, billingPeriodType, doesAutoRenew, loggedInUser?.ID.IfEmpty(0), msgs, dc);
         }
 
-        public static SubscriptionPlan CreateNew(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan CreateNew(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
             {
                 if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -31,9 +31,9 @@ namespace AfterSchoolLibrary.Services
                 BillingPeriodTypeId = billingPeriodType,
                 CostPerPeriod = costPerPeriod,
                 CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                CreatedBy = loggedInUserId,
                 LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUserId,
                 IsActive = true,
                 ParticipationObjectId = participationObjectId,
                 ParticipationObjectTypeId = participationObjectType,

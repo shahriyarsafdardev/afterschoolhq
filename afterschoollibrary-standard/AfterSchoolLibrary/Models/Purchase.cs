@@ -21,7 +21,8 @@ namespace AfterSchoolLibrary
 		public int? RegistrationId { get { return (int?)MDV["RegistrationId"].Value; } set { MDV["RegistrationId"].Value = value; } }
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
 		public int? CouponId { get { return (int?)MDV["CouponId"].Value; } set { MDV["CouponId"].Value = value; } }
-		public string StripeTokenOrCardId { get { return (string)MDV["StripeTokenOrCardId"].Value; } set { MDV["StripeTokenOrCardId"].Value = value; } }
+		public string StripeToken { get { return (string)MDV["StripeToken"].Value; } set { MDV["StripeToken"].Value = value; } }
+		public string StripeSourceId { get { return (string)MDV["StripeSourceId"].Value; } set { MDV["StripeSourceId"].Value = value; } }
 		public int? PurchaserAccountId { get { return (int?)MDV["PurchaserAccountId"].Value; } set { MDV["PurchaserAccountId"].Value = value; } }
 		public int? NumberOfSeats { get { return (int?)MDV["NumberOfSeats"].Value; } set { MDV["NumberOfSeats"].Value = value; } }
 		public int? LoggedInUserId { get { return (int?)MDV["LoggedInUserId"].Value; } set { MDV["LoggedInUserId"].Value = value; } }
@@ -45,7 +46,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "CouponId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "StripeTokenOrCardId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeToken", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeSourceId", System.Data.SqlDbType.NVarChar, 50);
 				_dp.Add(className, "PurchaserAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfSeats", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LoggedInUserId", System.Data.SqlDbType.Int);
@@ -136,7 +138,11 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripeTokenOrCardId"]);
+			dps.Add(ObjectMap["StripeToken"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeSourceId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

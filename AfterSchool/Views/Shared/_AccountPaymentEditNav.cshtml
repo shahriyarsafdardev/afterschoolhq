@@ -1,0 +1,37 @@
+﻿@model Account
+@{
+    var activeMenu = Url.RequestContext.RouteData.Values["action"].ToString();
+
+    var entityactive = activeMenu == "entityPayments" ? "active" : "";
+    var bankinformationactive = activeMenu == "bankInformationPayments" ? "active" : "";
+}
+<div id="list1" class="dd">
+    <ol class="dd-list">
+        <li data-id="1" class="dd-item">
+            <div class="dd-handle @entityactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("entityPayments", "account", new { id = Model.ID.ToString() }) },
+                            { "Text", "Legal Entity Information" },
+                            { "IsActive", true },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        <li data-id="2" class="dd-item">
+            <div class="dd-handle @bankinformationactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("bankInformationPayments", "account", new { id = Model.ID.ToString() }) },
+                            { "Text", "Bank information" },
+                            { "IsActive", true },
+                        }
+                    );
+                }
+            </div>
+        </li>
+    </ol>
+</div>   

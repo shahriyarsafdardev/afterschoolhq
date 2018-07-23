@@ -215,7 +215,23 @@ namespace AfterSchoolLibrary
         #endregion
 
 		#region "UserDefined"
+        public static List<PaymentPlan> LoadActiveByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+            dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
+            dq.Criterias.Add(ObjectMap["IsActive"], true);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
+        public void Deactivate(int loggedInUserId, DatabaseConnection dc = null)
+        {
+            this.IsActive = false;
+            this.LastModifiedDate = DateTime.UtcNow;
+            this.LastModifiedBy = loggedInUserId;
+            this.Save(dc);
+        }
         #endregion
     }
 }

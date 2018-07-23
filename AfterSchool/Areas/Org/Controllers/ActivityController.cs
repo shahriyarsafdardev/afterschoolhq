@@ -616,7 +616,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string mylocation, string cmd)
+        public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string mylocation, string isschool, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
@@ -633,7 +633,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "city", city},
                     { "state", state},
                     { "postalcode", postalcode},
-                    { "mylocation", mylocation }
+                    { "mylocation", mylocation },
+                    { "isschool", isschool }
                 };
 
                 activity = Activity.EditExisting(
@@ -693,7 +694,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
@@ -706,7 +707,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "costdescription", costdescription},
                     { "acceptpaypal", acceptpaypal.IfBlank("0")},
                     { "acceptcreditcard", acceptcreditcard.IfBlank("0")},
-                    { "allowtopaylater", allowtopaylater.IfBlank("0")}
+                    { "allowtopaylater", allowtopaylater.IfBlank("0")},
+                    { "hassubscriptionplan", hassubscriptionplan.IfBlank("0") },
+                    { "subscriptionplancost", subscriptionplancost },
+                    { "subscriptionplanperiod", subscriptionplanperiod },
+                    { "haspaymentplan", haspaymentplan.IfBlank("0") },
+                    { "paymentplancost", paymentplancost },
+                    { "paymentplanperiod", paymentplanperiod },
+                    { "paymentplanperiodnumber", paymentplanperiodnumber }
                 };
 
                 activity = Activity.EditExisting(

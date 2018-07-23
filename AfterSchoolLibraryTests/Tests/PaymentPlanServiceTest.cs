@@ -33,7 +33,7 @@ namespace AfterSchoolLibraryTests.Tests
                 35.ToDecimal(),
                 BillingPeriodType.Month,
                 12,
-                LoggedInUser,
+                LoggedInUser.ID.Value,
                 msgs,
                 dc);
 
@@ -52,7 +52,7 @@ namespace AfterSchoolLibraryTests.Tests
                 35.ToDecimal(),
                 BillingPeriodType.Month,
                 12,
-                LoggedInUser,
+                LoggedInUser.ID.Value,
                 msgs,
                 dc);
 

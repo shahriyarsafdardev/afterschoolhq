@@ -1155,6 +1155,7 @@
     <Content Include="Views\Account\Payment.cshtml" />
     <Content Include="Views\Account\ThankYou.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\Shared\_AccountLocation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

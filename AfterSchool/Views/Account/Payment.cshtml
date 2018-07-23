@@ -4,7 +4,7 @@
     ViewBag.Title = "Payment";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
-    var cards = (List<Stripe.StripeCard>)ViewBag.Cards;
+    var sources = (List<Stripe.StripeSource>)ViewBag.Sources;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var registration = (Registration)ViewBag.Registration;
 }
@@ -25,66 +25,76 @@
                 
                 <h4>Registration for @participationObject.Name is @participationObject.Cost.ToCurrency()</h4>
 
-                @if (cards.Any())
+                @if (sources.Any())
                 {
-                    <p>Pay using an existing card</p>
-                    <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post">
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
+                    <div class="padding-v-30">
+                        <div class="col-md-6 col-md-offset-3 col-sm-12">
+                            <p>Pay using an existing card</p>
+                            <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post">
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label">
 
-                            </label>
-                            <div class="col-md-6">
-                                <select name="card" id="card" class="form-control">
-                                    @foreach(var card in cards)
-                                    {
-                                        <option value="@card.Id">@card.DynamicLast4</option>
-                                    }
-                                </select>
-                            </div>
+                                    </label>
+                                    <div class="col-md-6">
+                                        <select name="source" id="source" class="form-control">
+                                            @foreach (var source in sources)
+                                            {
+                                            <option value="@source.Id">
+                                                **** **** **** @source.Card.Last4
+                                                - 
+                                                @source.Card.ExpirationMonth / @source.Card.ExpirationYear
+                                            </option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="form-group">
-                            <button type="button" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
-                        </div>
-                    </form>
+                    </div>
                 }
 
-                <div class="col-md-4 col-md-offset-4 col-sm-12">
-                    <form action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="payment-form" class="form-horizontal">
-                        <div class="form-group">
-                            <label for="card-element">
-                                Credit or debit card
-                            </label>
-                            <div id="card-number"></div>
-                            <div id="card-cvc"></div>
-                            <div id="card-expiry"></div>
+                <div class="padding-v-30">
+                    <div class="col-md-4 col-md-offset-4 col-sm-12">
+                        <form action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="payment-form" class="form-horizontal">
+                            <div class="form-group">
+                                <label for="card-element">
+                                    Credit or debit card
+                                </label>
+                                <div id="card-number"></div>
+                                <div id="card-cvc"></div>
+                                <div id="card-expiry"></div>
 
-                            <!-- Used to display Element errors. -->
-                            <div id="card-errors" role="alert"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 col-md-offset-3">
-                                <div class="am-checkbox text-center">
-                                    <input type="checkbox" 
-                                           id="savepaymentinfo" 
-                                           name="savepaymentinfo" 
-                                           value="1" 
-                                           @(Request["savepaymentinfo"] == "1" ? " checked=\"checked\" " : "") />
-                                    <label for="savepaymentinfo">
-                                        Save my card for convenient checkout
-                                    </label>
+                                <!-- Used to display Element errors. -->
+                                <div id="card-errors" role="alert"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox text-center">
+                                        <input type="checkbox" 
+                                               id="savepaymentinfo" 
+                                               name="savepaymentinfo" 
+                                               value="1" 
+                                               @(Request["savepaymentinfo"] == "1" ? " checked=\"checked\" " : "") />
+                                        <label for="savepaymentinfo">
+                                            Save my card for convenient checkout
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group padding-v-20">
-                            <button type="button" id="btn-paywitnewcard" class="btn btn-xl center-block btn-primary">Review Purchase &raquo;</button>
-                        </div>
-                    </form>
-                    @if (participationObject.AllowToPayLater)
-                    {
-                        <div class="padding-v-30">
-                            <a href="#">Pay Later</a>
-                        </div>
-                    }
+                            <div class="form-group padding-v-20">
+                                <button type="button" id="btn-paywitnewcard" class="btn btn-xl center-block btn-primary">Review Purchase &raquo;</button>
+                            </div>
+                        </form>
+                        @if (participationObject.AllowToPayLater)
+                        {
+                            <div class="padding-v-30">
+                                <a href="#">Pay Later</a>
+                            </div>
+                        }
+                    </div>
                 </div>
 
             </div>

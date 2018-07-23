@@ -16,16 +16,16 @@ namespace AfterSchool.Controllers
         public ActionResult Index(string regaccount)
         {
             var msgs = new SystemMessages();
-            if (!SessionVariables.LoggedInUser.IsEmpty())
+            if (SessionVariables.LoggedInUser.IsNotEmpty())
             {
-                LoginRedirect();
+                return LoginRedirect();
             }
             else if (!Request["Account"].IsEmpty())
             {
                 Account Account = AfterSchoolLibrary.Account.Load(Request["Account"].ToInteger());
                 if (!Account.IsEmpty() && !Account.UniqueName.IsEmpty())
                 {
-                    Response.Redirect(Account.UniqueName);
+                    return Redirect($"/{Account.UniqueName}");
                 }
             }
 
@@ -137,9 +137,9 @@ namespace AfterSchool.Controllers
                 {
                     msgs.Add("Passwords are required and must match", MessageType.UserError);
                 }
-                else if (password1.Length < 6)
+                else if (password1.Length < 8)
                 {
-                    msgs.Add("Password must be at least 6 characters", MessageType.UserError);
+                    msgs.Add("Password must be at least 8 characters", MessageType.UserError);
                 }
             }
 
