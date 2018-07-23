@@ -1876,6 +1876,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        [Obsolete]
         private SystemMessages SetupGrades(string gradeIds, Account account, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -2076,6 +2077,7 @@ namespace AfterSchoolLibrary
             return teammember;
         }
 
+        [Obsolete]
         public SystemMessages RemoveGrade(GradeLevel grade, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -2087,6 +2089,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        [Obsolete]
         public ActivityGradeLevel AddGrade(int gradeId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc= null)
         {
             ActivityGradeLevel activityGrade = ActivityGradeLevel.LoadByActivityIdByGradeLevelId(this.ID.Value, gradeId, dc: dc);
