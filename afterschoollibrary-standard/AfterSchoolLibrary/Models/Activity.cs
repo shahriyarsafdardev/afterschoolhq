@@ -7,7 +7,6 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
-using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary
 {
@@ -123,7 +122,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar, 100);
 				_dp.Add(className, "WaitingListSeats", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AcceptPayPal", System.Data.SqlDbType.Bit);
-                _dp.Add(className, "AcceptCreditCard", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AcceptCreditCard", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ParentActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AllowToPayLater", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AllowOrganizationRegistration", System.Data.SqlDbType.Bit);
@@ -454,11 +453,11 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         public SubscriptionPlan GetSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

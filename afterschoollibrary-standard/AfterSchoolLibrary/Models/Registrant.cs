@@ -34,6 +34,10 @@ namespace AfterSchoolLibrary
 		public int? FirstRegistrantId { get { return (int?)MDV["FirstRegistrantId"].Value; } set { MDV["FirstRegistrantId"].Value = value; } }
 		public bool IsParentOrGuardian { get { return (bool)MDV["IsParentOrGuardian"].Value; } set { MDV["IsParentOrGuardian"].Value = value; } }
 		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
+		/// <summary>
+		/// The location id of the school the registrant is attending
+		/// </summary>
+		public int? SchoolId { get { return (int?)MDV["SchoolId"].Value; } set { MDV["SchoolId"].Value = value; } }
 		
 
         public Registrant()
@@ -66,6 +70,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "FirstRegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "SchoolId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -181,6 +186,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AllowTextMessages"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SchoolId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
