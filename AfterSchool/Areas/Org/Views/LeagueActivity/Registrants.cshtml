@@ -117,14 +117,14 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <a href="@Url.Action("registrantsummary", "activity", new { id = Model.ID })" class="btn btn-default pull-right">
+                    <a href="@Url.Action("registrantsummary", "activity", new { id = Model.Uid })" class="btn btn-default pull-right">
                         <i class="icon icon-left s7-paper-plane"></i> Send Registration Report
                     </a>
 
-                    <a href="@Url.Action("registrantdownload", "activity", new { id = Model.ID })" class="btn btn-primary btn-space hide">
+                    <a href="@Url.Action("registrantdownload", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
                         <i class="icon icon-left s7-download"></i> Download Registration Data
                     </a>
-                    <a href="@Url.Action("registrantimport", "activity", new { id = Model.ID })" class="btn btn-primary btn-space hide">
+                    <a href="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
                         <i class="icon icon-left s7-upload"></i> Import Registration Data
                     </a>
                 </div>
@@ -149,6 +149,6 @@
 
 <script>
     function changeAssignment() {
-        location.href = '@Url.Action("registrants", "activity", new { id = Model.ID })?atype=' + $('#assignmentType').val();
+        location.href = '@Url.Action("registrants", "activity", new { id = Model.Uid })?atype=' + $('#assignmentType').val();
     }
 </script>

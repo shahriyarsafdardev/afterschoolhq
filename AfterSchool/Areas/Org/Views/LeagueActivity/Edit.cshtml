@@ -18,7 +18,7 @@
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Details"); }
         </div>
         <div class="panel-body">
-            <form method="post" action="@Url.Action("edit", "activity", new { id = Model.ID })" class="form-horizontal">
+            <form method="post" action="@Url.Action("edit", "activity", new { id = Model.Uid })" class="form-horizontal">
                
                 @{Html.RenderPartial("~/Views/Shared/_ActivityForm.cshtml", Model, new ViewDataDictionary() { { "AccountPackage", accountPackage } });}
 

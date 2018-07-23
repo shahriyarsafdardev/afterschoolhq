@@ -22,7 +22,7 @@
                 Model.GetMessages().OrderByDescending(x => x.DateSent.Value).ToList(),
                 new ViewDataDictionary()
                 {
-                    { "SendNewMessageLink", Url.Action("messageadd", "activity", new { id = Model.ID }) },
+                    { "SendNewMessageLink", Url.Action("messageadd", "activity", new { id = Model.Uid }) },
                     { "Account", SessionVariables.CurrentAccount },
                     { "ViewLinkController", "activity" }
                 }

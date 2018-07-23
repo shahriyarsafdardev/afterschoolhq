@@ -9,7 +9,7 @@
     var btnDisabled = "disabled";
     if (Model.IsPublishable)
     {
-        publishUrl = Url.Action("publish", "activity", new { id = Model.ID });
+        publishUrl = Url.Action("publish", "activity", new { id = Model.Uid });
         btnDisabled = "";
     }
 }
@@ -170,7 +170,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <a href="@Url.Action("unpublish", "activity", new { id = Model.ID })" class="btn btn-primary">
+            <a href="@Url.Action("unpublish", "activity", new { id = Model.Uid })" class="btn btn-primary">
                 Unpublish @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;
             </a>
         </div>

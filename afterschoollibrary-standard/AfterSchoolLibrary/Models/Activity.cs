@@ -988,7 +988,8 @@ namespace AfterSchoolLibrary
                 RegistrationModeId = this.RegistrationModeId,
                 ActivityGroupId = this.ActivityGroupId,
                 ActivityTypeId = this.ActivityTypeId,
-                LocationId = this.LocationId
+                LocationId = this.LocationId,
+              
             };
         }
 
@@ -1119,7 +1120,7 @@ namespace AfterSchoolLibrary
                     });
 
                     // NOTE: copy schedule?
-                    if (copy.ActivityScheduleId.HasValue)
+                    if (this.ActivityScheduleId.HasValue)
                     {
                         copy.ActivityScheduleId = this.GetSchedule(false, amsgs, adc)
                             .CopyAndSave(loggedInUserId, amsgs, adc)

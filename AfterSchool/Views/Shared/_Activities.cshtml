@@ -28,7 +28,7 @@
 
     var currentClass = "";
     var archiveClass = "";
-    if (Request["archive"] == "1")
+    if (Request["archive"] == "1" && hasArchivedActivities)
     {
         archiveClass = "text-bold";
     }
@@ -89,7 +89,10 @@ else
         <div class="col-md-12">
             <div class="pull-right">
                 <a href="@currentListUrl" class="@currentClass">Current</a> |
-                <a href="@archivedListUrl" class="@archiveClass">Archived</a>
+                @if (hasArchivedActivities)
+                {
+                    <a href="@archivedListUrl" class="@archiveClass">Archived</a>
+                }
             </div>
         </div>
     </div>
@@ -122,13 +125,14 @@ else
                     {
                         var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
                         var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
+                        
 
                         <tr>
                             <td>
-                                <a href="@Url.Action("summary", "activity", new { id = @activity.ID})" class="btn btn-default btn-sm">View</a>
+                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-default btn-sm">View</a>
                             </td>
                             <td>
-                                <a href="@Url.Action("summary", "activity", new { id = @activity.ID})">
+                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})">
                                     @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
                                 </a>
                             </td>
@@ -179,8 +183,8 @@ else
 
                                     @if (activity.ActivityScheduleId.HasValue)
                                     {
-                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-schedule" id="edit-schedule-@activity.ID"
-                                                onclick="editSchedule('@activity.Name', @activity.ID, @activity.ActivityScheduleId)">
+                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-schedule" id="edit-schedule-@activity.Uid"
+                                                onclick="editSchedule('@activity.Name', '@activity.Uid', @activity.ActivityScheduleId)">
                                             <i class="s7-edit"></i> Schedule
                                         </button>
                                     }
@@ -390,6 +394,8 @@ else
         );
     }
     function editSchedule(name, activity, schedule) {
+        //console.log("editscheudle");
+       // console.log(name, activity, schedule);
         $('#schedule-activity-name').html(name);
         $('#schedule').val(schedule);
         $('#schedule-activity').val(activity);

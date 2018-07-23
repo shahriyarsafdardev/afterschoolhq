@@ -32,7 +32,7 @@
                     <a href="@Url.Action("messages", "activity", new { id = Model.ActivityId})" class="btn btn-primary pull-right">&laquo; Back to List</a>
                 </div>
 
-                <form method="post" action="@Url.Action("messageadd", "activity", new { id = Model.ID })" class="form-horizontal">
+                <form method="post" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal">
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Subject</label>

@@ -391,7 +391,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            var activity = Activity.Load(id.ToInteger());
+            var activity = Activity.LoadByUid(id.ToGuid());
             var timeSubmitted = DateTime.UtcNow;
 
 

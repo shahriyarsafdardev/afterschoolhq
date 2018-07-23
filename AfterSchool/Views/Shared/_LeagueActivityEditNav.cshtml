@@ -79,7 +79,7 @@
                 @{Html.RenderPartial(
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
-                            { "Url", Url.Action("editlocation", "activity", new { id = Model.ID.ToString() }) },
+                            { "Url", Url.Action("editlocation", "activity", new { id = Model.Uid.ToString() }) },
                             { "Text", "Location" },
                             { "IsActive", isActive },
                         }
@@ -92,7 +92,7 @@
                 @{Html.RenderPartial(
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
-                            { "Url", Url.Action("editcost", "activity", new { id = Model.ID.ToString() }) },
+                            { "Url", Url.Action("editcost", "activity", new { id = Model.Uid.ToString() }) },
                             { "Text", "Payment" },
                             { "IsActive", isActive && Model.CanAcceptPayments },
                         }

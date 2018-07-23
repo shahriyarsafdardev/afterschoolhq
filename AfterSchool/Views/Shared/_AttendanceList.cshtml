@@ -34,7 +34,7 @@
     </div>
 </div>
 
-<a href="@Url.Action("trackattendance", "activity", new { id = Model.ID.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
+<a href="@Url.Action("trackattendance", "activity", new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
 
 <div class="table-responsive">
     <table class="table table-hover">
@@ -55,7 +55,7 @@
                     var seatsPossible = attendance.GetAttendanceRegistrantCount();
                     var presentCount = attendance.GetPresentCount();
                     <tr>
-                        <td><a href="@Url.Action("trackattendance", "activity", new { id = Model.ID, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a></td>
+                        <td><a href="@Url.Action("trackattendance", "activity", new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a></td>
                         <td>@account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString()</td>
                         <td>@seatsPossible</td>
                         <td>@presentCount</td>
