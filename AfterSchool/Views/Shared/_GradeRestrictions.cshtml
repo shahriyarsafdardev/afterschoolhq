@@ -1,0 +1,69 @@
+﻿@{
+    var grades = (List<GradeLevel>)ViewData["grades"];
+    var minGradeLevelId = (int?)ViewData["minGradeLevelId"];
+    var maxGradeLevelId = (int?)ViewData["maxGradeLevelId"];
+}
+<div class="form-group">
+    <label class="col-md-3 control-label">
+        Grade Restrictions
+    </label>
+    <div class="col-md-1">
+        @{Html.RenderPartial
+          (
+              "~/Views/Shared/_SwitchButton.cshtml",
+              minGradeLevelId.HasValue,
+              new ViewDataDictionary()
+              {
+            { "checkboxname", "graderestrictions" },
+            { "checkboxid", "graderestrictions" },
+            { "disabled", false }
+              }
+          );
+        }
+    </div>
+    <div class="col-md-5 hide" id="grade">
+        <select id="mingrade" name="mingrade" class="form-control">
+            @foreach (var grade in grades)
+            {
+                <option value="@grade.ID" @(minGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+            }
+        </select>
+        <p class="margin-v-10">
+            To
+        </p>
+        <select id="maxgrade" name="maxgrade" class="form-control">
+            @foreach (var grade in grades)
+            {
+                <option value="@grade.ID" @(maxGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+            }
+        </select>
+    </div>
+</div>
+
+
+<script>
+    PageEvent.add(
+        PageEvent.AFTER_INIT,
+        function () {
+            $('#graderestrictions').click(function () {
+                gradeCheck();
+            });
+
+            $('#mingrade').change(function () {
+                if (parseInt($(this).val()) > parseInt($('#maxgrade').val())) {
+                    $('#maxgrade').val($(this).val());
+                }
+            });
+
+            gradeCheck();
+        }
+    );
+
+    function gradeCheck() {
+        if ($('#graderestrictions').is(':checked')) {
+            $('#grade').removeClass('hide');
+        } else {
+            $('#grade').addClass('hide');
+        }
+    }
+</script>
