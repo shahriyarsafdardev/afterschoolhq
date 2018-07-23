@@ -825,6 +825,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid()).Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
+            var ogSubscriptionPlan = Activity.LoadByUid(id.ToGuid()).GetSubscriptionPlan();
+            var copySubscriptionPlan = ogSubscriptionPlan.Copy(activity.ID.Value, SessionVariables.LoggedInUser.ID.Value, msgs);
+
 
             ViewBag.Messages = msgs;
             if (msgs.HasNoErrors())
