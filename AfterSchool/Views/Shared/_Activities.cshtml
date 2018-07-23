@@ -143,9 +143,9 @@ else
                                 }
                             </td>
                             <td class="text-center">
-                                @if (activity.GetGradeLevels().Count > 0)
+                                @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
                                 {
-                                    @activity.GetGradeLevels().OrderBy(x => x.ID.Value).Select(x => x.Abbreviation).ToStringList(", ")
+                                    <span>@activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name</span>
                                 }
                                 else
                                 {
@@ -177,7 +177,7 @@ else
                             <td>
                                 <div class="btn-group pull-right">
 
-                                    @if (activity.ActivityScheduleId.HasValue)
+                                    @if (activity.ActivityScheduleId.HasValue && false)
                                     {
                                         <button class="md-trigger btn btn-default btn-sm" data-modal="modal-schedule" id="edit-schedule-@activity.ID"
                                                 onclick="editSchedule('@activity.Name', @activity.ID, @activity.ActivityScheduleId)">

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -78,32 +78,58 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Location(string id, string address1, string address2, string city, string state, string postalcode, string country)
+        public ActionResult Location(string id, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string country, string mylocation, string isschool)
         {
             var msgs = new SystemMessages();
             var a = SessionVariables.CurrentAccount;
 
-            a.Address1 = address1;
-            a.Address2 = address2;
-            a.City = city;
-            a.State = state;
-            a.PostalCode = postalcode;
-            a.Country = country;
+            var locationType = LocationType.NotSet;
+            var hostAccountId = new int?();
 
-            if (msgs.HasNoErrors())
+            if (isschool.IsBoolean() && isschool.ToBoolean())
+                locationType = LocationType.School;
+
+            if (mylocation.IsBoolean() && mylocation.ToBoolean())
+                hostAccountId = SessionVariables.CurrentAccount.ID;
+
+            if (location.IsNumber())
             {
-                a.LastModifiedDate = DateTime.UtcNow;
-                a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                msgs.AddRange(a.Save());
+                var currentLocation = AfterSchoolLibrary.Location.Load(location.ToInteger(), msgs);
+
+                if (currentLocation.IsOwnedByOrIsNotOwned(SessionVariables.CurrentAccount))
+                {
+                    currentLocation.LocationTypeId = locationType;
+                    currentLocation.HostAccountId = hostAccountId;
+                    currentLocation.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                    currentLocation.LastModifiedDate = DateTime.UtcNow;
+                    msgs.AddRange(currentLocation.Save());
+                }
+
+                SessionVariables.CurrentAccount.SetDefaultLocation(location.ToInteger(), SessionVariables.LoggedInUser.ID.Value);
+            }
+            else
+            {
+                var newLocation = LocationService.CreateNewWithValidation(
+                    locationname,
+                    address1,
+                    address2,
+                    city,
+                    state,
+                    postalcode,
+                    "US",
+                    locationType,
+                    hostAccountId,
+                    SessionVariables.LoggedInUser,
+                    msgs
+                    );
 
                 if (msgs.HasNoErrors())
-                {
-                    msgs.Add("Saved Successfully", MessageType.Success);
-                }
-            }
+                    SessionVariables.CurrentAccount.SetDefaultLocation(newLocation.ID.Value, SessionVariables.LoggedInUser.ID.Value);
+            }            
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Location = SessionVariables.CurrentAccount.GetDefaultLocation();
             return View(a);
         }
 

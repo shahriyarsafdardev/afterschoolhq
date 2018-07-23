@@ -1415,30 +1415,33 @@ namespace AfterSchoolLibrary
             if (agestart.IsNumber())
             {
                 if (agestart.ToString().ToInteger() >= 0)
-                {
                     activity.AgeStart = agestart.ToString().ToInteger();
-                }
                 else
-                {
                     activity.AgeStart = null;
-                }
             }
             if (ageend.IsNumber())
             {
                 if (ageend.ToString().ToInteger() >= 0)
-                {
                     activity.AgeEnd = ageend.ToString().ToInteger();
-                }
                 else
-                {
                     activity.AgeEnd = null;
-                }
+            }
+
+            if (gradestart.IsNumber() && gradeend.IsNumber())
+            {
+                if (gradestart.ToString().ToInteger() > -1)
+                    activity.GradeLevelStart = gradestart.ToString().ToInteger();
+                else
+                    activity.GradeLevelStart = null;
+
+                if (gradeend.ToString().ToInteger() > -1)
+                    activity.GradeLevelEnd = gradeend.ToString().ToInteger();
+                else
+                    activity.GradeLevelEnd = null;
             }
 
             if (genderrestrictions.IsNumber())
-            {
                 activity.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
-            }
             
             if (contactname.IsNotEmpty()) activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);
             if (contactphone.IsNotEmpty()) activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
@@ -1449,7 +1452,10 @@ namespace AfterSchoolLibrary
             {
                 activity.CostPerRegistrant = cost.ToString().ToDecimal();
             }
-            if (costdescription.IsNotEmpty()) activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
+            if (costdescription.IsNotEmpty())
+            {
+                activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
+            }
             
             if (acceptcreditcard.IsNotEmpty() && acceptcreditcard.ToString().IsBoolean())
             {
@@ -1473,7 +1479,7 @@ namespace AfterSchoolLibrary
             }
             else
             {
-                activity.RegistrationModeId = RegistrationMode.Register;
+                // activity.RegistrationModeId = RegistrationMode.Register;
             }
 
             if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard && !activity.AcceptPayPal && !activity.AllowToPayLater)
@@ -1541,10 +1547,10 @@ namespace AfterSchoolLibrary
                         }
 
                         //days // deprecated
-                        if (amsgs.HasNoErrors() && days.IsNotEmpty())
-                        {
-                            amsgs.AddRange(activity.SetupActivityDays(days.ToString(), account, loggedInUserId, adc));
-                        }
+                        //if (amsgs.HasNoErrors() && days.IsNotEmpty())
+                        //{
+                        //    amsgs.AddRange(activity.SetupActivityDays(days.ToString(), account, loggedInUserId, adc));
+                        //}
 
                         // setup schedule
                         if(amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduledates.IsNotEmpty()))
@@ -1564,10 +1570,12 @@ namespace AfterSchoolLibrary
                         }
 
                         //grades
+                        /*
                         if (amsgs.HasNoErrors() && gradeIds.IsNotEmpty())
                         {
                             amsgs.AddRange(activity.SetupGrades(gradeIds.ToString(), account, loggedInUserId, adc));
                         }
+                        */
 
                         //setup initial activityProperties
                         if (amsgs.HasNoErrors())
@@ -1593,8 +1601,8 @@ namespace AfterSchoolLibrary
                                 state.IfEmpty(""),
                                 postalcode.IfEmpty(""),
                                 locationdetails.IfEmpty(""),
+                                ismylocation.IfEmpty(""),
                                 locationisaschool.IfEmpty(""),
-                                hostAccountId,
                                 loggedInUserId,
                                 adc
                                 ));
@@ -1653,15 +1661,15 @@ namespace AfterSchoolLibrary
 
             this.ScheduleRequiresAllDays = true;
 
-            if (account.HasFeature(FeatureType.ManageActivityGroups, msgs, dc) &&
-                schedule.IsNumber() &&
-                schedule.ToString().ToInteger() > 0 &&
-                scheduledates.IsEmpty())
-            {
-                this.ActivityScheduleId = schedule.ToString().ToInteger();
-            }
-            else if (scheduledates.IsNotEmpty())
-            {
+            //if (account.HasFeature(FeatureType.ManageActivityGroups, msgs, dc) &&
+            //    schedule.IsNumber() &&
+            //    schedule.ToString().ToInteger() > 0 &&
+            //    scheduledates.IsEmpty())
+            //{
+            //    this.ActivityScheduleId = schedule.ToString().ToInteger();
+            //}
+            //else if (scheduledates.IsNotEmpty())
+            //{
                 var newSchedule = Services.ActivityScheduleService.SetupSchedule(
                     this.AccountId.Value,
                     schedule.IfEmpty("0").ToInteger(),
@@ -1680,7 +1688,7 @@ namespace AfterSchoolLibrary
                     dc);
 
                 this.ActivityScheduleId = newSchedule.ID;
-            }
+            //}
 
             msgs.AddRange(this.Save(dc));
 
@@ -1801,7 +1809,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string locationisaschool, int? hostaccountid, int loggedInUserId, DatabaseConnection dc = null)
+        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string ismylocation, string locationisaschool, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1814,45 +1822,33 @@ namespace AfterSchoolLibrary
             // otherwise somehow the UI allowed them to enter a location that already exists, with the exact same location name
             else
             {
-                var doesExist = Services.LocationService.DoesLocationAlreadyExist(
-                    locationname,
-                    address1,
-                    address2,
-                    city,
-                    state,
-                    postalcode.MaxChars(5),
-                    msgs,
-                    dc);
+                var locationType = LocationType.NotSet;
+                var hostAccountId = new int?();
 
-                if (!doesExist)
-                {
-                    var locationType = locationisaschool.IsBoolean() ? LocationType.School : LocationType.NotSet;
+                if (locationisaschool.IsBoolean() && locationisaschool.ToBoolean())
+                    locationType = LocationType.School;
 
-                    var activityLocation = new Location()
-                    {
-                        CreateDate = DateTime.UtcNow,
-                        CreatedBy = loggedInUserId,
-                        LastModifiedBy = loggedInUserId,
-                        LastModifiedDate = DateTime.UtcNow,
-                        Address1 = address1,
-                        Address2 = address2,
-                        City = city,
-                        State = state,
-                        PostalCode = postalcode.MaxChars(5),
-                        Name = locationname,
-                        HostAccountId = hostaccountid,
-                        LocationTypeId = locationType
-                    };
-                    msgs.AddRange(activityLocation.Save(dc));
+                if (ismylocation.IsBoolean() && ismylocation.ToBoolean())
+                    hostAccountId = this.AccountId;
 
-                    this.LocationId = activityLocation.ID;
-                }
-                else
-                {
-                    msgs.Add("Location already exists", MessageType.UserError);
-                }
+                var activityLocation = Services.LocationService.CreateNewWithValidation(
+                        locationname,
+                        address1,
+                        address2,
+                        city,
+                        state,
+                        postalcode,
+                        "US",
+                        locationType,
+                        hostAccountId,
+                        new WebUser { ID = loggedInUserId },
+                        msgs,
+                        dc);
+
+                this.LocationId = activityLocation.ID;
             }
 
+            
             if (locationdetails.IsNotEmpty())
                 this.LocationDetails = locationdetails.IfBlank("").MaxChars(4000);
 

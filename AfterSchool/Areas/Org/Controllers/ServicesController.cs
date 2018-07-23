@@ -351,7 +351,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     location.State,
                     location.PostalCode,
                     FullAddress = location.FormatAddress(useLineBreaks: false),
-                    location.HostAccountId
+                    location.HostAccountId,
+                    LocationType = location.LocationTypeId.ToString()
                 })
             }, 
             ResponseType.JSON);
