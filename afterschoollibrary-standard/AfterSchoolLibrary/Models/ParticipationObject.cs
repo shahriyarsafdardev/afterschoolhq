@@ -30,6 +30,9 @@ namespace AfterSchoolLibrary
         public Account OwnerAccount { get; set; }
         public bool AllowToPayLater { get; set; }
         public bool IsFree { get; set; }
+        public Guid Uid { get; set; }
+        public int? SeatsRemaining { get; set; }
+        public int? WaitingListSeatsRemaining { get; set; }      
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -39,6 +42,7 @@ namespace AfterSchoolLibrary
             Object = activity;
             ObjectID = activity.ID;
             ObjectType = ParticipationObjectType.Activity;
+            Uid = activity.Uid;
             Name = activity.Name;
             Details = activity.Details;
             Schedule = activity.GetSchedule(false, msgs, dc);
@@ -47,6 +51,8 @@ namespace AfterSchoolLibrary
             ActivityType = activity.ActivityTypeId;
             UniqueName = activity.UniqueName;
             RegistrationMode = activity.RegistrationModeId;
+            SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
+            WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(msgs, dc);
            
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -76,6 +82,7 @@ namespace AfterSchoolLibrary
             Object = activityGroup;
             ObjectID = activityGroup.ID;
             ObjectType = ParticipationObjectType.ActivityGroup;
+            Uid = activityGroup.Uid;
             Name = activityGroup.Name;
             Details = activityGroup.Description;
             Schedule = activityGroup.GetSchedule(false, msgs, dc);
@@ -103,6 +110,7 @@ namespace AfterSchoolLibrary
             var activityGroup = aag.GetActivityGroup(msgs, dc);
             ObjectID = activityGroup.ID;
             ObjectType = ParticipationObjectType.ActivityGroup;
+            Uid = activityGroup.Uid;
             Name = activityGroup.Name;
             Details = activityGroup.Description;
             Schedule = activityGroup.GetSchedule(false, msgs, dc);
@@ -179,6 +187,25 @@ namespace AfterSchoolLibrary
                 return GradeLevel.Load(MaxGradeId.Value, msgs, dc);
 
             return null;
+        }
+
+        /// <summary>
+        /// if seats remaining is null meaning no seats are set (could be a league or unlimited access) 
+        /// or seats remaining > 0
+        /// </summary>
+        /// <returns></returns>
+        public bool HasSeatsAvailable()
+        {
+            return !SeatsRemaining.HasValue || SeatsRemaining.Value > 0;
+        }
+        
+        /// <summary>
+        /// if waiting list has a value and the value is greater than zero
+        /// </summary>
+        /// <returns></returns>
+        public bool HasWaitingListSeatsAvailable()
+        {
+            return WaitingListSeatsRemaining.HasValue && WaitingListSeatsRemaining.Value > 0;
         }
     }
 }

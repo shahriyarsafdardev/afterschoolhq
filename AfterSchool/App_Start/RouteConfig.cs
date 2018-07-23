@@ -97,6 +97,11 @@ namespace AfterSchool
                 new { controller = "r", action = "account", accountname = UrlParameter.Optional });
 
             routes.MapRoute(
+                "AccountBrowse",
+                "{accountname}/browse",
+                new { controller = "r", action = "browse", accountname = UrlParameter.Optional });
+
+            routes.MapRoute(
                 "ActivityHome",
                 "{accountname}/{activitytype}/{activityname}",
                 new
@@ -107,11 +112,6 @@ namespace AfterSchool
                     activitytype = UrlParameter.Optional,
                     activityname = UrlParameter.Optional
                 });
-
-            routes.MapRoute(
-                "AccountBrowse",
-                "{id}/browse",
-                new { controller = "r", action = "browse", id = UrlParameter.Optional });
 
             routes.MapRoute(
                 "Standard",

@@ -110,17 +110,18 @@ namespace AfterSchool.Areas.Org.Controllers
             else
             {
                 var newLocation = LocationService.CreateNewWithValidation(
-                    locationname,
-                    address1,
-                    address2,
-                    city,
-                    state,
-                    postalcode,
-                    "US",
-                    locationType,
-                    hostAccountId,
-                    SessionVariables.LoggedInUser,
-                    msgs
+                    locationName: locationname,
+                    address1: address1,
+                    address2: address2,
+                    city: city,
+                    state: state,
+                    postalCode: postalcode,
+                    country: "US",
+                    locationType: locationType,
+                    hostAccountId: hostAccountId,
+                    loggedInAccount: SessionVariables.CurrentAccount,
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs
                     );
 
                 if (msgs.HasNoErrors())

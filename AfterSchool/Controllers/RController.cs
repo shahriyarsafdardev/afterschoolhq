@@ -25,29 +25,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Account(string accountname)
         {
-            RestartRegistrationSession();
-
-            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname);
-            var participationObjects = new List<ParticipationObject>();
-            var sessions = new List<ActivityGroup>();
-            var msgs = new SystemMessages();
-
-            if (account.IsNotEmpty())
-            {
-                participationObjects.AddRange(account.GetPublishedActivities().Select(x => x.ToParticipationObject()));
-                participationObjects.AddRange(account.GetPublishedExternalLeagues().Select(x => x.ToParticipationObject()));
-                sessions.AddRange(account.GetPublishedSessions());
-            }
-            else
-            {
-                // 404
-            }
-
-            ViewBag.ParticipationObjects = participationObjects;
-            ViewBag.Sessions = sessions;
-            ViewBag.Messages = msgs;
-
-            return View("browse", account);
+            return Redirect($"/{accountname}/browse");            
         }
 
         [HttpGet]
@@ -55,25 +33,30 @@ namespace AfterSchool.Controllers
         {
             RestartRegistrationSession();
 
-            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname);
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
             var participationObjects = new List<ParticipationObject>();
             var sessions = new List<ActivityGroup>();
-            var msgs = new SystemMessages();
+            var locations = new List<Location>();
 
             if (account.IsNotEmpty())
             {
-                participationObjects.AddRange(account.GetPublishedActivities().Select(x => x.ToParticipationObject()));
-                participationObjects.AddRange(account.GetPublishedExternalLeagues().Select(x => x.ToParticipationObject()));
-                sessions.AddRange(account.GetPublishedSessions());
+                participationObjects.AddRange(account.GetPublishedActivities(msgs).Select(x => x.ToParticipationObject(msgs)));
+                participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.ToParticipationObject(msgs)));
+                sessions.AddRange(account.GetPublishedSessions(msgs));
+                locations.AddRange(account.GetAllAvailableLocations(msgs));
             }
             else
             {
                 // 404
             }
 
+            ViewBag.Grades = GradeLevel.Load(msgs: msgs);
             ViewBag.ParticipationObjects = participationObjects;
             ViewBag.Sessions = sessions;
             ViewBag.Messages = msgs;
+            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.Locations = locations;
 
             return View(account);
         }
