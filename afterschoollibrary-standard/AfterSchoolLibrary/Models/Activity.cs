@@ -1396,6 +1396,7 @@ namespace AfterSchoolLibrary
                 activity.SeatsAvailable = seatsavailable.ToString().ToInteger();
                 activity.WaitingListSeats = waitinglistseats.ToString().ToInteger();
                 activity.AccountId = account.ID;
+                activity.LocationId = account.DefaultLocationId;
 
                 if (group.IsEmpty() && !form.IsNumber())
                 {

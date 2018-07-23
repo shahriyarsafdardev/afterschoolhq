@@ -1378,6 +1378,7 @@ namespace AfterSchoolLibrary
         public static SystemMessages CreateSampleAccount(AccountType accountType, int packageId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
+
             var email = "sample@afterschoolhq.com";
             var phone = "(317) 316-0596";
             var firstName = "Sample";
@@ -1389,6 +1390,22 @@ namespace AfterSchoolLibrary
 
             var user = WebUserService.CreateNew(firstName, lastName, email, phone, password, true, true, true, true, null, msgs, dc);
             var account = user.AddNewAccount("Sample Account", "317-899-9189", true, accountType, packageId, BillingPeriodType.Month, true, user, msgs, dc);
+
+            var defaultLocation = LocationService.CreateNewWithValidation(
+                locationName: "The Sample Account Building",
+                address1: "5254 Winthrop Avenue",
+                address2: null,
+                city: "Indianapolis",
+                state: "IN",
+                postalCode: "46220",
+                country: "US",
+                locationType: LocationType.School,
+                hostAccountId: account.ID,
+                loggedInUser: null,
+                msgs: msgs,
+                dc: dc);
+
+            msgs.AddRange(account.SetDefaultLocation(defaultLocation.ID.Value, 0, dc));
 
             return msgs;
         }
