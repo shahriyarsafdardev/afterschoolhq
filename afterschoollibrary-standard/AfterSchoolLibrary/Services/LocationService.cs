@@ -22,7 +22,29 @@ namespace AfterSchoolLibrary.Services
             return Account.Load(location.HostAccountId.Value, dc: dc);
         }
 
-        public static Location CreateNew(string locationName, string address1, string address2, string city, string state, string postalCode, string country, int accountId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Location CreateNewWithValidation(string locationName, string address1, string address2, string city, string state, string postalCode, string country, LocationType locationType, int? hostAccountId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var doesExist = Services.LocationService.DoesLocationAlreadyExist(
+                   locationName,
+                   address1,
+                   address2,
+                   city,
+                   state,
+                   postalCode.MaxChars(5),
+                   country,
+                   msgs,
+                   dc);
+
+            if (!doesExist)
+            {
+                return LocationService.CreateNew(locationName, address1, address2, city, state, postalCode, country, locationType, hostAccountId, loggedInUser, msgs, dc);
+            }
+
+            msgs.Add("Location already exists", MessageType.UserError);
+            return null;
+        }
+
+        public static Location CreateNew(string locationName, string address1, string address2, string city, string state, string postalCode, string country, LocationType locationType, int? hostAccountId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -38,7 +60,7 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                HostAccountId = accountId,
+                HostAccountId = hostAccountId,
                 Name = locationName
             };
 
@@ -47,7 +69,7 @@ namespace AfterSchoolLibrary.Services
             return location;
         }
 
-        public static bool DoesLocationAlreadyExist(string locationName, string address1, string address2, string city, string state, string postalCode, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool DoesLocationAlreadyExist(string locationName, string address1, string address2, string city, string state, string postalCode, string country, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return Location.GetCount(
                 new Hashtable()
@@ -58,6 +80,7 @@ namespace AfterSchoolLibrary.Services
                     { "City", city.Trim() },
                     { "State", state.Trim() },
                     { "PostalCode", postalCode.Trim() },
+                    { "Country", country.Trim() }
                 },
                 msgs: msgs,
                 dc: dc) > 0;
@@ -77,6 +100,21 @@ namespace AfterSchoolLibrary.Services
                 },
                 msgs: msgs,
                 dc: dc);
+        }
+
+        public static bool IsOwned(this Location location)
+        {
+            return location.HostAccountId.HasValue;
+        }
+
+        public static bool IsOwnedBy(this Location location,  Account account)
+        {
+            return location.HostAccountId == account.ID;
+        }
+
+        public static bool IsOwnedByOrIsNotOwned(this Location location, Account account)
+        {
+            return location.IsOwnedBy(account) || !location.IsOwned();
         }
     }
 }

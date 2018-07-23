@@ -36,7 +36,7 @@
         $(`#location-${id}`).removeClass('bg-warning');
     }
 
-    function locationMouseClick(id, fullAddress, hostAccount) {
+    function locationMouseClick(id, fullAddress, hostAccount, locationType) {
         locationList.addClass('hide');
 
         if (id > 0) {
@@ -45,12 +45,23 @@
             locationSearch.val(fullAddress);
             $('#hostaccount').val(hostAccount);
 
+            $('#mylocation').prop('checked', false);
+            $('#isschool').prop('checked', false);
+
+            if (locationType.toLowerCase() == "school") {
+                $('#isschool').prop('checked', true);
+            }
+
             if (hostAccount.length > 0 && hostAccount != @accountId) {
                 $('#hostaccount-div').addClass('hide');
                 $('#isschool-div').addClass('hide');
             } else {
                 $('#hostaccount-div').removeClass('hide');
                 $('#isschool-div').removeClass('hide');
+
+                if (hostAccount.length > 0 && hostAccount == @accountId) {
+                    $('#mylocation').prop('checked', true);
+                }
             }
         } else {
             $('#add-location').removeClass('hide');
@@ -86,7 +97,7 @@
                                         id="location-${location.ID}" 
                                         onmouseover="${listItemOnMouseOver}(${location.ID})" 
                                         onmouseout="${listItemOnMouseOut}(${location.ID})" 
-                                        onclick="${listItemOnClick}(${location.ID},'${location.FullAddress}','${location.HostAccountId}')">
+                                        onclick="${listItemOnClick}(${location.ID},'${location.FullAddress}','${location.HostAccountId}','${location.LocationType}')">
                                         <strong>${location.FullAddress}</strong>
                                     </div>`);
                             }

@@ -13,7 +13,7 @@
     <div class="panel-body">
         <div>
 
-            @if (showScheduleList)
+            @if (showScheduleList && false)
             {
                 <div class="form-group">
                     <label class="col-md-3 control-label">
@@ -47,7 +47,7 @@
                 <input type="hidden" name="schedule" id="schedule" value="@Model.ID.IfEmpty(0)" />
             }
 
-            <div id="schedule-edit" class="hide">
+            <div id="schedule-edit" class="">
                 @*
                 <div class="form-group hide">
                     <label class="col-md-3 control-label">
@@ -274,22 +274,22 @@
     function checkScheduleVal() {
         if ($('#schedule').val().length > 0) {
             if ($('#schedule').val() != "0") {
-                $('#schedule-edit').addClass('hide');
-                $('#copy-edit').removeClass('hide');
-                $('#editSchedule').attr('href', '@Url.Action("edit", "schedule")/' + $('#schedule').val() + '?activity=@activityId');
-                $('#copySchedule').attr('href', '@Url.Action("copy", "schedule")/' + $('#schedule').val() + '?activity=@activityId');
+                //$('#schedule-edit').addClass('hide');
+                //$('#copy-edit').removeClass('hide');
+                //$('#editSchedule').attr('href', '@Url.Action("edit", "schedule")/' + $('#schedule').val() + '?activity=@activityId');
+                //$('#copySchedule').attr('href', '@Url.Action("copy", "schedule")/' + $('#schedule').val() + '?activity=@activityId');
             } else {
-                $('#schedule-edit').removeClass('hide');
-                $('#copy-edit').addClass('hide');
+                //$('#schedule-edit').removeClass('hide');
+                //$('#copy-edit').addClass('hide');
             }
 
         } else {
-            $('#schedule-edit').addClass('hide');
-            $('#copy-edit').addClass('hide');
+           // $('#schedule-edit').addClass('hide');
+            //$('#copy-edit').addClass('hide');
         }
 
         if ('@showScheduleList'.toLowerCase() == 'false') {
-            $('#schedule-edit').removeClass('hide');
+            //$('#schedule-edit').removeClass('hide');
         }
     }
 

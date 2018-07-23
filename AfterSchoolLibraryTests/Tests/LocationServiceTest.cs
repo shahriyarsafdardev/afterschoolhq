@@ -31,7 +31,8 @@ namespace AfterSchoolLibraryTests.Tests
                 state: "IN",
                 postalCode: "12345",
                 country: "US",
-                accountId: LocationOwnerAccount.ID.Value,
+                locationType: LocationType.School,
+                hostAccountId: LocationOwnerAccount.ID,
                 loggedInUser: LoggedInUser,
                 msgs: msgs,
                 dc: dc
@@ -58,7 +59,8 @@ namespace AfterSchoolLibraryTests.Tests
                 state: state,
                 postalCode: postalCode,
                 country: "US",
-                accountId: LocationOwnerAccount.ID.Value,
+                locationType: LocationType.NotSet,
+                hostAccountId: LocationOwnerAccount.ID.Value,
                 loggedInUser: LoggedInUser,
                 msgs: msgs,
                 dc: dc
@@ -71,6 +73,7 @@ namespace AfterSchoolLibraryTests.Tests
                 city: city,
                 state: state,
                 postalCode: postalCode,
+                country: "US",
                 msgs: msgs,
                 dc: dc
                 );
@@ -96,7 +99,8 @@ namespace AfterSchoolLibraryTests.Tests
                 state: state,
                 postalCode: postalCode,
                 country: "US",
-                accountId: LocationOwnerAccount.ID.Value,
+                locationType: LocationType.School,
+                hostAccountId: LocationOwnerAccount.ID.Value,
                 loggedInUser: LoggedInUser,
                 msgs: msgs,
                 dc: dc

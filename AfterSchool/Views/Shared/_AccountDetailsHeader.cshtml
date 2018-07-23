@@ -8,26 +8,32 @@
 {
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
-            <a href="@Url.Action("edit", "account", new { id = Model.ID })" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")"><i class="s7-graph2"></i>Details</a>
-            <a href="@Url.Action("location", "account", new { id = Model.ID })" class="btn btn-alt6@(actionName == "location" ? "-active" : "")"><i class="s7-graph2"></i>Default Location</a>
-            <a href="@Url.Action("style", "account", new { id = Model.ID })" class="btn btn-alt6@(actionName == "style" ? "-active" : "")"><i class="s7-graph2"></i>Content</a>
-            <a href="@Url.Action("integrations", "account", new { id = Model.ID })" class="btn btn-alt6@(actionName == "integrations" ? "-active" : "")"><i class="s7-graph2"></i>Integrations</a>
-            <a href="@Url.Action("entityPayments", "account", new { id = Model.ID })" class="btn btn-alt6@(actionName == "entityPayments" ? "-active" : "")"><i class="s7-graph2"></i>Accept Payments</a>
-            <a href="@Url.Action("newbilling", "account", new { id = Model.ID })" class="btn btn-alt6@(actionName == "newbilling" ? "-active" : "")"><i class="s7-graph2"></i>Packages</a>
-            <a href="@Url.Action("billing", "account", new { id = Model.ID })" class="btn btn-alt6@(actionName == "billing" ? "-active" : "")"><i class="s7-graph2"></i>Billing</a>
-            <a href="@Url.Action("features", "account", new { id = Model.ID })" class="btn btn-alt6@(actionName == "features" ? "-active" : "")"><i class="s7-graph2"></i>Features</a>
+            <a href="@Url.Action("edit", "account")" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">Details</a>
+            <a href="@Url.Action("location", "account")" class="btn btn-alt6@(actionName == "location" ? "-active" : "")">Location</a>
+            <a href="@Url.Action("style", "account")" class="btn btn-alt6@(actionName == "style" ? "-active" : "")">Content</a>
+            <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>
+            <a href="@Url.Action("entityPayments", "account")" class="btn btn-alt6@(actionName == "entityPayments" ? "-active" : "")">Accept Payments</a>
+            <a href="@Url.Action("newbilling", "account")" class="btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
+            <a href="@Url.Action("billing", "account")" class="btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
+            @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
+            {
+                <a href="@Url.Action("features", "account")" class="btn btn-alt6@(actionName == "features" ? "-active" : "")">Features</a>
+            }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="location.href=this.value;">
                 <option value="">Navigation</option>
-                <option value="@Url.Action("edit", "account", new { id = Model.ID })">Details</option>
-                <option value="@Url.Action("location", "account", new { id = Model.ID })">Default Location</option>
-                <option value="@Url.Action("style", "account", new { id = Model.ID })">Content</option>
-                <option value="@Url.Action("intgrations", "account", new { id = Model.ID })">Integrations</option>
-                <option value="@Url.Action("entityPayments", "account", new { id = Model.ID })">Accept Payments</option>
-                <option value="@Url.Action("newbilling", "account", new { id = Model.ID })">Packages</option>
-                <option value="@Url.Action("billing", "account", new { id = Model.ID })">Billing</option>
-                <option value="@Url.Action("features", "account", new { id = Model.ID })">Features</option>
+                <option value="@Url.Action("edit", "account")">Details</option>
+                <option value="@Url.Action("location", "account")">Default Location</option>
+                <option value="@Url.Action("style", "account")">Content</option>
+                <option value="@Url.Action("intgrations", "account")">Integrations</option>
+                <option value="@Url.Action("entityPayments", "account")">Accept Payments</option>
+                <option value="@Url.Action("newbilling", "account")">Packages</option>
+                <option value="@Url.Action("billing", "account")">Billing</option>
+                @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
+                {
+                    <option value="@Url.Action("features", "account")">Features</option>
+                }
             </select>
         </div>
     </div>

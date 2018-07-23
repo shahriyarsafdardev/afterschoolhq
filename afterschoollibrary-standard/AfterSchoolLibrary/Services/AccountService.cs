@@ -1395,7 +1395,7 @@ namespace AfterSchoolLibrary
 
         public static SystemMessages SetDefaultLocation(this Account account, int locationId, int loggedInUserId, DatabaseConnection dc = null)
         {
-            account.DefaultLocationId = account.ID.Value;
+            account.DefaultLocationId = locationId;
             account.LastModifiedBy = loggedInUserId;
             account.LastModifiedDate = DateTime.UtcNow;
             return account.Save(dc);
@@ -1434,7 +1434,7 @@ namespace AfterSchoolLibrary
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Registrant CreateRegistrant(this Account account, WebUser associatedUser, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian, bool allowTextMessages, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Registrant CreateRegistrant(this Account account, WebUser associatedUser, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian, bool allowTextMessages, int? schoolLocationId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1447,6 +1447,7 @@ namespace AfterSchoolLibrary
                 WebUserId = associatedUser?.ID,
                 AccountId = account.ID,
                 AllowTextMessages = allowTextMessages,
+                SchoolLocationId = schoolLocationId,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),

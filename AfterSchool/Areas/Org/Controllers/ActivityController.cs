@@ -264,7 +264,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string gradestart, string gradeend, string genderrestrictions, string cmd)
+        public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -286,8 +286,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "alloworganization", alloworganization.IfBlank("0")},
                     { "agestart", agerestrictions.IsNumber() ? agestart : "-1"},
                     { "ageend", agerestrictions.IsNumber() ? ageend : "-1"},
-                    { "gradestart", graderestrictions.IsNumber() ? gradestart : "-1"},
-                    { "gradeend", graderestrictions.IsNumber() ? gradeend : "-1"},
+                    { "gradestart", graderestrictions.IsNumber() ? mingrade : "-1"},
+                    { "gradeend", graderestrictions.IsNumber() ? maxgrade : "-1"},
                     { "genderrestrictions", genderrestrictions},
                     { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
                 };
@@ -512,15 +512,15 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var values = new Dictionary<string, object>();
 
-                if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
-                {
-                    values = new Dictionary<string, object>()
-                    {
-                        { "schedule", schedule }
-                    };
-                }
-                else
-                {
+                //if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
+                //{
+                //    values = new Dictionary<string, object>()
+                //    {
+                //        { "schedule", schedule }
+                //    };
+                //}
+                //else
+                //{
                     var filteredParams = Request.Params.Filter("schedulerepeat-");
                     var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
                     scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
@@ -538,7 +538,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         { "schedule", schedule }
                     };
                     
-                }
+                //}
 
                 activity = Activity.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,

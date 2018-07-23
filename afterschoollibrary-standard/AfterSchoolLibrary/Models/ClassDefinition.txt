@@ -560,7 +560,7 @@ property: IsContactOnly, bool, Bit
 property: FirstRegistrantId, int?, Int
 property: IsParentOrGuardian, bool, Bit
 property: AllowTextMessages, bool, Bit
-property: SchoolId, int?, Int, , The location id of the school the registrant is attending
+property: SchoolLocationId, int?, Int, , The location id of the school the registrant is attending
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId, List<>

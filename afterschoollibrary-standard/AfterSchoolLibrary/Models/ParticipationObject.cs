@@ -48,10 +48,10 @@ namespace AfterSchoolLibrary
             UniqueName = activity.UniqueName;
             RegistrationMode = activity.RegistrationModeId;
            
-            if (activity.GetGradeLevels().Any())
+            if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
-                MinGradeId = activity.GetGradeLevels(msgs, dc).First().ID;
-                MaxGradeId = activity.GetGradeLevels(msgs, dc).Last().ID;
+                MinGradeId = activity.GradeLevelStart;
+                MaxGradeId = activity.GradeLevelEnd;
             }
             else
             {

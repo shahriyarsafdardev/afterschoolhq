@@ -154,7 +154,8 @@ namespace AfterSchoolLibrary
                     state: state,
                     postalCode: postalCode,
                     country: "US",
-                    accountId: account.ID.Value,
+                    hostAccountId: account.ID.Value,
+                    locationType: LocationType.School,
                     loggedInUser: null,
                     msgs: msgs,
                     dc: dc
@@ -308,6 +309,16 @@ namespace AfterSchoolLibrary
         public static decimal GetTotalPaid(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc).Sum(payment => payment.Amount.Value);
+        }
+
+        public static GradeLevel GetStartingGradeLevel(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GradeLevel.Load(activity.GradeLevelStart.Value, msgs, dc);
+        }
+
+        public static GradeLevel GetEndingGradeLevel(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GradeLevel.Load(activity.GradeLevelEnd.Value, msgs, dc);
         }
 
     }
