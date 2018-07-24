@@ -9,10 +9,10 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
-    <h1>Select Student</h1>
+<div class="reg-header">
     <div>
-        Please select your student below
+        <h1>Complete registration</h1>
+        <p>Please select which student you&#39;d like to register below.</p>
     </div>
 </div>
 
@@ -32,7 +32,7 @@
                         <p>@registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade</p>
                         <p>
                             <a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })" 
-                               class="btn btn-primary btn-lg"
+                               class="btn btn-register btn-lg"
                                @disabledText>
                                @btnText
                             </a>
@@ -43,7 +43,7 @@
                 <div class="col-md-3">
                     <p>New Child</p>
                     <p>-</p>
-                    <p><a href="@Url.Action("addstudent", "account")" class="btn btn-primary btn-lg">Add Child</a></p>
+                    <p><a href="@Url.Action("addstudent", "account")" class="btn btn-register btn-lg">Add Child</a></p>
                 </div>
 
             </div>
