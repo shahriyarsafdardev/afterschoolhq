@@ -429,7 +429,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("PayPal information saved", MessageType.Success);
 
             ViewBag.Messages = msgs;
-            return View(SessionVariables.CurrentAccount);
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            return View(SessionVariables.CurrentAccount.GetStripeAccount(msgs));
         }
 
         [HttpGet]

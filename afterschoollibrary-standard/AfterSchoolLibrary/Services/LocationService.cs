@@ -10,6 +10,14 @@ namespace AfterSchoolLibrary.Services
 {
     public static class LocationService
     {
+        public static SystemMessages SetHostAccount(this Location location, Account hostAccount, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            location.HostAccountId = hostAccount.ID;
+            location.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            location.LastModifiedDate = DateTime.UtcNow;
+            return location.Save(dc);
+        }
+
         public static List<Account> GetVisitorAccounts(this Location location, DatabaseConnection dc = null)
         {
             return AccountRelationshipLocation.LoadByLocationId(location.ID.Value, dc: dc)
@@ -61,22 +69,21 @@ namespace AfterSchoolLibrary.Services
                 // then I should create an inactive Account for the location owner to claim at some point 
                 // and then create an account relationship between the Provider and the Host
 
-                var newHostAccount = AccountService.CreateNew(
+                var accountType = AccountType.ActivityProvider;
+
+                if (newLocation.LocationTypeId == LocationType.School)
+                    accountType = AccountType.School;
+
+                var newHostAccount = AccountService.CreateNewGhostAccount(
                     orgName: newLocation.Name,
-                    email: null,
-                    phone: null,
-                    isActive: false,
-                    accountType: AccountType.School,
-                    accountOwner: null,
-                    packageId: null,
-                    packageBillingPeriod: null,
+                    accountType: accountType,
                     loggedInUser: loggedInUser,
                     isAfterSchool: true,
                     msgs: msgs,
                     dc: dc);
 
-                newLocation.HostAccountId = newHostAccount.ID;
-                msgs.AddRange(newLocation.Save(dc));
+                // set host account
+                newLocation.SetHostAccount(newHostAccount, loggedInUser, dc);
 
                 var relationship = AccountRelationshipService.CreateNew(
                     hostAccount: newHostAccount,

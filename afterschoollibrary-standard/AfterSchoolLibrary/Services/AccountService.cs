@@ -1093,7 +1093,12 @@ namespace AfterSchoolLibrary
             return activePeriod;
         }
 
-        public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, WebUser loggedInUser, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateNewGhostAccount(string orgName, AccountType accountType, WebUser loggedInUser, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
+        {
+            return CreateNew(orgName, null, null, false, accountType, null, null, null, loggedInUser, isAfterSchool, false, msgs, dc);
+        }
+
+        public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var uniqueName = AccountService.GenerateUniqueName(orgName, null, dc: dc);
@@ -1114,7 +1119,11 @@ namespace AfterSchoolLibrary
                 AccountTypeId = accountType,
                 UniqueName = uniqueName
             };
-            msgs.AddRange(account.SaveWithStripe(dc));
+
+            if (createWithStripe)
+                msgs.AddRange(account.SaveWithStripe(dc));
+            else
+                msgs.AddRange(account.Save(dc));
 
             if (msgs.HasNoErrors())
             {
@@ -1687,6 +1696,15 @@ namespace AfterSchoolLibrary
                 dc: dc
             );
             
+        }
+
+        public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var stripeAccount = StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+
+            if(stripeAccount.IsEmpty())
+
+            return ;
         }
     }
 }
