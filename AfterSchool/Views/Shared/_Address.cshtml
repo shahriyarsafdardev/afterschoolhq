@@ -9,13 +9,25 @@
 
     var labelColWidth = 3;
     var maxCols = 12;
+    var disabled = false;
+    var disabledAttr = "";
 
     if (ViewData["labelcolwidth"].IsNumber())
     {
         labelColWidth = ViewData["labelcolwidth"].ToString().ToInteger();
     }
-
     var inputColWidth = maxCols - labelColWidth;
+
+    if (ViewData["disabled"].IsNotEmpty() && ViewData["disabled"].ToString().IsBoolean())
+    {
+        disabled = ViewData["disabled"].ToString().ToBoolean();
+    }
+
+    if (disabled)
+    {
+        disabledAttr = "disabled=\"disabled\"";
+    }
+
 }
 
 <div class="form-group">
@@ -27,7 +39,7 @@
         }
     </label>
     <div class="col-sm-@inputColWidth">
-        <input type="text" id="address1" name="address1" value="@Model.Address1" class="form-control" onfocus="this.select()" @(address1Required ? "required" : "") />
+        <input type="text" id="address1" name="address1" value="@Model.Address1" class="form-control" onfocus="this.select()" @(address1Required ? "required" : "") @disabledAttr />
     </div>
 </div>
 
@@ -40,7 +52,7 @@
         }
     </label>
     <div class="col-sm-@inputColWidth">
-        <input type="text" id="address2" name="address2" value="@Model.Address2" class="form-control" onfocus="this.select()" @(address2Required ? "required" : "") />
+        <input type="text" id="address2" name="address2" value="@Model.Address2" class="form-control" onfocus="this.select()" @(address2Required ? "required" : "") @disabledAttr />
     </div>
 </div>
 
@@ -53,7 +65,7 @@
         }
     </label>
     <div class="col-sm-@inputColWidth">
-        <input type="text" id="city" name="city" value="@Model.City" class="form-control" onfocus="this.select()" @(cityRequired ? "required" : "") />
+        <input type="text" id="city" name="city" value="@Model.City" class="form-control" onfocus="this.select()" @(cityRequired ? "required" : "") @disabledAttr />
     </div>
 </div>
 
@@ -66,7 +78,7 @@
         }
     </label>
     <div class="col-sm-@inputColWidth">
-        @{ Html.RenderPartial("~/views/shared/_statedropdown.cshtml", Model.State, new ViewDataDictionary() { { "required", stateRequired } }); }
+        @{ Html.RenderPartial("~/views/shared/_statedropdown.cshtml", Model.State, new ViewDataDictionary() { { "required", stateRequired }, { "disabled", disabled } }); }
     </div>
 </div>
 
@@ -79,6 +91,6 @@
         }
     </label>
     <div class="col-sm-@inputColWidth">
-        <input type="text" id="postalcode" name="postalcode" value="@Model.PostalCode" class="form-control" onfocus="this.select()" @(postalCodeRequired ? "required" : "") />
+        <input type="text" id="postalcode" name="postalcode" value="@Model.PostalCode" class="form-control" onfocus="this.select()" @(postalCodeRequired ? "required" : "") @disabledAttr />
     </div>
 </div>

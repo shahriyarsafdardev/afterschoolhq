@@ -348,11 +348,15 @@ property: TOSAcceptanceIP, string, NVarChar(20)
 property: TOSAcceptanceUserAgent, string, NVarChar(400)
 property: LegalEntityTypeId, LegalEntityType, Int
 property: BusinessPhone, string, NVarChar(20)
-property: SupportPhone, string, NVarChar(20)
-property: SupportEmail, string, NVarChar(30)
+property: SupportPhone, string, NVarChar(50)
+property: SupportEmail, string, NVarChar(100)
 property: BusinessUrl, string, NVarChar(100)
 property: RequiresFullSSN, bool, Bit
-property: IsVerified, bool, Bit
+property: VerificationStatusId, StripeVerificationStatus, Int
+property: ChargesEnabled, bool, Bit
+property: BankAccountId, string, NVarChar(50)
+property: BankName, string, NVarChar(50)
+property: BankLast4, string, NVarChar(4)
 loadmethod: AccountId
 [end]
 
@@ -1561,4 +1565,10 @@ values: NotSet, School, Business, NonProfit
 type: Enum
 name: LegalEntityType
 values: NotSet, Individual, Company
+[end]
+
+[begin]
+type: Enum
+name: StripeVerificationStatus
+values: NotSet, Unverified, Pending, Verified
 [end]

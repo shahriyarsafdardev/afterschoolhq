@@ -16,6 +16,9 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult New(string id, string a)
         {
+            // if logged in while signing up a new account logout to prevent confusion
+            Logout();
+
             var msgs = new SystemMessages();
             WebUser wu = null;
 

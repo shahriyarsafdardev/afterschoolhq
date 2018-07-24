@@ -234,6 +234,40 @@ namespace AfterSchoolLibrary.Services
             return Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
+        public static WebUser InviteNew(string firstName, string lastName, string email, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (firstName.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+            if (lastName.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (email.IsEmpty())
+                msgs.Add("Email is required", MessageType.UserError);
+            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Email must valid", MessageType.UserError);
+            else if (WebUser.ExistsByEmail(email))
+                msgs.Add("Email is already in use by another user", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var user = new WebUser()
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                    Username = WebUserService.GenerateUsername(firstName, lastName)
+                };                
+
+                msgs.AddRange(user.Save(dc));
+                return user;
+            }
+            return null;
+        }
+
         public static WebUser CreateNew(string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, bool allowTextMessages, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (firstName.IsEmpty())

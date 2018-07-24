@@ -1,5 +1,19 @@
 ﻿@model string
-<select id="state" name="state" class="form-control">
+@{ 
+    var disabled = false;
+    var disabledAttr = "";
+
+    if (ViewData["disabled"].IsNotEmpty() && ViewData["disabled"].ToString().IsBoolean())
+    {
+        disabled = ViewData["disabled"].ToString().ToBoolean();
+    }
+
+    if (disabled)
+    {
+        disabledAttr = "disabled=\"disabled\"";
+    }
+}
+<select id="state" name="state" class="form-control" @disabledAttr>
     <option value="">Select...</option>
     @foreach (var state in BasicLibrary.Utilities.GetStateList().Split(','))
     {

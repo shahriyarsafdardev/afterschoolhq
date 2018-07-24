@@ -1700,9 +1700,14 @@ namespace AfterSchoolLibrary
 
         public static StripeAccount GetStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             var stripeAccount = StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
 
             if (stripeAccount.IsEmpty())
+            {
+                var location = account.GetDefaultLocation(msgs, dc);
+
                 stripeAccount = new StripeAccount()
                 {
                     AccountId = account.ID,
@@ -1710,8 +1715,19 @@ namespace AfterSchoolLibrary
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    LegalEntityTypeId = LegalEntityType.Individual
+                    LegalEntityAddress1 = location?.Address1,
+                    LegalEntityAddress2 = location?.Address2,
+                    LegalEntityCity = location?.City,
+                    LegalEntityState = location?.State,
+                    LegalEntityPostalCode = location?.PostalCode,
+                    LegalEntityFirstName = loggedInUser.FirstName,
+                    LegalEntityLastName = loggedInUser.LastName,
+                    LegalEntityBusinessName = account.Name,
+                    SupportEmail = account.Email,
+                    SupportPhone = account.Phone
                 };
+                msgs.AddRange(stripeAccount.Save(dc));
+            }
 
             return stripeAccount;
         }
