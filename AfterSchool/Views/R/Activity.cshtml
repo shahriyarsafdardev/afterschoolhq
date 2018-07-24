@@ -6,28 +6,31 @@
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
-<div>
-    <h1>@Model.Name</h1>
+<div class="reg-header text-center">
+    <h1 class="activity-title">@Model.Name</h1>
     <div>
         @Html.Raw(Model.Details)
     </div>
 </div>
 
 <div>
-    <div class="col-md-12">
+    <div class="col-md-6 col-md-offset-3">
         <div class="panel">
             <div class="panel-body">
-                <p>
-                    @ParticipationObjectUI.PrintDaysOfWeek(Model)
-                </p>
-                <p>
+                <div class="panel-subhead">
+                    <span class="reg-info">
+                        @ParticipationObjectUI.PrintDaysOfWeek(Model)
+                    </span>  • 
+                    <span class="reg-info">
                     @ParticipationObjectUI.PrintGradeLevels(Model)
-                </p>
+                    </span>  • 
+                    <span class="reg-info">
+                        @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                    </span>
+                </div>
+                <br/>
                 <p>
                     @Html.Raw(ParticipationObjectUI.PrintLocation(Model).Replace("\n", "<br />"))
-                </p>
-                <p>
-                    @ParticipationObjectUI.PrintGenderRestrictions(Model)
                 </p>
                 <div>
                     <p>
@@ -46,14 +49,16 @@
                         </p>
                     }
                 </div>
-                <p>
-                    @ParticipationObjectUI.PrintRegistrationPeriod(Model)
-                </p>
                 <div>
-                    <a href="@Model.GetRegistrationPageUrl()" class="btn btn-primary btn-block">
+                    <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
                         @Model.RegistrationMode.ToString() &raquo;
                     </a>
                 </div>
+            </div>
+            <div class="panel-footer">
+                <p>
+                    @ParticipationObjectUI.PrintRegistrationPeriod(Model)
+                </p>
             </div>
         </div>
     </div>
