@@ -101,6 +101,103 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
+        public static Stripe.StripeAccount UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var legalOptions = new StripeAccountLegalEntityOptions()
+            {
+                AddressCity = city,
+                AddressState = state,
+                AddressPostalCode = postalCode,
+                AddressTwoLetterCountry = "US",
+                AddressLine1 = address1,
+                AddressLine2 = address2,
+                Type = entityType.ToString().ToLower(),
+                FirstName = firstName,
+                LastName = lastName,
+                BirthDay = dateOfBirth.Day,
+                BirthMonth = dateOfBirth.Month,
+                BirthYear = dateOfBirth.Year,
+                SSNLast4 = ssnLast4,               
+            };
+
+            var options = new StripeAccountUpdateOptions()
+            {
+                LegalEntity = legalOptions,
+                TosAcceptanceDate = tosAcceptanceDate,
+                TosAcceptanceIp = tosIPAddress,
+                SupportPhone = supportPhone,
+                SupportEmail = supportEmail
+            };
+
+            if (entityType == LegalEntityType.Company)
+            {
+                legalOptions.BusinessName = businessName;
+                legalOptions.BusinessTaxId = ein;
+                legalOptions.PhoneNumber = businessPhone;
+                options.BusinessUrl = businessUrl;
+            }
+
+            Stripe.StripeAccount account = null;
+
+            try
+            {
+                account = GetAccountService().Update(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add("Error updating stripe account", MessageType.Error);
+            }
+
+            return account;
+        }
+
+        public static void UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string businessName, string ein, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var legalOptions = new StripeAccountLegalEntityOptions()
+            {
+                AddressCity = city,
+                AddressState = state,
+                AddressPostalCode = postalCode,
+                AddressTwoLetterCountry = "US",
+                AddressLine1 = address1,
+                AddressLine2 = address2,
+                Type = entityType.ToString(),
+                FirstName = firstName,
+                LastName = lastName,
+                BirthDay = dateOfBirth.Day,
+                BirthMonth = dateOfBirth.Month,
+                BirthYear = dateOfBirth.Year
+            };
+
+            if (entityType == LegalEntityType.Company)
+            {
+                legalOptions.BusinessName = businessName;
+                legalOptions.BusinessTaxId = ein;
+            }
+
+            var options = new StripeAccountUpdateOptions()
+            {
+                LegalEntity = legalOptions
+            };
+
+            Stripe.StripeAccount account = null;
+
+            try
+            {
+                account = GetAccountService().Update(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add("Error updating stripe account", MessageType.Error);
+            }
+        }
+
         //BusinessName = "",
         //        BusinessUrl = "",
         //        Country = "US",

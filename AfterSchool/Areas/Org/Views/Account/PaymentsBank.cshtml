@@ -1,0 +1,71 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var clientId = AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model);}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Accept Payments
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-8 col-lg-9">                
+
+                <form method="post" action="@Url.Action("edit", "account")" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <p class="text-center">Please enter your bank account so we can pay you ;)</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Routing # <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="routingnumber1" name="routingnumber1" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Routing # Confirm <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="routingnumber2" name="routingnumber2" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Account # <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="accountnumber1" name="accountnumber1" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Account # Confirm<span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="accountnumber2" name="accountnumber2" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary btn-xl">Save Bank Information</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                @{Html.RenderPartial("~/Views/Shared/_AccountPaymentEditNav.cshtml", Model); }
+            </div>
+        </div>
+
+    </div>
+</div>

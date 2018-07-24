@@ -345,7 +345,14 @@ property: LegalEntityState, string, NVarChar(50)
 property: LegalEntityPostalCode, string, NVarChar(20)
 property: TOSAcceptanceDate, DateTime?, DateTime
 property: TOSAcceptanceIP, string, NVarChar(20)
+property: TOSAcceptanceUserAgent, string, NVarChar(400)
 property: LegalEntityTypeId, LegalEntityType, Int
+property: BusinessPhone, string, NVarChar(20)
+property: SupportPhone, string, NVarChar(20)
+property: SupportEmail, string, NVarChar(30)
+property: BusinessUrl, string, NVarChar(100)
+property: RequiresFullSSN, bool, Bit
+property: IsVerified, bool, Bit
 loadmethod: AccountId
 [end]
 
