@@ -8,11 +8,15 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
-    <h1>Get Started</h1>
+<div class="reg-header">
     <div>
-        Please enter your home address
-    </div>
+        @foreach (var item in cart.GetCartItems())
+        {
+            <div>
+                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
+            </div>
+        }
+    </div> 
 </div>
 
 <div>
@@ -21,15 +25,7 @@
             <div class="panel-body">
 
                 <div>
-                    <h3>Add home address</h3>
-                    <div>
-                        @foreach (var item in cart.GetCartItems())
-                        {
-                            <div>
-                                You are registering for: @item.GetParticipationObject().Name
-                            </div>
-                        }
-                    </div>
+                    <h3 class="text-center reg-instructions">Add your home address</h3>
                     <form class="form-horizontal" method="post" action="@Url.Action("addhomeaddress", "account")">
                         @foreach (var qvm in Model)
                         {
@@ -37,7 +33,7 @@
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                            <button type="submit" class="btn btn-xl center-block btn-register">Continue &raquo;</button>
                         </div>
 
                     </form>
