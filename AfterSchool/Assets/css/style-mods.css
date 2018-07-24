@@ -981,8 +981,14 @@ th.header {
 
 .reg-header {
     color: #fff;
-    background-color: #00ae85;
+    /*background-color: #00ae85;*/
     padding: 90px 60px;
+    background: #00d7bb; /* Old browsers */
+    background: -moz-linear-gradient(top, #00d7bb 0%, #00ae85 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #00d7bb 0%,#00ae85 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #00d7bb 0%,#00ae85 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00d7bb', endColorstr='#00ae85',GradientType=0 ); /* IE6-9 */
+
 }
 
 .activity-title {
@@ -1056,6 +1062,10 @@ th.header {
     background: #139476;
     color: #fff ;
     transition: all 0.3s;
+}
+
+.reg-instructions {
+    font-size: 20px;
 }
 
 /* montserrat-regular - latin */
