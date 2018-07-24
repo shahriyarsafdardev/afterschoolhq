@@ -1058,6 +1058,10 @@ th.header {
      transition: all 0.3s;
 }
 
+.btn-register-xl {
+    font-size: 11px;
+}
+
 .btn-register:hover {
     background: #139476;
     color: #fff ;
