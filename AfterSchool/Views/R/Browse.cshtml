@@ -9,19 +9,19 @@
     var locations = (List<Location>)ViewBag.Locations;
 }
 
-<div>
+<div class="reg-header">
     <h1>@Model.Name</h1>
     <p>@Model.LandingPageText</p>
 </div>
 
 <div>
-    <div class="padding-20 border-light-gray">
+    <div class="reg-container">
         <div class="col-md-@filterCols">
-            <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.Activity) Name" id="search-name" class="form-control" />
+            <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.Activity) Name" id="search-name" class="form-control search-field" />
         </div>    
                
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-location" name="search-location">
+            <select class="form-control reg-form-control" id="search-location" name="search-location">
                 <option value="">Any Location</option>
                 @foreach (var location in locations)
                 {
@@ -31,7 +31,7 @@
         </div>     
 
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-grade" name="search-grade">
+            <select class="form-control reg-form-control" id="search-grade" name="search-grade">
                 <option value="">Any Grade</option>
                 @foreach (var grade in grades)
                 {
@@ -41,7 +41,7 @@
         </div>
 
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-seatsfilled" name="search-seatsfilled">
+            <select class="form-control reg-form-control" id="search-seatsfilled" name="search-seatsfilled">
                 <option value="">All Activities</option>
                 <option value="1">Has Seats Available</option>
                 <option value="2">Has Waiting List Available</option>
@@ -49,7 +49,7 @@
         </div>    
 
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-dayofweek" name="search-dayofweek">
+            <select class="form-control reg-form-control" id="search-dayofweek" name="search-dayofweek">
                 <option value="">Any Day</option>
                 @foreach (var item in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
                 {
@@ -59,7 +59,7 @@
         </div>      
        
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-gender" name="search-gender">
+            <select class="form-control reg-form-control" id="search-gender" name="search-gender">
                 <option value="">Any Gender</option>
                 @foreach (var item in Enum.GetValues(typeof(GenderType)).Cast<GenderType>().Where(x => x != GenderType.NotSet))
                 {
@@ -86,22 +86,24 @@
              name="@item.Name">
 
             <div class="panel">
-                <div class="panel-heading">
-                    <h3>@item.Name</h3>
+                <div class="heading panel-h3">
+                    <h3><strong>@item.Name</strong></h3>
                 </div>
                 <div class="panel-body">
+                    <div class="panel-subhead">
+                        <span class="reg-info">
+                            @ParticipationObjectUI.PrintDaysOfWeek(item)
+                        </span>  • 
+                        <span class="reg-info">
+                            @ParticipationObjectUI.PrintGradeLevels(item)
+                        </span>  • 
+                        <span class="reg-info">
+                            @ParticipationObjectUI.PrintGenderRestrictions(item)
+                        </span>
+                    </div>
                     <p>@Html.Raw(item.Details)</p>
                     <p>
-                        @ParticipationObjectUI.PrintDaysOfWeek(item)
-                    </p>
-                    <p>
-                        @ParticipationObjectUI.PrintGradeLevels(item)
-                    </p>
-                    <p>
                         @Html.Raw(ParticipationObjectUI.PrintLocation(item).Replace("\n", "<br />"))
-                    </p>
-                    <p>
-                        @ParticipationObjectUI.PrintGenderRestrictions(item)
                     </p>
                     <div>
                         <p>
@@ -120,14 +122,16 @@
                             </p>
                         }
                     </div>
-                    <p>
-                        @ParticipationObjectUI.PrintRegistrationPeriod(item)
-                    </p>
                     <div>
-                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool)" class="btn btn-primary btn-block">
+                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool)" class="btn btn-register btn-block">
                             @item.RegistrationMode.ToString() &raquo;
                         </a>
                     </div>
+                </div>
+                <div class="panel-footer">
+                    <p>
+                        @ParticipationObjectUI.PrintRegistrationPeriod(item)
+                    </p>
                 </div>
             </div>
         </div>
