@@ -725,7 +725,7 @@ div.filter-full-width > span {
 }
 
 .panel {
-    margin-bottom: -20px;
+    margin: 20px;
     border: 1px solid #e7e4e4;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12);
     padding: 15px;
@@ -983,6 +983,16 @@ th.header {
     color: #fff;
     background-color: #00ae85;
     padding: 90px 60px;
+}
+
+.activity-title {
+    font-size: 50px;
+}
+
+.filter-bar {
+    background: #fff;
+    border: 1px solid #979797;
+    padding-top: 45px;
 }
 
 .reg-container {
