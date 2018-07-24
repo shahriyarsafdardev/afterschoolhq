@@ -2,8 +2,17 @@
 
 @{ 
     var location = Model.GetLocation() ?? new Location();
-    var isOwnedLocation = Model.AccountId == location?.HostAccountId;
-    var addressViewModel = isOwnedLocation ? location.ToAddressViewModel() : new AddressViewModel();
+    var isMyLocation = Model.AccountId == location?.HostAccountId;
+    var addressViewModel = isMyLocation ? location.ToAddressViewModel() : new AddressViewModel();
+
+    var hideRelationship = "";
+    var hideType = "";
+
+    if (!isMyLocation && location.ID.HasValue)
+    {
+        hideRelationship = "hide";
+        hideType = "hide";
+    }
 
 }
 
@@ -61,25 +70,37 @@
             </div>
         </div>
 
-        <div class="form-group" id="hostaccount-div">
-            <div class="col-sm-offset-3 col-sm-9">
-                <div class="am-checkbox">
-                    <input type="checkbox" class="checkbox" id="mylocation" name="mylocation" value="1" @(isOwnedLocation ? " checked=\"checked\" " : "") />
-                    <label for="mylocation">
-                        This is my location
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Do you own or have rights to this location? If so you can claim it" data-placement="top"></i>
-                    </label>
+        <div class="form-group @hideRelationship" id="hostaccount-div">
+            <label class="control-label col-sm-3">What is your relationship with this location?</label>
+            <div class="col-sm-9">
+                <div class="am-radio inline">
+                    <input type="radio" id="mylocation-no" name="mylocation" class="form-control" required="required" value="" @(isMyLocation ? "" : "checked=\"checked\"") />
+                    <label for="mylocation-no">I provide an activity at this location</label>
+                </div>
+                <div class="am-radio inline">
+                    <input type="radio" id="mylocation-yes" name="mylocation" class="form-control" required="required" value="1" @(isMyLocation ? "checked=\"checked\"" : "") />
+                    <label for="mylocation-yes">I am an employee/associated with this location</label>
                 </div>
             </div>
         </div>
 
-        <div class="form-group" id="isschool-div">
-            <div class="col-sm-offset-3 col-sm-9">
+        <div class="form-group @hideType" id="isschool-div">
+            <label class="control-label col-sm-3">What type of location is this?</label>
+            <div class="col-sm-9">
                 <div class="am-checkbox">
-                    <input type="checkbox" class="checkbox" id="isschool" name="isschool" value="1" @(location.LocationTypeId == LocationType.School ? " checked=\"checked\" " : "") />
-                    <label for="isschool">
-                        This is a School
-                    </label>
+                    @foreach (var item in Enum.GetValues(typeof(LocationType)).Cast<LocationType>().Where(x => x != LocationType.NotSet))
+                    {
+                        <div class="am-radio inline">
+                            <input type="radio" 
+                                   id="locationtype-@((int)item)" 
+                                   name="locationtype" 
+                                   class="form-control" 
+                                   required="required" 
+                                   value="@((int)item)" 
+                                   @(item == location.LocationTypeId ? "checked=\"checked\"" : "") />
+                            <label for="locationtype-@((int)item)">@item.ToString().SplitByUpperCase()</label>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

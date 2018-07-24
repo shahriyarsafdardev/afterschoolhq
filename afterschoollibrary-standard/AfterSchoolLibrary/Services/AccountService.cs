@@ -35,7 +35,19 @@ namespace AfterSchoolLibrary
 
             periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
 
-            return activities.Where(activity => activity.GetActiveActivityForm(msgs, dc).IsNotEmpty()).ToList();
+            return activities;
+        }
+
+        public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var periods = account.GetOpenAndUpcomingRegistrationPeriods(msgs, dc);
+            var activities = new List<Activity>();
+
+            periods.ForEach(period => 
+                activities.AddRange(period.GetActivitiesInLocations(locationIds, msgs, dc).Where(x => x.IsPubliclyViewable))
+            );
+
+            return activities;
         }
 
         public static List<ActivityForm> GetActivityForms(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -180,22 +192,22 @@ namespace AfterSchoolLibrary
                 dc);
         }
         
-        public static List<ActivityGroup> GetSessions(this Account account, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.Session, dc: dc);
+            return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.Session, msgs, dc);
         }
 
-        public static List<ActivityGroup> GetPublishedSessions(this Account account, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, dc: dc);
+            return ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
         }
 
-        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, dc: dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.Session, IsArchived, start, length, msgs, dc);
         }
 
-        public static int GetSessionCount(this Account account, bool IsArchived = false, DatabaseConnection dc = null)
+        public static int GetSessionCount(this Account account, bool IsArchived = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityGroup.GetCount(
                 new Hashtable() {
@@ -203,6 +215,7 @@ namespace AfterSchoolLibrary
                     { "ActivityGroupTypeId", (int)ActivityGroupType.Session },
                     { "IsArchived", IsArchived }
                 }, 
+                msgs: msgs,
                 dc: dc);
         }
 
@@ -1092,7 +1105,7 @@ namespace AfterSchoolLibrary
                 IsActive = isActive,
                 Email = email,
                 Phone = phone,
-                OwnerId = accountOwner.ID,
+                OwnerId = accountOwner?.ID,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser.ID,
@@ -1161,6 +1174,21 @@ namespace AfterSchoolLibrary
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
+
+        public static List<Account> GetApprovedVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByApproved(hostAccount.ID.Value, accountTypes, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
+                .ToList();
+        }
+
+        public static List<Account> GetApprovedVisitorAccounts(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByApproved(hostAccount.ID.Value, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
+                .ToList();
+        }
+
         //Gets the accounts that the host has Denied
         public static List<Account> GetDeniedVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1185,16 +1213,23 @@ namespace AfterSchoolLibrary
         //}
         
 
-        public static List<Location> GetVisitorLocations(this Account visitorAccount, DatabaseConnection dc = null)
+        public static List<Location> GetVisitorLocations(this Account visitorAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationshipLocation.LoadByVisitorAccountId(visitorAccount.ID.Value, dc: dc)
-                .Select(x => x.GetLocation(dc: dc))
+            return AccountRelationshipLocation.LoadByVisitorAccountId(visitorAccount.ID.Value, msgs, dc)
+                .Select(x => x.GetLocation(msgs, dc))
                 .ToList();
         }
 
-        public static List<Location> GetHostedLocations(this Account hostAccount, DatabaseConnection dc = null)
+        public static List<Location> GetHostedLocations(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Location.LoadByHostAccountId(hostAccount.ID.Value, dc: dc);
+            return Location.LoadByHostAccountId(hostAccount.ID.Value, msgs, dc);
+        }
+
+        public static List<Location> GetAllAvailableLocations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var locations = account.GetHostedLocations(msgs, dc);
+            locations.AddRange(account.GetVisitorLocations(msgs, dc));
+            return locations;
         }
 
         /// <summary>
@@ -1401,6 +1436,7 @@ namespace AfterSchoolLibrary
                 country: "US",
                 locationType: LocationType.School,
                 hostAccountId: account.ID,
+                loggedInAccount: account,
                 loggedInUser: null,
                 msgs: msgs,
                 dc: dc);

@@ -78,7 +78,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Location(string id, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string country, string mylocation, string isschool)
+        public ActionResult Location(string id, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string country, string mylocation, string locationtype)
         {
             var msgs = new SystemMessages();
             var a = SessionVariables.CurrentAccount;
@@ -86,8 +86,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var locationType = LocationType.NotSet;
             var hostAccountId = new int?();
 
-            if (isschool.IsBoolean() && isschool.ToBoolean())
-                locationType = LocationType.School;
+            if (locationtype.IsNumber())
+                locationType = (LocationType)locationtype.ToInteger();
 
             if (mylocation.IsBoolean() && mylocation.ToBoolean())
                 hostAccountId = SessionVariables.CurrentAccount.ID;
@@ -110,17 +110,18 @@ namespace AfterSchool.Areas.Org.Controllers
             else
             {
                 var newLocation = LocationService.CreateNewWithValidation(
-                    locationname,
-                    address1,
-                    address2,
-                    city,
-                    state,
-                    postalcode,
-                    "US",
-                    locationType,
-                    hostAccountId,
-                    SessionVariables.LoggedInUser,
-                    msgs
+                    locationName: locationname,
+                    address1: address1,
+                    address2: address2,
+                    city: city,
+                    state: state,
+                    postalCode: postalcode,
+                    country: "US",
+                    locationType: locationType,
+                    hostAccountId: hostAccountId,
+                    loggedInAccount: SessionVariables.CurrentAccount,
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs
                     );
 
                 if (msgs.HasNoErrors())

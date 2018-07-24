@@ -8,21 +8,41 @@ namespace AfterSchoolLibrary.Services
 {
     public static class AccountRelationshipLocationService
     {
-        public static Location GetLocation(this AccountRelationshipLocation alr, DatabaseConnection dc = null)
+        public static AccountRelationshipLocation CreateNew(AccountRelationship accountRelationship, Account hostAccount, Account visitorAccount, Location location, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Location.Load(alr.LocationId.Value, dc: dc);
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var arl = new AccountRelationshipLocation()
+            {
+                AccountRelationshipId = accountRelationship.ID,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                HostAccountId = hostAccount.ID,
+                VisitorAccountId = visitorAccount.ID,
+                LocationId = location.ID
+            };
+            msgs.AddRange(arl.Save(dc));
+
+            return arl;
         }
-        public static AccountRelationship GetAccountRelationship(this AccountRelationshipLocation alr, DatabaseConnection dc = null)
+
+        public static Location GetLocation(this AccountRelationshipLocation alr, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.Load(alr.AccountRelationshipId.Value, dc: dc);
+            return Location.Load(alr.LocationId.Value, msgs, dc);
         }
-        public static Account GetHostAccount(this AccountRelationshipLocation alr, DatabaseConnection dc = null)
+        public static AccountRelationship GetAccountRelationship(this AccountRelationshipLocation alr, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(alr.HostAccountId.Value, dc: dc);
+            return AccountRelationship.Load(alr.AccountRelationshipId.Value, msgs, dc);
         }
-        public static Account GetVisitorAccount(this AccountRelationshipLocation alr, DatabaseConnection dc = null)
+        public static Account GetHostAccount(this AccountRelationshipLocation alr, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(alr.VisitorAccountId.Value, dc: dc);
+            return Account.Load(alr.HostAccountId.Value, msgs, dc);
+        }
+        public static Account GetVisitorAccount(this AccountRelationshipLocation alr, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(alr.VisitorAccountId.Value, msgs, dc);
         }
     }
 }

@@ -27,6 +27,7 @@
                         <th></th>
                         <th>Account Name</th>
                         <th>Account #</th>
+                        <th>Account Type</th>
                         <th>Is Active</th>
                         <th>Member Since</th>
                     </tr>
@@ -40,6 +41,7 @@
                                 </td>
                                 <td>@a.Name</td>
                                 <td>@a.AccountNumber</td>
+                                <td>@a.AccountTypeId.ToString()</td>
                                 <td>@a.IsActive.ToYesNo()</td>
                                 <td>@a.CreateDate.Value.ToLongDateString()</td>
                             </tr>

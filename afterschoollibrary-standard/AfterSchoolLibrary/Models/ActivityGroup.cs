@@ -378,7 +378,7 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -386,10 +386,10 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["ActivityGroupTypeId"], (int)activityGroupTypeId);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, bool isArchived, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ActivityGroup> LoadByAccountId(int AccountId, ActivityGroupType activityGroupTypeId, bool isArchived, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -398,26 +398,26 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["ActivityGroupTypeId"], (int)activityGroupTypeId);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static ActivityGroup LoadByAccountIdByName(int AccountId, string Name, DatabaseConnection dc = null)
+        public static ActivityGroup LoadByAccountIdByName(int AccountId, string Name, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["Name"], Name);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static bool ExistsByAccountIdByName(int AccountId, string Name, Guid existingUid, DatabaseConnection dc = null)
+        public static bool ExistsByAccountIdByName(int AccountId, string Name, Guid existingUid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["Name"], Name);
             dq.Criterias.Add(ObjectMap["Uid"], existingUid, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.NotEqualTo);
-            return dq.GetCount() > 0;
+            return dq.GetCount(msgs) > 0;
         }
 
         public static string GenerateUniqueName(int accountId, string name, SystemMessages msgs, DatabaseConnection dc = null)

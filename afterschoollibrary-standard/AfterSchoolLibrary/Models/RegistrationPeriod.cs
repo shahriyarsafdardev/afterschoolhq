@@ -319,15 +319,32 @@ namespace AfterSchoolLibrary
             return ActivityRegistrationPeriod.LoadByRegistrationPeriodId(this.ID.Value, msgs, dc);
         }
 
+        public List<Activity> GetActivitiesInLocations(List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var activityIds = GetActivityRegistrationPeriods(msgs, dc)
+                    .Select(x => x.ActivityId.Value)
+                    .ToList();
+
+            return Activity.LoadListWithLocations(
+                    activityIds,
+                    locationIds,
+                    msgs,
+                    dc)
+                .Where(x => !x.IsDeleted)
+                .ToList();
+        }
+
         public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.LoadList(
-                GetActivityRegistrationPeriods(msgs, dc)
+            var activityIds = GetActivityRegistrationPeriods(msgs, dc)
                     .Select(x => x.ActivityId.Value)
-                    .ToList(), 
-                msgs, 
-                dc)
-                .Where(x => x.IsDeleted == false)
+                    .ToList();
+
+            return Activity.LoadList(
+                    activityIds, 
+                    msgs, 
+                    dc)
+                .Where(x => !x.IsDeleted)
                 .ToList();
         }
 
