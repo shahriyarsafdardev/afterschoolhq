@@ -43,15 +43,15 @@
                 <label class="col-sm-3 control-label">Subscription Plan</label>
                 <div class="col-sm-1">
                     @{Html.RenderPartial
-                                          (
-                                              "~/Views/Shared/_SwitchButton.cshtml",
-                                              Model.HasSubscriptionPlan(),
-                                              new ViewDataDictionary()
-                                              {
-                                                             { "checkboxname", "hassubscriptionplan" },
-                                                             { "checkboxid", "hassubscriptionplan" }
-                                              }
-                                          );
+                        (
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.HasSubscriptionPlan(),
+                            new ViewDataDictionary()
+                            {
+                                            { "checkboxname", "hassubscriptionplan" },
+                                            { "checkboxid", "hassubscriptionplan" }
+                            }
+                        );
                     }
                 </div>
                 <div id="subscriptionplansection">
@@ -80,19 +80,19 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group hide">
                 <label class="col-sm-3 control-label">Payment Plan</label>
                 <div class="col-sm-1">
                     @{Html.RenderPartial
-                                          (
-                                              "~/Views/Shared/_SwitchButton.cshtml",
-                                              Model.HasPaymentPlan(),
-                                              new ViewDataDictionary()
-                                              {
-                                                             { "checkboxname", "haspaymentplan" },
-                                                             { "checkboxid", "haspaymentplan" }
-                                              }
-                                          );
+                    (
+                        "~/Views/Shared/_SwitchButton.cshtml",
+                        Model.HasPaymentPlan(),
+                        new ViewDataDictionary()
+                        {
+                                        { "checkboxname", "haspaymentplan" },
+                                        { "checkboxid", "haspaymentplan" }
+                        }
+                    );
                     }
                 </div>
                 <div id="paymentplansection">

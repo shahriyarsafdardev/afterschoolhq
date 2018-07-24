@@ -39,7 +39,11 @@ namespace AfterSchoolLibrary
 		public string SupportEmail { get { return (string)MDV["SupportEmail"].Value; } set { MDV["SupportEmail"].Value = value; } }
 		public string BusinessUrl { get { return (string)MDV["BusinessUrl"].Value; } set { MDV["BusinessUrl"].Value = value; } }
 		public bool RequiresFullSSN { get { return (bool)MDV["RequiresFullSSN"].Value; } set { MDV["RequiresFullSSN"].Value = value; } }
-		public bool IsVerified { get { return (bool)MDV["IsVerified"].Value; } set { MDV["IsVerified"].Value = value; } }
+		public StripeVerificationStatus VerificationStatusId { get { return (StripeVerificationStatus)MDV["VerificationStatusId"].Value; } set { MDV["VerificationStatusId"].Value = value; } }
+		public bool ChargesEnabled { get { return (bool)MDV["ChargesEnabled"].Value; } set { MDV["ChargesEnabled"].Value = value; } }
+		public string BankAccountId { get { return (string)MDV["BankAccountId"].Value; } set { MDV["BankAccountId"].Value = value; } }
+		public string BankName { get { return (string)MDV["BankName"].Value; } set { MDV["BankName"].Value = value; } }
+		public string BankLast4 { get { return (string)MDV["BankLast4"].Value; } set { MDV["BankLast4"].Value = value; } }
 		
 
         public StripeAccount()
@@ -48,7 +52,8 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.LegalEntityTypeId = LegalEntityType.NotSet;
 			this.RequiresFullSSN = false;
-			this.IsVerified = false;
+			this.VerificationStatusId = StripeVerificationStatus.NotSet;
+			this.ChargesEnabled = false;
 			
         }
 
@@ -76,11 +81,15 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "TOSAcceptanceUserAgent", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "LegalEntityTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "BusinessPhone", System.Data.SqlDbType.NVarChar, 20);
-				_dp.Add(className, "SupportPhone", System.Data.SqlDbType.NVarChar, 20);
-				_dp.Add(className, "SupportEmail", System.Data.SqlDbType.NVarChar, 30);
+				_dp.Add(className, "SupportPhone", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "SupportEmail", System.Data.SqlDbType.NVarChar, 100);
 				_dp.Add(className, "BusinessUrl", System.Data.SqlDbType.NVarChar, 100);
 				_dp.Add(className, "RequiresFullSSN", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "IsVerified", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "VerificationStatusId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ChargesEnabled", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "BankAccountId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "BankName", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "BankLast4", System.Data.SqlDbType.NVarChar, 4);
 				
                 return _dp;
             }
@@ -239,7 +248,23 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsVerified"]);
+			dps.Add(ObjectMap["VerificationStatusId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ChargesEnabled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["BankAccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["BankName"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["BankLast4"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -265,6 +290,14 @@ namespace AfterSchoolLibrary
         #endregion
 
 		#region "UserDefined"
+
+        public bool IsVerified
+        {
+            get
+            {
+                return VerificationStatusId == StripeVerificationStatus.Verified;
+            }
+        }
 
         #endregion
     }

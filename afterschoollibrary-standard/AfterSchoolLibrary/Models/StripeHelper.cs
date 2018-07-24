@@ -101,6 +101,36 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
+        public static Stripe.StripeAccount UpdateCustomAccountBankInfo(string stripeAccountId, string routingNumber, string accountNumber, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new StripeAccountUpdateOptions()
+            {
+                ExternalBankAccount = new StripeAccountBankAccountOptions()
+                {
+                     RoutingNumber = routingNumber,
+                     AccountNumber = accountNumber,
+                     Country = "US",
+                     Currency = "usd",
+                } 
+            };
+
+            Stripe.StripeAccount account = null;
+
+            try
+            {
+                account = GetAccountService().Update(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add("Error updating stripe account", MessageType.Error);
+            }
+
+            return account;
+        }
+
         public static Stripe.StripeAccount UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -119,7 +149,7 @@ namespace AfterSchoolLibrary.Billing
                 BirthDay = dateOfBirth.Day,
                 BirthMonth = dateOfBirth.Month,
                 BirthYear = dateOfBirth.Year,
-                SSNLast4 = ssnLast4,               
+                SSNLast4 = ssnLast4               
             };
 
             var options = new StripeAccountUpdateOptions()

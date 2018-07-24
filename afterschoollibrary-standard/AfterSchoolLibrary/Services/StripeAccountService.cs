@@ -9,6 +9,34 @@ namespace AfterSchoolLibrary.Services
 {
     public static class StripeAccountService
     {
+        public static void SaveAndSendBankInfoToStripe(this StripeAccount stripeAccount, string routingNumber, string accountNumber, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var account = stripeAccount.GetAccount(msgs, dc);
+
+            var stripeStripeAccount = StripeHelper.UpdateCustomAccountBankInfo(
+                stripeAccountId: account.StripeUserId,
+                routingNumber: routingNumber,
+                accountNumber: accountNumber,
+                msgs: msgs
+                );
+
+
+            if (msgs.HasNoErrors())
+            {
+                var bankAccount = stripeStripeAccount.ExternalAccounts.Data[0].BankAccount;
+                stripeAccount.BankAccountId = bankAccount.Id;
+                stripeAccount.BankLast4 = bankAccount.Last4;
+                stripeAccount.BankName = bankAccount.BankName;
+                msgs.AddRange(stripeAccount.Save(dc));
+            }
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Your bank account info has been saved", MessageType.Success);
+
+        }
+
         public static void SaveAndSendLegalEntityToStripe(this StripeAccount stripeAccount, string fullSSN, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
@@ -46,26 +74,34 @@ namespace AfterSchoolLibrary.Services
                 var results = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(stripeStripeAccount.StripeResponse.ObjectJson);
                 var fieldsRequired = results.verification.fields_needed;
                 var chargesEnabled = results.charges_enabled;
+                var verificationStatus = results.legal_entity.verification.status;
 
                 stripeAccount.RequiresFullSSN = false;
 
                 foreach (var field in fieldsRequired)
                 {
-                    if (field.ToString() == "legal_entity.personal_id_number")
+                    if ((string)field == "legal_entity.personal_id_number")
                     {
                         stripeAccount.RequiresFullSSN = true;
                         msgs.Add("It has been determined your Full SSN required in order to process payments. Please update your information.", MessageType.Warning);
                     }
                 }
+                
+                stripeAccount.ChargesEnabled = ((string)chargesEnabled).ToBoolean();
 
-                if (chargesEnabled.ToString().ToBoolean())
-                {
-                    stripeAccount.IsVerified = true;
-                    msgs.Add("Your account has now been verified", MessageType.Success);
-                }
+                if ((string)verificationStatus == StripeVerificationStatus.Pending.ToString().ToLower())
+                    stripeAccount.VerificationStatusId = StripeVerificationStatus.Pending;
 
-                msgs.AddRange(stripeAccount.Save(dc));
-                    
+                else if ((string)verificationStatus == StripeVerificationStatus.Unverified.ToString().ToLower())
+                    stripeAccount.VerificationStatusId = StripeVerificationStatus.Unverified;
+
+                else if ((string)verificationStatus == StripeVerificationStatus.Verified.ToString().ToLower())
+                    stripeAccount.VerificationStatusId = StripeVerificationStatus.Verified;
+                
+                if (stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+                    msgs.Add("Your account is now verified", MessageType.Notice);
+
+                msgs.AddRange(stripeAccount.Save(dc));                    
             }
         }
 

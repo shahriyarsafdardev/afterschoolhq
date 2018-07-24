@@ -27,28 +27,7 @@ namespace AfterSchool.Controllers
             }
             else
             {
-                Session.Clear();
-
-                // Clear login cookies
-                if (!Request.Cookies["sessionuser"].IsEmpty())
-                {
-                    HttpCookie cookieUser = Request.Cookies["sessionuser"];
-                    Response.Cookies.Remove("sessionuser");
-                    cookieUser.Expires = DateTime.Now.AddDays(-1);
-                    cookieUser.Value = null;
-                    Response.SetCookie(cookieUser);
-                }
-                if (!Request.Cookies["sessionAccount"].IsEmpty())
-                {
-                    HttpCookie cookieUser = Request.Cookies["sessionAccount"];
-                    Response.Cookies.Remove("sessionAccount");
-                    cookieUser.Expires = DateTime.Now.AddDays(-1);
-                    cookieUser.Value = null;
-                    Response.SetCookie(cookieUser);
-                }
-
-                //Response.Redirect("/login");   
-                return RedirectToAction("index", "Login");
+                return Logout();
             }
         }
 

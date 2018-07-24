@@ -422,7 +422,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsEntity(string entityType, string firstName, string lastName, string address1, string address2, string city, string state, string postalCode, string dateOfBirth, string ssn, string ssnLast4, string legalbusinessname, string businessUrl, string supportphone, string supportemail, string businessPhone, string ein, string tosagree)
         {
             var msgs = new SystemMessages();
-
+            var stripeAccount = SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs);
             var entityTypeId = (LegalEntityType)entityType.ToInteger();
             var fullSSNRequired = false;
 
@@ -463,8 +463,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-            {
-                var stripeAccount = SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs);
+            {                
                 stripeAccount.LastModifiedBy = SessionVariables.LoggedInUser.ID;
                 stripeAccount.LastModifiedDate = DateTime.UtcNow;
                 stripeAccount.LegalEntityAddress1 = address1;
@@ -503,25 +502,46 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
-            return View(SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs));
+            return View(stripeAccount);
         }
 
         [HttpGet]
         public ActionResult PaymentsBank()
         {
-            Account a = SessionVariables.CurrentAccount;
-            ViewBag.Messages = new SystemMessages();
-            return View(a);
+            var msgs = new SystemMessages();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Messages = msgs;
+            return View(SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs));
         }
 
         [HttpPost]
-        public ActionResult PaymentsBank(string paypalemail)
+        public ActionResult PaymentsBank(string routingnumber1, string routingnumber2, string accountnumber1, string accountnumber2)
         {
             var msgs = new SystemMessages();
-            
+            var stripeAccount = SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs);
 
+            if (routingnumber1.IsEmpty())
+                msgs.Add("Routing Number is required", MessageType.UserError);
+            if (routingnumber2.IsEmpty())
+                msgs.Add("Confirm Routing Number is required", MessageType.UserError);
+            if (routingnumber1 != routingnumber2)
+                msgs.Add("Routing Numbers must match", MessageType.UserError);
+
+            if (accountnumber1.IsEmpty())
+                msgs.Add("Account Number is required", MessageType.UserError);
+            if (accountnumber2.IsEmpty())
+                msgs.Add("Confirm Account Number is required", MessageType.UserError);
+            if (accountnumber1 != accountnumber2)
+                msgs.Add("Account Numbers must match", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                stripeAccount.SaveAndSendBankInfoToStripe(routingnumber1, accountnumber1, msgs);
+            }
+
+            ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
-            return View(SessionVariables.CurrentAccount);
+            return View(stripeAccount);
         }
 
         [HttpGet]

@@ -1122,6 +1122,7 @@
     <Content Include="Views\Shared\_GoogleTagManagerNoScript.cshtml" />
     <Content Include="Views\Shared\_ZendeskWidget.cshtml" />
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
+    <Content Include="Views\Account\AddParent.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
