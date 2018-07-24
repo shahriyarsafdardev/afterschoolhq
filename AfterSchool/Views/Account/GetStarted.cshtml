@@ -9,32 +9,35 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
-    <h1>Get Started</h1>
+<div class="reg-header">
+   @* <h1 class="activity-title">Get Started</h1> *@
     <div>
-        Please enter you information below
+        @foreach (var item in cart.GetCartItems())
+        {
+            <div>
+                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
+            </div>
+        }
     </div>
+    <div>
+        Enter your information below to begin your most simple registration yet.
+    </div>
+   
 </div>
 
 <div>
     <div class="col-md-12">
         <div class="panel">
             <div class="panel-body">
-
-                <div>
+                <div class="text-center">
                     <p>Already have an account? <a href="@Url.Action("index", "login", new { regaccount = registrationAccount?.Uid })">Login</a></p>
+                </div><br />
+                <div class="text-center reg-instructions">
+                    <p><strong>Enter parent info below</strong></p>
+
                 </div>
 
                 <div>
-                    <p>Enter your parent info below</p>
-                    <div>
-                        @foreach (var item in cart.GetCartItems())
-                        {
-                            <div>
-                                You are registering for: @item.GetParticipationObject().Name
-                            </div>
-                        }
-                    </div>
                     <form class="form-horizontal" method="post" action="@Url.Action("getstarted", "account")">
                         @foreach (var qvm in Model)
                         {
@@ -47,7 +50,7 @@
                                         <div class="am-checkbox text-center">
                                             <input type="checkbox" id="textnotifications" name="textnotifications" value="1"  @(Request["textnotifications"] == "1" ? " checked=\"checked\" " : "") />
                                             <label for="textnotifications">
-                                                I want to be notified if I've forgotten my child at school
+                                                I would like to receive text messages about my student&#39;s activities.
                                             </label>
                                         </div>
                                     </div>
@@ -85,7 +88,7 @@
                         </div>
 
                         <div class="padding-v-20">
-                            <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                            <button type="submit" class="btn btn-xl center-block btn-register">Continue &raquo;</button>
                         </div>
 
                     </form>
