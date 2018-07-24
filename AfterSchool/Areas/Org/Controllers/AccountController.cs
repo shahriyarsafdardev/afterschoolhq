@@ -412,25 +412,98 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PaymentsEntity()
         {
-            Account a = SessionVariables.CurrentAccount;
-            ViewBag.Messages = new SystemMessages();
-            return View(a);
+            var msgs = new SystemMessages();
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            return View(SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs));
         }
 
         [HttpPost]
-        public ActionResult PaymentsEntity(string paypalemail)
+        public ActionResult PaymentsEntity(string entityType, string firstName, string lastName, string address1, string address2, string city, string state, string postalCode, string dateOfBirth, string ssn, string ssnLast4, string legalbusinessname, string businessUrl, string supportphone, string supportemail, string businessPhone, string ein, string tosagree)
         {
             var msgs = new SystemMessages();
 
-            SessionVariables.CurrentAccount.PayPalEmailAddress = paypalemail;
-            msgs.AddRange(SessionVariables.CurrentAccount.Save());
+            var entityTypeId = (LegalEntityType)entityType.ToInteger();
+            var fullSSNRequired = false;
 
-            if(msgs.HasNoErrors())
-                msgs.Add("PayPal information saved", MessageType.Success);
+            if (firstName.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+            if (lastName.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+            if (address1.IsEmpty())
+                msgs.Add("Address 1 is required", MessageType.UserError);
+            if (city.IsEmpty())
+                msgs.Add("City is required", MessageType.UserError);
+            if (state.IsEmpty())
+                msgs.Add("State is required", MessageType.UserError);
+            if (postalCode.IsEmpty())
+                msgs.Add("Postal Code is required", MessageType.UserError);
+            if (dateOfBirth.IsEmpty() || !dateOfBirth.IsDate())
+                msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
+            if (ssnLast4.IsEmpty() || !ssnLast4.IsNumber())
+                msgs.Add("SSN(last 4) is required", MessageType.UserError);
+            if (supportemail.IsEmpty())
+                msgs.Add("Support Email is required", MessageType.UserError);
+            if (supportphone.IsEmpty())
+                msgs.Add("Support Phone is required", MessageType.UserError);
+
+            if (fullSSNRequired && ssn.IsEmpty())
+                msgs.Add("SSN is required", MessageType.UserError);
+
+
+            if (entityTypeId == LegalEntityType.Company)
+            {
+                if (legalbusinessname.IsEmpty())
+                    msgs.Add("Legal Business Name is required", MessageType.UserError);
+                if (ein.IsEmpty())
+                    msgs.Add("Employer Identification Number is required", MessageType.UserError);
+            }
+
+            if (!tosagree.IsBoolean() || !tosagree.ToBoolean())
+                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var stripeAccount = SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs);
+                stripeAccount.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                stripeAccount.LastModifiedDate = DateTime.UtcNow;
+                stripeAccount.LegalEntityAddress1 = address1;
+                stripeAccount.LegalEntityAddress2 = address2;
+                stripeAccount.LegalEntityCity = city;
+                stripeAccount.LegalEntityState = state;
+                stripeAccount.LegalEntityPostalCode = postalCode;
+                stripeAccount.LegalEntityDOB = dateOfBirth.ToDateTime();
+                stripeAccount.LegalEntityFirstName = firstName;
+                stripeAccount.LegalEntityLastName = lastName;
+                stripeAccount.LegalEntitySSNLast4 = ssnLast4;
+                stripeAccount.LegalEntityTypeId = entityTypeId;
+                stripeAccount.SupportPhone = supportphone;
+                stripeAccount.SupportEmail = supportemail;
+                stripeAccount.BusinessUrl = businessUrl;
+                stripeAccount.BusinessPhone = businessPhone;
+
+                if (entityTypeId == LegalEntityType.Company)
+                {
+                    stripeAccount.LegalEntityBusinessName = legalbusinessname;
+                    stripeAccount.LegalEntityEIN = ein;
+                }
+
+                if (tosagree.IsBoolean())
+                {
+                    stripeAccount.TOSAcceptanceDate = DateTime.UtcNow;
+                    stripeAccount.TOSAcceptanceIP = Request.UserHostAddress;
+                    stripeAccount.TOSAcceptanceUserAgent = Request.UserAgent.MaxChars(400);
+                }
+
+                stripeAccount.SaveAndSendLegalEntityToStripe(ssn, msgs);
+            }
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Your update information has been submitted.", MessageType.Success);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
-            return View(SessionVariables.CurrentAccount.GetStripeAccount(msgs));
+            return View(SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs));
         }
 
         [HttpGet]
@@ -445,35 +518,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsBank(string paypalemail)
         {
             var msgs = new SystemMessages();
-
-            SessionVariables.CurrentAccount.PayPalEmailAddress = paypalemail;
-            msgs.AddRange(SessionVariables.CurrentAccount.Save());
-
-            if (msgs.HasNoErrors())
-                msgs.Add("PayPal information saved", MessageType.Success);
-
-            ViewBag.Messages = msgs;
-            return View(SessionVariables.CurrentAccount);
-        }
-
-        [HttpGet]
-        public ActionResult PaymentsTOS()
-        {
-            Account a = SessionVariables.CurrentAccount;
-            ViewBag.Messages = new SystemMessages();
-            return View(a);
-        }
-
-        [HttpPost]
-        public ActionResult PaymentsTOS(string paypalemail)
-        {
-            var msgs = new SystemMessages();
-
-            SessionVariables.CurrentAccount.PayPalEmailAddress = paypalemail;
-            msgs.AddRange(SessionVariables.CurrentAccount.Save());
-
-            if (msgs.HasNoErrors())
-                msgs.Add("PayPal information saved", MessageType.Success);
+            
 
             ViewBag.Messages = msgs;
             return View(SessionVariables.CurrentAccount);

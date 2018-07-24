@@ -32,7 +32,14 @@ namespace AfterSchoolLibrary
 		public string LegalEntityPostalCode { get { return (string)MDV["LegalEntityPostalCode"].Value; } set { MDV["LegalEntityPostalCode"].Value = value; } }
 		public DateTime? TOSAcceptanceDate { get { return (DateTime?)MDV["TOSAcceptanceDate"].Value; } set { MDV["TOSAcceptanceDate"].Value = value; } }
 		public string TOSAcceptanceIP { get { return (string)MDV["TOSAcceptanceIP"].Value; } set { MDV["TOSAcceptanceIP"].Value = value; } }
+		public string TOSAcceptanceUserAgent { get { return (string)MDV["TOSAcceptanceUserAgent"].Value; } set { MDV["TOSAcceptanceUserAgent"].Value = value; } }
 		public LegalEntityType LegalEntityTypeId { get { return (LegalEntityType)MDV["LegalEntityTypeId"].Value; } set { MDV["LegalEntityTypeId"].Value = value; } }
+		public string BusinessPhone { get { return (string)MDV["BusinessPhone"].Value; } set { MDV["BusinessPhone"].Value = value; } }
+		public string SupportPhone { get { return (string)MDV["SupportPhone"].Value; } set { MDV["SupportPhone"].Value = value; } }
+		public string SupportEmail { get { return (string)MDV["SupportEmail"].Value; } set { MDV["SupportEmail"].Value = value; } }
+		public string BusinessUrl { get { return (string)MDV["BusinessUrl"].Value; } set { MDV["BusinessUrl"].Value = value; } }
+		public bool RequiresFullSSN { get { return (bool)MDV["RequiresFullSSN"].Value; } set { MDV["RequiresFullSSN"].Value = value; } }
+		public bool IsVerified { get { return (bool)MDV["IsVerified"].Value; } set { MDV["IsVerified"].Value = value; } }
 		
 
         public StripeAccount()
@@ -40,6 +47,8 @@ namespace AfterSchoolLibrary
             this.Config(ObjectMap, DatabaseQuery, typeof(StripeAccount).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.LegalEntityTypeId = LegalEntityType.NotSet;
+			this.RequiresFullSSN = false;
+			this.IsVerified = false;
 			
         }
 
@@ -64,7 +73,14 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "LegalEntityPostalCode", System.Data.SqlDbType.NVarChar, 20);
 				_dp.Add(className, "TOSAcceptanceDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "TOSAcceptanceIP", System.Data.SqlDbType.NVarChar, 20);
+				_dp.Add(className, "TOSAcceptanceUserAgent", System.Data.SqlDbType.NVarChar, 400);
 				_dp.Add(className, "LegalEntityTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "BusinessPhone", System.Data.SqlDbType.NVarChar, 20);
+				_dp.Add(className, "SupportPhone", System.Data.SqlDbType.NVarChar, 20);
+				_dp.Add(className, "SupportEmail", System.Data.SqlDbType.NVarChar, 30);
+				_dp.Add(className, "BusinessUrl", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "RequiresFullSSN", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsVerified", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -195,7 +211,35 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["TOSAcceptanceUserAgent"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["LegalEntityTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["BusinessPhone"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SupportPhone"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["SupportEmail"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["BusinessUrl"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RequiresFullSSN"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsVerified"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

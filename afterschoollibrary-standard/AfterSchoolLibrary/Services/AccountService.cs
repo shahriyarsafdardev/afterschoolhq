@@ -1698,13 +1698,22 @@ namespace AfterSchoolLibrary
             
         }
 
-        public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static StripeAccount GetStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var stripeAccount = StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
 
-            if(stripeAccount.IsEmpty())
+            if (stripeAccount.IsEmpty())
+                stripeAccount = new StripeAccount()
+                {
+                    AccountId = account.ID,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                    LegalEntityTypeId = LegalEntityType.Individual
+                };
 
-            return ;
+            return stripeAccount;
         }
     }
 }

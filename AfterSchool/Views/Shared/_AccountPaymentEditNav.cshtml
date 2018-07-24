@@ -13,7 +13,7 @@
                 @{Html.RenderPartial(
                       "~/Views/Shared/_ActiveLink.cshtml",
                       new ViewDataDictionary {
-                                { "Url", Url.Action("paymentsentity", "account", new { id = Model.ID.ToString() }) },
+                                { "Url", Url.Action("paymentsentity", "account") },
                                 { "Text", "Legal Entity Information" },
                                 { "IsActive", true },
                       }
@@ -26,7 +26,7 @@
                 @{Html.RenderPartial(
                 "~/Views/Shared/_ActiveLink.cshtml",
                 new ViewDataDictionary {
-                { "Url", Url.Action("paymentsbank", "account", new { id = Model.ID.ToString() }) },
+                { "Url", Url.Action("paymentsbank", "account") },
                 { "Text", "Bank information" },
                 { "IsActive", true },
                 }
@@ -35,17 +35,19 @@
             </div>
         </li>
         <li data-id="2" class="dd-item">
-            <div class="dd-handle @paymentstos">
-                @{Html.RenderPartial(
-                        "~/Views/Shared/_ActiveLink.cshtml",
-                        new ViewDataDictionary {
-                            { "Url", Url.Action("paymentstos", "account", new { id = Model.ID.ToString() }) },
-                            { "Text", "Terms of Service" },
-                            { "IsActive", true },
-                        }
-                    );
-                }
-            </div>
+            &nbsp;
+        </li>
+        <li data-id="2" class="dd-item">
+            &nbsp;
+        </li>
+        <li data-id="2" class="dd-item">
+            &nbsp;
+        </li>
+        <li data-id="2" class="dd-item">
+            &nbsp;
+        </li>
+        <li data-id="2" class="dd-item">
+            &nbsp;
         </li>
     </ol>
 </div>   

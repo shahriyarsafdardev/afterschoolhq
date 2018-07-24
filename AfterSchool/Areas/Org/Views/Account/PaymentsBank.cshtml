@@ -14,31 +14,48 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="s7-box2"></i> Account - Payment Integrations
+            <i class="s7-cash"></i> Accept Payments
         </div>
         <div class="panel-body">
 
-            <div class="col-md-8 col-lg-9">
+            <div class="col-md-8 col-lg-9">                
 
                 <form method="post" action="@Url.Action("edit", "account")" class="form-horizontal">
                     <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <p class="text-center">Please enter your bank account so we can pay you ;)</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label">Routing # <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="routingnumber" name="routingnumber" value="" onfocus="this.select()" required />
+                            <input type="text" class="form-control" id="routingnumber1" name="routingnumber1" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Routing # Confirm <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="routingnumber2" name="routingnumber2" value="" onfocus="this.select()" required />
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Account # <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="accountnumber" name="accountnumber" value="" onfocus="this.select()" required />
+                            <input type="text" class="form-control" id="accountnumber1" name="accountnumber1" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Account # Confirm<span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="accountnumber2" name="accountnumber2" value="" onfocus="this.select()" required />
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group text-center">
                         <label class="col-sm-3 control-label"></label>
                         <div class="col-sm-9">
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="reset" class="btn btn-default">Discard Changes</button>
+                            <button type="submit" class="btn btn-primary btn-xl">Save Bank Information</button>
                         </div>
                     </div>
                 </form>
