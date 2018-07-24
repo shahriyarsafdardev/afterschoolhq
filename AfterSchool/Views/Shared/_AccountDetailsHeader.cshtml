@@ -13,8 +13,8 @@
             <a href="@Url.Action("style", "account")" class="hide btn btn-alt6@(actionName == "style" ? "-active" : "")">Content</a>
             <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>
             <a href="@Url.Action("paymentsentity", "account")" class="btn btn-alt6@(actionName == "paymentsentity" ? "-active" : "")">Accept Payments</a>
-            <a href="@Url.Action("newbilling", "account")" class="btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
-            <a href="@Url.Action("billing", "account")" class="btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
+            <a href="@Url.Action("newbilling", "account")" class="hide btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
+            <a href="@Url.Action("billing", "account")" class="hide btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
             @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {
                 <a href="@Url.Action("features", "account")" class="btn btn-alt6@(actionName == "features" ? "-active" : "")">Features</a>
@@ -24,11 +24,8 @@
             <select class="form-control" onchange="location.href=this.value;">
                 <option value="">Navigation</option>
                 <option value="@Url.Action("edit", "account")">Details</option>
-                <option value="@Url.Action("location", "account")">Default Location</option>
-                <option value="@Url.Action("style", "account")">Content</option>
+                <option value="@Url.Action("location", "account")">Location</option>
                 <option value="@Url.Action("paymentsentity", "account")">Accept Payments</option>
-                <option value="@Url.Action("newbilling", "account")">Packages</option>
-                <option value="@Url.Action("billing", "account")">Billing</option>
                 @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
                 {
                     <option value="@Url.Action("features", "account")">Features</option>

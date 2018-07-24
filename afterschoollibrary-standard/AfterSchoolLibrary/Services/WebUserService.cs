@@ -285,7 +285,7 @@ namespace AfterSchoolLibrary.Services
             if (phone.IsEmpty())
                 msgs.Add("Phone is required", MessageType.UserError);
             else if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                msgs.Add("Phone must valid", MessageType.UserError);
+                msgs.Add("Phone must be valid", MessageType.UserError);
             else if (WebUser.ExistsByPhone(phone))
                 msgs.Add("Phone is already in use by another user", MessageType.UserError);
 
