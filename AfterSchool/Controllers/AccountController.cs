@@ -408,8 +408,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Account = account;
             ViewBag.Cart = SessionVariables.Cart;
-            // ViewBag.Schools = schools;
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.School = new Location();
             ViewBag.SchoolLocation = location;
 
             return questions;
@@ -450,7 +449,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddStudent(string id, string samehomeaddress)
+        public ActionResult AddStudent(string id, string samehomeaddress, string location)
         {
             if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
                 return RedirectToAction("");
@@ -485,7 +484,7 @@ namespace AfterSchool.Controllers
                             isMaster: true,
                             isParentOrGuardian: false,
                             allowTextMessages: false,
-                            schoolLocationId: participationObject.Location?.ID,
+                            schoolLocationId: location.IsNumber() ? location.ToInteger() : new int?(),
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);

@@ -538,6 +538,15 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Activity> LoadListWithLocations(List<int> ids, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["LocationId"], locationIds, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         private static DatabaseQuery LoadByAccountIdQuery(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -1274,7 +1283,7 @@ namespace AfterSchoolLibrary
             var state = values.GetValueOrDefault("state");
             var postalcode = values.GetValueOrDefault("postalcode");
             var ismylocation = values.GetValueOrDefault("mylocation");
-            var locationisaschool = values.GetValueOrDefault("isschool");
+            var locationtype = values.GetValueOrDefault("locationtype");
             var cost = values.GetValueOrDefault("cost");
             var costdescription = values.GetValueOrDefault("costdescription");
             var acceptpaypal = values.GetValueOrDefault("acceptpaypal");
@@ -1603,7 +1612,7 @@ namespace AfterSchoolLibrary
                                 postalcode.IfEmpty(""),
                                 locationdetails.IfEmpty(""),
                                 ismylocation.IfEmpty(""),
-                                locationisaschool.IfEmpty(""),
+                                locationtype.IfEmpty(""),
                                 loggedInUserId,
                                 adc
                                 ));
@@ -1810,7 +1819,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string ismylocation, string locationisaschool, int loggedInUserId, DatabaseConnection dc = null)
+        private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string ismylocation, string locationtype, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1826,8 +1835,8 @@ namespace AfterSchoolLibrary
                 var locationType = LocationType.NotSet;
                 var hostAccountId = new int?();
 
-                if (locationisaschool.IsBoolean() && locationisaschool.ToBoolean())
-                    locationType = LocationType.School;
+                if (locationtype.IsNumber())
+                    locationType = (LocationType)locationtype.ToInteger();
 
                 if (ismylocation.IsBoolean() && ismylocation.ToBoolean())
                     hostAccountId = this.AccountId;

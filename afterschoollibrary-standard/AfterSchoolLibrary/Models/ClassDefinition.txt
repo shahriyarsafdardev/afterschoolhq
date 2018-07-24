@@ -301,7 +301,7 @@ property: StripePublishableKey, string, NVarChar(100)
 property: StripeSecretKey, string, NVarChar(100)
 property: Uid, Guid, UniqueIdentifier, required
 property: UniqueName, string, NVarChar(50)
-property: OwnerId, int?, Int, required
+property: OwnerId, int?, Int, , WebUser id that owns/created the account
 property: IsAdminAccount, bool, Bit
 property: IsActive, bool, Bit
 property: IsAfterSchool, bool, Bit
@@ -1547,7 +1547,7 @@ values: NotSet, PerRegistrant, PerActivity
 [begin]
 type: Enum
 name: LocationType
-values: NotSet, School
+values: NotSet, School, Business, NonProfit
 [end]
 
 [begin]

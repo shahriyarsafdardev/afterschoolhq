@@ -35,7 +35,19 @@ namespace AfterSchoolLibrary
 
             periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
 
-            return activities.Where(activity => activity.GetActiveActivityForm(msgs, dc).IsNotEmpty()).ToList();
+            return activities;
+        }
+
+        public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var periods = account.GetOpenAndUpcomingRegistrationPeriods(msgs, dc);
+            var activities = new List<Activity>();
+
+            periods.ForEach(period => 
+                activities.AddRange(period.GetActivitiesInLocations(locationIds, msgs, dc).Where(x => x.IsPubliclyViewable))
+            );
+
+            return activities;
         }
 
         public static List<ActivityForm> GetActivityForms(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1093,7 +1105,7 @@ namespace AfterSchoolLibrary
                 IsActive = isActive,
                 Email = email,
                 Phone = phone,
-                OwnerId = accountOwner.ID,
+                OwnerId = accountOwner?.ID,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser.ID,
@@ -1162,6 +1174,21 @@ namespace AfterSchoolLibrary
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
         }
+
+        public static List<Account> GetApprovedVisitorAccounts(this Account hostAccount, List<AccountType> accountTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByApproved(hostAccount.ID.Value, accountTypes, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
+                .ToList();
+        }
+
+        public static List<Account> GetApprovedVisitorAccounts(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.LoadByApproved(hostAccount.ID.Value, msgs, dc)
+                .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
+                .ToList();
+        }
+
         //Gets the accounts that the host has Denied
         public static List<Account> GetDeniedVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

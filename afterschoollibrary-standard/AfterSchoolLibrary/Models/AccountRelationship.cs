@@ -233,12 +233,31 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<AccountRelationship> LoadByApproved(int HostAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Approved);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static List<AccountRelationship> LoadByApproved(int HostAccountId, AccountType accountType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
             dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
+            dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Approved);
+            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<AccountRelationship> LoadByApproved(int HostAccountId, List<AccountType> accountTypes, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
+            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], accountTypes.Select(x => (int)x));
             dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Approved);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }

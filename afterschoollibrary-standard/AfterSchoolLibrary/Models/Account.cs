@@ -27,7 +27,7 @@ namespace AfterSchoolLibrary
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
 		/// <summary>
-		/// Required.
+		/// WebUser id that owns/created the account
 		/// </summary>
 		public int? OwnerId { get { return (int?)MDV["OwnerId"].Value; } set { MDV["OwnerId"].Value = value; } }
 		public bool IsAdminAccount { get { return (bool)MDV["IsAdminAccount"].Value; } set { MDV["IsAdminAccount"].Value = value; } }
@@ -142,8 +142,6 @@ namespace AfterSchoolLibrary
 
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on Account object", MessageType.Error);
-			if (this.OwnerId.IsEmpty())
-				msgs.Add("OwnerId is required on Account object", MessageType.Error);
 			if (this.Name.IsEmpty())
 				msgs.Add("Name is required on Account object", MessageType.Error);
 			

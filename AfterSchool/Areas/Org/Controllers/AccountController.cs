@@ -78,7 +78,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Location(string id, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string country, string mylocation, string isschool)
+        public ActionResult Location(string id, string location, string locationname, string address1, string address2, string city, string state, string postalcode, string country, string mylocation, string locationtype)
         {
             var msgs = new SystemMessages();
             var a = SessionVariables.CurrentAccount;
@@ -86,8 +86,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var locationType = LocationType.NotSet;
             var hostAccountId = new int?();
 
-            if (isschool.IsBoolean() && isschool.ToBoolean())
-                locationType = LocationType.School;
+            if (locationtype.IsNumber())
+                locationType = (LocationType)locationtype.ToInteger();
 
             if (mylocation.IsBoolean() && mylocation.ToBoolean())
                 hostAccountId = SessionVariables.CurrentAccount.ID;

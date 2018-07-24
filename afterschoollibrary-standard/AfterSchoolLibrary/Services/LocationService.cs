@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Services
                 msgs, 
                 dc);
 
-            if (msgs.HasNoErrors() && !newLocation.IsOwned() && newLocation.LocationTypeId == LocationType.School)
+            if (msgs.HasNoErrors() && !newLocation.IsOwned())
             {
                 // if it's a new location and the current account is not the owner and it's a school, 
                 // then I should create an inactive Account for the location owner to claim at some point 
@@ -75,6 +75,9 @@ namespace AfterSchoolLibrary.Services
                     msgs: msgs,
                     dc: dc);
 
+                newLocation.HostAccountId = newHostAccount.ID;
+                msgs.AddRange(newLocation.Save(dc));
+
                 var relationship = AccountRelationshipService.CreateNew(
                     hostAccount: newHostAccount,
                     visitorAccount: loggedInAccount,
@@ -88,7 +91,7 @@ namespace AfterSchoolLibrary.Services
                     accountRelationship: relationship,
                     hostAccount: newHostAccount,
                     visitorAccount: loggedInAccount,
-                    location: newLocation,
+                    location: newLocation,                    
                     loggedInUser: loggedInUser,
                     msgs: msgs,
                     dc: dc);
@@ -116,6 +119,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 HostAccountId = hostAccountId,
+                LocationTypeId = locationType,
                 Name = locationName
             };
 
