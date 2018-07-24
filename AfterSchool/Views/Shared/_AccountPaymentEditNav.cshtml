@@ -2,31 +2,45 @@
 @{
     var activeMenu = Url.RequestContext.RouteData.Values["action"].ToString();
 
-    var entityactive = activeMenu == "entityPayments" ? "active" : "";
-    var bankinformationactive = activeMenu == "bankInformationPayments" ? "active" : "";
+    var paymentsentity = activeMenu == "paymentsentity" ? "active" : "";
+    var paymentsbank = activeMenu == "paymentsbank" ? "active" : "";
+    var paymentstos = activeMenu == "paymentstos" ? "active" : "";
 }
 <div id="list1" class="dd">
     <ol class="dd-list">
         <li data-id="1" class="dd-item">
-            <div class="dd-handle @entityactive">
+            <div class="dd-handle @paymentsentity">
                 @{Html.RenderPartial(
-                        "~/Views/Shared/_ActiveLink.cshtml",
-                        new ViewDataDictionary {
-                            { "Url", Url.Action("entityPayments", "account", new { id = Model.ID.ToString() }) },
-                            { "Text", "Legal Entity Information" },
-                            { "IsActive", true },
-                        }
-                    );
+                      "~/Views/Shared/_ActiveLink.cshtml",
+                      new ViewDataDictionary {
+                                { "Url", Url.Action("paymentsentity", "account", new { id = Model.ID.ToString() }) },
+                                { "Text", "Legal Entity Information" },
+                                { "IsActive", true },
+                      }
+                  );
                 }
             </div>
         </li>
         <li data-id="2" class="dd-item">
-            <div class="dd-handle @bankinformationactive">
+            <div class="dd-handle @paymentsbank">
+                @{Html.RenderPartial(
+                "~/Views/Shared/_ActiveLink.cshtml",
+                new ViewDataDictionary {
+                { "Url", Url.Action("paymentsbank", "account", new { id = Model.ID.ToString() }) },
+                { "Text", "Bank information" },
+                { "IsActive", true },
+                }
+                );
+                }
+            </div>
+        </li>
+        <li data-id="2" class="dd-item">
+            <div class="dd-handle @paymentstos">
                 @{Html.RenderPartial(
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
-                            { "Url", Url.Action("bankInformationPayments", "account", new { id = Model.ID.ToString() }) },
-                            { "Text", "Bank information" },
+                            { "Url", Url.Action("paymentstos", "account", new { id = Model.ID.ToString() }) },
+                            { "Text", "Terms of Service" },
                             { "IsActive", true },
                         }
                     );

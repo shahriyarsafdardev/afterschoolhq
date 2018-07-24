@@ -101,6 +101,39 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
+        public static void UpdateCustomAccountLegalEntity(string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new StripeAccountUpdateOptions()
+            {
+                //LegalEntity = new StripeAccountLegalEntityOptions()
+                //{
+                     
+                //}
+                //Type = "custom",
+                //Country = "US",
+                //DefaultCurrency = "usd",
+                //BusinessName = businessName,
+                //Email = email,
+                //DebitNegativeBalances = true,
+                //PayoutStatementDescriptor = "AfterSchool transfer".MaxChars(22),
+                //TransferScheduleInterval = "manual"
+            };
+
+            Stripe.StripeAccount account = null;
+
+            try
+            {
+                account = GetAccountService().Update(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add("Error creating stripe account", MessageType.Error);
+            }
+        }
+
         //BusinessName = "",
         //        BusinessUrl = "",
         //        Country = "US",

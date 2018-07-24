@@ -96,6 +96,8 @@ namespace AfterSchoolLibrary.Services
                     msgs: msgs,
                     dc: dc);
 
+                // TODO: Send message to internal team about new ghost account
+
             }
 
             return newLocation;
