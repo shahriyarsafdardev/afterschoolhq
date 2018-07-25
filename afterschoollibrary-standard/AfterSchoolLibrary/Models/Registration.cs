@@ -1247,7 +1247,7 @@ namespace AfterSchoolLibrary
                 groupIds);
 
             var ms = new System.IO.MemoryStream(System.Text.UTF8Encoding.UTF8.GetBytes(csv));
-            var ah = new AmazonHelper(Utilities.AmazonBucketName, Utilities.AmazonAccessKeyId, Utilities.AmazonSecretAccessKeyId);
+            var ah = new AmazonHelper(Utilities.AmazonBucketName, Utilities.AmazonAccessKeyId, Utilities.AmazonSecretAccessKeyId, Utilities.AmazonRegionEndPoint);
 
             if (filename.IsNotEmpty())
             {
