@@ -496,21 +496,21 @@ namespace AfterSchoolLibrary
         }
 
 
-        public string GetHomePageUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return $"/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
+            return $"{Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
         }
 
-        public string GetRegistrationPageUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public string GetRegistrationPageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return $"{this.GetHomePageUrl(msgs, dc)}/register";
+            return $"{Utilities.BaseUrl(isAfterSchool)}/{this.GetHomePageUrl(isAfterSchool, msgs, dc)}/register";
         }
 
         public string HomePageUrl
         {
             get
             {
-                return GetHomePageUrl();
+                return GetHomePageUrl(true);
             }
         }
 
@@ -518,7 +518,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return string.Format("{0}{1}", HomePageUrl, "?preview=true");
+                return $"{HomePageUrl}{"?preview=true"}";
             }
         }
 

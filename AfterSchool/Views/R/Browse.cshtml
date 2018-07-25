@@ -124,7 +124,7 @@
                         }
                     </div>
                     <div>
-                        <a href="@item.GetHomePageUrl()" class="btn btn-primary btn-register btn-block">
+                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
                             @item.RegistrationMode.ToString() &raquo;
                         </a>
                     </div>
