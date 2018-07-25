@@ -973,7 +973,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         amsgs.AddRange(attendance.Save(adc));
 
-                        var registrants = attendance.ToActivity(true, adc).GetRegistrantActivities(adc);
+                        var registrants = attendance.ToActivity(true, adc).GetRegistrantActivities(amsgs, adc);
                         foreach (var registrant in registrants)
                         {
                             var ar = new AttendanceRegistrant();
@@ -1064,6 +1064,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();
+            ViewBag.Schedule = activity.GetSchedule();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(attendance);
         }
