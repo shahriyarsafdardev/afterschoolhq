@@ -8,7 +8,7 @@
             {
                 <li><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
                 <li><a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a></li>
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups))
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups) && SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
                 {
                     <li><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
                 }
@@ -23,11 +23,11 @@
                 }
                 if (SessionVariables.AccountUserType == UserType.Owner || SessionVariables.AccountUserType == UserType.Administrator)
                 {
-                    <li><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Account</a></li>
                     if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 0)
                     {
                         <li><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Team</a></li>
                     }
+                    <li><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
                 }
             }
             
