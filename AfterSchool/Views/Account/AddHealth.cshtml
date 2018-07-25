@@ -26,7 +26,8 @@
             <div class="panel-body">
 
                 <div>
-                    <h3 class="text-center reg-instructions">Add health information for: @student.DisplayName</h3>
+                    <h3 class="text-center reg-instructions"><strong>Health Information</strong></h3>
+                    <p class="text-center reg-login">Please add health information for: @student.DisplayName</p>
                     <form class="form-horizontal" method="post" action="@Url.Action("addhealth", "account")">
                         @foreach (var qvm in Model)
                         {

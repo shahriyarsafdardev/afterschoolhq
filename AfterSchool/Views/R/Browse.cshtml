@@ -82,7 +82,7 @@
              maxgrade="@item.MaxGradeId" 
              hasseatsremaining="@item.HasSeatsAvailable().ToString().ToLower()" 
              haswaitinglistremaining="@item.HasWaitingListSeatsAvailable().ToString().ToLower()"
-             days="@ParticipationObjectUI.PrintDaysOfWeek(item)"
+             days="@ParticipationObjectUI.PrintDaysOfWeek(item)" 
              location="@item.Location.ID"
              gender="@((int)item.GenderRestriction)"
              name="@item.Name">
@@ -92,7 +92,7 @@
                     <h3><strong>@item.Name</strong></h3>
                 </div>
                 <div class="panel-body">
-                    <div class="panel-subhead">
+                    <div>
                         <span class="reg-info">
                             @ParticipationObjectUI.PrintDaysOfWeek(item)
                         </span>
@@ -106,27 +106,32 @@
                         </span>
                     </div>
                     <p>@Html.Raw(item.Details)</p>
+
                     <div>
-                        <p>
-                            @ParticipationObjectUI.PrintRegistrationFee(item)
-                        </p>
-                        @if (item.SubscriptionPlans.Any())
-                        {
+                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
+                        <div>
+                            <p>
+                                @ParticipationObjectUI.PrintRegistrationFee(item)
+                            </p>
+                                @if (item.SubscriptionPlans.Any())
+                            {
                             <p>
                                 @Html.Raw(ParticipationObjectUI.PrintSubscriptions(item).ToStringList("<br />"))
                             </p>
-                        }
-                        @if (item.PaymentPlans.Any())
-                        {
+                            }
+                                @if (item.PaymentPlans.Any())
+                            {
                             <p>
                                 @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(item).ToStringList("<br />"))
                             </p>
-                        }
-                    </div>
-                    <div>
-                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
-                            @item.RegistrationMode.ToString() &raquo;
+                            }
+                         </div>
+                         &bull;
+                             @item.RegistrationMode.ToString() &raquo;
                         </a>
+                    </div> <br/>
+                    <div class="seats-remaining text-center">
+                         <strong><em> @item.SeatsRemaining.ToString() Seats Left!</em></strong>
                     </div>
                 </div>
                 <div class="panel-footer">

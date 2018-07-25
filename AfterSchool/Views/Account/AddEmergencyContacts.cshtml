@@ -1,7 +1,7 @@
 ﻿@model List<FormQuestionViewModel>
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
-    ViewBag.Title = "Add Student";
+    ViewBag.Title = "Add Emergency Contacts";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
 }
@@ -24,7 +24,7 @@
         <div class="panel">
             <div class="panel-body">
                 <div>
-                    <h3 class="text-center reg-instructions">Emergency Contacts</h3>
+                    <h3 class="text-center reg-instructions"><strong>Emergency Contacts</strong></h3>
                     <p class="text-center">In case of emergency, parents will be called first. Please list two additional contacts as backup.</p>
                     <form class="form-horizontal" method="post" action="@Url.Action("addemergencycontacts", "account")">
 

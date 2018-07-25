@@ -1,7 +1,7 @@
 ﻿@model List<FormQuestionViewModel>
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
-    ViewBag.Title = "Add Student";
+    ViewBag.Title = "Add Home Address";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
 }
@@ -25,7 +25,10 @@
             <div class="panel-body">
 
                 <div>
-                    <h3 class="text-center reg-instructions">Add your home address</h3>
+                    <h3 class="text-center reg-instructions"><strong>Home address</strong></h3>
+                    <div class="text-center reg-login">
+                        <p>Add your home address so that activity providers have it on file in case of an emergecy.</p><br/>
+                    </div>
                     <form class="form-horizontal" method="post" action="@Url.Action("addhomeaddress", "account")">
                         @foreach (var qvm in Model)
                         {

@@ -5,7 +5,7 @@
     margin: 20px;
     border: 1px solid #e7e4e4;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12);
-    padding: 15px;
+    padding: 0px;
 }
 
 .reg-header {
@@ -55,14 +55,16 @@
     color: #00ae85;
     font-size: 28px;
     font-weight: 600;
-}
-
-.panel-subhead {
-    margin-top: -15px;
+    padding-left: 20px;
+    margin-bottom: -15px;
 }
 
 .panel-footer {
     border: none;
+}
+
+.reg-login {
+    font-size:16px;
 }
 
 .reg-info {
@@ -70,6 +72,12 @@
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 15px;
+}
+
+.seats-remaining {
+    color: #d0021b;
+    font-size: 14px;
+    margin-top: 10px;
 }
 
 .btn-register {
