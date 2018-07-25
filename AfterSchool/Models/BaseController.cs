@@ -203,7 +203,10 @@ namespace AfterSchool.Models
 
         internal ActionResult Logout()
         {
-            Session.Clear();
+            SessionVariables.LoggedInUser = null;
+            SessionVariables.OriginalLoggedInUser = null;
+            SessionVariables.CurrentAccount = null;
+            SessionVariables.CurrentRegistrant = null;
 
             // Clear login cookies
             if (!Request.Cookies["sessionuser"].IsEmpty())
@@ -222,8 +225,7 @@ namespace AfterSchool.Models
                 cookieUser.Value = null;
                 Response.SetCookie(cookieUser);
             }
-
-            //Response.Redirect("/login");   
+ 
             return RedirectToAction("index", "Login");
         }
     }

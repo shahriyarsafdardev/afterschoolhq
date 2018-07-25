@@ -328,7 +328,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return $"/{this.UniqueName.ToLower()}";
+                return $"{Utilities.BaseUrl(true)}/{this.UniqueName.ToLower()}";
             }
 
         }
