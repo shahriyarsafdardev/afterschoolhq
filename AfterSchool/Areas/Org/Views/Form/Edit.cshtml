@@ -8,6 +8,7 @@
     var qgId = new int?();
     var questions = new List<FormQuestion>();
     var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix };
+    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.FileUpload, QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
 
     if (questionGroup.IsNotEmpty())
     {
@@ -103,76 +104,52 @@
                             <div class="panel-body">
                                 <div class="table-responsive">
                                     <table class="table table-striped" id="question-table">
-                                        <tr>
-                                            <td>Question Label</td>
-                                            <td>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</td>
-                                            <td>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                        @foreach (var question in questions)
-                                        {
+                                        <thead>
                                             <tr>
-                                                <td>
-                                                    @if (question.QuestionTypeId != QuestionType.TextBlock && question.QuestionTypeId != QuestionType.CheckboxList)
-                                                    {
-                                                        if (question.QuestionDataTypeId == QuestionDataType.NotSet)
+                                                <th>Question Label</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</th>
+                                                <th>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var question in questions)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @if (question.QuestionTypeId != QuestionType.TextBlock)
                                                         {
-                                                            <input type="text"
-                                                                   id="text-@question.ID"
-                                                                   name="text-@question.ID"
-                                                                   value="@question.Text"
-                                                                   required
-                                                                   class="form-control col-sm-3"
-                                                                   onfocus="this.select()"
-                                                                   data-tooltip-id="text-@question.ID" />
-                                                        }
-                                                        else if (question.IsLocked)
-                                                        {
-                                                            <i class="s7-lock icon-medium"></i> @question.Text
+                                                            if (question.QuestionDataTypeId == QuestionDataType.NotSet)
+                                                            {
+                                                                <input type="text"
+                                                                       id="text-@question.ID"
+                                                                       name="text-@question.ID"
+                                                                       value="@question.Text"
+                                                                       required
+                                                                       class="form-control col-sm-3"
+                                                                       onfocus="this.select()"
+                                                                       data-tooltip-id="text-@question.ID" />
+                                                            }
+                                                            else if (question.IsLocked)
+                                                            {
+                                                                <i class="s7-lock icon-medium"></i> @question.Text
+                                                            }
+                                                            else
+                                                            {
+                                                                @question.Text
+                                                            }
                                                         }
                                                         else
-                                                        {
-                                                            @question.Text
+                                                        {   
+                                                            <textarea class="form-control" id="description-@question.ID" name="description-@question.ID">@question.Description</textarea>
+                                                            <input type="hidden"
+                                                                    value="@((int)QuestionType.TextBlock)"
+                                                                    id="questiontype-@question.ID"
+                                                                    name="questiontype-@question.ID" />
                                                         }
-                                                    }
-                                                </td>
-                                                <td>
-                                                    @{Html.RenderPartial(
-                                                        "~/Views/Shared/_SwitchButton.cshtml",
-                                                        question.IsActive,
-                                                        new ViewDataDictionary()
-                                                        {
-                                                            { "checkboxname", "active-" + question.ID },
-                                                            { "checkboxid", "active-" + question.ID },
-                                                            { "disabled", question.IsLocked },
-                                                            { "classname", "question-isactive" }
-                                                      });}
-                                                </td>
-                                                @if (question.QuestionTypeId == QuestionType.TextBlock)
-                                                {
-                                                    <td colspan="3">
-                                                        <textarea class="form-control" id="description-@question.ID" name="description-@question.ID">@question.Description</textarea>
-                                                        <input type="hidden"
-                                                               value="@((int)QuestionType.TextBlock)"
-                                                               id="questiontype-@question.ID"
-                                                               name="questiontype-@question.ID" />
                                                     </td>
-                                                }
-                                                else
-                                                {
-                                                    <td>
-                                                        @{Html.RenderPartial(
-                                                              "~/Views/Shared/_SwitchButton.cshtml",
-                                                              question.IsRequired,
-                                                              new ViewDataDictionary()
-                                                              {
-                                                                { "checkboxname", "required-" + question.ID },
-                                                                { "checkboxid", "required-" + question.ID },
-                                                                { "disabled", question.IsLocked },
-                                                                { "classname", "question-isrequired" }
-                                                          });}
-                                                    </td>
+
                                                     <td>
                                                         @if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
                                                         {
@@ -192,33 +169,72 @@
                                                         }
                                                     </td>
                                                     <td>
-                                                        <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(@question.ID)" id="btn-setoptions-@question.ID">
+                                                        <button type="button" 
+                                                                class="btn btn-default md-trigger btn-space hide" 
+                                                                data-modal="modal-options" 
+                                                                onclick="setOptions(@question.ID)" 
+                                                                id="btn-setoptions-@question.ID">
                                                             Edit Options
                                                         </button>
-                                                        <input type="hidden" id="options-text-@question.ID" name="options-text-@question.ID" value="@question.Options" />
+                                                        <input type="hidden" 
+                                                               id="options-text-@question.ID" 
+                                                               name="options-text-@question.ID" 
+                                                               value="@question.Options" />
 
-                                                        <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(@question.ID)" id="btn-setlink-@question.ID">
+                                                        <button type="button" 
+                                                                class="btn btn-default md-trigger btn-space hide" 
+                                                                data-modal="modal-link" 
+                                                                onclick="setLink(@question.ID)" 
+                                                                id="btn-setlink-@question.ID">
                                                             Edit Link
                                                         </button>
-                                                        <input type="hidden" id="link-text-@question.ID" name="link-text-@question.ID" value="@question.Link" />
+                                                        <input type="hidden" 
+                                                               id="link-text-@question.ID" 
+                                                               name="link-text-@question.ID" 
+                                                               value="@question.Link" />
                                                     </td>
-                                                }
-                                            </tr>
-                                        }
 
-                                        @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
-                                        {
-                                            <tr>
-                                                <td colspan="5">
-                                                    <button type="button" class="btn btn-default" onclick="addQuestion()">
-                                                        <i class="s7-plus"></i> Add Question
-                                                    </button>
-                                                    <button type="button" class="btn btn-default" onclick="addTextBlock()">
-                                                        <i class="s7-plus"></i> Add Text Block
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        }
+                                                    <td>
+                                                        @{Html.RenderPartial(
+                                                            "~/Views/Shared/_SwitchButton.cshtml",
+                                                            question.IsActive,
+                                                            new ViewDataDictionary()
+                                                            {
+                                                                { "checkboxname", "active-" + question.ID },
+                                                                { "checkboxid", "active-" + question.ID },
+                                                                { "disabled", question.IsLocked },
+                                                                { "classname", "question-isactive" }
+                                                          });}
+                                                    </td>
+                                                    <td>
+                                                        @{Html.RenderPartial(
+                                                                "~/Views/Shared/_SwitchButton.cshtml",
+                                                                question.IsRequired,
+                                                                new ViewDataDictionary()
+                                                                {
+                                                                { "checkboxname", "required-" + question.ID },
+                                                                { "checkboxid", "required-" + question.ID },
+                                                                { "disabled", question.IsLocked },
+                                                                { "classname", "question-isrequired" }
+                                                            });}
+                                                    </td>
+                                                </tr>
+                                            }
+
+                                            @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || true)
+                                            {
+                                                <tr>
+                                                    <td colspan="5">
+                                                        <button type="button" class="btn btn-default" onclick="addQuestion()">
+                                                            <i class="s7-plus"></i> Add Question
+                                                        </button>
+                                                        <button type="button" class="btn btn-default" onclick="addTextBlock()">
+                                                            <i class="s7-plus"></i> Add Text Block
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -302,7 +318,7 @@
 
                 <div class="form-group">
                     <label><span id="question-options-label"></span> (options must be separated by commas)</label>
-                    <textarea class="form-control" id="question-options" name="question-options" rows="6"></textarea>
+                    <textarea class="form-control" id="question-options" name="question-options" rows="6" placeholder="ex: option 1, option 2, option 3"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -322,11 +338,11 @@
             </div>
             <div class="modal-body form">
 
-                <p>Update your link here. Your link is not saved until you hit the save button on the screen</p>
+                <p>Enter the url below. This will make your question label clickable and it will open a new window to your link. Note: Your link is not saved until you hit the <strong>Save</strong> button after you click <strong>Done</strong></p>
 
                 <div class="form-group">
                     <label><span id="question-link-label"></span></label>
-                    <textarea class="form-control" id="question-link" name="question-link" rows="6"></textarea>
+                    <textarea class="form-control" id="question-link" name="question-link" rows="6" placeholder="ex: http://yourdomain.com/go-here"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -356,7 +372,7 @@
     }
 
     function getLabelTextbox() {
-        return `<input type="text" id="text-${getQuestionCount()}" name="new-text-${getQuestionCount()}" value="" required class="form-control col-sm-3" onfocus="this.select()" data-tooltip-id="text-${getQuestionCount()}" />`;
+        return `<input type="text" id="text-${getQuestionCount()}" name="new-text-${getQuestionCount()}" value="" required class="form-control col-sm-3" onfocus="this.select()" data-tooltip-id="text-${getQuestionCount()}" placeholder="Enter your question" />`;
     }
 
     function getShowCheckbox() {
@@ -385,7 +401,7 @@
 
     function getQuestionTypeList() {
         var rtn = `<select class="form-control" onclick="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
-        @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(x=> x != QuestionType.NotSet && x != QuestionType.TextBlock))
+        @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
             @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
         }
@@ -394,11 +410,11 @@
     }
 
     function getOptionsLinks() {
-        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" />`;
+        return `<button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-options" onclick="setOptions(${getQuestionCount()})" id="btn-setoptions-${getQuestionCount()}">Edit Options</button><input type="hidden" id="options-text-${getQuestionCount()}" name="new-options-text-${getQuestionCount()}" value="" /><button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(${getQuestionCount()})" id="btn-setlink-${getQuestionCount()}">Add/Edit Link</button><input type="hidden" id="link-text-${getQuestionCount()}" name="new-link-text-${getQuestionCount()}" value="" />`;
     }
 
     function getDescription() {
-        return `<textarea class="form-control" id="description-${getQuestionCount()}" name="new-description-${getQuestionCount()}" placeholder="Enter text. Up to 4000 characters allowed."></textarea>`;
+        return `<textarea class="form-control" id="description-${getQuestionCount()}" name="new-description-${getQuestionCount()}" rows="6" placeholder="Enter text. Up to 4000 characters allowed."></textarea>`;
     }
 
     function getTextBlockQuestionType() {
@@ -409,7 +425,7 @@
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td>${getLabelTextbox()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td></tr>`);
+            .before(`<tr><td>${getLabelTextbox()}</td><td>${getQuestionTypeList()}</td><td>${getOptionsLinks()}</td><td>${getShowCheckbox()}</td><td>${getRequiredCheckbox()}</td></tr>`);
 
         incrementQuestionCount();
         $('.md-trigger').modalEffects();
@@ -419,7 +435,7 @@
         $('#question-table')
             .find('tr')
             .last()
-            .before(`<tr><td></td><td>${getShowCheckbox()}</td><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td></tr>`);
+            .before(`<tr><td colspan="3">${getDescription()}${getTextBlockQuestionType()}</td><td>${getShowCheckbox()}</td><td></td></tr>`);
 
         incrementQuestionCount();
     }
@@ -472,6 +488,7 @@
     }
     function uncheckAllActive() {
         $('input[id^="active-"][disabled!="disabled"]').prop('checked', false);
+        $('input[id^="active-"][disabled!="disabled"]').trigger('click');
     }
     function checkAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', true);

@@ -123,23 +123,21 @@ namespace AfterSchool.Areas.Org.Controllers
                         // save existing questions
                         questions.ForEach(question =>
                         {
-                           
-                            // question.Text = Request.Params[string.Format("text-{0}", question.ID)];
-                            // question.Description = Request.Params[string.Format("description-{0}", question.ID)];
-
                             if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
                             {
+                                question.Text = Request.Params[string.Format("text-{0}", question.ID)];
+                                // for Text Block
+                                question.Description = Request.Params[string.Format("description-{0}", question.ID)];
                                 question.IsActive = Request.Params[string.Format("active-{0}", question.ID)].IsBoolean();
                                 question.IsRequired = Request.Params[string.Format("required-{0}", question.ID)].IsBoolean();
                                 question.Options = Request.Params[string.Format("options-text-{0}", question.ID)];
                                 question.Link = Request.Params[string.Format("link-text-{0}", question.ID)];                                
                                 question.QuestionTypeId = (QuestionType)Request.Params[string.Format("questiontype-{0}", question.ID)].ToInteger();
-
+                                question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                question.LastModifiedDate = DateTime.UtcNow;
+                                amsgs.AddRange(question.Save(adc));
                             }
 
-                            question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                            question.LastModifiedDate = DateTime.UtcNow;
-                            amsgs.AddRange(question.Save(adc));
                         });
 
                         // save new questions
@@ -156,7 +154,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     LastModifiedDate = DateTime.UtcNow,
                                     CreatedBy = SessionVariables.LoggedInUser.ID,
                                     LastModifiedBy = SessionVariables.LoggedInUser.ID,
-                                    DisplayOrder = form.GetQuestionCount(adc) + i,
+                                    DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
                                     FormQuestionGroupId = questionGroup.ID,
                                     IsTemplate = false,
                                     QuestionDataTypeId = QuestionDataType.NotSet,
@@ -167,8 +165,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     Description = Request.Params[string.Format("new-description-{0}", i)],
                                     IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
                                     IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean()
-                                };                                
-
+                                };         
                                 amsgs.AddRange(question.Save(adc));
                             }
                         }
