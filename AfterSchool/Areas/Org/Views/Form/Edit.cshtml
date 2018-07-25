@@ -90,9 +90,17 @@
 
                                 <p></p>
 
-                                @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
+                                @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet || questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.Custom)
                                 {
-                                    <input type="text" id="name-@questionGroup.ID" name="name-@questionGroup.ID" value="@questionGroup.Name" required class="form-control input-lg input-lg-font" onfocus="this.select()" data-tooltip-id="name-@questionGroup.ID" />
+                                    <input type="text" 
+                                           id="name-@questionGroup.ID" 
+                                           name="name-@questionGroup.ID" 
+                                           value="@questionGroup.Name" 
+                                           required 
+                                           class="form-control input-lg input-lg-font" 
+                                           onfocus="this.select()" 
+                                           data-tooltip-id="name-@questionGroup.ID"
+                                           placeholder="Enter your new section name" />
                                 }
                                 else
                                 {
@@ -278,18 +286,27 @@
                         @{ Html.RenderPartial("_FormEditMenu",
                              Model,
                              new ViewDataDictionary() {
-                                                { "RegistrantType", RegistrantType.Individual },
-                                                { "QuestionGroups", individualGroups },
-                                                { "QuestionGroupId", qgId }
+                                { "RegistrantType", RegistrantType.Individual },
+                                { "QuestionGroups", individualGroups },
+                                { "QuestionGroupId", qgId }
                              });
                         }
+
+                        <li class="dd-item">
+                            <div class="dd-handle">
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <a href="@Url.Action("edit", "form", new { id = Model.ID.ToString(), qg = 0 })">
+                                    + Add New Section
+                                </a>
+                            </div>
+                        </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
                              Model,
                              new ViewDataDictionary() {
-                                                { "RegistrantType", RegistrantType.Organization },
-                                                { "QuestionGroups", organizationGroups },
-                                                { "QuestionGroupId", qgId }
+                                { "RegistrantType", RegistrantType.Organization },
+                                { "QuestionGroups", organizationGroups },
+                                { "QuestionGroupId", qgId }
                              });
                         }
 
@@ -488,10 +505,11 @@
     }
     function uncheckAllActive() {
         $('input[id^="active-"][disabled!="disabled"]').prop('checked', false);
-        $('input[id^="active-"][disabled!="disabled"]').trigger('click');
+        uncheckAllRequired();
     }
     function checkAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', true);
+        checkAllActive();
     }
     function uncheckAllRequired() {
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', false);

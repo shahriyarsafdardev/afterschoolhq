@@ -209,7 +209,10 @@ namespace AfterSchoolLibrary
 
         public List<FormQuestion> GetAllQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestion.LoadByFormQuestionGroupId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+            if (this.ID.HasValue)
+                return FormQuestion.LoadByFormQuestionGroupId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+
+            return new List<FormQuestion>();
         }
         public List<FormQuestion> GetActiveQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
