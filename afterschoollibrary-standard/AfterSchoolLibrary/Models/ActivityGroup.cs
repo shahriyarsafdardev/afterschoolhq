@@ -329,16 +329,16 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public string GetHomePageUrl(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return $"{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName}";
+            return $"{Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName}";
         }
 
         public string HomePageUrl
         {
             get
             {
-                return this.GetHomePageUrl();
+                return this.GetHomePageUrl(true);
             }
         }
 

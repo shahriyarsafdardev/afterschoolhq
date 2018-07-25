@@ -625,10 +625,11 @@ namespace AfterSchoolLibrary
             return answer;
         }
 
-        public SystemMessages AddInviteToActivity(int activityId, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, DatabaseConnection dc = null)
+        public RegistrantActivity AddInviteToActivity(int activityId, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, dc: dc);
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
             if (ra.IsEmpty())
             {
                 ra = new RegistrantActivity();
@@ -650,14 +651,14 @@ namespace AfterSchoolLibrary
 
             ra.RegistrationPeriodId = registrationPeriodId;
             msgs.AddRange(ra.Save(dc: dc));
-            return msgs;
+            return ra;
         }
 
         public SystemMessages AddInviteToActivities(List<int> activityIds, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            activityIds.ForEach(activityId => 
-                msgs.AddRange(this.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, dc: dc))
+            activityIds.ForEach(activityId =>
+                this.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, msgs, dc)
             );
             return msgs;
         }        
