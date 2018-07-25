@@ -74,11 +74,11 @@
             <label class="control-label col-sm-3">What is your relationship with this location?</label>
             <div class="col-sm-9">
                 <div class="am-radio inline">
-                    <input type="radio" id="mylocation-no" name="mylocation" class="form-control" required="required" value="" @(isMyLocation ? "" : "checked=\"checked\"") />
+                    <input type="radio" id="mylocation-no" name="mylocation" class="form-control my-location" required="required" value="" @(isMyLocation ? "" : "checked=\"checked\"") />
                     <label for="mylocation-no">I provide an activity at this location</label>
                 </div>
                 <div class="am-radio inline">
-                    <input type="radio" id="mylocation-yes" name="mylocation" class="form-control" required="required" value="1" @(isMyLocation ? "checked=\"checked\"" : "") />
+                    <input type="radio" id="mylocation-yes" name="mylocation" class="form-control my-location" required="required" value="1" @(isMyLocation ? "checked=\"checked\"" : "") />
                     <label for="mylocation-yes">I am an employee/associated with this location</label>
                 </div>
             </div>
@@ -94,7 +94,7 @@
                             <input type="radio" 
                                    id="locationtype-@((int)item)" 
                                    name="locationtype" 
-                                   class="form-control" 
+                                   class="form-control location-type" 
                                    required="required" 
                                    value="@((int)item)" 
                                    @(item == location.LocationTypeId ? "checked=\"checked\"" : "") />

@@ -133,26 +133,26 @@ namespace AfterSchoolLibrary
             IsFree = !aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal();
         }
 
-        public string GetHomePageUrl()
+        public string GetHomePageUrl(bool isAfterSchool = true)
         {
             switch (this.ObjectType)
             {
                 case ParticipationObjectType.Activity:
-                    return ((Activity)this.Object).GetHomePageUrl();
+                    return ((Activity)this.Object).GetHomePageUrl(isAfterSchool);
                 case ParticipationObjectType.ActivityGroup:
-                    return ((ActivityGroup)this.Object).GetHomePageUrl();
+                    return ((ActivityGroup)this.Object).GetHomePageUrl(isAfterSchool);
             }
             return "";
         }
 
-        public string GetRegistrationPageUrl()
+        public string GetRegistrationPageUrl(bool isAfterSchool = true)
         {
             switch (this.ObjectType)
             {
                 case ParticipationObjectType.Activity:
-                    return ((Activity)this.Object).GetRegistrationPageUrl();
+                    return ((Activity)this.Object).GetRegistrationPageUrl(isAfterSchool);
                 case ParticipationObjectType.ActivityGroup:
-                    return ((ActivityGroup)this.Object).GetHomePageUrl();
+                    return ((ActivityGroup)this.Object).GetHomePageUrl(isAfterSchool);
             }
             return "";
         }

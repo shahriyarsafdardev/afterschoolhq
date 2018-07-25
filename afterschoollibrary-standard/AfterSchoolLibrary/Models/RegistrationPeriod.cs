@@ -337,6 +337,7 @@ namespace AfterSchoolLibrary
         public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var activityIds = GetActivityRegistrationPeriods(msgs, dc)
+                    .Where(x => x.IsActive)
                     .Select(x => x.ActivityId.Value)
                     .ToList();
 
@@ -489,10 +490,10 @@ namespace AfterSchoolLibrary
         }
 
         private ActivityGroup _Group = null;
-        public ActivityGroup GetGroup(DatabaseConnection dc = null)
+        public ActivityGroup GetGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Group.IsEmpty())
-                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
+                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
 
             return _Group;
         }

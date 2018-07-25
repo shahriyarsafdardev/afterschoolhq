@@ -79,14 +79,14 @@
                         {
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    Do you want to add your new contacts to a list? (optional)
+                                    Add your new contacts to a list
                                 </div>
                                 <div class="panel-body">
                                     @if (Request["returnUrl"].IsNotEmpty())
                                     {
                                         <div class="form-group">
                                             <label>List Name</label>
-                                            <input type="text" name="listname" id="listname" class="form-control" placeholder="Enter your list name" />
+                                            <input type="text" name="listname" id="listname" class="form-control" placeholder="Enter your list name" required />
                                             <input type="hidden" name="createlist" value="1" />
                                         </div>
                                     }
