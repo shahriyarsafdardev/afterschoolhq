@@ -5,12 +5,8 @@
 <div class="form-group">
     @if (Model.Question.QuestionTypeId == QuestionType.Checkbox)
     {
-        <div class="col-md-1 col-md-offset-2">
+        <div class="col-md-6 col-md-offset-3">
             @{ Html.RenderPartial("~/Views/Shared/Form/_Checkbox.cshtml", Model); }
-        </div>
-        
-        <div class="col-md-6">
-            @{ Html.RenderPartial("~/Views/Shared/Form/_Label.cshtml", Model); }
         </div>
     }
     else

@@ -503,7 +503,7 @@ namespace AfterSchoolLibrary
 
         public string GetRegistrationPageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return $"{Utilities.BaseUrl(isAfterSchool)}/{this.GetHomePageUrl(isAfterSchool, msgs, dc)}/register";
+            return $"{this.GetHomePageUrl(isAfterSchool, msgs, dc)}/register";
         }
 
         public string HomePageUrl

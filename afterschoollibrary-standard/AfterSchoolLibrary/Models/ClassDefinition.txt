@@ -848,6 +848,7 @@ joinproperty: FormQuestionGroup.DisplayOrder, int?, Int
 joinproperty: FormQuestionGroup.QuestionGroupDataTypeId, QuestionGroupDataType, Int
 joinproperty: Registration.AccountId, int?, Int
 loadmethod: RegistrantId, List<>
+loadmethod: RegistrantId|FormQuestionId|RegistrationId
 loadmethod: RegistrantId|ActivityId, List<>
 loadmethod: FormQuestionId, List<>
 loadmethod: FormQuestionId|RegistrantId

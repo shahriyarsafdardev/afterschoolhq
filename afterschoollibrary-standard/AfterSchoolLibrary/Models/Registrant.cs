@@ -480,6 +480,8 @@ namespace AfterSchoolLibrary
             };
             msgs.AddRange(reg.Save(dc));
 
+            msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
+
             return reg;
         }
 
@@ -500,6 +502,8 @@ namespace AfterSchoolLibrary
                 LastUpdated = DateTime.UtcNow
             };
             msgs.AddRange(reg.Save(dc));
+
+            msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
 
             return reg;
         }
@@ -602,7 +606,17 @@ namespace AfterSchoolLibrary
 
 
             //check if answer for this one already exists, and where formquestion is null
-            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, dc: dc);
+            FormQuestionAnswer answer = null;
+
+            if (question.QuestionDataTypeId == QuestionDataType.NotSet)
+                answer = FormQuestionAnswer.LoadByRegistrantIdByFormQuestionIdByRegistrationId(
+                    this.ID.Value, 
+                    question.ID.Value,
+                    registrationId.Value,
+                    msgs, 
+                    dc);
+            else
+                answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, msgs, dc);
 
             if (answer.IsEmpty())
             {

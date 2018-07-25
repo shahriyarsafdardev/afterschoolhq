@@ -6,6 +6,10 @@
     var cart = (Cart)ViewBag.Cart;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
     var registrant = (Registrant)ViewBag.Registrant;
+    var groups = qvms.Select(qvm => qvm.Question.ToFormQuestionGroup())
+        .OrderBy(group => group.DisplayOrder)
+        .DistinctBy(group => group.ID)
+        .ToList();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -28,9 +32,12 @@
 
                 <form class="form-horizontal" id="register-form" method="post" action="@Url.Action("register", "account")">
 
-                    @foreach (var group in qvms.Select(qvm => qvm.Question.ToFormQuestionGroup()))
+                    @foreach (var group in groups)
                     {
-                        Html.RenderPartial("~/Views/Shared/Form/_Group.cshtml", group, new ViewDataDictionary() { { "QuestionViewModels", qvms } });
+                        Html.RenderPartial(
+                            "~/Views/Shared/Form/_Group.cshtml", 
+                            group, 
+                            new ViewDataDictionary() { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
                     }
 
                     <div class="form-group">

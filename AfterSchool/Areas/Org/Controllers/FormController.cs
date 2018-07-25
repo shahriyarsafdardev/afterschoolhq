@@ -49,7 +49,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (qg.IsNumber())
             {
-                questionGroup = FormQuestionGroup.Load(qg.ToInteger());
+                if (qg.ToInteger() == 0)
+                    questionGroup = new FormQuestionGroup()
+                    {
+                        QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+                        FormId = form.ID,
+                        RegistrantTypeId = RegistrantType.Individual,
+                        ID = 0
+                    };
+                else
+                    questionGroup = FormQuestionGroup.Load(qg.ToInteger());
             }
             else
             {
@@ -108,68 +117,85 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (qg.IsNumber())
                         {
-                            questionGroup = FormQuestionGroup.Load(qg.ToInteger(), amsgs, adc);
-                            questions = questionGroup.GetAllQuestions(amsgs, adc);
-                        }
-
-                        if (questionGroup.IsNotEmpty())
-                        {
-                            //questionGroup.Name = Request.Params[string.Format("name-{0}", questionGroup.ID)];
-                            //questionGroup.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                            //questionGroup.LastModifiedDate = DateTime.UtcNow;
-                            //amsgs.AddRange(questionGroup.Save(adc));
-                        }
-
-                        // save existing questions
-                        questions.ForEach(question =>
-                        {
-                           
-                            // question.Text = Request.Params[string.Format("text-{0}", question.ID)];
-                            // question.Description = Request.Params[string.Format("description-{0}", question.ID)];
-
-                            if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
+                            if (qg.ToInteger() == 0)
                             {
-                                question.IsActive = Request.Params[string.Format("active-{0}", question.ID)].IsBoolean();
-                                question.IsRequired = Request.Params[string.Format("required-{0}", question.ID)].IsBoolean();
-                                question.Options = Request.Params[string.Format("options-text-{0}", question.ID)];
-                                question.Link = Request.Params[string.Format("link-text-{0}", question.ID)];                                
-                                question.QuestionTypeId = (QuestionType)Request.Params[string.Format("questiontype-{0}", question.ID)].ToInteger();
+                                questionGroup = new FormQuestionGroup()
+                                {
+                                    CreateDate = DateTime.UtcNow,
+                                    CreatedBy = SessionVariables.LoggedInUser.ID,
+                                    LastModifiedDate = DateTime.UtcNow,
+                                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                                    DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
+                                    FormId = form.ID,
+                                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+                                    RegistrantTypeId = RegistrantType.Individual,
+                                    Name = Request.Params["name-0"]
+                                };
+                                amsgs.AddRange(questionGroup.Save(adc));
+                                questions = new List<FormQuestion>();
+                            }
+                            else
+                            {
+                                questionGroup = FormQuestionGroup.Load(qg.ToInteger(), amsgs, adc);
+                                questions = questionGroup.GetAllQuestions(amsgs, adc);
 
+                                if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
+                                {
+                                    questionGroup.Name = Request.Params[$"name-{questionGroup.ID}"];
+                                    questionGroup.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                    questionGroup.LastModifiedDate = DateTime.UtcNow;
+                                    amsgs.AddRange(questionGroup.Save(adc));
+                                }
                             }
 
-                            question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                            question.LastModifiedDate = DateTime.UtcNow;
-                            amsgs.AddRange(question.Save(adc));
-                        });
-
-                        // save new questions
-                        if (Request.Form["newquestioncount"].IsNumber() && Request.Form["newquestioncount"].ToInteger() > 0)
-                        {
-                            var questionCount = Request.Form["newquestioncount"].ToInteger();
-
-                            for (var i = 0; i < questionCount; i++)
+                            // save existing questions
+                            questions.ForEach(question =>
                             {
-                                var question = new FormQuestion
+                                if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
                                 {
-                                    FormId = form.ID,
-                                    CreateDate = DateTime.UtcNow,
-                                    LastModifiedDate = DateTime.UtcNow,
-                                    CreatedBy = SessionVariables.LoggedInUser.ID,
-                                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
-                                    DisplayOrder = form.GetQuestionCount(adc) + i,
-                                    FormQuestionGroupId = questionGroup.ID,
-                                    IsTemplate = false,
-                                    QuestionDataTypeId = QuestionDataType.NotSet,
-                                    QuestionTypeId = (QuestionType)Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
-                                    Text = Request.Params[string.Format("new-text-{0}", i)],
-                                    Options = Request.Params[string.Format("new-options-text-{0}", i)],
-                                    Link = Request.Params[string.Format("new-link-text-{0}", i)],
-                                    Description = Request.Params[string.Format("new-description-{0}", i)],
-                                    IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
-                                    IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean()
-                                };                                
+                                    question.Text = Request.Params[$"text-{question.ID}"];
+                                    // for Text Block
+                                    question.Description = Request.Params[$"description-{question.ID}"];
+                                    question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
+                                    question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
+                                    question.Options = Request.Params[$"options-text-{question.ID}"];
+                                    question.Link = Request.Params[$"link-text-{question.ID}"];
+                                    question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
+                                    question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                    question.LastModifiedDate = DateTime.UtcNow;
+                                    amsgs.AddRange(question.Save(adc));
+                                }
 
-                                amsgs.AddRange(question.Save(adc));
+                            });
+
+                            // save new questions
+                            if (Request.Form["newquestioncount"].IsNumber() && Request.Form["newquestioncount"].ToInteger() > 0)
+                            {
+                                var questionCount = Request.Form["newquestioncount"].ToInteger();
+
+                                for (var i = 0; i < questionCount; i++)
+                                {
+                                    var question = new FormQuestion
+                                    {
+                                        FormId = form.ID,
+                                        CreateDate = DateTime.UtcNow,
+                                        LastModifiedDate = DateTime.UtcNow,
+                                        CreatedBy = SessionVariables.LoggedInUser.ID,
+                                        LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                                        DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
+                                        FormQuestionGroupId = questionGroup.ID,
+                                        IsTemplate = false,
+                                        QuestionDataTypeId = QuestionDataType.NotSet,
+                                        QuestionTypeId = (QuestionType)Request.Params[string.Format("new-questiontype-{0}", i)].ToInteger(),
+                                        Text = Request.Params[string.Format("new-text-{0}", i)],
+                                        Options = Request.Params[string.Format("new-options-text-{0}", i)],
+                                        Link = Request.Params[string.Format("new-link-text-{0}", i)],
+                                        Description = Request.Params[string.Format("new-description-{0}", i)],
+                                        IsActive = Request.Params[string.Format("new-active-{0}", i)].IsBoolean(),
+                                        IsRequired = Request.Params[string.Format("new-required-{0}", i)].IsBoolean()
+                                    };
+                                    amsgs.AddRange(question.Save(adc));
+                                }
                             }
                         }
                     },
