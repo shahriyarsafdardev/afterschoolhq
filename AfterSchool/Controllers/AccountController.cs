@@ -690,10 +690,13 @@ namespace AfterSchool.Controllers
 
         private List<FormQuestion> RegisterViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
-
-            var requiredQuestions = participationObject.Form
+            var allQuestions = participationObject.Form
                 .GetActiveQuestions(msgs)
-                .Where(question => question.IsRequired && question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual)
+                .ToList();
+            var requiredQuestions = allQuestions
+                .Where(question => question.IsRequired && 
+                    question.FormQuestionGroupRegistrantTypeId == RegistrantType.Individual && 
+                    question.QuestionDataTypeId != QuestionDataType.NotSet)
                 .ToList();
 
             var answers = SessionVariables.CurrentRegistrant.GetAnswers(msgs);
@@ -703,6 +706,12 @@ namespace AfterSchool.Controllers
                 )
                 .Distinct()
                 .ToList();
+
+            questions.AddRange(
+                    allQuestions
+                        .Where(question => question.QuestionDataTypeId == QuestionDataType.NotSet)
+                        .Where(question => answers.Find(answer => answer.FormQuestionId == question.ID).IsEmpty())
+                );
 
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Registrant = SessionVariables.CurrentRegistrant;
@@ -763,6 +772,20 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
+                        // add standardized questions that the student just now answered back to the main profile
+                        // that means no registration id
+                        qvms.Where(qvm => qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
+                        .ToList()
+                        .ForEach(qvm =>
+                        {
+                            SessionVariables.CurrentRegistrant.AddAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Question,
+                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
                         var accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
@@ -788,6 +811,20 @@ namespace AfterSchool.Controllers
                             loggedInUser: SessionVariables.LoggedInUser, 
                             msgs: amsgs, 
                             dc: adc);
+
+                        // add custom answers to questions directly to this registration
+                        qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
+                        .ToList()
+                        .ForEach(qvm =>
+                        {
+                            accountRegistrantCopy.AddAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Question,
+                                registrationId: registration.ID,
+                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
 
                     },
                     onSuccess: (SystemMessages smsgs) =>
