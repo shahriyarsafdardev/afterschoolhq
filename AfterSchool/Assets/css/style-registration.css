@@ -84,7 +84,6 @@
     background: #00ae85;
     color: #fff;
     padding: 11px 0px;
-    /* max-width: 304px; */
     width: 100%;
     border-radius: 24px;
     font-weight: 600;
@@ -95,14 +94,34 @@
     transition: all 0.3s;
 }
 
-.btn-register-xl {
-    font-size: 11px;
+.btn-waitlist {
+    background: #ffad49;
+    color: #fff;
+    padding: 11px 0px;
+    width: 100%;
+    border-radius: 24px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    word-break: break-word;
+    margin-top: 10px;
+    transition: all 0.3s;
 }
 
 .btn-register:hover {
     background: #139476;
     color: #fff;
     transition: all 0.3s;
+}
+
+.btn-waitlist:hover {
+    background: #e59b41;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+.btn-register-xl {
+    font-size: 11px;
 }
 
 .reg-instructions {
