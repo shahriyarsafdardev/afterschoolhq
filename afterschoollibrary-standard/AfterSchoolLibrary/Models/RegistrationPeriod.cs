@@ -319,15 +319,33 @@ namespace AfterSchoolLibrary
             return ActivityRegistrationPeriod.LoadByRegistrationPeriodId(this.ID.Value, msgs, dc);
         }
 
+        public List<Activity> GetActivitiesInLocations(List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var activityIds = GetActivityRegistrationPeriods(msgs, dc)
+                    .Select(x => x.ActivityId.Value)
+                    .ToList();
+
+            return Activity.LoadListWithLocations(
+                    activityIds,
+                    locationIds,
+                    msgs,
+                    dc)
+                .Where(x => !x.IsDeleted)
+                .ToList();
+        }
+
         public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.LoadList(
-                GetActivityRegistrationPeriods(msgs, dc)
+            var activityIds = GetActivityRegistrationPeriods(msgs, dc)
+                    .Where(x => x.IsActive)
                     .Select(x => x.ActivityId.Value)
-                    .ToList(), 
-                msgs, 
-                dc)
-                .Where(x => x.IsDeleted == false)
+                    .ToList();
+
+            return Activity.LoadList(
+                    activityIds, 
+                    msgs, 
+                    dc)
+                .Where(x => !x.IsDeleted)
                 .ToList();
         }
 
@@ -472,10 +490,10 @@ namespace AfterSchoolLibrary
         }
 
         private ActivityGroup _Group = null;
-        public ActivityGroup GetGroup(DatabaseConnection dc = null)
+        public ActivityGroup GetGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Group.IsEmpty())
-                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
+                _Group = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
 
             return _Group;
         }

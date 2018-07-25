@@ -39,8 +39,8 @@ namespace AfterSchoolLibrary.Services
 
                 // if user doesn't have feature then we're updaing in the background
                 // otherwise user may have multiple activities with the same schedule so we cannot update directly on the activity
-                if (account.HasFeature(FeatureType.ManageActivityGroups, dc: dc) == false)
-                {
+                //if (account.HasFeature(FeatureType.ManageActivityGroups, dc: dc) == false)
+                //{
                     msgs.AddRange(schedule.UpdateScheduleAndInstances(
                         schedule.Name,
                         schedule.ScheduleDetails,
@@ -52,7 +52,7 @@ namespace AfterSchoolLibrary.Services
                         scheduledates,
                         loggedInUserId,
                         dc));
-                }
+                //}
             }
 
             return schedule;

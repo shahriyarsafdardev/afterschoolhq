@@ -37,7 +37,7 @@ namespace AfterSchoolLibrary
 		/// <summary>
 		/// The location id of the school the registrant is attending
 		/// </summary>
-		public int? SchoolId { get { return (int?)MDV["SchoolId"].Value; } set { MDV["SchoolId"].Value = value; } }
+		public int? SchoolLocationId { get { return (int?)MDV["SchoolLocationId"].Value; } set { MDV["SchoolLocationId"].Value = value; } }
 		
 
         public Registrant()
@@ -70,7 +70,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "FirstRegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "SchoolId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "SchoolLocationId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -189,7 +189,7 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["SchoolId"]);
+			dps.Add(ObjectMap["SchoolLocationId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -627,10 +627,11 @@ namespace AfterSchoolLibrary
             return answer;
         }
 
-        public SystemMessages AddInviteToActivity(int activityId, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, DatabaseConnection dc = null)
+        public RegistrantActivity AddInviteToActivity(int activityId, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, dc: dc);
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
             if (ra.IsEmpty())
             {
                 ra = new RegistrantActivity();
@@ -652,14 +653,14 @@ namespace AfterSchoolLibrary
 
             ra.RegistrationPeriodId = registrationPeriodId;
             msgs.AddRange(ra.Save(dc: dc));
-            return msgs;
+            return ra;
         }
 
         public SystemMessages AddInviteToActivities(List<int> activityIds, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            activityIds.ForEach(activityId => 
-                msgs.AddRange(this.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, dc: dc))
+            activityIds.ForEach(activityId =>
+                this.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, msgs, dc)
             );
             return msgs;
         }        

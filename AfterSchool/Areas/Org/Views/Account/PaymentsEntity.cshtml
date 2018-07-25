@@ -1,0 +1,340 @@
+﻿@model AfterSchoolLibrary.StripeAccount
+@{
+    var account = (Account)ViewBag.Account;
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+    ViewBag.Title = account.Name;
+
+    var disabled = "";
+    if (Model.IsVerified)
+    {
+        disabled = "disabled=\"disabled\"";
+    }
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", account); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Accept Payments
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-8 col-lg-9">
+
+                @if (Model.IsVerified)
+                {
+                    <div role="alert" class="alert alert-success alert-icon">
+                        <div class="icon">
+                            <span class="s7-check-circle"></span>
+                        </div>
+                        <div class="message">
+                            <p class="text-center">
+                                Your account has been verified.
+                            </p>
+                        </div>
+                    </div>
+                }
+                else if(Model.RequiresFullSSN)
+                {
+                    <div role="alert" class="alert alert-danger alert-icon">
+                        <div class="icon">
+                            <span class="s7-close-circle"></span>
+                        </div>
+                        <div class="message">
+                            <p class="text-center">
+                                It has been determined that your full SSN is required to activate your payments account.
+                            </p>
+                        </div>
+                    </div>
+                }
+                else if(Model.VerificationStatusId == StripeVerificationStatus.Pending)
+                {
+                    
+                     <div role="alert" class="alert alert-info alert-icon">
+                        <div class="icon">
+                            <span class="s7-info"></span>
+                        </div>
+                        <div class="message">
+                            <p class="text-center">
+                                We are verifying your information
+                            </p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                     <div role="alert" class="alert alert-danger alert-icon">
+                        <div class="icon">
+                            <span class="s7-close-circle"></span>
+                        </div>
+                        <div class="message">
+                            <p class="text-center">
+                                You will need to submit the info below within 7 days or payment processing will be suspended.
+                            </p>
+                        </div>
+                    </div>
+                }
+
+
+                <form method="post" action="@Url.Action("paymentsentity", "account")" class="form-horizontal">
+
+                    <div class="form-group">
+                        <div class="text-medium-small text-center">
+                            <p>Are you an Individual or are you representing a Company?</p>
+                        </div>
+                        <div class="text-center">
+
+                            @if (Model.LegalEntityTypeId == LegalEntityType.Individual || !Model.IsVerified)
+                            {
+                                <div class="am-radio inline">
+                                    <input type="radio"
+                                           name="entitytype"
+                                           id="entitytype-individual"
+                                           value="@((int)LegalEntityType.Individual)"
+                                           onclick="showIndividual()"
+                                           @(Model.LegalEntityTypeId == LegalEntityType.Individual ? " checked=\"checked\"" : "") />
+                                    <label for="entitytype-individual">@LegalEntityType.Individual.ToString()</label>
+                                </div>
+                            }
+                            @if (Model.LegalEntityTypeId == LegalEntityType.Company || !Model.IsVerified)
+                            {
+                                <div class="am-radio inline">
+                                    <input type="radio"
+                                           name="entitytype"
+                                           id="entitytype-company"
+                                           value="@((int)LegalEntityType.Company)"
+                                           onclick="showCompany()"
+                                           @(Model.LegalEntityTypeId == LegalEntityType.Company ? " checked=\"checked\"" : "") />
+                                    <label for="entitytype-company">@LegalEntityType.Company.ToString()</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div id="all-info" class="hide">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <span id="personal-info">Personal Information</span>
+                            </div>
+                            <div class="panel-body">
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">First Name <span class="text-danger">*</span></label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="firstname" name="firstname" value="@Model.LegalEntityFirstName" onfocus="this.select()" required @disabled />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Last Name <span class="text-danger">*</span></label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="lastname" name="lastname" value="@Model.LegalEntityLastName" onfocus="this.select()" required @disabled />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Date of Birth <span class="text-danger">*</span></label>
+                                    <div class="col-sm-8">
+                                        <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                            <input type="text" class="form-control" id="dateofbirth" name="dateofbirth" onfocus="this.select()" data-type="date" value="@Model.LegalEntityDOB.ToShortDateString()" @disabled />
+                                            <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (!Model.IsVerified)
+                                {
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">SSN(last 4) <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="ssnlast4" name="ssnlast4" value="@Model.LegalEntitySSNLast4" onfocus="this.select()" maxlength="4" required @disabled />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group hide" id="full-ssn">
+                                        <label class="col-sm-4 control-label">SSN <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="ssn" name="ssn" value="" onfocus="this.select()" maxlength="9" @disabled />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div id="contact-info">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <span>Contact Information</span>
+                                </div>
+                                <div class="panel-body">
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Support Email <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="supportemail" name="supportemail" value="@Model.SupportEmail" onfocus="this.select()" required @disabled />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Support Phone <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="supportphone" name="supportphone" value="@Model.SupportPhone" onfocus="this.select()" required @disabled />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Website <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="businessUrl" name="businessUrl" value="@Model.BusinessUrl" onfocus="this.select()" @disabled />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="company-info">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <span>Company Information</span>
+                                </div>
+                                <div class="panel-body">
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Legal Business Name <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control business-input" id="legalbusinessname" name="legalbusinessname" value="@Model.LegalEntityBusinessName" onfocus="this.select()" @disabled />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Employer Identification Number (EIN) <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control business-input" id="ein" name="ein" value="@Model.LegalEntityEIN" onfocus="this.select()" @disabled />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="address-info">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <span id="address-header">Legal Address</span>
+                                </div>
+                                <div class="panel-body">
+                                    @{
+                                        Html.RenderPartial(
+                                            "~/Views/Shared/_Address.cshtml",
+                                            Model.ToAddressViewModel(),
+                                            new ViewDataDictionary()
+                                            {
+                                                { "address1required", true },
+                                                { "cityrequired", true },
+                                                { "staterequired", true },
+                                                { "postalcoderequired", true },
+                                                { "labelcolwidth", 4 },
+                                                { "disabled", Model.IsVerified }
+                                            });
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div id="tos-info" class="padding-20">
+                            <div class="text-center">
+                                @if (!Model.IsVerified && Model.VerificationStatusId != StripeVerificationStatus.Pending)
+                                {
+                                    <div class="am-checkbox inline">
+                                        <input type="checkbox" name="tosagree" id="tosagree" value="1" />
+                                        <label class="control-label" for="tosagree">
+                                            I agree to the <a href="#" target="_blank">Terms of Services</a> and <a href="#" target="_blank">Stripe Terms of Services</a>
+                                        </label>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p>You have agreed to the <a href="#" target="_blank">Terms of Services</a> and <a href="#" target="_blank">Stripe Terms of Services</a> on @Model.TOSAcceptanceDate.ToLongDateTimeString()</p>
+                                }
+                            
+                            </div>
+                        </div>
+
+                        <div><p>&nbsp;</p></div>
+
+                        @if (!Model.IsVerified && Model.VerificationStatusId != StripeVerificationStatus.Pending)
+                        {
+                            <div class="form-group margin-10 text-center">
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-xl">Update and Activate Payments &raquo;</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </form>
+
+                <div>
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                </div>
+
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                @{
+                    Html.RenderPartial("~/Views/Shared/_AccountPaymentEditNav.cshtml", account); 
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    function showIndividual() {
+        if ($('#entitytype-individual').is(':checked')) {
+            $('#all-info').removeClass('hide');
+            $('#company-info').addClass('hide');
+
+            $('#address-header').html('Personal Address');
+            $('#personal-info').html('Personal Information');
+
+            $('.business-input').removeAttr('required');
+        }
+    }
+
+    function showCompany() {
+        if ($('#entitytype-company').is(':checked')) {
+            $('#all-info').removeClass('hide');
+            $('#company-info').removeClass('hide');
+
+            $('#address-header').html('Company Legal Address');
+            $('#personal-info').html('Legal Company Representative');
+
+            $('.business-input').attr('required', 'required');
+        }
+    }
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        if (@((int)Model.LegalEntityTypeId) == '@((int)LegalEntityType.Company)')
+            showCompany();
+        else
+            showIndividual();
+
+        if (@Model.RequiresFullSSN.ToString().ToLower() == true) {
+            $('#full-ssn').removeClass('hide');
+            $('#full-ssn').attr('required', 'required');
+        }
+            
+    });
+
+</script>

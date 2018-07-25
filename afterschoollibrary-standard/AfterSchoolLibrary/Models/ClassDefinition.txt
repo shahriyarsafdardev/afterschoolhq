@@ -47,9 +47,6 @@ property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
 property: AllowTextMessages, bool, Bit
-baseproperty: FirstName, required
-baseproperty: LastName, required
-baseproperty: Email, required
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>
@@ -301,7 +298,7 @@ property: StripePublishableKey, string, NVarChar(100)
 property: StripeSecretKey, string, NVarChar(100)
 property: Uid, Guid, UniqueIdentifier, required
 property: UniqueName, string, NVarChar(50)
-property: OwnerId, int?, Int, required
+property: OwnerId, int?, Int, , WebUser id that owns/created the account
 property: IsAdminAccount, bool, Bit
 property: IsActive, bool, Bit
 property: IsAfterSchool, bool, Bit
@@ -345,7 +342,18 @@ property: LegalEntityState, string, NVarChar(50)
 property: LegalEntityPostalCode, string, NVarChar(20)
 property: TOSAcceptanceDate, DateTime?, DateTime
 property: TOSAcceptanceIP, string, NVarChar(20)
+property: TOSAcceptanceUserAgent, string, NVarChar(400)
 property: LegalEntityTypeId, LegalEntityType, Int
+property: BusinessPhone, string, NVarChar(20)
+property: SupportPhone, string, NVarChar(50)
+property: SupportEmail, string, NVarChar(100)
+property: BusinessUrl, string, NVarChar(100)
+property: RequiresFullSSN, bool, Bit
+property: VerificationStatusId, StripeVerificationStatus, Int
+property: ChargesEnabled, bool, Bit
+property: BankAccountId, string, NVarChar(50)
+property: BankName, string, NVarChar(50)
+property: BankLast4, string, NVarChar(4)
 loadmethod: AccountId
 [end]
 
@@ -560,7 +568,7 @@ property: IsContactOnly, bool, Bit
 property: FirstRegistrantId, int?, Int
 property: IsParentOrGuardian, bool, Bit
 property: AllowTextMessages, bool, Bit
-property: SchoolId, int?, Int, , The location id of the school the registrant is attending
+property: SchoolLocationId, int?, Int, , The location id of the school the registrant is attending
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId, List<>
@@ -1547,11 +1555,17 @@ values: NotSet, PerRegistrant, PerActivity
 [begin]
 type: Enum
 name: LocationType
-values: NotSet, School
+values: NotSet, School, Business, NonProfit
 [end]
 
 [begin]
 type: Enum
 name: LegalEntityType
 values: NotSet, Individual, Company
+[end]
+
+[begin]
+type: Enum
+name: StripeVerificationStatus
+values: NotSet, Unverified, Pending, Verified
 [end]

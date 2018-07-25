@@ -1,239 +1,268 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Web;
-//using System.Web.Mvc;
-//using AfterSchoolLibrary;
-//using BasicLibrary;
-//using AfterSchool.Models;
-//using AfterSchool.Helpers;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using AfterSchoolLibrary;
+using BasicLibrary;
+using AfterSchool.Models;
+using AfterSchool.Helpers;
 
-//namespace AfterSchool.Controllers
-//{
-//    public class ServicesController : BaseController
-//    {
-//        // GET: Services
+namespace AfterSchool.Controllers
+{
+    public class ServicesController : BaseController
+    {
+        // GET: Services
 
-//        public ActionResult SetGrade(string id)
-//        {
-//            var msgs = new SystemMessages();
-//            Response.Clear();
-//            if (id.IsNumber())
-//            {
-//                if (SessionVariables.Cart.IsEmpty())
-//                {
-//                    SessionVariables.Cart = Cart.GetNewCart(msgs: msgs);
-//                }
-//                SessionVariables.Cart.GradeLevel = id.ToInteger();
-//            }
+        public ActionResult SearchLocations(string search)
+        {
+            var msgs = new SystemMessages();
+            var locations = Location.Search(search.Trim(), 0, 10, msgs);
 
-//            HandleErrors(msgs, ResponseType.JSON);
-//            Response.End();
-//            return View();
-//        }
+            Response.Clear();
+            WriteOutput(new
+            {
+                status = "ok",
+                locations = locations.Select(location => new
+                {
+                    location.ID,
+                    location.Name,
+                    location.Address1,
+                    location.Address2,
+                    location.City,
+                    location.State,
+                    location.PostalCode,
+                    FullAddress = location.FormatAddress(useLineBreaks: false),
+                    location.HostAccountId,
+                    LocationType = location.LocationTypeId.ToString()
+                })
+            },
+            ResponseType.JSON);
+            Response.End();
 
-//        public ActionResult SetGender(string id)
-//        {
-//            var msgs = new SystemMessages();
-//            Response.Clear();
-//            if (id.IsNumber())
-//            {
-//                if (SessionVariables.Cart.IsEmpty())
-//                {
-//                    SessionVariables.Cart = Cart.GetNewCart(msgs: msgs);
-//                }
-//                SessionVariables.Cart.Gender = (GenderType)id.ToInteger();
-//            }
+            return View();
+        }
 
-//            HandleErrors(msgs, ResponseType.JSON);
-//            Response.End();
-//            return View();
-//        }
+        //public ActionResult SetGrade(string id)
+        //{
+        //    var msgs = new SystemMessages();
+        //    Response.Clear();
+        //    if (id.IsNumber())
+        //    {
+        //        if (SessionVariables.Cart.IsEmpty())
+        //        {
+        //            SessionVariables.Cart = Cart.GetNewCart(msgs: msgs);
+        //        }
+        //        SessionVariables.Cart.GradeLevel = id.ToInteger();
+        //    }
 
-//        public ActionResult SetAge(string id)
-//        {
-//            var msgs = new SystemMessages();
-//            Response.Clear();
-//            if (id.IsNumber())
-//            {
-//                if (SessionVariables.Cart.IsEmpty())
-//                {
-//                    SessionVariables.Cart = Cart.GetNewCart(msgs: msgs);
-//                }
-//                SessionVariables.Cart.Age = id.ToInteger();
-//            }
+        //    HandleErrors(msgs, ResponseType.JSON);
+        //    Response.End();
+        //    return View();
+        //}
 
-//            HandleErrors(msgs, ResponseType.JSON);
-//            Response.End();
-//            return View();
-//        }
+        //public ActionResult SetGender(string id)
+        //{
+        //    var msgs = new SystemMessages();
+        //    Response.Clear();
+        //    if (id.IsNumber())
+        //    {
+        //        if (SessionVariables.Cart.IsEmpty())
+        //        {
+        //            SessionVariables.Cart = Cart.GetNewCart(msgs: msgs);
+        //        }
+        //        SessionVariables.Cart.Gender = (GenderType)id.ToInteger();
+        //    }
 
-//        public ActionResult CartItemsGet()
-//        {
-//            var msgs = new SystemMessages();
-//            Response.Clear();
-//            if (msgs.HasNoErrors())
-//            {
-//                var list = new List<object>();
-//                var items = new List<CartItem>();
+        //    HandleErrors(msgs, ResponseType.JSON);
+        //    Response.End();
+        //    return View();
+        //}
 
-//                if (SessionVariables.Cart.IsNotEmpty())
-//                {
-//                    items = SessionVariables.Cart.GetCartItems();
-//                }
+        //public ActionResult SetAge(string id)
+        //{
+        //    var msgs = new SystemMessages();
+        //    Response.Clear();
+        //    if (id.IsNumber())
+        //    {
+        //        if (SessionVariables.Cart.IsEmpty())
+        //        {
+        //            SessionVariables.Cart = Cart.GetNewCart(msgs: msgs);
+        //        }
+        //        SessionVariables.Cart.Age = id.ToInteger();
+        //    }
 
-//                foreach(var x in items)
-//                {
-//                    var dows = new List<object>();
-//                    var activity = Activity.Load(x.ActivityId.Value);
+        //    HandleErrors(msgs, ResponseType.JSON);
+        //    Response.End();
+        //    return View();
+        //}
 
-//                    foreach(var y in activity.GetDaysOfTheWeek())
-//                    {
-//                        dows.Add(new
-//                        {
-//                            Day = y.ToString(),
-//                            SeatsRemaining = activity.GetSeatsRemaining(),
-//                            WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(),                           
-//                        });
-//                    }
+        //public ActionResult CartItemsGet()
+        //{
+        //    var msgs = new SystemMessages();
+        //    Response.Clear();
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        var list = new List<object>();
+        //        var items = new List<CartItem>();
 
-//                    list.Add(new
-//                    {
-//                        Name = activity.Name,
-//                        Uid = activity.Uid,
-//                        Days = dows,
-//                        Cost = activity.CostPerRegistrant.ToCurrency().Replace("$", ""),
-//                        IsRegistered = x.RegistrantActivityId.HasValue
-//                    });
-//                }
-                
-//                WriteOutput(new { status = "ok", cartItems = list }, ResponseType.JSON);
-//            }
-//            else
-//            {
-//                HandleErrors(msgs, ResponseType.JSON);
-//            }
-//            Response.End();
-//            return View();
-//        }
+        //        if (SessionVariables.Cart.IsNotEmpty())
+        //        {
+        //            items = SessionVariables.Cart.GetCartItems();
+        //        }
 
-//        public ActionResult CartItemAdd(string uid)
-//        {
-//            var msgs = new SystemMessages();
-//            Activity activity = null;
+        //        foreach (var x in items)
+        //        {
+        //            var dows = new List<object>();
+        //            var activity = Activity.Load(x.ActivityId.Value);
 
-//            if (SessionVariables.Cart.IsEmpty())
-//            {
-//                SessionVariables.Cart = Cart.GetNewCart(msgs: msgs);
-//            }
+        //            foreach (var y in activity.GetDaysOfTheWeek())
+        //            {
+        //                dows.Add(new
+        //                {
+        //                    Day = y.ToString(),
+        //                    SeatsRemaining = activity.GetSeatsRemaining(),
+        //                    WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(),
+        //                });
+        //            }
 
-//            activity = Activity.LoadByUid(uid.ToGuid());
-//            if (activity.IsNotEmpty())
-//            {               
-//                SessionVariables.Cart.AddCartItem(activity.ID.Value, DayOfWeekASL.NotSet, null, msgs);
-//            }
-//            else
-//            {
-//                msgs.Add("Invalid activity", MessageType.UserError);
-//            }
+        //            list.Add(new
+        //            {
+        //                Name = activity.Name,
+        //                Uid = activity.Uid,
+        //                Days = dows,
+        //                Cost = activity.CostPerRegistrant.ToCurrency().Replace("$", ""),
+        //                IsRegistered = x.RegistrantActivityId.HasValue
+        //            });
+        //        }
 
-//            Response.Clear();
-//            if (msgs.HasNoErrors())
-//            {
-//                WriteOutput(new { status = "ok" }, ResponseType.JSON);
-//            }
-//            else
-//            {
-//                HandleErrors(msgs, ResponseType.JSON);
-//            }
-//            Response.End();
+        //        WriteOutput(new { status = "ok", cartItems = list }, ResponseType.JSON);
+        //    }
+        //    else
+        //    {
+        //        HandleErrors(msgs, ResponseType.JSON);
+        //    }
+        //    Response.End();
+        //    return View();
+        //}
 
-//            return View();
-//        }
+        //public ActionResult CartItemAdd(string uid)
+        //{
+        //    var msgs = new SystemMessages();
+        //    Activity activity = null;
 
-//        public ActionResult CartItemRemove(string uid)
-//        {
-//            var msgs = new SystemMessages();
+        //    if (SessionVariables.Cart.IsEmpty())
+        //    {
+        //        SessionVariables.Cart = Cart.GetNewCart(msgs: msgs);
+        //    }
 
-//            if (SessionVariables.Cart.IsNotEmpty())
-//            {
-//                var items = SessionVariables.Cart.GetCartItems();
-//                var activity = Activity.LoadByUid(uid.ToGuid());
+        //    activity = Activity.LoadByUid(uid.ToGuid());
+        //    if (activity.IsNotEmpty())
+        //    {
+        //        SessionVariables.Cart.AddCartItem(activity.ID.Value, DayOfWeekASL.NotSet, null, msgs);
+        //    }
+        //    else
+        //    {
+        //        msgs.Add("Invalid activity", MessageType.UserError);
+        //    }
 
-//                if (activity.IsNotEmpty() && items.Count > 0)
-//                {
-//                    var item = items.Where(x => x.ActivityId == activity.ID.Value).FirstOrDefault();
-//                    if (item.IsNotEmpty())
-//                    {
-//                        msgs.AddRange(item.Delete());
-//                        SessionVariables.Cart.ResetCartItems();
-//                    }
-//                }
-//            }
+        //    Response.Clear();
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        WriteOutput(new { status = "ok" }, ResponseType.JSON);
+        //    }
+        //    else
+        //    {
+        //        HandleErrors(msgs, ResponseType.JSON);
+        //    }
+        //    Response.End();
 
-//            Response.Clear();
-//            if (msgs.HasNoErrors())
-//            {
-//                WriteOutput(new { status = "ok" }, ResponseType.JSON);
-//            }
-//            else
-//            {
-//                HandleErrors(msgs, ResponseType.JSON);
-//            }
-//            Response.End();
+        //    return View();
+        //}
 
-//            return View();
-//        }
+        //public ActionResult CartItemRemove(string uid)
+        //{
+        //    var msgs = new SystemMessages();
 
-//        public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)
-//        {
-//            var msgs = new SystemMessages();
+        //    if (SessionVariables.Cart.IsNotEmpty())
+        //    {
+        //        var items = SessionVariables.Cart.GetCartItems();
+        //        var activity = Activity.LoadByUid(uid.ToGuid());
 
-//            var status = "";
+        //        if (activity.IsNotEmpty() && items.Count > 0)
+        //        {
+        //            var item = items.Where(x => x.ActivityId == activity.ID.Value).FirstOrDefault();
+        //            if (item.IsNotEmpty())
+        //            {
+        //                msgs.AddRange(item.Delete());
+        //                SessionVariables.Cart.ResetCartItems();
+        //            }
+        //        }
+        //    }
 
-//            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-//            {
-//                msgs.Add("Please enter an email", MessageType.UserError);
-//            }
-//            if (subject.IsBlank())
-//            {
-//                msgs.Add("Please enter a subject", MessageType.UserError);
-//            }
-//            if (message.IsBlank())
-//            {
-//                msgs.Add("Please enter a message", MessageType.UserError);
-//            }
+        //    Response.Clear();
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        WriteOutput(new { status = "ok" }, ResponseType.JSON);
+        //    }
+        //    else
+        //    {
+        //        HandleErrors(msgs, ResponseType.JSON);
+        //    }
+        //    Response.End();
 
-//            msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+        //    return View();
+        //}
 
-//            if (msgs.HasNoErrors())
-//            {
-//                /*
-//                var msg = new System.Net.Mail.MailMessage();
-//                msg.To.Add(AfterSchoolLibrary.Email.AppAdminEmailAddress);
-//                msg.From = new System.Net.Mail.MailAddress(AfterSchoolLibrary.Email.AppEmailAddress);
-//                msg.Subject = string.Format("WEBSITE FORM: {0}", subject);
-//                msg.Body = string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message);
-//                msg.IsBodyHtml = true;
+        public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)
+        {
+            var msgs = new SystemMessages();
 
-//                AfterSchoolLibrary.Email.SendMail(msg);
-//                */
+            var status = "";
 
-//                AfterSchoolLibrary.SendGridHelper.SendMail(
-//                    fromEmail: AfterSchoolLibrary.Email.AppEmailAddress,
-//                    toEmail: AfterSchoolLibrary.Email.AppAdminEmailAddress,
-//                    subject: string.Format("WEBSITE FORM: {0}", subject),
-//                    body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message)
-//                );
+            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+            {
+                msgs.Add("Please enter an email", MessageType.UserError);
+            }
+            if (subject.IsBlank())
+            {
+                msgs.Add("Please enter a subject", MessageType.UserError);
+            }
+            if (message.IsBlank())
+            {
+                msgs.Add("Please enter a message", MessageType.UserError);
+            }
 
-//                status = "ok";
-//            }
-//            else
-//            {
-//                status = "error";
-//            }
+            msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
 
-//            return new JsonResult { Data = new { status = status, messages = msgs } };
-//        }
-//    }
-//}
+            if (msgs.HasNoErrors())
+            {
+                /*
+                var msg = new System.Net.Mail.MailMessage();
+                msg.To.Add(AfterSchoolLibrary.Email.AppAdminEmailAddress);
+                msg.From = new System.Net.Mail.MailAddress(AfterSchoolLibrary.Email.AppEmailAddress);
+                msg.Subject = string.Format("WEBSITE FORM: {0}", subject);
+                msg.Body = string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message);
+                msg.IsBodyHtml = true;
+
+                AfterSchoolLibrary.Email.SendMail(msg);
+                */
+
+                AfterSchoolLibrary.SendGridHelper.SendMail(
+                    fromEmail: AfterSchoolLibrary.Email.AppEmailAddress,
+                    toEmail: AfterSchoolLibrary.Email.AppAdminEmailAddress,
+                    subject: string.Format("WEBSITE FORM: {0}", subject),
+                    body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message)
+                );
+
+                status = "ok";
+            }
+            else
+            {
+                status = "error";
+            }
+
+            return new JsonResult { Data = new { status = status, messages = msgs } };
+        }
+    }
+}

@@ -1,5 +1,5 @@
 ﻿@model AfterSchoolLibrary.Activity
-@{ 
+@{
     var grades = GradeLevel.Load();
 }
 <div class="panel panel-default">
@@ -7,6 +7,7 @@
         Restrictions
     </div>
     <div class="panel-body">
+        @*
         <div class="form-group hide">
             <label class="col-md-3 control-label">
                 Allow Organizations to Register
@@ -18,14 +19,15 @@
                             Model.AllowOrganizationRegistration,
                             new ViewDataDictionary()
                             {
-                                { "checkboxname", "alloworganization" },
-                                { "checkboxid", "alloworganization" },
-                                { "disabled", false }
+                                            { "checkboxname", "alloworganization" },
+                                            { "checkboxid", "alloworganization" },
+                                            { "disabled", false }
                             }
                         );
                 }
             </div>
         </div>
+        *@
 
         <div class="form-group">
             <label class="col-md-3 control-label">
@@ -34,32 +36,32 @@
             <div class="col-md-9">
                 <div class="am-radio inline">
                     @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
-                    {
-                        <input type="radio" name="genderrestrictions" id="genderrestrictions-@((int)item)" @(Model.GenderRestriction == item ? " checked=\"checked\" " : "") value="@((int)item)" />
-                        <label for="genderrestrictions-@((int)item)" class="margin-h-10">
-                            @item.ToString().SplitByUpperCase()
-                        </label>
-                    }
+                {
+                    <input type="radio" name="genderrestrictions" id="genderrestrictions-@((int)item)" @(Model.GenderRestriction == item ? " checked=\"checked\" " : "") value="@((int)item)" />
+                    <label for="genderrestrictions-@((int)item)" class="margin-h-10">
+                        @item.ToString().SplitByUpperCase()
+                    </label>
+            }
                 </div>
             </div>
         </div>
-
-        <div class="form-group">
+        @*
+        <div class="form-group hide">
             <label class="col-md-3 control-label">
                 Age Restrictions
             </label>
             <div class="col-md-1">
                 @{Html.RenderPartial
-                    (
-                        "~/Views/Shared/_SwitchButton.cshtml",
-                        Model.AgeStart.HasValue,
-                        new ViewDataDictionary()
-                        {
-                            { "checkboxname", "agerestrictions" },
-                            { "checkboxid", "agerestrictions" },
-                            { "disabled", false }
-                        }
-                    );
+                      (
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.AgeStart.HasValue,
+                          new ViewDataDictionary()
+                          {
+                                    { "checkboxname", "agerestrictions" },
+                                    { "checkboxid", "agerestrictions" },
+                                    { "disabled", false }
+                          }
+                      );
                 }
             </div>
             <div class="col-md-8 hide" id="age">
@@ -78,25 +80,25 @@
                         <option value="@i" @(Model.AgeEnd == i ? " selected=\"selected\" " : "")>@i</option>
                     }
                 </select>
-            </div>           
+            </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group hide">
             <label class="col-md-3 control-label">
                 Grade Restrictions
             </label>
             <div class="col-md-1">
                 @{Html.RenderPartial
-                    (
-                        "~/Views/Shared/_SwitchButton.cshtml",
-                        Model.GetGradeLevels().Count > 0,
-                        new ViewDataDictionary()
-                        {
-                            { "checkboxname", "graderestrictions" },
-                            { "checkboxid", "graderestrictions" },
-                            { "disabled", false }
-                        }
-                    );
+                      (
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.GetGradeLevels().Count > 0,
+                          new ViewDataDictionary()
+                          {
+                                    { "checkboxname", "graderestrictions" },
+                                    { "checkboxid", "graderestrictions" },
+                                    { "disabled", false }
+                          }
+                      );
                 }
             </div>
             <div class="col-md-8 hide" id="grade">
@@ -116,61 +118,73 @@
                 }
             </div>
         </div>
+        *@
+
+        @{
+        Html.RenderPartial(
+            "~/Views/Shared/_GradeRestrictions.cshtml",
+            null,
+            new ViewDataDictionary() { { "minGradeLevelId", Model.GradeLevelStart }, { "MaxGradeLevelId", Model.GradeLevelEnd }, { "grades", grades } }
+            );
+        }
+
     </div>
 </div>
 
-<script>
-    PageEvent.add(
-        PageEvent.AFTER_INIT,
-        function () {
-            $('#agerestrictions').click(function() {
+@*
+    <script>
+        PageEvent.add(
+            PageEvent.AFTER_INIT,
+            function () {
+                $('#agerestrictions').click(function() {
+                    ageCheck();
+                });
+                $('#graderestrictions').click(function() {
+                    gradeCheck();
+                });
+
+                $('#agestart').change(function() {
+                    if(parseInt($(this).val()) > parseInt($('#ageend').val())){
+                        $('#ageend').val($(this).val());
+                    }
+                });
+
+                $('#gradestart').change(function() {
+                    if(parseInt($(this).val()) > parseInt($('#gradeend').val())){
+                        $('#gradeend').val($(this).val());
+                    }
+                });
+
                 ageCheck();
-            });
-            $('#graderestrictions').click(function() {
                 gradeCheck();
-            });
+            }
+        );
 
-            $('#agestart').change(function() {
-                if(parseInt($(this).val()) > parseInt($('#ageend').val())){
-                    $('#ageend').val($(this).val());
-                }
-            });
+        function ageCheck(){
+            if ($('#agerestrictions').is(':checked')) {
+                $('#age').removeClass('hide');
+                $('#graderestrictions').prop('disabled', true);
 
-            $('#gradestart').change(function() {
-                if(parseInt($(this).val()) > parseInt($('#gradeend').val())){
-                    $('#gradeend').val($(this).val());
-                }
-            });
+                $('.gradelevel').prop('checked', false);
+                $('.gradelevel').prop('disabled', true);
 
-            ageCheck();
-            gradeCheck();
+            } else {
+                $('#age').addClass('hide');
+                $('#graderestrictions').prop('disabled', false);
+                $('.gradelevel').prop('disabled', false);
+            }
         }
-    );
 
-    function ageCheck(){
-        if ($('#agerestrictions').is(':checked')) {
-            $('#age').removeClass('hide');
-            $('#graderestrictions').prop('disabled', true);
-
-            $('.gradelevel').prop('checked', false);
-            $('.gradelevel').prop('disabled', true);
-
-        } else {
-            $('#age').addClass('hide');
-            $('#graderestrictions').prop('disabled', false);
-            $('.gradelevel').prop('disabled', false);
+        function gradeCheck() {
+            if ($('#graderestrictions').is(':checked')) {
+                $('#grade').removeClass('hide');
+                $('#agerestrictions').prop('disabled', true);
+                $('.gradelevel').prop('disabled', false);
+            } else {
+                $('#grade').addClass('hide');
+                $('#agerestrictions').prop('disabled', false);
+                $('.gradelevel').prop('disabled', true);
+            }
         }
-    }
-
-    function gradeCheck() {
-        if ($('#graderestrictions').is(':checked')) {
-            $('#grade').removeClass('hide');
-            $('#agerestrictions').prop('disabled', true);
-            $('.gradelevel').prop('disabled', false);
-        } else {
-            $('#grade').addClass('hide');
-            $('#agerestrictions').prop('disabled', false);
-            $('.gradelevel').prop('disabled', true);
-        }
-    }
-</script>
+    </script>
+*@

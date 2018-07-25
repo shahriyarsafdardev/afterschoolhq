@@ -66,11 +66,13 @@
                             <option value="0"> + New @UILabel.RegistrationPeriodLabel()</option>
                             @foreach (var period in periods)
                             {
-                                <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>@period.Name</option>
+                                <option value="@period.ID" @(activePeriod?.ID == period.ID ? " selected=\"selected\" " : "")>
+                                    @period.StartDateTime.ToShortDateTimeString() - @period.EndDateTime.ToShortDateTimeString()
+                                </option>
                             }
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 hide">
                         <a class="btn btn-block btn-link" href="@Url.Action("edit", "period", new { id = activePeriod?.ID })" id="editPeriod" target="_blank">
                             Edit @UILabel.RegistrationPeriodLabel()
                         </a>

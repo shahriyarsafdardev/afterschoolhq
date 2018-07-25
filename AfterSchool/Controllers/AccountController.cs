@@ -137,6 +137,7 @@ namespace AfterSchool.Controllers
                             isMaster: true, 
                             isParentOrGuardian: true,
                             allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
+                            schoolLocationId: null,
                             loggedInUser: user,
                             msgs: amsgs, 
                             dc: adc);
@@ -393,7 +394,7 @@ namespace AfterSchool.Controllers
 
         #region AddStudent
 
-        private List<FormQuestion> AddStudentViewBag(SystemMessages msgs)
+        private List<FormQuestion> AddStudentViewBag(ParticipationObject participationObject, SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
             var studentQuestionGroup = form.GetQuestionGroups(msgs)
@@ -426,7 +427,17 @@ namespace AfterSchool.Controllers
                     }
                 });
 
+            var account = participationObject.OwnerAccount;
+            var location = participationObject.Location;
+            //var schools = new List<Location>();
+
+            //if (location.IsNotEmpty())
+            //    schools = Location.LoadByLocationTypeIdByCityByState(LocationType.School, location?.City, location?.State, msgs);
+
+            ViewBag.Account = account;
             ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.School = new Location();
+            ViewBag.SchoolLocation = location;
 
             return questions;
         }
@@ -442,7 +453,8 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-            var questions = AddStudentViewBag(msgs);
+            var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
+            var questions = AddStudentViewBag(participationObject, msgs);
             var values = new NameValueCollection();
 
             questions.ForEach(question => {
@@ -465,7 +477,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddStudent(string id, string samehomeaddress)
+        public ActionResult AddStudent(string id, string samehomeaddress, string location)
         {
             if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
                 return RedirectToAction("");
@@ -475,7 +487,8 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
-            var questions = AddStudentViewBag(msgs);
+            var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
+            var questions = AddStudentViewBag(participationObject, msgs);
 
             questions.ForEach(question => {
                 if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
@@ -499,6 +512,7 @@ namespace AfterSchool.Controllers
                             isMaster: true,
                             isParentOrGuardian: false,
                             allowTextMessages: false,
+                            schoolLocationId: location.IsNumber() ? location.ToInteger() : new int?(),
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -684,6 +698,9 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("");
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
+                return RedirectToAction("");
+
+            if (SessionVariables.Cart.IsEmpty())
                 return RedirectToAction("");
 
             //if (SessionVariables.CurrentRegistrant.IsNotEmpty())

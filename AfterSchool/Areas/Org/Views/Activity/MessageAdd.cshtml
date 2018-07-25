@@ -41,12 +41,16 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Body</label>
                         <div class="col-sm-6">
-                            <div class="text-editor" id="body-div">
-                            </div>
-                            <textarea name="body" id="body" class="hide" required></textarea>
-                            <!--
-                            <textarea name="body" id="body" class="form-control" rows="10" required></textarea>
-                            -->
+                            @{ Html.RenderPartial(
+                              "~/Views/Shared/_TextEditor.cshtml",
+                              "",
+                              new ViewDataDictionary() {
+                                    { "required", true },
+                                    { "name", "body" },
+                                    { "id", "body" }
+                              }
+                              ); }
+
                         </div>
                     </div>
 
@@ -95,20 +99,4 @@
             $(this).prop('checked', false);
         });
     }
-</script>
-
-
-<script>
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('.text-editor').wysihtml5({
-            toolbar: {
-                'image': false,
-                'color': false,
-            }
-        });
-
-        $('.text-editor').on('blur', function () {
-            $('#body').val($('#body-div').html());
-        });
-    });
 </script>

@@ -1,0 +1,108 @@
+﻿@model AfterSchoolLibrary.StripeAccount
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var account = (Account)ViewBag.Account;
+
+    ViewBag.Title = account.Name;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", account.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", account);}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Accept Payments
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-8 col-lg-9">      
+
+                @if (Model.BankAccountId.IsNotEmpty())
+                {
+                     <div role="alert" class="alert alert-success alert-icon">
+                        <div class="icon">
+                            <span class="s7-info"></span>
+                        </div>
+                        <div class="message">
+                            <p class="text-center">
+                                Your bank account is now connected
+                            </p>
+                        </div>
+                    </div>
+
+                    <div><p><br /><br /></p></div>
+                    <div class="row">
+                        <div class="col-md-offset-4 col-md-4 text-center">
+                            <i class="s7-culture icon-large"></i>
+                            <p class="text-medium">
+                                @Model.BankName
+                                *** *** @Model.BankLast4
+                            </p>
+                        </div>
+                    </div>
+                    <div><p><br /><br /></p></div>
+                    <hr />
+                }
+
+                <form method="post" action="@Url.Action("paymentsbank", "account")" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label"></label>
+                        <div class="col-sm-8">
+                            <p class="text-center">
+                                @if (Model.BankAccountId.IsNotEmpty())
+                                {
+                                    @:Update your bank account information
+                                }
+                                else
+                                {
+                                    @:Enter your bank account information
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Routing # <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="routingnumber1" name="routingnumber1" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Routing # Confirm <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="routingnumber2" name="routingnumber2" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Account # <span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="accountnumber1" name="accountnumber1" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Account # Confirm<span class="text-danger">*</span></label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="accountnumber2" name="accountnumber2" value="" onfocus="this.select()" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <label class="col-sm-4 control-label"></label>
+                        <div class="col-sm-8">
+                            <button type="submit" class="btn btn-primary btn-xl">Save Bank Information &raquo;</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                @{Html.RenderPartial("~/Views/Shared/_AccountPaymentEditNav.cshtml", account); }
+            </div>
+        </div>
+
+    </div>
+</div>

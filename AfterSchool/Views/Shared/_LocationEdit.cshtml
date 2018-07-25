@@ -1,16 +1,38 @@
 ﻿@model Location
 
 @{ 
-    var accountId = (int)ViewData["accountId"];
-   
+    var accountId = 0;
+    var searchOnly = false;
+    var label = "Enter your location";
+    var placeholderText = "Search Locations...";
+
+    if (ViewData["searchonly"].IsNotEmpty())
+    {
+        searchOnly = (bool)ViewData["searchonly"];
+    }
+
+    if (ViewData["label"].IsNotEmpty())
+    {
+        label = ViewData["label"].ToString();
+    }
+
+    if (ViewData["placeholderText"].IsNotEmpty())
+    {
+        placeholderText = ViewData["placeholderText"].ToString();
+    }
+
+    if (!searchOnly)
+    {
+        accountId = (int)ViewData["accountId"];
+    }
 }
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
-        Enter your location <span class="text-danger">*</span>
+        @label
     </label>
-    <div class="col-sm-9" style="position:relative;">
-        <input type="text" class="form-control" id="location-search" name="location-search" value="@Model.FormatAddress(false)" placeholder="Search Locations..." autocomplete="off" />
+    <div class="col-sm-6" style="position:relative;">
+        <input type="text" class="form-control" id="location-search" name="location-search" value="@Model.FormatAddress(false)" placeholder="@placeholderText" autocomplete="off" />
         <input type="hidden" name="location" id="location" value="@(Model?.ID)" />
         <input type="hidden" name="hostaccount" id="hostaccount" value="" />
         <div id="location-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;">
@@ -37,7 +59,7 @@
         $(`#location-${id}`).removeClass('bg-warning');
     }
 
-    function locationMouseClick(id, fullAddress, hostAccount) {
+    function locationMouseClick(id, fullAddress, hostAccount, locationType) {
         locationList.addClass('hide');
 
         if (id > 0) {
@@ -46,14 +68,34 @@
             locationSearch.val(fullAddress);
             $('#hostaccount').val(hostAccount);
 
+            $('#mylocation').prop('checked', false);
+            $('#isschool').prop('checked', false);
+
+            if (locationType.toLowerCase() == "school") {
+                $('#isschool').prop('checked', true);
+            }
+
             if (hostAccount.length > 0 && hostAccount != @accountId) {
                 $('#hostaccount-div').addClass('hide');
                 $('#isschool-div').addClass('hide');
+
+                $('.my-location').removeAttr('required');
+                $('.location-type').removeAttr('required');
+
             } else {
                 $('#hostaccount-div').removeClass('hide');
                 $('#isschool-div').removeClass('hide');
+
+                $('.my-location').attr('required', 'required');
+                $('.location-type').attr('required', 'required');
+
+                if (hostAccount.length > 0 && hostAccount == @accountId) {
+                    $('#mylocation').prop('checked', true);
+                }
             }
-        } else {
+        } else if(@searchOnly.ToString().ToLower() == 'false') {
+            $('#locationname').val(locationSearch.val());
+
             $('#add-location').removeClass('hide');
             $('#location').val('');
             locationSearch.val('');
@@ -87,12 +129,12 @@
                                         id="location-${location.ID}" 
                                         onmouseover="${listItemOnMouseOver}(${location.ID})" 
                                         onmouseout="${listItemOnMouseOut}(${location.ID})" 
-                                        onclick="${listItemOnClick}(${location.ID},'${location.FullAddress}','${location.HostAccountId}')">
+                                        onclick="${listItemOnClick}(${location.ID},'${location.FullAddress}','${location.HostAccountId}','${location.LocationType}')">
                                         <strong>${location.FullAddress}</strong>
                                     </div>`);
                             }
 
-                            if (locationSearch.val().length > 8) {
+                            if (locationSearch.val().length > 6 && @searchOnly.ToString().ToLower() == 'false') {
                                 locationList.append(`
                                 <div class="${listItemClass}" 
                                     style="${listItemStyle}" 

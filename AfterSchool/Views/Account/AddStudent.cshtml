@@ -4,6 +4,7 @@
     ViewBag.Title = "Add Student";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
+    var school = (Location)ViewBag.School;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -34,6 +35,13 @@
                         @foreach (var qvm in Model)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                        }
+
+                        @{ 
+                            Html.RenderPartial(
+                               "~/Views/Shared/_LocationEdit.cshtml",
+                               school,
+                               new ViewDataDictionary() { { "label", "Enter your school" }, { "searchOnly", true }, { "placeholderText", "Enter your school name" } });
                         }
 
                         <div class="padding-v-20">

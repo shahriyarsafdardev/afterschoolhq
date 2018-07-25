@@ -91,7 +91,7 @@
                         @if (participationObject.AllowToPayLater)
                         {
                             <div class="padding-v-30">
-                                <a href="#">Pay Later</a>
+                                <a href="@Url.Action("finalizeregistration", new { id = registration.Uid })">Pay Later</a>
                             </div>
                         }
                     </div>

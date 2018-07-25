@@ -43,7 +43,7 @@
                                     <label for="list" class="col-md-6">Contact List</label>
                                     <select id="list" name="list" class="form-control col-md-6" onchange="selectList()" required>
                                         <option value="">Select List...</option>
-                                        <option value="0">Import New Contact List</option>
+                                        <option value="0">New Contact List</option>
                                         <optgroup label="Contact Lists">
                                             @foreach (var list in lists)
                                             {
@@ -54,7 +54,7 @@
                                         </optgroup>
                                     </select>
                                 </div>
-                                @if (activities.Count > 0)
+                                @if (activities.Count > 0 && activities.Where(x => x.ActivityGroupId.HasValue).Any())
                                 {
                                     <div class="form-group">
                                         <label for="list" class="col-md-12">
@@ -96,7 +96,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-primary btn-lg btn-block">Send Invites</button>
+                                    <button type="submit" class="btn btn-primary btn-lg btn-block">Send Invites &raquo;</button>
                                 </div>
 
                             </div>

@@ -30,6 +30,18 @@ namespace AfterSchool.Models
             return new FormQuestionViewModel(question);
         }
 
+        public static AddressViewModel ToAddressViewModel(this AfterSchoolLibrary.StripeAccount stripeAccount)
+        {
+            return new AddressViewModel()
+            {
+                Address1 = stripeAccount.LegalEntityAddress1,
+                Address2 = stripeAccount.LegalEntityAddress2,
+                City = stripeAccount.LegalEntityCity,
+                State = stripeAccount.LegalEntityState,
+                PostalCode = stripeAccount.LegalEntityPostalCode
+            };
+        }
+
         public static AddressViewModel ToAddressViewModel(this Activity activity)
         {
             var location = activity.GetLocation();

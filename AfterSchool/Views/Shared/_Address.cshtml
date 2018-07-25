@@ -6,69 +6,91 @@
     var cityRequired = ViewData["cityRequired"].IsNotEmpty() && ViewData["cityRequired"].ToString().ToBoolean();
     var stateRequired = ViewData["stateRequired"].IsNotEmpty() && ViewData["stateRequired"].ToString().ToBoolean();
     var postalCodeRequired = ViewData["postalCodeRequired"].IsNotEmpty() && ViewData["postalCodeRequired"].ToString().ToBoolean();
+
+    var labelColWidth = 3;
+    var maxCols = 12;
+    var disabled = false;
+    var disabledAttr = "";
+
+    if (ViewData["labelcolwidth"].IsNumber())
+    {
+        labelColWidth = ViewData["labelcolwidth"].ToString().ToInteger();
+    }
+    var inputColWidth = maxCols - labelColWidth;
+
+    if (ViewData["disabled"].IsNotEmpty() && ViewData["disabled"].ToString().IsBoolean())
+    {
+        disabled = ViewData["disabled"].ToString().ToBoolean();
+    }
+
+    if (disabled)
+    {
+        disabledAttr = "disabled=\"disabled\"";
+    }
+
 }
 
 <div class="form-group">
-    <label class="col-sm-3 control-label">
+    <label class="col-sm-@labelColWidth control-label">
         Street Address
         @if (address1Required)
         {
             <span class="text-danger">*</span>
         }
     </label>
-    <div class="col-sm-9">
-        <input type="text" id="address1" name="address1" value="@Model.Address1" class="form-control" onfocus="this.select()" @(address1Required ? "required" : "") />
+    <div class="col-sm-@inputColWidth">
+        <input type="text" id="address1" name="address1" value="@Model.Address1" class="form-control" onfocus="this.select()" @(address1Required ? "required" : "") @disabledAttr />
     </div>
 </div>
 
 <div class="form-group">
-    <label class="col-sm-3 control-label">
-        Suite
+    <label class="col-sm-@labelColWidth control-label">
+        Apt/Suite
         @if (address2Required)
         {
             <span class="text-danger">*</span>
         }
     </label>
-    <div class="col-sm-9">
-        <input type="text" id="address2" name="address2" value="@Model.Address2" class="form-control" onfocus="this.select()" @(address2Required ? "required" : "") />
+    <div class="col-sm-@inputColWidth">
+        <input type="text" id="address2" name="address2" value="@Model.Address2" class="form-control" onfocus="this.select()" @(address2Required ? "required" : "") @disabledAttr />
     </div>
 </div>
 
 <div class="form-group">
-    <label class="col-sm-3 control-label">
+    <label class="col-sm-@labelColWidth control-label">
         City
         @if (cityRequired)
         {
             <span class="text-danger">*</span>
         }
     </label>
-    <div class="col-sm-9">
-        <input type="text" id="city" name="city" value="@Model.City" class="form-control" onfocus="this.select()" @(cityRequired ? "required" : "") />
+    <div class="col-sm-@inputColWidth">
+        <input type="text" id="city" name="city" value="@Model.City" class="form-control" onfocus="this.select()" @(cityRequired ? "required" : "") @disabledAttr />
     </div>
 </div>
 
 <div class="form-group">
-    <label class="col-sm-3 control-label">
+    <label class="col-sm-@labelColWidth control-label">
         State
         @if (stateRequired)
         {
             <span class="text-danger">*</span>
         }
     </label>
-    <div class="col-sm-9">
-        @{ Html.RenderPartial("~/views/shared/_statedropdown.cshtml", Model.State, new ViewDataDictionary() { { "required", stateRequired } }); }
+    <div class="col-sm-@inputColWidth">
+        @{ Html.RenderPartial("~/views/shared/_statedropdown.cshtml", Model.State, new ViewDataDictionary() { { "required", stateRequired }, { "disabled", disabled } }); }
     </div>
 </div>
 
 <div class="form-group">
-    <label class="col-sm-3 control-label">
+    <label class="col-sm-@labelColWidth control-label">
         Zip Code
         @if (postalCodeRequired)
         {
             <span class="text-danger">*</span>
         }
     </label>
-    <div class="col-sm-9">
-        <input type="text" id="postalcode" name="postalcode" value="@Model.PostalCode" class="form-control" onfocus="this.select()" @(postalCodeRequired ? "required" : "") />
+    <div class="col-sm-@inputColWidth">
+        <input type="text" id="postalcode" name="postalcode" value="@Model.PostalCode" class="form-control" onfocus="this.select()" @(postalCodeRequired ? "required" : "") @disabledAttr />
     </div>
 </div>
