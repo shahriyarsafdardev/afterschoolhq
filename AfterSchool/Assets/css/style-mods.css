@@ -819,11 +819,11 @@ th.header {
 
 #layout-footer{
     bottom: 0px;
-    height: 60px;
+    height: 66px;
     width: 100%;
-    background-color: #777;
+    background-color: #2f3c40;
     color: #fff;
-    padding: 20px;
+    padding: 10px;;
     text-align: center;
 }
 #layout-footer a{

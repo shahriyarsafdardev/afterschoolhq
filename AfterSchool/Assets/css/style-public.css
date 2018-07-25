@@ -437,7 +437,7 @@ color: #888;
 }
 
 .navbar-default .navbar-nav>li>a:hover.btn-signup {
-    color: #fff; !important;
+    color: #fff !important;
     border-color: #4ac65b;
 }
 
