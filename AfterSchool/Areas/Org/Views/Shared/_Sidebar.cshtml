@@ -1,7 +1,7 @@
 <div class="am-left-sidebar">
     <div class="content">
         <div class="am-logo hide"></div>
-        
+
         <ul class="sidebar-elements">
             @if ((SessionVariables.AccountPackage.IsNotEmpty() &&
                     (SessionVariables.AccountPackage.IsFree || SessionVariables.AccountPackage.IsDuringTrial)) || SessionVariables.CurrentAccount.HasPaymentCard)
@@ -11,6 +11,10 @@
                 if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups) && SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
                 {
                     <li><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
+                }
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups) && SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
+                {
+                    <li><a href="@Url.Action("index", "league")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
                 }
                 <li><a href="@Url.Action("index", "registration")"><i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)</a></li>
                 if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
@@ -30,7 +34,7 @@
                     <li><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
                 }
             }
-            
+
             <li><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i><span>Profile</span></a></li>
             <li><a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a></li>
         </ul>

@@ -82,6 +82,8 @@ namespace AfterSchool.Controllers
 
             if (password1.IsEmpty())
                 msgs.Add("Password 1 is required", MessageType.UserError);
+            if (password1.Length < 8)
+                msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
             if (password2.IsEmpty())
                 msgs.Add("Password 2 is required", MessageType.UserError);
             if (password1 != password2)
@@ -325,10 +327,36 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var questions = AddEmergencyContactsViewBag(msgs);
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+            var emergencyContactPhone1 = "";
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString();
+                var qvmNameIsEmpty = qvmName.IsEmpty();
+                if (question.IsRequired && qvmNameIsEmpty)
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+                
+                //validate emegercy contact phone 1
+                if(question.QuestionDataTypeId == QuestionDataType.EmergencyContact1Phone)
+                {
+                    emergencyContactPhone1 = qvmName;
+                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    {
+                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
+                    }
+                }
+
+                //validate emegercy contact phone 2
+                if ( question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone)
+                {
+                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    {
+                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
+                    }
+                    if(qvmName == emergencyContactPhone1)
+                    {
+                        msgs.Add($"{question.Text} emergency contact phone numbers can't be the same", MessageType.UserError);
+                    }
+                }
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -560,9 +588,9 @@ namespace AfterSchool.Controllers
                 {
                     case QuestionDataType.RegistrantDoctorName:
                     case QuestionDataType.RegistrantDoctorPhone:
-                    case QuestionDataType.RegistrantAllergies:
-                    case QuestionDataType.RegistrantMedicalConditions:
-                    case QuestionDataType.RegistrantMedications:
+                    //case QuestionDataType.RegistrantAllergies:
+                    //case QuestionDataType.RegistrantMedicalConditions:
+                    //case QuestionDataType.RegistrantMedications:
                     case QuestionDataType.RegistrantImmunizations:
                     case QuestionDataType.RegistrantPreferredHospital:
                         question.IsRequired = true;
@@ -606,8 +634,19 @@ namespace AfterSchool.Controllers
             var questions = AddHealthViewBag(msgs);
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var qvmName = Request[question.ToFormQuestionViewModel().Name];
+                if (question.IsRequired && qvmName.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantDoctorPhone:
+                        if (!qvmName.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        {
+                            msgs.Add($"{question.Text}, valid phone number is required", MessageType.UserError);
+                        }
+                      break;
+                }
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -644,6 +683,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("select");
 
+            ViewBag.Student = SessionVariables.CurrentRegistrant;
             ViewBag.Messages = msgs;
 
             return View(qvms);

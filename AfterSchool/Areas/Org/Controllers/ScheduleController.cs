@@ -23,6 +23,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var schedule = ActivitySchedule.Load(id.ToInteger());
             var copy = schedule.GetCopy();
+            
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.ShowScheduleList = false;
@@ -53,7 +54,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditForActivity(string id, string activity)
         {
             var schedule = new ActivitySchedule();
-            var act = Activity.Load(activity.ToInteger());
+            var act = Activity.LoadByUid(activity.ToGuid());
 
             if (id.ToInteger() > 0)
             {
@@ -106,7 +107,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (activity.IsNumber())
+                if (activity.IsGuid())
                 {
                     return RedirectToAction("editschedule", "activity", new { id = activity, schedule = schedule.ID });
                 }

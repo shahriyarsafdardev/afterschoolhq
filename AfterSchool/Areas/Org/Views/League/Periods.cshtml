@@ -1,0 +1,174 @@
+﻿@model ActivityGroup
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+    var periods = (List<RegistrationPeriod>)ViewBag.Periods;
+    var account = (Account)ViewBag.Account; 
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_LeagueHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("_ActivityGroupTitle", Model.Name); }
+        </div>
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="pull-right">
+                    <button class="btn btn-primary btn-space margin-r-10 md-trigger" data-modal="modal-add">
+                        <i class="icon icon-left s7-plus"></i>
+                        Add @UILabel.RegistrationPeriodLabel()
+                    </button>
+                </div>
+            </div>
+
+           <div class="table-responsive">
+               <table class="table table-striped">
+                   <thead>
+                       <tr>
+                           <th></th>
+                           <th>Open Date</th>
+                           <th>Close Date</th>
+                           <th>Status</th>
+                           <th class="text-center">Registrations</th>
+                           <th></th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                        @if (periods.Count > 0)
+                        {
+                            foreach (var period in periods)
+                            {
+                                <tr>
+                                    <td>
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-default btn-sm md-trigger" 
+                                            data-modal="modal-add" 
+                                            onclick="editPeriod('@period.ID', '@period.StartDateTime.ToShortDateString()', '@period.StartDateTime.ToShortTimeString().ToLower()', '@period.EndDateTime.ToShortDateString()', '@period.EndDateTime.ToShortTimeString().ToLower()')">
+                                            Edit
+                                        </button>
+                                    </td>
+                                    <td>@period.StartDateTime.ToLongDateTimeString()</td>
+                                    <td>@period.EndDateTime.ToLongDateTimeString()</td>
+                                    <td>@period.GetStatus()</td>
+                                    <td class="text-center">@period.GetRegistrationCount()</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            @if (period.EndDateTime.Value > account.NowInAccountTimeZone() && !Model.IsArchived)
+                                            {
+                                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="modal-send" onclick="sendPeriod(@period.ID)">
+                                                    Invite All @UILabel.RegistrantLabel(true)
+                                                </button>
+                                                <a class="btn btn-default btn-sm" href="@Url.Action("inviteto", "contact", new { id = period.Uid, type = "period" })">
+                                                    Invite Contact List
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4">You haven't created any @UILabel.RegistrationPeriodLabel(true).ToLower()</td>
+                            </tr>
+                       }
+                       
+                   </tbody>
+               </table>
+           </div>
+
+        </div>
+    </div>
+</div>
+
+@{ Html.RenderPartial("_EditRegistrationPeriodModal", Model); }
+
+<div id="modal-send" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-add" action="@Url.Action("periodnotify", "group", new { id = Model.Uid })" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-edit"></i> Invite All @UILabel.RegistrantLabel(true)</h3>
+            </div>
+            <div class="modal-body form" style="min-height: 250px;">
+                <div class="form-group">
+                    <label class="col-sm-12 control-label">Custom Email Message (optional)</label>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        @{ 
+                            Html.RenderPartial(
+                                "~/Views/Shared/_TextEditor.cshtml",
+                                "",
+                                new ViewDataDictionary()
+                                {
+                                    { "required", false },
+                                    { "id", "emailmessage" },
+                                    { "name", "emailmessage" }
+                                }
+                            );
+                        }
+                    </div>
+                </div>
+                <input type="hidden" name="period" id="period-notify" value="" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Send Notifications &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-send-custom" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-add" action="@Url.Action("periodnotifycustom", "group", new { id = Model.Uid })" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title"><i class="s7-edit"></i> Invite Contacts</h3>
+            </div>
+            <div class="modal-body form" style="min-height: 250px;">
+                <div class="form-group">
+                    <label class="col-sm-12 control-label">Custom Email Message (optional)</label>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_TextEditor.cshtml",
+                                "",
+                                new ViewDataDictionary()
+                                {
+                                    { "required", false },
+                                    { "id", "emailmessage" },
+                                    { "name", "emailmessage" }
+                                }
+                            );
+                        }
+                    </div>
+                </div>
+                <input type="hidden" name="period" id="period-notify" value="" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Send Notifications &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function sendPeriod(id){
+        $('#period-notify').val(id);
+    }
+</script>

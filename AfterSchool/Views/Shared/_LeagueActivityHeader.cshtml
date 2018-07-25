@@ -1,0 +1,102 @@
+﻿@model Activity
+
+@{
+    var isActivityLeader = true;
+    if (ViewBag.IsActivityLeader != null)
+    {
+        isActivityLeader = (bool)ViewBag.IsActivityLeader;
+    }
+
+    var publishClass = "btn-danger";
+    if (!Model.IsPublished)
+    {
+        publishClass = "btn-alt7";
+    }
+    else if (Model.IsPublishable)
+    {
+        publishClass = "btn-success";
+    }
+    var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var registrantCount = Model.GetRegistrantCount();
+    var group = Model.GetActivityGroup();
+}
+
+@if (Model?.ID.GetValueOrDefault(0) > 0)
+{
+    <div class="btn-toolbar">
+        <div class="btn-group hidden-xs">
+            <a href="@Url.Action("summary", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")"><i class="s7-graph2"></i>Summary</a>
+            @if (isActivityLeader)
+            {
+                <a href="@Url.Action("editsetup", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
+                if (!Model.IsChildActivity && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
+                {
+                    <a href="@Url.Action("form", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
+                }
+            }
+            @if(Model.IsPublished || registrantCount > 0)
+            {
+                <a href="@Url.Action("registrants", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
+                {
+                    <a href="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
+                }
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
+                {
+                    <a href="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
+                }
+            }
+            @if (isActivityLeader && !Model.IsChildActivity)
+            {
+                if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
+                {
+                    <a href="@Url.Action("team", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")"><i class="s7-users"></i> Staff</a>
+                }
+                <a href="@Url.Action("publishdetail", "leagueactivity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
+            }
+            @if (Model.ActivityGroupId.HasValue)
+            {
+                <a href="@Url.Action("leagueactivities", "league", new {id = group.Uid})" class="btn btn-alt5"><i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</a>
+            }
+        </div>
+        <div class="hidden-lg hidden-sm hidden-md">
+            <select class="form-control" onchange="location.href=this.value;">
+                <option value="">Navigation</option>
+                <option value="@Url.Action("summary", "leagueactivity", new { id = Model.Uid })">Summary</option>
+                @if (isActivityLeader)
+                {
+                    <option value="@Url.Action("editsetup", "leagueactivity", new { id = Model.Uid })">Setup</option>
+                    if (!Model.IsChildActivity && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
+                    {
+                        <option value="@Url.Action("form", "leagueactivity", new { id = Model.Uid })">Reg Form</option>
+                    }
+                }
+                @if (Model.IsPublished || registrantCount > 0)
+                {
+                    <option value="@Url.Action("registrants", "leagueactivity", new { id = Model.Uid })">@UILabel.RegistrantLabel(true)</option>
+
+                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
+                    {
+                        <option value="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })">Attendance</option>
+                    }
+                    if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
+                    {
+                        <option value="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })">Messaging</option>
+                    }
+                }
+                @if (isActivityLeader && !Model.IsChildActivity)
+                {
+                    if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
+                    {
+                        <option value="@Url.Action("team", "leagueactivity", new { id = Model.Uid })">Team</option>
+                    }
+                    <option value="@Url.Action("publishdetail", "leagueactivity", new { id = Model.Uid })">Publish...</option>
+                }
+                @if (Model.ActivityGroupId.HasValue)
+                {
+                    <option value="@Url.Action("summary", "league", new { id = group.Uid })">@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)  &raquo;</option>
+                }
+            </select>
+        </div>
+    </div>
+}

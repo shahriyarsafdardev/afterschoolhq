@@ -51,21 +51,21 @@
         </div>
 
         <div class="form-group">
-            <label class="col-sm-3 control-label">
+            <label class="col-sm-3">
                 Specific Instructions <span class="text-danger">*</span>
                 <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Any special instructions or information about the location?" data-placement="top"></i>
             </label>
             <div class="col-sm-9">
                 @{
-                Html.RenderPartial(
-                 "~/Views/Shared/_TextEditor.cshtml",
-                 Model.LocationDetails,
-                 new ViewDataDictionary() {
-                            { "required", true },
+                    Html.RenderPartial(
+                     "~/Views/Shared/_TextEditor.cshtml",
+                     Model.LocationDetails,
+                     new ViewDataDictionary() {
+                            //{ "required", true },
                             { "name", "locationdetails" },
                             { "id", "locationdetails" }
-                 }
-                 );
+                     }
+                     );
                 }
             </div>
         </div>
@@ -85,7 +85,7 @@
         </div>
 
         <div class="form-group @hideType" id="isschool-div">
-            <label class="control-label col-sm-3">What type of location is this?</label>
+            <label class="col-sm-3">What type of location is this?</label>
             <div class="col-sm-9">
                 <div class="am-checkbox">
                     @foreach (var item in Enum.GetValues(typeof(LocationType)).Cast<LocationType>().Where(x => x != LocationType.NotSet))
@@ -95,7 +95,7 @@
                                    id="locationtype-@((int)item)" 
                                    name="locationtype" 
                                    class="form-control location-type" 
-                                   required="required" 
+                                   @*required="required"*@ 
                                    value="@((int)item)" 
                                    @(item == location.LocationTypeId ? "checked=\"checked\"" : "") />
                             <label for="locationtype-@((int)item)">@item.ToString().SplitByUpperCase()</label>

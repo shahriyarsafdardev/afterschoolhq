@@ -599,6 +599,8 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
+
+
             //check if answer for this one already exists, and where formquestion is null
             var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, dc: dc);
 
@@ -1007,11 +1009,21 @@ namespace AfterSchoolLibrary
             return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
         }
 
+        public SystemMessages DeleteRegistrantActivity(int activityId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var registrantAcitivity = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
+
+            msgs.AddRange(registrantAcitivity.Delete(dc));
+
+            return msgs;
+        }
+        
         public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.LoadByRegistrantId(this.ID.Value, msgs, dc).Sum(payment => payment.Amount.Value);
         }
-
+        
         /*
         public List<Attendance> GetAttendance(int ActivityId, DatabaseConnection dc = null)
         {

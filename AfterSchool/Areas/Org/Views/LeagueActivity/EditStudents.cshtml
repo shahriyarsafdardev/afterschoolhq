@@ -1,0 +1,114 @@
+﻿@model AfterSchoolLibrary.Activity
+@{
+    ViewBag.Title = ((Account)ViewBag.Account).Name;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+
+    var group = (ActivityGroup)ViewBag.Group;
+    var mainColWidth = 10;
+    var saveBtnWidth = 7;
+    var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId));
+    var availableRegistrants = (List<Registrant>)ViewBag.AvailableRegistrants;
+    var currentRegistrants = (List<Registrant>)ViewBag.CurrentRegistrants;
+    var registrantsPerColumn = 2;
+    var count = availableRegistrants.Count;
+    if (group.IsNotEmpty())
+    {
+        title = group.Name + " - " + title;
+    }
+
+
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("~/Views/Shared/_LeagueActivityHeader.cshtml", Model);}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", title); }
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-8 col-lg-9">
+                <form id="form1" method="post" action="@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid, selectedStudents = currentRegistrants })" class="form-horizontal">
+
+                    @if (availableRegistrants.Count == 0 || true)
+                    {
+                        <p> No one has registered for this team yet. </p>
+                    } else
+                    {
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Select @UILabel.RegistrantLabel(true)<br/>
+                                <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                            </label>
+                            <div class="col-sm-6">
+                                @for (int i = 0; i < 3; i++)
+                                {
+                                    <div class="col-md-4">
+                                        @foreach (var registrant in availableRegistrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                                        {
+                                            <div class="am-checkbox">
+                                                <input type="checkbox" onclick="toggleCheck(@registrant)" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" @(currentRegistrants.Contains(registrant) ? " checked=\"checked\" " : "") />
+                                                <label for="registrant-@registrant.ID">@registrant.DisplayName.MaxChars(20, "...")</label>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    
+
+                    
+
+                    <div class="form-group">
+
+                         <div class="col-sm-2">
+                             <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editcontact", "leagueactivity", new { id = Model.Uid, cmd = "prev" })')">&laquo; Previous</button>
+                        </div>
+
+                        <div class="col-sm-@saveBtnWidth col-sm-offset-3">
+                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick=onclick="navigateActivity('@Url.Action("editcontact", "leagueactivity")')"><i class="s7-diskette"></i>Save</button>
+                        </div>
+
+                        
+
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                @{Html.RenderPartial("~/Views/Shared/_LeagueActivityEditNav.cshtml", Model); }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    
+    function navigateActivity(url) {
+        $('#form1').attr('action', url);
+    }
+
+    function toggleCheck(registrant) {
+        var cr = @currentRegistrants;
+        if (cr.Contains(r)) {
+            cr.Remove(r);
+        } else {
+            cr.Add(r);
+        }
+        @currentRegistrants = cr;
+    }
+
+    
+
+</script>
+

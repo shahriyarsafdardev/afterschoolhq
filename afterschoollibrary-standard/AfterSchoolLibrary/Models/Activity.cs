@@ -1034,7 +1034,8 @@ namespace AfterSchoolLibrary
                 RegistrationModeId = this.RegistrationModeId,
                 ActivityGroupId = this.ActivityGroupId,
                 ActivityTypeId = this.ActivityTypeId,
-                LocationId = this.LocationId
+                LocationId = this.LocationId,
+              
             };
         }
 
@@ -1165,7 +1166,7 @@ namespace AfterSchoolLibrary
                     });
 
                     // NOTE: copy schedule?
-                    if (copy.ActivityScheduleId.HasValue)
+                    if (this.ActivityScheduleId.HasValue)
                     {
                         copy.ActivityScheduleId = this.GetSchedule(false, amsgs, adc)
                             .CopyAndSave(loggedInUserId, amsgs, adc)
@@ -1183,6 +1184,7 @@ namespace AfterSchoolLibrary
                 },
                 dc: dc
             );
+            
 
             return copy;
         }
@@ -1310,6 +1312,7 @@ namespace AfterSchoolLibrary
             var dailyendtime = values.GetValueOrDefault("dailyendtime");
             var scheduledates = values.GetValueOrDefault("scheduledates");
             var schedule = values.GetValueOrDefault("schedule");
+            var description = values.GetValueOrDefault("description");
             var hassubscriptionplan = values.GetValueOrDefault("hassubscriptionplan");
             var subscriptionplancost = values.GetValueOrDefault("subscriptionplancost");
             var subscriptionplanperiod = values.GetValueOrDefault("subscriptionplanperiod");
@@ -1454,9 +1457,23 @@ namespace AfterSchoolLibrary
                 activity.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
             
             if (contactname.IsNotEmpty()) activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);
-            if (contactphone.IsNotEmpty()) activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
+            if (contactphone.IsNotEmpty())
+            {
+               if(contactphone.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                {
+                    activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
+                } else
+                {
+                    msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);
+                }
+                
+                
+            }
+            
             if (contactemail.IsNotEmpty()) activity.ContactEmail = contactemail.ToString().IfBlank("").MaxChars(100);
-            if (details.IsNotEmpty()) activity.Details = details.ToString().IfBlank("").MaxChars(4000);            
+            if (details.IsNotEmpty()) activity.Details = details.ToString().IfBlank("").MaxChars(4000);
+            if (description.IsNotEmpty()) activity.Description = description.ToString().IfBlank("").MaxChars(1000);
+
 
             if (cost.IsNumber())
             {

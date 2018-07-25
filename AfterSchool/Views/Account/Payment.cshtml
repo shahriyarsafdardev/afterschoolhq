@@ -109,17 +109,23 @@
         
         $('#btn-paywitnewcard').click(function () {
 
-            console.log('clicked pay');
+           
+            $('#btn-paywitnewcard').html('Confirming Payment...');
+            $('#btn-paywitnewcard').prop('disabled', true);
+           
+          //  console.log('clicked pay');
 
             stripe.createToken(card).then(function (result) {
 
-                console.log('result: ');
+            //    console.log('result: ');
                 console.log(result);
 
                 if (result.error) {
                     // Inform the customer that there was an error.
                     var errorElement = document.getElementById('card-errors');
                     errorElement.textContent = result.error.message;
+                    $('#btn-paywitnewcard').html('Review Purchase');
+                    $('#btn-paywitnewcard').prop('disabled', false);
                 } else {
                     // Send the token to your server.
                     stripeTokenHandler(result.token);

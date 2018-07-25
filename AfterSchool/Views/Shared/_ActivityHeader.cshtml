@@ -1,6 +1,7 @@
 ﻿@model Activity
 
 @{
+    var m = Model;
     var isActivityLeader = true;
     if (ViewBag.IsActivityLeader != null)
     {
@@ -25,34 +26,34 @@
 {
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
-            <a href="@Url.Action("summary", "activity", new { id = Model.ID })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")"><i class="s7-graph2"></i> Summary</a>
+            <a href="@Url.Action("summary", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")"><i class="s7-graph2"></i> Summary</a>
             @if (isActivityLeader)
             {
-                <a href="@Url.Action("editsetup", "activity", new { id = Model.ID })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
+                <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
                 if (!Model.IsChildActivity && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                 {
-                    <a href="@Url.Action("form", "activity", new { id = Model.ID })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
+                    <a href="@Url.Action("form", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
                 }
             }
             @if(Model.IsPublished || registrantCount > 0)
             {
-                <a href="@Url.Action("registrants", "activity", new { id = Model.ID })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
+                <a href="@Url.Action("registrants", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
                 if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
                 {
-                    <a href="@Url.Action("attendance", "activity", new { id = Model.ID })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
+                    <a href="@Url.Action("attendance", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
                 }
                 if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
                 {
-                    <a href="@Url.Action("messages", "activity", new { id = Model.ID })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
+                    <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
                 }
             }
             @if (isActivityLeader && !Model.IsChildActivity)
             {
                 if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
                 {
-                    <a href="@Url.Action("team", "activity", new { id = Model.ID })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")"><i class="s7-users"></i> Team</a>
+                    <a href="@Url.Action("team", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")"><i class="s7-users"></i> Team</a>
                 }
-                <a href="@Url.Action("publishdetail", "activity", new { id = Model.ID })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
+                <a href="@Url.Action("publishdetail", "activity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
             }
             @if (Model.ActivityGroupId.HasValue)
             {
@@ -62,35 +63,35 @@
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="location.href=this.value;">
                 <option value="">Navigation</option>
-                <option value="@Url.Action("summary", "activity", new { id = Model.ID })">Summary</option>
+                <option value="@Url.Action("summary", "activity", new { id = Model.Uid })">Summary</option>
                 @if (isActivityLeader)
                 {
-                    <option value="@Url.Action("editsetup", "activity", new { id = Model.ID })">Setup</option>
+                    <option value="@Url.Action("editsetup", "activity", new { id = Model.Uid })">Setup</option>
                     if (!Model.IsChildActivity && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                     {
-                        <option value="@Url.Action("form", "activity", new { id = Model.ID })">Reg Form</option>
+                        <option value="@Url.Action("form", "activity", new { id = Model.Uid })">Reg Form</option>
                     }
                 }
                 @if (Model.IsPublished || registrantCount > 0)
                 {
-                    <option value="@Url.Action("registrants", "activity", new { id = Model.ID })">@UILabel.RegistrantLabel(true)</option>
+                    <option value="@Url.Action("registrants", "activity", new { id = Model.Uid })">@UILabel.RegistrantLabel(true)</option>
 
                     if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
                     {
-                        <option value="@Url.Action("attendance", "activity", new { id = Model.ID })">Attendance</option>
+                        <option value="@Url.Action("attendance", "activity", new { id = Model.Uid })">Attendance</option>
                     }
                     if (SessionVariables.AccountPackage.HasFeature(FeatureType.Messaging))
                     {
-                        <option value="@Url.Action("messages", "activity", new { id = Model.ID })">Messaging</option>
+                        <option value="@Url.Action("messages", "activity", new { id = Model.Uid })">Messaging</option>
                     }
                 }
                 @if (isActivityLeader && !Model.IsChildActivity)
                 {
                     if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
                     {
-                        <option value="@Url.Action("team", "activity", new { id = Model.ID })">Team</option>
+                        <option value="@Url.Action("team", "activity", new { id = Model.Uid })">Team</option>
                     }
-                    <option value="@Url.Action("publishdetail", "activity", new { id = Model.ID })">Publish...</option>
+                    <option value="@Url.Action("publishdetail", "activity", new { id = Model.Uid })">Publish...</option>
                 }
                 @if (Model.ActivityGroupId.HasValue)
                 {

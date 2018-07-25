@@ -111,6 +111,7 @@
                         {
                             var activity = ra.ToActivity(true);
                             var dayText = ra.Day.ToString();
+                            
                             if (ra.ActivityScheduleRequiresAllDays)
                             {
                                 dayText = activity.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ", " and ");
@@ -122,7 +123,7 @@
                                         <button class="btn btn-default md-trigger" data-modal="modal-move-seat" onclick="moveSeat(@ra.ID, @((int)ra.RegistrationAssignmentTypeId))"><i class="s7-gleam"></i> <span>Move Seat</span></button>
                                         <button class="btn btn-default md-trigger" data-modal="modal-confirmation-activity" onclick="deleteActivity(@ra.ActivityId, '@UI.JavascriptSafeString(ra.ActivityName)')"><i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span></button>
                                     </div>
-                                    <a href="@Url.Action("summary", "activity", new { id = ra.ActivityId })">@activity.ToFullDescription()</a>                                    
+                                    <a href="@Url.Action("summary", "activity", new { id = activity.Uid })">@activity.ToFullDescription()</a>                                    
                                 </div>
                                 <div class="panel-body">
                                     <div class="table-responsive">
