@@ -86,7 +86,7 @@
                                     }
                                 </div>
                                 <div class="clearfix"></div>
-                                
+
                                 <p></p>
 
                                 @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
@@ -118,14 +118,14 @@
                                                     {
                                                         if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                                         {
-                                                            <input type="text" 
-                                                                    id="text-@question.ID" 
-                                                                    name="text-@question.ID" 
-                                                                    value="@question.Text" 
-                                                                    required 
-                                                                    class="form-control col-sm-3" 
-                                                                    onfocus="this.select()" 
-                                                                    data-tooltip-id="text-@question.ID" />
+                                                            <input type="text"
+                                                                   id="text-@question.ID"
+                                                                   name="text-@question.ID"
+                                                                   value="@question.Text"
+                                                                   required
+                                                                   class="form-control col-sm-3"
+                                                                   onfocus="this.select()"
+                                                                   data-tooltip-id="text-@question.ID" />
                                                         }
                                                         else if (question.IsLocked)
                                                         {
@@ -139,46 +139,47 @@
                                                 </td>
                                                 <td>
                                                     @{Html.RenderPartial(
-                                                      "~/Views/Shared/_SwitchButton.cshtml",
-                                                      question.IsActive,
-                                                      new ViewDataDictionary()
-                                                      {
-                                                          { "checkboxname", "active-" + question.ID },
-                                                          { "checkboxid", "active-" + question.ID },
-                                                          { "disabled", question.IsLocked }
-                                                    });}
+                                                        "~/Views/Shared/_SwitchButton.cshtml",
+                                                        question.IsActive,
+                                                        new ViewDataDictionary()
+                                                        {
+                                                            { "checkboxname", "active-" + question.ID },
+                                                            { "checkboxid", "active-" + question.ID },
+                                                            { "disabled", question.IsLocked },
+                                                            { "classname", "question-isactive" }
+                                                      });}
                                                 </td>
                                                 @if (question.QuestionTypeId == QuestionType.TextBlock)
                                                 {
                                                     <td colspan="3">
                                                         <textarea class="form-control" id="description-@question.ID" name="description-@question.ID">@question.Description</textarea>
-                                                        <input type="hidden" 
-                                                               value="@((int)QuestionType.TextBlock)" 
-                                                               id="questiontype-@question.ID" 
-                                                               name="questiontype-@question.ID"  />
+                                                        <input type="hidden"
+                                                               value="@((int)QuestionType.TextBlock)"
+                                                               id="questiontype-@question.ID"
+                                                               name="questiontype-@question.ID" />
                                                     </td>
                                                 }
                                                 else
                                                 {
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                            "~/Views/Shared/_SwitchButton.cshtml",
-                                                            question.IsRequired,
-                                                            new ViewDataDictionary()
-                                                            {
-                                                              { "checkboxname", "required-" + question.ID },
-                                                              { "checkboxid", "required-" + question.ID },
-                                                              { "disabled", question.IsLocked }
-                                                        });}
+                                                              "~/Views/Shared/_SwitchButton.cshtml",
+                                                              question.IsRequired,
+                                                              new ViewDataDictionary()
+                                                              {
+                                                                { "checkboxname", "required-" + question.ID },
+                                                                { "checkboxid", "required-" + question.ID },
+                                                                { "disabled", question.IsLocked },
+                                                                { "classname", "question-isrequired" }
+                                                          });}
                                                     </td>
                                                     <td>
                                                         @if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
                                                         {
-                                                            <select 
-                                                                    class="form-control questiontype-select" 
-                                                                    id="questiontype-@question.ID" 
-                                                                    name="questiontype-@question.ID" 
-                                                                    onchange="showEditButton(@question.ID)" 
+                                                            <select class="form-control questiontype-select"
+                                                                    id="questiontype-@question.ID"
+                                                                    name="questiontype-@question.ID"
+                                                                    onchange="showEditButton(@question.ID)"
                                                                     @(question.QuestionDataTypeId != QuestionDataType.NotSet ? "disabled=\"disabled\"" : "")>
 
                                                                 @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(x => x != QuestionType.NotSet && x != QuestionType.TextBlock))
@@ -199,7 +200,7 @@
                                                         <button type="button" class="btn btn-default md-trigger btn-space hide" data-modal="modal-link" onclick="setLink(@question.ID)" id="btn-setlink-@question.ID">
                                                             Edit Link
                                                         </button>
-                                                        <input type="hidden" id="link-text-@question.ID" name="link-text-@question.ID" value="@question.Link" /> 
+                                                        <input type="hidden" id="link-text-@question.ID" name="link-text-@question.ID" value="@question.Link" />
                                                     </td>
                                                 }
                                             </tr>
@@ -223,7 +224,7 @@
                             </div>
                         </div>
                     }
-                    
+
                     @if (qgId.HasValue)
                     {
                         <div class="col-sm-2">
@@ -259,23 +260,23 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                            Model,
-                            new ViewDataDictionary() {
-                                { "RegistrantType", RegistrantType.Individual },
-                                { "QuestionGroups", individualGroups },
-                                { "QuestionGroupId", qgId }
-                            });
-                         }
+                             Model,
+                             new ViewDataDictionary() {
+                                                { "RegistrantType", RegistrantType.Individual },
+                                                { "QuestionGroups", individualGroups },
+                                                { "QuestionGroupId", qgId }
+                             });
+                        }
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                            Model,
-                            new ViewDataDictionary() {
-                                { "RegistrantType", RegistrantType.Organization },
-                                { "QuestionGroups", organizationGroups },
-                                { "QuestionGroupId", qgId }
-                            });
-                         }
-                        
+                             Model,
+                             new ViewDataDictionary() {
+                                                { "RegistrantType", RegistrantType.Organization },
+                                                { "QuestionGroups", organizationGroups },
+                                                { "QuestionGroupId", qgId }
+                             });
+                        }
+
                     </ol>
                 </div>
 
@@ -306,7 +307,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal"  class="btn btn-primary md-close" onclick="updateOptions()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateOptions()">Done</button>
             </div>
         </div>
     </form>
@@ -479,4 +480,22 @@
         $('input[id^="required-"][disabled!="disabled"]').prop('checked', false);
     }
 
+</script>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('.question-isactive').click(function () {
+            if (!$(this).is(':checked')) {
+                var id = $(this).attr('id').split('-')[1];
+                $('#required-' + id).prop('checked', false);
+            }
+        });
+        $('.question-isrequired').click(function () {
+            if ($(this).is(':checked')) {
+                var id = $(this).attr('id').split('-')[1];
+                $('#active-' + id).prop('checked', true);
+            }
+        });
+    });
 </script>
