@@ -28,6 +28,7 @@ namespace AfterSchoolLibraryTests.Tests
                 accountOwner: accountOwner,
                 packageId: package.ID,
                 packageBillingPeriod: BillingPeriodType.Month,
+                createWithStripe: true,
                 loggedInUser: loggedInUser,
                 isAfterSchool: true,
                 msgs: msgs,

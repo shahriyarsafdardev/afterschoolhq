@@ -61,9 +61,9 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">Brief Instructions</label>
+                                    <label class="col-sm-3 control-label">Description</label>
                                     <div class="col-sm-9">
-                                        <textarea name="description" id="description" class="form-control" rows="5" required>@Model.Description.IfBlank("Please fill in the registration form below")</textarea>
+                                        <textarea name="description" id="description" class="form-control" rows="5" required>@Model.Description</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -86,26 +86,37 @@
                                     }
                                 </div>
                                 <div class="clearfix"></div>
+                                
                                 <p></p>
-                                <input type="text" id="name-@questionGroup.ID" name="name-@questionGroup.ID" value="@questionGroup.Name" required class="form-control input-lg input-lg-font" onfocus="this.select()" data-tooltip-id="name-@questionGroup.ID" />
+
+                                @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
+                                {
+                                    <input type="text" id="name-@questionGroup.ID" name="name-@questionGroup.ID" value="@questionGroup.Name" required class="form-control input-lg input-lg-font" onfocus="this.select()" data-tooltip-id="name-@questionGroup.ID" />
+                                }
+                                else
+                                {
+                                    <p class="text-medium">@questionGroup.Name</p>
+                                }
+
+
                             </div>
                             <div class="panel-body">
                                 <div class="table-responsive">
                                     <table class="table table-striped" id="question-table">
                                         <tr>
                                             <td>Question Label</td>
-                                            <td>Show? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</td>
+                                            <td>Ask? (<a href="javascript:checkAllActive()">All</a> / <a href="javascript:uncheckAllActive()">None</a>)</td>
                                             <td>Required? (<a href="javascript:checkAllRequired()">All</a> / <a href="javascript:uncheckAllRequired()">None</a>)</td>
-                                            <td>Type</td>
+                                            <td></td>
                                             <td></td>
                                         </tr>
                                         @foreach (var question in questions)
                                         {
                                             <tr>
                                                 <td>
-                                                    @if (question.QuestionTypeId != QuestionType.TextBlock)
+                                                    @if (question.QuestionTypeId != QuestionType.TextBlock && question.QuestionTypeId != QuestionType.CheckboxList)
                                                     {
-                                                        if (!question.IsLocked || true)
+                                                        if (question.QuestionDataTypeId == QuestionDataType.NotSet)
                                                         {
                                                             <input type="text" 
                                                                     id="text-@question.ID" 
@@ -116,9 +127,13 @@
                                                                     onfocus="this.select()" 
                                                                     data-tooltip-id="text-@question.ID" />
                                                         }
-                                                        else
+                                                        else if (question.IsLocked)
                                                         {
                                                             <i class="s7-lock icon-medium"></i> @question.Text
+                                                        }
+                                                        else
+                                                        {
+                                                            @question.Text
                                                         }
                                                     }
                                                 </td>
@@ -157,7 +172,7 @@
                                                         });}
                                                     </td>
                                                     <td>
-                                                        @if (!question.IsLocked)
+                                                        @if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
                                                         {
                                                             <select 
                                                                     class="form-control questiontype-select" 
@@ -189,16 +204,20 @@
                                                 }
                                             </tr>
                                         }
-                                        <tr>
-                                            <td colspan="5">
-                                                <button type="button" class="btn btn-default" onclick="addQuestion()">
-                                                    <i class="s7-plus"></i> Add Question
-                                                </button>
-                                                <button type="button" class="btn btn-default" onclick="addTextBlock()">
-                                                    <i class="s7-plus"></i> Add Text Block
-                                                </button>
-                                            </td>
-                                        </tr>
+
+                                        @if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
+                                        {
+                                            <tr>
+                                                <td colspan="5">
+                                                    <button type="button" class="btn btn-default" onclick="addQuestion()">
+                                                        <i class="s7-plus"></i> Add Question
+                                                    </button>
+                                                    <button type="button" class="btn btn-default" onclick="addTextBlock()">
+                                                        <i class="s7-plus"></i> Add Text Block
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
                                     </table>
                                 </div>
                             </div>
