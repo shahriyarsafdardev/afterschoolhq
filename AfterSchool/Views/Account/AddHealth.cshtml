@@ -9,11 +9,15 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
-    <h1>Get Started</h1>
+<div class="reg-header">
     <div>
-        Please enter you student health information below
-    </div>
+        @foreach (var item in cart.GetCartItems())
+        {
+            <div>
+                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
+            </div>
+        }
+    </div> 
 </div>
 
 <div>
@@ -22,15 +26,8 @@
             <div class="panel-body">
 
                 <div>
-                    <h3>Add health information for: @student.DisplayName</h3>
-                    <div>
-                        @foreach (var item in cart.GetCartItems())
-                        {
-                            <div>
-                                You are registering for: @item.GetParticipationObject().Name
-                            </div>
-                        }
-                    </div>
+                    <h3 class="text-center reg-instructions"><strong>Health Information</strong></h3>
+                    <p class="text-center reg-login">Please add health information for: @student.DisplayName</p>
                     <form class="form-horizontal" id="add-health-form" method="post" action="@Url.Action("addhealth", "account")">
                         @foreach (var qvm in Model)
                         {
@@ -38,7 +35,7 @@
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" id="btn-add-health" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                            <button type="submit" id="btn-add-health" class="btn btn-xl center-block btn-register">Continue &raquo;</button>
                         </div>
 
                     </form>

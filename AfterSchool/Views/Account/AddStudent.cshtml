@@ -9,11 +9,15 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
-    <h1>Get Started</h1>
+<div class="reg-header">
     <div>
-        Please enter you student information below
-    </div>
+        @foreach (var item in cart.GetCartItems())
+        {
+            <div>
+                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
+            </div>
+        }
+    </div> 
 </div>
 
 <div>
@@ -22,16 +26,9 @@
             <div class="panel-body">
 
                 <div>
-                    <h3>Add a student</h3>
-                    <div>
-                        @foreach (var item in cart.GetCartItems())
-                        {
-                            <div>
-                                You are registering for: @item.GetParticipationObject().Name
-                            </div>
-                        }
-                    </div>
+                    <h3 class="text-center reg-instructions"><strong>Student Information</strong></h3>
                     <form class="form-horizontal" id="add-student-form" method="post" action="@Url.Action("addstudent", "account")">
+
                         @foreach (var qvm in Model)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
@@ -45,7 +42,7 @@
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" class="btn btn-xl center-block btn-primary" id="btn-add-student">Continue &raquo;</button>
+                            <button type="submit" id="btn-add-student" class="btn btn-xl center-block btn-register">Continue &raquo;</button>
                         </div>
 
                     </form>

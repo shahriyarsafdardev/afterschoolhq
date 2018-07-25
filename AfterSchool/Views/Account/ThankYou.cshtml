@@ -14,21 +14,18 @@
 </div>
 
 <div>
-    <div class="col-md-12">
+    <div class="col-md-6 col-md-offset-3 text-center">
         <div class="panel">
             <div class="panel-body">
 
                 <h1>Thank You</h1>
-                <p>
-                    You have been registered
-                </p>
 
-                <div>
+                <div class="reg-ul">
                     @Html.Raw(Registration.GetRegistrationConfirmationHtml(registration, account, null, null, null))
                 </div>
 
                 <div>
-                    <a href="@account.HomePageUrl" class="btn btn-xl btn-primary center-block">Register for another activity</a>
+                    <a href="@account.HomePageUrl" class="btn btn-xl btn-register btn-register-xl">Register for another activity</a>
                 </div>
 
             </div>

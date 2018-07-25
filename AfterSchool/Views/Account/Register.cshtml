@@ -14,11 +14,8 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
-    <h1>Register for @SessionVariables.CurrentRegistrant.DisplayName for @Model.Name</h1>
-    <div>
-        @Html.Raw(Model.Details)
-    </div>
+<div class="reg-header">
+    <h1>Register @SessionVariables.CurrentRegistrant.DisplayName for @Model.Name</h1>
 </div>
 
 <div>
@@ -26,9 +23,9 @@
         <div class="panel">
             <div class="panel-body">
 
-                <p>
+                <h3 class="text-center reg-instructions">
                     You must e-sign to finalize registration
-                </p>
+                </h3>
 
                 <form class="form-horizontal" id="register-form" method="post" action="@Url.Action("register", "account")">
 
@@ -51,7 +48,7 @@
                     </div>
 
                     <div class="padding-v-20">
-                        <button type="submit" class="btn btn-xl center-block btn-primary" id="btn-register">
+                        <button type="submit" id="btn-register" class="btn btn-xl center-block btn-register btn-register-xl">
                             @if (Model.Cost == 0)
                             {
                                 @: Complete Registration &raquo;

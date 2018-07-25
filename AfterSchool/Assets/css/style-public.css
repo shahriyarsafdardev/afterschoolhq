@@ -437,7 +437,7 @@ color: #888;
 }
 
 .navbar-default .navbar-nav>li>a:hover.btn-signup {
-    color: #fff; !important;
+    color: #fff !important;
     border-color: #4ac65b;
 }
 
@@ -1590,4 +1590,29 @@ color: #0dc0c0;
 
 .text-small{
     font-size: .9em;
+}
+
+/* ----- Error ----- */
+
+.pagenotfound-container {
+    background: #2f3c40;
+    color: #fff;
+}
+
+.theme-text {
+    color: #00ae85;
+}
+
+.theme-btn {
+    background: #00ae85;
+    color: #fff;
+    padding: 11px 0px;
+    width: 100%;
+    border-radius: 24px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    word-break: break-word;
+    margin-top: 10px;
+    transition: all 0.3s;
 }

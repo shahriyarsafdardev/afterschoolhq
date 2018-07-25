@@ -1,51 +1,47 @@
 ﻿@model List<FormQuestionViewModel>
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
-    ViewBag.Title = "Add Student";
+    ViewBag.Title = "Add Emergency Contacts";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
-    <h1>Get Started</h1>
+<div class="reg-header">
     <div>
-        Please enter your emergency contacts below
-    </div>
+        @foreach (var item in cart.GetCartItems())
+        {
+            <div>
+                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
+            </div>
+        }
+    </div> 
 </div>
 
 <div>
     <div class="col-md-12">
         <div class="panel">
             <div class="panel-body">
-
                 <div>
-                    <h3>Emergency Contacts</h3>
-                    <div>
-                        @foreach (var item in cart.GetCartItems())
-                        {
-                            <div>
-                                You are registering for: @item.GetParticipationObject().Name
-                            </div>
-                        }
-                    </div>
+                    <h3 class="text-center reg-instructions"><strong>Emergency Contacts</strong></h3>
+                    <p class="text-center">In case of emergency, parents will be called first. Please list two additional contacts as backup.</p>
                     <form class="form-horizontal" id="emergency-contact-form" method="post" action="@Url.Action("addemergencycontacts", "account")">
 
-                        <h4>Contact 1</h4>
+                        <h4 class="col-md-9 col-md-offset-3">Contact 1</h4>
                         @foreach (var qvm in Model.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }
 
-                        <h4>Contact 2</h4>
+                        <h4 class="col-md-9 col-md-offset-3">Contact 2</h4>
                         @foreach (var qvm in Model.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" id="btn-emergency-contact" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                            <button type="submit" id="btn-emergency-contact" class="btn btn-xl center-block btn-register">Continue &raquo;</button>
                         </div>
 
                     </form>

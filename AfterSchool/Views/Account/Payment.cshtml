@@ -11,10 +11,10 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
+<div class="reg-header">
     <h1>Enter Payment</h1>
     <div>
-        Please pay to finalize your registration
+        Please submit payment to finalize your registration
     </div>
 </div>
 
@@ -23,7 +23,7 @@
         <div class="panel">
             <div class="panel-body">
                 
-                <h4>Registration for @participationObject.Name is @participationObject.Cost.ToCurrency()</h4>
+                <h4 class="text-center reg-instructions"><strong>Registration for @participationObject.Name is @participationObject.Cost.ToCurrency()</strong></h4>
 
                 @if (sources.Any())
                 {
@@ -49,7 +49,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                                    <button type="submit" class="btn btn-xl center-block btn-register">Continue &raquo;</button>
                                 </div>
                             </form>
                         </div>
@@ -85,7 +85,7 @@
                                 </div>
                             </div>
                             <div class="form-group padding-v-20">
-                                <button type="button" id="btn-paywitnewcard" class="btn btn-xl center-block btn-primary">Review Purchase &raquo;</button>
+                                <button type="button" id="btn-paywitnewcard" class="btn btn-xl center-block btn-register">Review Purchase &raquo;</button>
                             </div>
                         </form>
                         @if (participationObject.AllowToPayLater)

@@ -9,19 +9,21 @@
     var locations = (List<Location>)ViewBag.Locations;
 }
 
-<div>
-    <h1>@Model.Name</h1>
-    <p>@Model.LandingPageText</p>
+<div class="reg-header">
+    <div class="reg-header-overlay">
+        <h1 class="activity-title"><strong>@Model.Name</strong></h1>
+        <p>@Model.LandingPageText</p>
+    </div>
 </div>
 
-<div>
-    <div class="padding-20 border-light-gray">
+<div class="filter-bar">
+    <div class="reg-container">
         <div class="col-md-@filterCols">
-            <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.Activity) Name" id="search-name" class="form-control" />
+            <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.Activity) Name" id="search-name" class="form-control search-field" />
         </div>    
                
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-location" name="search-location">
+            <select class="form-control reg-form-control" id="search-location" name="search-location">
                 <option value="">Any Location</option>
                 @foreach (var location in locations)
                 {
@@ -31,7 +33,7 @@
         </div>     
 
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-grade" name="search-grade">
+            <select class="form-control reg-form-control" id="search-grade" name="search-grade">
                 <option value="">Any Grade</option>
                 @foreach (var grade in grades)
                 {
@@ -41,7 +43,7 @@
         </div>
 
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-seatsfilled" name="search-seatsfilled">
+            <select class="form-control reg-form-control" id="search-seatsfilled" name="search-seatsfilled">
                 <option value="">All Activities</option>
                 <option value="1">Has Seats Available</option>
                 <option value="2">Has Waiting List Available</option>
@@ -49,7 +51,7 @@
         </div>    
 
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-dayofweek" name="search-dayofweek">
+            <select class="form-control reg-form-control" id="search-dayofweek" name="search-dayofweek">
                 <option value="">Any Day</option>
                 @foreach (var item in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
                 {
@@ -59,7 +61,7 @@
         </div>      
        
         <div class="col-md-@filterCols">
-            <select class="form-control" id="search-gender" name="search-gender">
+            <select class="form-control reg-form-control" id="search-gender" name="search-gender">
                 <option value="">Any Gender</option>
                 @foreach (var item in Enum.GetValues(typeof(GenderType)).Cast<GenderType>().Where(x => x != GenderType.NotSet))
                 {
@@ -80,54 +82,62 @@
              maxgrade="@item.MaxGradeId" 
              hasseatsremaining="@item.HasSeatsAvailable().ToString().ToLower()" 
              haswaitinglistremaining="@item.HasWaitingListSeatsAvailable().ToString().ToLower()"
-             days="@ParticipationObjectUI.PrintDaysOfWeek(item)"
+             days="@ParticipationObjectUI.PrintDaysOfWeek(item)" 
              location="@item.Location.ID"
              gender="@((int)item.GenderRestriction)"
              name="@item.Name">
 
             <div class="panel">
-                <div class="panel-heading">
-                    <h3>@item.Name</h3>
+                <div class="heading panel-h3">
+                    <h3><strong>@item.Name</strong></h3>
                 </div>
                 <div class="panel-body">
-                    <p>@Html.Raw(item.Details)</p>
-                    <p>
-                        @ParticipationObjectUI.PrintDaysOfWeek(item)
-                    </p>
-                    <p>
-                        @ParticipationObjectUI.PrintGradeLevels(item)
-                    </p>
-                    <p>
-                        @Html.Raw(ParticipationObjectUI.PrintLocation(item).Replace("\n", "<br />"))
-                    </p>
-                    <p>
-                        @ParticipationObjectUI.PrintGenderRestrictions(item)
-                    </p>
                     <div>
-                        <p>
-                            @ParticipationObjectUI.PrintRegistrationFee(item)
-                        </p>
-                        @if (item.SubscriptionPlans.Any())
-                        {
+                        <span class="reg-info">
+                            @ParticipationObjectUI.PrintDaysOfWeek(item)
+                        </span>
+                        &bull;
+                        <span class="reg-info">
+                            @ParticipationObjectUI.PrintGradeLevels(item) Grade
+                        </span>
+                        &bull;
+                        <span class="reg-info">
+                            @ParticipationObjectUI.PrintGenderRestrictions(item)
+                        </span>
+                    </div>
+                    <p>@Html.Raw(item.Details)</p>
+
+                    <div>
+                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
+                        <span>
+                            <span>
+                                @ParticipationObjectUI.PrintRegistrationFee(item)
+                            </span>
+                                @if (item.SubscriptionPlans.Any())
+                            {
                             <p>
                                 @Html.Raw(ParticipationObjectUI.PrintSubscriptions(item).ToStringList("<br />"))
                             </p>
-                        }
-                        @if (item.PaymentPlans.Any())
-                        {
+                            }
+                                @if (item.PaymentPlans.Any())
+                            {
                             <p>
                                 @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(item).ToStringList("<br />"))
                             </p>
-                        }
+                            }
+                         </span>
+                         &bull;
+                             @item.RegistrationMode.ToString() &raquo;
+                        </a>
+                    </div> <br/>
+                    <div class="seats-remaining text-center">
+                         <strong><em> @item.SeatsRemaining.ToString() Seats Left!</em></strong>
                     </div>
+                </div>
+                <div class="panel-footer">
                     <p>
                         @ParticipationObjectUI.PrintRegistrationPeriod(item)
                     </p>
-                    <div>
-                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-block">
-                            @item.RegistrationMode.ToString() &raquo;
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
