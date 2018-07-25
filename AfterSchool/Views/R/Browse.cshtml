@@ -93,10 +93,12 @@
                     <div class="panel-subhead">
                         <span class="reg-info">
                             @ParticipationObjectUI.PrintDaysOfWeek(item)
-                        </span>  • 
+                        </span>
+                        &bull;
                         <span class="reg-info">
-                            @ParticipationObjectUI.PrintGradeLevels(item)
-                        </span>  • 
+                            @ParticipationObjectUI.PrintGradeLevels(item) Grade
+                        </span>
+                        &bull;
                         <span class="reg-info">
                             @ParticipationObjectUI.PrintGenderRestrictions(item)
                         </span>
@@ -120,7 +122,7 @@
                         }
                     </div>
                     <div>
-                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool)" class="btn btn-register btn-block">
+                        <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool)" class="btn btn-primary btn-register btn-block">
                             @item.RegistrationMode.ToString() &raquo;
                         </a>
                     </div>

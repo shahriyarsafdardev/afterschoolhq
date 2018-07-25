@@ -11,6 +11,8 @@
 
     @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
 
+    <link href="~/Assets/css/style-registration.css" type="text/css" rel="stylesheet" />
+
     @Html.Raw(SessionVariables.CurrentAccount?.GetAccountProperty(AccountPropertyType.FacebookAdPixel)?.Value)
     @RenderSection("fbadevents", required: false)
 
