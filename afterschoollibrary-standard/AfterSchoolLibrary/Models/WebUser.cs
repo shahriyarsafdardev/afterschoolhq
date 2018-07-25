@@ -111,12 +111,6 @@ namespace AfterSchoolLibrary
 
 			if (this.Uid.IsEmpty())
 				msgs.Add("Uid is required on WebUser object", MessageType.Error);
-			if (this.FirstName.IsEmpty())
-				msgs.Add("FirstName is required on WebUser object", MessageType.Error);
-			if (this.LastName.IsEmpty())
-				msgs.Add("LastName is required on WebUser object", MessageType.Error);
-			if (this.Email.IsEmpty())
-				msgs.Add("Email is required on WebUser object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(WebUser).Name));

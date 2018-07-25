@@ -47,9 +47,6 @@ property: VerifiedAccount, bool, Bit
 property: IsRegistered, bool, Bit
 property: DefaultAccountId, int?, Int
 property: AllowTextMessages, bool, Bit
-baseproperty: FirstName, required
-baseproperty: LastName, required
-baseproperty: Email, required
 loadmethod: Uid
 loadmethod: Uid|IsActive
 loadmethod: IsActive, List<>
