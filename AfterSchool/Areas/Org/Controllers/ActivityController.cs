@@ -330,7 +330,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         return View("EditSetup", activity);
                     case "next":
                         ViewBag.ActiveMenu = "EditSchedule";
-                        LoadEditScheduleViewBag(activity, null);
+                        var scheduleId = activity.ActivityScheduleId?.ToString();
+                        LoadEditScheduleViewBag(activity, scheduleId);
                         return View("EditSchedule", activity);
                 }
             }
@@ -455,6 +456,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditSchedule";
+                        var scheduleId = activity.ActivityScheduleId?.ToString();
+                        LoadEditScheduleViewBag(activity, scheduleId);
                         return View("EditSchedule", activity);
                     case "next":
                         ViewBag.ActiveMenu = "EditContact";
@@ -619,13 +622,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string mylocation, string locationtype, string cmd)
         {
             var msgs = new SystemMessages();
-            var locdeets = locationdetails;
             Activity activity = Activity.LoadByUid(id.ToGuid());
 
-            if (locationdetails.IsEmpty())
-            {
-                msgs.Add("Specific Instructions cannot be blank", MessageType.UserError);
-            }
+           
 
             if (activity.IsNotEmpty() && msgs.HasNoErrors())
             {
