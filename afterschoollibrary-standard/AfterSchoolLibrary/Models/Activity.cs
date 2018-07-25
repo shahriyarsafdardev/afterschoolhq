@@ -786,49 +786,49 @@ namespace AfterSchoolLibrary
 
         public bool IsChildActivity { get { return this.ParentActivityId.HasValue; } }
 
-        public Activity GetParentActivity(DatabaseConnection dc = null)
+        public Activity GetParentActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ParentActivityId.HasValue)
-                return Activity.Load(this.ParentActivityId.Value, dc: dc);
+                return Activity.Load(this.ParentActivityId.Value, msgs, dc);
 
             return null;
         }
 
         private List<ActivityDay> _Days = null;
-        public List<ActivityDay> GetDays(DatabaseConnection dc = null)
+        public List<ActivityDay> GetDays(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Days.IsEmpty())
-                _Days = ActivityDay.LoadByActivityId(this.ID.Value, dc: dc);
+                _Days = ActivityDay.LoadByActivityId(this.ID.Value, msgs, dc);
 
             return _Days;
         }
 
-        public List<DayOfWeekASL> GetDaysOfTheWeek(DatabaseConnection dc = null)
+        public List<DayOfWeekASL> GetDaysOfTheWeek(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (this.GetSchedule(dc: dc)?.GetDaysOfTheWeek(dc: dc).Any() ?? false)
-                return this.GetSchedule(dc: dc)?.GetDaysOfTheWeek();
+            if (this.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek(msgs, dc).Any() ?? false)
+                return this.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek();
 
             return new List<DayOfWeekASL>();
         }
 
-        public List<Registrant> GetRegistrants(DatabaseConnection dc = null)
+        public List<Registrant> GetRegistrants(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrantActivities(dc: dc).Select(x => x.ToRegistrant()).ToList();
+            return GetRegistrantActivities(msgs, dc).Select(x => x.ToRegistrant()).ToList();
         }
 
-        public List<RegistrantActivity> GetRegistrantActivities(DatabaseConnection dc = null)
+        public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrantActivities(false, dc: dc);
+            return GetRegistrantActivities(false, msgs, dc);
         }
 
-        public List<RegistrantActivity> GetRegistrantActivities(bool includeInvited, DatabaseConnection dc = null)
+        public List<RegistrantActivity> GetRegistrantActivities(bool includeInvited, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var ras = new List<RegistrantActivity>();
 
             if (includeInvited)
-                ras = RegistrantActivity.LoadByActivityId(this.ID.Value, dc: dc).ToList();
+                ras = RegistrantActivity.LoadByActivityId(this.ID.Value, msgs, dc).ToList();
             else
-                ras = RegistrantActivity.LoadByActivityId(this.ID.Value, dc: dc).Where(x =>
+                ras = RegistrantActivity.LoadByActivityId(this.ID.Value, msgs, dc).Where(x =>
                     x.NumberOfApplicationSeats.HasValue ||
                     x.NumberOfSeats.HasValue ||
                     x.NumberOfWaitingListSeats.HasValue
@@ -1143,7 +1143,7 @@ namespace AfterSchoolLibrary
                     });
 
                     // copy days
-                    this.GetDays(adc).ForEach(day => {
+                    this.GetDays(amsgs, adc).ForEach(day => {
                         var newDay = new ActivityDay
                         {
                             ActivityId = copy.ID,
@@ -2409,14 +2409,14 @@ namespace AfterSchoolLibrary
         public static SystemMessages SendRegistrationSummaryReport(int activityId, string uiActivityLabel, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.Load(activityId, dc: dc);
-            var registrants = activity.GetRegistrants(dc: dc);
+            var activity = Activity.Load(activityId, msgs, dc);
+            var registrants = activity.GetRegistrants(msgs, dc);
 
             string subject = $"{activity.Name} Registration Summary Report";
             string body = $"<p>{activity.ContactName},</p><p>Here's your registration summary report for <strong>{activity.Name}</strong>. You have <strong>{registrants.Count.ToString()}</strong> registrations.</p>";
 
             msgs.AddRange(Registration.EmailCSVReport(
-                activity.GetAccount(dc: dc).ID.Value, 
+                activity.GetAccount(msgs, dc).ID.Value, 
                 null,
                 null,
                 activity.ActivityGroupId.HasValue ? activity.ActivityGroupId.Value.AsList() : null, 

@@ -21,10 +21,6 @@ Public Class AmazonHelper
         End Set
     End Property
 
-
-    'Public Const AccessKeyId As String = "AKIAJYC2CLH2FV3IGLCQ"
-    'Public Const SecretAccessKeyId As String = "e6dMqKRyzcq7SaZ+HuH3FoFaKA/W6BG5uk6Or0B5"
-
     Private _bucketName As String
     Public Property BucketName() As String
         Get
@@ -32,6 +28,16 @@ Public Class AmazonHelper
         End Get
         Set(ByVal value As String)
             _bucketName = value
+        End Set
+    End Property
+
+    Private _RegionEndpoint As Amazon.RegionEndpoint
+    Public Property RegionEndPoint() As Amazon.RegionEndpoint
+        Get
+            Return _RegionEndpoint
+        End Get
+        Set(ByVal value As Amazon.RegionEndpoint)
+            _RegionEndpoint = value
         End Set
     End Property
 
@@ -49,17 +55,27 @@ Public Class AmazonHelper
         End If
     End Function
 
+    Private Function GetS3Client()
+        Return New Amazon.S3.AmazonS3Client(Me.AccessKeyId, Me.SecretAccessKeyId, Me.RegionEndPoint)
+    End Function
+
     Public Sub New()
 
     End Sub
     Public Sub New(ByVal bucketName As String)
         Me.BucketName = bucketName
     End Sub
-	Public Sub New(ByVal bucketName As String, ByVal accessKeyId As String, ByVal secretAccessKeyId As String)
-		Me.BucketName = bucketName
-		Me.AccessKeyId = accessKeyId
-		Me.SecretAccessKeyId = secretAccessKeyId
-	End Sub
+    Public Sub New(ByVal bucketName As String, ByVal accessKeyId As String, ByVal secretAccessKeyId As String)
+        Me.BucketName = bucketName
+        Me.AccessKeyId = accessKeyId
+        Me.SecretAccessKeyId = secretAccessKeyId
+    End Sub
+    Public Sub New(ByVal bucketName As String, ByVal accessKeyId As String, ByVal secretAccessKeyId As String, ByVal regionEndPoint As Amazon.RegionEndpoint)
+        Me.BucketName = bucketName
+        Me.AccessKeyId = accessKeyId
+        Me.SecretAccessKeyId = secretAccessKeyId
+        Me.RegionEndPoint = regionEndPoint
+    End Sub
 
     Public Function AddFile(ByVal fromFileLocation As String, ByVal amazonLocation As String) As SystemMessages
         Return AddFile(fromFileLocation, amazonLocation, False)
@@ -105,7 +121,7 @@ Public Class AmazonHelper
 
         Try
 
-            Dim client As New Amazon.S3.AmazonS3Client(Me.AccessKeyId, Me.SecretAccessKeyId)
+            Dim client As Amazon.S3.AmazonS3Client = GetS3Client()
 
             If client.IsEmpty() = False Then
                 Dim request As Amazon.S3.Model.DeleteObjectRequest = New Amazon.S3.Model.DeleteObjectRequest()
@@ -132,7 +148,7 @@ Public Class AmazonHelper
 
             System.Net.ServicePointManager.ServerCertificateValidationCallback = New System.Net.Security.RemoteCertificateValidationCallback(AddressOf AmazonHelper.ValidateCertificate)
 
-            Dim client As New Amazon.S3.AmazonS3Client(Me.AccessKeyId, Me.SecretAccessKeyId)
+            Dim client As Amazon.S3.AmazonS3Client = GetS3Client()
 
             If client.IsEmpty() = False Then
                 Dim tu As Amazon.S3.Transfer.TransferUtility = New Amazon.S3.Transfer.TransferUtility(client)
@@ -165,7 +181,7 @@ Public Class AmazonHelper
 
             System.Net.ServicePointManager.ServerCertificateValidationCallback = New System.Net.Security.RemoteCertificateValidationCallback(AddressOf AmazonHelper.ValidateCertificate)
 
-            Dim client As New Amazon.S3.AmazonS3Client(Me.AccessKeyId, Me.SecretAccessKeyId)
+            Dim client As Amazon.S3.AmazonS3Client = GetS3Client()
 
             If client.IsEmpty() = False Then
 
@@ -206,7 +222,7 @@ Public Class AmazonHelper
 
         System.Net.ServicePointManager.ServerCertificateValidationCallback = New System.Net.Security.RemoteCertificateValidationCallback(AddressOf AmazonHelper.ValidateCertificate)
 
-        Dim client As New Amazon.S3.AmazonS3Client(Me.AccessKeyId, Me.SecretAccessKeyId)
+        Dim client As Amazon.S3.AmazonS3Client = GetS3Client()
 
         Dim request As Amazon.S3.Model.GetObjectRequest = New Amazon.S3.Model.GetObjectRequest()
         request.BucketName = Me.BucketName
@@ -241,7 +257,7 @@ Public Class AmazonHelper
         Try
             System.Net.ServicePointManager.ServerCertificateValidationCallback = New System.Net.Security.RemoteCertificateValidationCallback(AddressOf AmazonHelper.ValidateCertificate)
 
-            Dim client As New Amazon.S3.AmazonS3Client(Me.AccessKeyId, Me.SecretAccessKeyId)
+            Dim client As Amazon.S3.AmazonS3Client = GetS3Client()
 
             If client.IsEmpty() = False Then
 
@@ -290,7 +306,7 @@ Public Class AmazonHelper
 
         Try
 
-            Dim client As New Amazon.S3.AmazonS3Client(Me.AccessKeyId, Me.SecretAccessKeyId)
+            Dim client As Amazon.S3.AmazonS3Client = GetS3Client()
 
             If client.IsEmpty() = False Then
                 Dim request As Amazon.S3.Model.GetPreSignedUrlRequest = New Amazon.S3.Model.GetPreSignedUrlRequest()

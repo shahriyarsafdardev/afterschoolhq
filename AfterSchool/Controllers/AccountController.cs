@@ -660,6 +660,9 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
                 return RedirectToAction("");
 
+            if (SessionVariables.Cart.IsEmpty())
+                return RedirectToAction("");
+
             //if (SessionVariables.CurrentRegistrant.IsNotEmpty())
             //    return RedirectToAction("register", "account");
 

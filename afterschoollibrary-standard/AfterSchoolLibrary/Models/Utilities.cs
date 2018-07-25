@@ -248,9 +248,10 @@ namespace AfterSchoolLibrary
             Utilities.AmazonBucketNameTest = "afterschoolhq-test"; //all files are stored in amazon bucket
             Utilities.AmazonBucketNameProduction = "afterschoolhq-prod"; //all files are stored in amazon bucket
             Utilities.AmazonBucketNameLocal = "afterschoolhq-local"; //all files are stored in amazon bucket
+            Utilities.AmazonRegionEndPoint = Amazon.RegionEndpoint.USEast2;
 
-            Utilities.AmazonAccessKeyId = "AKIAIRWKZE6AEP57RE2Q";
-            Utilities.AmazonSecretAccessKeyId = "j8rbG/g32C2f15U0xLy4os5RNkypQgFxxVqCcS9N";
+            Utilities.AmazonAccessKeyId = "AKIAJYT3PYXGXTSEMSAQ";
+            Utilities.AmazonSecretAccessKeyId = "rTkFaZuJ/65sc4QcpjA0tBNEaoIYOXCoUjvlVRBD";
 
             Email.AppAdminEmailAddress = "support@afterschoolhq.com"; //all app admin emails are sent to this email address
             Email.ReplyHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
@@ -1443,6 +1444,7 @@ namespace AfterSchoolLibrary
         public static string AmazonBucketNameCI { get; set; }
         public static string AmazonBucketNameQA { get; set; }
         public static string AmazonBucketNameLocal { get; set; }
+        public static Amazon.RegionEndpoint AmazonRegionEndPoint { get; set; }
 
         public static string AmazonBucketName
         {
