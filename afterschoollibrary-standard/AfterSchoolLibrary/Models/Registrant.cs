@@ -480,6 +480,8 @@ namespace AfterSchoolLibrary
             };
             msgs.AddRange(reg.Save(dc));
 
+            msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
+
             return reg;
         }
 
@@ -500,6 +502,8 @@ namespace AfterSchoolLibrary
                 LastUpdated = DateTime.UtcNow
             };
             msgs.AddRange(reg.Save(dc));
+
+            msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
 
             return reg;
         }
@@ -599,8 +603,20 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
+
+
             //check if answer for this one already exists, and where formquestion is null
-            var answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, dc: dc);
+            FormQuestionAnswer answer = null;
+
+            if (question.QuestionDataTypeId == QuestionDataType.NotSet)
+                answer = FormQuestionAnswer.LoadByRegistrantIdByFormQuestionIdByRegistrationId(
+                    this.ID.Value, 
+                    question.ID.Value,
+                    registrationId.Value,
+                    msgs, 
+                    dc);
+            else
+                answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, msgs, dc);
 
             if (answer.IsEmpty())
             {
@@ -1007,11 +1023,21 @@ namespace AfterSchoolLibrary
             return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
         }
 
+        public SystemMessages DeleteRegistrantActivity(int activityId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var registrantAcitivity = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
+
+            msgs.AddRange(registrantAcitivity.Delete(dc));
+
+            return msgs;
+        }
+        
         public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.LoadByRegistrantId(this.ID.Value, msgs, dc).Sum(payment => payment.Amount.Value);
         }
-
+        
         /*
         public List<Attendance> GetAttendance(int ActivityId, DatabaseConnection dc = null)
         {

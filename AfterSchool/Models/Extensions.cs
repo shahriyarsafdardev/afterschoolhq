@@ -148,7 +148,7 @@ namespace AfterSchool.Models
             }
             if (setupMsgs.HasErrors())
             {
-                setupMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editsetup/{0}\" class=\"publish-error-title\">Settings</a>", activity.ID), MessageType.UserError));
+                setupMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editsetup/{0}\" class=\"publish-error-title\">Settings</a>", activity.Uid), MessageType.UserError));
                 msgs.AddRange(setupMsgs);
             }
 
@@ -158,7 +158,7 @@ namespace AfterSchool.Models
             }
             if (scheduleMessages.HasErrors())
             {
-                scheduleMessages.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editschedule/{0}\" class=\"publish-error-title\">Schedule</a>", activity.ID), MessageType.UserError));
+                scheduleMessages.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editschedule/{0}\" class=\"publish-error-title\">Schedule</a>", activity.Uid), MessageType.UserError));
                 msgs.AddRange(scheduleMessages);
             }
 
@@ -168,7 +168,7 @@ namespace AfterSchool.Models
             }
             if (detailMsgs.HasErrors())
             {
-                detailMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editdetails/{0}\" class=\"publish-error-title\">About Your Activity</a>", activity.ID), MessageType.UserError));
+                detailMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editdetails/{0}\" class=\"publish-error-title\">About Your Activity</a>", activity.Uid), MessageType.UserError));
                 msgs.AddRange(detailMsgs);
             }
 
@@ -186,7 +186,7 @@ namespace AfterSchool.Models
             }
             if (contactMsgs.HasErrors())
             {
-                contactMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editcontact/{0}\" class=\"publish-error-title\">Contact Information</a>", activity.ID), MessageType.UserError));
+                contactMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editcontact/{0}\" class=\"publish-error-title\">Contact Information</a>", activity.Uid), MessageType.UserError));
                 msgs.AddRange(contactMsgs);
             }
 
@@ -212,7 +212,7 @@ namespace AfterSchool.Models
             //}
             if (locationMsgs.HasErrors())
             {
-                locationMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editlocation/{0}\" class=\"publish-error-title\">Location</a>", activity.ID), MessageType.UserError));
+                locationMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editlocation/{0}\" class=\"publish-error-title\">Location</a>", activity.Uid), MessageType.UserError));
                 msgs.AddRange(locationMsgs);
             }
 
@@ -222,7 +222,7 @@ namespace AfterSchool.Models
             }
             if (paymentMsgs.HasErrors())
             {
-                paymentMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editcost/{0}\" class=\"publish-error-title\">Payment</a>", activity.ID), MessageType.UserError));
+                paymentMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editcost/{0}\" class=\"publish-error-title\">Payment</a>", activity.Uid), MessageType.UserError));
                 msgs.AddRange(paymentMsgs);
             }
 
@@ -243,7 +243,7 @@ namespace AfterSchool.Models
 
             if (confirmationMsgs.HasErrors())
             {
-                confirmationMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editconfirmation/{0}\" class=\"publish-error-title\">Confirmation Message</a>", activity.ID), MessageType.UserError));
+                confirmationMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editconfirmation/{0}\" class=\"publish-error-title\">Confirmation Message</a>", activity.Uid), MessageType.UserError));
                 msgs.AddRange(confirmationMsgs);
             }
 
@@ -258,7 +258,7 @@ namespace AfterSchool.Models
 
             if (archiveMsgs.HasErrors())
             {
-                archiveMsgs.Insert(0, new SystemMessage(string.Format("<span class=\"publish-error-title\">Archive Errors<span>", activity.ID), MessageType.UserError));
+                archiveMsgs.Insert(0, new SystemMessage(string.Format("<span class=\"publish-error-title\">Archive Errors<span>", activity.Uid), MessageType.UserError));
                 msgs.AddRange(archiveMsgs);
             }
 

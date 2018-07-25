@@ -222,6 +222,11 @@ namespace AfterSchoolLibrary
             return FormQuestionGroup.LoadByFormId(this.ID.Value, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
         }
 
+        public int GetQuestionGroupCount(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", this.ID.Value } }, msgs, dc);
+        }
+
         public Form Copy(int loggedInUserId, int newAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();

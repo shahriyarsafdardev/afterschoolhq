@@ -113,9 +113,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Response.Clear();
 
-            if (id.IsNumber() && schedule.IsNumber())
+            if (id.IsGuid() && schedule.IsNumber())
             {
-                var activity = Activity.Load(id.ToInteger());
+                var activity = Activity.LoadByUid(id.ToGuid());
                 var sched = ActivitySchedule.Load(schedule.ToInteger());
 
                 if (activity.AccountId != SessionVariables.CurrentAccount.ID || sched.AccountId != SessionVariables.CurrentAccount.ID)
@@ -301,7 +301,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult GetActivityDays(string id)
         {
-            var activity = Activity.Load(id.ToInteger());
+            var activity = Activity.LoadByUid(id.ToGuid());
             Response.Clear();
             WriteOutput(new { status = "ok", days = activity.GetDaysOfTheWeek().Select(x => new { Value = (int)x, Text = x.ToString() }) }, ResponseType.JSON);
             Response.End();

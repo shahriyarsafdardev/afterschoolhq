@@ -234,6 +234,25 @@ namespace AfterSchoolLibrary
             return _RegistrationPeriods;
         }
 
+        public SystemMessages UpdateInvitationStatus(InviteStatus inviteStatus, int currentAccountId, DatabaseConnection dc = null)
+        {
+            this.InviteStatusId = inviteStatus;
+            this.LastModifiedBy = currentAccountId;
+            this.LastModifiedDate = DateTime.UtcNow;
+
+            return this.Save(dc);
+        }
+
+        public ActivityGroup GetActivityGroup()
+        {
+            return ActivityGroup.Load(this.ActivityGroupId.Value);
+        }
+
+        public static bool IsExternalLeague(int accountId, int activityGroupId)
+        {
+            return AccountActivityGroup.LoadByAccountId(accountId).Where(aag => aag.ActivityGroupId == activityGroupId).Count() > 0;
+        }
+
         #endregion
     }
 }

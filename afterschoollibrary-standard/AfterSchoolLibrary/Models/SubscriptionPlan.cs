@@ -235,6 +235,52 @@ namespace AfterSchoolLibrary
             this.Save(dc);
         }
 
+       private SubscriptionPlan CopyFields()
+        {
+            return new SubscriptionPlan()
+            {
+                ParticipationObjectTypeId = this.ParticipationObjectTypeId,
+                ParticipationObjectId = this.ParticipationObjectId,
+                PlanOwnerAccountId = this.PlanOwnerAccountId,
+                CostPerPeriod = this.CostPerPeriod,
+                BillingPeriodTypeId = this.BillingPeriodTypeId,
+                DoesAutoRenew = this.DoesAutoRenew,
+                IsActive = this.IsActive,
+                StripeSubscriptionId = this.StripeSubscriptionId
+            };
+        }
+
+        public SubscriptionPlan Copy(int newParticipationObjectId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            SubscriptionPlan copy = null;
+
+            Database.ExecuteTransaction(
+               action: (SystemMessages amsgs, DatabaseConnection adc) =>
+               {
+                   copy = this.CopyFields();
+                   copy.ParticipationObjectId = newParticipationObjectId;
+                   copy.CreateDate = DateTime.UtcNow;
+                   copy.CreatedBy = loggedInUserId;
+                   copy.LastModifiedDate = DateTime.UtcNow;
+                   copy.LastModifiedBy = loggedInUserId;
+                   amsgs.AddRange(copy.Save(adc));
+               },
+               onSuccess: (SystemMessages smsgs) =>
+               {
+                   msgs.AddRange(smsgs);
+               },
+               onFailure: (SystemMessages fmsgs) =>
+               {
+                   msgs.AddRange(fmsgs);
+               },
+               dc: dc
+           );
+
+            return copy;
+        }
+
         #endregion
     }
 }

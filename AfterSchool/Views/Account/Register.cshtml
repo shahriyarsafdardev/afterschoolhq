@@ -6,6 +6,10 @@
     var cart = (Cart)ViewBag.Cart;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
     var registrant = (Registrant)ViewBag.Registrant;
+    var groups = qvms.Select(qvm => qvm.Question.ToFormQuestionGroup())
+        .OrderBy(group => group.DisplayOrder)
+        .DistinctBy(group => group.ID)
+        .ToList();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -23,11 +27,14 @@
                     You must e-sign to finalize registration
                 </h3>
 
-                <form class="form-horizontal" method="post" action="@Url.Action("register", "account")">
+                <form class="form-horizontal" id="register-form" method="post" action="@Url.Action("register", "account")">
 
-                    @foreach (var group in qvms.Select(qvm => qvm.Question.ToFormQuestionGroup()))
+                    @foreach (var group in groups)
                     {
-                        Html.RenderPartial("~/Views/Shared/Form/_Group.cshtml", group, new ViewDataDictionary() { { "QuestionViewModels", qvms } });
+                        Html.RenderPartial(
+                            "~/Views/Shared/Form/_Group.cshtml", 
+                            group, 
+                            new ViewDataDictionary() { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
                     }
 
                     <div class="form-group">
@@ -41,7 +48,7 @@
                     </div>
 
                     <div class="padding-v-20">
-                        <button type="submit" class="btn btn-xl center-block btn-register btn-register-xl">
+                        <button type="submit" id="btn-register" class="btn btn-xl center-block btn-register btn-register-xl">
                             @if (Model.Cost == 0)
                             {
                                 @: Complete Registration &raquo;
@@ -58,3 +65,12 @@
         </div>
     </div>
 </div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#register-form').submit(function () {
+            $('#btn-register').html('Registering...');
+            $('#btn-register').prop('disabled', true);
+        });
+    });
+</script>

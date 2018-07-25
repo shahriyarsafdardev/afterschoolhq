@@ -199,6 +199,16 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static FormQuestionAnswer LoadByRegistrantIdByFormQuestionIdByRegistrationId(int RegistrantId, int FormQuestionId, int RegistrationId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			dq.Criterias.Add(ObjectMap["FormQuestionId"], FormQuestionId);
+			dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		public static List<FormQuestionAnswer> LoadByRegistrantIdByActivityId(int RegistrantId, int ActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -316,6 +326,7 @@ namespace AfterSchoolLibrary
                     case QuestionDataType.OrganizationContactEmail:
                         registrant.Email = this.Text;
                         break;
+                 
                 }
 
                 msgs.AddRange(registrant.Save(dc: dc));
@@ -323,15 +334,15 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static List<FormQuestionAnswer> LoadByRegistrationIds(List<int> RegistrationIds, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<FormQuestionAnswer> LoadByRegistrationIds(List<int> RegistrationIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationIds, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static FormQuestionAnswer LoadByRegistrantIdByQuestionTypeId(int registrantId, QuestionDataType qt, DatabaseConnection dc)
+        public static FormQuestionAnswer LoadByRegistrantIdByQuestionTypeId(int registrantId, QuestionDataType qt, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -340,7 +351,7 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["QuestionDataTypeId"], (int)qt);
             dq.Criterias.Add(ObjectMap["RegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.Criterias.Add(ObjectMap["FormQuestionId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
         #endregion

@@ -9,6 +9,11 @@ namespace AfterSchool.Models
 {
     public class UI
     {
+        public static string MakeLink(string url)
+        {
+            return url.Contains("http://") || url.Contains("https://") ? url : $"http://{url}";
+        }
+
         public static string JavascriptSafeString(string value)
         {
             return value.Replace("'", "\\'");

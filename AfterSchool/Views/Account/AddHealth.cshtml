@@ -28,14 +28,14 @@
                 <div>
                     <h3 class="text-center reg-instructions"><strong>Health Information</strong></h3>
                     <p class="text-center reg-login">Please add health information for: @student.DisplayName</p>
-                    <form class="form-horizontal" method="post" action="@Url.Action("addhealth", "account")">
+                    <form class="form-horizontal" id="add-health-form" method="post" action="@Url.Action("addhealth", "account")">
                         @foreach (var qvm in Model)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" class="btn btn-xl center-block btn-register">Continue &raquo;</button>
+                            <button type="submit" id="btn-add-health" class="btn btn-xl center-block btn-register">Continue &raquo;</button>
                         </div>
 
                     </form>
@@ -44,3 +44,12 @@
         </div>
     </div>
 </div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#add-health-form').submit(function () {
+            $('#btn-add-health').html('Saving Health Info...');
+            $('#btn-add-health').prop('disabled', true);
+        });
+    });
+</script>

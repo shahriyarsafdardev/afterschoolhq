@@ -93,7 +93,7 @@
                     $('#mylocation').prop('checked', true);
                 }
             }
-        } else if(@searchOnly.ToString().ToLower() == 'false') {
+        } else if (@searchOnly.ToString().ToLower() == false) {          
             $('#locationname').val(locationSearch.val());
 
             $('#add-location').removeClass('hide');
@@ -134,7 +134,7 @@
                                     </div>`);
                             }
 
-                            if (locationSearch.val().length > 6 && @searchOnly.ToString().ToLower() == 'false') {
+                            if (locationSearch.val().length > 6 && @searchOnly.ToString().ToLower() == false) {
                                 locationList.append(`
                                 <div class="${listItemClass}" 
                                     style="${listItemStyle}" 

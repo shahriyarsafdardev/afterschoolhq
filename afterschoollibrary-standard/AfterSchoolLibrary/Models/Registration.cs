@@ -398,6 +398,7 @@ namespace AfterSchoolLibrary
 
         public SystemMessages FindAndSetFirstRegistration(string firstName, string lastName, string email, DatabaseConnection dc = null)
         {
+            var msgs = new SystemMessages();
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
@@ -409,16 +410,16 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
             dq.OrderBys.Add(ObjectMap["Id"], OrderByDirectionEnum.Ascending);
 
-            var firstRegistration = dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            var firstRegistration = dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
             if (firstRegistration.IsNotEmpty())
             {
                 this.FirstRegistrationId = firstRegistration.ID;
                 this.LastModifiedBy = 0;
                 this.LastModifiedDate = DateTime.UtcNow;
-                return this.Save(dc: dc);
+                msgs.AddRange(this.Save(dc: dc));
             }
 
-            return new SystemMessages();
+            return msgs;
         }
 
         public static List<Registration> FindRelatedRegistrations(int AccountId, string firstName, string lastName, string email, DatabaseConnection dc = null)

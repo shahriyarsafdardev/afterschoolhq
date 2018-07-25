@@ -88,7 +88,7 @@ namespace AfterSchoolLibrary.Services
                     q.FormQuestionGroupId = group.ID;
                     q.IsTemplate = true;
                     q.IsLocked = question.IsLocked;
-                    q.DisplayOrder = displayOrder;
+                    q.DisplayOrder = group.GetQuestionCount(msgs, dc) + 1;
                     q.QuestionTypeId = question.QuestionTypeId;
                     q.QuestionDataTypeId = question.QuestionDataTypeId;
                     q.Options = question.Options;
