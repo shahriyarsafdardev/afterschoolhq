@@ -30,14 +30,14 @@
                             </div>
                         }
                     </div>
-                    <form class="form-horizontal" method="post" action="@Url.Action("addhomeaddress", "account")">
+                    <form class="form-horizontal" id="add-home-address-form" method="post" action="@Url.Action("addhomeaddress", "account")">
                         @foreach (var qvm in Model)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                            <button type="submit" id ="btn-add-home-address" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
                         </div>
 
                     </form>
@@ -46,3 +46,13 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#add-home-address-form').submit(function () {
+            $('#btn-add-home-address').html('Saving Home Address...');
+            $('#btn-add-home-address').prop('disabled', true);
+        });
+    });
+</script>

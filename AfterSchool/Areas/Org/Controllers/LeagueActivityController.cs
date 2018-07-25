@@ -192,7 +192,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ActiveForm = activity.GetActiveActivityForm();
             ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
             ViewBag.ActivePeriod = activePeriod;
-            ViewBag.Group = activityGroup;         
+            ViewBag.Group = activityGroup;
+            ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
 
             return View(activity);
         }
@@ -276,6 +277,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.ActivePeriod = activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
             ViewBag.ActiveForm = activity.GetActiveActivityForm();
+            ViewBag.ActivityGroupType = ActivityGroupType.League;
 
             if (msgs.HasNoErrors())
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
@@ -429,7 +431,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         LoadEditScheduleViewBag(activity, null);
                         return View("EditSchedule", activity);
                     case "next":
-                        ViewBag.ActiveMenu = "EditStudents";
+                        LoadEditStudentsViewBag(activity);
                         return View("EditStudents", activity);
                 }
             }
@@ -439,34 +441,30 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
 
-        [HttpGet]
-        public ActionResult EditStudents(string id)
+        private void LoadEditStudentsViewBag(Activity activity)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-
-            
-            var group = activity.GetActivityGroup();
-            var otherActiviesInGroup = group.GetActivities();
+            var activityGroup = activity.GetActivityGroup();
+            var otherActiviesInGroup = activityGroup.GetActivities();
             otherActiviesInGroup.Remove(activity);
-            var fullListOfRegistrants = group.GetRegistrants();
+            var fullListOfRegistrants = activityGroup.GetRegistrants();
             var registrantsOfSchool = fullListOfRegistrants.Where(r => r.AccountId == activity.AccountId);
             var availableRegistrants = new List<Registrant>();
             var currentRegistrants = activity.GetRegistrants();
 
             availableRegistrants.AddRange(currentRegistrants);
 
-            foreach ( var registrant in registrantsOfSchool )
+            foreach (var registrant in registrantsOfSchool)
             {
                 var activities = registrant.GetActivities();
-               
-                if ( !activities.Any( a => otherActiviesInGroup.Any(oa => a.ID == oa.ID)))
+
+                if (!activities.Any(a => otherActiviesInGroup.Any(oa => a.ID == oa.ID)))
                 {
                     availableRegistrants.Add(registrant);
                 }
-                  
+
             }
 
-          
+
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.AvailableRegistrants = availableRegistrants;
@@ -474,49 +472,54 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Group = activity.GetActivityGroup();
             ViewBag.ActiveMenu = "EditStudents";
+            ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
+        }
 
+        [HttpGet]
+        public ActionResult EditStudents(string id)
+        {
+            var activity = Activity.LoadByUid(id.ToGuid());
+
+
+            LoadEditStudentsViewBag(activity);
+            
             return View(activity);
         }
 
         [HttpPost]
-        public ActionResult EditStudents(string id,  List<int> selectedRegistrants,string cmd)
+        public ActionResult EditStudents(string id, List<Registrant> selectedRegistrants, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
             var updatedRegistrants = new List<Registrant>();
 
             var currentRegistrants = activity.GetRegistrants();
-            var updatedRegistrantIds = currentRegistrants.Select(cr => cr.ID.Value).ToList();
-            var currentRegistrantsIds = currentRegistrants.Select(c => c.ID).ToList();
-            var removedRegistrants = currentRegistrants.Where(i => !selectedRegistrants.Contains(i.ID.Value));
-            var addedRegistrants = selectedRegistrants.Where(i => !currentRegistrantsIds.Contains(i));
+            //var updatedRegistrantIds = currentRegistrants.Select(cr => cr.ID.Value).ToList();
+            //var currentRegistrantsIds = currentRegistrants.Select(c => c.ID).ToList();
+            var removedRegistrants = currentRegistrants.Where(i => !selectedRegistrants.Contains(i));
+            var addedRegistrants = selectedRegistrants.Where(i => !currentRegistrants.Contains(i));
             
 
             if (id.IsGuid())
             {     
-                foreach (var regId in addedRegistrants)
+                foreach (var addedRegistrant in addedRegistrants)
                 {
-                    Registrant registrant = Registrant.Load(regId);
+                    Registrant registrant = Registrant.Load(addedRegistrant.ID.Value);
 
-                    var registrantActivity = registrant.AddOrUpdateActivity(regId, activity.ID.Value, activity.SeatsAvailable.Value, activity.WaitingListSeats.Value, activity.SeatsAvailable.Value, 0, 0, SessionVariables.LoggedInUser.ID.Value, msgs);
+                    var registrantActivity = registrant.AddOrUpdateActivity(addedRegistrant.ID.Value, activity.ID.Value, activity.SeatsAvailable.Value, activity.WaitingListSeats.Value, activity.SeatsAvailable.Value, 0, 0, SessionVariables.LoggedInUser.ID.Value, msgs);
 
-                    updatedRegistrantIds.Add(registrantActivity.RegistrantId.Value);
+                    updatedRegistrants.Add(registrant);
                 }
 
                 foreach( var registrant in removedRegistrants)
                 {
                     msgs.AddRange(registrant.DeleteRegistrantActivity(activity.ID.Value));
-                    updatedRegistrantIds.Remove(registrant.ID.Value);
-                }
-
-                foreach( var regId in updatedRegistrantIds)
-                {
-                    updatedRegistrants.Add(Registrant.Load(regId));
+                    updatedRegistrants.Remove(registrant);
                 }
             }
 
             
-            
+           
             
             if (msgs.HasNoErrors())
             {
@@ -527,6 +530,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.SelectedRegistrants = updatedRegistrants;
+            LoadEditStudentsViewBag(activity);
 
             if (msgs.HasNoErrors())
             {

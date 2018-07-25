@@ -22,21 +22,21 @@
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editdetails", "activity", new { id = Model.Uid })" class="form-horizontal">
 
-                    <button type="submit" class="btn btn-primary pull-right btn-space" onclick="navigateActivity('@Url.Action("editdetails", "leagueactivity", new { id = Model.ID, cmd = "next" })')">&raquo;</button>
+                    <button type="submit" class="btn btn-primary pull-right btn-space" onclick="navigateActivity('@Url.Action("editdetails", "leagueactivity", new { id = Model.Uid, cmd = "next" })')">&raquo;</button>
                     <button type="submit" class="btn btn-default pull-right btn-space"><i class="s7-diskette"></i> Save</button>
-                    <button type="submit" class="btn btn-default pull-right btn-space" onclick="navigateActivity('@Url.Action("editdetails", "leagueactivity", new { id = Model.ID, cmd = "prev" })')">&laquo;</button>
+                    <button type="submit" class="btn btn-default pull-right btn-space" onclick="navigateActivity('@Url.Action("editdetails", "leagueactivity", new { id = Model.Uid, cmd = "prev" })')">&laquo;</button>
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormDetails.cshtml", Model);}
 
                     <div class="form-group">
                         <div class="col-sm-2 col-sm-offset-3">
-                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editdetails", "leagueactivity", new { id = Model.ID, cmd = "prev" })')">&laquo; Previous</button>
+                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editdetails", "leagueactivity", new { id = Model.Uid, cmd = "prev" })')">&laquo; Previous</button>
                         </div>
                         <div class="col-sm-5">
                             <button type="submit" class="btn btn-default btn-space btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
                         </div>
                         <div class="col-sm-2">
-                            <button type="submit" class="btn btn-primary btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editdetails", "leagueactivity", new { id = Model.ID, cmd = "next" })')">Next &raquo;</button>
+                            <button type="submit" class="btn btn-primary btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editdetails", "leagueactivity", new { id = Model.Uid, cmd = "next" })')">Next &raquo;</button>
                         </div>
                     </div>
 

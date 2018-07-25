@@ -316,6 +316,7 @@ namespace AfterSchoolLibrary
                     case QuestionDataType.OrganizationContactEmail:
                         registrant.Email = this.Text;
                         break;
+                 
                 }
 
                 msgs.AddRange(registrant.Save(dc: dc));

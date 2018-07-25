@@ -30,7 +30,7 @@
                             </div>
                         }
                     </div>
-                    <form class="form-horizontal" method="post" action="@Url.Action("addemergencycontacts", "account")">
+                    <form class="form-horizontal" id="emergency-contact-form" method="post" action="@Url.Action("addemergencycontacts", "account")">
 
                         <h4>Contact 1</h4>
                         @foreach (var qvm in Model.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
@@ -45,7 +45,7 @@
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                            <button type="submit" id="btn-emergency-contact" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
                         </div>
 
                     </form>
@@ -54,3 +54,13 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#emergency-contact-form').submit(function () {
+            $('#btn-emergency-contact').html('Saving Emergency Contact Info...');
+            $('#btn-emergency-contact').prop('disabled', true);
+        });
+    });
+</script>

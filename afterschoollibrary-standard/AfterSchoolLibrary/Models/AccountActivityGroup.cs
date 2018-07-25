@@ -248,6 +248,11 @@ namespace AfterSchoolLibrary
             return ActivityGroup.Load(this.ActivityGroupId.Value);
         }
 
+        public static bool IsExternalLeague(int accountId, int activityGroupId)
+        {
+            return AccountActivityGroup.LoadByAccountId(accountId).Where(aag => aag.ActivityGroupId == activityGroupId).Count() > 0;
+        }
+
         #endregion
     }
 }

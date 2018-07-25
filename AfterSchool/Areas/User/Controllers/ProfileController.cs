@@ -53,6 +53,10 @@ namespace AfterSchool.Areas.User.Controllers
             {
                 msgs.Add("Passwords must match", MessageType.UserError);
             }
+            if (password1.Length < 8)
+            {
+                msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
+            }
 
             if (msgs.HasNoErrors())
             {

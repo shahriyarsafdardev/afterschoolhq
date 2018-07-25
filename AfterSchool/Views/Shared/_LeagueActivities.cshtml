@@ -125,10 +125,10 @@ else
 
                         <tr>
                             <td>
-                                <a href="@Url.Action("summary", "leagueactivity", new { id = @activity.ID})" class="btn btn-default btn-sm">View</a>
+                                <a href="@Url.Action("summary", "leagueactivity", new { id = @activity.Uid})" class="btn btn-default btn-sm">View</a>
                             </td>
                             <td>
-                                <a href="@Url.Action("summary", "leagueactivity", new { id = @activity.ID})">
+                                <a href="@Url.Action("summary", "leagueactivity", new { id = @activity.Uid})">
                                     @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
                                 </a>
                             </td>

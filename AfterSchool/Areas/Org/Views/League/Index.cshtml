@@ -3,6 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var activityGroupType = (ActivityGroupType)ViewBag.ActivityGroupType;
     var controller = ViewBag.GroupController;
+    ViewBag.IsInternalLeague = true;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}

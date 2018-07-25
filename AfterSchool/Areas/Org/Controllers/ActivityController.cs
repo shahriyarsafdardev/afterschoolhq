@@ -619,9 +619,15 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditLocation(string id, string location, string locationname, string locationdetails, string address1, string address2, string city, string state, string postalcode, string mylocation, string isschool, string cmd)
         {
             var msgs = new SystemMessages();
+            var locdeets = locationdetails;
             Activity activity = Activity.LoadByUid(id.ToGuid());
 
-            if (activity.IsNotEmpty())
+            if (locationdetails.IsEmpty())
+            {
+                msgs.Add("Specific Instructions cannot be blank", MessageType.UserError);
+            }
+
+            if (activity.IsNotEmpty() && msgs.HasNoErrors())
             {
                 var values = new Dictionary<string, object>()
                 {

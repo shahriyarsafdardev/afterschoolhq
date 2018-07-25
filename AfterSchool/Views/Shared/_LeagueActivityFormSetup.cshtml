@@ -8,6 +8,8 @@
     var activePeriod = (RegistrationPeriod)ViewBag.ActivePeriod;
     var activeForm = (ActivityForm)ViewBag.ActiveForm;
     var isActivityLeader = (bool)ViewBag.IsActivityLeader;
+    var activityGroupType = group.ActivityGroupTypeId;
+    var isExternalLeague = ViewBag.isExternalLeague;
 
     var waitinglistdisabled = "";
     if (!accountPackage.HasFeature(FeatureType.WaitingList))
@@ -23,9 +25,9 @@
     <div class="panel-body">
 
         <div class="form-group">
-            <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger">*</span></label>
+            <label class="col-sm-3 control-label">@UILabel.ActivityLabel(activityGroupType) Name <span class="text-danger">*</span></label>
             <div class="col-sm-9">
-                <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name" />
+                <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required placeholder="Your @UILabel.ActivityLabel(activityGroupType) Name" />
             </div>
         </div>
 
@@ -39,7 +41,36 @@
             </div>
         </div>
         
-       
+       @if(!isExternalLeague)
+       {
+           <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Total Available Seats <span class="text-danger">*</span>
+                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value" data-placement="top"></i>
+            </label>
+            <div class="col-sm-9">
+                <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Waiting List Seats <span class="text-danger">*</span>
+                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Can be any positive number" data-placement="top"></i>
+            </label>
+            <div class="col-sm-9">
+                <input type="number" class="form-control" id="waitinglistseats" name="waitinglistseats" value="@Model.WaitingListSeats" onfocus="this.select()" required step="1" min="0" @waitinglistdisabled />
+            </div>
+        </div>
+       }
+
+        
+
+
+
+
+
+
 
         @if(group.IsEmpty())
         { 

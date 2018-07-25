@@ -1442,9 +1442,22 @@ namespace AfterSchoolLibrary
             {
                 activity.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
             }
+
             
             if (contactname.IsNotEmpty()) activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);
-            if (contactphone.IsNotEmpty()) activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
+            if (contactphone.IsNotEmpty())
+            {
+               if(contactphone.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                {
+                    activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
+                } else
+                {
+                    msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);
+                }
+                
+                
+            }
+            
             if (contactemail.IsNotEmpty()) activity.ContactEmail = contactemail.ToString().IfBlank("").MaxChars(100);
             if (details.IsNotEmpty()) activity.Details = details.ToString().IfBlank("").MaxChars(4000);
             if (description.IsNotEmpty()) activity.Description = description.ToString().IfBlank("").MaxChars(1000);

@@ -82,7 +82,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Index(string pn, string rpp, string archive)
         {
             var groups = LoadIndexViewBag(pn, rpp, archive);
-
+            ViewBag.isExternalGroupsView = false;
             return View(groups);
         }
 
@@ -416,6 +416,51 @@ namespace AfterSchool.Areas.Org.Controllers
             var groups = LoadIndexViewBag();
 
             return View("Index",groups);
+        }
+
+        [HttpGet]
+        public ActionResult PublishDetail(string id)
+        {
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            return View(activityGroup);
+        }
+
+        [HttpGet]
+        public ActionResult Publish(string id)
+        {
+            SystemMessages msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+
+            msgs.AddRange(activityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been published", activityGroup.Name), MessageType.Success);
+                UpdateSession(SessionActionType.ActivityGroupPublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
+            }
+
+            ViewBag.Messages = msgs;
+            return View("publishdetail", activityGroup);
+        }
+
+        [HttpGet]
+        public ActionResult Unpublish(string id)
+        {
+            SystemMessages msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+
+            msgs.AddRange(activityGroup.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.Add(string.Format("{0} has been unpublished", activityGroup.Name), MessageType.Success);
+                UpdateSession(SessionActionType.ActivityGroupUnpublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
+            }
+
+            ViewBag.Messages = msgs;
+            return View("publishdetail", activityGroup);
         }
     }
 }
