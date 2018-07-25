@@ -109,10 +109,10 @@
 
                     <div>
                         <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
-                        <div>
-                            <p>
+                        <span>
+                            <span>
                                 @ParticipationObjectUI.PrintRegistrationFee(item)
-                            </p>
+                            </span>
                                 @if (item.SubscriptionPlans.Any())
                             {
                             <p>
@@ -125,7 +125,7 @@
                                 @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(item).ToStringList("<br />"))
                             </p>
                             }
-                         </div>
+                         </span>
                          &bull;
                              @item.RegistrationMode.ToString() &raquo;
                         </a>
