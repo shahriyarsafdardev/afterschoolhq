@@ -248,7 +248,7 @@ namespace AfterSchoolLibrary
         public string GetInviteUrl(DatabaseConnection dc = null)
         {
             var url = this.GetGroup(dc: dc).HomePageUrl;
-            url += (url.Contains("?") ? "&" : "?") + "invite=" + this.Uid.ToString();
+            url += (url.Contains("?") ? "&" : "?") + $"invite={this.Uid.ToString()}";
             return url;
         }
 

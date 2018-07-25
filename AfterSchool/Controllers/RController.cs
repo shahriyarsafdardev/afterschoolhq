@@ -16,6 +16,17 @@ namespace AfterSchool.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Used to know where to direct someone if there is an error or lack of information
+        /// the question is where did they start and how do we get them back there?
+        /// </summary>
+        /// <param name="account"></param>
+        private void SetRegistrationStartPage(Account account)
+        {
+            if (SessionVariables.RegistrationStartPageAccount.IsEmpty())
+                SessionVariables.RegistrationStartPageAccount = account;
+        }
+
         private void RestartRegistrationSession()
         {
             SessionVariables.CurrentRegistrant = null;
@@ -35,6 +46,9 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
+
+            SetRegistrationStartPage(account);
+
             var participationObjects = new List<ParticipationObject>();
             var sessions = new List<ActivityGroup>();
             var locations = new List<Location>();
@@ -74,6 +88,9 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
+
+            SetRegistrationStartPage(account);
+
             var activity = AfterSchoolLibrary.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
@@ -88,6 +105,8 @@ namespace AfterSchool.Controllers
             var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
             var activity = AfterSchoolLibrary.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
             var participationObject = activity.ToParticipationObject(msgs);
+
+            SetRegistrationStartPage(account);
 
             SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
             SessionVariables.Cart.AddCartItem(participationObject, msgs);

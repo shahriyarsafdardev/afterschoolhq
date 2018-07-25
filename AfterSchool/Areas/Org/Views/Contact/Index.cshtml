@@ -94,7 +94,7 @@
                                     <td>
                                         <div class="btn-group btn-hspace">
                                             <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">Add To List <span class="caret"></span></button>
-                                            <ul role="menu" class="dropdown-menu" id="list-add-menu">
+                                            <ul role="menu" class="dropdown-menu" id="list-add-menu-@registrant.Uid">
                                                 @foreach (var list in lists)
                                                 {
                                                     if (!list.HasContact(registrant))
@@ -108,7 +108,7 @@
                                         </div>
                                         <div class="btn-group btn-hspace">
                                             <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">Remove From List <span class="caret"></span></button>
-                                            <ul role="menu" class="dropdown-menu" id="list-remove-menu">
+                                            <ul role="menu" class="dropdown-menu" id="list-remove-menu-@registrant.Uid">
                                                 @foreach (var list in lists)
                                                 {
                                                     if (list.HasContact(registrant))
@@ -220,13 +220,17 @@
             function (data) {
                 if (data && data.status == 'ok') {
 
-                    var id = 'add-list-' + listId + '-' + contactUid
-                    $('#' + id).remove();
-                    $('#list-remove-menu').append('<li id="rm-list-' + listId + '-' + contactUid + '"><a href="javascript:removeFromList(' + listId + ', \'' + contactUid + '\')">' + data.listName + '</a></li>');
+                    var id = `add-list-${listId}-${contactUid}`;
+                    var removeId = `list-remove-menu-${contactUid}`;
+
+                    $(`#${id}`).remove();
+                    $(`#${removeId}`).append(`<li id="rm-list-${listId}-${contactUid}"><a href="javascript:removeFromList(${listId}, \'${contactUid}\')">${data.listName}</a></li>`);
+
+                    console.log($(`#${removeId}`).parent());
 
                     Notifications.showBar({
                         title: 'Success',
-                        message: '<strong>' + data.contactName + '</strong> has been added to <strong>' + data.listName + '</strong>',
+                        message: `<strong>${data.contactName}</strong> has been added to <strong>${data.listName}</strong>`,
                         success: true
                     });
                 } else {
@@ -245,13 +249,15 @@
             function (data) {
                 if (data && data.status == 'ok') {
 
-                    var id = 'rm-list-' + listId + '-' + contactUid
-                    $('#' + id).remove();
-                    $('#list-add-menu').append('<li id="add-list-' + listId + '-' + contactUid + '"><a href="javascript:addToList(' + listId + ', \'' + contactUid + '\')">' + data.listName + '</a></li>');
+                    var id = `rm-list-${listId}-${contactUid}`;
+                    var addId = `list-add-menu-${contactUid}`;
+
+                    $(`#${id}`).remove();
+                    $(`#${addId}`).append(`<li id="add-list-${listId}-${contactUid}"><a href="javascript:addToList(${listId}, \'${contactUid}\')">${data.listName}</a></li>`);
 
                     Notifications.showBar({
                         title: 'Success',
-                        message: '<strong>' + data.contactName + '</strong> has been removed from <strong>' + data.listName + '</strong>',
+                        message: `<strong>${data.contactName}</strong> has been removed from <strong>${data.listName}</strong>`,
                         success: true
                     });
                 } else {
