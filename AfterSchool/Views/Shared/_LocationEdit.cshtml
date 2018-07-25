@@ -93,7 +93,7 @@
                     $('#mylocation').prop('checked', true);
                 }
             }
-        } else if(@searchOnly.ToString().ToLower() == 'false') {
+        } else if(@searchOnly.ToString().ToLower() == false) {
             $('#locationname').val(locationSearch.val());
 
             $('#add-location').removeClass('hide');

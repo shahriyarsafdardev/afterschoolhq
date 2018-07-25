@@ -114,28 +114,26 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (questionGroup.IsNotEmpty())
                         {
-                            questionGroup.Name = Request.Params[string.Format("name-{0}", questionGroup.ID)];
-                            questionGroup.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                            questionGroup.LastModifiedDate = DateTime.UtcNow;
-                            amsgs.AddRange(questionGroup.Save(adc));
+                            //questionGroup.Name = Request.Params[string.Format("name-{0}", questionGroup.ID)];
+                            //questionGroup.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                            //questionGroup.LastModifiedDate = DateTime.UtcNow;
+                            //amsgs.AddRange(questionGroup.Save(adc));
                         }
 
                         // save existing questions
                         questions.ForEach(question =>
                         {
                            
-                            question.Text = Request.Params[string.Format("text-{0}", question.ID)];
-                            question.Description = Request.Params[string.Format("description-{0}", question.ID)];
+                            // question.Text = Request.Params[string.Format("text-{0}", question.ID)];
+                            // question.Description = Request.Params[string.Format("description-{0}", question.ID)];
 
-                            if (!question.IsLocked)
+                            if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
                             {
                                 question.IsActive = Request.Params[string.Format("active-{0}", question.ID)].IsBoolean();
                                 question.IsRequired = Request.Params[string.Format("required-{0}", question.ID)].IsBoolean();
                                 question.Options = Request.Params[string.Format("options-text-{0}", question.ID)];
-                                question.Link = Request.Params[string.Format("link-text-{0}", question.ID)];
-
-                                if (question.QuestionDataTypeId == QuestionDataType.NotSet)
-                                    question.QuestionTypeId = (QuestionType)Request.Params[string.Format("questiontype-{0}", question.ID)].ToInteger();
+                                question.Link = Request.Params[string.Format("link-text-{0}", question.ID)];                                
+                                question.QuestionTypeId = (QuestionType)Request.Params[string.Format("questiontype-{0}", question.ID)].ToInteger();
 
                             }
 
