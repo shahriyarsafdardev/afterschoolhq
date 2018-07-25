@@ -53,6 +53,17 @@ namespace AfterSchool.Models
                 HttpContext.Current.Session["CurrentAccount"] = value;
             }
         }
+        public static Account RegistrationStartPageAccount
+        {
+            get
+            {
+                return (Account)HttpContext.Current.Session["RegistrationStartPageAccount"];
+            }
+            set
+            {
+                HttpContext.Current.Session["RegistrationStartPageAccount"] = value;
+            }
+        }
         public static UserType AccountUserType
         {
             get
