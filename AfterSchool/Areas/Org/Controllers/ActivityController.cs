@@ -822,6 +822,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             ViewBag.ActiveMenu = "EditLocation";
                             return View("EditLocation", activity);
                         }
+                    case "publish":
+                        return RedirectToAction("publishdetail", new { id = activity.Uid });
                 }
             }
 

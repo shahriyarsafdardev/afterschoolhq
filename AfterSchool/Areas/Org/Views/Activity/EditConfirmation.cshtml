@@ -31,9 +31,21 @@
                         <div class="col-sm-2 col-sm-offset-3">
                             <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editconfirmation", "activity", new { id = Model.Uid, cmd = "prev" })')">&laquo; Previous</button>
                         </div>
-                        <div class="col-sm-7">
-                            <button type="submit" class="btn btn-primary btn-space btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
-                        </div>
+                        @if (!Model.IsPublished)
+                        {
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-default btn-space btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
+                            </div>
+                            <div class="col-sm-4">
+                                <button type="submit" class="btn btn-primary btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editconfirmation", "activity", new { id = Model.Uid, cmd = "publish" })')">Ready to Publish? &raquo;</button>
+                            </div>
+                        }
+                        else
+                        {                            
+                            <div class="col-sm-7">
+                                <button type="submit" class="btn btn-default btn-space btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
+                            </div>
+                        }
                     </div>
 
                 </form>
