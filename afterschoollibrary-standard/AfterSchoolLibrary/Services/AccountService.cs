@@ -1133,7 +1133,7 @@ namespace AfterSchoolLibrary
                     account.AddPackage(packageId.Value, packageBillingPeriod.Value, loggedInUser, msgs, dc);
 
                 // create stripe custom account to allow account to receive payments
-                if (accountType != AccountType.AfterSchool && accountType != AccountType.Registrant)
+                if (accountType != AccountType.AfterSchool && accountType != AccountType.Registrant && createWithStripe)
                     account.CreateStripeCustomAccount(msgs, dc);
 
                 //create default form for account to use for registration
