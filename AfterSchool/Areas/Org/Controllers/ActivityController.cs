@@ -418,7 +418,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult EditDetails(string id, string details, string scheduledetails, string cmd)
+        public ActionResult EditDetails(string id, string description, string details, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -429,7 +429,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var values = new Dictionary<string, object>()
                 {
                     { "details", details},
-                    { "scheduledetails", scheduledetails}
+                    { "description", description}
                 };
 
                 activity = Activity.EditExisting(

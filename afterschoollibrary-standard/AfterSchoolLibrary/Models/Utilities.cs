@@ -254,10 +254,10 @@ namespace AfterSchoolLibrary
             Utilities.AmazonSecretAccessKeyId = "rTkFaZuJ/65sc4QcpjA0tBNEaoIYOXCoUjvlVRBD";
 
             Email.AppAdminEmailAddress = "support@afterschoolhq.com"; //all app admin emails are sent to this email address
-            Email.ReplyHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
+            Email.ReplyHostName = "app.afterschoolhq.com"; // can be modified based on live/dev/test server
             Email.SenderHostName = "mailer.afterschoolhq.com"; // can be modified based on live/dev/test server            
 
-            Utilities.HostNameProductionAfterSchoolHQ = "afterschoolhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
+            Utilities.HostNameProductionAfterSchoolHQ = "app.afterschoolhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
             Utilities.HostNameStagingAfterSchoolHQ = "staging.afterschoolhq.com";
             Utilities.HostNameCIAfterSchoolHQ = "ci.afterschoolhq.com";
             Utilities.HostNameQAAfterSchoolHQ = "qa.afterschoolhq.com";
@@ -330,8 +330,8 @@ namespace AfterSchoolLibrary
                 //// msgs.AddRange(FixMessedUpPreferences(dc: dc));
                 // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc: dc));
                 // msgs.AddRange(CreateMasterRecord(dc: dc));
-                msgs.AddRange(CreateSessionsLeagues(dc: dc));
-                msgs.AddRange(CreateActivitiesTeams(dc: dc));
+                // msgs.AddRange(CreateSessionsLeagues(dc: dc));
+                // msgs.AddRange(CreateActivitiesTeams(dc: dc));
             }
             catch (Exception ex)
             {

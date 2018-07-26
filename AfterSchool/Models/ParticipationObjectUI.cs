@@ -67,7 +67,7 @@ namespace AfterSchool.Models
                 case GenderRestrictionType.MaleOnly:
                     return "Boys Only";
             }
-            return "All Genders";
+            return "Co-Ed";
         }
 
         public static string PrintRegistrationPeriod(ParticipationObject participationObject)

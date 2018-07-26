@@ -74,6 +74,26 @@
     margin-bottom: 15px;
 }
 
+.activity-headline 
+{
+    margin-top: 20px;
+    font-size: 1.15em;
+}
+
+.activity-description
+{
+    padding: 10px 0px;
+    color: #3f3f3f;
+    font-weight: 500;
+    height: 60px;
+}
+
+.activity-detail-block
+{
+    padding: 5px 0px;
+    font-size: 1.15em;
+}
+
 .seats-remaining {
     color: #d0021b;
     font-size: 14px;
@@ -90,7 +110,7 @@
     letter-spacing: 2.5px;
     text-transform: uppercase;
     word-break: break-word;
-    margin-top: 10px;
+    margin: 5px 0px;
     transition: all 0.3s;
 }
 
