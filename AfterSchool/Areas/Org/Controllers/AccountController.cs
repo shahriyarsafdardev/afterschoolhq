@@ -413,9 +413,12 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsEntity()
         {
             var msgs = new SystemMessages();
+            var stripeAccount = SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs);
+            stripeAccount.GetLatestStripeAccountDetails(SessionVariables.CurrentAccount, msgs);
+
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
-            return View(SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser, msgs));
+            return View(stripeAccount);
         }
 
         [HttpPost]

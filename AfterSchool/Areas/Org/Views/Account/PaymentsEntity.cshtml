@@ -62,8 +62,12 @@
                             <span class="s7-info"></span>
                         </div>
                         <div class="message">
+                            <p class="text-center text-medium-small">
+                                We are verifying your information. In the meantime:
+                            </p>
                             <p class="text-center">
-                                We are verifying your information
+                                You are @(!Model.ChargesEnabled ? "NOT" : "") able to accept payments<br />
+                                You are @(!Model.PayoutsEnabled ? "NOT" : "") able to receive deposits to your bank account
                             </p>
                         </div>
                     </div>
@@ -254,7 +258,7 @@
                                     <div class="am-checkbox inline">
                                         <input type="checkbox" name="tosagree" id="tosagree" value="1" />
                                         <label class="control-label" for="tosagree">
-                                            I agree to the <a href="/legal/tos" target="_blank">Terms of Services</a> and <a href="https://stripe.com/us/connect-account/legal" target="_blank">
+                                            I agree to the <a href="/legal/tos" target="_blank">Terms of Services</a> and <a href="https://stripe.com/us/connect-account/legal" target="_blank">Stripe Terms of Services</a>
                                         </label>
                                     </div>
                                 }
