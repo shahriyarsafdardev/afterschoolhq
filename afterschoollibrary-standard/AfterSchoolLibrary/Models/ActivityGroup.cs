@@ -427,10 +427,11 @@ namespace AfterSchoolLibrary
                 System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline
                 );
 
-            string origUniqueName = reg.Replace(name, "").MaxChars(25);
-            string uniqueName = origUniqueName;
+            var origUniqueName = name.GetMaxWords(25);
+            var uniqueName = origUniqueName;
             var duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, msgs, dc);
-            int count = 1;
+            var count = 1;
+
             while (!duplicate.IsEmpty() && duplicate.ID != accountId)
             {
                 uniqueName = origUniqueName + count.ToString();
