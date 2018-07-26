@@ -746,7 +746,6 @@
     <Content Include="Areas\Org\Views\League\PublishDetail.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsBank.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsEntity.cshtml" />
-    <Content Include="Areas\Org\Views\Account\PaymentsTOS.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -792,7 +791,6 @@
     <Content Include="Areas\Org\Views\Activity\Messages.cshtml" />
     <Content Include="Areas\Org\Views\Activity\MessageDetail.cshtml" />
     <Content Include="Areas\Org\Views\Activity\MessageAdd.cshtml" />
-    <Content Include="Areas\Org\Views\Account\Payments.cshtml" />
     <Content Include="Areas\Org\Views\User\Edit.cshtml" />
     <Content Include="Areas\Org\Views\User\Index.cshtml" />
     <Content Include="Areas\Org\Views\User\Invite.cshtml" />

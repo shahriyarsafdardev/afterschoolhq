@@ -73,8 +73,11 @@ namespace AfterSchoolLibrary.Services
             {
                 var results = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(stripeStripeAccount.StripeResponse.ObjectJson);
                 var fieldsRequired = results.verification.fields_needed;
-                var chargesEnabled = results.charges_enabled;
+                var verificationDueBy = results.verification.due_by;
                 var verificationStatus = results.legal_entity.verification.status;
+                var disabledReason = results.verification.disabled_reason;
+                var payoutsEnabled = stripeStripeAccount.PayoutsEnabled;
+                var chargesEnabled = stripeStripeAccount.ChargesEnabled;
 
                 stripeAccount.RequiresFullSSN = false;
 
@@ -86,8 +89,12 @@ namespace AfterSchoolLibrary.Services
                         msgs.Add("It has been determined your Full SSN required in order to process payments. Please update your information.", MessageType.Warning);
                     }
                 }
-                
-                stripeAccount.ChargesEnabled = ((string)chargesEnabled).ToBoolean();
+
+                if (verificationDueBy != null && ((string)verificationDueBy).IsDateTime())
+                    stripeAccount.VerificationDueBy = ((DateTime)verificationDueBy);
+
+                if (disabledReason != null)
+                    stripeAccount.ChargesDisabledReason = (string)disabledReason;
 
                 if ((string)verificationStatus == StripeVerificationStatus.Pending.ToString().ToLower())
                     stripeAccount.VerificationStatusId = StripeVerificationStatus.Pending;

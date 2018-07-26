@@ -41,9 +41,12 @@ namespace AfterSchoolLibrary
 		public bool RequiresFullSSN { get { return (bool)MDV["RequiresFullSSN"].Value; } set { MDV["RequiresFullSSN"].Value = value; } }
 		public StripeVerificationStatus VerificationStatusId { get { return (StripeVerificationStatus)MDV["VerificationStatusId"].Value; } set { MDV["VerificationStatusId"].Value = value; } }
 		public bool ChargesEnabled { get { return (bool)MDV["ChargesEnabled"].Value; } set { MDV["ChargesEnabled"].Value = value; } }
+		public string ChargesDisabledReason { get { return (string)MDV["ChargesDisabledReason"].Value; } set { MDV["ChargesDisabledReason"].Value = value; } }
+		public bool PayoutsEnabled { get { return (bool)MDV["PayoutsEnabled"].Value; } set { MDV["PayoutsEnabled"].Value = value; } }
 		public string BankAccountId { get { return (string)MDV["BankAccountId"].Value; } set { MDV["BankAccountId"].Value = value; } }
 		public string BankName { get { return (string)MDV["BankName"].Value; } set { MDV["BankName"].Value = value; } }
 		public string BankLast4 { get { return (string)MDV["BankLast4"].Value; } set { MDV["BankLast4"].Value = value; } }
+		public DateTime? VerificationDueBy { get { return (DateTime?)MDV["VerificationDueBy"].Value; } set { MDV["VerificationDueBy"].Value = value; } }
 		
 
         public StripeAccount()
@@ -54,6 +57,7 @@ namespace AfterSchoolLibrary
 			this.RequiresFullSSN = false;
 			this.VerificationStatusId = StripeVerificationStatus.NotSet;
 			this.ChargesEnabled = false;
+			this.PayoutsEnabled = false;
 			
         }
 
@@ -87,9 +91,12 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RequiresFullSSN", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "VerificationStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ChargesEnabled", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "ChargesDisabledReason", System.Data.SqlDbType.NVarChar, 400);
+				_dp.Add(className, "PayoutsEnabled", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "BankAccountId", System.Data.SqlDbType.NVarChar, 50);
 				_dp.Add(className, "BankName", System.Data.SqlDbType.NVarChar, 50);
 				_dp.Add(className, "BankLast4", System.Data.SqlDbType.NVarChar, 4);
+				_dp.Add(className, "VerificationDueBy", System.Data.SqlDbType.DateTime);
 				
                 return _dp;
             }
@@ -256,6 +263,14 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ChargesDisabledReason"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PayoutsEnabled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["BankAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -265,6 +280,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["BankLast4"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["VerificationDueBy"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
