@@ -52,8 +52,9 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index(string group, string pn, string rpp, string archive)
+        public ActionResult Index(string group, string pn, string rpp, string archive, string copyerror)
         {
+            var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 10;
             bool isArchived = false;
@@ -99,6 +100,10 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 return RedirectToAction("index");
             }
+
+            if (copyerror.IsBoolean() && copyerror.ToBoolean())
+                msgs.Add("Error creating copy", MessageType.Error);
+
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = new SystemMessages();
@@ -831,8 +836,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid())
                 .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
             
-
-
             ViewBag.Messages = msgs;
             if (msgs.HasNoErrors())
             {
@@ -840,7 +843,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                return RedirectToAction("index", "activity");
+                return RedirectToAction("index", "activity", new { copyerror = true });
             }
         }
 
