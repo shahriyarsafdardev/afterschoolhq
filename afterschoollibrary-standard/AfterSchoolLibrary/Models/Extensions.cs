@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BasicLibrary;
 
 namespace AfterSchoolLibrary
 {
@@ -27,6 +28,22 @@ namespace AfterSchoolLibrary
                 }
             }
             return rows.AsEnumerable();
+        }
+
+        public static string GetMaxWords(this string aString, int maxChars)
+        {
+            var words = aString.Split(' ');
+            var finalSlug = "";
+
+            foreach (var word in words)
+            {
+                if (word.Length + finalSlug.Length <= maxChars)
+                    finalSlug += word;
+                else
+                    break;
+            }
+
+            return finalSlug;
         }
 
         public static TValue GetValueOrDefault<TKey,TValue> (this IDictionary<TKey, TValue> dictionary, TKey key) =>

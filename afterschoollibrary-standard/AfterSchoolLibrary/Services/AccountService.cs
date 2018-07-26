@@ -466,10 +466,11 @@ namespace AfterSchoolLibrary
             //unique name
             var reg = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
 
-            string origUniqueName = reg.Replace(name, "").MaxChars(25);
-            string uniqueName = origUniqueName;
-            Account duplicate = Account.LoadByUniqueName(uniqueName, msgs, dc);
-            int count = 1;
+            var origUniqueName = name.GetMaxWords(25);
+            var uniqueName = origUniqueName;
+            var duplicate = Account.LoadByUniqueName(uniqueName, msgs, dc);
+            var count = 1;
+
             while (duplicate.IsNotEmpty() && duplicate.ID != accountId)
             {
                 uniqueName = origUniqueName + count.ToString();
