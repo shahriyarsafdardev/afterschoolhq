@@ -61,6 +61,12 @@
                     <p>
                         Registration Fee: @ParticipationObjectUI.PrintRegistrationFee(Model) / Student
                     </p>
+                    @if (Model.CostDescription.IsNotEmpty())
+                    {
+                        <p>
+                            @Model.CostDescription
+                        </p>
+                    }
                 </div>
 
                 <div class="activity-detail-block">
