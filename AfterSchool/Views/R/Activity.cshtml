@@ -8,55 +8,83 @@
 
 <div class="reg-header text-center">
     <h1 class="activity-title">@Model.Name</h1>
-    <div>
-        @Html.Raw(Model.Details)
+    <div class="activity-headline">
+        @Model.Description
     </div>
 </div>
 
 <div>
     <div class="col-md-6 col-md-offset-3">
-        <div class="panel">
+        <div class="panel panel-alt5">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-lg-8 col-md-12">
+                        <h3 class="text-white text-center">
+                            @ParticipationObjectUI.PrintDaysOfWeek(Model) &bull;
+                            @ParticipationObjectUI.PrintGradeLevels(Model) &bull;
+                            @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                        </h3>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
+                            <span>
+                                @ParticipationObjectUI.PrintRegistrationFee(Model)
+                            </span>
+                            &bull;
+                            @Model.RegistrationMode.ToString() &raquo;
+                        </a>
+                    </div>
+                </div>
+            </div>
             <div class="panel-body">
-                <div class="panel-subhead">
-                    <span class="reg-info">
-                        @ParticipationObjectUI.PrintDaysOfWeek(Model)
-                    </span>  • 
-                    <span class="reg-info">
-                    @ParticipationObjectUI.PrintGradeLevels(Model)
-                    </span>  • 
-                    <span class="reg-info">
-                        @ParticipationObjectUI.PrintGenderRestrictions(Model)
-                    </span>
+                
+                <div class="activity-detail-block">
+                    @Html.Raw(Model.Details)
                 </div>
-                <br/>
-                <p>
-                    @Html.Raw(ParticipationObjectUI.PrintLocation(Model).Replace("\n", "<br />"))
-                </p>
-                <div>
+
+                <div class="activity-detail-block">
+                    <h3>Schedule</h3>
                     <p>
-                        @ParticipationObjectUI.PrintRegistrationFee(Model)
+                        @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
                     </p>
-                    @if (Model.SubscriptionPlans.Any())
-                    {
-                        <p>
-                            @Html.Raw(ParticipationObjectUI.PrintSubscriptions(Model).ToStringList("<br />"))
-                        </p>
-                    }
-                    @if (Model.PaymentPlans.Any())
-                    {
-                        <p>
-                            @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(Model).ToStringList("<br />"))
-                        </p>
-                    }
                 </div>
-                <div>
+
+                <div class="activity-detail-block">
+                    <h3>Location <i class="s7-map-marker"></i></h3>
+                    <p>
+                        @Html.Raw(ParticipationObjectUI.PrintLocation(Model))
+                    </p>
+                </div>
+
+                <div class="activity-detail-block">
+                    <h3>Cost</h3>
+                    <p>
+                        Registration Fee: @ParticipationObjectUI.PrintRegistrationFee(Model) / Student
+                    </p>
+                </div>
+
+                <div class="activity-detail-block">
+                    <h3>Contact</h3>
+                    <p>
+                        @Model.ContactName &bull;
+                        <a href="mailto:@Model.ContactEmail">@Model.ContactEmail</a> &bull;
+                        @Model.ContactPhone
+                    </p>
+                </div>
+
+                <div class="margin-10">
                     <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
+                        <span>
+                            @ParticipationObjectUI.PrintRegistrationFee(Model)
+                        </span>
+                        &bull;
                         @Model.RegistrationMode.ToString() &raquo;
                     </a>
                 </div>
+
             </div>
             <div class="panel-footer">
-                <p>
+                <p class="text-center">
                     @ParticipationObjectUI.PrintRegistrationPeriod(Model)
                 </p>
             </div>

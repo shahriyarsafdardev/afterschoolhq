@@ -105,31 +105,33 @@
                             @ParticipationObjectUI.PrintGenderRestrictions(item)
                         </span>
                     </div>
-                    <p>@Html.Raw(item.Details)</p>
+
+                    <p class="activity-description">
+                        @Html.Raw(item.Description.IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(item.Details).MaxChars(100)))
+                    </p>
 
                     <div>
                         <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
-                        <span>
                             <span>
-                                @ParticipationObjectUI.PrintRegistrationFee(item)
-                            </span>
+                                <span>
+                                    @ParticipationObjectUI.PrintRegistrationFee(item)
+                                </span>
                                 @if (item.SubscriptionPlans.Any())
-                            {
-                            <p>
-                                @Html.Raw(ParticipationObjectUI.PrintSubscriptions(item).ToStringList("<br />"))
-                            </p>
-                            }
+                                {
+                                    <p>
+                                        @Html.Raw(ParticipationObjectUI.PrintSubscriptions(item).ToStringList("<br />"))
+                                    </p>
+                                }
                                 @if (item.PaymentPlans.Any())
-                            {
-                            <p>
-                                @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(item).ToStringList("<br />"))
-                            </p>
-                            }
-                         </span>
-                         &bull;
-                             @item.RegistrationMode.ToString() &raquo;
+                                {
+                                    <p>
+                                        @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(item).ToStringList("<br />"))
+                                    </p>
+                                }
+                             </span>
+                             &bull; Learn More &raquo;
                         </a>
-                    </div> <br/>
+                    </div>
                     <div class="seats-remaining text-center">
                          <strong><em> @item.SeatsRemaining.ToString() Seats Left!</em></strong>
                     </div>

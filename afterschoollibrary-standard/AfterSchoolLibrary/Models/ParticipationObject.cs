@@ -32,7 +32,11 @@ namespace AfterSchoolLibrary
         public bool IsFree { get; set; }
         public Guid Uid { get; set; }
         public int? SeatsRemaining { get; set; }
-        public int? WaitingListSeatsRemaining { get; set; }      
+        public int? WaitingListSeatsRemaining { get; set; } 
+        public string Description { get; set; }
+        public string ContactName { get; set; }
+        public string ContactPhone { get; set; }
+        public string ContactEmail { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -53,6 +57,10 @@ namespace AfterSchoolLibrary
             RegistrationMode = activity.RegistrationModeId;
             SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
             WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(msgs, dc);
+            Description = activity.Description;
+            ContactName = activity.ContactName;
+            ContactEmail = activity.ContactEmail;
+            ContactPhone = activity.ContactPhone;
            
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -97,6 +105,7 @@ namespace AfterSchoolLibrary
             RegistrationMode = activityGroup.RegistrationModeId;
             Form = activityGroup.GetForm(msgs, dc);
             OwnerAccount = activityGroup.GetAccount(msgs, dc);
+            Description = activityGroup.Description;
             // TODO: PayLater = activityGroup.AllowToPayLater;
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
@@ -126,6 +135,7 @@ namespace AfterSchoolLibrary
             RegistrationMode = activityGroup.RegistrationModeId;
             Form = activityGroup.GetForm(msgs, dc);
             OwnerAccount = aag.GetAccount(msgs, dc);
+            Description = activityGroup.Description;
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);

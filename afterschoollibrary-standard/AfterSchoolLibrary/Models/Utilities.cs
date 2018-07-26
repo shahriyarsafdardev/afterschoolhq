@@ -330,8 +330,8 @@ namespace AfterSchoolLibrary
                 //// msgs.AddRange(FixMessedUpPreferences(dc: dc));
                 // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc: dc));
                 // msgs.AddRange(CreateMasterRecord(dc: dc));
-                msgs.AddRange(CreateSessionsLeagues(dc: dc));
-                msgs.AddRange(CreateActivitiesTeams(dc: dc));
+                // msgs.AddRange(CreateSessionsLeagues(dc: dc));
+                // msgs.AddRange(CreateActivitiesTeams(dc: dc));
             }
             catch (Exception ex)
             {
