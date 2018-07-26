@@ -1161,9 +1161,9 @@ namespace AfterSchoolLibrary
                     });
 
                     // copy grades
-                    this.GetGradeLevels(amsgs, adc).ForEach(grade => {
-                        copy.AddGrade(grade.ID.Value, loggedInUserId, amsgs, dc: adc);
-                    });
+                    //this.GetGradeLevels(amsgs, adc).ForEach(grade => {
+                    //    copy.AddGrade(grade.ID.Value, loggedInUserId, amsgs, dc: adc);
+                    //});
 
                     // NOTE: copy schedule?
                     if (this.ActivityScheduleId.HasValue)
@@ -1173,6 +1173,10 @@ namespace AfterSchoolLibrary
                             .ID;
                         amsgs.AddRange(copy.Save(adc));
                     }
+
+                    var oldSubPlan = this.GetSubscriptionPlan(amsgs, adc);
+                    var newSubPlan = oldSubPlan.Copy(this.ID.Value, loggedInUserId, amsgs, adc);
+
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

@@ -147,15 +147,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.IsActivityLeader = isLeader;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            LoadEditSetupViewBag(activity, activePeriod, new SystemMessages());
             ViewBag.ActiveMenu = "EditSetup";
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-            ViewBag.ActiveForm = activity.GetActiveActivityForm();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
-            ViewBag.ActivePeriod = activePeriod;
             ViewBag.Group = activityGroup;         
 
             return View(activity);
@@ -230,15 +223,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
             }
 
-            ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
+            LoadEditSetupViewBag(activity, null, msgs);
             ViewBag.Group = activityGroup;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.ActivePeriod = activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-            ViewBag.ActiveForm = activity.GetActiveActivityForm();
 
             if (msgs.HasNoErrors())
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
@@ -255,6 +241,18 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.ActiveMenu = "EditSetup";
             return View(activity);
+        }
+
+        private void LoadEditSetupViewBag(Activity activity, RegistrationPeriod activiePeriod, SystemMessages msgs)
+        {
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
+            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
+            ViewBag.ActivePeriod = activiePeriod ?? activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+            ViewBag.ActiveForm = activity.GetActiveActivityForm();
         }
 
         [HttpGet]
@@ -324,9 +322,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditSetup";
-                        ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-                        ViewBag.IsActivityLeader = IsActivityLeader(activity);
-                        ViewBag.ActiveForm = activity.GetActiveActivityForm();
+                        LoadEditSetupViewBag(activity, null, msgs);
                         return View("EditSetup", activity);
                     case "next":
                         ViewBag.ActiveMenu = "EditSchedule";
@@ -832,9 +828,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid()).Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
-            var ogSubscriptionPlan = Activity.LoadByUid(id.ToGuid()).GetSubscriptionPlan();
-            var copySubscriptionPlan = ogSubscriptionPlan.Copy(activity.ID.Value, SessionVariables.LoggedInUser.ID.Value, msgs);
+            var activity = Activity.LoadByUid(id.ToGuid())
+                .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
+            
 
 
             ViewBag.Messages = msgs;
@@ -971,7 +967,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         //create attendance records for this date and mark as absent by default (even if temporary)
                         attendance = new Attendance();
                         //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
-                        var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(id.ToInteger(), false, dc: adc);
+                        var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, dc: adc);
                         if (attendanceList.Count > 0)
                         {
                             foreach (var a in attendanceList)
