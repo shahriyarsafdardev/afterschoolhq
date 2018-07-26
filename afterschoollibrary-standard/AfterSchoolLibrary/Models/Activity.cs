@@ -795,6 +795,7 @@ namespace AfterSchoolLibrary
         }
 
         private List<ActivityDay> _Days = null;
+        [Obsolete]
         public List<ActivityDay> GetDays(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Days.IsEmpty())
@@ -1144,6 +1145,7 @@ namespace AfterSchoolLibrary
                     });
 
                     // copy days
+                    // deprecated
                     this.GetDays(amsgs, adc).ForEach(day => {
                         var newDay = new ActivityDay
                         {
@@ -1175,7 +1177,10 @@ namespace AfterSchoolLibrary
                     }
 
                     var oldSubPlan = this.GetSubscriptionPlan(amsgs, adc);
-                    var newSubPlan = oldSubPlan.Copy(this.ID.Value, loggedInUserId, amsgs, adc);
+                    if (oldSubPlan.IsNotEmpty())
+                    {
+                        var newSubPlan = oldSubPlan.Copy(this.ID.Value, loggedInUserId, amsgs, adc);
+                    }
 
                 },
                 onSuccess: (SystemMessages smsgs) =>
