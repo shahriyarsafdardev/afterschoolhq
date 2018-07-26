@@ -144,7 +144,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     { "Name", locationName.Trim() },
                     { "Address1", address1.Trim() },
-                    { "Address2", address2.Trim() },
+                    { "Address2", address2.IfBlank("").Trim() },
                     { "City", city.Trim() },
                     { "State", state.Trim() },
                     { "PostalCode", postalCode.Trim() },

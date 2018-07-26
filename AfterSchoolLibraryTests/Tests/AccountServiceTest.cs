@@ -4,6 +4,8 @@ using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary;
 using BasicLibrary;
+using AfterSchoolLibrary.Services;
+using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -35,6 +37,17 @@ namespace AfterSchoolLibraryTests.Tests
                 dc: dc);
 
             Assert.True(account.ID.HasValue);
+        }
+
+        [Fact]
+        public void CreateSampleAccountTest()
+        {
+            var accountCount = Account.GetCount(msgs: msgs, dc: dc);
+            var loggedInUser = WebUserFactory.Create(msgs, dc);
+            var package = PackageService.CreateDefaultPackage(loggedInUser, msgs, dc);
+            msgs.AddRange(AccountService.CreateSampleAccount(AccountType.School, package.ID.Value, dc));
+
+            Assert.Equal(accountCount + 1, Account.GetCount(msgs: msgs, dc: dc));
         }
     }
 }
