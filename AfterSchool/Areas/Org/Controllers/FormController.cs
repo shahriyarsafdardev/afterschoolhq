@@ -151,20 +151,22 @@ namespace AfterSchool.Areas.Org.Controllers
                             // save existing questions
                             questions.ForEach(question =>
                             {
+                                question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
+                                question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
+
                                 if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
                                 {
                                     question.Text = Request.Params[$"text-{question.ID}"];
                                     // for Text Block
                                     question.Description = Request.Params[$"description-{question.ID}"];
-                                    question.IsActive = Request.Params[$"active-{question.ID}"].IsBoolean();
-                                    question.IsRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
                                     question.Options = Request.Params[$"options-text-{question.ID}"];
                                     question.Link = Request.Params[$"link-text-{question.ID}"];
                                     question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
-                                    question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                                    question.LastModifiedDate = DateTime.UtcNow;
-                                    amsgs.AddRange(question.Save(adc));
                                 }
+
+                                question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                question.LastModifiedDate = DateTime.UtcNow;
+                                amsgs.AddRange(question.Save(adc));
 
                             });
 
