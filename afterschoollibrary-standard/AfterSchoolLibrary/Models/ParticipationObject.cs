@@ -32,11 +32,12 @@ namespace AfterSchoolLibrary
         public bool IsFree { get; set; }
         public Guid Uid { get; set; }
         public int? SeatsRemaining { get; set; }
-        public int? WaitingListSeatsRemaining { get; set; } 
+        public int? WaitingListSeatsRemaining { get; set; }
         public string Description { get; set; }
         public string ContactName { get; set; }
         public string ContactPhone { get; set; }
         public string ContactEmail { get; set; }
+        public string CostDescription { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -61,6 +62,7 @@ namespace AfterSchoolLibrary
             ContactName = activity.ContactName;
             ContactEmail = activity.ContactEmail;
             ContactPhone = activity.ContactPhone;
+            CostDescription = activity.CostDescription;
            
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {

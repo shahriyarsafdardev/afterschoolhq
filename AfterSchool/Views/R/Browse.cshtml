@@ -112,24 +112,7 @@
 
                     <div>
                         <a href="@item.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
-                            <span>
-                                <span>
-                                    @ParticipationObjectUI.PrintRegistrationFee(item)
-                                </span>
-                                @if (item.SubscriptionPlans.Any())
-                                {
-                                    <p>
-                                        @Html.Raw(ParticipationObjectUI.PrintSubscriptions(item).ToStringList("<br />"))
-                                    </p>
-                                }
-                                @if (item.PaymentPlans.Any())
-                                {
-                                    <p>
-                                        @Html.Raw(ParticipationObjectUI.PrintPaymentPlans(item).ToStringList("<br />"))
-                                    </p>
-                                }
-                             </span>
-                             &bull; Learn More &raquo;
+                            Learn More &raquo;
                         </a>
                     </div>
                     <div class="seats-remaining text-center">
