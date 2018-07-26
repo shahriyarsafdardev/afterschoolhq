@@ -3,9 +3,9 @@
 [begin]
 type: Database
 productionname: AfterSchool
-productionserver: afterschool.cdyenngbc33v.us-east-2.rds.amazonaws.com
-productionusername: AfterSchoolUser
-productionpassword: Nj8Ed$wpLfJ
+productionserver: afterschool-production.cdyenngbc33v.us-east-2.rds.amazonaws.com
+productionusername: AfterSchoolProd
+productionpassword: pNeiDj$nwpPynDhXfghT
 
 stagingname: AfterSchoolStaging
 stagingserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
