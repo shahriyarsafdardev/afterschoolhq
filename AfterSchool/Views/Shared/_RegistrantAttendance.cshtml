@@ -5,12 +5,12 @@
     var schedule = (ActivitySchedule)ViewBag.Schedule;
 }
 
-<form method="post" action="@Url.Action("trackattendance", "activity", new { id = Model.ActivityId, att = Model.ID })" class="form-horizontal">
+<form method="post" action="@Url.Action("trackattendance", "activity", new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
 
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="pull-right">
-                <a href="@Url.Action("attendance", "activity", new { id = Model.ActivityId })" class="btn btn-default btn-space">&laquo; Back to List</a>
+                <a href="@Url.Action("attendance", "activity", new { id = Model.ActivityUid })" class="btn btn-default btn-space">&laquo; Back to List</a>
                 <button type="submit" class="btn btn-primary btn-space"><i class="icon icon-left s7-diskette"></i> Save Attendance</button>
             </div>
             <i class="s7-check"></i> Take Attendance
