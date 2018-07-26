@@ -6,8 +6,9 @@
     var amrs = (List<ActivityMessageRegistrant>)ViewBag.Registrants;
     var registrantsPerColumn = 0;
     var account = SessionVariables.CurrentAccount;
-    
-    if(amrs.IsNotEmpty())
+    var activity = Model.GetActivity();
+
+    if (amrs.IsNotEmpty())
     {
         registrantsPerColumn = Math.Ceiling(amrs.Count / 3.0).ToInteger();
     }
@@ -19,20 +20,20 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model.GetActivity());}
+    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", activity);}
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.ActivityName + " - Message"); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activity.Name + " - Message"); }
         </div>
         <div class="panel-body">
             <div class="col-md-10 col-md-offset-1">
 
                 <div class="row">
-                    <a href="@Url.Action("messages", "activity", new { id = Model.ActivityId})" class="btn btn-primary pull-right">&laquo; Back to List</a>
+                    <a href="@Url.Action("messages", "activity", new { id = activity.Uid})" class="btn btn-primary pull-right">&laquo; Back to List</a>
                 </div>
 
-                <form method="post" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal">
+                <form method="post" action="@Url.Action("messageadd", "activity", new { id = activity.Uid })" class="form-horizontal">
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Subject</label>
