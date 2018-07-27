@@ -1699,11 +1699,9 @@ namespace AfterSchoolLibrary
             
         }
 
-        public static StripeAccount GetStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static StripeAccount GetOrCreateStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var stripeAccount = StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+            var stripeAccount = account.GetStripeAccount(msgs, dc);
 
             if (stripeAccount.IsEmpty())
             {
@@ -1731,6 +1729,11 @@ namespace AfterSchoolLibrary
             }
 
             return stripeAccount;
+        }
+
+        public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
         }
     }
 }

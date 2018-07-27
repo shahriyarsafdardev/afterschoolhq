@@ -321,6 +321,7 @@ loadmethod: UniqueName
 loadmethod: IsAdminAccount
 loadmethod: Uid
 loadmethod: AccountTypeId, List<>
+loadmethod: StripeUserId
 [end]
 
 [begin]

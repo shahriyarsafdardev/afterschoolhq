@@ -138,6 +138,12 @@
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Http, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.2\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.2\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\System.Web.Mvc.dll</HintPath>
@@ -235,6 +241,7 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
@@ -260,6 +267,8 @@
     <Compile Include="Areas\Org\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
+    <Compile Include="Areas\StripeWebHooks\Controllers\AccountController.cs" />
+    <Compile Include="Areas\StripeWebHooks\StripeWebHooksAreaRegistration.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
     <Compile Include="Areas\User\Controllers\ProfileController.cs" />
     <Compile Include="Areas\User\UserAreaRegistration.cs" />
@@ -746,6 +755,7 @@
     <Content Include="Areas\Org\Views\League\PublishDetail.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsBank.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsEntity.cshtml" />
+    <Content Include="Areas\StripeWebHooks\Views\web.config" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1174,6 +1184,8 @@
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
     <Folder Include="Areas\District\Models\" />
     <Folder Include="Areas\Org\Models\" />
+    <Folder Include="Areas\StripeWebHooks\Models\" />
+    <Folder Include="Areas\StripeWebHooks\Views\Shared\" />
     <Folder Include="Areas\User\Models\" />
     <Folder Include="Views\User\" />
   </ItemGroup>

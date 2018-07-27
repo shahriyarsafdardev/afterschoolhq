@@ -44,14 +44,12 @@ namespace AfterSchoolLibrary.Services
 
             var stripeStripeAccount = StripeHelper.GetCustomAccount(account.StripeUserId, msgs);
 
-            stripeAccount.ParseStripeCustomAccount(stripeStripeAccount, msgs, dc);
+            stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount.StripeResponse.ObjectJson, msgs, dc);
         }
 
         public static void SaveAndSendLegalEntityToStripe(this StripeAccount stripeAccount, string fullSSN, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
-
-            msgs.AddRange(stripeAccount.Save(dc));
 
             var account = stripeAccount.GetAccount(msgs, dc);
 
@@ -81,19 +79,19 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
             {
-                stripeAccount.ParseStripeCustomAccount(stripeStripeAccount, msgs, dc);
+                stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount.StripeResponse.ObjectJson, msgs, dc);
             }
         }
 
-        private static void ParseStripeCustomAccount(this StripeAccount stripeAccount, Stripe.StripeAccount stripeStripeAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ParseAndUpdateStripeCustomAccount(this StripeAccount stripeAccount, string json, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var results = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(stripeStripeAccount.StripeResponse.ObjectJson);
+            var results = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(json);
             var fieldsRequired = results.verification.fields_needed;
             var verificationDueBy = results.verification.due_by;
             var verificationStatus = results.legal_entity.verification.status;
             var disabledReason = results.verification.disabled_reason;
-            var payoutsEnabled = stripeStripeAccount.PayoutsEnabled;
-            var chargesEnabled = stripeStripeAccount.ChargesEnabled;
+            var payoutsEnabled = results.payouts_enabled;
+            var chargesEnabled = results.charges_enabled;
 
             stripeAccount.RequiresFullSSN = false;
 
@@ -112,6 +110,12 @@ namespace AfterSchoolLibrary.Services
             if (disabledReason != null)
                 stripeAccount.ChargesDisabledReason = (string)disabledReason;
 
+            if (payoutsEnabled != null && ((string)payoutsEnabled).IsBoolean())
+                stripeAccount.PayoutsEnabled = ((string)payoutsEnabled).ToBoolean();
+
+            if (chargesEnabled != null && ((string)chargesEnabled).IsBoolean())
+                stripeAccount.ChargesEnabled = ((string)chargesEnabled).ToBoolean();
+
             if ((string)verificationStatus == StripeVerificationStatus.Pending.ToString().ToLower())
                 stripeAccount.VerificationStatusId = StripeVerificationStatus.Pending;
 
@@ -123,9 +127,6 @@ namespace AfterSchoolLibrary.Services
 
             if (stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
                 msgs.Add("Your account is now verified", MessageType.Notice);
-
-            stripeAccount.ChargesEnabled = chargesEnabled;
-            stripeAccount.PayoutsEnabled = payoutsEnabled;
 
             msgs.AddRange(stripeAccount.Save(dc));
         }
