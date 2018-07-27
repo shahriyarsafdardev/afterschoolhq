@@ -358,7 +358,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            var values = new NameValueCollection()
+            var values = new Dictionary<string, object>()
             {
                 { "name", name },
                 { "description", description },
