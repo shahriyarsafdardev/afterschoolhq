@@ -58,7 +58,8 @@ namespace AfterSchool.Areas.Admin.Controllers
         private string[] schoolHeaders { get { return new string[] { "school", "schoolname", "name" }; } }
         private string[] gradeHeaders { get { return new string[] { "grades", "gradelevels" }; } }
         private string[] phoneHeaders { get { return new string[] { "phone", "phonenumber", "phoneno", "telephone"  }; } }
-        private string[] addressHeaders { get { return new string[] { "address", "zip" }; } }
+        private string[] addressHeaders { get { return new string[] { "address", "addr", "streetaddress", "address1" }; } }
+        private string[] aptSuiteHeaders { get { return new string[] { "address2","apartmentno", "suite", "apt/suite" }; } }
         private string[] cityHeaders { get { return new string[] { "city", "town", "cityname" }; } }
         private string[] stateHeaders { get { return new string[] { "state", "statename" }; } }
         private string[] zipHeaders { get { return new string[] { "zip", "zipcode" }; } }
@@ -74,6 +75,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             list.Add(stateHeaders);
             list.Add(zipHeaders);
             list.Add(websiteHeaders);
+            list.Add(aptSuiteHeaders);
         }
 
         private string ProcessImport(HttpPostedFileBase importfile, SystemMessages msgs)
@@ -95,7 +97,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                 reader.Configuration.Delimiter = ",";
                 reader.Configuration.HasHeaderRecord = true;
                 reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
-
+                reader.Read();
+                reader.ReadHeader();
                 while (reader.Read())
                 {
                     if (headers.Count == 0)

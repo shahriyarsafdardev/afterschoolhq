@@ -4,6 +4,7 @@
     var importText = ViewBag.ImportText;
     var contactList = (ContactList)ViewBag.ContactList;
     var contactLists = (List<ContactList>)ViewBag.ContactLists;
+    string[] importTextArray = importText.Split( new[] { Environment.NewLine }, StringSplitOptions.None);
 }
 
 @{ Html.RenderPartial("AdminHeader"); }
@@ -31,23 +32,35 @@
                                 <input type="file" class="form-control" name="csvfile" id="csvfile" />
                             </div>
                             <div class="form-group">
-                                <button type="submit" class="btn btn-primary btn-lg btn-block">Next &raquo;</button>
+                                <button type="submit" class="btn btn-primary btn-lg btn-block">Import CSV</button>
                             </div>
-                        </div>                            
+                        </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <textarea  readonly style="width:auto; height:30vh; white-space: pre-line;">@importText</textarea>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-lg btn-block">Confirm Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
             </form>
-            <div>
-                @importText
-            </div>
         </div>
     </div>
 </div>
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        showCSVFile();
-        showEmailList();
-        showListName();
+     
     });
+
+    function showImportText() {
+        $('#importtext').removeClass('hide');
+        $('#confirm-upload').removeClass('hide');
+    }
 </script>
