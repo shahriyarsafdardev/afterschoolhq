@@ -203,9 +203,11 @@ property: ActivityGroupId, int?, Int
 property: Day, DayOfWeekASL, Int
 property: StartDateTime, DateTime?, DateTime, required
 property: EndDateTime, DateTime?, DateTime, required
+property: InstanceTypeId, InstanceType, Int
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
+loadmethod: ActivityScheduleId|InstanceTypeId, List<>
 [end]
 
 [begin]
@@ -1583,4 +1585,10 @@ values: NotSet, Unverified, Pending, Verified
 type: Enum
 name: StripeVerificationFailedCode
 values: NotSet, ScanCorrupt, ScanFailedGrayscale, ScanFailedOther, ScanIDCountryNotSupported, ScanNameMismatch, ScanNotReadable, ScanNotUploaded, FailedKeyedIdentity, FailedOther, ScanFailedTestMode
+[end]
+
+[begin]
+type: Enum
+name: InstanceType
+values: NotSet, InSession, OutOfSession
 [end]

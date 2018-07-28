@@ -119,6 +119,7 @@ namespace AfterSchoolLibrary
                   dailyStartTime: DateTime.UtcNow.Date.AddHours(15),
                   dailyEndTime: DateTime.UtcNow.Date.AddHours(17),
                   scheduleDates: null,
+                  scheduleDatesClosed: null,
                   accountId: account.ID.Value,
                   activityGroupId: null,
                   loggedInUserId: 0,

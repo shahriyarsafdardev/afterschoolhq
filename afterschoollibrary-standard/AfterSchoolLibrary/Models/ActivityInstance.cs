@@ -33,6 +33,7 @@ namespace AfterSchoolLibrary
 		/// Required.
 		/// </summary>
 		public DateTime? EndDateTime { get { return (DateTime?)MDV["EndDateTime"].Value; } set { MDV["EndDateTime"].Value = value; } }
+		public InstanceType InstanceTypeId { get { return (InstanceType)MDV["InstanceTypeId"].Value; } set { MDV["InstanceTypeId"].Value = value; } }
 		
 
         public ActivityInstance()
@@ -40,6 +41,7 @@ namespace AfterSchoolLibrary
             this.Config(ObjectMap, DatabaseQuery, typeof(ActivityInstance).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Day = DayOfWeekASL.NotSet;
+			this.InstanceTypeId = InstanceType.NotSet;
 			
         }
 
@@ -56,6 +58,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "Day", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDateTime", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "EndDateTime", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "InstanceTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -157,6 +160,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["EndDateTime"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["InstanceTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
