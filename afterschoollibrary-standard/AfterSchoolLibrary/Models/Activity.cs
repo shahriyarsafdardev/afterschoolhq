@@ -689,32 +689,12 @@ namespace AfterSchoolLibrary
                 totalErrors++;
             }
             totalFields++;
-            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(LocationDetails).IsBlank())
+            if (!LocationId.HasValue)
             {
                 totalErrors++;
             }
-            //totalFields++;
-            //if (Address1.IsBlank())
-            //{
-            //    totalErrors++;
-            //}
-            //totalFields++;
-            //if (City.IsBlank())
-            //{
-            //    totalErrors++;
-            //}
-            //totalFields++;
-            //if (State.IsBlank())
-            //{
-            //    totalErrors++;
-            //}
-            //totalFields++;
-            //if (PostalCode.IsBlank())
-            //{
-            //    totalErrors++;
-            //}
             totalFields++;
-            if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard && !AcceptPayPal)
+            if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
             {
                 totalErrors++;
             }

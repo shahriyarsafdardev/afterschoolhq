@@ -165,7 +165,6 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label">
                         Registration Mode <span class="text-danger">*</span>
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Set whether you want the @UILabel.RegistrantLabel() to automatically register or to apply for a seat" data-placement="top"></i>
                     </label>
                     <div class="col-sm-9">
                         <div class="am-radio inline">
@@ -175,6 +174,12 @@
                                 <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
                             }
                         </div>
+                        <p class="text-muted">
+                            <em>
+                                <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
+                                <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
+                            </em>
+                        </p>
                     </div>
                 </div>
             }

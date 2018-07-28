@@ -26,13 +26,7 @@
                         </h3>
                     </div>
                     <div class="col-lg-4 col-md-12">
-                        <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
-                            <span>
-                                @ParticipationObjectUI.PrintRegistrationFee(Model)
-                            </span>
-                            &bull;
-                            @Model.RegistrationMode.ToString() &raquo;
-                        </a>
+                        @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model, new ViewDataDictionary() { { "condensed", true } }); }
                     </div>
                 </div>
             </div>
@@ -50,9 +44,9 @@
                 </div>
 
                 <div class="activity-detail-block">
-                    <h3>Location <i class="s7-map-marker"></i></h3>
+                    <h3>Location <a href="@Model.Location.GetGoogleMapsLink()" target="_blank"><i class="s7-map-marker"></i></a></h3>
                     <p>
-                        @Html.Raw(ParticipationObjectUI.PrintLocation(Model))
+                        <a href="@Model.Location.GetGoogleMapsLink()" target="_blank">@ParticipationObjectUI.PrintLocation(Model)</a>
                     </p>
                 </div>
 
@@ -79,13 +73,7 @@
                 </div>
 
                 <div class="margin-10">
-                    <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
-                        <span>
-                            @ParticipationObjectUI.PrintRegistrationFee(Model)
-                        </span>
-                        &bull;
-                        @Model.RegistrationMode.ToString() &raquo;
-                    </a>
+                    @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
                 </div>
 
             </div>
