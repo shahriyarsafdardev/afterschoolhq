@@ -18,9 +18,10 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        Location Information
+        Your Activity Location Information
     </div>
     <div class="panel-body">
+        
 
         @{
         Html.RenderPartial(
@@ -51,9 +52,8 @@
         </div>
 
         <div class="form-group">
-            <label class="col-sm-3">
-                Specific Instructions <span class="text-danger">*</span>
-                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Any special instructions or information about the location?" data-placement="top"></i>
+            <label class="col-sm-3 control-label">
+                Specific Instructions
             </label>
             <div class="col-sm-9">
                 @{
@@ -67,6 +67,7 @@
                      }
                      );
                 }
+                <p class="text-muted"><em>Any special instructions or information about the location? Such as pick up or drop off locations?</em></p>
             </div>
         </div>
 
