@@ -3,6 +3,7 @@ using BasicLibrary;
 using Stripe;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 
 namespace AfterSchoolLibrary.Billing
 {
@@ -150,7 +151,7 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static Stripe.StripeAccount UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
+        public static Stripe.StripeAccount UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -168,7 +169,7 @@ namespace AfterSchoolLibrary.Billing
                 BirthDay = dateOfBirth.Day,
                 BirthMonth = dateOfBirth.Month,
                 BirthYear = dateOfBirth.Year,
-                SSNLast4 = ssnLast4               
+                SSNLast4 = ssnLast4
             };
 
             var options = new StripeAccountUpdateOptions()
@@ -186,6 +187,16 @@ namespace AfterSchoolLibrary.Billing
                 legalOptions.BusinessTaxId = ein;
                 legalOptions.PhoneNumber = businessPhone;
                 options.BusinessUrl = businessUrl;
+            }
+
+            if (fullSSN.IsNotEmpty())
+            {
+                legalOptions.PersonalIdNumber = fullSSN;
+            }
+
+            if (documentFileId.IsNotEmpty())
+            {
+                legalOptions.VerificationDocumentFileId = documentFileId;
             }
 
             Stripe.StripeAccount account = null;
@@ -300,6 +311,38 @@ namespace AfterSchoolLibrary.Billing
         //            SSNLast4 = "",
 
         //        },
+
+        #endregion
+
+        #region StripeFiles
+
+        private static StripeFileUploadService GetFileUploadService()
+        {
+            return new StripeFileUploadService(StripeAccessToken);
+        }
+
+        public static StripeFileUpload UploadFile(StripeUploadFile stripeUploadFile, SystemMessages msgs)
+        {
+            return UploadFile(stripeUploadFile.Document, stripeUploadFile.FileName, stripeUploadFile.Purpose, msgs);
+        }
+
+        public static StripeFileUpload UploadFile(Stream file, string filename, StripeFilePurpose purpose, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            StripeFileUpload fileUpload = null;
+            
+            try
+            {
+                fileUpload = GetFileUploadService().Create(filename, file, purpose.ToString().SplitByUpperCase().Replace(" ", "_").ToLower());
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"Stripe file was not uploaded", MessageType.Error, ex);
+            }
+
+            return fileUpload;
+        }
 
         #endregion
 
@@ -1136,6 +1179,16 @@ namespace AfterSchoolLibrary.Billing
         DinersClub2,
         JCB,
         UnionPay
+    }
+
+    public enum StripeFilePurpose
+    {
+        BusinesLogo,
+        CustomerSignature,
+        DisputeEvidence,
+        IdentityDocument,
+        PciDocument,
+        TaxDocumentUserUpload
     }
 
     enum StripeAccountType

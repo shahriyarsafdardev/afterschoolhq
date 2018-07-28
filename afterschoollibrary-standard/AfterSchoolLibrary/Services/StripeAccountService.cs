@@ -3,6 +3,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace AfterSchoolLibrary.Services
@@ -44,14 +45,22 @@ namespace AfterSchoolLibrary.Services
 
             var stripeStripeAccount = StripeHelper.GetCustomAccount(account.StripeUserId, msgs);
 
-            stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount.StripeResponse.ObjectJson, msgs, dc);
+            stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount.StripeResponse.ObjectJson, null, msgs, dc);
         }
 
-        public static void SaveAndSendLegalEntityToStripe(this StripeAccount stripeAccount, string fullSSN, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void SaveAndSendLegalEntityToStripe(this StripeAccount stripeAccount, string fullSSN, StripeUploadFile document, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
             var account = stripeAccount.GetAccount(msgs, dc);
+
+            Stripe.StripeFileUpload stripeFileUpload = null;
+
+            if (stripeAccount.RequiresDocument)
+                stripeFileUpload = StripeHelper.UploadFile(document, msgs);
+
+            if (msgs.HasErrors())
+                return;
 
             var stripeStripeAccount = StripeHelper.UpdateCustomAccountLegalEntity(
                 stripeAccountId: account.StripeUserId,
@@ -72,6 +81,7 @@ namespace AfterSchoolLibrary.Services
                 ein: stripeAccount.LegalEntityEIN,
                 businessUrl: stripeAccount.BusinessUrl,
                 businessPhone: stripeAccount.BusinessPhone,
+                documentFileId: stripeFileUpload?.Id,
                 tosAcceptanceDate: stripeAccount.TOSAcceptanceDate.Value,
                 tosIPAddress: stripeAccount.TOSAcceptanceIP,
                 tosUserAgent: stripeAccount.TOSAcceptanceUserAgent,
@@ -79,29 +89,38 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
             {
-                stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount.StripeResponse.ObjectJson, msgs, dc);
+                stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount.StripeResponse.ObjectJson, stripeFileUpload, msgs, dc);
             }
         }
 
-        public static void ParseAndUpdateStripeCustomAccount(this StripeAccount stripeAccount, string json, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ParseAndUpdateStripeCustomAccount(this StripeAccount stripeAccount, string json, Stripe.StripeFileUpload stripeFileUpload, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var results = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(json);
             var fieldsRequired = results.verification.fields_needed;
             var verificationDueBy = results.verification.due_by;
             var verificationStatus = results.legal_entity.verification.status;
             var disabledReason = results.verification.disabled_reason;
+            var detailsCode = results.legal_entity.verification.details_code;
             var payoutsEnabled = results.payouts_enabled;
-            var chargesEnabled = results.charges_enabled;
+            var chargesEnabled = results.charges_enabled;            
 
             stripeAccount.RequiresFullSSN = false;
+            stripeAccount.RequiresDocument = false;
 
             foreach (var field in fieldsRequired)
             {
-                if ((string)field == "legal_entity.personal_id_number")
+                switch ((string)field)
                 {
-                    stripeAccount.RequiresFullSSN = true;
-                    msgs.Add("It has been determined your Full SSN required in order to process payments. Please update your information.", MessageType.Warning);
+                    case "legal_entity.personal_id_number":
+                        stripeAccount.RequiresFullSSN = true;
+                        msgs.Add("It has been determined your Full SSN required in order to process payments. Please update your information.", MessageType.Warning);
+                        break;
+                    case "legal_entity.verification.document":
+                        stripeAccount.RequiresDocument = true;
+                        msgs.Add("It has been determined that a scan of a Valid Driver's license or Passport is required to be uploaded in order to process payments. Please update your information.", MessageType.Warning);
+                        break;
                 }
+                
             }
 
             if (verificationDueBy != null && ((string)verificationDueBy).IsDateTime())
@@ -115,18 +134,25 @@ namespace AfterSchoolLibrary.Services
 
             if (chargesEnabled != null && ((string)chargesEnabled).IsBoolean())
                 stripeAccount.ChargesEnabled = ((string)chargesEnabled).ToBoolean();
+                
 
-            if ((string)verificationStatus == StripeVerificationStatus.Pending.ToString().ToLower())
-                stripeAccount.VerificationStatusId = StripeVerificationStatus.Pending;
+            if (verificationStatus != null)
+                stripeAccount.VerificationStatusId = ((string)verificationStatus).ParseEnum<StripeVerificationStatus>();
 
-            else if ((string)verificationStatus == StripeVerificationStatus.Unverified.ToString().ToLower())
-                stripeAccount.VerificationStatusId = StripeVerificationStatus.Unverified;
-
-            else if ((string)verificationStatus == StripeVerificationStatus.Verified.ToString().ToLower())
-                stripeAccount.VerificationStatusId = StripeVerificationStatus.Verified;
+            if (detailsCode != null)
+            {
+                msgs.Add(stripeAccount.FailedDetailsCode.GetDescription(), MessageType.Warning);
+                stripeAccount.FailedDetailsCode = ((string)detailsCode).Replace("_", " ")
+                                                    .ToProperCase()
+                                                    .Replace(" ", "")
+                                                    .ParseEnum<StripeVerificationFailedCode>();
+            }
 
             if (stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
                 msgs.Add("Your account is now verified", MessageType.Notice);
+
+            if (stripeFileUpload.IsNotEmpty())
+                stripeAccount.DocumentFileId = stripeFileUpload.Id;
 
             msgs.AddRange(stripeAccount.Save(dc));
         }

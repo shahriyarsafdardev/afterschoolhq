@@ -358,6 +358,10 @@ property: BankAccountId, string, NVarChar(50)
 property: BankName, string, NVarChar(50)
 property: BankLast4, string, NVarChar(4)
 property: VerificationDueBy, DateTime?, DateTime
+property: RequiresDocument, bool, Bit
+property: RequiresAdditionalOwners, bool, Bit
+property: DocumentFileId, string, NVarChar(50)
+property: FailedDetailsCode, StripeVerificationFailedCode, Int
 loadmethod: AccountId
 [end]
 
@@ -1573,4 +1577,10 @@ values: NotSet, Individual, Company
 type: Enum
 name: StripeVerificationStatus
 values: NotSet, Unverified, Pending, Verified
+[end]
+
+[begin]
+type: Enum
+name: StripeVerificationFailedCode
+values: NotSet, ScanCorrupt, ScanFailedGrayscale, ScanFailedOther, ScanIDCountryNotSupported, ScanNameMismatch, ScanNotReadable, ScanNotUploaded, FailedKeyedIdentity, FailedOther, ScanFailedTestMode
 [end]

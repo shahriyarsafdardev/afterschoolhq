@@ -10,6 +10,31 @@ Imports System.Data
 Public Module Extensions
 
     <Extension>
+    Public Function ParseEnum(Of T)(ByVal aString As String) As T
+        Return System.Enum.Parse(GetType(T), aString, True)
+    End Function
+
+    <Extension>
+    Public Function Contains(ByVal aString As String, ByVal strings As IEnumerable(Of String)) As Boolean
+        For Each item As String In strings
+            If aString.Contains(item) Then
+                Return True
+            End If
+        Next
+        Return False
+    End Function
+
+    <Extension>
+    Public Function LastChars(ByVal aString As String, ByVal length As Integer) As String
+
+        If aString.Length < length Then
+            Return aString
+        End If
+        Return aString.Substring(aString.Length - 4)
+
+    End Function
+
+    <Extension>
     Public Function IsSameAs(ByVal aString As String, ByVal bString As String) As Boolean
         If aString.ToLower.Trim = bString.ToLower.Trim Then
             Return True
