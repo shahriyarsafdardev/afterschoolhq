@@ -27,7 +27,7 @@ namespace AfterSchool.Models
         {
             var scheduleDates = new List<DateTime>();
 
-            for (var i = 1; i <= 50; i++)
+            for (var i = 1; i <= 30; i++)
             {
                 var meetingStartDate = closedMeetingDates["meeting-closed-date-" + i];
                 var meetingInUse = closedMeetingDates["meeting-closed-inuse-" + i];
@@ -68,7 +68,7 @@ namespace AfterSchool.Models
             }
             else
             {
-                for (var i = 1; i <= 50; i++)
+                for (var i = 1; i <= 30; i++)
                 {
                     var meetingStartDate = meetingDates["meeting-open-date-" + i];
                     var meetingEndDate = meetingDates["meeting-open-date-" + i];
