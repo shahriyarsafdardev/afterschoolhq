@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary
         public decimal? Cost { get; set; }
         public CostUnitType? CostUnitType { get; set; }
         public RegistrationPeriod RegistrationPeriod { get; set; }
-        public List<PaymentPlan> PaymentPlans { get; set; }
+        public List<SubscriptionPlan> PaymentPlans { get; set; }
         public List<SubscriptionPlan> SubscriptionPlans { get; set; }
         public string UniqueName { get; set; }
         public RegistrationMode RegistrationMode { get; set; }

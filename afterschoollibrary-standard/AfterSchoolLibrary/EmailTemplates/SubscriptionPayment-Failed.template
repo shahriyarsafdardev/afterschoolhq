@@ -1,0 +1,14 @@
+﻿<div>
+  <p>@Model.FirstName,</p>
+
+  <p>
+    Unfortunately your @Model.Period payment in the amount of @Model.PaymentAmount for @Model.ActivityName failed.
+  </p>
+
+  <p>
+   Please login to your account to update your payment details <a href="@Model.LoginLink">@Model.LoginLink</a>
+  </p>
+  <p>
+    Your @Model.AccountName Team
+  </p>
+</div>

@@ -324,6 +324,7 @@ loadmethod: IsAdminAccount
 loadmethod: Uid
 loadmethod: AccountTypeId, List<>
 loadmethod: StripeUserId
+loadmethod: StripeCustomerId
 [end]
 
 [begin]
@@ -631,6 +632,7 @@ loadmethod: ActivityId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: Uid
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|RegistrantId, List<>, LoadByParticipationObjectByRegistrant
 [end]
 
 [begin]
@@ -1204,7 +1206,7 @@ property: Used, bool, Bit
 loadmethod: Uid
 [end]
 
-[begin]
+[begin-ignore]
 type: Class
 name: PaymentPlan
 description: Used to create payment options for a particular activity or activity group
@@ -1220,7 +1222,7 @@ property: IsActive, bool, Bit
 property: StripePlanId, string, NVarChar(50)
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
-[end]
+[end-ignore]
 
 [begin]
 type: Class
@@ -1235,12 +1237,14 @@ property: CostPerPeriod, decimal?, Money, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: DoesAutoRenew, bool, Bit
 property: IsActive, bool, Bit
-property: StripeSubscriptionId, string, NVarChar(50)
-loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+property: TotalPeriods, int?, Int, required
+property: StripePlanId, string, NVarChar(50)
+property: PlanTypeId, SubscriptionPlanType, Int
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
 
-[begin]
+[begin-ignore]
 type: Class
 name: RegistrantPaymentPlan
 description: Keeps track of which registrants are on which payment plans
@@ -1254,7 +1258,7 @@ loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: PaymentPlanId, List<>
 loadmethod: RegistrantId|PaymentPlanId
-[end]
+[end-ignore]
 
 [begin]
 type: Class
@@ -1266,10 +1270,12 @@ property: PurchaseId, int?, Int, required
 property: SubscriptionPlanId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
+property: StripeSubscriptionId, string, NVarChar(50)
 loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>
 loadmethod: RegistrantId|SubscriptionPlanId
+loadmethod: StripeSubscriptionId
 [end]
 
 [begin]
@@ -1598,4 +1604,10 @@ values: NotSet, InSession, OutOfSession
 type: Enum
 name: RegistrationCompletionStatus
 values: NotSet, Started, Completed
+[end]
+
+[begin]
+type: Enum
+name: SubscriptionPlanType
+values: NotSet, Subscription, PaymentPlan
 [end]

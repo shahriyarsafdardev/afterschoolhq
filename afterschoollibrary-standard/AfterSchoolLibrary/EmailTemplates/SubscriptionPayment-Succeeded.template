@@ -1,0 +1,14 @@
+﻿<div>
+  <p>@Model.FirstName,</p>
+
+  <p>
+    Thank you! Your @Model.Period payment in the amount of @Model.PaymentAmount for @Model.ActivityName succeeded.
+  </p>
+
+  <p>
+    In order to view your billing details, please login to your account <a href="@Model.LoginLink">@Model.LoginLink</a>
+  </p>
+  <p>
+    Your @Model.AccountName Team
+  </p>
+</div>

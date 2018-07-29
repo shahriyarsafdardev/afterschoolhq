@@ -437,6 +437,22 @@ namespace AfterSchoolLibrary
             return EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
         }
 
+        public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account, SubscriptionPlan plan, DatabaseConnection dc)
+        {
+            var msgs = new SystemMessages();
+            var accountOwner = account.GetAccountOwner(msgs, dc);            
+            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(account, accountOwner, plan, account.IsAfterSchool));
+            return msgs;
+        }
+
+        public static SystemMessages SendSubscriptionPaymentFailed(this Account account, SubscriptionPlan plan, DatabaseConnection dc)
+        {
+            var msgs = new SystemMessages();
+            var accountOwner = account.GetAccountOwner(msgs, dc);
+            msgs.AddRange(EmailHelper.SendSubscriptionPaymentFailed(account, accountOwner, plan, account.IsAfterSchool));
+            return msgs;
+        }
+
         public static SystemMessages SendStripeAccountVerified(this Account account, DatabaseConnection dc)
         {
             var msgs = new SystemMessages();
@@ -1670,19 +1686,20 @@ namespace AfterSchoolLibrary
                     // if they have a subscription plan
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                     {
-                        accountRegistrant.StartSubscriptionPlan(
-                            subscriptionPlan: checkoutObject.SubscriptionPlan,
+                        var rpp = accountRegistrant.StartSubscriptionPlan(
+                            fromAccount: fromAccount,
+                            toAccount: toAccount,
+                            checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
-                            dc: adc
-                            );
+                            dc: adc);
                     }
 
                     // if they have a payment plan
                     if (checkoutObject.PaymentPlan.IsNotEmpty())
                     {
-                        var rpp = accountRegistrant.StartPaymentPlan(
+                        var rpp = accountRegistrant.StartSubscriptionPlan(
                             fromAccount: fromAccount,
                             toAccount: toAccount,
                             checkoutObject: checkoutObject,

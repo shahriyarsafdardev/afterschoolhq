@@ -76,6 +76,90 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendSubscriptionPaymentFailed(Account account, WebUser user, SubscriptionPlan plan, bool isAfterSchool)
+        {
+            var msgs = new SystemMessages();
+
+            var activityName = "";
+
+            if (plan.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                activityName = plan.GetActivity().Name;
+            else
+                activityName = plan.GetActivityGroup().Name;
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", user.FirstName },
+                { "AccountName", account.Name },
+                { "Period", $"{plan.BillingPeriodTypeId.ToString().ToLower()}ly" },
+                { "PaymentAmount", plan.CostPerPeriod.ToCurrency() },
+                { "ActivityName", activityName },
+                { "LoginLink", $"{Email.BaseUrl(isAfterSchool)}login" }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.SubscriptionPayment_Failed,
+                model,
+                "subscriptionpaymentfailed-1.0.0",
+                msgs
+                );
+
+            var subject = $"Your payment failed for ${activityName}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
+        public static SystemMessages SendSubscriptionPaymentSucceeded(Account account, WebUser user, SubscriptionPlan plan, bool isAfterSchool)
+        {
+            var msgs = new SystemMessages();
+
+            var activityName = "";
+
+            if (plan.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                activityName = plan.GetActivity().Name;
+            else
+                activityName = plan.GetActivityGroup().Name;
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", user.FirstName },
+                { "AccountName", account.Name },
+                { "Period", $"{plan.BillingPeriodTypeId.ToString().ToLower()}ly" },
+                { "PaymentAmount", plan.CostPerPeriod.ToCurrency() },
+                { "ActivityName", activityName },
+                { "LoginLink", $"{Email.BaseUrl(isAfterSchool)}login" }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.SubscriptionPayment_Succeeded,
+                model,
+                "subscriptionpaymentsucceeded-1.0.0",
+                msgs
+                );
+
+            var subject = $"Your payment succeeded for ${activityName}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
         public static SystemMessages SendEmailVerification(WebUser user, bool isAfterSchool)
         {
             var msgs = new SystemMessages();            

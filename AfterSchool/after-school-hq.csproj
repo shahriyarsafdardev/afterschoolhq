@@ -270,8 +270,7 @@
     <Compile Include="Areas\Org\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
-    <Compile Include="Areas\StripeHooks\Controllers\AccountController.cs" />
-    <Compile Include="Areas\StripeHooks\Controllers\SubscriptionController.cs" />
+    <Compile Include="Areas\StripeHooks\Controllers\ReceiveController.cs" />
     <Compile Include="Areas\StripeHooks\StripeHooksAreaRegistration.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
     <Compile Include="Areas\User\Controllers\ProfileController.cs" />

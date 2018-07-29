@@ -1001,10 +1001,10 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                PaymentPlan paymentPlan = null;
+                SubscriptionPlan paymentPlan = null;
 
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
-                    paymentPlan = PaymentPlan.Load(paymentoption.ToInteger(), msgs);
+                    paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
 
                 SessionVariables.CurrentAccount.ProcessRegistrationWithPayment(
                     toAccount: participationObject.OwnerAccount,

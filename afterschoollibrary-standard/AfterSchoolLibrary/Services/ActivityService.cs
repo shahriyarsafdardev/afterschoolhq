@@ -70,9 +70,9 @@ namespace AfterSchoolLibrary
             return Math.Max(0, rtn);
         }
 
-        public static PaymentPlan AddPaymentPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan AddPaymentPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return PaymentPlanService.CreateNew(
+            return SubscriptionPlanService.CreateNewPaymentPlan(
                 activity.GetAccount(msgs, dc),
                 activity,
                 costPerPeriod, 
@@ -85,7 +85,7 @@ namespace AfterSchoolLibrary
 
         public static SubscriptionPlan AddSubscriptionPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return SubscriptionPlanService.CreateNew(
+            return SubscriptionPlanService.CreateNewSubscription(
                 activity.GetAccount(msgs, dc), 
                 activity,
                 costPerPeriod, 
@@ -96,14 +96,14 @@ namespace AfterSchoolLibrary
                 dc);
         }
 
-        public static List<PaymentPlan> GetPaymentPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<SubscriptionPlan> GetPaymentPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return PaymentPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
+            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PaymentPlan, msgs, dc);
         }
 
         public static List<SubscriptionPlan> GetSubscriptionPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
+            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.Subscription, msgs, dc);
         }
 
         public static void CreateSampleActivity(Account account, SystemMessages msgs, DatabaseConnection dc = null)

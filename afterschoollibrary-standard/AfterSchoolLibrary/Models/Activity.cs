@@ -461,24 +461,39 @@ namespace AfterSchoolLibrary
 
         public SubscriptionPlan GetSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            // fdafds
             return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).FirstOrDefault();
         }
 
         public bool HasSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return SubscriptionPlan.GetCount(new Hashtable() { { "ParticipationObjectId", this.ID.Value }, { "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity } }, msgs, dc) > 0;
+            return SubscriptionPlan.GetCount(
+                new Hashtable() {
+                    { "ParticipationObjectId", this.ID.Value },
+                    { "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity },
+                    { "PlanTypeId", (int)SubscriptionPlanType.Subscription }
+                }, 
+                msgs, 
+                dc) > 0;
         }
 
-        public PaymentPlan GetPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public SubscriptionPlan GetPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return PaymentPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).FirstOrDefault();
+            // fdasfsd
+            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).FirstOrDefault();
         }
 
         public bool HasPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return PaymentPlan.GetCount(new Hashtable() { { "ParticipationObjectId", this.ID.Value }, { "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity } }, msgs, dc) > 0;
+            return SubscriptionPlan.GetCount(
+               new Hashtable() {
+                    { "ParticipationObjectId", this.ID.Value },
+                    { "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity },
+                    { "PlanTypeId", (int)SubscriptionPlanType.PaymentPlan }
+               },
+               msgs,
+               dc) > 0;
         }
-
 
         public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1702,7 +1717,7 @@ namespace AfterSchoolLibrary
                 // let's create a new one
                 if (!activity.HasSubscriptionPlan(msgs, dc))
                 {
-                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNew(
+                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscription(
                             account,
                             ParticipationObjectType.Activity,
                             activity.ID.Value,
@@ -1725,7 +1740,7 @@ namespace AfterSchoolLibrary
                         msgs.AddRange(subscriptionPlan.Deactivate(loggedInUserId, dc));
 
                         // second: create a new plan
-                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNew(
+                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscription(
                                 account,
                                 ParticipationObjectType.Activity,
                                 activity.ID.Value,
@@ -1769,7 +1784,7 @@ namespace AfterSchoolLibrary
                 // let's create a new one
                 if (!activity.HasPaymentPlan(msgs, dc))
                 {
-                    var paymentPlan = Services.PaymentPlanService.CreateNew(
+                    var paymentPlan = Services.SubscriptionPlanService.CreateNewPaymentPlan(
                         account,
                         ParticipationObjectType.Activity,
                         activity.ID.Value,
@@ -1791,7 +1806,7 @@ namespace AfterSchoolLibrary
                         msgs.AddRange(paymentPlan.Deactivate(loggedInUserId, dc));
 
                         // second: create a new plan
-                        var newPaymentPlan = Services.PaymentPlanService.CreateNew(
+                        var newPaymentPlan = Services.SubscriptionPlanService.CreateNewPaymentPlan(
                                 account,
                                 ParticipationObjectType.Activity,
                                 activity.ID.Value,

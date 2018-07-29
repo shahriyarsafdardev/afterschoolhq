@@ -26,7 +26,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
             var plan = activity.AddPaymentPlan(35, BillingPeriodType.Month, 12, LoggedInUser, msgs, dc);
 
-            Assert.Single(PaymentPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc));
+            Assert.Single(SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PaymentPlan, msgs, dc));
         }
 
         [Fact(DisplayName = "Payment plan is saved as an option on an activity group")]
@@ -35,7 +35,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
             var plan = activityGroup.AddPaymentPlan(35, BillingPeriodType.Month, 12, LoggedInUser, msgs, dc);
 
-            Assert.Single(PaymentPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, msgs, dc));
+            Assert.Single(SubscriptionPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, SubscriptionPlanType.PaymentPlan, msgs, dc));
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace AfterSchoolLibraryTests.Tests
         public void GetPaymentPlansTest()
         {
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var plan = PaymentPlanFactory.Create(ActivityOwnerAccount, activity, msgs, dc);
+            var plan = SubscriptionPlanFactory.Create(ActivityOwnerAccount, activity, SubscriptionPlanType.PaymentPlan, msgs, dc);
 
             Assert.Single(activity.GetPaymentPlans(msgs, dc));
         }
@@ -73,7 +73,7 @@ namespace AfterSchoolLibraryTests.Tests
         public void GetSubscriptionPlansTest()
         {
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
-            var plan = SubscriptionPlanFactory.Create(ActivityOwnerAccount, activity, msgs, dc);
+            var plan = SubscriptionPlanFactory.Create(ActivityOwnerAccount, activity, SubscriptionPlanType.Subscription, msgs, dc);
 
             Assert.Single(activity.GetSubscriptionPlans(msgs, dc));
         }

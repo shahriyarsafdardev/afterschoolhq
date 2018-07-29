@@ -140,7 +140,7 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
-        public static RegistrantPaymentPlan StartPaymentPlan(this Registrant registrant, Account fromAccount, Account toAccount, CheckoutObject checkoutObject, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, Account fromAccount, Account toAccount, CheckoutObject checkoutObject, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -151,15 +151,6 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
-
-            var rpp = RegistrantPaymentPlanService.CreateNew(
-                registrant,
-                checkoutObject.PaymentPlan,
-                startDateTime.IfEmpty(DateTime.UtcNow),
-                purchase.ID,
-                loggedInUser,
-                msgs,
-                dc);
 
             if (msgs.HasErrors())
                 return null;
@@ -205,22 +196,21 @@ namespace AfterSchoolLibrary.Services
                 stripeAccountId: toAccount.StripeUserId,
                 msgs: msgs);
 
-            return rpp;
-        }
-
-        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, SubscriptionPlan subscriptionPlan, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            if (msgs.HasErrors())
+                return null;
 
             var rpp = RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
-                subscriptionPlan,
+                checkoutObject.PaymentPlan,
                 startDateTime.IfEmpty(DateTime.UtcNow),
+                purchase.ID,
+                subscription.Id,
                 loggedInUser,
                 msgs,
                 dc);
 
             return rpp;
         }
+        
     }
 }
