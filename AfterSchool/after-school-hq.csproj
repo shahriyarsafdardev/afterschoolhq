@@ -271,6 +271,7 @@
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
     <Compile Include="Areas\StripeWebHooks\Controllers\AccountController.cs" />
+    <Compile Include="Areas\StripeWebHooks\Controllers\SubscriptionController.cs" />
     <Compile Include="Areas\StripeWebHooks\StripeWebHooksAreaRegistration.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
     <Compile Include="Areas\User\Controllers\ProfileController.cs" />

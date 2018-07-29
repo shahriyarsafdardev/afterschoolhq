@@ -8,7 +8,7 @@
         We will meet from <strong>@Model.DailyStartTime.ToShortTimeString()</strong> to <strong>@Model.DailyEndTime.ToShortTimeString()</strong> every <strong>@Model.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(3)).ToStringList(", ", " & ")</strong> starting <strong>@Model.StartDate.ToShortDateString()</strong> and ending on <strong>@Model.EndDate.ToShortDateString()</strong><br/>
 
         @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Any())
-        {   
+        {   <br />
             <span>
                 We will <strong><em>not</em></strong> meet on the following dates: @instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Select(range => range.StartDateTime.ToShortDateString()).ToStringList(", ")
             </span>

@@ -10,18 +10,31 @@
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 <div class="reg-header">
-    <div>
-        @foreach (var item in cart.GetCartItems())
-        {
+
+    <div class="row">
+        <div class="col-md-8 col-sm-12">
             <div>
-                <h1>You are registering for&#58; @item.GetParticipationObject().Name</h1>
+                @foreach (var item in cart.GetCartItems())
+                {
+                    <div>
+                        <h1>You are registering for&#58; @item.GetParticipationObject().Name</h1>
+                    </div>
+                }
             </div>
-        }
+            <div>
+                Enter your information below to begin your most simple registration yet.
+            </div>
+        </div>
+
+        <div class="col-md-4 col-sm-12 hide">
+            <div class="pull-right">
+                <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-alt8">
+                    &laquo; @SessionVariables.RegistrationStartPageAccount.Name Home
+                </a>
+            </div>
+        </div>
     </div>
-    <div>
-        Enter your information below to begin your most simple registration yet.
-    </div>
-   
+
 </div>
 
 <div>
@@ -81,7 +94,7 @@
                                 <div class="am-checkbox text-center">
                                     <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
                                     <label for="agree">
-                                        I agree to the <a href="">terms and services</a> of using @UILabel.ProductName()
+                                        I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and services</a> of using @UILabel.ProductName()
                                     </label>
                                 </div>
                             </div>

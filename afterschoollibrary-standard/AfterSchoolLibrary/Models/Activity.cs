@@ -1375,14 +1375,17 @@ namespace AfterSchoolLibrary
             }
             else
             {
-                activity = new Activity();
-                activity.ActivityTypeId = ActivityType.Activity;
-                activity.CreateDate = DateTime.UtcNow;
-                activity.CreatedBy = loggedInUserId;
-                activity.SeatsAvailable = seatsavailable.ToString().ToInteger();
-                activity.WaitingListSeats = waitinglistseats.ToString().ToInteger();
-                activity.AccountId = account.ID;
-                activity.LocationId = account.DefaultLocationId;
+                activity = new Activity
+                {
+                    ActivityTypeId = ActivityType.Activity,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId,
+                    SeatsAvailable = seatsavailable.ToString().ToInteger(),
+                    WaitingListSeats = waitinglistseats.ToString().ToInteger(),
+                    AccountId = account.ID,
+                    LocationId = account.DefaultLocationId,
+                    AcceptCreditCard = true
+                };
 
                 if (group.IsEmpty() && !form.IsNumber())
                 {
