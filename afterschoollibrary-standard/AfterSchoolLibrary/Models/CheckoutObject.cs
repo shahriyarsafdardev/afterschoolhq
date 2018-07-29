@@ -57,6 +57,14 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public decimal PaymentPlanTotalCost
+        {
+            get
+            {
+                return PaymentPlan.IsNotEmpty() ? PaymentPlan.CostPerPeriod.Value * PaymentPlan.TotalPeriods.Value * NumberOfSeats : 0;
+            }
+        }
+
         public decimal ProductCost
         {
             get

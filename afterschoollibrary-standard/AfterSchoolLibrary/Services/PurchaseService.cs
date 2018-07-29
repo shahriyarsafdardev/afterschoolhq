@@ -11,9 +11,16 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
+            var totalCost = checkoutObject.TotalCostToPurchase;
+
+            if (checkoutObject.PaymentPlan.IsNotEmpty())
+                totalCost = checkoutObject.PaymentPlanTotalCost;
+            else if (checkoutObject.SubscriptionPlan.IsNotEmpty())
+                totalCost = checkoutObject.SubscriptionCostToday;
+
             var purchase = new Purchase()
             {
-                AmountPaid = checkoutObject.TotalCostToPurchase,
+                AmountPaid = totalCost,
                 CouponId = checkoutObject.Coupon?.ID,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),

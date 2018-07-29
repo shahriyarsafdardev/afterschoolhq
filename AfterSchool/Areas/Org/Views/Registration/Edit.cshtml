@@ -65,7 +65,7 @@
                                     </table>
                                 </div>
 
-                                @foreach (var group in answers.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID).OrderBy(x => x.DisplayOrder))
+                                @foreach (var group in answers.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.QuestionGroupDataTypeId).OrderBy(x => x.DisplayOrder))
                                 {
                                     <div class="table-responsive">
                                         <table class="table table-striped">

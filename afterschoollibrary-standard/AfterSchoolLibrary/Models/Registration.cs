@@ -395,7 +395,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
@@ -411,7 +411,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], this.AccountId);
-            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName.Trim());
             dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName.Trim());
@@ -1141,7 +1141,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
-            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -1154,7 +1154,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
