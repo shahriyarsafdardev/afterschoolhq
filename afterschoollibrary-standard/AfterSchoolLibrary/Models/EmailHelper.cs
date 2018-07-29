@@ -62,7 +62,7 @@ namespace AfterSchoolLibrary
                 msgs
                 );
 
-            var subject = $"You can now accept payments on {Utilities.AppName(isAfterSchool)}";
+            var subject = $"You can now accept payments on {Utilities.AppName(isAfterSchool)}!";
 
             var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),

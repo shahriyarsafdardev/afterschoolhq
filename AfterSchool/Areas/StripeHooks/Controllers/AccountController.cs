@@ -1,6 +1,7 @@
 ﻿using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using Hangfire;
 using Newtonsoft.Json;
 using Stripe;
 using System;
@@ -26,9 +27,13 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 var account = Account.LoadByStripeUserId(stripeAccountId);
                 var stripeAccount = account.GetStripeAccount(msgs);
                 var serializedAccountJson = JsonConvert.SerializeObject(stripeEvent.Data.Object);
+                var startingStatus = stripeAccount.VerificationStatusId;
 
-                msgs.Add("Updating Parse and Update", MessageType.Notice);
                 stripeAccount.ParseAndUpdateStripeCustomAccount((string)serializedAccountJson, null, msgs);
+
+                if (msgs.HasNoErrors() && startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+                    BackgroundJob.Enqueue(() => account.SendStripeAccountVerified(null));
+                
             }
             catch (Exception ex)
             {

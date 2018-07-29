@@ -437,7 +437,7 @@ namespace AfterSchoolLibrary
             return EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
         }
 
-        public static SystemMessages SendStripeAccountVerified(this Account account, DatabaseConnection dc = null)
+        public static SystemMessages SendStripeAccountVerified(this Account account, DatabaseConnection dc)
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);

@@ -8,6 +8,7 @@ using AfterSchoolLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Services;
 using System.IO;
+using Hangfire;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -415,7 +416,6 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
-            stripeAccount.GetLatestStripeAccountDetails(SessionVariables.CurrentAccount, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -427,6 +427,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
+            var startingStatus = stripeAccount.VerificationStatusId;
             var entityTypeId = (LegalEntityType)entityType.ToInteger();
 
             if (firstName.IsEmpty())
@@ -520,6 +521,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
                 msgs.Add("Your update information has been submitted.", MessageType.Success);
+
+            if (msgs.HasNoErrors() && startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+                BackgroundJob.Enqueue(() => SessionVariables.CurrentAccount.SendStripeAccountVerified(null));
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
