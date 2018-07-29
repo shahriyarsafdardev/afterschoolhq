@@ -840,9 +840,10 @@ namespace AfterSchool.Controllers
                             ownerAccountId: participationObject.OwnerAccount.ID.Value,
                             activityGroupId: participationObject.ObjectType == ParticipationObjectType.Activity ? ((Activity)participationObject.Object).ActivityGroupId : null,
                             esignature: signature,
+                            completionStatus: RegistrationCompletionStatus.Started,
                             loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                             msgs: amsgs,
-                            dc: adc);
+                            dc: adc);                        
 
                         //copy all answers from the main account to the registrant & registration :)
                         SessionVariables.CurrentRegistrant.CopyAnswers(
@@ -924,7 +925,7 @@ namespace AfterSchool.Controllers
             {
                 SessionVariables.CurrentAccount.ProcessRegistrationWithoutPayment(
                     toAccount: participationObject.OwnerAccount,
-                    purchaseObject: new CheckoutObject()
+                    checkoutObject: new CheckoutObject()
                     {
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
@@ -1007,7 +1008,7 @@ namespace AfterSchool.Controllers
 
                 SessionVariables.CurrentAccount.ProcessRegistrationWithPayment(
                     toAccount: participationObject.OwnerAccount,
-                    purchaseObject: new CheckoutObject()
+                    checkoutObject: new CheckoutObject()
                     {
                         Coupon = null,
                         NumberOfSeats = 1,

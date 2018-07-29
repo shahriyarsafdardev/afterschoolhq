@@ -214,12 +214,13 @@ namespace AfterSchoolLibrary
 
         #endregion
 
+        #region "UserDefined"
+
         public bool IsPurchased(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantPaymentPlan.GetCount(new Hashtable() { { "ID", this.ID.Value } }, msgs, dc) > 0;
+            return RegistrantPaymentPlan.GetCount(new Hashtable() { { "PaymentPlanId", this.ID.Value } }, msgs, dc) > 0;
         }
 
-        #region "UserDefined"
         public static List<PaymentPlan> LoadActiveByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

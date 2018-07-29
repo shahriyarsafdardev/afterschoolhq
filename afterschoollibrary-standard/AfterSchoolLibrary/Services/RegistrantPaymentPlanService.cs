@@ -8,7 +8,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RegistrantPaymentPlanService
     {
-        public static RegistrantPaymentPlan CreateNew(Registrant registrant, PaymentPlan paymentPlan, DateTime startDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RegistrantPaymentPlan CreateNew(Registrant registrant, PaymentPlan paymentPlan, DateTime startDate, int? purchaseId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -20,10 +20,11 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 PaymentPlanId = paymentPlan.ID,
                 RegistrantId = registrant.ID,
-                StartDate = startDate
+                StartDate = startDate,
+                PurchaseId = purchaseId
             };
 
-            msgs.AddRange(rpp.SaveWithStripe(dc));
+            msgs.AddRange(rpp.Save(dc));
 
             return rpp;
         }

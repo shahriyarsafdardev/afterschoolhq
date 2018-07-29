@@ -214,7 +214,7 @@ namespace AfterSchoolLibrary
 
         public bool IsPurchased(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantSubscriptionPlan.GetCount(new Hashtable() { { "ID", this.ID.Value } }, msgs, dc) > 0;
+            return RegistrantSubscriptionPlan.GetCount(new Hashtable() { { "SubscriptionPlanId", this.ID.Value } }, msgs, dc) > 0;
         }
 
         public static List<SubscriptionPlan> LoadActiveByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

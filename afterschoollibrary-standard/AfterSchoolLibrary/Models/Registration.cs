@@ -37,6 +37,7 @@ namespace AfterSchoolLibrary
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public int? FirstRegistrationId { get { return (int?)MDV["FirstRegistrationId"].Value; } set { MDV["FirstRegistrationId"].Value = value; } }
 		public string ESignature { get { return (string)MDV["ESignature"].Value; } set { MDV["ESignature"].Value = value; } }
+		public RegistrationCompletionStatus RegistrationCompletionStatusId { get { return (RegistrationCompletionStatus)MDV["RegistrationCompletionStatusId"].Value; } set { MDV["RegistrationCompletionStatusId"].Value = value; } }
 		public string RegistrantEmail { get { return (string)MDV["RegistrantEmail"].Value; } }
 		public string RegistrantFirstName { get { return (string)MDV["RegistrantFirstName"].Value; } }
 		public string RegistrantLastName { get { return (string)MDV["RegistrantLastName"].Value; } }
@@ -52,6 +53,7 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
 			this.PaymentTypeId = PaymentType.NotSet;
+			this.RegistrationCompletionStatusId = RegistrationCompletionStatus.NotSet;
 			
         }
 
@@ -75,6 +77,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FirstRegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "RegistrationCompletionStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -210,6 +213,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ESignature"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RegistrationCompletionStatusId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -388,6 +395,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
@@ -403,6 +411,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], this.AccountId);
+            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName.Trim());
             dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName.Trim());
@@ -788,79 +797,7 @@ namespace AfterSchoolLibrary
             registrantActivities.ForEach(ra => ra.SendNewRegistrationNotice(account, null, null));
 
             return msgs;
-        }
-
-        [Obsolete]
-        public SystemMessages ProcessStripePayment(Registrant registrant, decimal costPerRegistrant, int totalSeats, string ccname, string ccnumber, string cccvc, string ccexpmonth, string ccexpyear, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var account = Account.Load(this.AccountId.Value, dc: dc);
-            if (account.IsNotEmpty())
-            {
-                var charge = Billing.StripeHelper.CreateChargeWithSource(
-                    totalAmount: costPerRegistrant * totalSeats,
-                    description: $"{account.Name} Registration for {registrant.Name}",
-                    toAccount: account,
-                    sourceCard: new Stripe.SourceCard()
-                    {
-                        Name = ccname,
-                        Number = ccnumber,
-                        Cvc = cccvc,
-                        ExpirationMonth = ccexpmonth.ToInteger(),
-                        ExpirationYear = ccexpyear.ToInteger(),
-                    },
-                    statementDescriptor: $"Reg: {account.Name} - {registrant.Name}".MaxChars(22),
-                    msgs: msgs);
-
-                if (msgs.HasNoErrors())
-                {
-                    this.StripeChargeId = charge.Id;
-                    this.DatePaid = DateTime.UtcNow;
-                    this.AmountPaid = costPerRegistrant;
-                    this.PaymentTypeId = PaymentType.CreditCard;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-
-                //Stripe.StripeChargeCreateOptions options = new Stripe.StripeChargeCreateOptions();
-                //options.Amount = (costPerRegistrant * totalSeats * 100).ToInteger();
-                //options.Currency = "usd";
-                //options.Description = $"{account.Name} Registration for {registrant.Name}";
-
-                //options.Destination = account.StripeUserId;
-
-                //options.SourceCard = new Stripe.SourceCard();
-                //options.SourceCard.Name = ccname;
-                //options.SourceCard.Number = ccnumber;
-                //options.SourceCard.Cvc = cccvc;
-                //options.SourceCard.ExpirationMonth = ccexpmonth.ToInteger();
-                //options.SourceCard.ExpirationYear = ccexpyear.ToInteger();
-
-                //options.StatementDescriptor = $"Reg: {account.Name} - {registrant.Name}";
-
-                //try
-                //{
-                //    var service = new Stripe.StripeChargeService(Billing.StripeHelper.SecretKey);
-                //    var charge = service.Create(options);
-
-                //    this.StripeChargeId = charge.Id;
-                //    this.DatePaid = DateTime.UtcNow;
-                //    this.AmountPaid = costPerRegistrant;
-                //    this.PaymentTypeId = PaymentType.CreditCard;
-                //    msgs.AddRange(this.Save(dc: dc));
-
-                //}
-                //catch (Stripe.StripeException ex)
-                //{
-                //    msgs.Add(ex.Message, MessageType.Error, ex);
-                //}
-                //catch (Exception ex)
-                //{
-                //    msgs.Add("Error charging credit card", MessageType.Error, ex);
-                //}
-
-            }
-            return msgs;
-        }
+        }        
 
         private static DatabaseQuery GetSearchQuery(string searchText, int accountId, int? questionId, List<int> activityGroupIds, RegistrationStatus regStatus, List<int> activityIds = null, RegistrationAssignmentType rat = RegistrationAssignmentType.NotSet, DatabaseConnection dc = null)
         {
@@ -868,6 +805,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 
             // aggregate related registrations
@@ -1206,6 +1144,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
+            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -1218,6 +1157,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;

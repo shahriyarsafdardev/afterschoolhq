@@ -883,6 +883,7 @@ property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
 property: ESignature, string, NVarChar(50)
+property: RegistrationCompletionStatusId, RegistrationCompletionStatus, Int
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -1591,4 +1592,10 @@ values: NotSet, ScanCorrupt, ScanFailedGrayscale, ScanFailedOther, ScanIDCountry
 type: Enum
 name: InstanceType
 values: NotSet, InSession, OutOfSession
+[end]
+
+[begin]
+type: Enum
+name: RegistrationCompletionStatus
+values: NotSet, Started, Completed
 [end]

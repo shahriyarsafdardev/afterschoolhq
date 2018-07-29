@@ -324,6 +324,7 @@ namespace AfterSchoolLibrary
                     var subscription = Billing.StripeHelper.CreateSubscription(
                         customerId: stripeCustomerId, 
                         planId: this.GetPackage(msgs, dc).GetStripePlanId(this.BillingPeriodTypeId), 
+                        sourceId: null,
                         platformFeePercent: null,
                         trialEndDate: this.TrialEndDate, 
                         stripeAccountId: null,

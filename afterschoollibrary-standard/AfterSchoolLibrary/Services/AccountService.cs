@@ -1522,7 +1522,7 @@ namespace AfterSchoolLibrary
             return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue().ToDecimal();
         }
 
-        private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Add Products
             // if they have products
@@ -1533,31 +1533,31 @@ namespace AfterSchoolLibrary
 
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
-            if (msgs.HasNoErrors() && purchaseObject.SavePaymentInfo)
+            if (msgs.HasNoErrors() && checkoutObject.SavePaymentInfo)
             {
-                var source = Billing.StripeHelper.CreateSource(purchaseObject.StripeToken, msgs);
+                var source = Billing.StripeHelper.CreateSource(checkoutObject.StripeToken, msgs);
                 msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
-                purchaseObject.SourceId = source.Id;
+                checkoutObject.SourceId = source.Id;
             }
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
             // don't process charge if the user is using a payment plan
-            if (msgs.HasNoErrors() && purchaseObject.PaymentPlan.IsEmpty())
+            if (msgs.HasNoErrors() && checkoutObject.PaymentPlan.IsEmpty())
             {
                 // if stripe token then don't send customer id
                 string customerId = null;
 
-                if (purchaseObject.SavePaymentInfo || purchaseObject.SourceId.IsNotEmpty())
+                if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
                     customerId = fromAccount.StripeCustomerId;
 
                 var charge = Billing.StripeHelper.CreateCharge(
                     fromCustomerId: customerId,
-                    destinationUserId: toAccount.StripeUserId,
-                    tokenOrSourceId: purchaseObject.SourceId.IfEmpty(purchaseObject.StripeToken),
-                    totalAmount: purchaseObject.TotalCostToPurchase,
-                    platformFee: toAccount.CalculatePlatformFeeAmount(purchaseObject.TotalCostToPurchase, msgs, dc),
-                    description: $"{purchaseObject.ParticipationObject.Name} registration",
+                    destinationAccountId: toAccount.StripeUserId,
+                    tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
+                    totalAmount: checkoutObject.TotalCostToPurchase,
+                    platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.TotalCostToPurchase, msgs, dc),
+                    description: $"{checkoutObject.ParticipationObject.Name} registration",
                     statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
                     msgs: msgs
                     );
@@ -1570,28 +1570,28 @@ namespace AfterSchoolLibrary
                 // tracks the whole purchase, could contain multiple activities/activity groups
                 var purchase = new Purchase()
                 {
-                    AmountPaid = purchaseObject.TotalCostToPurchase,
-                    CouponId = purchaseObject.Coupon?.ID,
+                    AmountPaid = checkoutObject.TotalCostToPurchase,
+                    CouponId = checkoutObject.Coupon?.ID,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
-                    NumberOfSeats = purchaseObject.NumberOfSeats,
+                    NumberOfSeats = checkoutObject.NumberOfSeats,
                     PurchaserAccountId = fromAccount.ID,
-                    RegistrantId = purchaseObject.Registrant.ID,
-                    RegistrationId = purchaseObject.Registration.ID,
-                    StripeToken = purchaseObject.StripeToken,
-                    StripeSourceId = purchaseObject.SourceId
+                    RegistrantId = checkoutObject.Registrant.ID,
+                    RegistrationId = checkoutObject.Registration.ID,
+                    StripeToken = checkoutObject.StripeToken,
+                    StripeSourceId = checkoutObject.SourceId
                 };
                 msgs.AddRange(purchase.Save(dc));
 
                 // charge successful so I need to create a transaction
                 var transaction = new Transaction()
                 {
-                    Amount = purchaseObject.TotalCostToPurchase,
+                    Amount = checkoutObject.TotalCostToPurchase,
                     BillerAccountId = toAccount.ID.Value,
-                    Description = $"{purchaseObject.ParticipationObject.Name} registration",
+                    Description = $"{checkoutObject.ParticipationObject.Name} registration",
                     PayerAccountId = fromAccount.ID,
                     PaymentTypeId = PaymentType.CreditCard,
                     PurchaseId = purchase.ID,
@@ -1603,13 +1603,13 @@ namespace AfterSchoolLibrary
                 msgs.AddRange(transaction.Save(dc));
 
                 // need to track a payment for each activity/activitygroup
-                if (purchaseObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
+                if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
                 {
                     // TODO: How much does a user pay for an activity if a coupon is used to purchase multiple activities at once?
-                    var activity = (Activity)purchaseObject.ParticipationObject.Object;
+                    var activity = (Activity)checkoutObject.ParticipationObject.Object;
                     var payment = activity.AddPayment(
-                        amount: activity.CostPerRegistrant.Value * purchaseObject.NumberOfSeats, 
-                        registrant: purchaseObject.Registration.GetRegistrant(msgs, dc), 
+                        amount: activity.CostPerRegistrant.Value * checkoutObject.NumberOfSeats, 
+                        registrant: checkoutObject.Registration.GetRegistrant(msgs, dc), 
                         loggedInUser: loggedInUser, 
                         msgs: msgs, 
                         dc: dc);
@@ -1617,16 +1617,23 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            // mark as completed
+            checkoutObject.Registration.RegistrationCompletionStatusId = RegistrationCompletionStatus.Completed;
+            checkoutObject.Registration.LastModifiedDate = DateTime.UtcNow;
+            checkoutObject.Registration.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(checkoutObject.Registration.Save(dc));
+
+
             // TODO: Allow user to register for multiple activities in one session at once
 
             // add them to the activity
-            if (purchaseObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
+            if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
             {
-                var activity = ((Activity)purchaseObject.ParticipationObject.Object);
+                var activity = ((Activity)checkoutObject.ParticipationObject.Object);
                 activity.ProcessRegistration(
-                    purchaseObject: purchaseObject,
+                    purchaseObject: checkoutObject,
                     loggedInUser: loggedInUser,
                     msgs: msgs,
                     dc: dc);
@@ -1636,7 +1643,7 @@ namespace AfterSchoolLibrary
 
         }
 
-        public static void ProcessRegistrationWithPayment(this Account fromAccount, Account toAccount, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessRegistrationWithPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
 
             Database.ExecuteTransaction
@@ -1644,22 +1651,22 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
 
-                    fromAccount.ProcessRegistrationWithoutPayment(toAccount, purchaseObject, loggedInUser, msgs, dc);                    
+                    fromAccount.ProcessRegistrationWithoutPayment(toAccount, checkoutObject, loggedInUser, amsgs, adc);                    
 
                     // process payment by to account, includes registration fee and product purchases
-                    toAccount.ProcessRegistrationFeeAndProducts(fromAccount, purchaseObject, loggedInUser, msgs, dc);
+                    toAccount.ProcessRegistrationFeeAndProducts(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the Registration Fee
 
                     // TODO: Decide if master account registrant should be added to plans or the account copy
                     // get the registrant record that was created just for the account
-                    var accountRegistrant = purchaseObject.Registration.GetRegistrant(msgs, dc);
+                    var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
                     // if they have a subscription plan
-                    if (purchaseObject.SubscriptionPlan.IsNotEmpty())
+                    if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                     {
                         accountRegistrant.StartSubscriptionPlan(
-                            subscriptionPlan: purchaseObject.SubscriptionPlan,
+                            subscriptionPlan: checkoutObject.SubscriptionPlan,
                             startDateTime: DateTime.UtcNow,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
@@ -1668,15 +1675,16 @@ namespace AfterSchoolLibrary
                     }
 
                     // if they have a payment plan
-                    if (purchaseObject.PaymentPlan.IsNotEmpty())
+                    if (checkoutObject.PaymentPlan.IsNotEmpty())
                     {
-                        accountRegistrant.StartPaymentPlan(
-                            paymentPlan: purchaseObject.PaymentPlan,
+                        var rpp = accountRegistrant.StartPaymentPlan(
+                            fromAccount: fromAccount,
+                            toAccount: toAccount,
+                            checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
-                            dc: adc
-                            );
+                            dc: adc);
                     }
 
                 },

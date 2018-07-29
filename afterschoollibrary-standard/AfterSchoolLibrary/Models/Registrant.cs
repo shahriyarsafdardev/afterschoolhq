@@ -485,7 +485,7 @@ namespace AfterSchoolLibrary
             return reg;
         }
 
-        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, string esignature, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -495,6 +495,7 @@ namespace AfterSchoolLibrary
                 RegistrantId = this.ID,
                 ActivityGroupId = activityGroupId,
                 ESignature = esignature,
+                RegistrationCompletionStatusId = completionStatus,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUserId,
@@ -503,7 +504,8 @@ namespace AfterSchoolLibrary
             };
             msgs.AddRange(reg.Save(dc));
 
-            msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
+            if (completionStatus == RegistrationCompletionStatus.Completed)
+                msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
 
             return reg;
         }
