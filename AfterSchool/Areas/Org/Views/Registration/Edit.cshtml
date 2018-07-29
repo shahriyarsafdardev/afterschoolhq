@@ -75,7 +75,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach (var answer in answers.Where(x => x.FormQuestionFormQuestionGroupId == group.ID).OrderBy(x => x.FormQuestionDisplayOrder))
+                                                @foreach (var answer in answers.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == group.QuestionGroupDataTypeId).OrderBy(x => x.FormQuestionDisplayOrder))
                                                 {
                                                     <tr>
                                                         <td valign="top" width="33%" class="text-right">@answer.FormQuestionText</td>
