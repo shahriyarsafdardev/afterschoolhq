@@ -495,7 +495,7 @@ namespace AfterSchoolLibrary
                 RegistrantId = this.ID,
                 ActivityGroupId = activityGroupId,
                 ESignature = esignature,
-                RegistrationCompletionStatusId = completionStatus,
+                CompletionStatusId = completionStatus,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUserId,

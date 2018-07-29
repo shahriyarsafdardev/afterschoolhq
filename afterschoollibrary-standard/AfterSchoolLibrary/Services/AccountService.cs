@@ -1031,25 +1031,39 @@ namespace AfterSchoolLibrary
         public static List<Registration> GetRegistrations(this Account account, DatabaseConnection dc = null)
         {
             return Registration.LoadByAccountId(account.ID.Value, dc: dc)
-                .Where(x => x.RegistrationCompletionStatusId == RegistrationCompletionStatus.Completed)
+                .Where(x => x.CompletionStatusId == RegistrationCompletionStatus.Completed)
                 .ToList();
         }
 
         public static List<Registration> GetCurrentRegistrations(this Account account, DatabaseConnection dc = null)
         {
             return Registration.LoadCurrentByAccountId(account.ID.Value, dc: dc)
-                .Where(x=> x.RegistrationCompletionStatusId == RegistrationCompletionStatus.Completed)
+                .Where(x=> x.CompletionStatusId == RegistrationCompletionStatus.Completed)
                 .ToList();
         }
 
-        public static List<Registration> GetRegistrations(this Account account, int start, int length, DatabaseConnection dc = null)
+        public static List<Registration> GetRegistrations(this Account account, int start, int length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadByAccountId(account.ID.Value, start, length, dc: dc);
+            return Registration.Load(
+                new Hashtable() {
+                    { "AccountId", account.ID.Value },
+                    { "CompletionStatusId", RegistrationCompletionStatus.Completed }
+                }, 
+                start, 
+                length, 
+                msgs, 
+                dc);
         }
 
-        public static int GetRegistrationCount(this Account account, DatabaseConnection dc = null)
+        public static int GetRegistrationCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, dc: dc);
+            return Registration.GetCount(
+                new Hashtable() {
+                    { "AccountId", account.ID.Value },
+                    { "CompletionStatusId", RegistrationCompletionStatus.Completed }
+                }, 
+                msgs: msgs,
+                dc: dc);
         }
 
         public static List<Registration> SearchRegistrations(this Account account, string searchText, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, int? start, int? length, DatabaseConnection dc = null)
@@ -1572,39 +1586,22 @@ namespace AfterSchoolLibrary
             if (msgs.HasNoErrors())
             {
                 // tracks the whole purchase, could contain multiple activities/activity groups
-                var purchase = new Purchase()
-                {
-                    AmountPaid = checkoutObject.TotalCostToPurchase,
-                    CouponId = checkoutObject.Coupon?.ID,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    LastModifiedDate = DateTime.UtcNow,
-                    LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
-                    NumberOfSeats = checkoutObject.NumberOfSeats,
-                    PurchaserAccountId = fromAccount.ID,
-                    RegistrantId = checkoutObject.Registrant.ID,
-                    RegistrationId = checkoutObject.Registration.ID,
-                    StripeToken = checkoutObject.StripeToken,
-                    StripeSourceId = checkoutObject.SourceId
-                };
-                msgs.AddRange(purchase.Save(dc));
+                var purchase = PurchaseService.CreateNew(
+                    purchasingAccount: fromAccount,
+                    checkoutObject: checkoutObject,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
 
                 // charge successful so I need to create a transaction
-                var transaction = new Transaction()
-                {
-                    Amount = checkoutObject.TotalCostToPurchase,
-                    BillerAccountId = toAccount.ID.Value,
-                    Description = $"{checkoutObject.ParticipationObject.Name} registration",
-                    PayerAccountId = fromAccount.ID,
-                    PaymentTypeId = PaymentType.CreditCard,
-                    PurchaseId = purchase.ID,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                    LastModifiedDate = DateTime.UtcNow,
-                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                };
-                msgs.AddRange(transaction.Save(dc));
+                var transaction = TransactionService.CreateNew(
+                    fromAccount,
+                    toAccount,
+                    checkoutObject,
+                    purchase.ID,
+                    loggedInUser,
+                    msgs,
+                    dc);
 
                 // need to track a payment for each activity/activitygroup
                 if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
@@ -1624,11 +1621,7 @@ namespace AfterSchoolLibrary
         public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // mark as completed
-            checkoutObject.Registration.RegistrationCompletionStatusId = RegistrationCompletionStatus.Completed;
-            checkoutObject.Registration.LastModifiedDate = DateTime.UtcNow;
-            checkoutObject.Registration.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-            msgs.AddRange(checkoutObject.Registration.Save(dc));
-
+            msgs.AddRange(checkoutObject.Registration.FinalizeRegistration(loggedInUser, dc));
 
             // TODO: Allow user to register for multiple activities in one session at once
 

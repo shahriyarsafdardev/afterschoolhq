@@ -883,7 +883,7 @@ property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
 property: ESignature, string, NVarChar(50)
-property: RegistrationCompletionStatusId, RegistrationCompletionStatus, Int
+property: CompletionStatusId, RegistrationCompletionStatus, Int
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>

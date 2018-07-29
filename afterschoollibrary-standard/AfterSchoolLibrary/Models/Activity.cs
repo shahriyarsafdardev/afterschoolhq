@@ -1614,7 +1614,7 @@ namespace AfterSchoolLibrary
                         }
 
                         //setup SubscriptionPlan
-                        if (amsgs.HasNoErrors())
+                        if (amsgs.HasNoErrors() && hassubscriptionplan != null && hassubscriptionplan.ToString().IsBoolean())
                         {
                             amsgs.AddRange(activity.SetupSubscriptionPlan(
                                 account,
@@ -1628,7 +1628,7 @@ namespace AfterSchoolLibrary
                         }
 
                         //setup PaymentPlan
-                        if (amsgs.HasNoErrors())
+                        if (amsgs.HasNoErrors() && haspaymentplan != null && haspaymentplan.ToString().IsBoolean())
                         {
                             amsgs.AddRange(activity.SetupPaymentPlan(
                                 account,
@@ -1695,8 +1695,8 @@ namespace AfterSchoolLibrary
             // if the subscription plan option(UI) is activated
             if (hassubscriptionplan.ToBoolean())
             {
-                 // if there is no subscription plan active in the DB
-                 // let's create a new one
+                // if there is no subscription plan active in the DB
+                // let's create a new one
                 if (!activity.HasSubscriptionPlan(msgs, dc))
                 {
                     var subscriptionPlan = Services.SubscriptionPlanService.CreateNew(
@@ -1778,7 +1778,7 @@ namespace AfterSchoolLibrary
                         dc);
                 }
                 else
-                {                   
+                {
                     var paymentPlan = activity.GetPaymentPlan(msgs, dc);
 
                     // if the plan is purchased and begin edited

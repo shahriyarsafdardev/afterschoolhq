@@ -145,23 +145,12 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             // need to create a purchase record first
-            var purchase = new Purchase()
-            {
-                AmountPaid = checkoutObject.TotalCostToPurchase,
-                CouponId = checkoutObject.Coupon?.ID,
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
-                LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
-                NumberOfSeats = checkoutObject.NumberOfSeats,
-                PurchaserAccountId = fromAccount.ID,
-                RegistrantId = checkoutObject.Registrant.ID,
-                RegistrationId = checkoutObject.Registration.ID,
-                StripeToken = checkoutObject.StripeToken,
-                StripeSourceId = checkoutObject.SourceId
-            };
-            msgs.AddRange(purchase.Save(dc));
+            var purchase = PurchaseService.CreateNew(
+                purchasingAccount: fromAccount,
+                checkoutObject: checkoutObject,
+                loggedInUser: loggedInUser,
+                msgs: msgs,
+                dc: dc);
 
             var rpp = RegistrantPaymentPlanService.CreateNew(
                 registrant,

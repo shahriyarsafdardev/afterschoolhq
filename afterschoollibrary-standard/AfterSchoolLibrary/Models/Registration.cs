@@ -37,7 +37,7 @@ namespace AfterSchoolLibrary
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public int? FirstRegistrationId { get { return (int?)MDV["FirstRegistrationId"].Value; } set { MDV["FirstRegistrationId"].Value = value; } }
 		public string ESignature { get { return (string)MDV["ESignature"].Value; } set { MDV["ESignature"].Value = value; } }
-		public RegistrationCompletionStatus RegistrationCompletionStatusId { get { return (RegistrationCompletionStatus)MDV["RegistrationCompletionStatusId"].Value; } set { MDV["RegistrationCompletionStatusId"].Value = value; } }
+		public RegistrationCompletionStatus CompletionStatusId { get { return (RegistrationCompletionStatus)MDV["CompletionStatusId"].Value; } set { MDV["CompletionStatusId"].Value = value; } }
 		public string RegistrantEmail { get { return (string)MDV["RegistrantEmail"].Value; } }
 		public string RegistrantFirstName { get { return (string)MDV["RegistrantFirstName"].Value; } }
 		public string RegistrantLastName { get { return (string)MDV["RegistrantLastName"].Value; } }
@@ -53,7 +53,7 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
 			this.PaymentTypeId = PaymentType.NotSet;
-			this.RegistrationCompletionStatusId = RegistrationCompletionStatus.NotSet;
+			this.CompletionStatusId = RegistrationCompletionStatus.NotSet;
 			
         }
 
@@ -77,7 +77,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FirstRegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar, 50);
-				_dp.Add(className, "RegistrationCompletionStatusId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -216,7 +216,7 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["RegistrationCompletionStatusId"]);
+			dps.Add(ObjectMap["CompletionStatusId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -481,7 +481,7 @@ namespace AfterSchoolLibrary
             var dq = DatabaseQuery;
             dq.UseParameterizedQuery = false;
 
-            var sql = string.Format(@"
+            var sql = $@"
                         select
 	                        *
                         from
@@ -499,17 +499,14 @@ namespace AfterSchoolLibrary
 			                        activityinstance ai2 on a2.activityscheduleid = ai2.activityscheduleid
 		                        where
 			                        ai2.StartDateTime >= getdate() and
-                                    r2.AccountId = {0}
+                                    r2.AccountId = {this.AccountId}
 	                        ) and
 	                        (
-		                        r.FirstRegistrationId = {1} or
-		                        r.ID = {1} or
-		                        r.FirstRegistrationId = {2} or
-		                        r.ID = {2}
-	                        )", 
-                            this.AccountId, 
-                            this.FirstRegistrationId.IfEmpty(0), 
-                            this.ID);
+		                        r.FirstRegistrationId = {this.FirstRegistrationId.IfEmpty(0)} or
+		                        r.ID = {this.FirstRegistrationId.IfEmpty(0)} or
+		                        r.FirstRegistrationId = {this.ID} or
+		                        r.ID = {this.ID}
+	                        ) and r.CompletionStatusId = {(int)RegistrationCompletionStatus.Completed}";
 
             var registrations = dq.ExecuteSelect(sql).AsEnumerable().ToList().ConvertAll(LoadObject);
 
@@ -805,7 +802,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["RegistrationCompletionStatus"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 
             // aggregate related registrations
@@ -1561,10 +1558,11 @@ namespace AfterSchoolLibrary
 
         public static int TotalCurrentRegistrationsCount(int accountId, DatabaseConnection dc = null)
         {
-            var sql = string.Format(@"select count(id) 
+            var sql = $@"select count(id) 
                         from Registration r
                         where 
-                        accountId = {0} and
+                        accountId = {accountId} and
+                        completionStatusId = {(int)RegistrationCompletionStatus.Completed} and
                         (
                             select count(ra.id) 
                             from RegistrationActivity ra
@@ -1575,7 +1573,7 @@ namespace AfterSchoolLibrary
                                 a.IsArchived = 0 and
                                 a.IsDeleted = 0 and
                                 (a.ActivityGroupId is null or ag.IsArchived = 0)
-                        ) > 0", accountId);
+                        ) > 0";
 
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1583,13 +1581,9 @@ namespace AfterSchoolLibrary
             dq.UseDistinct = false;
             DataTable dt = dq.ExecuteSelect(sql);
             if (dt.Rows.Any())
-            {
                 return dq.ExecuteSelect(sql).Rows[0][0].ToString().ToInteger();
-            }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
         public static List<Registration> LoadCurrentByAccountId(int AccountId, DatabaseConnection dc = null)
@@ -1748,6 +1742,20 @@ namespace AfterSchoolLibrary
                     msgs.AddRange(laterReg.FindAndSetFirstRegistration(laterReg.RegistrantFirstName, laterReg.RegistrantLastName, laterReg.RegistrantEmail, dc: dc));
                 }
             }
+
+            return msgs;
+        }
+
+        public SystemMessages FinalizeRegistration(WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            this.CompletionStatusId = RegistrationCompletionStatus.Completed;
+            this.LastModifiedDate = DateTime.UtcNow;
+            this.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(this.Save(dc));
+
+            msgs.AddRange(this.FindAndSetFirstRegistration(this.RegistrantFirstName, this.RegistrantLastName, this.RegistrantEmail, dc));
 
             return msgs;
         }
