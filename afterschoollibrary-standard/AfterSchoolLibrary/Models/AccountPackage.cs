@@ -297,7 +297,7 @@ namespace AfterSchoolLibrary
 
             if(this.StripeSubscriptionId.IsNotEmpty())
             {
-                msgs.AddRange(Billing.StripeHelper.CancelSubscription(this.StripeSubscriptionId));
+                msgs.AddRange(Billing.StripeHelper.CancelSubscription(this.StripeSubscriptionId, null));
             }
 
             return msgs;
@@ -321,24 +321,20 @@ namespace AfterSchoolLibrary
                 // first time, may have payment info
                 if (this.StripeSubscriptionId.IsEmpty())
                 {
-                    var subscription = Billing.StripeHelper.CreateSubscription(stripeCustomerId, this.GetPackage(msgs, dc).GetStripePlanId(this.BillingPeriodTypeId), this.TrialEndDate, msgs);
+                    var subscription = Billing.StripeHelper.CreateSubscription(
+                        customerId: stripeCustomerId, 
+                        planId: this.GetPackage(msgs, dc).GetStripePlanId(this.BillingPeriodTypeId), 
+                        platformFeePercent: null,
+                        trialEndDate: this.TrialEndDate, 
+                        stripeAccountId: null,
+                        msgs: msgs);
 
                     if (subscription.IsNotEmpty())
                     {
                         this.StripeSubscriptionId = subscription.Id;
                         msgs.AddRange(this.Save(dc: dc));
                     }
-
-                    //var options = new Stripe.StripeSubscriptionCreateOptions();
-
-                    //if (this.TrialEndDate.HasValue)
-                    //{
-                    //    options.TrialEnd = this.TrialEndDate.Value;
-                    //}
-
-                    //var subscription = service.Create(stripeCustomerId, this.ToPackage().GetStripePlanId(this.BillingPeriodTypeId), options);
-                    //this.StripeSubscriptionId = subscription.Id;
-                    //msgs.AddRange(this.Save(dc: dc));
+                    
                 }
                 else
                 {
@@ -366,40 +362,15 @@ namespace AfterSchoolLibrary
                         }
                     }
                     
-                    msgs.AddRange(Billing.StripeHelper.UpdateSubscription(
+                    Billing.StripeHelper.UpdateSubscription(
                         this.StripeSubscriptionId,
                         newStripePlanId,
                         billingCycleAnchorNow,
                         billingCycleAnchorUnchanged,
                         endTrialNow,
-                        prorate
-                        ));
-
-                    //var options = new Stripe.StripeSubscriptionUpdateOptions();
-                    //if (newStripePlanId.IsNotEmpty())
-                    //{
-                    //    options.PlanId = newStripePlanId;
-                    //}
-                    //if (upgradingFromTrial)
-                    //{
-                    //    options.BillingCycleAnchorNow = true;
-                    //    options.EndTrialNow = true;
-                    //}
-                    //else
-                    //{
-                    //    if (this.BillingPeriodTypeId == BillingPeriodType.Year)
-                    //    {
-                    //        options.Prorate = false;
-                    //        options.BillingCycleAnchorNow = true;
-                    //    }
-                    //    else
-                    //    {
-                    //        options.Prorate = true;
-                    //        options.BillingCycleAnchorUnchanged = true;
-                    //    }
-                    //}
-
-                    //var subscription = service.Update(stripeCustomerId, this.StripeSubscriptionId, options);
+                        prorate,
+                        null,
+                        msgs);                   
                 }
             }
 

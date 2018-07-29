@@ -988,7 +988,7 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? PaymentActionGet(id);
         }
 
-        private ActionResult PaymentActionPost(string id, string stripetoken, string sourceId, string savepaymentinfo)
+        private ActionResult PaymentActionPost(string id, string stripetoken, string sourceId, string savepaymentinfo, string paymentoption)
         {
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
@@ -1000,6 +1000,11 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
+                PaymentPlan paymentPlan = null;
+
+                if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
+                    paymentPlan = PaymentPlan.Load(paymentoption.ToInteger(), msgs);
+
                 SessionVariables.CurrentAccount.ProcessRegistrationWithPayment(
                     toAccount: participationObject.OwnerAccount,
                     purchaseObject: new CheckoutObject()
@@ -1007,7 +1012,7 @@ namespace AfterSchool.Controllers
                         Coupon = null,
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
-                        PaymentPlan = null,
+                        PaymentPlan = paymentPlan,
                         Products = new List<Product>(),
                         Purchaser = SessionVariables.CurrentAccount,
                         Registration = registration,
@@ -1028,9 +1033,9 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Payment(string id, string source, string stripetoken, string savepaymentinfo)
+        public ActionResult Payment(string id, string source, string stripetoken, string savepaymentinfo, string paymentoption)
         {
-            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo);
+            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo, paymentoption);
         }
 
         #endregion

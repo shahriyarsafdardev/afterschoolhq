@@ -214,7 +214,7 @@ namespace AfterSchoolLibrary
 
         public bool IsPurchased(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantSubscriptionPlan.LoadBySubscriptionPlanId(this.ID.Value, msgs, dc).Any();
+            return RegistrantSubscriptionPlan.GetCount(new Hashtable() { { "ID", this.ID.Value } }, msgs, dc) > 0;
         }
 
         public static List<SubscriptionPlan> LoadActiveByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -227,12 +227,12 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public void Deactivate(int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages Deactivate(int loggedInUserId, DatabaseConnection dc = null)
         {
             this.IsActive = false;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
-            this.Save(dc);
+            return this.Save(dc);
         }
 
        private SubscriptionPlan CopyFields()

@@ -12,10 +12,6 @@
 @if (Model.RegistrationPeriod.IsOpen())
 {
     <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
-        <span>
-            @ParticipationObjectUI.PrintRegistrationFee(Model)
-        </span>
-        &bull;
         @Model.RegistrationMode.ToString() &raquo;
     </a>
 }
@@ -35,6 +31,14 @@ else if (Model.RegistrationPeriod.WillOpen())
 else if (Model.RegistrationPeriod.IsClosed())
 {
     <button type="button" class="btn btn-register">
-        Registration is now closed
+        @if (condensed)
+        {
+            @:Registration Closed
+        }
+        else
+        {
+            @:Registration is now closed
+        }
+        
     </button>
 }

@@ -200,6 +200,15 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<ActivityInstance> LoadByActivityScheduleIdByInstanceTypeId(int ActivityScheduleId, InstanceType InstanceTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityScheduleId"], ActivityScheduleId);
+			dq.Criterias.Add(ObjectMap["InstanceTypeId"], InstanceTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion

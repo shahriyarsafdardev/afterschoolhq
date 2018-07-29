@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary
 		/// </summary>
 		public decimal? CostPerPeriod { get { return (decimal?)MDV["CostPerPeriod"].Value; } set { MDV["CostPerPeriod"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-		public string StripeSubscriptionId { get { return (string)MDV["StripeSubscriptionId"].Value; } set { MDV["StripeSubscriptionId"].Value = value; } }
+		public string StripePlanId { get { return (string)MDV["StripePlanId"].Value; } set { MDV["StripePlanId"].Value = value; } }
 		
 
         public PaymentPlan()
@@ -67,7 +67,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "CostPerPeriod", System.Data.SqlDbType.Money);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripePlanId", System.Data.SqlDbType.NVarChar, 50);
 				
                 return _dp;
             }
@@ -180,7 +180,7 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripeSubscriptionId"]);
+			dps.Add(ObjectMap["StripePlanId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -210,11 +210,16 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        public bool IsPurchased(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantPaymentPlan.GetCount(new Hashtable() { { "ID", this.ID.Value } }, msgs, dc) > 0;
+        }
+
+        #region "UserDefined"
         public static List<PaymentPlan> LoadActiveByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -225,13 +230,85 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public void Deactivate(int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages Deactivate(int loggedInUserId, DatabaseConnection dc = null)
         {
             this.IsActive = false;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
-            this.Save(dc);
+            return this.SaveWithStripe(dc);
         }
+
+        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.Load(this.ParticipationObjectId.Value, msgs, dc);
+        }
+
+        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(this.PlanOwnerAccountId.Value, msgs, dc);
+        }
+
+        public string GetNickName(Activity activity)
+        {
+            return $"{activity.Name} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
+        }
+
+        public SystemMessages SaveWithStripe(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            msgs.AddRange(this.Save(dc));
+
+            if (msgs.HasErrors())
+                return msgs;
+
+            var activity = this.GetActivity(msgs, dc);
+            var account = activity.GetAccount(msgs, dc);
+
+            // do stripe
+            Stripe.StripeProduct product = Billing.StripeHelper.GetProduct(activity.Uid.ToString(), account.StripeUserId, msgs);
+
+            if (product.IsEmpty())
+            {
+                product = Billing.StripeHelper.CreateProduct(
+                    activity.Uid.ToString(),
+                    activity.Name,
+                    activity.UniqueName,
+                    this.IsActive,
+                    account.StripeUserId,
+                    msgs);
+            }
+
+            if (msgs.HasErrors())
+                return msgs;
+
+            Stripe.StripePlan plan = null;
+
+            if (this.StripePlanId.IsNotEmpty())
+            {
+                plan = Billing.StripeHelper.GetPlan(this.StripePlanId, account.StripeUserId, msgs);
+                Billing.StripeHelper.UpdatePlan(this.StripePlanId, plan.Nickname, plan.Active, account.StripeUserId, msgs);
+            }
+            else
+            {
+                plan = Billing.StripeHelper.CreatePlan(
+                    product,
+                    null,
+                    this.CostPerPeriod.Value,
+                    this.BillingPeriodTypeId,
+                    this.GetNickName(activity),
+                    account.StripeUserId,
+                    msgs
+                    );
+            }
+
+            // update stripe plan id
+            this.StripePlanId = plan.Id;
+            msgs.AddRange(this.Save(dc));
+
+            return msgs;
+        }
+
         #endregion
     }
 }

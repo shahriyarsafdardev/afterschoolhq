@@ -722,11 +722,11 @@ namespace AfterSchoolLibrary
 
             if (customer.IsNotEmpty())
             {
-                msgs.AddRange(Billing.StripeHelper.UpdateCustomer(customer.Id, account.Name, account.Email));
+                customer = Billing.StripeHelper.UpdateCustomer(customer.Id, account.Name, account.Email, null, msgs);
             }
             else
             {
-                customer = Billing.StripeHelper.CreateCustomer(account.Name, account.Email, msgs);
+                customer = Billing.StripeHelper.CreateCustomer(account.Name, account.Email, null, msgs);
 
                 if (customer.IsNotEmpty())
                 {
@@ -900,11 +900,12 @@ namespace AfterSchoolLibrary
 
             if (!account.StripeCustomerId.IsEmpty())
             {
-                customer = Billing.StripeHelper.GetCustomer(account.StripeCustomerId, msgs);
+                customer = Billing.StripeHelper.GetCustomer(account.StripeCustomerId, null, msgs);
             }
             return customer;
         }
 
+        [Obsolete]
         public static SystemMessages SetStripeDefaultCard(this Account account, string cardId)
         {
             var msgs = new SystemMessages();
@@ -912,26 +913,13 @@ namespace AfterSchoolLibrary
 
             if (customer.IsNotEmpty())
             {
-                msgs.AddRange(Billing.StripeHelper.UpdateCustomerDefaultCard(customer.Id, cardId));
+                msgs.AddRange(Billing.StripeHelper.UpdateCustomerDefaultCard(customer.Id, null, cardId));
             }
             else
             {
                 msgs.Add("Invalid stripe customer", MessageType.Error);
             }
-
-            //var options = new Stripe.StripeCustomerUpdateOptions();
-            //options.DefaultSource = cardId;
-
-            //try
-            //{
-            //    Stripe.StripeCustomerService service = new Stripe.StripeCustomerService(StripeHelper.SecretKey);
-            //    service.Update(customer.Id, options);
-            //}
-            //catch (Stripe.StripeException ex)
-            //{
-            //    msgs.Add("Error retrieving update default payment information", MessageType.Error, ex);
-            //}
-
+            
             return msgs;
         }
 
@@ -1521,12 +1509,17 @@ namespace AfterSchoolLibrary
             return registrant;
         }
 
-        private static decimal CalculatePlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
+        public static decimal CalculatePlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
             var flatFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
 
             return (totalAmountToCharge * percentageFee.ToDecimal()) + flatFee.ToDecimal();
+        }
+
+        public static decimal GetPlatformFeePercent(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue().ToDecimal();
         }
 
         private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -1543,13 +1536,14 @@ namespace AfterSchoolLibrary
             if (msgs.HasNoErrors() && purchaseObject.SavePaymentInfo)
             {
                 var source = Billing.StripeHelper.CreateSource(purchaseObject.StripeToken, msgs);
-                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id));
+                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
                 purchaseObject.SourceId = source.Id;
             }
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
-            if (msgs.HasNoErrors())
+            // don't process charge if the user is using a payment plan
+            if (msgs.HasNoErrors() && purchaseObject.PaymentPlan.IsEmpty())
             {
                 // if stripe token then don't send customer id
                 string customerId = null;

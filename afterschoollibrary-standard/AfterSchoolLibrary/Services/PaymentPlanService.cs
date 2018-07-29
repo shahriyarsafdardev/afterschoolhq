@@ -40,11 +40,8 @@ namespace AfterSchoolLibrary.Services
                 TotalPeriods = totalPeriods
             };
 
-            msgs.AddRange(plan.Save(dc));
-
-            // TODO: Integrate Stripe
+            msgs.AddRange(plan.SaveWithStripe(dc));
             
-
             return plan;
         }
     }

@@ -194,11 +194,51 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
+
+        public PaymentPlan GetPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return PaymentPlan.Load(this.PaymentPlanId.Value, msgs, dc);
+        }
+
+        public Registrant GetRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.Load(this.RegistrantId.Value, msgs, dc);
+        }
+
+        public SystemMessages SaveWithStripe(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            msgs.AddRange(this.Save(dc));
+
+            // stripe stuff
+            var plan = this.GetPaymentPlan(msgs, dc);
+            var account = plan.GetAccount(msgs, dc);
+            var registrant = this.GetRegistrant(msgs, dc);
+
+            // what happens if the same registrant gets another payment plan?
+            // Create a new customer? For now YES, it doesn't really matter I don't think
+            var customer = Billing.StripeHelper.CreateCustomer(
+                description: registrant.DisplayName,
+                email: registrant.Email,
+                stripeAccountId: account.StripeUserId,
+                msgs: msgs);
+
+            var subscription = Billing.StripeHelper.CreateSubscription(
+                customerId: customer.Id,
+                planId: plan.StripePlanId,
+                platformFeePercent: account.GetPlatformFeePercent(msgs, dc),
+                trialEndDate: null,
+                stripeAccountId: account.StripeUserId,
+                msgs: msgs);
+
+            return msgs;
+        }
 
         #endregion
     }

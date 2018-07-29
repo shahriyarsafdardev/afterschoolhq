@@ -23,9 +23,7 @@ namespace AfterSchoolLibrary.Services
                 StartDate = startDate
             };
 
-            msgs.AddRange(rpp.Save(dc));
-
-            // TODO: Integrate Stripe
+            msgs.AddRange(rpp.SaveWithStripe(dc));
 
             return rpp;
         }

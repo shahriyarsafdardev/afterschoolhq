@@ -1216,7 +1216,7 @@ property: TotalPeriods, int?, Int, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: CostPerPeriod, decimal?, Money, required
 property: IsActive, bool, Bit
-property: StripeSubscriptionId, string, NVarChar(50)
+property: StripePlanId, string, NVarChar(50)
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
