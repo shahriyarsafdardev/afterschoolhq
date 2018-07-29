@@ -1030,12 +1030,16 @@ namespace AfterSchoolLibrary
 
         public static List<Registration> GetRegistrations(this Account account, DatabaseConnection dc = null)
         {
-            return Registration.LoadByAccountId(account.ID.Value, dc: dc);
+            return Registration.LoadByAccountId(account.ID.Value, dc: dc)
+                .Where(x => x.RegistrationCompletionStatusId == RegistrationCompletionStatus.Completed)
+                .ToList();
         }
 
         public static List<Registration> GetCurrentRegistrations(this Account account, DatabaseConnection dc = null)
         {
-            return Registration.LoadCurrentByAccountId(account.ID.Value, dc: dc);
+            return Registration.LoadCurrentByAccountId(account.ID.Value, dc: dc)
+                .Where(x=> x.RegistrationCompletionStatusId == RegistrationCompletionStatus.Completed)
+                .ToList();
         }
 
         public static List<Registration> GetRegistrations(this Account account, int start, int length, DatabaseConnection dc = null)

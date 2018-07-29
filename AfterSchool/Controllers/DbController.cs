@@ -19,8 +19,6 @@ namespace AfterSchool.Controllers
             if (Request.UserHostAddress == "::1")
             {
                 var msgs = new SystemMessages();
-                msgs.Add(Request.UserHostAddress, MessageType.Error);
-                msgs.Add(Request.UserHostName, MessageType.Error);
 
                 msgs.AddRange(AfterSchoolLibrary.Utilities.InitDatabase("darye@afterschool.com", "help students learn", "317-316-0596", false, "AfterSchool HQ"));
 
