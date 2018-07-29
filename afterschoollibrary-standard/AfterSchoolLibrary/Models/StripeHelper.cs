@@ -795,7 +795,7 @@ namespace AfterSchoolLibrary.Billing
                 CustomerId = customerId,
                 Billing = StripeBilling.ChargeAutomatically,
                 TrialEnd = trialEndDate,
-                ApplicationFeePercent = platformFeePercent,
+                ApplicationFeePercent = platformFeePercent * 100, // convert to integer
                 Source = sourceId
             };
 

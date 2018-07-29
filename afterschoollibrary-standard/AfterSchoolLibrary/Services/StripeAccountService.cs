@@ -95,6 +95,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ParseAndUpdateStripeCustomAccount(this StripeAccount stripeAccount, string json, Stripe.StripeFileUpload stripeFileUpload, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            var startingStatus = stripeAccount.VerificationStatusId;
             var results = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(json);
             var fieldsRequired = results.verification.fields_needed;
             var verificationDueBy = results.verification.due_by;
@@ -136,8 +137,6 @@ namespace AfterSchoolLibrary.Services
                 stripeAccount.ChargesEnabled = ((string)chargesEnabled).ToBoolean();
                 
 
-            if (verificationStatus != null)
-                stripeAccount.VerificationStatusId = ((string)verificationStatus).ParseEnum<StripeVerificationStatus>();
 
             if (detailsCode != null)
             {
@@ -148,6 +147,9 @@ namespace AfterSchoolLibrary.Services
                                                     .ParseEnum<StripeVerificationFailedCode>();
             }
 
+            if (verificationStatus != null)
+                stripeAccount.VerificationStatusId = ((string)verificationStatus).ParseEnum<StripeVerificationStatus>();
+
             if (stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
                 msgs.Add("Your account is now verified", MessageType.Notice);
 
@@ -155,6 +157,12 @@ namespace AfterSchoolLibrary.Services
                 stripeAccount.DocumentFileId = stripeFileUpload.Id;
 
             msgs.AddRange(stripeAccount.Save(dc));
+
+            // send verification email
+            if (msgs.HasNoErrors() && startingStatus != stripeAccount.VerificationStatusId && stripeAccount.IsVerified)
+            {
+                
+            }
         }
 
         public static Account GetAccount(this StripeAccount stripeAccount, SystemMessages msgs = null, DatabaseConnection dc = null)

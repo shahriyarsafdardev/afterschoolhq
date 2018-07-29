@@ -43,6 +43,39 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendStripeAccountVerified(Account account, WebUser user, bool isAfterSchool)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", user.FirstName },
+                { "AccountName", account.Name },
+                { "ProductName", Utilities.AppName(isAfterSchool) },
+                { "LoginLink", $"{Email.BaseUrl(isAfterSchool)}login" }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.StripeAccount_Verified,
+                model,
+                "stripeaccountverified-1.0.0",
+                msgs
+                );
+
+            var subject = $"You can now accept payments on {Utilities.AppName(isAfterSchool)}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
         public static SystemMessages SendEmailVerification(WebUser user, bool isAfterSchool)
         {
             var msgs = new SystemMessages();            

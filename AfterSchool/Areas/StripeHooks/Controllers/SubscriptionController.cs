@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
-namespace AfterSchool.Areas.StripeWebHooks.Controllers
+namespace AfterSchool.Areas.StripeHooks.Controllers
 {
     public class SubscriptionController : ApiController
     {

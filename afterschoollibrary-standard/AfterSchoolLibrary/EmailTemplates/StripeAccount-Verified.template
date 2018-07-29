@@ -1,0 +1,14 @@
+﻿<div>
+  <p>Hey @Model.FirstName,</p>
+
+  <p>
+    Congrats! You are now verified and can accept payments for @Model.AccountName.
+  </p>
+
+  <p>
+    <a href="@Model.LoginLink">@Model.LoginLink</a>
+  </p>
+  <p>
+      @Model.ProductName
+  </p>
+</div>

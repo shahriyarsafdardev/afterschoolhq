@@ -437,6 +437,14 @@ namespace AfterSchoolLibrary
             return EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
         }
 
+        public static SystemMessages SendStripeAccountVerified(this Account account, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var accountOwner = account.GetAccountOwner(msgs, dc);
+            msgs.AddRange(EmailHelper.SendStripeAccountVerified(account, accountOwner, account.IsAfterSchool));
+            return msgs;
+        }
+
         public static SystemMessages SendWelcomeEmailPurchase(this Account account, DatabaseConnection dc = null)
         {
             return EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
