@@ -617,10 +617,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
 
-            if (locationdetails.IsEmpty())
-            {
-                msgs.Add("Please specificy location instructions", MessageType.UserError);
-            }
+            //if (locationdetails.IsEmpty())
+            //{
+            //    msgs.Add("Please specificy location instructions", MessageType.UserError);
+            //}
 
             if (activity.IsNotEmpty() && msgs.HasNoErrors())
             {
