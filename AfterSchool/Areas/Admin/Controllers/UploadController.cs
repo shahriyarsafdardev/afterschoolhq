@@ -13,6 +13,7 @@ using System;
 using Hangfire;
 
 
+
 namespace AfterSchool.Areas.Admin.Controllers
 {
     public class UploadController : Controller
@@ -22,36 +23,45 @@ namespace AfterSchool.Areas.Admin.Controllers
         public ActionResult Index()
         {
            AddContacts("1", null, null, null, null, null, null);
+            ViewBag.Step = 1;
+            ViewBag.ShowSubmit = false;
             return View();
         }
 
         [HttpPost]
         public ActionResult Index(string step, string importtype, string emaillist, string createlist, string listname, string importtext, string listId)
         {
-            AddContacts("2", importtype, emaillist, createlist, listname,importtext, listId);
-            return View();
+            AddContacts(step, importtype, emaillist, createlist, listname,importtext, listId);
+            ViewBag.Step = step.ToInteger();
+            ViewBag.ShowSubmit = ViewBag.Messages.HasNoErrors();
+            ViewBag.ImportFile = Request.Files[0];
+            return View("LocationsSubmitted");
         }
 
         private void AddContacts(string step, string importtype, string emaillist, string createlist, string listname, string importtext, string listId)
         {
             var msgs = new SystemMessages();
             var csvMsgs = new SystemMessages();
-            ViewBag.Step = 1;
+            
             ViewBag.ContactLists = SessionVariables.CurrentAccount.GetContactLists();
 
             if (step == "1")
             {
-                ViewBag.ImportText = "im import text";
+                ViewBag.ImportText = "";
             }
-            else if (Request.Files.Count == 0 || Request.Files[0].ContentLength == 0 || !Request.Files[0].FileName.Contains(".csv"))
+            else if ((Request.Files.Count == 0 || Request.Files[0].ContentLength == 0 || !Request.Files[0].FileName.Contains(".csv")))
             {
-                msgs.Add("Please upload a valid CSV file", MessageType.UserError);
+                 msgs.Add("Please upload a valid CSV file", MessageType.UserError);
             }
-            else 
+            else
             {
                 ViewBag.ImportText = ProcessImport(Request.Files[0], msgs);
-            }                      
-
+                if(msgs.HasNoErrors())
+                {
+                    msgs.AddRange(AddLocations(ViewBag.Rows, ViewBag.Headers, msgs));
+                }
+            }                    
+           
             ViewBag.Messages = msgs;
         }
 
@@ -175,9 +185,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                             if (field.IsBlank() || !field.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
                             {
                                 hasErrors = true;
-                                validatedField.Messages.Add("Must be a valid phone number", MessageType.UserError);
+                                msgs.Add(String.Format("In csv, line: {1} \n {0} is not a valid phone number", field, rows.IndexOf(row)), MessageType.UserError);
                             }
                         }
+                      
                         validatedRow.Add(validatedField);
                     }
                     validatedRows.Add(validatedRow);
@@ -202,7 +213,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 csvString.Append("\n");
             }
 
-            //ViewBag.Headers = headersWithData;
+            ViewBag.Headers = headersWithData;
             ViewBag.Rows = validatedRows;
             //ViewBag.Csv = csvString.ToString();
 
@@ -213,5 +224,102 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             return csvString.ToString();
         }
+
+
+        [HttpPost]
+        public ActionResult SubmitLocations()
+        {
+            var msgs = new SystemMessages();
+            ProcessImport(Request.Files[0], msgs);
+            msgs.AddRange(AddLocations(ViewBag.Rows,ViewBag.headers, msgs));
+            ViewBag.Messages = msgs;
+            return View("LocationsSubmitted");
+        }
+
+        private int GetHeaderPostion(List<string> headersWithData, string[] headerToCheckFor )
+        {
+            for(int i = 0; i < headersWithData.Count; i++)
+            {
+                if (headerToCheckFor.Contains(headersWithData[i]))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private SystemMessages AddLocations(List<List<ImportField>> rows, List<string> headersWithData, SystemMessages msgs)
+        {
+            //List<string[]> headerList = new List<string[]>();
+            //AddHeaders(headerList);
+
+            var schoolIndex = GetHeaderPostion(headersWithData, schoolHeaders);
+            var addressIndex = GetHeaderPostion(headersWithData, addressHeaders);
+            var address2Index = GetHeaderPostion(headersWithData, aptSuiteHeaders);
+            var cityIndex = GetHeaderPostion(headersWithData, cityHeaders);
+            var stateIndex = GetHeaderPostion(headersWithData, stateHeaders);
+            var postalCodeIndex = GetHeaderPostion(headersWithData, zipHeaders);
+
+            foreach ( var row in rows )
+            {
+
+                var schoolName = row.ElementAt(schoolIndex).Value;
+                var address = row.ElementAt(addressIndex).Value;
+                var address2 = "";
+                if(address2Index > -1)
+                {
+                    address2 = row.ElementAt(address2Index).Value;
+                }
+                var city = row.ElementAt(cityIndex).Value;
+                var state = row.ElementAt(stateIndex).Value;
+                var postalCode = row.ElementAt(postalCodeIndex).Value;
+                var country = "US";
+                var locationType = LocationType.School;
+
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // Add new Location
+                        LocationService.CreateNewWithValidation(
+                            schoolName,
+                            address,
+                            address2,
+                            city,
+                            state,
+                            postalCode,
+                            country,
+                            locationType,
+                            null,
+                            SessionVariables.CurrentAccount,
+                            SessionVariables.LoggedInUser,
+                            msgs);
+
+
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+
+            }
+            return msgs;
+        }
+
+        [HttpGet]
+        public ActionResult LocationsSubmitted(SystemMessages msgs)
+        {
+
+            return View();
+        }
     }
+
+    
 }

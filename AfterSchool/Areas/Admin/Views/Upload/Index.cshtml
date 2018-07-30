@@ -1,10 +1,18 @@
-﻿@model List<AfterSchoolLibrary.Registrant>
-@{
+﻿@{
     var msgs = (SystemMessages)ViewBag.Messages;
     var importText = ViewBag.ImportText;
-    var contactList = (ContactList)ViewBag.ContactList;
-    var contactLists = (List<ContactList>)ViewBag.ContactLists;
-    string[] importTextArray = importText.Split( new[] { Environment.NewLine }, StringSplitOptions.None);
+    var showSubmit = (bool)ViewBag.ShowSubmit;
+    var step = (int)ViewBag.step;
+
+    var url = Url.Action("index", "upload", new { step = (step + 1).ToString()});
+    var buttonText = "Import CSV";
+
+    if (showSubmit)
+    {
+        url = Url.Action("submitLocations", "upload", new { rows = ViewBag.Rows, headers = ViewBag.Headers });
+        buttonText = "Confirm Upload";
+    }
+
 }
 
 @{ Html.RenderPartial("AdminHeader"); }
@@ -21,7 +29,7 @@
         </div>
 
         <div class="panel-body">
-            <form action="@Url.Action("index", "upload" )" method="post" enctype="multipart/form-data" class="form-horizontal">
+            <form action="@url" method="post" enctype="multipart/form-data" class="form-horizontal">
                 <div class="row">
                     <div class="col-md-6 col-md-offset-3">
                         <div class="panel-body">
@@ -29,26 +37,20 @@
                                 <label for="csvfile">
                                     Import CSV
                                 </label>
-                                <input type="file" class="form-control" name="csvfile" id="csvfile" />
+                                <input type="file" class="form-control" name="csvfile" id="csvfile"  />
                             </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary btn-lg btn-block">Import CSV</button>
-                            </div>
+                            @if (showSubmit)
+                            {
+                                <div class="form-group">
+                                    <textarea readonly style="width:auto; height:30vh; white-space: pre-line;">@importText</textarea>
+                                </div>
+                            }
+                        <div class="form-group">
+                            <button type="submit"  class="btn btn-primary btn-lg btn-block">@buttonText</button>
+                        </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3">
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <textarea  readonly style="width:auto; height:30vh; white-space: pre-line;">@importText</textarea>
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary btn-lg btn-block">Confirm Upload</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>  
             </form>
         </div>
     </div>
@@ -56,11 +58,16 @@
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-     
+
     });
 
     function showImportText() {
         $('#importtext').removeClass('hide');
         $('#confirm-upload').removeClass('hide');
     }
+
+    function navigateActivity(url) {
+        $('#form1').attr('action', url);
+    }
+
 </script>
