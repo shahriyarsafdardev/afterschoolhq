@@ -1,4 +1,5 @@
 ﻿using AfterSchool.Models;
+using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -10,6 +11,7 @@ namespace AfterSchool
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
+            GlobalConfiguration.Configure(WebApiConfig.Register);
 
             if (!AfterSchoolLibrary.Utilities.IsLocalHost)
                 GlobalFilters.Filters.Add(new RollbarExceptionFilter());

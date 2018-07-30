@@ -140,34 +140,77 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
-        public static RegistrantPaymentPlan StartPaymentPlan(this Registrant registrant, PaymentPlan paymentPlan, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, Account fromAccount, Account toAccount, CheckoutObject checkoutObject, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var rpp = RegistrantPaymentPlanService.CreateNew(
-                registrant,
-                paymentPlan,
-                startDateTime.IfEmpty(DateTime.UtcNow),
-                loggedInUser,
-                msgs,
-                dc);
+            // need to create a purchase record first
+            var purchase = PurchaseService.CreateNew(
+                purchasingAccount: fromAccount,
+                checkoutObject: checkoutObject,
+                loggedInUser: loggedInUser,
+                msgs: msgs,
+                dc: dc);
 
-            return rpp;
-        }
+            if (msgs.HasErrors())
+                return null;
 
-        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, SubscriptionPlan subscriptionPlan, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            // stripe stuff
+            // create payment source if not already existent on the user
+            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+            if (customer.DefaultSourceId.IsEmpty())
+            {
+                var source = Billing.StripeHelper.CreateSource(checkoutObject.StripeToken, msgs);
+                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+                checkoutObject.SourceId = source.Id;
+            }
+            else
+            {
+                checkoutObject.SourceId = customer.DefaultSourceId;
+            }
+
+            // what happens if the same registrant gets another payment plan?
+            // Create a new customer? For now YES, it doesn't really matter I don't think
+
+            // get shared source
+            var copiedSource = Billing.StripeHelper.CreateSourceFromOriginal(customer.Id, checkoutObject.SourceId, toAccount.StripeUserId, msgs);
+
+            // get customer from platform, shared customer
+            //var token = Billing.StripeHelper.CreateCustomerToken(fromAccount.StripeCustomerId, toAccount.StripeUserId, msgs);
+
+            // create the customer on the connected account
+            var accountCustomer = Billing.StripeHelper.CreateCustomer(
+                description: fromAccount.Name,
+                email: fromAccount.Email,         
+                sourceId: copiedSource.Id,
+                stripeAccountId: toAccount.StripeUserId,
+                msgs: msgs);
+
+            // create the subscription on the connected account
+            var subscription = Billing.StripeHelper.CreateSubscription(
+                customerId: accountCustomer.Id,
+                planId: checkoutObject.PaymentPlan.StripePlanId,
+                sourceId: copiedSource.Id,
+                platformFeePercent: toAccount.GetPlatformFeePercent(msgs, dc),
+                trialEndDate: null,
+                stripeAccountId: toAccount.StripeUserId,
+                msgs: msgs);
+
+            if (msgs.HasErrors())
+                return null;
 
             var rpp = RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
-                subscriptionPlan,
+                checkoutObject.PaymentPlan,
                 startDateTime.IfEmpty(DateTime.UtcNow),
+                purchase.ID,
+                subscription.Id,
                 loggedInUser,
                 msgs,
                 dc);
 
             return rpp;
         }
+        
     }
 }

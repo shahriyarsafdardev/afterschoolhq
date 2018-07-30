@@ -42,9 +42,9 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static PaymentPlan AddPaymentPlan(this ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionPlan AddPaymentPlan(this ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return PaymentPlanService.CreateNew(
+            return SubscriptionPlanService.CreateNewPaymentPlan(
                 activityGroup.GetAccount(msgs, dc),
                 activityGroup,
                 costPerPeriod,
@@ -68,7 +68,7 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static SubscriptionPlan AddSubscriptionPlan(this ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return SubscriptionPlanService.CreateNew(
+            return SubscriptionPlanService.CreateNewSubscription(
                 activityGroup.GetAccount(msgs, dc),
                 activityGroup,
                 costPerPeriod,
@@ -79,14 +79,14 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static List<PaymentPlan> GetPaymentPlans(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<SubscriptionPlan> GetPaymentPlans(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return PaymentPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, msgs, dc);
+            return SubscriptionPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, SubscriptionPlanType.PaymentPlan, msgs, dc);
         }
 
         public static List<SubscriptionPlan> GetSubscriptionPlans(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return SubscriptionPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, msgs, dc);
+            return SubscriptionPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, SubscriptionPlanType.Subscription, msgs, dc);
         }
     }
 }

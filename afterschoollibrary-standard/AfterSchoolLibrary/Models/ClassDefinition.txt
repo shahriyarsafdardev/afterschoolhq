@@ -203,9 +203,11 @@ property: ActivityGroupId, int?, Int
 property: Day, DayOfWeekASL, Int
 property: StartDateTime, DateTime?, DateTime, required
 property: EndDateTime, DateTime?, DateTime, required
+property: InstanceTypeId, InstanceType, Int
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
+loadmethod: ActivityScheduleId|InstanceTypeId, List<>
 [end]
 
 [begin]
@@ -321,6 +323,8 @@ loadmethod: UniqueName
 loadmethod: IsAdminAccount
 loadmethod: Uid
 loadmethod: AccountTypeId, List<>
+loadmethod: StripeUserId
+loadmethod: StripeCustomerId
 [end]
 
 [begin]
@@ -351,9 +355,16 @@ property: BusinessUrl, string, NVarChar(100)
 property: RequiresFullSSN, bool, Bit
 property: VerificationStatusId, StripeVerificationStatus, Int
 property: ChargesEnabled, bool, Bit
+property: ChargesDisabledReason, string, NVarChar(400)
+property: PayoutsEnabled, bool, Bit
 property: BankAccountId, string, NVarChar(50)
 property: BankName, string, NVarChar(50)
 property: BankLast4, string, NVarChar(4)
+property: VerificationDueBy, DateTime?, DateTime
+property: RequiresDocument, bool, Bit
+property: RequiresAdditionalOwners, bool, Bit
+property: DocumentFileId, string, NVarChar(50)
+property: FailedDetailsCode, StripeVerificationFailedCode, Int
 loadmethod: AccountId
 [end]
 
@@ -621,6 +632,7 @@ loadmethod: ActivityId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: Uid
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|RegistrantId, List<>, LoadByParticipationObjectByRegistrant
 [end]
 
 [begin]
@@ -873,6 +885,7 @@ property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
 property: ESignature, string, NVarChar(50)
+property: CompletionStatusId, RegistrationCompletionStatus, Int
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>
@@ -1193,7 +1206,7 @@ property: Used, bool, Bit
 loadmethod: Uid
 [end]
 
-[begin]
+[begin-ignore]
 type: Class
 name: PaymentPlan
 description: Used to create payment options for a particular activity or activity group
@@ -1206,10 +1219,10 @@ property: TotalPeriods, int?, Int, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: CostPerPeriod, decimal?, Money, required
 property: IsActive, bool, Bit
-property: StripeSubscriptionId, string, NVarChar(50)
+property: StripePlanId, string, NVarChar(50)
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
-[end]
+[end-ignore]
 
 [begin]
 type: Class
@@ -1224,12 +1237,14 @@ property: CostPerPeriod, decimal?, Money, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: DoesAutoRenew, bool, Bit
 property: IsActive, bool, Bit
-property: StripeSubscriptionId, string, NVarChar(50)
-loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+property: TotalPeriods, int?, Int, required
+property: StripePlanId, string, NVarChar(50)
+property: PlanTypeId, SubscriptionPlanType, Int
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
 
-[begin]
+[begin-ignore]
 type: Class
 name: RegistrantPaymentPlan
 description: Keeps track of which registrants are on which payment plans
@@ -1243,7 +1258,7 @@ loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: PaymentPlanId, List<>
 loadmethod: RegistrantId|PaymentPlanId
-[end]
+[end-ignore]
 
 [begin]
 type: Class
@@ -1255,10 +1270,12 @@ property: PurchaseId, int?, Int, required
 property: SubscriptionPlanId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
+property: StripeSubscriptionId, string, NVarChar(50)
 loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>
 loadmethod: RegistrantId|SubscriptionPlanId
+loadmethod: StripeSubscriptionId
 [end]
 
 [begin]
@@ -1569,4 +1586,28 @@ values: NotSet, Individual, Company
 type: Enum
 name: StripeVerificationStatus
 values: NotSet, Unverified, Pending, Verified
+[end]
+
+[begin]
+type: Enum
+name: StripeVerificationFailedCode
+values: NotSet, ScanCorrupt, ScanFailedGrayscale, ScanFailedOther, ScanIDCountryNotSupported, ScanNameMismatch, ScanNotReadable, ScanNotUploaded, FailedKeyedIdentity, FailedOther, ScanFailedTestMode
+[end]
+
+[begin]
+type: Enum
+name: InstanceType
+values: NotSet, InSession, OutOfSession
+[end]
+
+[begin]
+type: Enum
+name: RegistrationCompletionStatus
+values: NotSet, Started, Completed
+[end]
+
+[begin]
+type: Enum
+name: SubscriptionPlanType
+values: NotSet, Subscription, PaymentPlan
 [end]

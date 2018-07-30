@@ -27,7 +27,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void LoadTest()
         {
-            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
+            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
 
             Assert.True(SubscriptionPlan.Load(plan.ID.Value, msgs, dc).IsNotEmpty());
         }
@@ -39,7 +39,7 @@ namespace AfterSchoolLibraryTests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
+                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
             }
 
             Assert.Equal(
@@ -59,7 +59,7 @@ namespace AfterSchoolLibraryTests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
+                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
             }
 
             Assert.Equal(numberToCreate, SubscriptionPlan.GetCount(msgs: msgs, dc: dc));
@@ -71,7 +71,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void SaveTest()
         {
-            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
+            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
 
             plan.LastModifiedBy = 1;
             msgs.AddRange(plan.Save(dc));
@@ -85,7 +85,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void DeleteTest()
         {
-            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
+            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
 
             msgs.AddRange(plan.Delete(dc));
 
@@ -98,7 +98,7 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void ReloadTest()
         {
-            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
+            var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
 
             Assert.Equal(plan.ID, plan.Reload(msgs, dc).ID);
         }
@@ -108,14 +108,14 @@ namespace AfterSchoolLibraryTests
         [InlineData(ParticipationObjectType.ActivityGroup)]
         public void LoadByParticipationObjectTest(ParticipationObjectType ParticipationObjectType)
         {
-            var plan1 = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
-            var plan2 = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, ActivityGroup, msgs, dc);
+            var plan1 = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
+            var plan2 = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, ActivityGroup, SubscriptionPlanType.Subscription, msgs, dc);
 
             var ParticipationObjectId = Activity.ID;
             if (ParticipationObjectType == ParticipationObjectType.ActivityGroup)
                 ParticipationObjectId = ActivityGroup.ID;
 
-            Assert.Single(SubscriptionPlan.LoadByParticipationObject(ParticipationObjectId.Value, ParticipationObjectType, msgs, dc));
+            Assert.Single(SubscriptionPlan.LoadByParticipationObject(ParticipationObjectId.Value, ParticipationObjectType, SubscriptionPlanType.Subscription, msgs, dc));
         }
 
         [Theory]
@@ -125,7 +125,7 @@ namespace AfterSchoolLibraryTests
         {
             for (var i = 0; i < numberToCreate; i++)
             {
-                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, msgs, dc);
+                var plan = Factories.SubscriptionPlanFactory.Create(PlanOwnerAccount, Activity, SubscriptionPlanType.Subscription, msgs, dc);
             }
 
             Assert.Equal(numberToCreate, SubscriptionPlan.LoadByPlanOwnerAccountId(PlanOwnerAccount.ID.Value, msgs, dc).Count);

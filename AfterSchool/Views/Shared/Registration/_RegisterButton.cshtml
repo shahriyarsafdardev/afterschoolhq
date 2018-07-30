@@ -1,0 +1,44 @@
+﻿@model ParticipationObject
+
+@{ 
+    var condensed = false;
+
+    if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
+    {
+        condensed = true;
+    }
+}
+
+@if (Model.RegistrationPeriod.IsOpen())
+{
+    <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
+        @Model.RegistrationMode.ToString() &raquo;
+    </a>
+}
+else if (Model.RegistrationPeriod.WillOpen())
+{
+    <button type="button" class="btn btn-register">
+        @if (condensed)
+        {
+            @:Will open soon
+        }
+        else
+        {
+            @:Registration will open in @Model.RegistrationPeriod.WillOpenIn().Days days @Model.RegistrationPeriod.WillOpenIn().Hours hrs
+        }
+    </button>
+}
+else if (Model.RegistrationPeriod.IsClosed())
+{
+    <button type="button" class="btn btn-register">
+        @if (condensed)
+        {
+            @:Registration Closed
+        }
+        else
+        {
+            @:Registration is now closed
+        }
+        
+    </button>
+}

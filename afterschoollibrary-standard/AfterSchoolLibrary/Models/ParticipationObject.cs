@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary
         public decimal? Cost { get; set; }
         public CostUnitType? CostUnitType { get; set; }
         public RegistrationPeriod RegistrationPeriod { get; set; }
-        public List<PaymentPlan> PaymentPlans { get; set; }
+        public List<SubscriptionPlan> PaymentPlans { get; set; }
         public List<SubscriptionPlan> SubscriptionPlans { get; set; }
         public string UniqueName { get; set; }
         public RegistrationMode RegistrationMode { get; set; }
@@ -32,11 +32,12 @@ namespace AfterSchoolLibrary
         public bool IsFree { get; set; }
         public Guid Uid { get; set; }
         public int? SeatsRemaining { get; set; }
-        public int? WaitingListSeatsRemaining { get; set; } 
+        public int? WaitingListSeatsRemaining { get; set; }
         public string Description { get; set; }
         public string ContactName { get; set; }
         public string ContactPhone { get; set; }
         public string ContactEmail { get; set; }
+        public string CostDescription { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -61,6 +62,7 @@ namespace AfterSchoolLibrary
             ContactName = activity.ContactName;
             ContactEmail = activity.ContactEmail;
             ContactPhone = activity.ContactPhone;
+            CostDescription = activity.CostDescription;
            
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -82,7 +84,7 @@ namespace AfterSchoolLibrary
 
             PaymentPlans = activity.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activity.GetSubscriptionPlans(msgs, dc);
-            IsFree = !activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal();
+            IsFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
         public ParticipationObject(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -110,7 +112,7 @@ namespace AfterSchoolLibrary
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
-            IsFree = !activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal();
+            IsFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
         public ParticipationObject(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)

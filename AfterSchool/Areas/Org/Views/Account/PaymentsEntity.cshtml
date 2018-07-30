@@ -49,7 +49,28 @@
                         </div>
                         <div class="message">
                             <p class="text-center">
-                                It has been determined that your full SSN is required to activate your payments account.
+                                It has been determined that your full SSN is required to activate your payments account. Please enter your SSN below.
+                            </p>
+                        </div>
+                    </div>
+                }
+                else if (Model.RequiresDocument)
+                {
+                    <div role="alert" class="alert alert-danger alert-icon">
+                        <div class="icon">
+                            <span class="s7-close-circle"></span>
+                        </div>
+                        <div class="message">
+                            <p class="text-center">
+                                @if (Model.DocumentFileId.IsBlank())
+                                {
+                                    @:It has been determined that a scan of a Valid Driver's license or Passport is required to be uploaded in order to process payments. 
+                                }
+                                else if (Model.FailedDetailsCode != StripeVerificationFailedCode.NotSet)
+                                {
+                                    @:We are having issues verifying your identity for the following reason: @Model.FailedDetailsCode.GetDescription()
+                                }
+                                Please upload your document below and verify the information you have entered previously.
                             </p>
                         </div>
                     </div>
@@ -62,8 +83,25 @@
                             <span class="s7-info"></span>
                         </div>
                         <div class="message">
+                            <p class="text-center text-medium-small">
+                                We are verifying your information. In the meantime:
+                            </p>
                             <p class="text-center">
-                                We are verifying your information
+                                You are @(!Model.ChargesEnabled ? "NOT" : "") able to accept payments<br />
+                                You are @(!Model.PayoutsEnabled ? "NOT" : "") able to receive deposits to your bank account
+                            </p>
+                        </div>
+                    </div>
+                }
+                else if (Model.VerificationStatusId == StripeVerificationStatus.Unverified && Model.LegalEntitySSNLast4.IsNotBlank())
+                {
+                    <div role="alert" class="alert alert-danger alert-icon">
+                        <div class="icon">
+                            <span class="s7-close-circle"></span>
+                        </div>
+                        <div class="message">
+                            <p class="text-center">
+                                Your details have not been verified for the following reason: @Model.FailedDetailsCode.GetDescription()
                             </p>
                         </div>
                     </div>
@@ -76,14 +114,14 @@
                         </div>
                         <div class="message">
                             <p class="text-center">
-                                You will need to submit the info below within 7 days or payment processing will be suspended.
+                                You will need to submit the info below in order to process payments and receive deposits.
                             </p>
                         </div>
                     </div>
                 }
 
 
-                <form method="post" action="@Url.Action("paymentsentity", "account")" class="form-horizontal">
+                <form method="post" action="@Url.Action("paymentsentity", "account")" class="form-horizontal" enctype="multipart/form-data">
 
                     <div class="form-group">
                         <div class="text-medium-small text-center">
@@ -117,6 +155,36 @@
                             }
                         </div>
                     </div>
+
+                    @if (Model.RequiresFullSSN || Model.RequiresDocument || Model.RequiresAdditionalOwners)
+                    {
+                        <div class="panel" id="additional-info">
+                            <div class="panel-heading">
+                                <span>Additional Information</span>
+                            </div>
+                            <div class="panel-body">
+                                @if (Model.RequiresFullSSN)
+                                {
+                                    <div class="form-group" id="full-ssn">
+                                        <label class="col-sm-4 control-label">SSN <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="ssn" name="ssn" value="" onfocus="this.select()" maxlength="9" @disabled />
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.RequiresDocument)
+                                {
+                                    <div class="form-group" id="document-info">
+                                        <label class="col-sm-4 control-label">Driver's License or Passport Upload <span class="text-danger">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input type="file" class="form-control" id="document" name="document" value="" @disabled />
+                                            <p class="text-muted"><em>The file must be a jpg or png file and no more than 8mbs</em></p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
 
                     <div id="all-info" class="hide">
                         <div class="panel">
@@ -153,13 +221,6 @@
                                         <label class="col-sm-4 control-label">SSN(last 4) <span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
                                             <input type="text" class="form-control" id="ssnlast4" name="ssnlast4" value="@Model.LegalEntitySSNLast4" onfocus="this.select()" maxlength="4" required @disabled />
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group hide" id="full-ssn">
-                                        <label class="col-sm-4 control-label">SSN <span class="text-danger">*</span></label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="ssn" name="ssn" value="" onfocus="this.select()" maxlength="9" @disabled />
                                         </div>
                                     </div>
                                 }
@@ -254,13 +315,13 @@
                                     <div class="am-checkbox inline">
                                         <input type="checkbox" name="tosagree" id="tosagree" value="1" />
                                         <label class="control-label" for="tosagree">
-                                            I agree to the <a href="#" target="_blank">Terms of Services</a> and <a href="#" target="_blank">Stripe Terms of Services</a>
+                                            I agree to the <a href="/legal/tos" target="_blank">Terms of Services</a> and <a href="https://stripe.com/us/connect-account/legal" target="_blank">Stripe Terms of Services</a>
                                         </label>
                                     </div>
                                 }
                                 else
                                 {
-                                    <p>You have agreed to the <a href="#" target="_blank">Terms of Services</a> and <a href="#" target="_blank">Stripe Terms of Services</a> on @Model.TOSAcceptanceDate.ToLongDateTimeString()</p>
+                                    <p>You have agreed to the <a href="/legal/tos" target="_blank">Terms of Services</a> and <a href="https://stripe.com/us/connect-account/legal" target="_blank">Stripe Terms of Services</a> on @Model.TOSAcceptanceDate.ToLongDateTimeString()</p>
                                 }
                             
                             </div>
@@ -331,8 +392,14 @@
             showIndividual();
 
         if (@Model.RequiresFullSSN.ToString().ToLower() == true) {
+            $('#additional-info').removeClass('hide');
             $('#full-ssn').removeClass('hide');
-            $('#full-ssn').attr('required', 'required');
+            $('#ssn').attr('required', 'required');
+        }
+        if (@Model.RequiresFullSSN.ToString().ToLower() == true) {
+            $('#additional-info').removeClass('hide');
+            $('#document-info').removeClass('hide');
+            $('#document').attr('required', 'required');
         }
             
     });

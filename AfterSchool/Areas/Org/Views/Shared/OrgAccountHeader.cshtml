@@ -19,7 +19,7 @@
         Please verify your email address in order to publish activities. <a href="javascript:sendVerificationEmail()" class="white">Resend Email Verification Email &raquo;</a>
     </div>
 }
-@if (!SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser).IsVerified)
+@if (!SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser).IsVerified)
 {
     <div class="trial-header text-center text-white bg-danger">
         Finish setting up your account in order to accept payments. <a href="@Url.Action("paymentsentity", "account")" class="white">Setup Payments &raquo;</a>
@@ -29,7 +29,6 @@
 <div class="page-head">
     <div class="pull-right">
         <p>
-            @Html.Raw(SessionVariables.AccountPackage.IsNotEmpty() ? $"{SessionVariables.AccountPackage.PackageName} Package<br />" : "")
             Logged in as: @SessionVariables.LoggedInUser.DisplayName
         </p>
     </div>

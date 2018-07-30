@@ -4,6 +4,8 @@
     var schedules = (List<ActivitySchedule>)ViewBag.Schedules;
     var showScheduleList = (bool)ViewBag.ShowScheduleList;
     var activityId = (string)ViewBag.ActivityId;
+    var openInstances = Model.GetInstances().Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
+    var closedInstances = Model.GetInstances().Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
 }
 
 <div class="panel panel-default">
@@ -48,25 +50,27 @@
             }
 
             <div id="schedule-edit" class="">
+
                 @*
-                <div class="form-group hide">
-                    <label class="col-md-3 control-label">
-                        Additional Instructions
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Should @UILabel.RegistrantLabel(true).ToLower() arrive 15 mins early? Are there issues if the @UILabel.RegistrantLabel().ToLower() is late?" data-placement="top"></i>
-                    </label>
-                    <div class="col-md-7">
-                        @{ Html.RenderPartial(
-                            "~/Views/Shared/_TextEditor.cshtml",
-                            Model.ScheduleDetails,
-                            new ViewDataDictionary() {
-                                { "required", true },
-                                { "name", "scheduledetails" },
-                                { "id", "scheduledetails" }
-                            }
-                            ); }
+                    <div class="form-group hide">
+                        <label class="col-md-3 control-label">
+                            Additional Instructions
+                            <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Should @UILabel.RegistrantLabel(true).ToLower() arrive 15 mins early? Are there issues if the @UILabel.RegistrantLabel().ToLower() is late?" data-placement="top"></i>
+                        </label>
+                        <div class="col-md-7">
+                            @{ Html.RenderPartial(
+                                "~/Views/Shared/_TextEditor.cshtml",
+                                Model.ScheduleDetails,
+                                new ViewDataDictionary() {
+                                    { "required", true },
+                                    { "name", "scheduledetails" },
+                                    { "id", "scheduledetails" }
+                                }
+                                ); }
+                        </div>
                     </div>
-                </div>
                 *@
+
                 <div class="form-group">
                     <label class="col-md-3 control-label">
                         Repeats Weekly?
@@ -74,16 +78,16 @@
                     </label>
                     <div class="col-md-1">
                         @{Html.RenderPartial
-                            (
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.RepeatsWeekly,
-                                new ViewDataDictionary()
-                                {
-                                    { "checkboxname", "repeatsweekly" },
-                                    { "checkboxid", "repeatsweekly" },
-                                    { "disabled", false }
-                                }
-                            );
+                        (
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.RepeatsWeekly,
+                            new ViewDataDictionary()
+                            {
+                                { "checkboxname", "repeatsweekly" },
+                                { "checkboxid", "repeatsweekly" },
+                                { "disabled", false }
+                            }
+                        );
                         }
                     </div>
                 </div>
@@ -130,50 +134,50 @@
                         </label>
                         <div class="col-md-7">
                             @{Html.RenderPartial(
-                                "~/Views/Shared/_TimeSelect.cshtml",
-                                Model.DailyStartTime,
-                                new ViewDataDictionary()
-                                {
-                                    { "name", "dailystarttime" },
-                                    { "id", "dailystarttime" },
-                                    { "required", true }
-                                }
-                            );
+                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                    Model.DailyStartTime,
+                                    new ViewDataDictionary()
+                                    {
+                                        { "name", "dailystarttime" },
+                                        { "id", "dailystarttime" },
+                                        { "required", true }
+                                    }
+                                );
                             }
                         </div>
                     </div>
-                
+
                     <div class="form-group">
                         <label class="col-md-3 control-label">
                             Meeting End Time
                         </label>
                         <div class="col-md-7">
                             @{Html.RenderPartial(
-                                "~/Views/Shared/_TimeSelect.cshtml",
-                                Model.DailyEndTime,
-                                new ViewDataDictionary()
-                                {
-                                    { "name", "dailyendtime" },
-                                    { "id", "dailyendtime" },
-                                    { "required", true }
-                                }
-                            );
+                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                    Model.DailyEndTime,
+                                    new ViewDataDictionary()
+                                    {
+                                        { "name", "dailyendtime" },
+                                        { "id", "dailyendtime" },
+                                        { "required", true }
+                                    }
+                                );
                             }
                         </div>
                     </div>
                 </div>
-            
+
                 <div id="schedule-dates" class="hide">
-                    @for (var i = 1; i <= 50; i++)
+                    @for (var i = 1; i <= 30; i++)
                     {
                         var startDate = DateTime.UtcNow;
                         var startTime = startDate.Date.AddHours(15);
                         var endTime = startDate.Date.AddHours(17);
 
                         ActivityInstance instance = null;
-                        if (Model.GetInstances()?.Count >= i)
+                        if (openInstances.Count >= i)
                         {
-                            instance = Model.GetInstances()[i - 1];
+                            instance = openInstances[i - 1];
                             startDate = instance.StartDateTime.Value;
                             startTime = instance.StartDateTime.Value;
                             endTime = instance.EndDateTime.Value;
@@ -188,37 +192,37 @@
                                     <tr>
                                         <td>
                                             <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                                <input size="16" type="text" class="form-control" id="meeting-date-@i" name="meeting-date-@i" onfocus="this.select()" required value="@startDate.ToShortDateString()" data-type="date" />
+                                                <input size="16" type="text" class="form-control" id="meeting-open-date-@i" name="meeting-open-date-@i" onfocus="this.select()" required value="@startDate.ToShortDateString()" data-type="date" />
                                                 <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
                                             </div>
                                         </td>
                                         <td>
                                             @{Html.RenderPartial(
-                                                "~/Views/Shared/_TimeSelect.cshtml",
-                                                startTime,
-                                                new ViewDataDictionary()
-                                                {
-                                                    { "name", string.Format("meeting-starttime-{0}", i) },
-                                                    { "id", string.Format("meeting-starttime-{0}", i) },
-                                                    { "required", true }
-                                                }
-                                            );
+                                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                                    startTime,
+                                                    new ViewDataDictionary()
+                                                    {
+                                                        { "name", string.Format("meeting-open-starttime-{0}", i) },
+                                                        { "id", string.Format("meeting-open-starttime-{0}", i) },
+                                                        { "required", true }
+                                                    }
+                                                );
                                             }
                                         </td>
                                         <td>
                                             &nbsp;To&nbsp;
                                         </td>
-                                        <td>                                   
+                                        <td>
                                             @{Html.RenderPartial(
-                                                "~/Views/Shared/_TimeSelect.cshtml",
-                                                endTime,
-                                                new ViewDataDictionary()
-                                                {
-                                                { "name", string.Format("meeting-endtime-{0}", i) },
-                                                { "id", string.Format("meeting-endtime-{0}", i) },
-                                                { "required", true }
-                                                }
-                                            );
+                                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                                    endTime,
+                                                    new ViewDataDictionary()
+                                                    {
+                                                        { "name", string.Format("meeting-open-endtime-{0}", i) },
+                                                        { "id", string.Format("meeting-open-endtime-{0}", i) },
+                                                        { "required", true }
+                                                    }
+                                                );
                                             }
                                         </td>
                                         <td>
@@ -229,18 +233,69 @@
                                         </td>
                                     </tr>
                                 </table>
-                        
+
                             </div>
                         </div>
-                        <input type="hidden" name="meeting-inuse-@i" id="meeting-inuse-@i" value="0" />
+                        <input type="hidden" name="meeting-open-inuse-@i" id="meeting-open-inuse-@i" value="0" />
                     }
                     <div class="col-md-7 col-md-offset-3">
                         <button type="button" class="btn btn-alt4" onclick="showNextDate()">Add New Date</button>
                     </div>
                 </div>
-            </div>
-        </div>        
 
+            </div>
+        </div>
+
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Enter any dates that you will not meet
+        </div>
+    </div>
+    <div class="panel-body">
+
+        <div id="schedule-closed-dates">
+
+            @for (var i = 1; i <= 30; i++)
+            {
+                var startDate = DateTime.UtcNow;
+
+                ActivityInstance instance = null;
+                if (closedInstances.Count >= i)
+                {
+                    instance = closedInstances[i - 1];
+                    startDate = instance.StartDateTime.Value;
+                }
+
+                <div class="form-group hide schedule-closed-date" id="schedule-closed-date-@i">
+                    <label class="col-md-3 control-label">
+                        Date Closed @i
+                    </label>
+                    <div class="col-md-7">
+                        <table>
+                            <tr>
+                                <td>
+                                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                        <input size="16" type="text" class="form-control" id="meeting-closed-date-@i" name="meeting-closed-date-@i" onfocus="this.select()" required value="@startDate.ToShortDateString()" data-type="date" />
+                                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default" onclick="removeClosedDate(@i)">Delete</button>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+                <input type="hidden" name="meeting-closed-inuse-@i" id="meeting-inuse-@i" value="0" />
+            }
+            <div class="col-md-7 col-md-offset-3">
+                <button type="button" class="btn btn-alt4" onclick="showNextClosedDate()">Add Closed Dates</button>
+            </div>
+        </div>
+        
     </div>
 </div>
 
@@ -254,11 +309,12 @@
         });
         checkRepeatsWeekly();
         checkScheduleVal();
+        showClosedDates();
 
         $('#schedule').change(function(){
             if($(this).val() == '0') {
-                $('select[id^="meeting-starttime-"]').val('3:00 pm');
-                $('select[id^="meeting-endtime-"]').val('5:00 pm');
+                $('select[id^="meeting-open-starttime-"]').val('3:00 pm');
+                $('select[id^="meeting-open-endtime-"]').val('5:00 pm');
                 $('#dailystarttime').val('3:00 pm');
                 $('#dailyendtime').val('5:00 pm');
                 $('#startdate').val('@DateTime.UtcNow.ToShortDateString()');
@@ -297,7 +353,11 @@
 
     function removeDate(i){
         $('#schedule-date-' + i).addClass('hide');
-        $('#meeting-inuse-' + i).val(0);
+        $('#meeting-open-inuse-' + i).val(0);
+    }
+    function removeClosedDate(i) {
+        $('#schedule-closed-date-' + i).addClass('hide');
+        $('#meeting-closed-inuse-' + i).val(0);
     }
 
     function showNextDate() {
@@ -306,16 +366,31 @@
         obj.next().val(1);
     }
 
+    function showNextClosedDate() {
+        var obj = $('.schedule-closed-date.hide').first();
+        obj.removeClass('hide');
+        obj.next().val(1);
+    }
+
     function showDates() {
-        @if(Model.GetInstances()?.Count > 0)
+        @if(openInstances.Count > 0)
         {
-            @: for(var i = 0; i < @Model.GetInstances().Count; i++){
+            @: for(var i = 0; i < @openInstances.Count; i++){
             @:  showNextDate();
             @: }
         }
         else
         {
             @: showNextDate();
+        }
+    }
+
+    function showClosedDates() {
+        @if(closedInstances.Count > 0)
+        {
+            @: for(var i = 0; i < @closedInstances.Count; i++){
+            @:  showNextClosedDate();
+            @: }
         }
     }
 

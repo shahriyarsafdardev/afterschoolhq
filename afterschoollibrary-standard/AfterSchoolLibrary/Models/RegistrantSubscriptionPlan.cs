@@ -34,6 +34,7 @@ namespace AfterSchoolLibrary
 		/// Required.
 		/// </summary>
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
+		public string StripeSubscriptionId { get { return (string)MDV["StripeSubscriptionId"].Value; } set { MDV["StripeSubscriptionId"].Value = value; } }
 		
 
         public RegistrantSubscriptionPlan()
@@ -54,6 +55,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "SubscriptionPlanId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar, 50);
 				
                 return _dp;
             }
@@ -151,6 +153,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["StartDate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeSubscriptionId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -194,11 +200,29 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static RegistrantSubscriptionPlan LoadByStripeSubscriptionId(string StripeSubscriptionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["StripeSubscriptionId"], StripeSubscriptionId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		
 
         #endregion
 
 		#region "UserDefined"
+
+        public SubscriptionPlan GetSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.Load(this.SubscriptionPlanId.Value, msgs, dc);
+        }
+
+        public Registrant GetRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.Load(this.RegistrantId.Value, msgs, dc);
+        }
 
         #endregion
     }

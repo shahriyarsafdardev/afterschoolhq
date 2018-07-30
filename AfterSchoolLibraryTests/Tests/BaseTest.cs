@@ -15,35 +15,44 @@ namespace AfterSchoolLibraryTests
     {
         internal DatabaseConnection dc = null;
         internal SystemMessages msgs = null;
+        private bool UseDatabase;
+
         private readonly ITestOutputHelper _output;
 
-        public BaseTest(ITestOutputHelper output)
+        public BaseTest(ITestOutputHelper output, bool useDatabase = true)
         {
-            AfterSchoolLibrary.Utilities.InitializeApp();
-
             _output = output;
+            UseDatabase = useDatabase;
 
-            dc = new DatabaseConnection(Database.TestCredentials.ConnectionString);
-            msgs = new SystemMessages();
-            dc.Open();
-            Database.CreateTables(dc);
-            Database.AlterTables(dc);
-            Database.UpdateData(dc);
-            dc.BeginTransaction();
+            if (UseDatabase)
+            {
+                AfterSchoolLibrary.Utilities.InitializeApp();
 
-            // need some default data in the AfterSchool admin account in order to run certain tests
-            msgs.AddRange(AccountService.CreateAfterSchoolAccount(null, null, null, null, dc));
-            msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
+                dc = new DatabaseConnection(Database.TestCredentials.ConnectionString);
+                msgs = new SystemMessages();
+                dc.Open();
+                Database.CreateTables(dc);
+                Database.AlterTables(dc);
+                Database.UpdateData(dc);
+                dc.BeginTransaction();
+
+                // need some default data in the AfterSchool admin account in order to run certain tests
+                msgs.AddRange(AccountService.CreateAfterSchoolAccount(null, null, null, null, dc));
+                msgs.AddRange(GradeLevel.CreateDefaultGradeLevels(dc));
+            }
         }
 
         public void Dispose()
         {
-            if (msgs.Count > 0)
-                _output.WriteLine(msgs.RenderMessageList(MessageOutputType.Text));
+            if (UseDatabase)
+            {
+                if (msgs.Count > 0)
+                    _output.WriteLine(msgs.RenderMessageList(MessageOutputType.Text));
 
-            dc.RollbackTransaction();
-            dc.Close();
-            dc.Dispose();
+                dc.RollbackTransaction();
+                dc.Close();
+                dc.Dispose();
+            }
         }
     }
 }

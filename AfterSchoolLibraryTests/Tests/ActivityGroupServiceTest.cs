@@ -53,19 +53,10 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void GetPaymentPlansTest()
-        {
-            var activityGroup = ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.League, msgs, dc);
-            var plan = PaymentPlanFactory.Create(ActivityGroupOwner, activityGroup, msgs, dc);
-
-            Assert.Single(activityGroup.GetPaymentPlans(msgs, dc));
-        }
-
-        [Fact]
         public void GetSubscriptionPlansTest()
         {
             var activityGroup = ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.League, msgs, dc);
-            var plan = SubscriptionPlanFactory.Create(ActivityGroupOwner, activityGroup, msgs, dc);
+            var plan = SubscriptionPlanFactory.Create(ActivityGroupOwner, activityGroup, SubscriptionPlanType.Subscription, msgs, dc);
 
             Assert.Single(activityGroup.GetSubscriptionPlans(msgs, dc));
         }

@@ -11,7 +11,7 @@ namespace AfterSchoolLibrary
         public Registration Registration { get; set; }
         public Coupon Coupon { get; set; }
         public SubscriptionPlan SubscriptionPlan { get; set; }
-        public PaymentPlan PaymentPlan { get; set; }
+        public SubscriptionPlan PaymentPlan { get; set; }
         public string StripeToken { get; set; }
         public string SourceId { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
@@ -54,6 +54,14 @@ namespace AfterSchoolLibrary
             get
             {
                 return PaymentPlan.IsNotEmpty() ? PaymentPlan.CostPerPeriod.Value * NumberOfSeats : 0;
+            }
+        }
+
+        public decimal PaymentPlanTotalCost
+        {
+            get
+            {
+                return PaymentPlan.IsNotEmpty() ? PaymentPlan.CostPerPeriod.Value * PaymentPlan.TotalPeriods.Value * NumberOfSeats : 0;
             }
         }
 

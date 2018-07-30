@@ -271,7 +271,7 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             
-            var product = Billing.StripeHelper.GetProduct(this.GetStripePlanId(billingPeriodType), msgs);
+            var product = Billing.StripeHelper.GetProduct(this.GetStripePlanId(billingPeriodType), null, msgs);
 
             if (product.IsEmpty())
             {
@@ -280,15 +280,18 @@ namespace AfterSchoolLibrary
                     this.GetStripePlanName(billingPeriodType),
                     $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
                     true,
+                    null,
                     msgs);
             }
             else
             {
-                msgs.AddRange(Billing.StripeHelper.UpdateProduct(
+                product = Billing.StripeHelper.UpdateProduct(
                     this.GetStripePlanId(billingPeriodType),
                     this.GetStripePlanName(billingPeriodType),
                     $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
-                    true));
+                    true,
+                    null,
+                    msgs);
             }
 
             return product;
@@ -298,7 +301,7 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             
-            var plan = Billing.StripeHelper.GetPlan(this.GetStripePlanId(billingPeriodType), msgs);
+            var plan = Billing.StripeHelper.GetPlan(this.GetStripePlanId(billingPeriodType), null, msgs);
 
             if (plan.IsEmpty())
             {
@@ -308,6 +311,7 @@ namespace AfterSchoolLibrary
                     price,
                     billingPeriodType,
                     this.GetStripePlanName(billingPeriodType),
+                    null,
                     msgs);
             }
             else
