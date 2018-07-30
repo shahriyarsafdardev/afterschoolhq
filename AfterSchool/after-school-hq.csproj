@@ -1192,6 +1192,7 @@
     <Folder Include="Areas\StripeHooks\Views\Shared\" />
     <Folder Include="Areas\StripeHooks\Views\Test\" />
     <Folder Include="Areas\User\Models\" />
+    <Folder Include="Home\" />
     <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>

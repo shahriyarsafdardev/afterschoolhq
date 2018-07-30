@@ -1734,6 +1734,8 @@ namespace AfterSchoolLibrary
 
         public static StripeAccount GetOrCreateStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             var stripeAccount = account.GetStripeAccount(msgs, dc);
 
             if (stripeAccount.IsEmpty())
