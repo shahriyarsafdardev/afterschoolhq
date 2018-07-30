@@ -310,7 +310,12 @@
 
                         <div id="tos-info" class="padding-20">
                             <div class="text-center">
-                                @if (!Model.IsVerified && Model.VerificationStatusId != StripeVerificationStatus.Pending)
+                                
+                                @if (Model.IsVerified)
+                                {
+                                    <p>You have agreed to the <a href="/legal/tos" target="_blank">Terms of Services</a> and <a href="https://stripe.com/us/connect-account/legal" target="_blank">Stripe Terms of Services</a> on @Model.TOSAcceptanceDate.ToLongDateTimeString()</p>
+                                }
+                                else
                                 {
                                     <div class="am-checkbox inline">
                                         <input type="checkbox" name="tosagree" id="tosagree" value="1" />
@@ -319,11 +324,6 @@
                                         </label>
                                     </div>
                                 }
-                                else
-                                {
-                                    <p>You have agreed to the <a href="/legal/tos" target="_blank">Terms of Services</a> and <a href="https://stripe.com/us/connect-account/legal" target="_blank">Stripe Terms of Services</a> on @Model.TOSAcceptanceDate.ToLongDateTimeString()</p>
-                                }
-                            
                             </div>
                         </div>
 

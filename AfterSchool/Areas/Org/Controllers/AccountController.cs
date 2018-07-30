@@ -416,7 +416,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
-            stripeAccount.GetLatestStripeAccountDetails(SessionVariables.CurrentAccount, msgs);
+
+            if (stripeAccount.TOSAcceptanceDate.HasValue)
+                stripeAccount.GetLatestStripeAccountDetails(SessionVariables.CurrentAccount, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
