@@ -29,7 +29,6 @@
 <div class="page-head">
     <div class="pull-right">
         <p>
-            @Html.Raw(SessionVariables.AccountPackage.IsNotEmpty() ? $"{SessionVariables.AccountPackage.PackageName} Package<br />" : "")
             Logged in as: @SessionVariables.LoggedInUser.DisplayName
         </p>
     </div>
