@@ -300,7 +300,9 @@ namespace AfterSchool.Controllers
             var questions = new List<FormQuestion>();
 
             emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
-            questions.ForEach(question => { question.IsRequired = true; });
+            questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
+                .ToList()
+                .ForEach(question => { question.IsRequired = true; });
 
             ViewBag.Cart = SessionVariables.Cart;
 
@@ -587,11 +589,11 @@ namespace AfterSchool.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantDoctorName:
-                    case QuestionDataType.RegistrantDoctorPhone:
-                    //case QuestionDataType.RegistrantAllergies:
-                    //case QuestionDataType.RegistrantMedicalConditions:
-                    //case QuestionDataType.RegistrantMedications:
-                    case QuestionDataType.RegistrantImmunizations:
+                    // case QuestionDataType.RegistrantDoctorPhone:
+                    // case QuestionDataType.RegistrantAllergies:
+                    // case QuestionDataType.RegistrantMedicalConditions:
+                    // case QuestionDataType.RegistrantMedications:
+                    // case QuestionDataType.RegistrantImmunizations:
                     case QuestionDataType.RegistrantPreferredHospital:
                         question.IsRequired = true;
                         break;
