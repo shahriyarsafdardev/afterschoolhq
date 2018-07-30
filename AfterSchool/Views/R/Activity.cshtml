@@ -51,38 +51,46 @@
                 </div>
 
                 <div class="activity-detail-block">
-                    <h3>Cost</h3>
-                    <p>
-                        Registration Fee payment options:
-                        <ul>
-                            <li>1 payment of @ParticipationObjectUI.PrintRegistrationFee(Model)</li>
-                            @if (Model.PaymentPlans.Any())
-                            {
-                                foreach(var plan in Model.PaymentPlans)
+                    <h3>
+                        Cost
+                        @if (Model.IsFree)
+                        {
+                            <span>- Free</span>
+                        }
+                    </h3>
+                    @if (!Model.IsFree)
+                    {
+                        <p>
+                            Registration Fee payment options:
+                            <ul>
+                                <li>1 payment of @ParticipationObjectUI.PrintRegistrationFee(Model)</li>
+                                @if (Model.PaymentPlans.Any())
                                 {
-                                    <li>@plan.TotalPeriods payments of @plan.CostPerPeriod.ToCurrency() each @plan.BillingPeriodTypeId.ToString()</li>
+                                    foreach (var plan in Model.PaymentPlans)
+                                    {
+                                        <li>@plan.TotalPeriods payments of @plan.CostPerPeriod.ToCurrency() each @plan.BillingPeriodTypeId.ToString()</li>
+                                    }
                                 }
-                            }
-                        </ul>
-                    </p>                    
+                            </ul>
+                        </p>                    
 
-                    @if (Model.SubscriptionPlans.Any())
-                    {
-                        <p>
-                            @foreach(var plan in Model.SubscriptionPlans)
-                            {
-                                <span>@plan.CostPerPeriod.ToCurrency() every @plan.BillingPeriodTypeId.ToString()</span>
-                            }
-                        </p>
-                    }
-                    
-                    @if (Model.CostDescription.IsNotEmpty())
-                    {
-                        <p>
-                            @Model.CostDescription
-                        </p>
-                    }
+                        if (Model.SubscriptionPlans.Any())
+                        {
+                            <p>
+                                @foreach (var plan in Model.SubscriptionPlans)
+                                {
+                                    <span>@plan.CostPerPeriod.ToCurrency() every @plan.BillingPeriodTypeId.ToString()</span>
+                                }
+                            </p>
+                        }
 
+                        if (Model.CostDescription.IsNotEmpty())
+                        {
+                            <p>
+                                @Model.CostDescription
+                            </p>
+                        }
+                    }
                 </div>
 
                 <div class="activity-detail-block">
