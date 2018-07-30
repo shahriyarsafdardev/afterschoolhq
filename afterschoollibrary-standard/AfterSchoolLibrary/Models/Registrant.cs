@@ -601,33 +601,37 @@ namespace AfterSchoolLibrary
         {
             return AddAnswer(answerText, question, null, loggedInUserId, msgs, dc);
         }
+
         public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            return AddAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUserId, msgs, dc);
+        }
+
+        public FormQuestionAnswer AddAnswer(string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-
 
             //check if answer for this one already exists, and where formquestion is null
             FormQuestionAnswer answer = null;
 
-            if (question.QuestionDataTypeId == QuestionDataType.NotSet)
+            if (questionDataType == QuestionDataType.NotSet)
                 answer = FormQuestionAnswer.LoadByRegistrantIdByFormQuestionIdByRegistrationId(
-                    this.ID.Value, 
-                    question.ID.Value,
-                    registrationId.Value,
-                    msgs, 
-                    dc);
+                    RegistrantId: this.ID.Value,
+                    FormQuestionId: questionId.Value,
+                    RegistrationId: registrationId.Value,
+                    msgs: msgs, 
+                    dc: dc);
             else
-                answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, question.QuestionDataTypeId, msgs, dc);
+                answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, questionDataType, msgs, dc);
 
             if (answer.IsEmpty())
             {
                 answer = new FormQuestionAnswer
                 {
                     RegistrantId = this.ID,
-                    FormQuestionId = question.ID,
-                    QuestionDataTypeId = question.QuestionDataTypeId,
-                    QuestionText = question.Text,
+                    FormQuestionId = questionId.Value,
+                    QuestionDataTypeId = questionDataType,
+                    QuestionText = questionText,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId
                 };

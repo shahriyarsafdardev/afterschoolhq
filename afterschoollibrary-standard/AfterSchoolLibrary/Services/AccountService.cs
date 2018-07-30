@@ -1507,6 +1507,15 @@ namespace AfterSchoolLibrary
                 .FirstOrDefault();
         }
 
+        public static Registrant GetSecondParentOrGuardianRegistrant(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAccountId(account.ID.Value, msgs, dc)
+                .Where(registrant => registrant.IsParentOrGuardian)
+                .OrderBy(registrant => registrant.ID)
+                .Skip(1)
+                .FirstOrDefault();
+        }
+
         public static List<Registrant> GetChildrenRegistrants(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByAccountId(account.ID.Value, msgs, dc)
