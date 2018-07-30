@@ -333,7 +333,7 @@ namespace AfterSchool.Controllers
                 }
 
                 //validate emegercy contact phone 2
-                if ( question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone)
+                if (question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone && question.IsRequired)
                 {
                     if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                     {
@@ -806,7 +806,7 @@ namespace AfterSchool.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantDoctorPhone:
-                        if (!qvmName.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (!qvmName.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx) && question.IsRequired)
                         {
                             msgs.Add($"{question.Text}, valid phone number is required", MessageType.UserError);
                         }
