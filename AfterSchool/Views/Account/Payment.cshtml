@@ -168,8 +168,8 @@
                     // Inform the customer that there was an error.
                     var errorElement = document.getElementById('card-errors');
                     errorElement.textContent = result.error.message;
-                    $('#btn-paywitnewcard').html('Review Purchase');
-                    $('#btn-paywitnewcard').prop('disabled', false);
+                    $('#btn-paywithnewcard').html('Review Purchase');
+                    $('#btn-paywithnewcard').prop('disabled', false);
                 } else {
                     // Send the token to your server.
                     stripeTokenHandler(result.token);
