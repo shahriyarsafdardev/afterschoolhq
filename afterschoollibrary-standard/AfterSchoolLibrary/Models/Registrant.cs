@@ -312,10 +312,11 @@ namespace AfterSchoolLibrary
                 .ToList();
         }
 
-        public FormQuestionAnswer GetAnswer(QuestionDataType questionDataType, DatabaseConnection dc = null)
+        public FormQuestionAnswer GetAnswer(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionAnswer.Load(
                         criterias: new Hashtable() { { "QuestionDataTypeId", (int)questionDataType }, { "RegistrantId", this.ID.Value } }, 
+                        msgs: msgs,
                         dc: dc)
                     .FirstOrDefault();
         }
@@ -595,6 +596,13 @@ namespace AfterSchoolLibrary
             msgs.AddRange(ra.Save(dc: dc));
 
             return ra;
+        }
+
+        public FormQuestionAnswer MapAndAddAnswer(List<FormQuestion> questions, Registrant fromRegistrant, QuestionDataType fromType, QuestionDataType toType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var parentAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
+            var studentQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
+            return this.AddAnswer(parentAnswer.Text, studentQuestion, loggedInUser.ID.Value, msgs, dc);
         }
 
         public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
