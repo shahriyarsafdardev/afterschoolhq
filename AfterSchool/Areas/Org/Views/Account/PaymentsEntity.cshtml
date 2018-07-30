@@ -93,7 +93,7 @@
                         </div>
                     </div>
                 }
-                else if (Model.VerificationStatusId == StripeVerificationStatus.Unverified)
+                else if (Model.VerificationStatusId == StripeVerificationStatus.Unverified && Model.LegalEntitySSNLast4.IsNotBlank())
                 {
                     <div role="alert" class="alert alert-danger alert-icon">
                         <div class="icon">
