@@ -520,40 +520,32 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             Activity activity = null;
-            var scheduleDates = new List<DateRange>();
+            var inSessionDates = new List<DateRange>();
+            var outOfSessionDates = new List<DateTime>();
 
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
                 var values = new Dictionary<string, object>();
 
-                //if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
-                //{
-                //    values = new Dictionary<string, object>()
-                //    {
-                //        { "schedule", schedule }
-                //    };
-                //}
-                //else
-                //{
-                    var filteredParams = Request.Params.Filter("schedulerepeat-");
-                    var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-                    scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
+                var filteredParams = Request.Params.Filter("schedulerepeat-");
+                var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+                inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                    values = new Dictionary<string, object>()
-                    {
-                        { "scheduledetails", scheduledetails},
-                        { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
-                        { "repeatsweekly", repeatsweekly.IfBlank("0") },
-                        { "startdate", startdate },
-                        { "enddate", enddate },
-                        { "dailystarttime", dailystarttime },
-                        { "dailyendtime", dailyendtime },
-                        { "scheduledates", scheduleDates },
-                        { "schedule", schedule }
-                    };
-                    
-                //}
+                values = new Dictionary<string, object>()
+                {
+                    { "scheduledetails", scheduledetails},
+                    { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
+                    { "repeatsweekly", repeatsweekly.IfBlank("0") },
+                    { "startdate", startdate },
+                    { "enddate", enddate },
+                    { "dailystarttime", dailystarttime },
+                    { "dailyendtime", dailyendtime },
+                    { "scheduledates", inSessionDates },
+                    { "scheduledatesclosed", outOfSessionDates },
+                    { "schedule", schedule }
+                };
 
                 activity = Activity.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
@@ -577,7 +569,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                sched = ActivitySchedule.GetNewDefaultSchedule(scheduleDates);
+                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
             }
 
             ViewBag.Messages = msgs;

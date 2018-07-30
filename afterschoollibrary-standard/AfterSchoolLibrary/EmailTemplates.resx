@@ -127,6 +127,15 @@
   <data name="Password_Reset" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\Password-Reset.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="StripeAccount_Verified" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>EmailTemplates\StripeAccount-Verified.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="SubscriptionPayment_Failed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>EmailTemplates\SubscriptionPayment-Failed.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="SubscriptionPayment_Succeeded" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>EmailTemplates\SubscriptionPayment-Succeeded.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Welcome_Purchase" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\Welcome-Purchase.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

@@ -148,7 +148,7 @@ namespace AfterSchool.Models
             }
             if (setupMsgs.HasErrors())
             {
-                setupMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editsetup/{0}\" class=\"publish-error-title\">Settings</a>", activity.Uid), MessageType.UserError));
+                setupMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editsetup/{activity.Uid}\" class=\"publish-error-title\">Settings</a>", MessageType.UserError));
                 msgs.AddRange(setupMsgs);
             }
 
@@ -158,7 +158,7 @@ namespace AfterSchool.Models
             }
             if (scheduleMessages.HasErrors())
             {
-                scheduleMessages.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editschedule/{0}\" class=\"publish-error-title\">Schedule</a>", activity.Uid), MessageType.UserError));
+                scheduleMessages.Insert(0, new SystemMessage($"<a href=\"/org/activity/editschedule/{activity.Uid}\" class=\"publish-error-title\">Schedule</a>", MessageType.UserError));
                 msgs.AddRange(scheduleMessages);
             }
 
@@ -168,7 +168,7 @@ namespace AfterSchool.Models
             }
             if (detailMsgs.HasErrors())
             {
-                detailMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editdetails/{0}\" class=\"publish-error-title\">About Your Activity</a>", activity.Uid), MessageType.UserError));
+                detailMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editdetails/{activity.Uid}\" class=\"publish-error-title\">About Your Activity</a>", MessageType.UserError));
                 msgs.AddRange(detailMsgs);
             }
 
@@ -186,43 +186,27 @@ namespace AfterSchool.Models
             }
             if (contactMsgs.HasErrors())
             {
-                contactMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editcontact/{0}\" class=\"publish-error-title\">Contact Information</a>", activity.Uid), MessageType.UserError));
+                contactMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editcontact/{activity.Uid}\" class=\"publish-error-title\">Contact Information</a>", MessageType.UserError));
                 msgs.AddRange(contactMsgs);
             }
 
-            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(activity.LocationDetails).IsBlank())
+            if (!activity.LocationId.HasValue)
             {
-                locationMsgs.Add("Location Details", MessageType.UserError);
-            }
-            //if (activity.Address1.IsBlank())
-            //{
-            //    locationMsgs.Add("Street Address", MessageType.UserError);
-            //}
-            //if (activity.City.IsBlank())
-            //{
-            //    locationMsgs.Add("City", MessageType.UserError);
-            //}
-            //if (activity.State.IsBlank())
-            //{
-            //    locationMsgs.Add("State", MessageType.UserError);
-            //}
-            //if (activity.PostalCode.IsBlank())
-            //{
-            //    locationMsgs.Add("Postal Code", MessageType.UserError);
-            //}
+                locationMsgs.Add("Activity Location", MessageType.UserError);
+            }            
             if (locationMsgs.HasErrors())
             {
-                locationMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editlocation/{0}\" class=\"publish-error-title\">Location</a>", activity.Uid), MessageType.UserError));
+                locationMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editlocation/{activity.Uid}\" class=\"publish-error-title\">Location</a>", MessageType.UserError));
                 msgs.AddRange(locationMsgs);
             }
 
-            if (activity.CostPerRegistrant.HasValue && activity.CostPerRegistrant.Value > 0 && !activity.AllowToPayLater && !activity.AcceptCreditCard && !activity.AcceptPayPal)
+            if (activity.CostPerRegistrant.HasValue && activity.CostPerRegistrant.Value > 0 && !activity.AllowToPayLater && !activity.AcceptCreditCard)
             {
-                paymentMsgs.Add("Payment Information: Either accept credit cards, paypal, or allow to pay later", MessageType.UserError);
+                paymentMsgs.Add("Payment Information: Either accept credit cards or allow to pay later", MessageType.UserError);
             }
             if (paymentMsgs.HasErrors())
             {
-                paymentMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editcost/{0}\" class=\"publish-error-title\">Payment</a>", activity.Uid), MessageType.UserError));
+                paymentMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editcost/{activity.Uid}\" class=\"publish-error-title\">Payment</a>", MessageType.UserError));
                 msgs.AddRange(paymentMsgs);
             }
 
@@ -243,22 +227,22 @@ namespace AfterSchool.Models
 
             if (confirmationMsgs.HasErrors())
             {
-                confirmationMsgs.Insert(0, new SystemMessage(string.Format("<a href=\"/org/activity/editconfirmation/{0}\" class=\"publish-error-title\">Confirmation Message</a>", activity.Uid), MessageType.UserError));
+                confirmationMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editconfirmation/{activity.Uid}\" class=\"publish-error-title\">Confirmation Message</a>", MessageType.UserError));
                 msgs.AddRange(confirmationMsgs);
             }
 
             if (activity.IsArchived)
             {
-                archiveMsgs.Add(string.Format("<a href=\"/org/activity/restore/{1}\">Restore {0}</a>. It is currently archived", activity.Name, activity.Uid), MessageType.Error);
+                archiveMsgs.Add($"<a href=\"/org/activity/restore/{activity.Uid}\">Restore {activity.Name}</a>. It is currently archived", MessageType.Error);
             }
             if (activity.IsGroupArchived)
             {
-                archiveMsgs.Add(string.Format("<a href=\"/org/group/restore/{1}\">Restore {0}</a>. It is currently archived", activity.GetActivityGroup().Name, activity.GetActivityGroup().Uid), MessageType.Error);
+                archiveMsgs.Add($"<a href=\"/org/group/restore/{activity.GetActivityGroup().Uid}\">Restore {activity.GetActivityGroup().Name}</a>. It is currently archived", MessageType.Error);
             }
 
             if (archiveMsgs.HasErrors())
             {
-                archiveMsgs.Insert(0, new SystemMessage(string.Format("<span class=\"publish-error-title\">Archive Errors<span>", activity.Uid), MessageType.UserError));
+                archiveMsgs.Insert(0, new SystemMessage($"<span class=\"publish-error-title\">Archive Errors<span>", MessageType.UserError));
                 msgs.AddRange(archiveMsgs);
             }
 
@@ -271,7 +255,7 @@ namespace AfterSchool.Models
 
             if (group.IsArchived)
             {
-                msgs.Add(string.Format("<a href=\"/org/group/restore/{1}\">Restore {0}</a>. It is currently archived", group.Name, group.Uid), MessageType.Error);
+                msgs.Add($"<a href=\"/org/group/restore/{group.Uid}\">Restore {group.Name}</a>. It is currently archived", MessageType.Error);
             }
 
             return msgs;

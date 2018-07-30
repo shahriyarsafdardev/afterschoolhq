@@ -16,7 +16,7 @@ namespace AfterSchool.Controllers
         public ActionResult Index(string regaccount)
         {
             var msgs = new SystemMessages();
-            if (SessionVariables.LoggedInUser.IsNotEmpty())
+            if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty() && (regaccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant))
             {
                 return LoginRedirect();
             }

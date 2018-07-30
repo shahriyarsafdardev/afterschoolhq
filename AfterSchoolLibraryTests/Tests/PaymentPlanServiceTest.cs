@@ -26,7 +26,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var activity = ActivityFactory.Create(PlanOwner, msgs, dc);
 
-            var plan = PaymentPlanService.CreateNew(
+            var plan = SubscriptionPlanService.CreateNewPaymentPlan(
                 PlanOwner,
                 ParticipationObjectType.Activity,
                 activity.ID.Value,
@@ -45,7 +45,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var activityGroup = ActivityGroupFactory.Create(PlanOwner, ActivityGroupType.Session, msgs, dc);
 
-            var plan = PaymentPlanService.CreateNew(
+            var plan = SubscriptionPlanService.CreateNewPaymentPlan(
                 PlanOwner,
                 ParticipationObjectType.ActivityGroup,
                 activityGroup.ID.Value,

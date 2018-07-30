@@ -461,40 +461,39 @@ namespace AfterSchoolLibrary
 
         public SubscriptionPlan GetSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var list = SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc);
-            SubscriptionPlan subscriptionPlan = null;
-
-            if (list.Any())
-            {
-                subscriptionPlan = list.First();
-            }
-
-            return subscriptionPlan;
+            // fdafds
+            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).FirstOrDefault();
         }
 
         public bool HasSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).Any();
+            return SubscriptionPlan.GetCount(
+                new Hashtable() {
+                    { "ParticipationObjectId", this.ID.Value },
+                    { "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity },
+                    { "PlanTypeId", (int)SubscriptionPlanType.Subscription }
+                }, 
+                msgs, 
+                dc) > 0;
         }
 
-        public PaymentPlan GetPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public SubscriptionPlan GetPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var list = PaymentPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc);
-            PaymentPlan paymentPlan = null;
-
-            if (list.Any())
-            {
-                paymentPlan = list.First();
-            }
-
-            return paymentPlan;
+            // fdasfsd
+            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).FirstOrDefault();
         }
 
         public bool HasPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return PaymentPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).Any();
+            return SubscriptionPlan.GetCount(
+               new Hashtable() {
+                    { "ParticipationObjectId", this.ID.Value },
+                    { "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity },
+                    { "PlanTypeId", (int)SubscriptionPlanType.PaymentPlan }
+               },
+               msgs,
+               dc) > 0;
         }
-
 
         public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -689,32 +688,12 @@ namespace AfterSchoolLibrary
                 totalErrors++;
             }
             totalFields++;
-            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(LocationDetails).IsBlank())
+            if (!LocationId.HasValue)
             {
                 totalErrors++;
             }
-            //totalFields++;
-            //if (Address1.IsBlank())
-            //{
-            //    totalErrors++;
-            //}
-            //totalFields++;
-            //if (City.IsBlank())
-            //{
-            //    totalErrors++;
-            //}
-            //totalFields++;
-            //if (State.IsBlank())
-            //{
-            //    totalErrors++;
-            //}
-            //totalFields++;
-            //if (PostalCode.IsBlank())
-            //{
-            //    totalErrors++;
-            //}
             totalFields++;
-            if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard && !AcceptPayPal)
+            if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
             {
                 totalErrors++;
             }
@@ -1320,6 +1299,7 @@ namespace AfterSchoolLibrary
             var dailystarttime = values.GetValueOrDefault("dailystarttime");
             var dailyendtime = values.GetValueOrDefault("dailyendtime");
             var scheduledates = values.GetValueOrDefault("scheduledates");
+            var scheduledatesClosed = values.GetValueOrDefault("scheduledatesclosed");
             var schedule = values.GetValueOrDefault("schedule");
             var description = values.GetValueOrDefault("description");
             var hassubscriptionplan = values.GetValueOrDefault("hassubscriptionplan");
@@ -1410,14 +1390,17 @@ namespace AfterSchoolLibrary
             }
             else
             {
-                activity = new Activity();
-                activity.ActivityTypeId = ActivityType.Activity;
-                activity.CreateDate = DateTime.UtcNow;
-                activity.CreatedBy = loggedInUserId;
-                activity.SeatsAvailable = seatsavailable.ToString().ToInteger();
-                activity.WaitingListSeats = waitinglistseats.ToString().ToInteger();
-                activity.AccountId = account.ID;
-                activity.LocationId = account.DefaultLocationId;
+                activity = new Activity
+                {
+                    ActivityTypeId = ActivityType.Activity,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId,
+                    SeatsAvailable = seatsavailable.ToString().ToInteger(),
+                    WaitingListSeats = waitinglistseats.ToString().ToInteger(),
+                    AccountId = account.ID,
+                    LocationId = account.DefaultLocationId,
+                    AcceptCreditCard = true
+                };
 
                 if (group.IsEmpty() && !form.IsNumber())
                 {
@@ -1488,7 +1471,7 @@ namespace AfterSchoolLibrary
             {
                 activity.CostPerRegistrant = cost.ToString().ToDecimal();
             }
-            if (costdescription.IsNotEmpty())
+            if (costdescription != null)
             {
                 activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
             }
@@ -1595,6 +1578,7 @@ namespace AfterSchoolLibrary
                                 account,
                                 schedule.IfEmpty(""), 
                                 (List<DateRange>)scheduledates,
+                                (List<DateTime>)scheduledatesClosed,
                                 scheduledetails.IfEmpty(""),
                                 repeatsweekly.IfEmpty(""), 
                                 startdate.IfEmpty(""), 
@@ -1648,7 +1632,7 @@ namespace AfterSchoolLibrary
                         }
 
                         //setup SubscriptionPlan
-                        if (amsgs.HasNoErrors())
+                        if (amsgs.HasNoErrors() && hassubscriptionplan != null && hassubscriptionplan.ToString().IsBoolean())
                         {
                             amsgs.AddRange(activity.SetupSubscriptionPlan(
                                 account,
@@ -1662,7 +1646,7 @@ namespace AfterSchoolLibrary
                         }
 
                         //setup PaymentPlan
-                        if (amsgs.HasNoErrors())
+                        if (amsgs.HasNoErrors() && haspaymentplan != null && haspaymentplan.ToString().IsBoolean())
                         {
                             amsgs.AddRange(activity.SetupPaymentPlan(
                                 account,
@@ -1691,40 +1675,31 @@ namespace AfterSchoolLibrary
             return activity;
         }
 
-        private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, int loggedInUserId, DatabaseConnection dc = null)
+        private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
             this.ScheduleRequiresAllDays = true;
 
-            //if (account.HasFeature(FeatureType.ManageActivityGroups, msgs, dc) &&
-            //    schedule.IsNumber() &&
-            //    schedule.ToString().ToInteger() > 0 &&
-            //    scheduledates.IsEmpty())
-            //{
-            //    this.ActivityScheduleId = schedule.ToString().ToInteger();
-            //}
-            //else if (scheduledates.IsNotEmpty())
-            //{
-                var newSchedule = Services.ActivityScheduleService.SetupSchedule(
-                    this.AccountId.Value,
-                    schedule.IfEmpty("0").ToInteger(),
-                    $"{this.Name} - Schedule",
-                    scheduledetails.ToString(),
-                    repeatsweekly.ToString(),
-                    startdate.ToString(),
-                    enddate.ToString(),
-                    dailystarttime.ToString(),
-                    dailyendtime.ToString(),
-                    (List<DateRange>)scheduledates,
-                    account,
-                    this.ActivityGroupId,
-                    loggedInUserId,
-                    msgs,
-                    dc);
+            var newSchedule = Services.ActivityScheduleService.SetupSchedule(
+                this.AccountId.Value,
+                schedule.IfEmpty("0").ToInteger(),
+                $"{this.Name} - Schedule",
+                scheduledetails.ToString(),
+                repeatsweekly.ToString(),
+                startdate.ToString(),
+                enddate.ToString(),
+                dailystarttime.ToString(),
+                dailyendtime.ToString(),
+                scheduledates,
+                scheduledatesclosed,
+                account,
+                this.ActivityGroupId,
+                loggedInUserId,
+                msgs,
+                dc);
 
-                this.ActivityScheduleId = newSchedule.ID;
-            //}
+            this.ActivityScheduleId = newSchedule.ID;
 
             msgs.AddRange(this.Save(dc));
 
@@ -1738,11 +1713,11 @@ namespace AfterSchoolLibrary
             // if the subscription plan option(UI) is activated
             if (hassubscriptionplan.ToBoolean())
             {
-                 // if there is no subscription plan active in the DB
-                 // let's create a new one
-                if (!activity.HasSubscriptionPlan())
+                // if there is no subscription plan active in the DB
+                // let's create a new one
+                if (!activity.HasSubscriptionPlan(msgs, dc))
                 {
-                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNew(
+                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscription(
                             account,
                             ParticipationObjectType.Activity,
                             activity.ID.Value,
@@ -1756,16 +1731,16 @@ namespace AfterSchoolLibrary
                 }
                 else
                 {
-                    SubscriptionPlan subscriptionPlan = activity.GetSubscriptionPlan();
+                    var subscriptionPlan = activity.GetSubscriptionPlan(msgs, dc);
 
                     // if the plan is purchased and begin edited
-                    if (subscriptionPlan.IsPurchased() && (subscriptionPlan.CostPerPeriod != Convert.ToDecimal(subscriptionplancost)))// || subscriptionPlan.BillingPeriodTypeId != Convert.ToInt32(subscriptionplanperiod))
+                    if (subscriptionPlan.IsPurchased(msgs, dc) && (subscriptionPlan.CostPerPeriod != subscriptionplancost.ToDecimal()))
                     {
                         // first: desactivate the current plan
-                        subscriptionPlan.Deactivate(loggedInUserId, dc);
+                        msgs.AddRange(subscriptionPlan.Deactivate(loggedInUserId, dc));
 
                         // second: create a new plan
-                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNew(
+                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscription(
                                 account,
                                 ParticipationObjectType.Activity,
                                 activity.ID.Value,
@@ -1791,9 +1766,8 @@ namespace AfterSchoolLibrary
             }
             else if (activity.HasSubscriptionPlan())
             {
-                SubscriptionPlan subscriptionPlan = activity.GetSubscriptionPlan();
-
-                subscriptionPlan.Deactivate(loggedInUserId, dc);
+                var subscriptionPlan = activity.GetSubscriptionPlan();
+                msgs.AddRange(subscriptionPlan.Deactivate(loggedInUserId, dc));
             }
 
             return msgs;
@@ -1808,9 +1782,9 @@ namespace AfterSchoolLibrary
             {
                 // if there is no payment plan active in the DB
                 // let's create a new one
-                if (!activity.HasPaymentPlan())
+                if (!activity.HasPaymentPlan(msgs, dc))
                 {
-                    var paymentPlan = Services.PaymentPlanService.CreateNew(
+                    var paymentPlan = Services.SubscriptionPlanService.CreateNewPaymentPlan(
                         account,
                         ParticipationObjectType.Activity,
                         activity.ID.Value,
@@ -1820,26 +1794,46 @@ namespace AfterSchoolLibrary
                         loggedInUserId,
                         msgs,
                         dc);
-                    msgs.AddRange(paymentPlan.Save(dc));
                 }
                 else
                 {
-                    PaymentPlan subscriptionPlan = activity.GetPaymentPlan();
-                    // update the current plan
-                    subscriptionPlan.LastModifiedBy = loggedInUserId;
-                    subscriptionPlan.LastModifiedDate = DateTime.UtcNow;
-                    subscriptionPlan.CostPerPeriod = paymentplancost.ToDecimal();
-                    subscriptionPlan.TotalPeriods = paymentplanperiodnumber.ToInteger();
-                    subscriptionPlan.BillingPeriodTypeId = (BillingPeriodType)paymentplanperiod.ToInteger();
-                    msgs.AddRange(subscriptionPlan.Save(dc));
+                    var paymentPlan = activity.GetPaymentPlan(msgs, dc);
+
+                    // if the plan is purchased and begin edited
+                    if (paymentPlan.IsPurchased(msgs, dc) && (paymentPlan.CostPerPeriod != paymentplancost.ToDecimal()))
+                    {
+                        // first: desactivate the current plan
+                        msgs.AddRange(paymentPlan.Deactivate(loggedInUserId, dc));
+
+                        // second: create a new plan
+                        var newPaymentPlan = Services.SubscriptionPlanService.CreateNewPaymentPlan(
+                                account,
+                                ParticipationObjectType.Activity,
+                                activity.ID.Value,
+                                paymentplancost.ToDecimal(),
+                                (BillingPeriodType)paymentplanperiod.ToInteger(),
+                                paymentplanperiodnumber.ToInteger(),
+                                loggedInUserId,
+                                msgs,
+                                dc
+                            );
+                    }
+                    else
+                    {
+                        // update the current plan
+                        paymentPlan.LastModifiedBy = loggedInUserId;
+                        paymentPlan.LastModifiedDate = DateTime.UtcNow;
+                        paymentPlan.CostPerPeriod = paymentplancost.ToDecimal();
+                        paymentPlan.BillingPeriodTypeId = (BillingPeriodType)paymentplanperiod.ToInteger();
+                        msgs.AddRange(paymentPlan.SaveWithStripe(dc));
+                    }
                 }
 
             }
-            else if (activity.HasPaymentPlan())
+            else if (activity.HasPaymentPlan(msgs, dc))
             {
-                PaymentPlan paymentPlan = activity.GetPaymentPlan();
-
-                paymentPlan.Deactivate(loggedInUserId, dc);
+                var paymentPlan = activity.GetPaymentPlan(msgs, dc);
+                msgs.AddRange(paymentPlan.Deactivate(loggedInUserId, dc));
             }
 
             return msgs;

@@ -265,7 +265,7 @@ namespace AfterSchoolLibrary
             return rtnName;
         }
 
-        public static ActivitySchedule EditExisting(string scheduleId, string scheduleName, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivitySchedule EditExisting(string scheduleId, string scheduleName, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             ActivitySchedule schedule = null;
@@ -284,6 +284,7 @@ namespace AfterSchoolLibrary
                         dailyStartTime: dailyStartTime,
                         dailyEndTime: dailyEndTime,
                         scheduleDates: scheduleDates,
+                        scheduleDatesClosed: scheduleDatesClosed,
                         loggedInUserId: loggedInUserId,
                         dc: adc)); 
                 },
@@ -334,17 +335,18 @@ namespace AfterSchoolLibrary
             return schedule;
         }
 
-        public ActivityInstance AddInstance(DateRange dateRange, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public ActivityInstance AddInstance(DateRange dateRange, InstanceType instanceType, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddInstance(dateRange.StartDate, dateRange.EndDate, loggedInUserId, msgs, dc);
+            return AddInstance(dateRange.StartDate, dateRange.EndDate, instanceType, loggedInUserId, msgs, dc);
         }
 
-        public ActivityInstance AddInstance(DateTime startDateTime, DateTime endDateTime, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public ActivityInstance AddInstance(DateTime startDateTime, DateTime endDateTime, InstanceType instanceType, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var instance = new ActivityInstance();
             instance.ActivityScheduleId = this.ID;
             instance.StartDateTime = startDateTime;
             instance.EndDateTime = endDateTime;
+            instance.InstanceTypeId = instanceType;
             instance.CreateDate = instance.LastModifiedDate = DateTime.UtcNow;
             instance.CreatedBy = instance.LastModifiedBy = loggedInUserId;
             instance.Day = instance.StartDateTime.Value.DayOfWeek.ToDayOfWeekASL();
@@ -353,7 +355,7 @@ namespace AfterSchoolLibrary
             return instance;
         }
 
-        public SystemMessages UpdateScheduleAndInstances(string name, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages UpdateScheduleAndInstances(string name, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -368,18 +370,20 @@ namespace AfterSchoolLibrary
             this.CreatedBy = this.LastModifiedBy = loggedInUserId;
             msgs.AddRange(this.Save(dc: dc));
 
-            msgs.AddRange(UpdateInstances(scheduleDates, loggedInUserId, dc));
+            msgs.AddRange(UpdateInstances(scheduleDates, scheduleDatesClosed, loggedInUserId, dc));
 
             return msgs;
         }
 
-        public SystemMessages UpdateInstances(List<DateRange> scheduleDates, int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages UpdateInstances(List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var existingInstances = this.GetInstances(false, dc: dc);
+            var existingInstances = this.GetInstances(false, msgs, dc);
 
-            // delete instances
+            // IN SESSION
+            // delete in session instances
             existingInstances
+                .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
                 .Where(instance => !scheduleDates
                     .Where(dateRange => 
                         dateRange.StartDate == instance.StartDateTime.Value && 
@@ -390,28 +394,57 @@ namespace AfterSchoolLibrary
                 .ToList()
                 .ForEach(instance => msgs.AddRange(instance.Delete(dc)));
 
-            // add new instances
+            // add new in session instances
             scheduleDates
                 .Where(dateRange => 
                     !existingInstances
+                        .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
                         .Where(instance => 
                             instance.StartDateTime.Value == dateRange.StartDate && 
                             instance.EndDateTime.Value == dateRange.EndDate
                         )
                         .Any())
                 .ToList()
-                .ForEach(dateRange => this.AddInstance(dateRange, loggedInUserId, msgs, dc: dc));            
+                .ForEach(dateRange => this.AddInstance(dateRange, InstanceType.InSession, loggedInUserId, msgs, dc));
 
-            msgs.AddRange(this.ValidateInstances(dc));
+            // OUT OF SESSION
+            // delete out of session instances
+            existingInstances
+                .Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession)
+                .Where(instance => !scheduleDatesClosed
+                    .Where(date =>
+                        date == instance.StartDateTime.Value
+                    )
+                    .Any()
+                 )
+                .ToList()
+                .ForEach(instance => msgs.AddRange(instance.Delete(dc)));
+
+            // add new out of session instances
+            scheduleDatesClosed
+                .Where(date =>
+                    !existingInstances
+                        .Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession)
+                        .Where(instance =>
+                            instance.StartDateTime.Value == date
+                        )
+                        .Any())
+                .ToList()
+                .ForEach(date => this.AddInstance(new DateRange(date, date), InstanceType.OutOfSession, loggedInUserId, msgs, dc));
+
+
+            msgs.AddRange(this.ValidateInSessionInstances(dc));
 
             return msgs;
         }
 
-        public SystemMessages ValidateInstances(DatabaseConnection dc = null)
+        public SystemMessages ValidateInSessionInstances(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             // get all instances currently saved in the transaction
-            var updatedInstances = this.GetInstances(forceReload: true, dc: dc);
+            var updatedInstances = this.GetInstances(true, msgs, dc)
+                                    .Where(x => x.InstanceTypeId == InstanceType.InSession)
+                                    .ToList();
 
             // check for dates where end time is less than start time
             if (updatedInstances.Where(x => !x.GetDateRange().IsValid()).Any())
@@ -483,6 +516,7 @@ namespace AfterSchoolLibrary
                             copy.AddInstance(
                                 instance.StartDateTime.Value, 
                                 instance.EndDateTime.Value, 
+                                instance.InstanceTypeId,
                                 loggedInUserId, 
                                 amsgs, 
                                 adc)

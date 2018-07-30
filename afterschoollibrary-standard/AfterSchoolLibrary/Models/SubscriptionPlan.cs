@@ -37,7 +37,12 @@ namespace AfterSchoolLibrary
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		public bool DoesAutoRenew { get { return (bool)MDV["DoesAutoRenew"].Value; } set { MDV["DoesAutoRenew"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-		public string StripeSubscriptionId { get { return (string)MDV["StripeSubscriptionId"].Value; } set { MDV["StripeSubscriptionId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public int? TotalPeriods { get { return (int?)MDV["TotalPeriods"].Value; } set { MDV["TotalPeriods"].Value = value; } }
+		public string StripePlanId { get { return (string)MDV["StripePlanId"].Value; } set { MDV["StripePlanId"].Value = value; } }
+		public SubscriptionPlanType PlanTypeId { get { return (SubscriptionPlanType)MDV["PlanTypeId"].Value; } set { MDV["PlanTypeId"].Value = value; } }
 		
 
         public SubscriptionPlan()
@@ -48,6 +53,7 @@ namespace AfterSchoolLibrary
 			this.BillingPeriodTypeId = BillingPeriodType.NotSet;
 			this.DoesAutoRenew = false;
 			this.IsActive = false;
+			this.PlanTypeId = SubscriptionPlanType.NotSet;
 			
         }
 
@@ -65,7 +71,9 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DoesAutoRenew", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "TotalPeriods", System.Data.SqlDbType.Int);
+				_dp.Add(className, "StripePlanId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "PlanTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -125,6 +133,8 @@ namespace AfterSchoolLibrary
 				msgs.Add("PlanOwnerAccountId is required on SubscriptionPlan object", MessageType.Error);
 			if (this.CostPerPeriod.IsEmpty())
 				msgs.Add("CostPerPeriod is required on SubscriptionPlan object", MessageType.Error);
+			if (this.TotalPeriods.IsEmpty())
+				msgs.Add("TotalPeriods is required on SubscriptionPlan object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(SubscriptionPlan).Name));
@@ -176,7 +186,15 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripeSubscriptionId"]);
+			dps.Add(ObjectMap["TotalPeriods"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripePlanId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PlanTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -189,12 +207,13 @@ namespace AfterSchoolLibrary
 			return SubscriptionPlan.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<SubscriptionPlan> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<SubscriptionPlan> LoadByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SubscriptionPlanType PlanTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
 			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
+			dq.Criterias.Add(ObjectMap["PlanTypeId"], PlanTypeId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -214,7 +233,7 @@ namespace AfterSchoolLibrary
 
         public bool IsPurchased(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantSubscriptionPlan.LoadBySubscriptionPlanId(this.ID.Value, msgs, dc).Any();
+            return RegistrantSubscriptionPlan.GetCount(new Hashtable() { { "SubscriptionPlanId", this.ID.Value } }, msgs, dc) > 0;
         }
 
         public static List<SubscriptionPlan> LoadActiveByParticipationObject(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -227,15 +246,35 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public void Deactivate(int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages Deactivate(int loggedInUserId, DatabaseConnection dc = null)
         {
             this.IsActive = false;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
-            this.Save(dc);
+            return this.Save(dc);
         }
 
-       private SubscriptionPlan CopyFields()
+        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.Load(this.ParticipationObjectId.Value, msgs, dc);
+        }
+
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
+        }
+
+        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(this.PlanOwnerAccountId.Value, msgs, dc);
+        }
+
+        public string GetNickName(Activity activity)
+        {
+            return $"{activity.Name} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
+        }
+
+        private SubscriptionPlan CopyFields()
         {
             return new SubscriptionPlan()
             {
@@ -246,7 +285,9 @@ namespace AfterSchoolLibrary
                 BillingPeriodTypeId = this.BillingPeriodTypeId,
                 DoesAutoRenew = this.DoesAutoRenew,
                 IsActive = this.IsActive,
-                StripeSubscriptionId = this.StripeSubscriptionId
+                StripePlanId = this.StripePlanId,
+                PlanTypeId = this.PlanTypeId,
+                TotalPeriods = this.TotalPeriods
             };
         }
 
@@ -279,6 +320,62 @@ namespace AfterSchoolLibrary
            );
 
             return copy;
+        }
+
+        public SystemMessages SaveWithStripe(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            msgs.AddRange(this.Save(dc));
+
+            if (msgs.HasErrors())
+                return msgs;
+
+            var activity = this.GetActivity(msgs, dc);
+            var account = activity.GetAccount(msgs, dc);
+
+            // do stripe
+            Stripe.StripeProduct product = Billing.StripeHelper.GetProduct(activity.Uid.ToString(), account.StripeUserId, msgs);
+
+            if (product.IsEmpty())
+            {
+                product = Billing.StripeHelper.CreateProduct(
+                    activity.Uid.ToString(),
+                    activity.Name,
+                    activity.UniqueName,
+                    this.IsActive,
+                    account.StripeUserId,
+                    msgs);
+            }
+
+            if (msgs.HasErrors())
+                return msgs;
+
+            Stripe.StripePlan plan = null;
+
+            if (this.StripePlanId.IsNotEmpty())
+            {
+                plan = Billing.StripeHelper.GetPlan(this.StripePlanId, account.StripeUserId, msgs);
+                Billing.StripeHelper.UpdatePlan(this.StripePlanId, plan.Nickname, plan.Active, account.StripeUserId, msgs);
+            }
+            else
+            {
+                plan = Billing.StripeHelper.CreatePlan(
+                    product,
+                    null,
+                    this.CostPerPeriod.Value,
+                    this.BillingPeriodTypeId,
+                    this.GetNickName(activity),
+                    account.StripeUserId,
+                    msgs
+                    );
+            }
+
+            // update stripe plan id
+            this.StripePlanId = plan.Id;
+            msgs.AddRange(this.Save(dc));
+
+            return msgs;
         }
 
         #endregion

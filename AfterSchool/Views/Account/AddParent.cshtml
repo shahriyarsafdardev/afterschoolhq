@@ -9,10 +9,14 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div>
-    <h1>Get Started</h1>
+<div class="reg-header">
     <div>
-        Please enter your student information below
+        @foreach (var item in cart.GetCartItems())
+        {
+            <div>
+                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
+            </div>
+        }
     </div>
 </div>
 
@@ -22,31 +26,20 @@
             <div class="panel-body">
 
                 <div>
-                    <h3>Add a student</h3>
-                    <div>
-                        @foreach (var item in cart.GetCartItems())
-                        {
-                            <div>
-                                You are registering for: @item.GetParticipationObject().Name
-                            </div>
-                        }
+                    <div class="row">
+                        <a href="@Url.Action("addstudent", "account")" class="btn btn-default pull-right">Skip to Add Student &raquo;</a>
                     </div>
-                    <form class="form-horizontal" method="post" action="@Url.Action("addstudent", "account")">
+                    <h3 class="text-center reg-instructions"><strong>Additional Parent Information</strong></h3>
+
+                    <form class="form-horizontal" id="add-parent-form" method="post" action="@Url.Action("addparent", "account")">
 
                         @foreach (var qvm in Model)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }
 
-                        @{ 
-                            Html.RenderPartial(
-                               "~/Views/Shared/_LocationEdit.cshtml",
-                               school,
-                               new ViewDataDictionary() { { "label", "Enter your school" }, { "searchOnly", true }, { "placeholderText", "Enter your school name" } });
-                        }
-
                         <div class="padding-v-20">
-                            <button type="submit" class="btn btn-xl center-block btn-primary">Continue &raquo;</button>
+                            <button type="submit" id="btn-add-student" class="btn btn-xl center-block btn-register">Save &amp; Continue &raquo;</button>
                         </div>
 
                     </form>
@@ -55,3 +48,12 @@
         </div>
     </div>
 </div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#add-parent-form').submit(function () {
+            $('#btn-add-parent').html('Saving Parent Info...');
+            $('#btn-add-parent').prop('disabled', true);
+        });
+    });
+</script>

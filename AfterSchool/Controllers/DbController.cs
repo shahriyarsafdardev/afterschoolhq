@@ -16,14 +16,16 @@ namespace AfterSchool.Controllers
     {
         public ActionResult Update(string id)
         {
+            if (Request.UserHostAddress == "::1")
+            {
+                var msgs = new SystemMessages();
 
-            var msgs = new SystemMessages();
-            msgs.AddRange(AfterSchoolLibrary.Utilities.InitDatabase("darye@afterschool.com", "help students learn", "317-316-0596", false, "AfterSchool HQ"));
-            
-            Response.Clear();
-            Response.Write(msgs.RenderMessageList(MessageOutputType.Text));
-            Response.End();
+                msgs.AddRange(AfterSchoolLibrary.Utilities.InitDatabase("darye@afterschool.com", "help students learn", "317-316-0596", false, "AfterSchool HQ"));
 
+                Response.Clear();
+                Response.Write(msgs.RenderMessageList(MessageOutputType.Text));
+                Response.End();
+            }
             return View();
         }
     }

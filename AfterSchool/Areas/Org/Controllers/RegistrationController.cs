@@ -71,7 +71,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             registrations = SessionVariables.CurrentAccount.SearchRegistrations(q, questionId, groupIds, activityIds, registrationStatus, rat, start, length);
-            totalCount = SessionVariables.CurrentAccount.SearchRegistrationCount(q, questionId, groupIds, activityIds, registrationStatus, rat);                               
+            totalCount = SessionVariables.CurrentAccount.SearchRegistrationCount(q, questionId, groupIds, activityIds, registrationStatus, rat);                 
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.LoggedInUser, false, false).OrderBy(x => x.Name).ToList();

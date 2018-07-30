@@ -58,6 +58,9 @@
     <Reference Include="AWSSDK.S3, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
       <HintPath>..\packages\AWSSDK.S3.3.3.20\lib\net45\AWSSDK.S3.dll</HintPath>
     </Reference>
+    <Reference Include="ByteSize, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ByteSize.1.3.0\lib\net45\ByteSize.dll</HintPath>
+    </Reference>
     <Reference Include="CsvHelper, Version=7.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>..\packages\CsvHelper.7.1.0\lib\net45\CsvHelper.dll</HintPath>
     </Reference>
@@ -109,8 +112,8 @@
       <HintPath>..\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Stripe.net, Version=16.10.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Stripe.net.16.10.0\lib\net45\Stripe.net.dll</HintPath>
+    <Reference Include="Stripe.net, Version=17.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Stripe.net.17.6.0\lib\net45\Stripe.net.dll</HintPath>
     </Reference>
     <Reference Include="StyleCop, Version=4.7.1000.0, Culture=neutral, PublicKeyToken=f904653c63bc2738, processorArchitecture=MSIL">
       <HintPath>..\packages\StyleCop.4.7.55\lib\net35\StyleCop.dll</HintPath>
@@ -138,6 +141,12 @@
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Http, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.2\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.2\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\System.Web.Mvc.dll</HintPath>
@@ -235,6 +244,7 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
@@ -260,6 +270,8 @@
     <Compile Include="Areas\Org\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
+    <Compile Include="Areas\StripeHooks\Controllers\ReceiveController.cs" />
+    <Compile Include="Areas\StripeHooks\StripeHooksAreaRegistration.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
     <Compile Include="Areas\User\Controllers\ProfileController.cs" />
     <Compile Include="Areas\User\UserAreaRegistration.cs" />
@@ -746,7 +758,7 @@
     <Content Include="Areas\Org\Views\League\PublishDetail.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsBank.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsEntity.cshtml" />
-    <Content Include="Areas\Org\Views\Account\PaymentsTOS.cshtml" />
+    <Content Include="Areas\StripeHooks\Views\web.config" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -792,7 +804,6 @@
     <Content Include="Areas\Org\Views\Activity\Messages.cshtml" />
     <Content Include="Areas\Org\Views\Activity\MessageDetail.cshtml" />
     <Content Include="Areas\Org\Views\Activity\MessageAdd.cshtml" />
-    <Content Include="Areas\Org\Views\Account\Payments.cshtml" />
     <Content Include="Areas\Org\Views\User\Edit.cshtml" />
     <Content Include="Areas\Org\Views\User\Index.cshtml" />
     <Content Include="Areas\Org\Views\User\Invite.cshtml" />
@@ -1169,6 +1180,7 @@
     <Content Include="Views\Shared\_ZendeskWidget.cshtml" />
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
     <Content Include="Views\Account\AddParent.cshtml" />
+    <Content Include="Views\Shared\Registration\_RegisterButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1176,6 +1188,9 @@
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
     <Folder Include="Areas\District\Models\" />
     <Folder Include="Areas\Org\Models\" />
+    <Folder Include="Areas\StripeHooks\Models\" />
+    <Folder Include="Areas\StripeHooks\Views\Shared\" />
+    <Folder Include="Areas\StripeHooks\Views\Test\" />
     <Folder Include="Areas\User\Models\" />
     <Folder Include="Views\User\" />
   </ItemGroup>
@@ -1237,9 +1252,9 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    <Error Condition="!Exists('..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets'))" />
+    <Error Condition="!Exists('..\packages\NETStandard.Library.2.0.1\build\netstandard2.0\NETStandard.Library.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NETStandard.Library.2.0.1\build\netstandard2.0\NETStandard.Library.targets'))" />
   </Target>
-  <Import Project="..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />
+  <Import Project="..\packages\NETStandard.Library.2.0.1\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.1\build\netstandard2.0\NETStandard.Library.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

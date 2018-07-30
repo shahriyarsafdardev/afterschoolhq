@@ -123,13 +123,14 @@
                             locationList.html('');
 
                             for (let location of data.locations) {
+                                let addressEscaped = location.FullAddress.replace(/'/g, "\\'");
                                 locationList.append(`
                                     <div class="${listItemClass}" 
                                         style="${listItemStyle}" 
                                         id="location-${location.ID}" 
                                         onmouseover="${listItemOnMouseOver}(${location.ID})" 
                                         onmouseout="${listItemOnMouseOut}(${location.ID})" 
-                                        onclick="${listItemOnClick}(${location.ID},'${location.FullAddress}','${location.HostAccountId}','${location.LocationType}')">
+                                        onclick="${listItemOnClick}(${location.ID},'${addressEscaped}','${location.HostAccountId}','${location.LocationType}')">
                                         <strong>${location.FullAddress}</strong>
                                     </div>`);
                             }

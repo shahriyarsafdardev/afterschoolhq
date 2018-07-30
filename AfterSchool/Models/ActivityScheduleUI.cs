@@ -23,6 +23,29 @@ namespace AfterSchool.Models
             return days;
         }
 
+        public static List<DateTime> PrepScheduleDatesClosed(NameValueCollection closedMeetingDates)
+        {
+            var scheduleDates = new List<DateTime>();
+
+            for (var i = 1; i <= 30; i++)
+            {
+                var meetingStartDate = closedMeetingDates["meeting-closed-date-" + i];
+                var meetingInUse = closedMeetingDates["meeting-closed-inuse-" + i];
+
+                if (meetingInUse.IsBoolean() && meetingInUse.ToBoolean() && meetingStartDate.IsDateTime())
+                {
+                    var dateAlreadyExists = scheduleDates.Where(date => date == meetingStartDate.ToDateTime()).Any();
+
+                    if (!dateAlreadyExists)
+                    {
+                        scheduleDates.Add(meetingStartDate.ToDateTime());
+                    }
+                }
+            }
+
+            return scheduleDates;
+        }
+
         public static List<DateRange> PrepScheduleDates(string repeatsweekly, List<DayOfWeekASL> days, string startdate, string enddate, string dailystarttime, string dailyendtime, NameValueCollection meetingDates)
         {
             var scheduleDates = new List<DateRange>();
@@ -45,13 +68,13 @@ namespace AfterSchool.Models
             }
             else
             {
-                for (var i = 1; i <= 50; i++)
+                for (var i = 1; i <= 30; i++)
                 {
-                    var meetingStartDate = meetingDates["meeting-date-" + i];
-                    var meetingEndDate = meetingDates["meeting-date-" + i];
-                    var meetingStartTime = meetingDates["meeting-starttime-" + i];
-                    var meetingEndTime = meetingDates["meeting-endtime-" + i];
-                    var meetingInUse = meetingDates["meeting-inuse-" + i];
+                    var meetingStartDate = meetingDates["meeting-open-date-" + i];
+                    var meetingEndDate = meetingDates["meeting-open-date-" + i];
+                    var meetingStartTime = meetingDates["meeting-open-starttime-" + i];
+                    var meetingEndTime = meetingDates["meeting-open-endtime-" + i];
+                    var meetingInUse = meetingDates["meeting-open-inuse-" + i];
 
                     if (meetingInUse.IsBoolean() && meetingInUse.ToBoolean() && meetingStartDate.IsDateTime())
                     {

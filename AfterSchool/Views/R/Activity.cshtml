@@ -26,13 +26,7 @@
                         </h3>
                     </div>
                     <div class="col-lg-4 col-md-12">
-                        <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
-                            <span>
-                                @ParticipationObjectUI.PrintRegistrationFee(Model)
-                            </span>
-                            &bull;
-                            @Model.RegistrationMode.ToString() &raquo;
-                        </a>
+                        @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model, new ViewDataDictionary() { { "condensed", true } }); }
                     </div>
                 </div>
             </div>
@@ -50,23 +44,45 @@
                 </div>
 
                 <div class="activity-detail-block">
-                    <h3>Location <i class="s7-map-marker"></i></h3>
+                    <h3>Location <a href="@Model.Location.GetGoogleMapsLink()" target="_blank"><i class="s7-map-marker"></i></a></h3>
                     <p>
-                        @Html.Raw(ParticipationObjectUI.PrintLocation(Model))
+                        <a href="@Model.Location.GetGoogleMapsLink()" target="_blank">@ParticipationObjectUI.PrintLocation(Model)</a>
                     </p>
                 </div>
 
                 <div class="activity-detail-block">
                     <h3>Cost</h3>
                     <p>
-                        Registration Fee: @ParticipationObjectUI.PrintRegistrationFee(Model) / Student
-                    </p>
+                        Registration Fee payment options:
+                        <ul>
+                            <li>1 payment of @ParticipationObjectUI.PrintRegistrationFee(Model)</li>
+                            @if (Model.PaymentPlans.Any())
+                            {
+                                foreach(var plan in Model.PaymentPlans)
+                                {
+                                    <li>@plan.TotalPeriods payments of @plan.CostPerPeriod.ToCurrency() each @plan.BillingPeriodTypeId.ToString()</li>
+                                }
+                            }
+                        </ul>
+                    </p>                    
+
+                    @if (Model.SubscriptionPlans.Any())
+                    {
+                        <p>
+                            @foreach(var plan in Model.SubscriptionPlans)
+                            {
+                                <span>@plan.CostPerPeriod.ToCurrency() every @plan.BillingPeriodTypeId.ToString()</span>
+                            }
+                        </p>
+                    }
+                    
                     @if (Model.CostDescription.IsNotEmpty())
                     {
                         <p>
                             @Model.CostDescription
                         </p>
                     }
+
                 </div>
 
                 <div class="activity-detail-block">
@@ -79,13 +95,7 @@
                 </div>
 
                 <div class="margin-10">
-                    <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
-                        <span>
-                            @ParticipationObjectUI.PrintRegistrationFee(Model)
-                        </span>
-                        &bull;
-                        @Model.RegistrationMode.ToString() &raquo;
-                    </a>
+                    @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
                 </div>
 
             </div>

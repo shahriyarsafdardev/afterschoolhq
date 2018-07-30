@@ -255,7 +255,9 @@ namespace AfterSchoolLibrary
             {
                 ID = this.FormQuestionFormQuestionGroupId,
                 Name = this.FormQuestionGroupName,
-                DisplayOrder = this.FormQuestionGroupDisplayOrder               
+                DisplayOrder = this.FormQuestionGroupDisplayOrder,
+                QuestionGroupDataTypeId = this.FormQuestionGroupQuestionGroupDataTypeId
+                
             };
         }
 

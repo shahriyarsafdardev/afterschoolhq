@@ -307,7 +307,7 @@ namespace AfterSchoolLibrary
             try
             {
                 msgs.AddRange(AdditionalData(dc));
-
+                msgs.AddRange(UpdateRegistrations2(dc));
                 //msgs.AddRange(UpdateAccountFeatures(dc: dc));
                 //msgs.AddRange(UpdateLocations(dc: dc));
                 //msgs.AddRange(UpdateQuestionGroups(dc: dc));
@@ -341,6 +341,23 @@ namespace AfterSchoolLibrary
             {
                 Database.EndTransaction(dc, msgs);
             }
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateRegistrations2(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var registrations = Registration.Load(
+                criterias: new Hashtable() { { "CompletionStatusId", 0 } },                 
+                msgs: msgs, 
+                dc: dc);
+
+            registrations.ForEach(registration => {
+                registration.CompletionStatusId = RegistrationCompletionStatus.Completed;
+                msgs.AddRange(registration.Save(dc));
+            });
 
             return msgs;
         }
