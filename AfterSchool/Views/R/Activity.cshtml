@@ -74,7 +74,7 @@
                             </ul>
                         </p>                    
 
-                        @if (Model.SubscriptionPlans.Any())
+                        if (Model.SubscriptionPlans.Any())
                         {
                             <p>
                                 @foreach (var plan in Model.SubscriptionPlans)
@@ -84,7 +84,7 @@
                             </p>
                         }
 
-                        @if (Model.CostDescription.IsNotEmpty())
+                        if (Model.CostDescription.IsNotEmpty())
                         {
                             <p>
                                 @Model.CostDescription
