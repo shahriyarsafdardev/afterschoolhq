@@ -227,7 +227,7 @@ namespace AfterSchoolLibrary
                     .OrderBy(x => x.StartDateTime)
                     .ToList();
 
-            return _instances;
+            return _instances ?? new List<ActivityInstance>();
         }
         
         public static ActivitySchedule LoadByAccountIdByName(int AccountId, string Name, SystemMessages msgs = null, DatabaseConnection dc = null)
