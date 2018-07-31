@@ -407,8 +407,9 @@ namespace AfterSchool.Areas.District.Controllers
         [ValidateInput(false)]
         // GET: District/School
         [HttpGet]
-        public ActionResult Schedule(string pn, string rpp)
+        public ActionResult Schedule(string id, string pn, string rpp)
         {
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
             int pageNumber = 1;
             int recordsPerPage = 10;
 
@@ -433,7 +434,7 @@ namespace AfterSchool.Areas.District.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-            return View(visitorAccounts);
+            return View(group);
         }
 
         [HttpGet]
