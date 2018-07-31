@@ -10,10 +10,10 @@
         </div>
         <div class="col-md-6 col-sm-6 col-xs-12">
             <div class="btn-group pull-right">
-                @if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() && !Request.Url.AbsolutePath.IsSameAs(SessionVariables.RegistrationStartPageAccount.HomePageUrl))
+                @if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() && !Request.Url.ToString().IsSameAs($"{SessionVariables.RegistrationStartPageAccount.HomePageUrl}/browse"))
                 {
                     <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-link">
-                        @SessionVariables.RegistrationStartPageAccount.Name Home
+                        &laquo; Return to @SessionVariables.RegistrationStartPageAccount.Name Home
                     </a>
                 }
                 @if (SessionVariables.LoggedInUser.IsNotEmpty())
