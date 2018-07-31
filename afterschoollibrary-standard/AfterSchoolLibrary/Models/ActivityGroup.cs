@@ -759,19 +759,23 @@ namespace AfterSchoolLibrary
                     {
                         if (form.ToString().ToInteger() == 0)
                         {
-                            var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, msgs, adc);
-                            var newForm = defaultForm.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, adc);
+                            var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, amsgs, adc);
+                            var newForm = defaultForm.Copy(loggedInUser.ID.Value, account.ID.Value, amsgs, adc);
                             newForm.Name = (group.Name + " Form").MaxChars(100, "...");
-                            msgs.AddRange(newForm.Save(adc));
+                            amsgs.AddRange(newForm.Save(adc));
 
                             group.FormId = newForm.ID;
+                        }
+                        else
+                        {
+                            group.FormId = form.ToString().ToInteger();
                         }
 
                         group.AccountId = account.ID;
                         group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, amsgs, adc);
                         group.LastModifiedDate = DateTime.UtcNow;
                         group.LastModifiedBy = loggedInUser.ID;
-                        msgs.AddRange(group.Save(adc));
+                        amsgs.AddRange(group.Save(adc));
                         
                         group.GetActivities(false, false, null, null, false, adc)
                         .ForEach(activity => {
@@ -779,17 +783,17 @@ namespace AfterSchoolLibrary
                             activity.GenderRestriction = group.GenderRestriction;
 
                             for (var i = group.MinGradeLevelId.Value; i <= group.MaxGradeLevelId.Value; i++)
-                                activity.AddGrade(i, loggedInUser.ID.Value, msgs, dc);
+                                activity.AddGrade(i, loggedInUser.ID.Value, amsgs, adc);
                             
-                            msgs.AddRange(activity.Save(adc));
+                            amsgs.AddRange(activity.Save(adc));
                         });
 
                         if (isNew)
                         {
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUser.ID.Value, msgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUser.ID.Value, msgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUser.ID.Value, msgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUser.ID.Value, msgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUser.ID.Value, amsgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUser.ID.Value, amsgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUser.ID.Value, amsgs, adc);
+                            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUser.ID.Value, amsgs, adc);
                         }
 
                         // setup schedule
@@ -797,16 +801,16 @@ namespace AfterSchoolLibrary
                         {
                             amsgs.AddRange(group.SetupSchedule(
                                 account,
-                                schedule.ToString(),
+                                schedule.IfEmpty(""),
                                 (List<DateRange>)scheduledates,
-                                scheduledetails.ToString(),
-                                repeatsweekly.ToString(),
-                                startdate.ToString(),
+                                scheduledetails.IfEmpty(""),
+                                repeatsweekly.IfEmpty(""),
+                                startdate.IfEmpty(""),
                                 enddate.ToString(),
-                                dailystarttime.ToString(),
-                                dailyendtime.ToString(),
+                                dailystarttime.IfEmpty(""),
+                                dailyendtime.IfEmpty(""),
                                 loggedInUser.ID.Value,
-                                dc));
+                                adc));
                         }
 
                         //instances & schedule

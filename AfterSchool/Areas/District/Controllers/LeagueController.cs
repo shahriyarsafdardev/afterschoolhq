@@ -384,6 +384,8 @@ namespace AfterSchool.Areas.District.Controllers
             var msgs = new SystemMessages();
             var scheduleDates = new List<DateRange>();
 
+            
+
             var values = new Dictionary<string, object>()
             {
                 { "name", name },
@@ -406,7 +408,6 @@ namespace AfterSchool.Areas.District.Controllers
                 var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
                 scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
 
-                values = new Dictionary<string, object>();
                 values.Add("scheduledetails", scheduledetails);
                 values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
                 values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
