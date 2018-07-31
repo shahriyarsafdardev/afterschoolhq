@@ -1182,6 +1182,8 @@
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
     <Content Include="Views\Account\AddParent.cshtml" />
     <Content Include="Views\Shared\Registration\_RegisterButton.cshtml" />
+    <Content Include="Views\Shared\Registration\_AccountTopBar.cshtml" />
+    <Content Include="Views\Shared\Registration\_LoginModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

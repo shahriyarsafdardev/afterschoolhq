@@ -515,6 +515,10 @@ div.filter-full-width > span {
     padding-right: 20px;
 }
 
+.panel-full-dark {
+    background-color: #2f3c40;
+}
+
 /* new */
 
 .trial-header{

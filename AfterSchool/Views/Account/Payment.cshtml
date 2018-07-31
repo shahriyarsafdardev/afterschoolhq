@@ -11,6 +11,8 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml"); }
+
 <div class="reg-header">
     <h1>@participationObject.Name Payment</h1>
     <div>
@@ -25,29 +27,32 @@
 
                 <h4 class="text-center reg-instructions"><strong>Checkout</strong></h4>
 
-                <div class="row padding-30">
-                    <div class="col-md-6 col-md-offset-3 col-sm-12 ">
-                        <p class="text-medium">
-                            Choose a payment option:
-                        </p>
-                        <div class="am-radio">
-                            <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" />
-                            <label for="paymentoption-0">Pay @participationObject.Cost.ToCurrency() Today</label>
-                        </div>
-
-                        @foreach (var plan in participationObject.PaymentPlans)
-                        {
-                            <div class="am-radio inline">
-                                <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
-                                <label for="paymentoption-@plan.ID">
-                                    Pay @plan.CostPerPeriod.ToCurrency() Today and 
-                                    @(plan.TotalPeriods - 1) more payments of @plan.CostPerPeriod.ToCurrency() 
-                                    each @plan.BillingPeriodTypeId.ToString().ToLower()
-                                </label>
+                @if (participationObject.PaymentPlans.Any())
+                {
+                    <div class="row padding-30">
+                        <div class="col-md-6 col-md-offset-3 col-sm-12 ">
+                            <p class="text-medium">
+                                Choose a payment option:
+                            </p>
+                            <div class="am-radio">
+                                <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" />
+                                <label for="paymentoption-0">Pay @participationObject.Cost.ToCurrency() Today</label>
                             </div>
-                        }
+
+                            @foreach (var plan in participationObject.PaymentPlans)
+                            {
+                                <div class="am-radio inline">
+                                    <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
+                                    <label for="paymentoption-@plan.ID">
+                                        Pay @plan.CostPerPeriod.ToCurrency() Today and
+                                        @(plan.TotalPeriods - 1) more payments of @plan.CostPerPeriod.ToCurrency()
+                                        each @plan.BillingPeriodTypeId.ToString().ToLower()
+                                    </label>
+                                </div>
+                            }
+                        </div>
                     </div>
-                </div>
+                }
 
                 @if (sources.Any())
                 {
@@ -77,7 +82,7 @@
                                     <p>&nbsp;</p>
                                 </div>
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-xl center-block btn-register" id="btn-paywithexistingcard">Purchase &raquo;</button>
+                                    <button type="submit" class="btn btn-register btn-lg" id="btn-paywithexistingcard">Purchase &raquo;</button>
                                 </div>
                             </form>
                         </div>
@@ -115,7 +120,7 @@
                                 </div>
                             </div>
                             <div class="form-group padding-v-20">
-                                <button type="button" id="btn-paywithnewcard" class="btn btn-xl center-block btn-register">Purchase &raquo;</button>
+                                <button type="button" id="btn-paywithnewcard" class="btn btn-register btn-lg">Purchase &raquo;</button>
                             </div>
                         </form>
 
@@ -124,15 +129,17 @@
 
                 <div class="clearfix"></div>
 
-                @if (participationObject.AllowToPayLater || true)
-                {
-                    <div class="row">
-                        <div class="padding-v-30 text-center">
-                            <a href="@Url.Action("finalizeregistration", new { id = registration.Uid })" class="text-muted">Pay Later</a>
-                        </div>
+                <div class="row">
+                    <div class="padding-v-30 text-center">
+                        <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                        @if (participationObject.AllowToPayLater)
+                        {
+                            @:&bull; <a href="@Url.Action("finalizeregistration", new { id = registration.Uid })" class="text-muted">Pay Later</a>
+                        }
+
                     </div>
-                }
-                
+                </div>
+
             </div>
         </div>
     </div>
@@ -153,10 +160,10 @@
         });
 
         $('#btn-paywithnewcard').click(function () {
-           
+
             $('#btn-paywithnewcard').html('Processing Payment...');
             $('#btn-paywithnewcard').prop('disabled', true);
-           
+
           //  console.log('clicked pay');
 
             stripe.createToken(card).then(function (result) {
@@ -206,7 +213,7 @@
 
         // Create a token or display an error when the form is submitted.
         var form = document.getElementById('payment-form');
-        
+
         function stripeTokenHandler(token) {
             // Insert the token ID into the form so it gets submitted to the server
             var form = $('#payment-form');

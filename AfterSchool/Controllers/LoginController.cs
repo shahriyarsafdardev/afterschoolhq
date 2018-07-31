@@ -36,7 +36,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string username, string password, string regaccount)
+        public ActionResult Index(string username, string password, string returnurl)
         {
             var msgs = new SystemMessages();
 
@@ -67,11 +67,13 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var registrationAccount = regaccount.IsGuid() ? Account.LoadByUid(regaccount.ToGuid()) : null;
-                return LoginRedirect(registrationAccount);
+                if (returnurl.IsNotEmpty())
+                    return Redirect(returnurl);
+                else
+                    return LoginRedirect();
             }
-            else
-                return View();
+
+            return View();
         }        
 
         [HttpGet]

@@ -6,6 +6,8 @@
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml"); }
+
 <div class="reg-header text-center">
     <h1 class="activity-title">@Model.Name</h1>
     <div class="activity-headline">

@@ -15,7 +15,7 @@ namespace AfterSchool.Controllers
         //
         // GET: /Logout/
 
-        public ActionResult Index()
+        public ActionResult Index(string returnurl)
         {
             var msgs = new SystemMessages();
 
@@ -27,7 +27,7 @@ namespace AfterSchool.Controllers
             }
             else
             {
-                return Logout();
+                return Logout(returnurl);
             }
         }
 

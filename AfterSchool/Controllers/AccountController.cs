@@ -848,7 +848,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("select");
+                return RedirectToAction("register");
 
             ViewBag.Student = SessionVariables.CurrentRegistrant;
             ViewBag.Messages = msgs;

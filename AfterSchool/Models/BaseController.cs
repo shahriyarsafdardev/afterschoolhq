@@ -201,7 +201,7 @@ namespace AfterSchool.Models
             return msgs;
         }
 
-        internal ActionResult Logout()
+        internal ActionResult Logout(string returnUrl = null)
         {
             SessionVariables.LoggedInUser = null;
             SessionVariables.OriginalLoggedInUser = null;
@@ -225,7 +225,10 @@ namespace AfterSchool.Models
                 cookieUser.Value = null;
                 Response.SetCookie(cookieUser);
             }
- 
+
+            if (returnUrl.IsNotEmpty())
+                return Redirect(returnUrl);
+
             return RedirectToAction("index", "Login");
         }
     }
