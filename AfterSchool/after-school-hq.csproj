@@ -339,6 +339,7 @@
     <Content Include="Assets\css\font-awesome-4.6.3\HELP-US-OUT.txt" />
     <Content Include="Assets\css\style-mods.css" />
     <Content Include="Assets\css\style-public.css" />
+    <Content Include="Assets\css\style-registration.css" />
     <Content Include="Assets\css\style.css" />
     <Content Include="Assets\css\style.min.css" />
     <Content Include="Assets\css\themes\theme-cake.css" />

@@ -508,6 +508,13 @@ div.filter-full-width > span {
     padding-right: 20px;
 }
 
+.panel-alt6 .panel-heading, .panel-full-alt6 .panel-heading {
+    background-color: #2f3c40;
+    margin: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
 /* new */
 
 .trial-header{

@@ -9,6 +9,32 @@
     var locations = (List<Location>)ViewBag.Locations;
 }
 
+<div class="reg-login-bar">
+    <div class="row">
+        <div class="col-md-6">
+            
+            @if (SessionVariables.LoggedInUser.IsNotEmpty())
+            {
+                <span class="reg-login-bar-title">@SessionVariables.LoggedInUser.DisplayName</span>
+            }       
+            
+        </div>
+        <div class="col-md-6">
+            <div class="btn-group pull-right">
+                @if (SessionVariables.LoggedInUser.IsNotEmpty())
+                {
+                    <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-alt7 btn-space pull-right">View Account</a>
+                    <a href="@Url.Action("index", "logout")" class="btn btn-alt7 btn-space pull-right">Logout</a>
+                }
+                else
+                {
+                    <a href="#" class="btn btn-alt5 btn-space padding-h-30">Login to Family Account</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="reg-header">
     <div class="reg-header-overlay">
         <h1 class="activity-title"><strong>@Model.Name</strong></h1>
@@ -76,7 +102,7 @@
 <div class="margin-10">
     @foreach(var item in objects)
     {
-        <div class="col-md-4 participation-object" 
+        <div class="col-sm-12 col-md-6 col-lg-4 participation-object" 
              id="@item.Uid" 
              mingrade="@item.MinGradeId" 
              maxgrade="@item.MaxGradeId" 

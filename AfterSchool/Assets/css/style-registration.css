@@ -63,8 +63,19 @@
     border: none;
 }
 
+.reg-login-bar {
+    height: 50px;
+    background-color: #2f3c40;
+    padding-top: 5px;
+}
+
+.reg-login-bar-title {
+    font-size: 1.5em;
+    color: #fff;
+}
+
 .reg-login {
-    font-size:16px;
+    font-size: 16px;
 }
 
 .reg-info {
