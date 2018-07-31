@@ -15,8 +15,9 @@
                     <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-link">
                         &laquo; Return to @SessionVariables.RegistrationStartPageAccount.Name Home
                     </a>
-                    <span>@SessionVariables.RegistrationStartPageAccount.HomePageUrl.ToLower()</span>
+                    <span>@($"{SessionVariables.RegistrationStartPageAccount.HomePageUrl}/browse".ToLower())</span>
                     <span>@Request.Url.AbsolutePath.ToLower()</span>
+                    <span>@($"{SessionVariables.RegistrationStartPageAccount.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower()))</span>
                 }
                 @if (SessionVariables.LoggedInUser.IsNotEmpty())
                 {
