@@ -83,16 +83,10 @@ namespace AfterSchool.Areas.District.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.CreateNew(
+                        user = WebUserService.InviteNew(
                             firstName: firstname,
                             lastName: lastname,
                             email: email,
-                            phone: null,
-                            password: null,
-                            isActive: false,
-                            isRegistered: false,
-                            isVerified: false,
-                            allowTextMessages: false,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);
