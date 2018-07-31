@@ -319,19 +319,25 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Schedules(string id)
+        public ActionResult Schedule(string id)
         {
-
-            var msgs = new SystemMessages();
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
-            ViewBag.Messages = msgs;
-            ViewBag.Schedules = group.GetSchedules();
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.Activities = group.GetActivities();
-
-            return View(group);
-        }
+            var schedule = new ActivitySchedule();
+            if (id.ToInteger() > 0)
+            {
+                schedule = ActivitySchedule.Load(id.ToInteger());
+            }
+            else
+            {
+                schedule = ActivitySchedule.GetNewDefaultSchedule();
+            }
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.ShowScheduleList = false;
+            ViewBag.ActivityGroupUid = group;
+            return View(schedule);
+        
+    }
 
         [HttpGet]
         public ActionResult Edit(string id)
