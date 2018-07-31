@@ -353,7 +353,7 @@ namespace AfterSchool.Areas.District.Controllers
         [ValidateInput(false)]
         // GET: District/School
         [HttpGet]
-        public ActionResult Schools(string id,string pn, string rpp)
+        public ActionResult Schools(string id, string pn, string rpp)
         {
             var msgs = new SystemMessages() { };
             var group = ActivityGroup.LoadByUid(id.ToGuid());
@@ -391,6 +391,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
+            ViewBag.ActivityGroupUid = id;
             ViewBag.Messages = new SystemMessages();
             ViewBag.PagingModel = new PagingModel()
             {
