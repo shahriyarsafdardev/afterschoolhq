@@ -140,9 +140,40 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
+
         public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, Account fromAccount, Account toAccount, CheckoutObject checkoutObject, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            // process registration fee if one exists and it has a subscription
+            if (!checkoutObject.ParticipationObject.IsFree && checkoutObject.SubscriptionPlan.IsNotEmpty())
+            {
+                // create a charge for the registration fee and save the card                
+                checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.SourceId, msgs);
+
+                if (msgs.HasNoErrors())
+                {
+                    // if stripe token then don't send customer id
+                    string customerId = null;
+
+                    if (checkoutObject.SourceId.IsNotEmpty())
+                        customerId = fromAccount.StripeCustomerId;
+
+                    var charge = Billing.StripeHelper.CreateCharge(
+                        fromCustomerId: customerId,
+                        destinationAccountId: toAccount.StripeUserId,
+                        tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
+                        totalAmount: checkoutObject.TotalCostToPurchase,
+                        platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.TotalCostToPurchase, msgs, dc),
+                        description: $"{checkoutObject.ParticipationObject.Name} registration",
+                        statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
+                        msgs: msgs
+                        );
+                }
+            }
+
+            if (msgs.HasErrors())
+                return null;
 
             // need to create a purchase record first
             var purchase = PurchaseService.CreateNew(
@@ -151,6 +182,10 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
+
+            // need to create a transaction if there's a registration fee
+
+            // need to create an activity payment if there's a registration fee
 
             if (msgs.HasErrors())
                 return null;

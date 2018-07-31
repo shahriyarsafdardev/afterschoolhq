@@ -100,8 +100,8 @@
                       Model.HasPaymentPlan(),
                       new ViewDataDictionary()
                       {
-                                    { "checkboxname", "haspaymentplan" },
-                                    { "checkboxid", "haspaymentplan" }
+                            { "checkboxname", "haspaymentplan" },
+                            { "checkboxid", "haspaymentplan" }
                       }
                   );
                     }
@@ -163,8 +163,8 @@
                           Model.HasSubscriptionPlan(),
                           new ViewDataDictionary()
                           {
-                                                { "checkboxname", "hassubscriptionplan" },
-                                                { "checkboxid", "hassubscriptionplan" }
+                                { "checkboxname", "hassubscriptionplan" },
+                                { "checkboxid", "hassubscriptionplan" }
                           }
                       );
                     }
@@ -202,7 +202,7 @@
             <div class="row">
                 <div class="col-sm-3"></div>
                 <div class="col-sm-9">
-                    <p class="text-muted padding-v-10">Subscriptions are used to bill users monthly for ongoing activities.</p>
+                    <p class="text-muted padding-v-10">Subscriptions are used to bill users monthly for ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower(). You can make your @UILabel.ActivityLabel(ActivityType.Activity).ToLower() ongoing by <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })">editing the schedule</a></p>
                 </div>
             </div>
 

@@ -62,33 +62,35 @@
                     </h3>
                     @if (!Model.IsFree)
                     {
-                        <p>
-                            Registration Fee payment options:
-                            <ul>
-                                <li>1 payment of @ParticipationObjectUI.PrintRegistrationFee(Model)</li>
-                                @if (Model.PaymentPlans.Any())
-                                {
-                                    foreach (var plan in Model.PaymentPlans)
-                                    {
-                                        <li>@plan.TotalPeriods payments of @plan.CostPerPeriod.ToCurrency() each @plan.BillingPeriodTypeId.ToString()</li>
-                                    }
-                                }
-                            </ul>
-                        </p>                    
-
-                        if (Model.SubscriptionPlans.Any())
+                        if (!Model.PaymentPlans.Any())
                         {
                             <p>
-                                @foreach (var plan in Model.SubscriptionPlans)
+                                The registration fee is <strong>@Model.Cost.ToCurrency()</strong>
+                                @if (Model.SubscriptionPlans.Any())
                                 {
-                                    <span>@plan.CostPerPeriod.ToCurrency() every @plan.BillingPeriodTypeId.ToString()</span>
+                                    <span>
+                                        plus <strong>@Model.SubscriptionPlans.First().CostPerPeriod.ToCurrency()</strong> each @Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
+                                    </span>
                                 }
                             </p>
+                        }
+                        else
+                        {
+                            <p>
+                                Registration Fee payment options:
+                                <ul>
+                                    <li>1 payment of @ParticipationObjectUI.PrintRegistrationFee(Model), or</li>
+                                    @foreach (var plan in Model.PaymentPlans)
+                                    {
+                                        <li>@plan.TotalPeriods payments of @plan.CostPerPeriod.ToCurrency() each @plan.BillingPeriodTypeId.ToString(), or</li>
+                                    }
+                                </ul>
+                            </p>      
                         }
 
                         if (Model.CostDescription.IsNotEmpty())
                         {
-                            <p>
+                            <p class="padding-v-10">
                                 @Model.CostDescription
                             </p>
                         }

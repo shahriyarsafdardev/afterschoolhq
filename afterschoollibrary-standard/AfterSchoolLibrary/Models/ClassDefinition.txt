@@ -1240,7 +1240,7 @@ property: CostPerPeriod, decimal?, Money, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: DoesAutoRenew, bool, Bit
 property: IsActive, bool, Bit
-property: TotalPeriods, int?, Int, required
+property: TotalPeriods, int?, Int
 property: StripePlanId, string, NVarChar(50)
 property: PlanTypeId, SubscriptionPlanType, Int
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
