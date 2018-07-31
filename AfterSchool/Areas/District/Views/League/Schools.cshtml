@@ -1,8 +1,9 @@
 ﻿@model  ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var inviteUrl = Url.Action("inviteschool", "league");
     var invitedAccounts = (List<Account>)ViewBag.InvitedAccounts;
+    var activityGroupUid = ViewBag.ActivityGroupUid;
+    var inviteUrl = Url.Action("inviteschool", "league", new { uid = activityGroupUid });
 }
 
 @{Html.RenderPartial("DistrictHeader");}

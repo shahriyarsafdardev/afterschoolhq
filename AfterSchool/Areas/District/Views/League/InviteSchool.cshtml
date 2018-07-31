@@ -2,11 +2,18 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var inviteUrl = Url.Action("inviteschool", "league");
+    var schoolsToInvite = ViewBag.SchoolsToInvite;
+    var currentSchools = (List<Account>)ViewBag.CurrentSchools;
+    var schoolsPerColumn = (int)ViewBag.SchoolsPerColumn;
+    var activityGroupUid = ViewBag.ActivityGroupUid;
+
 }
 
 @{Html.RenderPartial("DistrictHeader");}
 
 <div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -29,41 +36,40 @@
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table">
-                        <tr>
-                            <th></th>
-                            <th>School</th>
-                            <th>Status</th>
-                            <th>Teams</th>
-                        </tr>
-                        @foreach (var account in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <a href="#" class="btn btn-default">Invite</a>
-                                </td>
-                                <td>@account.Name</td>
-                                @if (AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).Count() != 0)
+                if (Model.Count == 0)
+                {
+                    <p> You have no schools in your disctrict, please go to Schools in the side bar and invite them there. </p>
+                }
+                else
+                {
+                    <form action="@Url.Action("inviteschool","league",new { uid = activityGroupUid } )" method="post" id="invite-schools-forms">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Select @UILabel.RegistrantLabel(true)<br />
+                                <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                            </label>
+                            <div class="col-sm-6">
+                                @for (int i = 0; i < 3; i++)
                                 {
-                                    if (AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).First().IsNotEmpty())
-                                    {
-                                        <td>@AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).First().InviteStatusId</td>
-                                    }
-                                    foreach (var AccountActivity in AccountActivityGroup.LoadByActivityGroupId(account.ID.Value))
-                                    {
-                                        <td>@AccountActivity.InviteStatusId</td>
-                                    }
+                                    <div class="col-md-4">
+                                        @foreach (var school in Model.Skip((i * schoolsPerColumn)).ToList().Take(schoolsPerColumn))
+                                        {
+                                            <div class="am-checkbox">
+                                                <input type="checkbox" onclick="toggleCheck(@school)" id="school-@school.ID.Value" name="registrant-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
+                                                <label for="school-@school.ID">@school.Name.MaxChars(20, "...")</label>
+                                            </div>
+                                        }
+                                    </div>
                                 }
-                                else
-                                {
-                                    <td>Not yet invited</td>
-                                }
-                                <td>@account.GetActivityCount(UserType.ActivityLeader, account.GetAccountOwner(), null, null, null)</td>
-                            </tr>
-                        }
-                    </table>
-                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Invite Teams</button>
+                        </div>
+
+                    </form>
+
+                }
             }
             else
             {
@@ -84,3 +90,16 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    function toggleCheck(school) {
+        var cs = @currentSchools;
+        if (cs.Contains(school)) {
+            cr.Remove(school);
+        } else {
+            cr.Add(school);
+        }
+        @currentSchools = cr;
+    }
+</script>

@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
 using AfterSchoolLibrary;
 using System.Collections.Specialized;
 using AfterSchoolLibrary.Services;
@@ -86,7 +87,7 @@ namespace AfterSchool.Areas.District.Controllers
         [ValidateInput(false)]
         // GET: District/School
         [HttpGet]
-        public ActionResult Schools(string id,string pn, string rpp)
+        public ActionResult Schools(string id, string pn, string rpp)
         {
             var msgs = new SystemMessages() { };
             var group = ActivityGroup.LoadByUid(id.ToGuid());
@@ -124,6 +125,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
+            ViewBag.ActivityGroupUid = id;
             ViewBag.Messages = new SystemMessages();
             ViewBag.PagingModel = new PagingModel()
             {
@@ -463,8 +465,7 @@ namespace AfterSchool.Areas.District.Controllers
 
 
 
-        [HttpGet]
-        public ActionResult InviteSchool(string pn, string rpp)
+        private List<Account> LoadInviteSchoolViewBag(string pn, string rpp, string uid)
         {
             int pageNumber = 1;
             int recordsPerPage = 10;
@@ -479,10 +480,18 @@ namespace AfterSchool.Areas.District.Controllers
             var length = recordsPerPage;
 
             int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.School);
-            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School,start, length);
+            var schools = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School);
+            var activityGroup = ActivityGroup.LoadByUid(uid.ToGuid());
+            var invitedSchools = AccountActivityGroup.LoadByActivityGroupId(activityGroup.ID.Value);
+            var invitedSchoolsIds = invitedSchools.Select(i => i.ID.Value);
+            var currentSchools = schools.Where(school => invitedSchoolsIds.Contains(school.ID.Value)).ToList();
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
-            ViewBag.Messages = new SystemMessages();
+
+            ViewBag.CurrentSchools = currentSchools;
+            ViewBag.SchoolsPerColumn = (schools.Count / 3) > (schools.Count % 3) ? (schools.Count / 3) : (schools.Count % 3);
+            ViewBag.ActivityGroupUid = uid;
+           
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = count,
@@ -490,7 +499,47 @@ namespace AfterSchool.Areas.District.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-            return View(visitorAccounts);
+            return schools;
+        }
+
+        [HttpGet]
+        public ActionResult InviteSchool(string pn, string rpp, string uid)
+        {
+            var msgs = new SystemMessages();
+            var schools = LoadInviteSchoolViewBag(pn, rpp, uid);
+            ViewBag.Messages = msgs;
+            return View(schools);
+        }
+
+        [HttpPost]
+        public ActionResult InviteSchool( string uid)
+        {
+            var msgs = new SystemMessages();
+            var schools = LoadInviteSchoolViewBag(null, null, uid);
+            var activityGroup = ActivityGroup.LoadByUid(uid.ToGuid());
+
+            Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
+                        foreach (var school in schools)
+                        {
+                            if (Request[$"school-{school.ID.Value}"].IsBoolean())
+                            {
+                                AccountActivityGroupService.CreateNew(school, activityGroup, InviteStatus.Invited, SessionVariables.LoggedInUser);
+                            }
+
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) => {
+                        msgs.AddRange(smsgs);
+                        msgs.Add("Invites Sent Saved", MessageType.Success);
+                    },
+                    onFailure: (SystemMessages fmsgs) => {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+
+            ViewBag.Messages = msgs;
+            return View(schools);
         }
 
     }
