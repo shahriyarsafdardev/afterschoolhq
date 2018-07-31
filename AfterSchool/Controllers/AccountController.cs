@@ -146,7 +146,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             registrant.AddAnswer(
-                                answerText: qvm.Value.Trim(), 
+                                answerText: qvm.Value.IfEmpty("").Trim(), 
                                 question: qvm.Question, 
                                 loggedInUserId: user.ID.Value, 
                                 msgs: amsgs, 
@@ -244,7 +244,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             parentRegistrant.AddAnswer(
-                                answerText: qvm.Value.Trim(),
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -263,7 +263,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("addemergencycontacts");
+                return RedirectToAction("addparent");
 
             ViewBag.Messages = msgs;
 
@@ -373,7 +373,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             otherParent.AddAnswer(
-                                answerText: qvm.Value.Trim(),
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -446,7 +446,7 @@ namespace AfterSchool.Controllers
             var emergencyContactPhone1 = "";
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString().Trim();
+                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString().IfEmpty("").Trim();
                 var qvmNameIsEmpty = qvmName.IsEmpty();
                 if (question.IsRequired && qvmNameIsEmpty)
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
@@ -488,7 +488,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             parentRegistrant.AddAnswer(
-                                answerText: qvm.Value.Trim(),
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -642,7 +642,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             student.AddAnswer(
-                                answerText: qvm.Value.Trim(),
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -660,7 +660,7 @@ namespace AfterSchool.Controllers
                             .ForEach(answer =>
                             {
                                 student.AddAnswer(
-                                    answerText: answer.Text.Trim(),
+                                    answerText: answer.Text.IfEmpty("").Trim(),
                                     question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
                                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                     msgs: amsgs,
@@ -692,28 +692,31 @@ namespace AfterSchool.Controllers
                                amsgs,
                                adc);
                         }
-                        
-                        // get parent 2 info
-                        var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
-                        {
-                            { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent2FirstName },
-                            { QuestionDataType.RegistrantLastName,  QuestionDataType.Parent2LastName },
-                            { QuestionDataType.RegistrantEmail,  QuestionDataType.Parent2Email },
-                            { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent2HomePhone },
-                            { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent2MobilePhone },
-                            { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent2WorkPhone },
-                        };
 
-                        foreach (var key in parent2Map.Keys)
+                        if (parentRegistrant2.IsNotEmpty())
                         {
-                            student.MapAndAddAnswer(
-                               allquestions,
-                               parentRegistrant2,
-                               key,
-                               parent2Map[key],
-                               SessionVariables.LoggedInUser,
-                               amsgs,
-                               adc);
+                            // get parent 2 info
+                            var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
+                            {
+                                { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent2FirstName },
+                                { QuestionDataType.RegistrantLastName,  QuestionDataType.Parent2LastName },
+                                { QuestionDataType.RegistrantEmail,  QuestionDataType.Parent2Email },
+                                { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent2HomePhone },
+                                { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent2MobilePhone },
+                                { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent2WorkPhone },
+                            };
+
+                            foreach (var key in parent2Map.Keys)
+                            {
+                                student.MapAndAddAnswer(
+                                   allquestions,
+                                   parentRegistrant2,
+                                   key,
+                                   parent2Map[key],
+                                   SessionVariables.LoggedInUser,
+                                   amsgs,
+                                   adc);
+                            }
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>
@@ -799,7 +802,7 @@ namespace AfterSchool.Controllers
             var questions = AddHealthViewBag(msgs);
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name].Trim();
+                var qvmName = Request[question.ToFormQuestionViewModel().Name];
                 if (question.IsRequired && qvmName.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
@@ -827,7 +830,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             SessionVariables.CurrentRegistrant.AddAnswer(
-                                answerText: qvm.Value.Trim(),
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
