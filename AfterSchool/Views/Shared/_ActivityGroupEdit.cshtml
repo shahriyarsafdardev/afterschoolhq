@@ -19,12 +19,15 @@
         <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Registration Description / Instructions" data-placement="top"></i>
     </label>
     <div class="col-md-9">
-        <div class="text-editor-container">
-            <div class="text-editor" id="description-div">
-                @Html.Raw(Model.Description)
-            </div>
-            <textarea name="description" id="description" class="hide"></textarea>
-        </div>
+        @{ Html.RenderPartial(
+        "~/Views/Shared/_TextEditor.cshtml",
+        Model.Description,
+        new ViewDataDictionary() {
+                    { "required", true },
+                    { "name", "details" },
+                    { "id", "details" }
+        }
+        ); }
     </div>
 </div>
 
