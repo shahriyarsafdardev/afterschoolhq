@@ -15,7 +15,7 @@
 
     var dates = registrations.OrderBy(x => x.CreateDate).Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
-    var addUrl = Url.Action("editsetup", "activity", new { group = Model.Uid });
+    var addUrl = Url.Action("schools", "league", new { group = Model.Uid });
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -41,10 +41,10 @@
                     <div class="widget-tile">
                         <hr />
                         <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
-                        <p>You haven't created any @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true).ToLower() for @Model.Name yet. In order to get started, <a href="@addUrl">add your first @UILabel.ActivityLabel(Model.ActivityGroupTypeId).ToLower()</a> for @Model.Name.</p>
+                        <p>You haven't invited any schools for @Model.Name yet. In order to get started, <a href="@addUrl">invite your first school</a> for @Model.Name.</p>
                         <p>&nbsp;</p>
                         <p>
-                            <a href="@addUrl" class="btn btn-primary btn-lg">Add Your First @UILabel.ActivityLabel(Model.ActivityGroupTypeId) &raquo;</a>
+                            <a href="@addUrl" class="btn btn-primary btn-lg">Invite Your First School &raquo;</a>
                         </p>
                     </div>
                 </div>
