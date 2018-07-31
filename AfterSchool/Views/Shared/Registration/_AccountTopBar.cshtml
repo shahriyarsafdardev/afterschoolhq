@@ -15,6 +15,7 @@
                     <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-link">
                         &laquo; Return to @SessionVariables.RegistrationStartPageAccount.Name Home
                     </a>
+                    <span>@Request.Url.ToString()</span>
                 }
                 @if (SessionVariables.LoggedInUser.IsNotEmpty())
                 {
