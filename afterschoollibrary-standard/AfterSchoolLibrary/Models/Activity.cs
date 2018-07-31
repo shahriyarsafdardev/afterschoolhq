@@ -1300,6 +1300,7 @@ namespace AfterSchoolLibrary
             var applicationthankyouemail = values.GetValueOrDefault("applicationthankyouemail");
             var daysoftheweek = values.GetValueOrDefault("daysoftheweek");
             var repeatsweekly = values.GetValueOrDefault("repeatsweekly");
+            var isongoing = values.GetValueOrDefault("isongoing");
             var startdate = values.GetValueOrDefault("startdate");
             var enddate = values.GetValueOrDefault("enddate");
             var dailystarttime = values.GetValueOrDefault("dailystarttime");
@@ -1591,6 +1592,7 @@ namespace AfterSchoolLibrary
                                 enddate.IfEmpty(""), 
                                 dailystarttime.IfEmpty(""), 
                                 dailyendtime.IfEmpty(""), 
+                                isongoing.IfEmpty(""),
                                 loggedInUserId, 
                                 adc));
                         }
@@ -1681,7 +1683,7 @@ namespace AfterSchoolLibrary
             return activity;
         }
 
-        private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, int loggedInUserId, DatabaseConnection dc = null)
+        private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -1693,6 +1695,7 @@ namespace AfterSchoolLibrary
                 $"{this.Name} - Schedule",
                 scheduledetails.ToString(),
                 repeatsweekly.ToString(),
+                isongoing.ToString(),
                 startdate.ToString(),
                 enddate.ToString(),
                 dailystarttime.ToString(),
@@ -1772,7 +1775,7 @@ namespace AfterSchoolLibrary
             }
             else if (activity.HasSubscriptionPlan())
             {
-                var subscriptionPlan = activity.GetSubscriptionPlan();
+                var subscriptionPlan = activity.GetSubscriptionPlan(msgs, dc);
                 msgs.AddRange(subscriptionPlan.Deactivate(loggedInUserId, dc));
             }
 

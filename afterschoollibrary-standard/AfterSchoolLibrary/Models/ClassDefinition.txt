@@ -184,12 +184,15 @@ property: AccountId, int?, Int, required
 property: ActivityGroupId, int?, Int
 property: ScheduleDetails, string, NVarChar(4000)
 property: RepeatsWeekly, bool, Bit
+property: IsOngoing, bool, Bit
 property: StartDate, DateTime?, DateTime, required
 property: EndDate, DateTime?, DateTime, required
 property: DailyStartTime, DateTime?, DateTime, required
 property: DailyEndTime, DateTime?, DateTime, required
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: AccountId|IsOngoing, List<>
+loadmethod: ActivityGroupId|IsOngoing, List<>
 [end]
 
 [begin]

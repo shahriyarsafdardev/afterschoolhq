@@ -1189,7 +1189,7 @@ namespace AfterSchoolLibrary
 
         public static int GetVisitorAccountsCount(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountTypeId", (int)accountType } }, msgs, dc);
+            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountAccountTypeId", (int)accountType } }, msgs, dc);
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)

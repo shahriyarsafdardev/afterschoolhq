@@ -516,7 +516,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         [ValidateInput(false)]
-        public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime)
+        public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -544,7 +544,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "dailyendtime", dailyendtime },
                     { "scheduledates", inSessionDates },
                     { "scheduledatesclosed", outOfSessionDates },
-                    { "schedule", schedule }
+                    { "schedule", schedule },
+                    { "isongoing", isongoing }
                 };
 
                 activity = Activity.EditExisting(
@@ -690,6 +691,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.PaymentPlan = activity.GetPaymentPlan();
+            ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
             ViewBag.ActiveMenu = "EditCost";
             return View(activity);
         }
@@ -735,6 +738,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.PaymentPlan = activity.GetPaymentPlan();
+            ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
 
             if (msgs.HasNoErrors())
             {

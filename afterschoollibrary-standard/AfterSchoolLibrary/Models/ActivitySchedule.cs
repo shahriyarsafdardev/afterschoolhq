@@ -26,6 +26,7 @@ namespace AfterSchoolLibrary
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public string ScheduleDetails { get { return (string)MDV["ScheduleDetails"].Value; } set { MDV["ScheduleDetails"].Value = value; } }
 		public bool RepeatsWeekly { get { return (bool)MDV["RepeatsWeekly"].Value; } set { MDV["RepeatsWeekly"].Value = value; } }
+		public bool IsOngoing { get { return (bool)MDV["IsOngoing"].Value; } set { MDV["IsOngoing"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -49,6 +50,7 @@ namespace AfterSchoolLibrary
             this.Config(ObjectMap, DatabaseQuery, typeof(ActivitySchedule).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.RepeatsWeekly = false;
+			this.IsOngoing = false;
 			
         }
 
@@ -64,6 +66,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ScheduleDetails", System.Data.SqlDbType.NVarChar, 4000);
 				_dp.Add(className, "RepeatsWeekly", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsOngoing", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "EndDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "DailyStartTime", System.Data.SqlDbType.DateTime);
@@ -172,6 +175,10 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsOngoing"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["StartDate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -210,6 +217,24 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<ActivitySchedule> LoadByAccountIdByIsOngoing(int AccountId, bool IsOngoing, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["IsOngoing"], IsOngoing);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<ActivitySchedule> LoadByActivityGroupIdByIsOngoing(int ActivityGroupId, bool IsOngoing, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			dq.Criterias.Add(ObjectMap["IsOngoing"], IsOngoing);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -265,7 +290,7 @@ namespace AfterSchoolLibrary
             return rtnName;
         }
 
-        public static ActivitySchedule EditExisting(string scheduleId, string scheduleName, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivitySchedule EditExisting(string scheduleId, string scheduleName, string details, bool repeatsWeekly, bool isOngoing, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             ActivitySchedule schedule = null;
@@ -279,6 +304,7 @@ namespace AfterSchoolLibrary
                         name: scheduleName,
                         details: details,
                         repeatsWeekly: repeatsWeekly,
+                        isOngoing: isOngoing,
                         startDate: startDate,
                         endDate: endDate,
                         dailyStartTime: dailyStartTime,
@@ -355,13 +381,14 @@ namespace AfterSchoolLibrary
             return instance;
         }
 
-        public SystemMessages UpdateScheduleAndInstances(string name, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages UpdateScheduleAndInstances(string name, string details, bool repeatsWeekly, bool isOngoing, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
             this.Name = name;
             this.ScheduleDetails = details;
             this.RepeatsWeekly = repeatsWeekly;
+            this.IsOngoing = isOngoing;
             this.StartDate = startDate;
             this.EndDate = endDate;
             this.DailyStartTime = dailyStartTime;
