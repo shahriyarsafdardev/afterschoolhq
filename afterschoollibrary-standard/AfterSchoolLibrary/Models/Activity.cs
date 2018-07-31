@@ -1161,6 +1161,12 @@ namespace AfterSchoolLibrary
                         var newSubPlan = oldSubPlan.Copy(this.ID.Value, loggedInUserId, amsgs, adc);
                     }
 
+                    var oldPaymentPlan = this.GetPaymentPlan(amsgs, adc);
+                    if (oldPaymentPlan.IsNotEmpty())
+                    {
+                        var newPaymentPlan = oldPaymentPlan.Copy(this.ID.Value, loggedInUserId, amsgs, adc);
+                    }
+
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

@@ -110,8 +110,8 @@ namespace AfterSchool.Controllers
                         user = WebUserService.CreateNew(
                             firstName: firstName.Value,
                             lastName: lastName.Value,
-                            email: email.Value,
-                            phone: phone.Value,
+                            email: email.Value.Trim(),
+                            phone: phone.Value.Trim(),
                             password: password1,
                             isActive: true,
                             isRegistered: true,
@@ -146,7 +146,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             registrant.AddAnswer(
-                                answerText: qvm.Value, 
+                                answerText: qvm.Value.Trim(), 
                                 question: qvm.Question, 
                                 loggedInUserId: user.ID.Value, 
                                 msgs: amsgs, 
@@ -244,7 +244,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             parentRegistrant.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -271,7 +271,6 @@ namespace AfterSchool.Controllers
         }
 
         #endregion
-
 
         #region AddParent
 
@@ -374,7 +373,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             otherParent.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -401,7 +400,6 @@ namespace AfterSchool.Controllers
         }
 
         #endregion
-
 
         #region AddEmergencyContacts
 
@@ -448,7 +446,7 @@ namespace AfterSchool.Controllers
             var emergencyContactPhone1 = "";
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString();
+                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString().Trim();
                 var qvmNameIsEmpty = qvmName.IsEmpty();
                 if (question.IsRequired && qvmNameIsEmpty)
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
@@ -490,7 +488,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             parentRegistrant.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -644,7 +642,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             student.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -662,7 +660,7 @@ namespace AfterSchool.Controllers
                             .ForEach(answer =>
                             {
                                 student.AddAnswer(
-                                    answerText: answer.Text,
+                                    answerText: answer.Text.Trim(),
                                     question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
                                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                     msgs: amsgs,
@@ -801,7 +799,7 @@ namespace AfterSchool.Controllers
             var questions = AddHealthViewBag(msgs);
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name];
+                var qvmName = Request[question.ToFormQuestionViewModel().Name].Trim();
                 if (question.IsRequired && qvmName.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
@@ -829,7 +827,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             SessionVariables.CurrentRegistrant.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
