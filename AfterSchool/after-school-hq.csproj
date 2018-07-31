@@ -1289,6 +1289,7 @@
     <Content Include="Views\Shared\Login\_SignUpForm.cshtml" />
     <Content Include="Views\Login\Select.cshtml" />
     <Content Include="Views\SignUp\CreateAccount.cshtml" />
+    <Content Include="Views\Shared\_Teams.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -86,8 +86,12 @@ namespace AfterSchool.Areas.District.Controllers
         [ValidateInput(false)]
         // GET: District/School
         [HttpGet]
-        public ActionResult Schools(string pn, string rpp)
+        public ActionResult Schools(string id,string pn, string rpp)
         {
+            var msgs = new SystemMessages() { };
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+
             int pageNumber = 1;
             int recordsPerPage = 10;
 
@@ -100,8 +104,24 @@ namespace AfterSchool.Areas.District.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.School);
-            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School,start, length);
+            int count = AccountActivityGroup.GetCount(
+                new System.Collections.Hashtable()
+                {
+                    { "activitygroupid", group.ID.Value}
+                }, 
+                msgs);
+
+            var invitedAccounts = AccountActivityGroup.Load(
+                new System.Collections.Hashtable()
+                {
+                    { "activitygroupid", group.ID.Value}
+                },
+                start,
+                length,
+                msgs)
+                .Select(accountActivityGroup => accountActivityGroup.GetAccount(msgs))
+                .ToList();
+
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = new SystemMessages();
@@ -112,7 +132,9 @@ namespace AfterSchool.Areas.District.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-            return View(visitorAccounts);
+
+            ViewBag.InvitedAccounts = invitedAccounts;
+            return View(group);
         }
 
         [ValidateInput(false)]
@@ -287,8 +309,9 @@ namespace AfterSchool.Areas.District.Controllers
 
         // GET: User
         [HttpGet]
-        public ActionResult Teams(string pn, string rpp)
+        public ActionResult Teams(string id, string pn, string rpp)
         {
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
             int pageNumber = 1;
             int recordsPerPage = 10;
 
@@ -314,7 +337,8 @@ namespace AfterSchool.Areas.District.Controllers
                 TotalPages = totalPages
             };
 
-            return View(teams);
+            ViewBag.Activities = group.GetActivities();
+            return View(group);
         }
 
         [ValidateInput(false)]

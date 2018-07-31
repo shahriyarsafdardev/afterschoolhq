@@ -1,0 +1,422 @@
+﻿@{
+    var account = (Account)ViewData["Account"];
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var showRegistrationPeriodFilter = (bool)ViewData["ShowRegistrationPeriodFilter"];
+    var group = (ActivityGroup)ViewData["Group"];
+    var groups = (List<ActivityGroup>)ViewData["Groups"];
+    var needToUpgrade = (bool)ViewData["NeedToUpgrade"];
+
+    var addUrl = Url.Action("editsetup", "activity");
+    var pagingController = "activity";
+    var pagingAction = "index";
+    var id = "";
+    var currentListUrl = Url.Action("index", "activity", new { archive = 0 });
+    var archivedListUrl = Url.Action("index", "activity", new { archive = 1 });
+    var hasArchivedActivities = (bool)ViewData["HasArchivedActivities"];
+    var activityType = ActivityType.Activity;
+
+    if (group.IsNotEmpty())
+    {
+        addUrl = Url.Action("editsetup", "activity", new { group = group.Uid });
+        pagingController = "group";
+        pagingAction = "activities";
+        id = group.Uid.ToString();
+        currentListUrl = Url.Action("activities", "group", new { archive = 0 });
+        archivedListUrl = Url.Action("activities", "group", new { archive = 1 });
+    }
+
+    var currentClass = "";
+    var archiveClass = "";
+    if (Request["archive"] == "1" && hasArchivedActivities)
+    {
+        archiveClass = "text-bold";
+    }
+    else
+    {
+        currentClass = "text-bold";
+    }
+
+    var paging = (PagingModel)ViewData["PagingModel"];
+}
+
+@if (Model.Count == 0 && group.IsEmpty() && !hasArchivedActivities)
+{
+    <div class="widget">
+        <div class="widget-head">
+            <h1>@account.Name @UILabel.ActivityLabel(activityType, true)</h1>
+        </div>
+        <div class="widget-tile">
+            <hr />
+            <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
+            <p>You haven't created any @UILabel.ActivityLabel(activityType, true).ToLower()s yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(activityType).ToLower()</a>.</p>
+            <p>&nbsp;</p>
+            <p>
+                <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(activityType) &raquo;</a>
+            </p>
+        </div>
+    </div>
+}
+else
+{
+    if (showRegistrationPeriodFilter && account.HasFeature(FeatureType.ManageActivityGroups) && false)
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <select class="form-control" id="registration-group" name="registration-group">
+                    <option value="">All @UILabel.ActivityLabel(activityType, true)</option>
+                    @if (groups.Count > 0)
+                    {
+                        <optgroup label="@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId, true)">
+                            @foreach (var item in groups)
+                            {
+                                <option value="@item.Uid" @(group.IsNotEmpty() && group.ID == item.ID ? "selected=\"selected\"" : "")>@item.Name</option>
+                            }
+                        </optgroup>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4 hide">
+                <p class="text-bold pull-right">
+                    @Model.Count of @accountPackage.GetFeature(FeatureType.Activities).Max.Value @UILabel.ActivityLabel(activityType, true)
+                </p>
+            </div>
+        </div>
+        <p></p>
+    }
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="pull-right">
+                <a href="@currentListUrl" class="@currentClass">Current</a> |
+                @if (hasArchivedActivities)
+                {
+                    <a href="@archivedListUrl" class="@archiveClass">Archived</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Teams</th>
+                    <th class="text-center">Grades</th>
+                    <!--<th class="text-center">Ages</th>-->
+                    <th class="text-center">Players</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count > 0)
+                {
+                    foreach (Activity activity in Model)
+                    {
+                        var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
+                        var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
+
+
+                        <tr>
+                            <td>
+                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-default btn-sm">View</a>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})">
+                                    @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
+                                </a>
+                            </td>
+                            <td class="text-center">
+                                @if (activity.GetDaysOfTheWeek().Any())
+                                {
+                                    @:@activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                                }
+                                else
+                                {
+                                    @:-
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
+                                {
+                                    <span>@activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name</span>
+                                }
+                                else
+                                {
+                                    @:-
+                                }
+
+                            </td>
+                            <!--
+                            <td class="text-center">
+                                @if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
+                                {
+                                    @: @activity.AgeStart.Value - @activity.AgeEnd.Value
+                                }
+                                else
+                                {
+                                    @:-
+                                }
+                            </td>
+                            -->
+                            <td class="text-center @reservedTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable</td>
+                            @if (account.HasFeature(FeatureType.WaitingList))
+                            {
+                                <td class="text-center @waitingTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList) / @activity.WaitingListSeats</td>
+                            }
+                            @if (account.HasFeature(FeatureType.AllowApplications))
+                            {
+                                <td class="text-center">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Application)</td>
+                            }
+                            <td>
+                                <div class="btn-group pull-right">
+
+                                    @if (activity.ActivityScheduleId.HasValue && false)
+                                    {
+                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-schedule" id="edit-schedule-@activity.Uid"
+                                                onclick="editSchedule('@activity.Name', '@activity.Uid', @activity.ActivityScheduleId)">
+                                            <i class="s7-edit"></i> Schedule
+                                        </button>
+                                    }
+
+                                    <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy"
+                                            onclick="setCopyActivity('@activity.Name', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString() })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                        <i class="s7-copy-file"></i> Copy
+                                    </button>
+
+                                    @if (!activity.IsGroupArchived)
+                                    {
+                                        if (!activity.IsArchived)
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@activity.Name', '@Url.Action("archive", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Archive</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@activity.Name', '@Url.Action("restore", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                        }
+                                    }
+
+                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@activity.Name', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8">There are no @UILabel.ActivityLabel(activityType, true).ToLower(). Please <a href="@addUrl">add new @UILabel.ActivityLabel(activityType).ToLower()</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    Html.RenderPartial(
+        "~/Views/Shared/_Paging.cshtml",
+        paging,
+        new ViewDataDictionary()
+        {
+{ "id", id },
+{ "querystring", string.Format("archive={0}", Request["archive"]) },
+{ "action", pagingAction },
+{ "controller", pagingController }
+        }
+    );
+
+}
+
+@{ var schedules = account.GetActivitySchedules(); }
+<div id="modal-schedule" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-schedule" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Edit Schedule - <span id="schedule-activity-name"></span></h3>
+            </div>
+            <div class="modal-body form">
+                <div class="form-group">
+                    <label for="schedule">Schedule</label>
+                    <select name="schedule" id="schedule" class="form-control">
+                        @foreach (var schedule in schedules)
+                        {
+                            <option value="@schedule.ID">@schedule.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary md-close" onclick="updateSchedule()">Update Schedule &raquo;</button>
+                <input type="hidden" name="schedule-activity" id="schedule-activity" value="" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-offering" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-offer" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Create New @UILabel.ActivityLabel(activityType) Offering</h3>
+            </div>
+            <div class="modal-body form">
+
+                <p>This is used to offer the same @UILabel.ActivityLabel(activityType).ToLower() for a new group of @UILabel.RegistrantLabel(true).ToLower(). You will only be able to change the name, seats, and registration open and close dates. All other changes will need to be made on the original @UILabel.ActivityLabel(activityType).ToLower() offering.</p>
+
+                <div class="form-group">
+                    <label>@UILabel.ActivityLabel(activityType) Name</label>
+                    <input type="text" placeholder="Your @UILabel.ActivityLabel(activityType) Name" class="form-control" id="activitynameoffer" name="activitynameoffer" onfocus="this.select()">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create New Offering &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-copy" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-copy" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Copy @UILabel.ActivityLabel(activityType)</h3>
+            </div>
+            <div class="modal-body form">
+
+                <p>This is used to create an exact copy of the existing @UILabel.ActivityLabel(activityType).ToLower(). Once copied you can make any modifications as needed.</p>
+
+                <div class="form-group">
+                    <label>@UILabel.ActivityLabel(activityType) Name</label>
+                    <input type="text" placeholder="Your @UILabel.ActivityLabel(activityType) Name" class="form-control" id="activitynamecopy" name="activitynamecopy" onfocus="this.select()">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Copy &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-delete" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Delete @UILabel.ActivityLabel(activityType)</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to delete <strong><span id="delete-activity-name"></span></strong>? </p><p>This action cannot be undone.</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-danger" href="#" id="delete-activity-button">Delete &raquo;</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-archive" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Archive @UILabel.ActivityLabel(activityType)</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to archive <strong><span id="archive-activity-name"></span></strong>? </p><p>Archived @UILabel.ActivityLabel(activityType, true).ToLower() are automatically unpublished.</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="archive-activity-button">Archive &raquo;</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-restore" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Restore @UILabel.ActivityLabel(activityType)</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>Are you sure you want to restore <strong><span id="restore-activity-name"></span></strong>? </p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="restore-activity-button">Restore &raquo;</a>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function updateSchedule() {
+        var schedule = $('#schedule').val();
+        var activity = $('#schedule-activity').val();
+        var activityName = $('#schedule-activity-name').html();
+        $.get(
+            `/org/services/updateschedule/${activity}?schedule=${schedule}`,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    $(`#edit-schedule-${activity}`).attr('onclick', `editSchedule('${activityName}', ${activity}, ${schedule})`);
+
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `The schedule for, <strong>${activityName}</strong>, has been updated`,
+                        success: true
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: `The schedule for, <strong>${activityName}</strong>, has NOT been updated`,
+                        success: false
+                    });
+                }
+            }
+        );
+    }
+    function editSchedule(name, activity, schedule) {
+        //console.log("editscheudle");
+       // console.log(name, activity, schedule);
+        $('#schedule-activity-name').html(name);
+        $('#schedule').val(schedule);
+        $('#schedule-activity').val(activity);
+        // $('#iframe-schedule-edit').attr('src', `/org/schedule/editforactivity/${schedule}?activity=${activity}`);
+    }
+    function setOfferingActivity(name, url) {
+        $('#activitynameoffer').val(name + ' [new offering]');
+        $('#form-offer').attr('action', url);
+    }
+    function setCopyActivity(name, url) {
+        $('#activitynamecopy').val(name + ' [copy]');
+        $('#form-copy').attr('action', url);
+    }
+    function deleteActivity(name, url) {
+        $('#delete-activity-name').html(name);
+        $('#delete-activity-button').attr('href', url);
+    }
+    function archiveActivity(name, url) {
+        $('#archive-activity-name').html(name);
+        $('#archive-activity-button').attr('href', url);
+    }
+    function restoreActivity(name, url) {
+        $('#restore-activity-name').html(name);
+        $('#restore-activity-button').attr('href', url);
+    }
+</script>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#registration-group').change(function () {
+            location.href = '@Url.Action("index", "activity")?group=' + $(this).val();
+        });
+    });
+</script>
