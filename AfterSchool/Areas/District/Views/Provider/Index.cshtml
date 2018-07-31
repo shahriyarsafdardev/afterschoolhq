@@ -25,7 +25,14 @@
                         <div class="widget widget-tile widget-bordered">
                             <div class="data-info">
                                 <div data-toggle="counter" data-end="@Model.Count" data-decimals="0" data-suffix="" class="value">@Model.Count</div>
-                                <div class="desc">Providers Registered</div>
+                                @if (Model.Count == 1)
+                                {
+                                    <div class="desc">Provider Registered</div>
+                                }
+                                else
+                                {
+                                    <div class="desc">Providers Registered</div>
+                                }
                             </div>
                             <div class="icon"><span class="s7-rocket"></span></div>
                         </div>

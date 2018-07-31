@@ -1,12 +1,15 @@
-﻿@model List<AfterSchoolLibrary.Account>
+﻿@model  ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var inviteUrl = Url.Action("inviteschool", "league");
+    var invitedAccounts = (List<Account>)ViewBag.InvitedAccounts;
 }
 
 @{Html.RenderPartial("DistrictHeader");}
 
 <div class="main-content">
+
+    @{Html.RenderPartial("_LeagueHeader");}
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -18,13 +21,13 @@
         </div>
         <div class="panel-body">
 
-            @if (Model.Any())
+            @if (invitedAccounts.Any())
             {
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="widget widget-tile widget-bordered">
                             <div class="data-info">
-                                <div data-toggle="counter" data-end="@Model.Count" data-decimals="0" data-suffix="" class="value">@Model.Count</div>
+                                <div data-toggle="counter" data-end="@invitedAccounts" data-decimals="0" data-suffix="" class="value">@invitedAccounts</div>
                                 <div class="desc">Schools Registered</div>
                             </div>
                             <div class="icon"><span class="s7-study"></span></div>
@@ -40,30 +43,30 @@
                             <th>Status</th>
                             <th>Teams</th>
                         </tr>
-                        @foreach (var account in Model)
+                        @foreach (var account in invitedAccounts)
                         {
-                        <tr>
-                            <td>
-                                <a href="#" class="btn btn-default">View</a>
-                            </td>
-                            <td>@account.Name</td>
-                            @if (AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).Count() != 0)
-                            {
-                                if (AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).First().IsNotEmpty())
+                            <tr>
+                                <td>
+                                    <a href="#" class="btn btn-default">View</a>
+                                </td>
+                                <td>@account.Name</td>
+                                @if (AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).Count() != 0)
                                 {
-                                    <td>@AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).First().InviteStatusId</td>
+                                    if (AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).First().IsNotEmpty())
+                                    {
+                                        <td>@AccountActivityGroup.LoadByActivityGroupId(account.ID.Value).First().InviteStatusId</td>
+                                    }
+                                    foreach (var AccountActivity in AccountActivityGroup.LoadByActivityGroupId(account.ID.Value))
+                                    {
+                                        <td>@AccountActivity.InviteStatusId</td>
+                                    }
                                 }
-                                foreach (var AccountActivity in AccountActivityGroup.LoadByActivityGroupId(account.ID.Value))
+                                else
                                 {
-                                    <td>@AccountActivity.InviteStatusId</td>
+                                    <td>Not yet invited</td>
                                 }
-                            }
-                            else
-                            {
-                                <td>Not yet invited</td>
-                            }
-                            <td>@account.GetActivityCount(UserType.ActivityLeader, account.GetAccountOwner(), null, null, null)</td>
-                        </tr>
+                                <td>@account.GetActivityCount(UserType.ActivityLeader, account.GetAccountOwner(), null, null, null)</td>
+                            </tr>
                         }
                     </table>
                 </div>
