@@ -339,6 +339,7 @@
     <Content Include="Assets\css\font-awesome-4.6.3\HELP-US-OUT.txt" />
     <Content Include="Assets\css\style-mods.css" />
     <Content Include="Assets\css\style-public.css" />
+    <Content Include="Assets\css\style-registration.css" />
     <Content Include="Assets\css\style.css" />
     <Content Include="Assets\css\style.min.css" />
     <Content Include="Assets\css\themes\theme-cake.css" />
@@ -1181,6 +1182,8 @@
     <Content Include="Views\Shared\_GradeRestrictions.cshtml" />
     <Content Include="Views\Account\AddParent.cshtml" />
     <Content Include="Views\Shared\Registration\_RegisterButton.cshtml" />
+    <Content Include="Views\Shared\Registration\_AccountTopBar.cshtml" />
+    <Content Include="Views\Shared\Registration\_LoginModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1192,6 +1195,7 @@
     <Folder Include="Areas\StripeHooks\Views\Shared\" />
     <Folder Include="Areas\StripeHooks\Views\Test\" />
     <Folder Include="Areas\User\Models\" />
+    <Folder Include="Home\" />
     <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>

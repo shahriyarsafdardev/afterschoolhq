@@ -272,120 +272,6 @@ namespace AfterSchool.Controllers
 
         #endregion
 
-        #region AddEmergencyContacts
-
-        private List<FormQuestion> AddEmergencyContactsViewBag(SystemMessages msgs)
-        {
-            var form = GetAdministratorAccountForm(msgs);
-            var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
-                .Where(group => 
-                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 || 
-                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
-                .ToList();
-            var questions = new List<FormQuestion>();
-
-            emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
-            questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
-                .ToList()
-                .ForEach(question => { question.IsRequired = true; });
-
-            ViewBag.Cart = SessionVariables.Cart;
-
-            return questions;
-        }
-
-        [HttpGet]
-        public ActionResult AddEmergencyContacts()
-        {
-            var results = CheckRedirect();
-            if (results.IsNotEmpty()) return results;
-
-            var msgs = new SystemMessages();
-            var questions = AddEmergencyContactsViewBag(msgs);
-
-            ViewBag.Messages = msgs;
-
-            return View(questions.Select(question => question.ToFormQuestionViewModel()).ToList());
-        }
-
-        [HttpPost]
-        public ActionResult AddEmergencyContacts(string id)
-        {
-            var msgs = new SystemMessages();
-            var questions = AddEmergencyContactsViewBag(msgs);
-            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-            var emergencyContactPhone1 = "";
-
-            questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString();
-                var qvmNameIsEmpty = qvmName.IsEmpty();
-                if (question.IsRequired && qvmNameIsEmpty)
-                    msgs.Add($"{question.Text} is required", MessageType.UserError);
-                
-                //validate emegercy contact phone 1
-                if(question.QuestionDataTypeId == QuestionDataType.EmergencyContact1Phone)
-                {
-                    emergencyContactPhone1 = qvmName;
-                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    {
-                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
-                    }
-                }
-
-                //validate emegercy contact phone 2
-                if (question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone && question.IsRequired)
-                {
-                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    {
-                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
-                    }
-                    if(qvmName == emergencyContactPhone1)
-                    {
-                        msgs.Add($"{question.Text} emergency contact phone numbers can't be the same", MessageType.UserError);
-                    }
-                }
-            });
-
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-
-            if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        // add answers to parent registrant record
-                        // will be used later to copy information over to student records
-                        qvms.ForEach(qvm =>
-                        {
-                            parentRegistrant.AddAnswer(
-                                answerText: qvm.Value,
-                                question: qvm.Question,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                                msgs: amsgs,
-                                dc: adc);
-                        });
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
-            }
-
-            if (msgs.HasNoErrors())
-                return RedirectToAction("addparent");
-
-            ViewBag.Messages = msgs;
-
-            return View(qvms);
-        }
-
-        #endregion
 
         #region AddParent
 
@@ -488,6 +374,122 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             otherParent.AddAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Question,
+                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("addemergencycontacts");
+
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        #endregion
+
+
+        #region AddEmergencyContacts
+
+        private List<FormQuestion> AddEmergencyContactsViewBag(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
+                .Where(group => 
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 || 
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
+                .ToList();
+            var questions = new List<FormQuestion>();
+
+            emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
+            questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
+                .ToList()
+                .ForEach(question => { question.IsRequired = true; });
+
+            ViewBag.Cart = SessionVariables.Cart;
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult AddEmergencyContacts()
+        {
+            var results = CheckRedirect();
+            if (results.IsNotEmpty()) return results;
+
+            var msgs = new SystemMessages();
+            var questions = AddEmergencyContactsViewBag(msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(questions.Select(question => question.ToFormQuestionViewModel()).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult AddEmergencyContacts(string id)
+        {
+            var msgs = new SystemMessages();
+            var questions = AddEmergencyContactsViewBag(msgs);
+            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+            var emergencyContactPhone1 = "";
+
+            questions.ForEach(question => {
+                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString();
+                var qvmNameIsEmpty = qvmName.IsEmpty();
+                if (question.IsRequired && qvmNameIsEmpty)
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+                
+                //validate emegercy contact phone 1
+                if(question.QuestionDataTypeId == QuestionDataType.EmergencyContact1Phone)
+                {
+                    emergencyContactPhone1 = qvmName;
+                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    {
+                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
+                    }
+                }
+
+                //validate emegercy contact phone 2
+                if (question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone && question.IsRequired)
+                {
+                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    {
+                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
+                    }
+                    if(qvmName == emergencyContactPhone1)
+                    {
+                        msgs.Add($"{question.Text} emergency contact phone numbers can't be the same", MessageType.UserError);
+                    }
+                }
+            });
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // add answers to parent registrant record
+                        // will be used later to copy information over to student records
+                        qvms.ForEach(qvm =>
+                        {
+                            parentRegistrant.AddAnswer(
                                 answerText: qvm.Value,
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
@@ -846,7 +848,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("select");
+                return RedirectToAction("register");
 
             ViewBag.Student = SessionVariables.CurrentRegistrant;
             ViewBag.Messages = msgs;

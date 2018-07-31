@@ -9,6 +9,8 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml"); }
+
 <div class="reg-header">
     <div>
         @foreach (var item in cart.GetCartItems())
@@ -17,7 +19,7 @@
                 <h1>You are registering for: @item.GetParticipationObject().Name</h1>
             </div>
         }
-    </div> 
+    </div>
 </div>
 
 <div>
@@ -34,7 +36,7 @@
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                         }
 
-                        @{ 
+                        @{
                             Html.RenderPartial(
                                "~/Views/Shared/_LocationEdit.cshtml",
                                school,
@@ -42,7 +44,13 @@
                         }
 
                         <div class="padding-v-20">
-                            <button type="submit" id="btn-add-student" class="btn btn-xl center-block btn-register">Save &amp; Continue &raquo;</button>
+                            <button type="submit" id="btn-add-student" class="btn btn-register btn-lg">Save &amp; Continue &raquo;</button>
+                        </div>
+
+                        <div class="row">
+                            <div class="padding-v-20 text-center">
+                                <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                            </div>
                         </div>
 
                     </form>

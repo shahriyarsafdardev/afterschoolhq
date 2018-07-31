@@ -9,44 +9,52 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml"); }
+
 <div class="reg-header">
     <div>
-        <h1>Complete registration</h1>
+        <h1>Complete registration for <u>@participationObject.Name</u></h1>
         <p>Please select which student you&#39;d like to register below.</p>
     </div>
 </div>
 
 <div>
-    <div class="col-md-12">
-        <div class="panel">
-            <div class="panel-body">
 
-                @foreach(var registrant in Model)
-                {
-                    var isRegistered = registrant.IsRegisteredFor(participationObject);
-                    var btnText = isRegistered ? "Already Registered" : "Register";
-                    var disabledText = isRegistered ? " disabled=\"disabled\" " : "";
+    @foreach (var registrant in Model)
+    {
+        var isRegistered = registrant.IsRegisteredFor(participationObject);
+        var btnText = isRegistered ? "Already Registered" : "Register";
+        var disabledText = isRegistered ? " disabled=\"disabled\" " : "";
 
-                    <div class="col-md-3">
-                        <p>@registrant.DisplayName</p>
-                        <p>@registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade</p>
-                        <p>
-                            <a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })" 
-                               class="btn btn-register btn-lg"
-                               @disabledText>
-                               @btnText
-                            </a>
-                        </p>
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <div class="panel">
+                <div class="heading panel-h3 text-center">
+                    <div class="padding-30">
+                        @registrant.DisplayName - @registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
                     </div>
-                }
-
-                <div class="col-md-3">
-                    <p>New Child</p>
-                    <p>-</p>
-                    <p><a href="@Url.Action("addstudent", "account")" class="btn btn-register btn-lg">Add Child</a></p>
                 </div>
+                <div class="panel-body">
+                    <p>
+                        <a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })"
+                           class="btn btn-register btn-lg"
+                           @disabledText>
+                            @btnText
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
 
+    <div class="col-sm-12 col-md-6 col-lg-4">
+        <div class="panel panel-full-dark">
+            <div class="heading panel-h3 text-center">
+                <div class="padding-30">New Child</div>
+            </div>
+            <div class="panel-body">
+                <p><a href="@Url.Action("addstudent", "account")" class="btn btn-register btn-lg">Add Child</a></p>
             </div>
         </div>
     </div>
+
 </div>

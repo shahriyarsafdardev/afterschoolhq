@@ -9,6 +9,8 @@
     var locations = (List<Location>)ViewBag.Locations;
 }
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml"); }
+
 <div class="reg-header">
     <div class="reg-header-overlay">
         <h1 class="activity-title"><strong>@Model.Name</strong></h1>
@@ -76,7 +78,7 @@
 <div class="margin-10">
     @foreach(var item in objects)
     {
-        <div class="col-md-4 participation-object" 
+        <div class="col-sm-12 col-md-6 col-lg-4 participation-object" 
              id="@item.Uid" 
              mingrade="@item.MinGradeId" 
              maxgrade="@item.MaxGradeId" 
@@ -106,8 +108,8 @@
                         </span>
                     </div>
 
-                    <p class="activity-description">
-                        @Html.Raw(item.Description.IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(item.Details).MaxChars(100)))
+                    <p class="activity-description text-muted">
+                        @Html.Raw(item.Description.IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(item.Details).MaxChars(200)))
                     </p>
 
                     <div>
