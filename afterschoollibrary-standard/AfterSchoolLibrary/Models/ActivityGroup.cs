@@ -813,23 +813,6 @@ namespace AfterSchoolLibrary
                                 adc));
                         }
 
-                        // setup schedule
-                        if (amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduledates.IsNotEmpty()))
-                        {
-                            amsgs.AddRange(group.SetupSchedule(
-                                account,
-                                schedule.ToString(),
-                                (List<DateRange>)scheduledates,
-                                scheduledetails.ToString(),
-                                repeatsweekly.ToString(),
-                                startdate.ToString(),
-                                enddate.ToString(),
-                                dailystarttime.ToString(),
-                                dailyendtime.ToString(),
-                                loggedInUser.ID.Value,
-                                dc));
-                        }
-
                         //instances & schedule
                         /*
                         (amsgs.HasNoErrors())
