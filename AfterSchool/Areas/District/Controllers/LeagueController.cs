@@ -375,7 +375,7 @@ namespace AfterSchool.Areas.District.Controllers
                 new System.Collections.Hashtable()
                 {
                     { "activitygroupid", group.ID.Value}
-                }, 
+                },
                 msgs);
 
             var invitedAccounts = AccountActivityGroup.Load(
@@ -402,6 +402,15 @@ namespace AfterSchool.Areas.District.Controllers
             };
 
             ViewBag.InvitedAccounts = invitedAccounts;
+            return group;
+        }
+
+        [ValidateInput(false)]
+        // GET: District/School
+        [HttpGet]
+        public ActionResult Schools(string id,string pn, string rpp)
+        {
+            var group = LoadSchoolsViewBag(id, pn, rpp);
             return View(group);
         }
 
