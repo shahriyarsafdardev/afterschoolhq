@@ -51,7 +51,7 @@
                                         @(plan.TotalPeriods - 1) more payments of @plan.CostPerPeriod.ToCurrency()
                                         each @plan.BillingPeriodTypeId.ToString().ToLower()
                                     </label>
-                                    <span id="payment-plan-cost-@plan.ID">@plan.CostPerPeriod</span>
+                                    <span id="payment-plan-cost-@plan.ID" class="hide">@plan.CostPerPeriod</span>
                                 </div>
                             }
                         </div>
@@ -69,13 +69,25 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    <tr id="registration-fee-row">
                                         <td>Registration Fee</td>
                                         <td>
                                             <span id="fee-total-value" class="hide">@participationObject.Cost</span>
                                             @participationObject.Cost.ToCurrency()
                                         </td>
                                     </tr>
+                                    @foreach (var plan in participationObject.PaymentPlans)
+                                    {
+                                        
+                                        <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
+                                            <td>Payment Plan</td>
+                                            <td>
+                                                @plan.CostPerPeriod.ToCurrency() /
+                                                @plan.BillingPeriodTypeId.ToString().ToLower() for
+                                                @plan.TotalPeriods @plan.BillingPeriodTypeId.ToString().ToLower()s
+                                            </td>
+                                        </tr>
+                                    }
                                     @if (participationObject.SubscriptionPlans.Any())
                                     {
                                         <tr>
@@ -91,7 +103,7 @@
                                 <tfoot>
                                     <tr>
                                         <td>
-                                            <p class="text-medium">
+                                            <p class="text-medium-small">
                                                 Total Due Today
                                             </p>
                                         </td>
@@ -217,6 +229,15 @@
     function updatePaymentOptionCost(paymentPlanId) {
         let regTotalToday = parseFloat($(`#payment-plan-cost-${paymentPlanId}`).html());
         updateTotals(regTotalToday);
+
+        $('#registration-fee-row').addClass('hide');
+        $('.paymentplan-fee-row').addClass('hide');
+
+        if (paymentPlanId == 0) {
+            $('#registration-fee-row').removeClass('hide');
+        } else {
+            $(`#paymentplan-fee-row-${paymentPlanId}`).removeClass('hide');
+        }
     }
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -233,12 +254,14 @@
         $('#existing-payment-form').submit(function () {
             $('#btn-paywithexistingcard').html('Processing Payment...');
             $('#btn-paywithexistingcard').prop('disabled', true);
+            $('#btn-paywithnewcard').prop('disabled', true);
         });
 
         $('#btn-paywithnewcard').click(function () {
 
             $('#btn-paywithnewcard').html('Processing Payment...');
             $('#btn-paywithnewcard').prop('disabled', true);
+            $('#btn-paywithexistingcard').prop('disabled', true);
 
           //  console.log('clicked pay');
 
