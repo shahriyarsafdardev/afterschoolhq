@@ -1123,23 +1123,23 @@ namespace AfterSchoolLibrary
                         amsgs.AddRange(newProperty.Save(adc));
                     });
 
-                    // copy days
-                    // deprecated
-                    this.GetDays(amsgs, adc).ForEach(day => {
-                        var newDay = new ActivityDay
-                        {
-                            ActivityId = copy.ID,
-                            ActivityRecurrenceId = day.ActivityRecurrenceId,
-                            Day = day.Day,
-                            EndTime = day.EndTime,
-                            StartTime = day.StartTime,
-                            CreateDate = DateTime.UtcNow,
-                            LastModifiedDate = DateTime.UtcNow,
-                            CreatedBy = loggedInUserId,
-                            LastModifiedBy = loggedInUserId
-                        };
-                        amsgs.AddRange(newDay.Save(adc));
-                    });
+                    //// copy days
+                    //// deprecated
+                    //this.GetDays(amsgs, adc).ForEach(day => {
+                    //    var newDay = new ActivityDay
+                    //    {
+                    //        ActivityId = copy.ID,
+                    //        ActivityRecurrenceId = day.ActivityRecurrenceId,
+                    //        Day = day.Day,
+                    //        EndTime = day.EndTime,
+                    //        StartTime = day.StartTime,
+                    //        CreateDate = DateTime.UtcNow,
+                    //        LastModifiedDate = DateTime.UtcNow,
+                    //        CreatedBy = loggedInUserId,
+                    //        LastModifiedBy = loggedInUserId
+                    //    };
+                    //    amsgs.AddRange(newDay.Save(adc));
+                    //});
 
                     // copy grades
                     //this.GetGradeLevels(amsgs, adc).ForEach(grade => {
@@ -1158,13 +1158,13 @@ namespace AfterSchoolLibrary
                     var oldSubPlan = this.GetSubscriptionPlan(amsgs, adc);
                     if (oldSubPlan.IsNotEmpty())
                     {
-                        var newSubPlan = oldSubPlan.Copy(this.ID.Value, loggedInUserId, amsgs, adc);
+                        var newSubPlan = oldSubPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
                     }
 
                     var oldPaymentPlan = this.GetPaymentPlan(amsgs, adc);
                     if (oldPaymentPlan.IsNotEmpty())
                     {
-                        var newPaymentPlan = oldPaymentPlan.Copy(this.ID.Value, loggedInUserId, amsgs, adc);
+                        var newPaymentPlan = oldPaymentPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
                     }
 
                 },

@@ -494,14 +494,17 @@ namespace AfterSchoolLibrary
 
         public ActivitySchedule GetCopy()
         {
-            var schedule = new ActivitySchedule();
-            schedule.Name = this.Name + " [copy]";
-            schedule.ScheduleDetails = this.ScheduleDetails;
-            schedule.StartDate = this.StartDate;
-            schedule.EndDate = this.EndDate;
-            schedule.DailyStartTime = this.DailyStartTime;
-            schedule.DailyEndTime = this.DailyEndTime;
-            schedule.RepeatsWeekly = this.RepeatsWeekly;
+            var schedule = new ActivitySchedule
+            {
+                Name = this.Name + " [copy]",
+                ScheduleDetails = this.ScheduleDetails,
+                StartDate = this.StartDate,
+                EndDate = this.EndDate,
+                DailyStartTime = this.DailyStartTime,
+                DailyEndTime = this.DailyEndTime,
+                RepeatsWeekly = this.RepeatsWeekly,
+                IsOngoing = this.IsOngoing
+            };
 
             schedule.AddInstances(this.GetInstances());
 
@@ -527,6 +530,7 @@ namespace AfterSchoolLibrary
                         StartDate = this.StartDate,
                         Name = this.Name + " [copy]",
                         RepeatsWeekly = this.RepeatsWeekly,
+                        IsOngoing = this.IsOngoing,
                         ScheduleDetails = this.ScheduleDetails,
                         CreateDate = DateTime.UtcNow,
                         CreatedBy = loggedInUserId,
