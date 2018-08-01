@@ -476,7 +476,7 @@ namespace AfterSchoolLibrary
         private Form _Form = null;
         public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (_Form.IsEmpty())
+            if (_Form.IsEmpty() && this.FormId.HasValue)
                 _Form = Form.Load(this.FormId.Value, msgs, dc);
 
             return _Form;

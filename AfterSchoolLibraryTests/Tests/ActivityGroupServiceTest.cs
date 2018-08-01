@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests.Tests
             ActivityGroupOwner = AccountFactory.Create(AccountOwner, msgs, dc);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Convert activity group to participation object with no vars set")]
         public void ToParticipationObjectTestSimple()
         {
             var actvityGroup = ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.League, msgs, dc);
@@ -29,7 +29,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(actvityGroup.ToParticipationObject(msgs, dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "Convert activity group to participation object with all vars set")]
         public void ToParticipationObjectTestFull()
         {
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);

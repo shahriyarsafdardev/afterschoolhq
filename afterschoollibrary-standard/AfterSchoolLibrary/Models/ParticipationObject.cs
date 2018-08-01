@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary
         public string CostDescription { get; set; }
 
         private ActivityType? ActivityType { get; set; }
-        private ActivityGroupType? ActivityGroupType { get; set; }
+        private ActivityGroupType? ActivityGroupType { get; set; }       
 
         public ParticipationObject(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
