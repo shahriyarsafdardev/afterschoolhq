@@ -1911,7 +1911,6 @@ namespace AfterSchoolLibrary
 
                 this.LocationId = activityLocation.ID;
             }
-
             
             if (locationdetails.IsNotEmpty())
                 this.LocationDetails = locationdetails.IfBlank("").MaxChars(4000);
