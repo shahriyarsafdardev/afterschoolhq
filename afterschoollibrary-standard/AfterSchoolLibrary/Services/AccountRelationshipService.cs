@@ -18,6 +18,13 @@ namespace AfterSchoolLibrary.Services
             return Account.Load(ar.VisitorAccountId.Value, msgs, dc);
         }
 
+        public static AccountRelationship GetOrCreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
+
+            return accountRelationship ?? CreateNew(hostAccount, visitorAccount, approvalStatus, hostPermissionType, loggedInUser, msgs, dc);
+        }
+
         public static AccountRelationship CreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountRelationship = new AccountRelationship

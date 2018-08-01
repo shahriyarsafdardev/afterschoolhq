@@ -274,7 +274,6 @@ namespace AfterSchoolLibrary
             return new SubscriptionPlan()
             {
                 ParticipationObjectTypeId = this.ParticipationObjectTypeId,
-                ParticipationObjectId = this.ParticipationObjectId,
                 PlanOwnerAccountId = this.PlanOwnerAccountId,
                 CostPerPeriod = this.CostPerPeriod,
                 BillingPeriodTypeId = this.BillingPeriodTypeId,

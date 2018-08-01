@@ -28,6 +28,13 @@ namespace AfterSchoolLibrary.Services
             return arl;
         }
 
+        public static AccountRelationshipLocation GetOrCreateNew(AccountRelationship accountRelationship, Account hostAccount, Account visitorAccount, Location location, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var arl = AccountRelationshipLocation.LoadByHostAccountIdByVisitorAccountIdByLocationId(hostAccount.ID.Value, visitorAccount.ID.Value, location.ID.Value, msgs, dc);
+
+           return arl ?? CreateNew(accountRelationship, hostAccount, visitorAccount, location, loggedInUser, msgs, dc);
+        }
+
         public static Location GetLocation(this AccountRelationshipLocation alr, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Location.Load(alr.LocationId.Value, msgs, dc);
