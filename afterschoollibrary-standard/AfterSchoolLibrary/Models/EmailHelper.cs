@@ -327,7 +327,44 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account hostAccount)
+        public static SystemMessages SendLeagueAccountInvitedEmail(WebUser invitedUser, Account invitedAccount, WebUser loggedInUser, string customMessage = null)
+        {
+            var msgs = new SystemMessages();
+
+            if (customMessage.IsNotEmpty())
+                customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", invitedUser.FirstName },
+                { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress(invitedAccount.IsAfterSchool) },
+                { "InviteUrl", invitedUser.GetInviteUrl(invitedAccount) },
+                { "CustomMessage", customMessage }
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Account_Invited,
+                model,
+                "accountinvited",
+                msgs
+                );
+
+            var subject = $"{loggedInUser.DisplayName} has invited you to their league in  {Utilities.AppName(invitedAccount.IsAfterSchool)}!";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(invitedAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(invitedUser.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(invitedAccount.IsAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
+        public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account Hostaccount)
         {
             var msgs = new SystemMessages();
             var hostAccountOwner = hostAccount.GetAccountOwner(msgs);
