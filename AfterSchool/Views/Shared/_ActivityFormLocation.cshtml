@@ -45,8 +45,16 @@
             @{
             Html.RenderPartial(
               "~/Views/Shared/_Address.cshtml",
-              addressViewModel
-             );
+              addressViewModel,
+                new ViewDataDictionary()
+                {
+                    { "address1required", true },
+                    { "cityrequired", true },
+                    { "staterequired", true },
+                    { "postalcoderequired", true },
+                    { "labelcolwidth", 3 },
+                    { "disabled", false }
+                });
             }
 
         </div>
@@ -58,14 +66,14 @@
             <div class="col-sm-9">
                 @{
                     Html.RenderPartial(
-                     "~/Views/Shared/_TextEditor.cshtml",
-                     Model.LocationDetails,
-                     new ViewDataDictionary() {
+                             "~/Views/Shared/_TextEditor.cshtml",
+                             Model.LocationDetails,
+                             new ViewDataDictionary() {
                             //{ "required", true },
                             { "name", "locationdetails" },
                             { "id", "locationdetails" }
-                     }
-                     );
+                             }
+                             );
                 }
                 <p class="text-muted"><em>Enter your room number or any special instructions or information about the location? Such as pick up or drop off locations?</em></p>
             </div>
