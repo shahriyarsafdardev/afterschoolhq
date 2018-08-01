@@ -126,7 +126,6 @@ else
                         var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
                         var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
                         
-
                         <tr>
                             <td>
                                 <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-default btn-sm">View</a>
@@ -134,6 +133,12 @@ else
                             <td>
                                 <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})">
                                     @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
+                                    @if (activity.LocationId.HasValue)
+                                    { 
+                                        <span>
+                                            @@ @(activity.GetLocation()?.Name)
+                                        </span>
+                                    }
                                 </a>
                             </td>
                             <td class="text-center">
@@ -157,18 +162,6 @@ else
                                 }
                                 
                             </td>
-                            <!--
-                            <td class="text-center">
-                                @if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
-                                {
-                                    @: @activity.AgeStart.Value - @activity.AgeEnd.Value
-                                }
-                                else
-                                {
-                                    @:-
-                                }
-                            </td>
-                            -->
                             <td class="text-center @reservedTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable</td>
                             @if (account.HasFeature(FeatureType.WaitingList))
                             {

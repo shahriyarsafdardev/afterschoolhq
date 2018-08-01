@@ -85,7 +85,7 @@ namespace AfterSchoolLibrary.Services
                 // set host account
                 newLocation.SetHostAccount(newHostAccount, loggedInUser, dc);
 
-                var relationship = AccountRelationshipService.CreateNew(
+                var relationship = AccountRelationshipService.GetOrCreateNew(
                     hostAccount: newHostAccount,
                     visitorAccount: loggedInAccount,
                     approvalStatus: ApprovalStatus.Requested,
@@ -94,7 +94,7 @@ namespace AfterSchoolLibrary.Services
                     msgs: msgs,
                     dc: dc);
 
-                var relationshipLocation = AccountRelationshipLocationService.CreateNew(
+                var relationshipLocation = AccountRelationshipLocationService.GetOrCreateNew(
                     accountRelationship: relationship,
                     hostAccount: newHostAccount,
                     visitorAccount: loggedInAccount,
