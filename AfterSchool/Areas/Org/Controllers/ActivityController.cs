@@ -996,7 +996,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         amsgs.AddRange(attendance.Save(adc));
 
                         var registrants = attendance.ToActivity(true, adc).GetRegistrantActivities(amsgs, adc);
-                        foreach (var registrant in registrants)
+                        foreach (var registrant in registrants.Where(registrant => registrant.NumberOfSeats > 0))
                         {
                             var ar = new AttendanceRegistrant();
                             ar.AttendanceId = attendance.ID;
