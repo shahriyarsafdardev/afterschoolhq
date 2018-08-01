@@ -1850,19 +1850,7 @@ namespace AfterSchoolLibrary
 
         private SystemMessages SetupLocation(string location, string locationname, string address1, string address2, string city, string state, string postalcode, string locationdetails, string ismylocation, string locationtype, int loggedInUserId, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
-            if (address1.IsEmpty())
-                msgs.Add("Address 1 is required", MessageType.UserError);
-            if (city.IsEmpty())
-                msgs.Add("City is required", MessageType.UserError);
-            if (state.IsEmpty())
-                msgs.Add("State is required", MessageType.UserError);
-            if (postalcode.IsEmpty())
-                msgs.Add("Postal Code is required", MessageType.UserError);
-
-            if (msgs.HasErrors())
-                return msgs;
+            var msgs = new SystemMessages();            
 
             // just switching locations
             if (location.IsNumber())
@@ -1897,6 +1885,18 @@ namespace AfterSchoolLibrary
             // otherwise somehow the UI allowed them to enter a location that already exists, with the exact same location name
             else
             {
+                if (address1.IsEmpty())
+                    msgs.Add("Address 1 is required", MessageType.UserError);
+                if (city.IsEmpty())
+                    msgs.Add("City is required", MessageType.UserError);
+                if (state.IsEmpty())
+                    msgs.Add("State is required", MessageType.UserError);
+                if (postalcode.IsEmpty())
+                    msgs.Add("Postal Code is required", MessageType.UserError);
+
+                if (msgs.HasErrors())
+                    return msgs;
+
                 var locationType = LocationType.NotSet;
                 var hostAccountId = new int?();
 

@@ -1558,7 +1558,7 @@ values: NotSet, Credit, Debit
 [begin]
 type: Enum
 name: ParticipationObjectType
-values: NotSet, Activity, ActivityGroup
+values: NotSet, Activity, ActivityGroup, AccountActivityGroup
 [end]
 
 [begin]
