@@ -1,11 +1,12 @@
 ﻿@model List<AfterSchoolLibrary.Account>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var inviteUrl = Url.Action("inviteschool", "league");
+    var inviteUrl = Url.Action("invite", "school");
     var schoolsToInvite = ViewBag.SchoolsToInvite;
     var currentSchools = (List<Account>)ViewBag.CurrentSchools;
     var schoolsPerColumn = (int)ViewBag.SchoolsPerColumn;
     var activityGroupUid = ViewBag.ActivityGroupUid;
+
 
 }
 
@@ -55,7 +56,7 @@
                                         @foreach (var school in Model.Skip((i * schoolsPerColumn)).ToList().Take(schoolsPerColumn))
                                         {
                                             <div class="am-checkbox">
-                                                <input type="checkbox" onclick="toggleCheck(@school)" id="school-@school.ID.Value" name="registrant-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
+                                                <input type="checkbox" onclick="toggleCheck(@school)" id="school-@school.ID.Value" name="school-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
                                                 <label for="school-@school.ID">@school.Name.MaxChars(20, "...")</label>
                                             </div>
                                         }
@@ -79,11 +80,11 @@
                     </div>
                     <div class="widget-tile">
                         <hr />
-                        <p>You haven't invited any schools yet. In order to get started, <a href="@inviteUrl">invite your first school</a>.</p>
-                        <p>&nbsp;</p>
-                        <p>
-                            <a href="@inviteUrl" class="btn btn-primary btn-lg">Invite Your First School &raquo;</a>
-                        </p>
+                        <p>Looks like there aren't any schools that you can invite to this league. </p>
+                        <br/>
+                        <p>Do you want to add more schools to this league? <a href="@inviteUrl">Invite them here first.</a>  Then they will appear here.</p>
+
+
                     </div>
                 </div>
             }

@@ -482,13 +482,17 @@ namespace AfterSchool.Areas.District.Controllers
             int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.School);
             var schools = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School);
             var activityGroup = ActivityGroup.LoadByUid(uid.ToGuid());
-            var invitedSchools = AccountActivityGroup.LoadByActivityGroupId(activityGroup.ID.Value);
-            var invitedSchoolsIds = invitedSchools.Select(i => i.ID.Value);
-            var currentSchools = schools.Where(school => invitedSchoolsIds.Contains(school.ID.Value)).ToList();
+            var accountActivityGroups = AccountActivityGroup.LoadByActivityGroupId(activityGroup.ID.Value);//.Where( s=> s.InviteStatusId != InviteStatus.NotSet);
+            var accountIds = accountActivityGroups.Select(a => a.AccountId.Value);
+
+            List<Account> notInivitedSchools = (List<Account>)schools.Where(s => !accountIds.Contains(s.ID.Value)).ToList();
+
+            var invitedSchools = new List<Account>();
+          
+
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
-
-            ViewBag.CurrentSchools = currentSchools;
+            ViewBag.CurrentSchools = invitedSchools;
             ViewBag.SchoolsPerColumn = (schools.Count / 3) > (schools.Count % 3) ? (schools.Count / 3) : (schools.Count % 3);
             ViewBag.ActivityGroupUid = uid;
            
@@ -499,7 +503,7 @@ namespace AfterSchool.Areas.District.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-            return schools;
+            return notInivitedSchools;
         }
 
         [HttpGet]
@@ -522,7 +526,9 @@ namespace AfterSchool.Areas.District.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) => {
                         foreach (var school in schools)
                         {
-                            if (Request[$"school-{school.ID.Value}"].IsBoolean())
+                            var checkString = String.Format("school-{0}", school.ID.Value);
+                            var checkbox = Request[checkString];
+                            if (checkbox.IsBoolean())
                             {
                                 AccountActivityGroupService.CreateNew(school, activityGroup, InviteStatus.Invited, SessionVariables.LoggedInUser);
                             }
@@ -539,7 +545,7 @@ namespace AfterSchool.Areas.District.Controllers
                 );
 
             ViewBag.Messages = msgs;
-            return View(schools);
+            return View("schools",schools);
         }
 
     }
