@@ -1748,6 +1748,7 @@ namespace AfterSchoolLibrary
                             toAccount: toAccount,
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
+                            subscriptionPlanType: SubscriptionPlanType.Subscription,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -1761,6 +1762,7 @@ namespace AfterSchoolLibrary
                             toAccount: toAccount,
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
+                            subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);

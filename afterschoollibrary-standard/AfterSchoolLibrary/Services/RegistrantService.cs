@@ -141,7 +141,7 @@ namespace AfterSchoolLibrary.Services
         }
 
 
-        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, Account fromAccount, Account toAccount, CheckoutObject checkoutObject, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, Account fromAccount, Account toAccount, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -149,7 +149,8 @@ namespace AfterSchoolLibrary.Services
             if (!checkoutObject.ParticipationObject.IsFree)
             {
                 // create source for new card to charge             
-                checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.SourceId, msgs);
+                if (checkoutObject.StripeToken.IsNotBlank())
+                    checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
 
                 // create chard for card
                 if (msgs.HasNoErrors())
@@ -195,10 +196,12 @@ namespace AfterSchoolLibrary.Services
                 stripeAccountId: toAccount.StripeUserId,
                 msgs: msgs);
 
+            var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
+
             // create the subscription on the connected account
             var subscription = Billing.StripeHelper.CreateSubscription(
                 customerId: accountCustomer.Id,
-                planId: checkoutObject.PaymentPlan.StripePlanId,
+                planId: plan.StripePlanId,
                 sourceId: copiedSourceId,
                 platformFeePercent: toAccount.GetPlatformFeePercent(msgs, dc),
                 trialEndDate: null,
@@ -207,10 +210,10 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasErrors())
                 return null;
-
+ 
             var rpp = RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
-                checkoutObject.PaymentPlan,
+                plan,
                 startDateTime.IfEmpty(DateTime.UtcNow),
                 purchase.ID,
                 subscription.Id,
