@@ -146,78 +146,52 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             // process registration fee if one exists and it has a subscription
-            if (!checkoutObject.ParticipationObject.IsFree && checkoutObject.SubscriptionPlan.IsNotEmpty())
+            if (!checkoutObject.ParticipationObject.IsFree)
             {
-                // create a charge for the registration fee and save the card                
+                // create source for new card to charge             
                 checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.SourceId, msgs);
 
+                // create chard for card
                 if (msgs.HasNoErrors())
-                {
-                    // if stripe token then don't send customer id
-                    string customerId = null;
-
-                    if (checkoutObject.SourceId.IsNotEmpty())
-                        customerId = fromAccount.StripeCustomerId;
-
-                    var charge = Billing.StripeHelper.CreateCharge(
-                        fromCustomerId: customerId,
-                        destinationAccountId: toAccount.StripeUserId,
-                        tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
-                        totalAmount: checkoutObject.TotalCostToPurchase,
-                        platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.TotalCostToPurchase, msgs, dc),
-                        description: $"{checkoutObject.ParticipationObject.Name} registration",
-                        statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
-                        msgs: msgs
-                        );
-                }
+                    fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
             }
 
             if (msgs.HasErrors())
                 return null;
 
             // need to create a purchase record first
-            var purchase = PurchaseService.CreateNew(
-                purchasingAccount: fromAccount,
-                checkoutObject: checkoutObject,
-                loggedInUser: loggedInUser,
-                msgs: msgs,
-                dc: dc);
+            var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
 
             // need to create a transaction if there's a registration fee
-
             // need to create an activity payment if there's a registration fee
+            if (!checkoutObject.ParticipationObject.IsFree)
+            {
+                fromAccount.AddTransaction(toAccount, purchase, checkoutObject, loggedInUser, msgs, dc);
+
+                if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
+                {
+                    // TODO: How much does a user pay for an activity if a coupon is used to purchase multiple activities at once?
+                    var activity = (Activity)checkoutObject.ParticipationObject.Object;
+                    var payment = activity.AddPayment(
+                        amount: activity.CostPerRegistrant.Value * checkoutObject.NumberOfSeats,
+                        registrant: checkoutObject.Registration.GetRegistrant(msgs, dc),
+                        loggedInUser: loggedInUser,
+                        msgs: msgs,
+                        dc: dc);
+                }
+            }
 
             if (msgs.HasErrors())
                 return null;
 
-            // stripe stuff
-            // create payment source if not already existent on the user
-            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
-            if (customer.DefaultSourceId.IsEmpty())
-            {
-                var source = Billing.StripeHelper.CreateSource(checkoutObject.StripeToken, msgs);
-                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
-                checkoutObject.SourceId = source.Id;
-            }
-            else
-            {
-                checkoutObject.SourceId = customer.DefaultSourceId;
-            }
-
-            // what happens if the same registrant gets another payment plan?
-            // Create a new customer? For now YES, it doesn't really matter I don't think
-
-            // get shared source
-            var copiedSource = Billing.StripeHelper.CreateSourceFromOriginal(customer.Id, checkoutObject.SourceId, toAccount.StripeUserId, msgs);
-
-            // get customer from platform, shared customer
-            //var token = Billing.StripeHelper.CreateCustomerToken(fromAccount.StripeCustomerId, toAccount.StripeUserId, msgs);
+            // have to copy the source from the platform to be able to move it to the stripe connected account
+            var copiedSourceId = fromAccount.CopyStripeSourceToAccount(toAccount, checkoutObject.StripeToken, msgs);
 
             // create the customer on the connected account
             var accountCustomer = Billing.StripeHelper.CreateCustomer(
                 description: fromAccount.Name,
                 email: fromAccount.Email,         
-                sourceId: copiedSource.Id,
+                sourceId: copiedSourceId,
                 stripeAccountId: toAccount.StripeUserId,
                 msgs: msgs);
 
@@ -225,7 +199,7 @@ namespace AfterSchoolLibrary.Services
             var subscription = Billing.StripeHelper.CreateSubscription(
                 customerId: accountCustomer.Id,
                 planId: checkoutObject.PaymentPlan.StripePlanId,
-                sourceId: copiedSource.Id,
+                sourceId: copiedSourceId,
                 platformFeePercent: toAccount.GetPlatformFeePercent(msgs, dc),
                 trialEndDate: null,
                 stripeAccountId: toAccount.StripeUserId,

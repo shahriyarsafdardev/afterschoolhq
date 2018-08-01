@@ -1624,6 +1624,33 @@ namespace AfterSchoolLibrary
                     dc);
         }
 
+        internal static string CopyStripeSourceToAccount(this Account fromAccount, Account toAccount, string stripeToken, SystemMessages msgs)
+        {
+            // stripe stuff
+            // create payment source if not already existent on the user
+            var sourceId = "";
+            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+
+            if (customer.DefaultSourceId.IsEmpty())
+            {
+                var source = Billing.StripeHelper.CreateSource(stripeToken, msgs);
+                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+                sourceId = source.Id;
+            }
+            else
+            {
+                sourceId = customer.DefaultSourceId;
+            }
+
+            // what happens if the same registrant gets another payment plan?
+            // Create a new customer? For now YES, it doesn't really matter I don't think
+
+            // get shared source
+            var copiedSource = Billing.StripeHelper.CreateSourceFromOriginal(customer.Id, sourceId, toAccount.StripeUserId, msgs);
+
+            return copiedSource.Id;
+        }
+
         private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Add Products
@@ -1636,17 +1663,13 @@ namespace AfterSchoolLibrary
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
             if (msgs.HasNoErrors() && checkoutObject.SavePaymentInfo)
-            {
                 checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
-            }
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
             // don't process charge if the user is using a payment plan
             if (msgs.HasNoErrors())
-            {
-                var charge = fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
-            }
+                fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
