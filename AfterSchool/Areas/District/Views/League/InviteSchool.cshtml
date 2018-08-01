@@ -46,8 +46,8 @@
                     <form action="@Url.Action("inviteschool","league",new { uid = activityGroupUid } )" method="post" id="invite-schools-forms">
                         <div class="form-group">
                             <label class="col-sm-3 control-label">
-                                Select @UILabel.RegistrantLabel(true)<br />
-                                <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                                Select Schools<br />
+                                @*<a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>*@
                             </label>
                             <div class="col-sm-6">
                                 @for (int i = 0; i < 3; i++)

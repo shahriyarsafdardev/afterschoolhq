@@ -84,10 +84,7 @@ namespace AfterSchool.Areas.District.Controllers
             return View(group);
         }
 
-        [ValidateInput(false)]
-        // GET: District/School
-        [HttpGet]
-        public ActionResult Schools(string id, string pn, string rpp)
+        private ActivityGroup LoadSchoolsViewBag(string id, string pn, string rpp)
         {
             var msgs = new SystemMessages() { };
             var group = ActivityGroup.LoadByUid(id.ToGuid());
@@ -109,7 +106,7 @@ namespace AfterSchool.Areas.District.Controllers
                 new System.Collections.Hashtable()
                 {
                     { "activitygroupid", group.ID.Value}
-                }, 
+                },
                 msgs);
 
             var invitedAccounts = AccountActivityGroup.Load(
@@ -136,6 +133,15 @@ namespace AfterSchool.Areas.District.Controllers
             };
 
             ViewBag.InvitedAccounts = invitedAccounts;
+            return group;
+        }
+
+        [ValidateInput(false)]
+        // GET: District/School
+        [HttpGet]
+        public ActionResult Schools(string id,string pn, string rpp)
+        {
+            var group = LoadSchoolsViewBag(id, pn, rpp);
             return View(group);
         }
 
@@ -521,31 +527,22 @@ namespace AfterSchool.Areas.District.Controllers
             var msgs = new SystemMessages();
             var schools = LoadInviteSchoolViewBag(null, null, uid);
             var activityGroup = ActivityGroup.LoadByUid(uid.ToGuid());
+            List<Account> invitedSchools = new List<Account>();
 
-            Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                        foreach (var school in schools)
-                        {
-                            var checkString = String.Format("school-{0}", school.ID.Value);
-                            var checkbox = Request[checkString];
-                            if (checkbox.IsBoolean())
-                            {
-                                AccountActivityGroupService.CreateNew(school, activityGroup, InviteStatus.Invited, SessionVariables.LoggedInUser);
-                            }
+            foreach(var school in schools)
+            {
+                if (Request[String.Format("school-{0}", school.ID.Value)].IsBoolean())
+                {
+                    invitedSchools.Add(school);
+                }
+            }
 
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Invites Sent Saved", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) => {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
+            AccountService.InviteSchoolsToLeague(invitedSchools, activityGroup, SessionVariables.LoggedInUser, msgs);
+
+            var group = LoadSchoolsViewBag(activityGroup.Uid.ToString(), null, null);
 
             ViewBag.Messages = msgs;
-            return View("schools",schools);
+            return View("schools", activityGroup);
         }
 
     }

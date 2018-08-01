@@ -1850,5 +1850,39 @@ namespace AfterSchoolLibrary
         {
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
         }
+        
+        public static AccountActivityGroup InviteSchoolToLeague(this Account account, ActivityGroup activityGroup, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+           return AccountActivityGroupService.CreateNew(account, activityGroup, InviteStatus.Invited, user);
+        }
+
+        public static List<AccountActivityGroup> InviteSchoolsToLeague(List<Account> schools, ActivityGroup activityGroup, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<AccountActivityGroup> accountActivityGroups = new List<AccountActivityGroup>();
+
+            Database.ExecuteTransaction(
+                   action: (SystemMessages amsgs, DatabaseConnection adc) => {
+                       foreach(var school in schools)
+                       { 
+                          accountActivityGroups.Add(school.InviteSchoolToLeague(activityGroup, user));
+                       }
+                   },
+                   onSuccess: (SystemMessages smsgs) => {
+                       foreach(var school in schools)
+                       {
+                           var schoolUser = school.GetUsers().First();
+                           school.SendLeagueInvite(schoolUser,user);
+                       }
+
+                       msgs.AddRange(smsgs);
+                       msgs.Add("Invites Sent Saved", MessageType.Success);
+                   },
+                   onFailure: (SystemMessages fmsgs) => {
+                       msgs.AddRange(fmsgs);
+                   }
+               );
+
+            return accountActivityGroups;
+        }
     }
 }

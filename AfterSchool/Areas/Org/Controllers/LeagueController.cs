@@ -25,7 +25,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var acceptedInvites = new List<ActivityGroup>();
             var pendingInvites = new List<ActivityGroup>();
             var internalGroups = new List<ActivityGroup>();
-            var externalGroups = new List<ActivityGroup>();
             int pageNumber = 1;
             int recordsPerPage = 10;
             bool isArchived = false;
@@ -71,7 +70,7 @@ namespace AfterSchool.Areas.Org.Controllers
             
             ViewBag.pendingInvites = pendingInvites;
             ViewBag.acceptedInvites = acceptedInvites;
-            ViewBag.ExternalGroups = externalGroups;
+            ViewBag.ExternalGroups = acceptedInvites;
             ViewBag.InternalGroups = internalGroups;
             
             return groups;
@@ -438,6 +437,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             SystemMessages msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            
 
             msgs.AddRange(activityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
 

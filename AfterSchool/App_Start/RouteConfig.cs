@@ -121,6 +121,18 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
+                "LeagueHome",
+                "{accountname}/league/{districtname}/{activityname}",
+                new
+                {
+                    controller = "r",
+                    action = "league",
+                    accountname = UrlParameter.Optional,
+                    districtname = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional,
+                });
+
+            routes.MapRoute(
                 "Standard",
                 "{controller}/{action}/{id}",
                 new { controller = "pricing", action = "index", id = UrlParameter.Optional }

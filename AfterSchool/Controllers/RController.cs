@@ -92,16 +92,37 @@ namespace AfterSchool.Controllers
             RestartRegistrationSession();
 
             var msgs = new SystemMessages();
+
             var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
 
             SetRegistrationStartPage(account);
 
             var activity = AfterSchoolLibrary.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
-
+            
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
 
             return View(activity.ToParticipationObject());
+        }
+
+        public ActionResult League(string accountname, string districtname, string activityname)
+        {
+            RestartRegistrationSession();
+
+            var msgs = new SystemMessages();
+
+            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
+
+            SetRegistrationStartPage(account);
+
+            var districtAccount = AfterSchoolLibrary.Account.LoadByUniqueName(districtname, msgs);
+            var activityGroup = AfterSchoolLibrary.ActivityGroup.LoadByAccountIdByUniqueName(districtAccount.ID.Value, activityname);
+            var accountActivityGroup = AfterSchoolLibrary.AccountActivityGroup.LoadByAccountIdByActivityGroupId(account.ID.Value, activityGroup.ID.Value);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = account;
+
+            return View("activity",accountActivityGroup.ToParticipationObject());
         }
 
         public ActionResult Register(string accountname, string activitytype, string activityname)
