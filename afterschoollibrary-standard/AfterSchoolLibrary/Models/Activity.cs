@@ -1852,6 +1852,18 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
+            if (address1.IsEmpty())
+                msgs.Add("Address 1 is required", MessageType.UserError);
+            if (city.IsEmpty())
+                msgs.Add("City is required", MessageType.UserError);
+            if (state.IsEmpty())
+                msgs.Add("State is required", MessageType.UserError);
+            if (postalcode.IsEmpty())
+                msgs.Add("Postal Code is required", MessageType.UserError);
+
+            if (msgs.HasErrors())
+                return msgs;
+
             // just switching locations
             if (location.IsNumber())
             {

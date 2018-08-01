@@ -7,6 +7,57 @@
     var stateRequired = ViewData["stateRequired"].IsNotEmpty() && ViewData["stateRequired"].ToString().ToBoolean();
     var postalCodeRequired = ViewData["postalCodeRequired"].IsNotEmpty() && ViewData["postalCodeRequired"].ToString().ToBoolean();
 
+    var labeladdress1Required = false;
+    var labeladdress2Required = false;
+    var labelcityRequired = false;
+    var labelstateRequired = false;
+    var labelpostalCodeRequired = false;
+
+    if (ViewData["labeladdress1required"].IsNotEmpty() && ViewData["labeladdress1required"].ToString().ToBoolean())
+    {
+        labeladdress1Required = ViewData["labeladdress1required"].ToString().ToBoolean();
+    }
+    else if (ViewData["address1required"].IsNotEmpty() && ViewData["address1required"].ToString().ToBoolean())
+    {
+        labeladdress1Required = ViewData["address1required"].ToString().ToBoolean();
+    }
+
+    if (ViewData["labeladdress2required"].IsNotEmpty() && ViewData["labeladdress2required"].ToString().ToBoolean())
+    {
+        labeladdress2Required = ViewData["labeladdress2required"].ToString().ToBoolean();
+    }
+    else if (ViewData["address2required"].IsNotEmpty() && ViewData["address2required"].ToString().ToBoolean())
+    {
+        labeladdress2Required = ViewData["address2required"].ToString().ToBoolean();
+    }
+
+    if (ViewData["labelcityRequired"].IsNotEmpty() && ViewData["labelcityRequired"].ToString().ToBoolean())
+    {
+        labelcityRequired = ViewData["labelcityRequired"].ToString().ToBoolean();
+    }
+    else if (ViewData["cityRequired"].IsNotEmpty() && ViewData["cityRequired"].ToString().ToBoolean())
+    {
+        labelcityRequired = ViewData["cityRequired"].ToString().ToBoolean();
+    }
+
+    if (ViewData["labelstateRequired"].IsNotEmpty() && ViewData["labelstateRequired"].ToString().ToBoolean())
+    {
+        labelstateRequired = ViewData["labelstateRequired"].ToString().ToBoolean();
+    }
+    else if (ViewData["stateRequired"].IsNotEmpty() && ViewData["stateRequired"].ToString().ToBoolean())
+    {
+        labelstateRequired = ViewData["stateRequired"].ToString().ToBoolean();
+    }
+
+    if (ViewData["labelpostalCodeRequired"].IsNotEmpty() && ViewData["labelpostalCodeRequired"].ToString().ToBoolean())
+    {
+        labelpostalCodeRequired = ViewData["labelpostalCodeRequired"].ToString().ToBoolean();
+    }
+    else if (ViewData["postalCodeRequired"].IsNotEmpty() && ViewData["postalCodeRequired"].ToString().ToBoolean())
+    {
+        labelpostalCodeRequired = ViewData["postalCodeRequired"].ToString().ToBoolean();
+    }
+
     var labelColWidth = 3;
     var maxCols = 12;
     var disabled = false;
@@ -33,7 +84,7 @@
 <div class="form-group">
     <label class="col-sm-@labelColWidth control-label">
         Street Address
-        @if (address1Required)
+        @if (labeladdress1Required)
         {
             <span class="text-danger">*</span>
         }
@@ -46,7 +97,7 @@
 <div class="form-group">
     <label class="col-sm-@labelColWidth control-label">
         Apt/Suite
-        @if (address2Required)
+        @if (labeladdress2Required)
         {
             <span class="text-danger">*</span>
         }
@@ -59,7 +110,7 @@
 <div class="form-group">
     <label class="col-sm-@labelColWidth control-label">
         City
-        @if (cityRequired)
+        @if (labelcityRequired)
         {
             <span class="text-danger">*</span>
         }
@@ -72,7 +123,7 @@
 <div class="form-group">
     <label class="col-sm-@labelColWidth control-label">
         State
-        @if (stateRequired)
+        @if (labelstateRequired)
         {
             <span class="text-danger">*</span>
         }
@@ -85,7 +136,7 @@
 <div class="form-group">
     <label class="col-sm-@labelColWidth control-label">
         Zip Code
-        @if (postalCodeRequired)
+        @if (labelpostalCodeRequired)
         {
             <span class="text-danger">*</span>
         }
