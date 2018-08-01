@@ -114,6 +114,7 @@ namespace AfterSchoolLibrary
                   scheduleName: "Sample Schedule",
                   details: "",
                   repeatsWeekly: true,
+                  isongoing: false,
                   startDate: DateTime.UtcNow.AddWeeks(1),
                   endDate: DateTime.UtcNow.AddWeeks(5),
                   dailyStartTime: DateTime.UtcNow.Date.AddHours(15),

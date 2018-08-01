@@ -8,7 +8,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class ActivityScheduleService
     {
-        public static ActivitySchedule SetupSchedule(int accountId, int scheduleId, string scheduleName, string details, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, Account account, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivitySchedule SetupSchedule(int accountId, int scheduleId, string scheduleName, string details, string repeatsweekly, string isongoing, string startdate, string enddate, string dailystarttime, string dailyendtime, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, Account account, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             ActivitySchedule schedule = null;
@@ -22,6 +22,7 @@ namespace AfterSchoolLibrary.Services
                     scheduleName,
                     details,
                     repeatsweekly.ToBoolean(),
+                    isongoing.ToBoolean(),
                     startdate.ToDateTime(),
                     enddate.ToDateTime(),
                     dailystarttime.ToDateTime(),
@@ -46,6 +47,7 @@ namespace AfterSchoolLibrary.Services
                         schedule.Name,
                         schedule.ScheduleDetails,
                         repeatsweekly.ToBoolean(),
+                        isongoing.ToBoolean(),
                         startdate.ToDateTime(),
                         enddate.ToDateTime(),
                         dailystarttime.ToDateTime(),
@@ -60,7 +62,7 @@ namespace AfterSchoolLibrary.Services
             return schedule;
         }
 
-        public static ActivitySchedule CreateNew(string scheduleName, string details, bool repeatsWeekly, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int accountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivitySchedule CreateNew(string scheduleName, string details, bool repeatsWeekly, bool isongoing, DateTime? startDate, DateTime? endDate, DateTime? dailyStartTime, DateTime? dailyEndTime, List<DateRange> scheduleDates, List<DateTime> scheduleDatesClosed, int accountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -75,6 +77,7 @@ namespace AfterSchoolLibrary.Services
                        ScheduleDetails = details.IfBlank("").MaxChars(4000),
                        AccountId = accountId,
                        RepeatsWeekly = repeatsWeekly,
+                       IsOngoing = isongoing,
                        StartDate = startDate,
                        EndDate = endDate,
                        DailyStartTime = dailyStartTime,

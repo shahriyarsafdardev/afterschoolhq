@@ -1172,7 +1172,7 @@ namespace AfterSchool.Controllers
                 SubscriptionPlan paymentPlan = null;
 
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
-                    paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
+                    paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);                
 
                 SessionVariables.CurrentAccount.ProcessRegistrationWithPayment(
                     toAccount: participationObject.OwnerAccount,
@@ -1182,12 +1182,12 @@ namespace AfterSchool.Controllers
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         PaymentPlan = paymentPlan,
+                        SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         Products = new List<Product>(),
                         Purchaser = SessionVariables.CurrentAccount,
                         Registration = registration,
                         StripeToken = stripetoken,
                         SourceId = sourceId,
-                        SubscriptionPlan = null,
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
                         Registrant = SessionVariables.CurrentRegistrant
                     },

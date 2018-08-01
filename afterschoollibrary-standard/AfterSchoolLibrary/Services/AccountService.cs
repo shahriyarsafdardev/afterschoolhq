@@ -1189,7 +1189,7 @@ namespace AfterSchoolLibrary
 
         public static int GetVisitorAccountsCount(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountTypeId", (int)accountType } }, msgs, dc);
+            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountAccountTypeId", (int)accountType } }, msgs, dc);
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
@@ -1573,6 +1573,84 @@ namespace AfterSchoolLibrary
             return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue().ToDecimal();
         }
 
+        internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
+        {
+            var source = Billing.StripeHelper.CreateSource(stripeToken, msgs);
+            msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+            return source.Id;
+        }
+
+        internal static Stripe.StripeCharge CreateStripeChargeDuringCheckout(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // if stripe token then don't send customer id
+            string customerId = null;
+
+            if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
+                customerId = fromAccount.StripeCustomerId;
+
+            var charge = Billing.StripeHelper.CreateCharge(
+                fromCustomerId: customerId,
+                destinationAccountId: toAccount.StripeUserId,
+                tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
+                totalAmount: checkoutObject.TotalCostToPurchase,
+                platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.TotalCostToPurchase, msgs, dc),
+                description: $"{checkoutObject.ParticipationObject.Name} registration",
+                statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
+                msgs: msgs
+                );
+
+            return charge;
+        }
+
+        internal static Purchase AddPurchase(this Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return PurchaseService.CreateNew(
+                    purchasingAccount: fromAccount,
+                    checkoutObject: checkoutObject,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+        }
+
+        internal static Transaction AddTransaction(this Account fromAccount, Account toAccount, Purchase purchase, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return TransactionService.CreateNew(
+                    fromAccount,
+                    toAccount,
+                    checkoutObject,
+                    purchase.ID,
+                    loggedInUser,
+                    msgs,
+                    dc);
+        }
+
+        internal static string CopyStripeSourceToAccount(this Account fromAccount, Account toAccount, string stripeToken, SystemMessages msgs)
+        {
+            // stripe stuff
+            // create payment source if not already existent on the user
+            var sourceId = "";
+            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+
+            if (customer.DefaultSourceId.IsEmpty())
+            {
+                var source = Billing.StripeHelper.CreateSource(stripeToken, msgs);
+                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+                sourceId = source.Id;
+            }
+            else
+            {
+                sourceId = customer.DefaultSourceId;
+            }
+
+            // what happens if the same registrant gets another payment plan?
+            // Create a new customer? For now YES, it doesn't really matter I don't think
+
+            // get shared source
+            var copiedSource = Billing.StripeHelper.CreateSourceFromOriginal(customer.Id, sourceId, toAccount.StripeUserId, msgs);
+
+            return copiedSource.Id;
+        }
+
         private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Add Products
@@ -1585,56 +1663,23 @@ namespace AfterSchoolLibrary
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
             if (msgs.HasNoErrors() && checkoutObject.SavePaymentInfo)
-            {
-                var source = Billing.StripeHelper.CreateSource(checkoutObject.StripeToken, msgs);
-                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
-                checkoutObject.SourceId = source.Id;
-            }
+                checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
             // don't process charge if the user is using a payment plan
-            if (msgs.HasNoErrors() && checkoutObject.PaymentPlan.IsEmpty())
-            {
-                // if stripe token then don't send customer id
-                string customerId = null;
-
-                if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
-                    customerId = fromAccount.StripeCustomerId;
-
-                var charge = Billing.StripeHelper.CreateCharge(
-                    fromCustomerId: customerId,
-                    destinationAccountId: toAccount.StripeUserId,
-                    tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
-                    totalAmount: checkoutObject.TotalCostToPurchase,
-                    platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.TotalCostToPurchase, msgs, dc),
-                    description: $"{checkoutObject.ParticipationObject.Name} registration",
-                    statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
-                    msgs: msgs
-                    );
-            }
+            if (msgs.HasNoErrors())
+                fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
             if (msgs.HasNoErrors())
             {
                 // tracks the whole purchase, could contain multiple activities/activity groups
-                var purchase = PurchaseService.CreateNew(
-                    purchasingAccount: fromAccount,
-                    checkoutObject: checkoutObject,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
+                var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
 
                 // charge successful so I need to create a transaction
-                var transaction = TransactionService.CreateNew(
-                    fromAccount,
-                    toAccount,
-                    checkoutObject,
-                    purchase.ID,
-                    loggedInUser,
-                    msgs,
-                    dc);
+                var transaction = fromAccount.AddTransaction(toAccount, purchase, checkoutObject, loggedInUser, msgs, dc);
 
                 // need to track a payment for each activity/activitygroup
                 if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
@@ -1642,10 +1687,10 @@ namespace AfterSchoolLibrary
                     // TODO: How much does a user pay for an activity if a coupon is used to purchase multiple activities at once?
                     var activity = (Activity)checkoutObject.ParticipationObject.Object;
                     var payment = activity.AddPayment(
-                        amount: activity.CostPerRegistrant.Value * checkoutObject.NumberOfSeats, 
-                        registrant: checkoutObject.Registration.GetRegistrant(msgs, dc), 
-                        loggedInUser: loggedInUser, 
-                        msgs: msgs, 
+                        amount: activity.CostPerRegistrant.Value * checkoutObject.NumberOfSeats,
+                        registrant: checkoutObject.Registration.GetRegistrant(msgs, dc),
+                        loggedInUser: loggedInUser,
+                        msgs: msgs,
                         dc: dc);
                 }
             }
@@ -1684,7 +1729,9 @@ namespace AfterSchoolLibrary
                     fromAccount.ProcessRegistrationWithoutPayment(toAccount, checkoutObject, loggedInUser, amsgs, adc);                    
 
                     // process payment by to account, includes registration fee and product purchases
-                    toAccount.ProcessRegistrationFeeAndProducts(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
+                    // skip for payment plans and subscription plans
+                    if (checkoutObject.PaymentPlan.IsEmpty() && checkoutObject.SubscriptionPlan.IsEmpty())
+                        toAccount.ProcessRegistrationFeeAndProducts(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the Registration Fee
 
@@ -1693,6 +1740,7 @@ namespace AfterSchoolLibrary
                     var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
                     // if they have a subscription plan
+                    // will also process registration fees
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                     {
                         var rpp = accountRegistrant.StartSubscriptionPlan(
@@ -1700,6 +1748,7 @@ namespace AfterSchoolLibrary
                             toAccount: toAccount,
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
+                            subscriptionPlanType: SubscriptionPlanType.Subscription,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -1713,6 +1762,7 @@ namespace AfterSchoolLibrary
                             toAccount: toAccount,
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
+                            subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);

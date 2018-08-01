@@ -4,6 +4,7 @@
     ViewBag.Title = Model.Name;
     var objects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
     var filterCols = 2;
+    var filterColsSm = 12;
     var grades = (List<GradeLevel>)ViewBag.Grades;
     var cart = (Cart)ViewBag.Cart;
     var locations = (List<Location>)ViewBag.Locations;
@@ -20,11 +21,11 @@
 
 <div class="filter-bar">
     <div class="reg-container">
-        <div class="col-md-@filterCols">
+        <div class="col-md-@filterCols col-sm-@filterColsSm">
             <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.Activity) Name" id="search-name" class="form-control search-field" />
         </div>    
                
-        <div class="col-md-@filterCols">
+        <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-location" name="search-location">
                 <option value="">Any Location</option>
                 @foreach (var location in locations)
@@ -34,7 +35,7 @@
             </select>
         </div>     
 
-        <div class="col-md-@filterCols">
+        <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-grade" name="search-grade">
                 <option value="">Any Grade</option>
                 @foreach (var grade in grades)
@@ -44,7 +45,7 @@
             </select>
         </div>
 
-        <div class="col-md-@filterCols">
+        <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-seatsfilled" name="search-seatsfilled">
                 <option value="">All Activities</option>
                 <option value="1">Has Seats Available</option>
@@ -52,7 +53,7 @@
             </select>
         </div>    
 
-        <div class="col-md-@filterCols">
+        <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-dayofweek" name="search-dayofweek">
                 <option value="">Any Day</option>
                 @foreach (var item in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
@@ -62,7 +63,7 @@
             </select>
         </div>      
        
-        <div class="col-md-@filterCols">
+        <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-gender" name="search-gender">
                 <option value="">Any Gender</option>
                 @foreach (var item in Enum.GetValues(typeof(GenderType)).Cast<GenderType>().Where(x => x != GenderType.NotSet))

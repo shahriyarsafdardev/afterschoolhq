@@ -7,6 +7,7 @@
     var sources = (List<Stripe.StripeSource>)ViewBag.Sources;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var registration = (Registration)ViewBag.Registration;
+    var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -27,6 +28,8 @@
 
                 <h4 class="text-center reg-instructions"><strong>Checkout</strong></h4>
 
+                <span id="payment-plan-cost-0" class="hide">@participationObject.Cost</span>
+
                 @if (participationObject.PaymentPlans.Any())
                 {
                     <div class="row padding-30">
@@ -36,7 +39,7 @@
                             </p>
                             <div class="am-radio">
                                 <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" />
-                                <label for="paymentoption-0">Pay @participationObject.Cost.ToCurrency() Today</label>
+                                <label for="paymentoption-0">Pay @participationObject.Cost.ToCurrency() Today</label>                                
                             </div>
 
                             @foreach (var plan in participationObject.PaymentPlans)
@@ -48,11 +51,73 @@
                                         @(plan.TotalPeriods - 1) more payments of @plan.CostPerPeriod.ToCurrency()
                                         each @plan.BillingPeriodTypeId.ToString().ToLower()
                                     </label>
+                                    <span id="payment-plan-cost-@plan.ID" class="hide">@plan.CostPerPeriod</span>
                                 </div>
                             }
                         </div>
                     </div>
                 }
+                                
+                <div class="row padding-30">
+                    <div class="col-md-6 col-md-offset-3">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="registration-fee-row">
+                                        <td>Registration Fee</td>
+                                        <td>
+                                            <span id="fee-total-value" class="hide">@participationObject.Cost</span>
+                                            @participationObject.Cost.ToCurrency()
+                                        </td>
+                                    </tr>
+                                    @foreach (var plan in participationObject.PaymentPlans)
+                                    {
+                                        
+                                        <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
+                                            <td>Payment Plan</td>
+                                            <td>
+                                                @plan.CostPerPeriod.ToCurrency() /
+                                                @plan.BillingPeriodTypeId.ToString().ToLower() for
+                                                @plan.TotalPeriods @plan.BillingPeriodTypeId.ToString().ToLower()s
+                                            </td>
+                                        </tr>
+                                    }
+                                    @if (participationObject.SubscriptionPlans.Any())
+                                    {
+                                        <tr>
+                                            <td>Ongoing Subscription</td>
+                                            <td>
+                                                <span id="subscription-total-value" class="hide">@participationObject.SubscriptionPlans.First().CostPerPeriod</span>
+                                                @participationObject.SubscriptionPlans.First().CostPerPeriod.ToCurrency() /
+                                                @participationObject.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td>
+                                            <p class="text-medium-small">
+                                                Total Due Today
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p class="text-medium">
+                                                $<span id="total-due-today"></span>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>                    
+                        </div>
+                    </div>
+                </div>
 
                 @if (sources.Any())
                 {
@@ -148,21 +213,55 @@
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
+
+    function updateTotals(regTotalToday) {
+        let total = regTotalToday + getSubscriptionTotalValue();
+        $('#total-due-today').html(total.toFixed(2));
+    }
+
+    function getSubscriptionTotalValue() {
+        if (!isNaN($('#subscription-total-value').html())) {
+            return parseFloat($('#subscription-total-value').html())
+        }
+        return 0;
+    }
+
+    function updatePaymentOptionCost(paymentPlanId) {
+        let regTotalToday = parseFloat($(`#payment-plan-cost-${paymentPlanId}`).html());
+        updateTotals(regTotalToday);
+
+        $('#registration-fee-row').addClass('hide');
+        $('.paymentplan-fee-row').addClass('hide');
+
+        if (paymentPlanId == 0) {
+            $('#registration-fee-row').removeClass('hide');
+        } else {
+            $(`#paymentplan-fee-row-${paymentPlanId}`).removeClass('hide');
+        }
+    }
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $('.payment-option-radio').click(function () {
             $('.payment-option').val($(this).val());
+
+            let paymentPlanId = $(this).attr('id').split('-')[1];
+            updatePaymentOptionCost(paymentPlanId);
         });
+
+        updatePaymentOptionCost(0);
 
         $('#existing-payment-form').submit(function () {
             $('#btn-paywithexistingcard').html('Processing Payment...');
             $('#btn-paywithexistingcard').prop('disabled', true);
+            $('#btn-paywithnewcard').prop('disabled', true);
         });
 
         $('#btn-paywithnewcard').click(function () {
 
             $('#btn-paywithnewcard').html('Processing Payment...');
             $('#btn-paywithnewcard').prop('disabled', true);
+            $('#btn-paywithexistingcard').prop('disabled', true);
 
           //  console.log('clicked pay');
 

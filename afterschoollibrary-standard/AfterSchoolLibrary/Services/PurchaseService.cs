@@ -16,7 +16,7 @@ namespace AfterSchoolLibrary.Services
             if (checkoutObject.PaymentPlan.IsNotEmpty())
                 totalCost = checkoutObject.PaymentPlanTotalCost;
             else if (checkoutObject.SubscriptionPlan.IsNotEmpty())
-                totalCost = checkoutObject.SubscriptionCostToday;
+                totalCost += checkoutObject.SubscriptionCostToday;
 
             var purchase = new Purchase()
             {

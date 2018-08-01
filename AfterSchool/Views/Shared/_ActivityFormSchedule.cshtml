@@ -74,7 +74,6 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label">
                         Repeats Weekly?
-                        <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="Select the days of the week your @UILabel.ActivityLabel(ActivityType.Activity).ToLower() will occur" data-placement="top"></i>
                     </label>
                     <div class="col-md-1">
                         @{Html.RenderPartial
@@ -91,7 +90,9 @@
                         }
                     </div>
                 </div>
+
                 <div class="hide" id="dailyrepeat">
+                    
                     <div class="form-group">
                         <label class="col-md-3 control-label">
                             Day of the week
@@ -106,140 +107,30 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            Start Date
-                        </label>
-                        <div class="col-md-7">
-                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                <input size="16" type="text" class="form-control" id="startdate" name="startdate" onfocus="this.select()" required value="@Model.StartDate.ToShortDateString()" data-type="date" />
-                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            End Date
-                        </label>
-                        <div class="col-md-7">
-                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                <input size="16" type="text" class="form-control" id="enddate" name="enddate" onfocus="this.select()" required value="@Model.EndDate.ToShortDateString()" data-type="date" />
-                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            Meeting Start Time
-                        </label>
-                        <div class="col-md-7">
-                            @{Html.RenderPartial(
-                                    "~/Views/Shared/_TimeSelect.cshtml",
-                                    Model.DailyStartTime,
-                                    new ViewDataDictionary()
-                                    {
-                                        { "name", "dailystarttime" },
-                                        { "id", "dailystarttime" },
-                                        { "required", true }
-                                    }
-                                );
-                            }
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            Meeting End Time
-                        </label>
-                        <div class="col-md-7">
-                            @{Html.RenderPartial(
-                                    "~/Views/Shared/_TimeSelect.cshtml",
-                                    Model.DailyEndTime,
-                                    new ViewDataDictionary()
-                                    {
-                                        { "name", "dailyendtime" },
-                                        { "id", "dailyendtime" },
-                                        { "required", true }
-                                    }
-                                );
-                            }
-                        </div>
-                    </div>
+                   
                 </div>
 
-                <div id="schedule-dates" class="hide">
-                    @for (var i = 1; i <= 30; i++)
-                    {
-                        var startDate = DateTime.UtcNow;
-                        var startTime = startDate.Date.AddHours(15);
-                        var endTime = startDate.Date.AddHours(17);
-
-                        ActivityInstance instance = null;
-                        if (openInstances.Count >= i)
-                        {
-                            instance = openInstances[i - 1];
-                            startDate = instance.StartDateTime.Value;
-                            startTime = instance.StartDateTime.Value;
-                            endTime = instance.EndDateTime.Value;
+                <div class="form-group" id="ongoing-div">
+                    <label class="col-md-3 control-label">
+                        Is this an ongoing @UILabel.ActivityLabel(ActivityType.Activity).ToLower()?
+                    </label>
+                    <div class="col-md-9">
+                        @{Html.RenderPartial
+                        (
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.IsOngoing,
+                            new ViewDataDictionary()
+                            {
+                                { "checkboxname", "isongoing" },
+                                { "checkboxid", "isongoing" },
+                                { "disabled", false }
+                            }
+                        );
                         }
 
-                        <div class="form-group hide schedule-date" id="schedule-date-@i">
-                            <label class="col-md-3 control-label">
-                                Meeting @i
-                            </label>
-                            <div class="col-md-7">
-                                <table>
-                                    <tr>
-                                        <td>
-                                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                                <input size="16" type="text" class="form-control" id="meeting-open-date-@i" name="meeting-open-date-@i" onfocus="this.select()" required value="@startDate.ToShortDateString()" data-type="date" />
-                                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @{Html.RenderPartial(
-                                                    "~/Views/Shared/_TimeSelect.cshtml",
-                                                    startTime,
-                                                    new ViewDataDictionary()
-                                                    {
-                                                        { "name", string.Format("meeting-open-starttime-{0}", i) },
-                                                        { "id", string.Format("meeting-open-starttime-{0}", i) },
-                                                        { "required", true }
-                                                    }
-                                                );
-                                            }
-                                        </td>
-                                        <td>
-                                            &nbsp;To&nbsp;
-                                        </td>
-                                        <td>
-                                            @{Html.RenderPartial(
-                                                    "~/Views/Shared/_TimeSelect.cshtml",
-                                                    endTime,
-                                                    new ViewDataDictionary()
-                                                    {
-                                                        { "name", string.Format("meeting-open-endtime-{0}", i) },
-                                                        { "id", string.Format("meeting-open-endtime-{0}", i) },
-                                                        { "required", true }
-                                                    }
-                                                );
-                                            }
-                                        </td>
-                                        <td>
-                                            &nbsp;
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-default" onclick="removeDate(@i)">Delete</button>
-                                        </td>
-                                    </tr>
-                                </table>
-
-                            </div>
-                        </div>
-                        <input type="hidden" name="meeting-open-inuse-@i" id="meeting-open-inuse-@i" value="0" />
-                    }
-                    <div class="col-md-7 col-md-offset-3">
-                        <button type="button" class="btn btn-alt4" onclick="showNextDate()">Add New Date</button>
+                        <p class="text-muted padding-v-10">
+                            Ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() do not have an end date and allow parents to sign up their children for ongoing subscriptions.
+                        </p>
                     </div>
                 </div>
 
@@ -250,9 +141,159 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
+            Enter your meeting schedule
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <div id="repeating-schedule" class="hide">
+            <div class="form-group">
+                <label class="col-md-3 control-label">
+                    Start Date
+                </label>
+                <div class="col-md-7">
+                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                        <input size="16" type="text" class="form-control" id="startdate" name="startdate" onfocus="this.select()" required value="@Model.StartDate.ToShortDateString()" data-type="date" />
+                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group repeating-end-date">
+                <label class="col-md-3 control-label">
+                    End Date
+                </label>
+                <div class="col-md-7">
+                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                        <input size="16" type="text" class="form-control" id="enddate" name="enddate" onfocus="this.select()" required value="@Model.EndDate.ToShortDateString()" data-type="date" />
+                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-3 control-label">
+                    Meeting Start Time
+                </label>
+                <div class="col-md-7">
+                    @{Html.RenderPartial(
+                            "~/Views/Shared/_TimeSelect.cshtml",
+                            Model.DailyStartTime,
+                            new ViewDataDictionary()
+                            {
+                                { "name", "dailystarttime" },
+                                { "id", "dailystarttime" },
+                                { "required", true }
+                            }
+                        );
+                    }
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-3 control-label">
+                    Meeting End Time
+                </label>
+                <div class="col-md-7">
+                    @{Html.RenderPartial(
+                            "~/Views/Shared/_TimeSelect.cshtml",
+                            Model.DailyEndTime,
+                            new ViewDataDictionary()
+                            {
+                                { "name", "dailyendtime" },
+                                { "id", "dailyendtime" },
+                                { "required", true }
+                            }
+                        );
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div id="schedule-dates" class="hide">
+            @for (var i = 1; i <= 30; i++)
+            {
+                var startDate = DateTime.UtcNow;
+                var startTime = startDate.Date.AddHours(15);
+                var endTime = startDate.Date.AddHours(17);
+
+                ActivityInstance instance = null;
+                if (openInstances.Count >= i)
+                {
+                    instance = openInstances[i - 1];
+                    startDate = instance.StartDateTime.Value;
+                    startTime = instance.StartDateTime.Value;
+                    endTime = instance.EndDateTime.Value;
+                }
+
+                <div class="form-group hide schedule-date" id="schedule-date-@i">
+                    <label class="col-md-3 control-label">
+                        Meeting @i
+                    </label>
+                    <div class="col-md-7">
+                        <table>
+                            <tr>
+                                <td>
+                                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                        <input size="16" type="text" class="form-control" id="meeting-open-date-@i" name="meeting-open-date-@i" onfocus="this.select()" required value="@startDate.ToShortDateString()" data-type="date" />
+                                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @{Html.RenderPartial(
+                                            "~/Views/Shared/_TimeSelect.cshtml",
+                                            startTime,
+                                            new ViewDataDictionary()
+                                            {
+                                                { "name", string.Format("meeting-open-starttime-{0}", i) },
+                                                { "id", string.Format("meeting-open-starttime-{0}", i) },
+                                                { "required", true }
+                                            }
+                                        );
+                                    }
+                                </td>
+                                <td>
+                                    &nbsp;To&nbsp;
+                                </td>
+                                <td>
+                                    @{Html.RenderPartial(
+                                            "~/Views/Shared/_TimeSelect.cshtml",
+                                            endTime,
+                                            new ViewDataDictionary()
+                                            {
+                                                { "name", string.Format("meeting-open-endtime-{0}", i) },
+                                                { "id", string.Format("meeting-open-endtime-{0}", i) },
+                                                { "required", true }
+                                            }
+                                        );
+                                    }
+                                </td>
+                                <td>
+                                    &nbsp;
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default" onclick="removeDate(@i)">Delete</button>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+                <input type="hidden" name="meeting-open-inuse-@i" id="meeting-open-inuse-@i" value="0" />
+            }
+            <div class="col-md-7 col-md-offset-3">
+                <button type="button" class="btn btn-alt4" onclick="showNextDate()">Add New Date</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
             Enter any dates that you will not meet
         </div>
     </div>
+
     <div class="panel-body">
 
         <div id="schedule-closed-dates">
@@ -292,7 +333,7 @@
                 <input type="hidden" name="meeting-closed-inuse-@i" id="meeting-inuse-@i" value="0" />
             }
             <div class="col-md-7 col-md-offset-3">
-                <button type="button" class="btn btn-alt4" onclick="showNextClosedDate()">Add Closed Dates</button>
+                <button type="button" class="btn btn-primary" onclick="showNextClosedDate()">Add Date</button>
             </div>
         </div>
         
@@ -307,9 +348,13 @@
         $('#schedule').change(function () {
             checkScheduleVal();
         });
+        $('#isongoing').change(function () {
+            checkIsOnGoing();
+        });
         checkRepeatsWeekly();
         checkScheduleVal();
         showClosedDates();
+        checkIsOnGoing();
 
         $('#schedule').change(function(){
             if($(this).val() == '0') {
@@ -397,16 +442,28 @@
     function checkRepeatsWeekly() {
         if ($('#repeatsweekly').is(':checked')) {
             $('#dailyrepeat').removeClass('hide');
+            $('#repeating-schedule').removeClass('hide');
             $('#requiresalldays-group').removeClass('hide');
             $('#schedule-dates').addClass('hide');
+            $('#ongoing-div').removeClass('hide');
         } else {
             $('#dailyrepeat').addClass('hide');
             $('#requiresalldays-group').addClass('hide');
+            $('#repeating-schedule').addClass('hide');
             $('#schedule-dates').removeClass('hide');
+            $('#ongoing-div').addClass('hide');
 
             if ($('.schedule-date').length == $('.schedule-date.hide').length) {
                 showDates();
             }
+        }
+    }
+
+    function checkIsOnGoing() {
+        if ($('#isongoing').is(':checked')) {
+            $('.repeating-end-date').addClass('hide');
+        } else {
+            $('.repeating-end-date').removeClass('hide');
         }
     }
 
