@@ -461,6 +461,11 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendLeagueInvite(this Account invitedAccount, WebUser invitedUser, WebUser loggedInUser, string customMessage = null, DatabaseConnection dc = null)
+        {
+            return EmailHelper.SendLeagueAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
+        }
+
         public static string GenerateUniqueName(string name, int? accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             //unique name
