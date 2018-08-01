@@ -111,7 +111,7 @@
         locationSearch = $('#location-search');
 
         locationSearch.keyup(function () {
-            if (locationSearch.val().length > 1 && !isSearching) {
+            if (locationSearch.val().length > 0 && !isSearching) {
                 isSearching = true;
                 
                 $.get(
@@ -135,9 +135,9 @@
                                     </div>`);
                             }
 
-                            if (locationSearch.val().length > 6 && @searchOnly.ToString().ToLower() == false) {
+                            if (locationSearch.val().length >= 4 && @searchOnly.ToString().ToLower() == false) {
                                 locationList.append(`
-                                <div class="${listItemClass}" 
+                                <div class="${listItemClass}"
                                     style="${listItemStyle}" 
                                     id="location-0"
                                     onmouseover="${listItemOnMouseOver}(0)" 
@@ -147,10 +147,10 @@
                                 </div>`);
                             } else if (data.locations.length == 0) {
                                 locationList.append(`
-                                <div class="${listItemClass}" 
+                                <div class="${listItemClass}"
                                     style="${listItemStyle}" 
                                     id="location-0">
-                                    <strong>Searching...</strong>
+                                    <strong>Searching... Type of the location name or address</strong>
                                 </div>`);
                             }
 
