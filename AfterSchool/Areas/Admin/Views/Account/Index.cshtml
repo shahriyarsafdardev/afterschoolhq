@@ -30,20 +30,30 @@
                         <th>Account Type</th>
                         <th>Is Active</th>
                         <th>Member Since</th>
+                        <th></th>
                     </tr>
                     @if (Model.Any())
                     {
-                        foreach (Account a in Model)
+                        foreach (var account in Model)
                         {
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("impersonate", "user", new { id = a.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-id"></i> View</a>
+                                    @if (account.GetUserCount() > 0)
+                                    {
+                                        <a href="@Url.Action("impersonate", "user", new { id = account.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-id"></i> View</a>
+                                    }
                                 </td>
-                                <td>@a.Name</td>
-                                <td>@a.AccountNumber</td>
-                                <td>@a.AccountTypeId.ToString()</td>
-                                <td>@a.IsActive.ToYesNo()</td>
-                                <td>@a.CreateDate.Value.ToLongDateString()</td>
+                                <td>@account.Name</td>
+                                <td>@account.AccountNumber</td>
+                                <td>@account.AccountTypeId.ToString()</td>
+                                <td>@account.IsActive.ToYesNo()</td>
+                                <td>@account.CreateDate.Value.ToLongDateString()</td>
+                                <td>
+                                    @if (account.GetUserCount() == 0)
+                                    {
+                                        <a href="@Url.Action("invite", "account", new { uid = account.Uid })" class="btn btn-default">Invite To Account</a>
+                                    }
+                                </td>
                             </tr>
                         }
                     }

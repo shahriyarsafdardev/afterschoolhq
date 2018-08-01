@@ -4,7 +4,7 @@
 {
     var errorMsgs = "";
 
-    if (Model.HasErrors() && Model.Has(MessageType.UserError))
+    if (Model.HasErrors() && !Model.Has(MessageType.UserError))
     {
         Model.Add("An error has occurred", MessageType.UserError);
     }

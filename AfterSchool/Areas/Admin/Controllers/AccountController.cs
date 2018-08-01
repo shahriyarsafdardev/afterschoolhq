@@ -59,24 +59,32 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
         
         [HttpGet]
-        public ActionResult Invite()
+        public ActionResult Invite(string id)
         {
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+
             ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
+            ViewBag.Account = Account.LoadByUid(id.ToGuid(), msgs);
+            ViewBag.Messages = msgs;
+
             return View();
         }
 
         [HttpPost]
-        public ActionResult Invite(string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname, string message)
+        public ActionResult Invite(string id, string orgname, string accounttype, string package, string billingperiod, string email, string firstname, string lastname, string message)
         {
             var msgs = new SystemMessages();
             WebUser user = null;
             Account account = null;
 
-            if (orgname.IsEmpty())
-                msgs.Add("Organization Name is required", MessageType.UserError);
-            if (!accounttype.IsNumber())
-                msgs.Add("Organization type is required", MessageType.UserError);
+            if (!id.IsGuid())
+            {
+                if (orgname.IsEmpty())
+                    msgs.Add("Organization Name is required", MessageType.UserError);
+                if (!accounttype.IsNumber())
+                    msgs.Add("Organization type is required", MessageType.UserError);
+            }
+
             if (!package.IsNumber())
                 msgs.Add("Package is required", MessageType.UserError);
             if (!billingperiod.IsNumber())
@@ -98,6 +106,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
+
                         user = WebUserService.InviteNew(
                             firstName: firstname, 
                             lastName: lastname, 
