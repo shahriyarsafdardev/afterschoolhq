@@ -402,11 +402,11 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                product = GetProductService().Update(product.Id, options, requestOptions);
+                product = GetProductService().Update(productId, options, requestOptions);
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe product ({product.Id}) was not updated", MessageType.Error, ex);
+                msgs.Add($"Stripe product ({productId}) was not updated", MessageType.Error, ex);
             }
 
             return product;

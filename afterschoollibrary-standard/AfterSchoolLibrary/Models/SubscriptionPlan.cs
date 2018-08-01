@@ -264,9 +264,9 @@ namespace AfterSchoolLibrary
             return Account.Load(this.PlanOwnerAccountId.Value, msgs, dc);
         }
 
-        public string GetNickName(Activity activity)
+        public string GetNickName(string participationObjectName)
         {
-            return $"{activity.Name} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
+            return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
         }
 
         private SubscriptionPlan CopyFields()
@@ -326,18 +326,37 @@ namespace AfterSchoolLibrary
             if (msgs.HasErrors())
                 return msgs;
 
-            var activity = this.GetActivity(msgs, dc);
-            var account = activity.GetAccount(msgs, dc);
+            Account account = null;
+            string uid = "";
+            string name = "";
+            string uniqueName = "";
+
+            if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+            {
+                var activity = this.GetActivity(msgs, dc);
+                account = activity.GetAccount(msgs, dc);
+                uid = activity.Uid.ToString();
+                name = activity.Name;
+                uniqueName = activity.UniqueName;
+            }
+            else
+            {
+                var activityGroup = this.GetActivityGroup(msgs, dc);
+                account = activityGroup.GetAccount(msgs, dc);
+                uid = activityGroup.Uid.ToString();
+                name = activityGroup.Name;
+                uniqueName = activityGroup.UniqueName;
+            }
 
             // do stripe
-            Stripe.StripeProduct product = Billing.StripeHelper.GetProduct(activity.Uid.ToString(), account.StripeUserId, msgs);
+            Stripe.StripeProduct product = Billing.StripeHelper.GetProduct(uid, account.StripeUserId, msgs);
 
             if (product.IsEmpty())
             {
                 product = Billing.StripeHelper.CreateProduct(
-                    activity.Uid.ToString(),
-                    activity.Name,
-                    activity.UniqueName,
+                    uid,
+                    name,
+                    uniqueName,
                     this.IsActive,
                     account.StripeUserId,
                     msgs);
@@ -360,7 +379,7 @@ namespace AfterSchoolLibrary
                     null,
                     this.CostPerPeriod.Value,
                     this.BillingPeriodTypeId,
-                    this.GetNickName(activity),
+                    this.GetNickName(name),
                     account.StripeUserId,
                     msgs
                     );

@@ -22,8 +22,8 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static SubscriptionPlan CreateNewSubscription(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-            {
-                if (msgs.IsEmpty()) msgs = new SystemMessages();
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var plan = new SubscriptionPlan()
             {
@@ -37,11 +37,11 @@ namespace AfterSchoolLibrary.Services
                 IsActive = true,
                 ParticipationObjectId = participationObjectId,
                 ParticipationObjectTypeId = participationObjectType,
-                DoesAutoRenew = doesAutoRenew,       
+                DoesAutoRenew = doesAutoRenew,
                 PlanTypeId = SubscriptionPlanType.Subscription
             };
 
-            msgs.AddRange(plan.SaveWithStripe(dc));            
+            msgs.AddRange(plan.SaveWithStripe(dc));
 
             return plan;
         }
