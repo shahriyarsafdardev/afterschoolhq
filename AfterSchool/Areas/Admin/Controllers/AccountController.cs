@@ -64,7 +64,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             var msgs = new SystemMessages();
 
             ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
-            ViewBag.Account = Account.LoadByUid(id.ToGuid(), msgs);
+            ViewBag.Account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
             ViewBag.Messages = msgs;
 
             return View();
