@@ -1200,11 +1200,29 @@ namespace AfterSchoolLibrary
         }
 
         //Gets the accounts that are requesting the host's approval
-        public static List<Account> GetRequestedVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Account> GetRequestedVisitorAccounts(this Account hostAccount, AccountType? accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByRequested(hostAccount.ID.Value, accountType, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
+        }
+
+        public static AccountRelationship GetRequestForAccount(this Account visitorAccount, Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc= null)
+        {
+            return AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
+        }
+
+        //Gets the accounts that are requesting the host's approval
+        public static int GetRequestedVisitorAccountsCount(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.GetCount(
+                new Hashtable()
+                {
+                    { "HostAccountId", hostAccount.ID.Value },
+                    { "ApprovalStatusId", (int)ApprovalStatus.Requested }
+                }, 
+                msgs, 
+                dc);
         }
 
         //Gets the accounts that the host has approved

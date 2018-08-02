@@ -223,12 +223,13 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public static List<AccountRelationship> LoadByRequested(int HostAccountId, AccountType accountType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountRelationship> LoadByRequested(int HostAccountId, AccountType? accountType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["HostAccountId"], HostAccountId);
-            dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType);
+            if (accountType.HasValue)
+                dq.Criterias.Add(ObjectMap["AccountAccountTypeId"], (int)accountType.Value);
             dq.Criterias.Add(ObjectMap["ApprovalStatusId"], ApprovalStatus.Requested);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }

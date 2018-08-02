@@ -97,8 +97,13 @@
                 <div class="panel-body">
                     <div>
                         <p class="text-medium-small">
-                            <i class="s7-map-marker"></i>
-                            @item.Location.Name
+                            <span>
+                                @item.OwnerAccount.Name
+                            </span>
+                            <span>
+                                @@
+                                @item.Location.Name
+                            </span>
                         </p>
                     </div>
                     <div>
