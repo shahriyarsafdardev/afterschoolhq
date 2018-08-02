@@ -736,15 +736,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 emails.Split(',')
                     .Select(x => x.Trim())
                     .ToList()
-                    .ForEach(email => msgs.AddRange(
+                    .ForEach(email => 
                         SessionVariables.CurrentAccount.InviteUser(
                             "", 
                             "", 
                             email, 
                             Request.Params["message"], 
                             (UserType)usertype.ToInteger(), 
-                            SessionVariables.LoggedInUser)
-                     ));
+                            SessionVariables.LoggedInUser,
+                            msgs)
+                     );
 
             if (msgs.HasNoErrors())
                 msgs.Add("All invites have been sent", MessageType.Success);

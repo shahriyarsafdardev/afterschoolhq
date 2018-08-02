@@ -339,7 +339,7 @@ namespace AfterSchoolLibrary.Services
         public static Account AddNewRegistrantAccount(this WebUser accountOwner, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
-                orgName: accountOwner.DisplayName,
+                orgName: $"{accountOwner.LastName} Family",
                 email: accountOwner.Email,
                 phone: accountOwner.Phone,
                 isActive: isActive,
