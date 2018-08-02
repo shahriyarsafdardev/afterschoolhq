@@ -468,7 +468,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (stripeAccount.RequiresFullSSN)
             {
-                msgs.Add("SSN is required", MessageType.UserError);
+                if (ssn.IsEmpty())
+                    msgs.Add("SSN is required", MessageType.UserError);
 
                 if (!ssn.LastChars(4).IsSameAs(ssnLast4))
                     msgs.Add("SSN and Last 4 of SSN must match", MessageType.UserError);
