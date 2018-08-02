@@ -53,7 +53,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             {
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 SendLogEmail(msgs);
-                return InternalServerError(ex);
+                return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
             }
         }
 
