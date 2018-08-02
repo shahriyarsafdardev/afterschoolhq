@@ -15,12 +15,14 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         [HttpPost]
         public IHttpActionResult Updated([FromBody] dynamic json)
         {
-            return Ok();
-
             var msgs = new SystemMessages();
             try
             {
+                msgs.Add("trying to get signature", MessageType.Notice);
                 var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
+
+                SendLogEmail(msgs);
+                return Ok();
 
                 if (!AfterSchoolLibrary.Utilities.IsLocalHost && stripeSignature.IsEmpty())
                 {
