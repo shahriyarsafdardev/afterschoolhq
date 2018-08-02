@@ -20,9 +20,6 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            // check for requests to post activities
-            var requestingAccounts = "";
-
             var account = SessionVariables.CurrentAccount;
             var actions = SessionAction.LoadByAccountId(
                 account.ID.Value, 
