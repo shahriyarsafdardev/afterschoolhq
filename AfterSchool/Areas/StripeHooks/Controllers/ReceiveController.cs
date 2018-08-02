@@ -99,7 +99,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
             msgs.Add("Getting SendStripeAccountVerified", MessageType.Notice);
             if (msgs.HasNoErrors() && startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
-                BackgroundJob.Enqueue(() => account.SendStripeAccountVerified(null));
+                account.SendStripeAccountVerified(null);
 
             if (msgs.HasErrors())
             {
