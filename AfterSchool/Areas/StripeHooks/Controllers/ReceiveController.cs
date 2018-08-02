@@ -20,7 +20,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             {
                 msgs.Add("trying to get signature", MessageType.Notice);
                 
-                return Ok(msgs.ToJSON());
+                // return Ok(msgs.ToJSON());
 
                 // var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
 
