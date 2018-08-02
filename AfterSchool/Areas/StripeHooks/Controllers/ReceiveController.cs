@@ -89,6 +89,14 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
             msgs.Add("Getting stripeAccount", MessageType.Notice);
             var stripeAccount = account.GetStripeAccount(msgs);
+
+            if (stripeAccount.IsEmpty())
+            {
+                msgs.Add("No stripe account yet", MessageType.Notice);
+                SendLogEmail(msgs);
+                return Ok(msgs.ToJSON());
+            }
+
             msgs.Add("Getting serializedAccountJson", MessageType.Notice);
             var serializedAccountJson = JsonConvert.SerializeObject(stripeEvent.Data.Object);
             msgs.Add("Getting startingStatus", MessageType.Notice);
