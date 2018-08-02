@@ -23,6 +23,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 if (!AfterSchoolLibrary.Utilities.IsLocalHost && stripeSignature.IsEmpty())
                 {
                     msgs.Add("Invalid Signature", MessageType.Error);
+                    SendLogEmail(msgs);
                     return Unauthorized();
                 }
 
