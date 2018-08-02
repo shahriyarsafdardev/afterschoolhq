@@ -319,6 +319,22 @@ Public Class SystemMessages
                 Next
             Case MessageOutputType.Json
                 rtn = Newtonsoft.Json.JsonConvert.SerializeObject(Me._items)
+
+            Case MessageOutputType.Html
+                Dim pMessageTypes As MessageType() = New MessageType() {messageType}
+                Dim tempHolder As String = ""
+                For i As Integer = 0 To Me.Count - 1
+                    If Array.IndexOf(pMessageTypes, Me(i).MessageType) > -1 OrElse (pMessageTypes.Count = 1 AndAlso pMessageTypes(0) = MessageType.NotSet) Then
+                        'If tempHolder.Contains(Me(i).Text & ",") = False Then
+                        Dim temp As String = "<p>" & Me(i).Text & "<br />"
+                        If Me(i).Exception IsNot Nothing Then
+                            temp &= Me(i).Exception.Message & "<br />"
+                            temp &= Me(i).Exception.StackTrace & "<br />"
+                        End If
+                        rtn &= Me(i).MessageType.ToString.SplitByUpperCase & "<br />" & temp & "</p>"
+                        'End If
+                    End If
+                Next
         End Select
 
         Return rtn

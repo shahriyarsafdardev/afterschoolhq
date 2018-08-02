@@ -9,6 +9,22 @@ namespace AfterSchoolLibrary
 {
     public class EmailHelper
     {
+        public static SystemMessages SendEmail(string toEmail, string subject, string body, bool isAfterSchool)
+        {
+            var msgs = new SystemMessages();
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(toEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
         public static SystemMessages SendPasswordReset(WebUser user, PasswordResetToken token, bool isAfterSchool)
         {
             var msgs = new SystemMessages();
