@@ -19,9 +19,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             try
             {
                 msgs.Add("trying to get signature", MessageType.Notice);
-
-                throw new Exception("new error message");
-
+                
                 return Ok(msgs.ToJSON());
 
                 // var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
@@ -72,7 +70,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Utilities.HostName(true)}";
             string body = msgs.RenderMessageList(MessageOutputType.Html);
 
-            BackgroundJob.Enqueue(() => EmailHelper.SendEmail(toEmail, subject, body, true));
+            EmailHelper.SendEmail(toEmail, subject, body, true);
         }
 
         private IHttpActionResult AccountUpdated(StripeEvent stripeEvent, SystemMessages msgs)
