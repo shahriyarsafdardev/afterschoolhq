@@ -91,7 +91,7 @@ namespace AfterSchoolLibraryTests
                 var shedule = Factories.ActivityInstanceFactory.Create(team,rounds, msgs, dc);
                 var start = new DateTime(1, 1, 1);
                 var end = new DateTime(2, 2, 2);
-                rounds.AddInstance(start, end, webUser.ID.Value, msgs, dc);
+                rounds.AddInstance(start, end, InstanceType.InSession, webUser.ID.Value, msgs, dc);
             }
 
             var roundInstances = rounds.GetInstances(false, msgs, dc);
@@ -115,7 +115,7 @@ namespace AfterSchoolLibraryTests
             {
                 var start = new DateTime(1, 1, 1);
                 var end = new DateTime(2, 2, 2);
-                rounds.AddInstance(start, end, webUser.ID.Value, msgs, dc);
+                rounds.AddInstance(start, end, InstanceType.InSession, webUser.ID.Value, msgs, dc);
             }
             // adds teams to the shedule
             for (int i = 0; i < 5; i++)

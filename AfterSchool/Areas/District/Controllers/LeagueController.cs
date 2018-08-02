@@ -681,12 +681,11 @@ namespace AfterSchool.Areas.District.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime)
+        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
         {
             var msgs = new SystemMessages();
-            var scheduleDates = new List<DateRange>();
-
-            
+            var inSessionDates = new List<DateRange>();
+            var outOfSessionDates = new List<DateTime>();
 
             var values = new Dictionary<string, object>()
             {
@@ -708,7 +707,8 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 var filteredParams = Request.Params.Filter("schedulerepeat-");
                 var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-                scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
+                inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
                 values.Add("scheduledetails", scheduledetails);
                 values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
@@ -717,8 +717,10 @@ namespace AfterSchool.Areas.District.Controllers
                 values.Add("enddate", enddate);
                 values.Add("dailystarttime", dailystarttime);
                 values.Add("dailyendtime", dailyendtime);
-                values.Add("scheduledates", scheduleDates);
+                values.Add("scheduledates", inSessionDates);
+                values.Add("scheduledatesclosed", outOfSessionDates);
                 values.Add("schedule", schedule);
+                values.Add("isongoing", isongoing);
             }
                 var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 

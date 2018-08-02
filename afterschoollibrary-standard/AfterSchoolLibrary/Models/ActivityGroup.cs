@@ -698,7 +698,9 @@ namespace AfterSchoolLibrary
             var dailyendtime = values.GetValueOrDefault("dailyendtime");
             var scheduledetails = values.GetValueOrDefault("scheduledetails");
             var scheduledates = values.GetValueOrDefault("scheduledates");
+            var scheduledatesClosed = values.GetValueOrDefault("scheduledatesclosed");
             var schedule = values.GetValueOrDefault("schedule");
+            var isongoing = values.GetValueOrDefault("isongoing");
 
             if (name.IsEmpty())
                 msgs.Add("Label is required", MessageType.UserError);
@@ -803,12 +805,14 @@ namespace AfterSchoolLibrary
                                 account,
                                 schedule.IfEmpty(""),
                                 (List<DateRange>)scheduledates,
+                                (List<DateTime>)scheduledatesClosed,
                                 scheduledetails.IfEmpty(""),
                                 repeatsweekly.IfEmpty(""),
                                 startdate.IfEmpty(""),
                                 enddate.ToString(),
                                 dailystarttime.IfEmpty(""),
                                 dailyendtime.IfEmpty(""),
+                                isongoing.IfEmpty(""),
                                 loggedInUser.ID.Value,
                                 adc));
                         }
@@ -848,42 +852,32 @@ namespace AfterSchoolLibrary
             return group;
         }
 
-         private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, int loggedInUserId, DatabaseConnection dc = null)
+         private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
             this.ScheduleRequiresAllDays = true;
 
-            if (account.HasFeature(FeatureType.ManageActivityGroups, msgs, dc) &&
-                schedule.IsNumber() &&
-                schedule.ToString().ToInteger() > 0 &&
-                scheduledates.IsEmpty())
-            {
-                this.ActivityScheduleId = schedule.ToString().ToInteger();
-            }
-            else if (scheduledates.IsNotEmpty())
-            {
-                var newSchedule = Services.ActivityScheduleService.SetupSchedule(
-                    this.AccountId.Value,
-                    schedule.IfEmpty("0").ToInteger(),
-                    $"{this.Name} - Schedule",
-                    scheduledetails.ToString(),
-                    repeatsweekly.ToString(),
-                    //ERRRRRRRRRRRRRR,
-                    startdate.ToString(),
-                    enddate.ToString(),
-                    dailystarttime.ToString(),
-                    dailyendtime.ToString(),
-                    //ERRRRRRRRRRRRRR,
-                    new List<DateTime>(),
-                    account,
-                    this.ID.Value,
-                    loggedInUserId,
-                    msgs,
-                    dc);
+            var newSchedule = Services.ActivityScheduleService.SetupSchedule(
+                 this.AccountId.Value,
+                 schedule.IfEmpty("0").ToInteger(),
+                 $"{this.Name} - Schedule",
+                 scheduledetails.ToString(),
+                 repeatsweekly.ToString(),
+                 isongoing.ToString(),
+                 startdate.ToString(),
+                 enddate.ToString(),
+                 dailystarttime.ToString(),
+                 dailyendtime.ToString(),
+                 scheduledates,
+                 scheduledatesclosed,
+                 account,
+                 this.ID,
+                 loggedInUserId,
+                 msgs,
+                 dc);
 
-                this.ActivityScheduleId = newSchedule.ID;
-            }
+            this.ActivityScheduleId = newSchedule.ID;
 
             msgs.AddRange(this.Save(dc));
 
