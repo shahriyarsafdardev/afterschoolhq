@@ -20,6 +20,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
+            // check for requests to post activities
+            var requestingAccounts = "";
+
             var account = SessionVariables.CurrentAccount;
             var actions = SessionAction.LoadByAccountId(
                 account.ID.Value, 
@@ -39,6 +42,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 10);            
             ViewBag.Messages = new SystemMessages();
             ViewBag.Actions = actions;
+            ViewBag.HasVisitorAccountsToApprove = SessionVariables.CurrentAccount.GetRequestedVisitorAccountsCount() > 0;
             return View(account);
         }
     }

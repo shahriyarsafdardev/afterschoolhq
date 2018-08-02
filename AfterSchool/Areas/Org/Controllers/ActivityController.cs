@@ -97,13 +97,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 .ToList();
 
             if(!finalActivities.Any() && archive == "1")
-            {
                 return RedirectToAction("index");
-            }
 
             if (copyerror.IsBoolean() && copyerror.ToBoolean())
                 msgs.Add("Error creating copy", MessageType.Error);
-
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = new SystemMessages();

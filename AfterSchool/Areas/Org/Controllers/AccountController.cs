@@ -757,5 +757,37 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.NeedToUpgrade = members.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).GetMaxValue();
             return View("Team", SessionVariables.CurrentAccount);
         }
+
+        [HttpGet]
+        public ActionResult Visitors()
+        {
+            var msgs = new SystemMessages();
+
+            ViewBag.RequestingVisitors = SessionVariables.CurrentAccount.GetRequestedVisitorAccounts(null, msgs);
+            ViewBag.ApprovedVisitors = SessionVariables.CurrentAccount.GetApprovedVisitorAccounts(msgs);
+            ViewBag.Messages = msgs;
+
+            return View(SessionVariables.CurrentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult ApproveVisitor(string id)
+        {
+            var msgs = new SystemMessages();
+            var accountRelationship = AccountRelationship.Load(id.ToInteger(), msgs);
+            msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Approved, SessionVariables.LoggedInUser));
+
+            return RedirectToAction("visitors");
+        }
+
+        [HttpGet]
+        public ActionResult DenyVisitor(string id)
+        {
+            var msgs = new SystemMessages();
+            var accountRelationship = AccountRelationship.Load(id.ToInteger(), msgs);
+            msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Denied, SessionVariables.LoggedInUser));
+
+            return RedirectToAction("visitors");
+        }
     }
 }
