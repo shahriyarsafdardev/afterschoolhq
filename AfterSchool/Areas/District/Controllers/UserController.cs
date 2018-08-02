@@ -153,7 +153,7 @@ namespace AfterSchool.Areas.District.Controllers
 
                 foreach (string email in emails.Split(',').Select(x => x.Trim()))
                 {
-                    msgs.AddRange(a.InviteUser("", "", email, Request.Params["message"], ut, SessionVariables.LoggedInUser));
+                    a.InviteUser("", "", email, Request.Params["message"], ut, SessionVariables.LoggedInUser, msgs);
                 }
             }
 

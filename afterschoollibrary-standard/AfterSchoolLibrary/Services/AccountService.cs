@@ -471,18 +471,18 @@ namespace AfterSchoolLibrary
             return EmailHelper.SendAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
         }
 
-        public static SystemMessages InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static WebUser InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if(msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var wu = account.AddUser(firstName, lastName, email, ut, loggedInUser.ID.Value, msgs, dc);
+            var user = account.AddUser(firstName, lastName, email, ut, loggedInUser.ID.Value, msgs, dc);
             if (msgs.HasNoErrors())
-                msgs.AddRange(wu.SendInviteToAccount(account, message, loggedInUser, dc: dc));
+                msgs.AddRange(user.SendInviteToAccount(account, message, loggedInUser, dc: dc));
             
             if (msgs.HasErrors())
                 msgs.Add($"An invitation was not sent to ${email.Trim()}, a system error has occurred", MessageType.UserError);       
 
-            return msgs;
+            return user;
         }
 
         public static string GenerateUniqueName(string name, int? accountId, SystemMessages msgs = null, DatabaseConnection dc = null)

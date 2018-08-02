@@ -84,6 +84,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                 if (!accounttype.IsNumber())
                     msgs.Add("Organization type is required", MessageType.UserError);
             }
+            else
+                account = Account.LoadByUid(id.ToGuid());
 
             if (!package.IsNumber())
                 msgs.Add("Package is required", MessageType.UserError);
@@ -106,26 +108,33 @@ namespace AfterSchool.Areas.Admin.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
+                        if (account.IsNotEmpty())
+                        {
+                            account.AddPackage(package.ToInteger(), (BillingPeriodType)billingperiod.ToInteger(), SessionVariables.LoggedInUser, amsgs, adc);
+                            user = account.AddUser(firstname, lastname, email, UserType.Owner, SessionVariables.LoggedInUser.ID.Value, amsgs, adc);
+                        }
+                        else
+                        {
+                            user = WebUserService.InviteNew(
+                                firstName: firstname,
+                                lastName: lastname,
+                                email: email,
+                                loggedInUser: SessionVariables.LoggedInUser,
+                                msgs: amsgs,
+                                dc: adc);
 
-                        user = WebUserService.InviteNew(
-                            firstName: firstname, 
-                            lastName: lastname, 
-                            email: email, 
-                            loggedInUser: SessionVariables.LoggedInUser, 
-                            msgs: amsgs, 
-                            dc: adc);
-
-                        account = user.AddNewAccount(
-                            orgName: orgname,
-                            phone: null,
-                            isActive: true, 
-                            accountType: (AccountType)accounttype.ToInteger(), 
-                            packageId: package.ToInteger(),
-                            packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
-                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                            loggedInUser: SessionVariables.LoggedInUser, 
-                            msgs: amsgs, 
-                            dc: adc);
+                            account = user.AddNewAccount(
+                                orgName: orgname,
+                                phone: null,
+                                isActive: true,
+                                accountType: (AccountType)accounttype.ToInteger(),
+                                packageId: package.ToInteger(),
+                                packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
+                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                                loggedInUser: SessionVariables.LoggedInUser,
+                                msgs: amsgs,
+                                dc: adc);
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -144,6 +153,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (msgs.HasNoErrors())
                 return View("InviteSent", user);
 
+            ViewBag.Account = account;
             ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
             return View();
         }

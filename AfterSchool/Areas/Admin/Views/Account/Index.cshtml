@@ -51,7 +51,7 @@
                                 <td>
                                     @if (account.GetUserCount() == 0)
                                     {
-                                        <a href="@Url.Action("invite", "account", new { uid = account.Uid })" class="btn btn-default">Invite To Account</a>
+                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-sm">Invite To Account</a>
                                     }
                                 </td>
                             </tr>

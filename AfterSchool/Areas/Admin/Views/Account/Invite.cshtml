@@ -1,8 +1,8 @@
 ﻿@{
     ViewBag.Title = "Invite Organization";
 
-    var packages = (List<Package>)ViewBag.Packages;
     var account = (Account)ViewBag.Account;
+    var packages = (List<Package>)ViewBag.Packages;
 }
 
 @{ Html.RenderPartial("AdminHeader"); }
@@ -28,7 +28,7 @@
                     </div>
                 </div>
 
-                @if (account.IsEmpty())
+                @if (account.IsNotEmpty())
                 {
                     <div class="form-group">
                         <div class="col-sm-3 control-label">
