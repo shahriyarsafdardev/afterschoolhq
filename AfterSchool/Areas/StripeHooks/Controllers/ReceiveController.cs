@@ -15,6 +15,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         [HttpPost]
         public IHttpActionResult Updated([FromBody] dynamic json)
         {
+            return Ok();
+
             var msgs = new SystemMessages();
             try
             {
@@ -24,7 +26,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 {
                     msgs.Add("Invalid Signature", MessageType.Error);
                     SendLogEmail(msgs);
-                    return Unauthorized();
+                    return Ok();
                 }
 
                 msgs.Add("Getting serializedJson", MessageType.Notice);
