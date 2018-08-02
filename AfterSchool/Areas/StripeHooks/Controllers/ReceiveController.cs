@@ -18,7 +18,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var msgs = new SystemMessages();
             try
             {
-                msgs.Add("trying to get signature", MessageType.Notice);
+                // msgs.Add("trying to get signature", MessageType.Notice);
                 
                 // return Ok(msgs.ToJSON());
 
