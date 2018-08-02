@@ -253,6 +253,18 @@ namespace AfterSchoolLibrary
             return AccountActivityGroup.LoadByAccountId(accountId).Where(aag => aag.ActivityGroupId == activityGroupId).Count() > 0;
         }
 
+        public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            this.IsPublished = isPublished;
+            this.LastModifiedBy = loggedInUserId;
+            this.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(this.Save(dc: dc));
+
+            return msgs;
+        }
+
         #endregion
     }
 }

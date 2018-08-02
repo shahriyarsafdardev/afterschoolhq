@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using AfterSchool.Models;
 using BasicLibrary;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Services;
 using System.Collections.Specialized;
 using Hangfire;
 
@@ -427,8 +428,18 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PublishDetail(string id)
         {
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            var account = SessionVariables.CurrentAccount;
+            bool isAccountActivityGroup = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
+            var accountActivityGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
             ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = account;
+            ViewBag.IsAccountActivityGroup = isAccountActivityGroup;
+            
+            if (isAccountActivityGroup) 
+            {
+                ViewBag.AccountActivityGroup = accountActivityGroup;
+                ViewBag.aagRegistrationURL = accountActivityGroup.GetRegistrationUrl(true);
+            }
             return View(activityGroup);
         }
 
@@ -437,9 +448,21 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             SystemMessages msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
-            
+            var account = SessionVariables.CurrentAccount;
 
-            msgs.AddRange(activityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+            var isAccountActivityGroup = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
+            var accountActivityGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+
+            if (isAccountActivityGroup)
+            {
+                msgs.AddRange(accountActivityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+            }
+            else
+            {
+                msgs.AddRange(activityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+            }
+
+            
 
             if (msgs.HasNoErrors())
             {
@@ -448,6 +471,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.isAccountActivty = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
+            ViewBag.AccountAcitivtyGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+            ViewBag.aagRegistrationURL = accountActivityGroup.GetRegistrationUrl(true);
             return View("publishdetail", activityGroup);
         }
 
@@ -456,8 +482,21 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             SystemMessages msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            var account = SessionVariables.CurrentAccount;
 
-            msgs.AddRange(activityGroup.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+
+            var isAccountActivityGroup = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
+            var accountActivityGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+
+            if (isAccountActivityGroup)
+            {
+                msgs.AddRange(accountActivityGroup.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+            }
+            else
+            {
+                msgs.AddRange(activityGroup.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+            }
+
 
             if (msgs.HasNoErrors())
             {
@@ -466,6 +505,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.isAccountActivty = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
+            ViewBag.AccountAcitivtyGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+            ViewBag.aagRegistrationURL = accountActivityGroup.GetRegistrationUrl(true);
             return View("publishdetail", activityGroup);
         }
     }

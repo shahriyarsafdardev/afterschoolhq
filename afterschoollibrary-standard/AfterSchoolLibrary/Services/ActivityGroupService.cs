@@ -88,5 +88,21 @@ namespace AfterSchoolLibrary.Services
         {
             return SubscriptionPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, SubscriptionPlanType.Subscription, msgs, dc);
         }
+
+        public static bool hasAccountAcitivtyGroup(this ActivityGroup activityGroup, int accountId)
+        {
+            return AccountActivityGroup.LoadByAccountIdByActivityGroupId(accountId, activityGroup.ID.Value).IsNotEmpty();
+        }
+
+        public static AccountActivityGroup loadAccountActivityGroup(this ActivityGroup activityGroup, int accountId)
+        {
+            if (activityGroup.hasAccountAcitivtyGroup(accountId))
+            {
+                return AccountActivityGroup.LoadByAccountIdByActivityGroupId(accountId, activityGroup.ID.Value);
+            } else
+            {
+                return null;
+            }
+        }
     }
 }
