@@ -19,11 +19,10 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             try
             {
                 msgs.Add("trying to get signature", MessageType.Notice);
+                
+                var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
                 return Ok();
 
-                var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
-                
-                
 
                 if (!AfterSchoolLibrary.Utilities.IsLocalHost && stripeSignature.IsEmpty())
                 {
