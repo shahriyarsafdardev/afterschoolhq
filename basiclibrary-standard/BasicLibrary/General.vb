@@ -311,6 +311,7 @@ Public Class SystemMessages
                             Dim temp As String = Me(i).Text
                             If Me(i).Exception IsNot Nothing Then
                                 temp &= " " & Me(i).Exception.Message
+                                temp &= " " & Me(i).Exception.StackTrace
                             End If
                             tempHolder &= temp & ","
                             rtn &= Me(i).MessageType.ToString.SplitByUpperCase & " - " & temp & vbCrLf
