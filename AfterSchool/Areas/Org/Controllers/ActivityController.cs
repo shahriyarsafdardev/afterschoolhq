@@ -826,12 +826,18 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy)
+        public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid())
-                .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
-            
+            Activity activity = null;
+
+            if (copywithregistrants.IsBoolean())
+                activity = Activity.LoadByUid(id.ToGuid())
+                    .Copy(activitynamecopy, true, true, SessionVariables.LoggedInUser.ID.Value, msgs);
+            else
+                activity = Activity.LoadByUid(id.ToGuid())
+                    .Copy(activitynamecopy, true, false, SessionVariables.LoggedInUser.ID.Value, msgs);
+
             ViewBag.Messages = msgs;
             if (msgs.HasNoErrors())
             {

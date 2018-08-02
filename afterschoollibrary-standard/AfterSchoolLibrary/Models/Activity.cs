@@ -1048,7 +1048,12 @@ namespace AfterSchoolLibrary
             return activity;
         }
 
-        public Activity Copy(string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public Activity CopyWithRegistrants(string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Copy(newName, useSameForm, true, loggedInUserId, msgs, dc);
+        }
+
+        public Activity Copy(string newName, bool useSameForm, bool includeRegistrants, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1165,6 +1170,51 @@ namespace AfterSchoolLibrary
                     if (oldPaymentPlan.IsNotEmpty())
                     {
                         var newPaymentPlan = oldPaymentPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
+                    }
+
+                    if (includeRegistrants)
+                    {
+                        // need a new registration
+                        
+                        var registrantActivities = this.GetRegistrantActivities(amsgs, adc);
+                        registrantActivities.ForEach(registrantActivity => {
+
+                            var registrant = registrantActivity.ToRegistrant();
+
+                            // copies with no esignature because the parent isn't really signing. 
+                            // TODO: Need to get it, request esignature from parent?
+                            var newRegistration = registrant.AddRegistration(
+                                account.ID.Value, 
+                                copy.ActivityGroupId, 
+                                RegistrationCompletionStatus.RequiresParentSignature, 
+                                loggedInUserId,
+                                amsgs, 
+                                adc);
+
+                            var newRegistrantActivity = new RegistrantActivity()
+                            {
+                                ActivityGroupId = this.ActivityGroupId,
+                                ActivityId = copy.ID,
+                                CreateDate = DateTime.UtcNow,
+                                CreatedBy = loggedInUserId,
+                                ApplicationSeatIndex = registrantActivity.ApplicationSeatIndex,
+                                LastModifiedBy = loggedInUserId,
+                                LastModifiedDate = DateTime.UtcNow,
+                                NumberOfApplicationSeats = registrantActivity.NumberOfApplicationSeats,
+                                NumberOfInvitationSeats = registrantActivity.NumberOfInvitationSeats,
+                                NumberOfSeats = registrantActivity.NumberOfSeats,
+                                NumberOfSeatsDeclined = registrantActivity.NumberOfSeatsDeclined,
+                                NumberOfWaitingListSeats = registrantActivity.NumberOfWaitingListSeats,
+                                PreferenceNumber = registrantActivity.PreferenceNumber,
+                                RegistrantId = registrantActivity.RegistrantId,
+                                SeatIndex = registrantActivity.SeatIndex,
+                                WaitingListSeatIndex = registrantActivity.WaitingListSeatIndex,
+                                RegistrationId = newRegistration.ID
+                            };
+                            amsgs.AddRange(newRegistrantActivity.Save(adc));
+
+                            // TODO: probably should notify parents that they've been added
+                        });
                     }
 
                 },
