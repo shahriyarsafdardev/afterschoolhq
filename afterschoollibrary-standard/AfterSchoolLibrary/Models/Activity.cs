@@ -1053,7 +1053,12 @@ namespace AfterSchoolLibrary
             return Copy(newName, useSameForm, true, loggedInUserId, msgs, dc);
         }
 
-        public Activity Copy(string newName, bool useSameForm, bool includeRegistrants, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public Activity Copy(string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return Copy(newName, useSameForm, false, loggedInUserId, msgs, dc);
+        }
+
+        internal Activity Copy(string newName, bool useSameForm, bool includeRegistrants, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
