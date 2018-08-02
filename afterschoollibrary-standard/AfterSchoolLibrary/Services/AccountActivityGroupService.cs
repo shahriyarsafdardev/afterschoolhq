@@ -81,5 +81,16 @@ namespace AfterSchoolLibrary.Services
         {
             return Account.Load(aag.AccountId.Value, msgs, dc);
         }
+
+        public static string GetRegistrationUrl(this AccountActivityGroup aag, bool isAfterSchool, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var districtName = aag.GetActivityGroup(msgs, dc).GetAccount(msgs,dc).UniqueName.ToLower();
+
+
+            return $"{Utilities.BaseUrl(isAfterSchool)}/{aag.GetAccount(msgs, dc).UniqueName.ToLower()}/league//{aag.UniqueName}";
+        
+
+            return "";
+        }
     }
 }
