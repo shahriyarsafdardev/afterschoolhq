@@ -19,27 +19,31 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             try
             {
                 msgs.Add("trying to get signature", MessageType.Notice);
-                
+
+                throw new Exception("new error message");
+
+                return Ok(msgs.ToJSON());
+
                 // var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
-                return Ok();
 
 
-                if (!AfterSchoolLibrary.Utilities.IsLocalHost && stripeSignature.IsEmpty())
-                {
-                    msgs.Add("Invalid Signature", MessageType.Error);
-                    SendLogEmail(msgs);
-                    return Ok();
-                }
+                //if (!AfterSchoolLibrary.Utilities.IsLocalHost && stripeSignature.IsEmpty())
+                //{
+                //    msgs.Add("Invalid Signature", MessageType.Error);
+                //    SendLogEmail(msgs);
+                //    return Ok();
+                //}
+                // ,
+                //stripeSignature, 
+                //        "whsec_ImO7GlHXHiYs8pityQDZbBWJvF0eLEas"
 
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
                 var stripeEvent = AfterSchoolLibrary.Utilities.IsLocalHost ?
                     (StripeEvent)StripeEventUtility.ParseEvent(serializedJson) :
-                    (StripeEvent)StripeEventUtility.ConstructEvent(
-                        serializedJson,
-                        stripeSignature, 
-                        "whsec_ImO7GlHXHiYs8pityQDZbBWJvF0eLEas");
+                    (StripeEvent)StripeEventUtility.ParseEvent(
+                        serializedJson);
 
                 switch (stripeEvent.Type)
                 {
@@ -56,7 +60,6 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             }
             catch (Exception ex)
             {
-                return Ok();
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 SendLogEmail(msgs);
                 return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
