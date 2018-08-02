@@ -206,7 +206,7 @@ namespace AfterSchoolLibrary.Billing
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Error updating stripe payment", MessageType.UserError);
+                msgs.Add("Error updating payment account", MessageType.UserError);
             }
 
             return account;
