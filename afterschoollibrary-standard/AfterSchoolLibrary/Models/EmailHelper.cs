@@ -339,6 +339,7 @@ namespace AfterSchoolLibrary
                 { "HostAccountName", hostAccount.Name},
                 { "VisitorAccountName", visitorAccount.Name },
                 { "VisitorUserDisplayName", visitorAccountOwner.DisplayName },
+                { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
                 { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
             };
 
@@ -380,6 +381,7 @@ namespace AfterSchoolLibrary
                 { "FirstName", visitorAccount.GetAccountOwner(msgs).DisplayName },
                 { "HostAccountName", hostAccount.Name},
                 { "VisitorAccountName", visitorAccount.Name },
+                { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
                 { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
             };            
 
@@ -412,6 +414,7 @@ namespace AfterSchoolLibrary
                 { "FirstName", visitorAccount.GetAccountOwner(msgs).DisplayName },
                 { "HostAccountName", hostAccount.Name},
                 { "VisitorAccountName", visitorAccount.Name },
+                { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
                 { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
             };
 
