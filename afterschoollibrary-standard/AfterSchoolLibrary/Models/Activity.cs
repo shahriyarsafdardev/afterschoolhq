@@ -1915,28 +1915,30 @@ namespace AfterSchoolLibrary
             if (location.IsNumber())
             {
                 // make sure we setup a relationship
-
                 var actualLocation = Location.Load(location.ToInteger(), msgs, dc);
-                var locationOwner = Account.Load(actualLocation.HostAccountId.Value, msgs, dc);
-                var visitorAccount = this.GetAccount(msgs, dc);
+                if (actualLocation.HostAccountId.HasValue)
+                {
+                    var locationOwner = Account.Load(actualLocation.HostAccountId.Value, msgs, dc);
+                    var visitorAccount = this.GetAccount(msgs, dc);
 
-                var relationship = Services.AccountRelationshipService.GetOrCreateNew(
-                   hostAccount: locationOwner,
-                   visitorAccount: visitorAccount,
-                   approvalStatus: ApprovalStatus.Requested,
-                   hostPermissionType: HostPermissionType.ApproveOnly,
-                   loggedInUser: new WebUser { ID = loggedInUserId },
-                   msgs: msgs,
-                   dc: dc);
+                    var relationship = Services.AccountRelationshipService.GetOrCreateNew(
+                       hostAccount: locationOwner,
+                       visitorAccount: visitorAccount,
+                       approvalStatus: ApprovalStatus.Requested,
+                       hostPermissionType: HostPermissionType.ApproveOnly,
+                       loggedInUser: new WebUser { ID = loggedInUserId },
+                       msgs: msgs,
+                       dc: dc);
 
-                var relationshipLocation = Services.AccountRelationshipLocationService.GetOrCreateNew(
-                    accountRelationship: relationship,
-                    hostAccount: locationOwner,
-                    visitorAccount: visitorAccount,
-                    location: actualLocation,
-                    loggedInUser: new WebUser { ID = loggedInUserId },
-                    msgs: msgs,
-                    dc: dc);
+                    var relationshipLocation = Services.AccountRelationshipLocationService.GetOrCreateNew(
+                        accountRelationship: relationship,
+                        hostAccount: locationOwner,
+                        visitorAccount: visitorAccount,
+                        location: actualLocation,
+                        loggedInUser: new WebUser { ID = loggedInUserId },
+                        msgs: msgs,
+                        dc: dc);
+                }
 
                 this.LocationId = location.ToString().ToInteger();
             }

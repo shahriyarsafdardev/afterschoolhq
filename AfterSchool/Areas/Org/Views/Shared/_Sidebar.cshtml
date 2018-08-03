@@ -3,12 +3,15 @@
         <div class="am-logo hide"></div>
 
         <ul class="sidebar-elements">
+            <li>
+                <img src="/public/images/footer-icon.png" class="side-menu-logo" />
+            </li>
             @if ((SessionVariables.AccountPackage.IsNotEmpty() &&
                     (SessionVariables.AccountPackage.IsFree || SessionVariables.AccountPackage.IsDuringTrial)) || SessionVariables.CurrentAccount.HasPaymentCard)
             {
                 <li><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
                 <li><a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a></li>
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups) && SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
+                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups) && SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider && false)
                 {
                     <li><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
                 }

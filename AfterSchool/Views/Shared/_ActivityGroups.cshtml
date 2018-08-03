@@ -73,7 +73,7 @@ else if (isExternalGroupsView && Model.Count == 0)
 }
 else
 {
-    <p>@UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() that @SessionVariables.CurrentAccount.Name is participating in</p>
+
 
     if (!isExternalGroupsView)
     {
@@ -85,6 +85,10 @@ else
                 </div>
             </div>
         </div>
+    }
+    else
+    {
+        <p>@UILabel.ActivityGroupLabel(activityGroupType, true) that @SessionVariables.CurrentAccount.Name is participating in</p>
     }
 
 
@@ -124,7 +128,7 @@ else
                                             <i class="s7-copy-file"></i> Repeat
                                         </button>
 
-                                        @if (!group.IsArchived )
+                                        @if (!group.IsArchived)
                                         {
                                             <button class="btn btn-default btn-sm md-trigger"
                                                     data-modal="modal-archive"
@@ -143,7 +147,7 @@ else
                                     </div>
                                 </td>
                             }
-                            
+
                         </tr>
                     }
                 }

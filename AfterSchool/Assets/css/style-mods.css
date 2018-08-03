@@ -96,6 +96,10 @@ div.border-light-gray {
     font-size: 1.0em;
 }
 
+.side-menu-logo{
+    margin: 15px 27px;
+    width: 50px;
+}
 
 /* DIVS */
 .rounded-corners {
