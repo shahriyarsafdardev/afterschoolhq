@@ -121,7 +121,7 @@
                     </div>
 
                     <p class="activity-description text-muted">
-                        @Html.Raw(item.Description.IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(item.Details).MaxChars(100, "...")))
+                        @Html.Raw(item.Description.MaxChars(100, "...").IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(item.Details).MaxChars(100, "...")))
                     </p>
 
                     <div>
