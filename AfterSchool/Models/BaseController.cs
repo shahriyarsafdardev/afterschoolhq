@@ -178,18 +178,10 @@ namespace AfterSchool.Models
             {
                 var awus = AccountWebUser.LoadByWebUserIdByIsActive(user.ID.Value, true);
 
-                if (awus.Any())
+                if (awus.Count == 1)
                 {
-                    if (awus.Where(x => x.IsDefault).Any())
-                    {
-                        SessionVariables.CurrentAccount = awus.Where(x => x.IsDefault).First().ToAccount(true);
-                        SessionVariables.AccountUserType = awus.Where(x => x.IsDefault).First().UserTypeId;
-                    }
-                    else
-                    {
-                        SessionVariables.CurrentAccount = awus.First().ToAccount(true);
-                        SessionVariables.AccountUserType = awus.First().UserTypeId;
-                    }                    
+                    SessionVariables.CurrentAccount = awus.First().ToAccount(true);
+                    SessionVariables.AccountUserType = awus.First().UserTypeId;
                 }
             }
 

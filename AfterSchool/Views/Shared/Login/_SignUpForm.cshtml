@@ -3,7 +3,7 @@
 @{ 
     var showPhone = false;
 
-    if (ViewData["showphone"].IsNotEmpty() && ViewData["showphone"].IsBoolean())
+    if (ViewData["showphone"].IsNotEmpty() && ViewData["showphone"].ToString().IsBoolean())
     {
         showPhone = ViewData["showphone"].ToString().ToBoolean();
     }

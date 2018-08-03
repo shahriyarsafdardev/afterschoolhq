@@ -415,7 +415,13 @@ namespace AfterSchool.Controllers
         public ActionResult Invite(string id, string firstname, string lastname, string email, string phone, string password1, string password2)
         {
             var msgs = new SystemMessages();
-            var user = new WebUser();
+            var user = new WebUser
+            {
+                FirstName = firstname,
+                LastName = lastname,
+                Email = email,
+                Phone = phone
+            };
 
             if (!id.IsGuid())           
                 msgs.Add("Invalid invitation code", MessageType.UserError);
@@ -447,15 +453,10 @@ namespace AfterSchool.Controllers
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (password1.Length < 8)
-                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);            
 
             if (msgs.HasNoErrors())
             {
-                user.FirstName = firstname;
-                user.LastName = lastname;
-                user.Email = email;
-                user.Phone = phone;
-
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
@@ -483,6 +484,8 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("createaccount", new { invitecode = invitingAccount.InviteCodeToShare });
 
             ViewBag.Messages = msgs;
+            ViewBag.User = user;
+
             return View(invitingAccount);            
         }
 
@@ -506,7 +509,12 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             Account invitingAccount = null;
-            Account newAccount = null;
+            var newAccount = new Account()
+            {
+                Name = orgname,
+                Phone = phone,
+                Email = email
+            };
 
             if (orgname.IsEmpty())
                 msgs.Add("Organization Name is required", MessageType.UserError);
@@ -523,13 +531,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                // if there are errors load the object to redisplay on the screen
-                newAccount = new Account()
-                {
-                    Name = orgname,
-                    Phone = phone,
-                    Email = email
-                };
+                
 
                 Database.ExecuteTransaction
                 (
@@ -549,6 +551,8 @@ namespace AfterSchool.Controllers
                             createWithStripe: true,
                             msgs: amsgs, 
                             dc: adc);
+
+                        msgs.AddRange(newAccount.AddUser(SessionVariables.LoggedInUser, UserType.Owner, SessionVariables.LoggedInUser.ID.Value, adc));
 
                         if (invitecode.IsGuid())
                         {
