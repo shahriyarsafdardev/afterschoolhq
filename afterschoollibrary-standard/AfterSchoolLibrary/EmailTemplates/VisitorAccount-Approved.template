@@ -1,0 +1,18 @@
+﻿<div>
+  <p>@Model.FirstName,</p>
+  
+  <p>
+      Your account is now approved to list your activities on the @Model.HostAccountName page!
+  </p>
+
+  <p>
+      Now when you create a new activity and select @Model.HostAccountName as your location, your activities will show up automatically on the @Model.HostAccountName page and parents can select and register their children for your activities.
+  </p>
+
+  <p>
+    <a href="@Model.LoginLink">Login to start adding new activities</a>
+  </p>
+  <p>
+      @Model.ProductName
+  </p>
+</div>

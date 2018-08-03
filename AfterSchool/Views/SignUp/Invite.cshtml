@@ -1,0 +1,36 @@
+﻿@model Account
+
+@{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    ViewBag.Title = "Sign Up";
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+<<div class="am-wrapper am-login am-signup">
+    <div class="am-content">
+        <div class="main-content">
+            <div class="login-container sign-up">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" height="80px" class="logo-img"></a>
+                        <span>Welcome! Please enter your information below to complete the sign-up process.</span>
+                    </div>
+                    <div class="panel-body">
+
+                        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+                        <p class="text-center">
+                            Already have an account?<br/>
+                            <a href="@Url.Action("index", "login", new { returnUrl = Url.Action("invite", "signup", new { id = Model.InviteCodeToShare }) })" class="btn btn-primary btn-lg">Login</a>
+                        </p>
+
+                        <form action="@Url.Action("new", "signup", new { id = Model.InviteCodeToShare })" parsley-validate="" novalidate="" method="post" class="form-horizontal">
+                            @{ Html.RenderPartial("~/Views/Shared/Login/SignUpForm.cshtml", Model); }
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center out-links"><a href="#">© @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+            </div>
+        </div>
+    </div>
+</div>
