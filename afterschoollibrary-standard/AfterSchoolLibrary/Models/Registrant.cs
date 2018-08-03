@@ -481,7 +481,8 @@ namespace AfterSchoolLibrary
             };
             msgs.AddRange(reg.Save(dc));
 
-            msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
+            if (FirstName.IsNotEmpty() && LastName.IsNotEmpty() && Email.IsNotEmpty())
+                msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
 
             return reg;
         }

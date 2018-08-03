@@ -461,8 +461,9 @@ namespace AfterSchoolLibrary
 
         public SubscriptionPlan GetSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // fdafds
-            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).FirstOrDefault();
+            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                .FirstOrDefault();
         }
 
         public bool HasSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -480,7 +481,9 @@ namespace AfterSchoolLibrary
         public SubscriptionPlan GetPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // fdasfsd
-            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).FirstOrDefault();
+            return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                .FirstOrDefault();
         }
 
         public bool HasPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1889,6 +1892,7 @@ namespace AfterSchoolLibrary
                         paymentPlan.LastModifiedDate = DateTime.UtcNow;
                         paymentPlan.CostPerPeriod = paymentplancost.ToDecimal();
                         paymentPlan.BillingPeriodTypeId = (BillingPeriodType)paymentplanperiod.ToInteger();
+                        paymentPlan.TotalPeriods = paymentplanperiodnumber.ToInteger();
                         msgs.AddRange(paymentPlan.SaveWithStripe(dc));
                     }
                 }
