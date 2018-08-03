@@ -1052,17 +1052,17 @@ namespace AfterSchoolLibrary
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(account.ID.Value, propertyType, dc: dc);
         }
 
-        public static List<Registration> GetRegistrations(this Account account, DatabaseConnection dc = null)
+        public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadByAccountId(account.ID.Value, dc: dc)
-                .Where(x => x.CompletionStatusId == RegistrationCompletionStatus.Completed)
+            return Registration.LoadByAccountId(account.ID.Value, msgs, dc)
+                .Where(registration => Registration.ValidCompletionStatus.Contains((int)registration.CompletionStatusId))
                 .ToList();
         }
 
-        public static List<Registration> GetCurrentRegistrations(this Account account, DatabaseConnection dc = null)
+        public static List<Registration> GetCurrentRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadCurrentByAccountId(account.ID.Value, dc: dc)
-                .Where(x=> x.CompletionStatusId == RegistrationCompletionStatus.Completed)
+            return Registration.LoadCurrentByAccountId(account.ID.Value, msgs, dc)
+                .Where(registration => Registration.ValidCompletionStatus.Contains((int)registration.CompletionStatusId))
                 .ToList();
         }
 
@@ -1071,7 +1071,7 @@ namespace AfterSchoolLibrary
             return Registration.Load(
                 new Hashtable() {
                     { "AccountId", account.ID.Value },
-                    { "CompletionStatusId", RegistrationCompletionStatus.Completed }
+                    { "CompletionStatusId", Registration.ValidCompletionStatus }
                 }, 
                 start, 
                 length, 

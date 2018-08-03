@@ -1606,7 +1606,7 @@ values: NotSet, InSession, OutOfSession
 [begin]
 type: Enum
 name: RegistrationCompletionStatus
-values: NotSet, Started, Completed
+values: NotSet, Started, Completed, RequiresParentSignature
 [end]
 
 [begin]

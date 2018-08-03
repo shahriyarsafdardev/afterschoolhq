@@ -389,13 +389,23 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        internal static List<int> ValidCompletionStatus
+        {
+            get
+            {
+                return new List<int>() { (int)RegistrationCompletionStatus.Completed, (int)RegistrationCompletionStatus.RequiresParentSignature };
+            }
+        } 
+
         public static List<Registration> LoadFirstRegistrations(int accountId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
+            var completionStatus = new List<int>() { (int)RegistrationCompletionStatus.Completed, (int)RegistrationCompletionStatus.RequiresParentSignature };
+
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
@@ -411,7 +421,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], this.AccountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName.Trim());
             dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName.Trim());
@@ -506,7 +516,7 @@ namespace AfterSchoolLibrary
 		                        r.ID = {this.FirstRegistrationId.IfEmpty(0)} or
 		                        r.FirstRegistrationId = {this.ID} or
 		                        r.ID = {this.ID}
-	                        ) and r.CompletionStatusId = {(int)RegistrationCompletionStatus.Completed}";
+	                        ) and r.CompletionStatusId in ({ValidCompletionStatus.ToArray().ToStringArray().ToStringList()})";
 
             var registrations = dq.ExecuteSelect(sql).AsEnumerable().ToList().ConvertAll(LoadObject);
 
@@ -802,7 +812,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 
             // aggregate related registrations
@@ -1141,7 +1151,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -1154,7 +1164,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -1562,7 +1572,7 @@ namespace AfterSchoolLibrary
                         from Registration r
                         where 
                         accountId = {accountId} and
-                        completionStatusId = {(int)RegistrationCompletionStatus.Completed} and
+                        completionStatusId in ({ValidCompletionStatus.ToArray().ToStringArray().ToStringList()}) and
                         (
                             select count(ra.id) 
                             from RegistrationActivity ra
@@ -1586,7 +1596,7 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
-        public static List<Registration> LoadCurrentByAccountId(int AccountId, DatabaseConnection dc = null)
+        public static List<Registration> LoadCurrentByAccountId(int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1624,7 +1634,7 @@ namespace AfterSchoolLibrary
 	                    ) and
 	                    r.AccountId = {0}", AccountId);
 
-            return dq.ExecuteSelect(sql).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public SystemMessages DeleteWithRelatedRecords(DatabaseConnection dc = null)

@@ -49,18 +49,17 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         msgs.Add("Getting AccountUpdated", MessageType.Notice);
                         return AccountUpdated(stripeEvent, msgs);
                     case "invoice.payment_succeeded":
-                        return Ok(msgs.ToJSON());
+                        return ReturnOK(msgs);
                         msgs.Add("Getting payment_succeeded", MessageType.Notice);
                         return InvoicePaymentSucceeded(stripeEvent, msgs);
                     default:
-                        return Ok(msgs.ToJSON());
+                        return ReturnOK(msgs);
                 }
             }
             catch (Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.Error, ex);
-                SendLogEmail(msgs);
-                return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
+                return Return500(msgs);
             }
         }
 
@@ -73,6 +72,18 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             EmailHelper.SendEmail(toEmail, subject, body, true);
         }
 
+        private IHttpActionResult ReturnOK(SystemMessages msgs)
+        {
+            SendLogEmail(msgs);
+            return Ok(msgs.ToJSON());
+        }
+
+        private IHttpActionResult Return500(SystemMessages msgs)
+        {
+            SendLogEmail(msgs);
+            return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
+        }
+
         private IHttpActionResult AccountUpdated(StripeEvent stripeEvent, SystemMessages msgs)
         {
             msgs.Add("Getting stripeAccountId", MessageType.Notice);
@@ -83,12 +94,18 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             if (account.IsEmpty())
             {
                 msgs.Add("Account not found for some reason", MessageType.Notice);
-                SendLogEmail(msgs);
-                return Ok(msgs.ToJSON());
+                return ReturnOK(msgs);
             }
 
             msgs.Add("Getting stripeAccount", MessageType.Notice);
             var stripeAccount = account.GetStripeAccount(msgs);
+
+            if (stripeAccount.IsEmpty())
+            {
+                msgs.Add("No stripe account yet", MessageType.Notice);
+                return ReturnOK(msgs);
+            }
+
             msgs.Add("Getting serializedAccountJson", MessageType.Notice);
             var serializedAccountJson = JsonConvert.SerializeObject(stripeEvent.Data.Object);
             msgs.Add("Getting startingStatus", MessageType.Notice);
@@ -102,13 +119,9 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 account.SendStripeAccountVerified(null);
 
             if (msgs.HasErrors())
-            {
-                SendLogEmail(msgs);
-                return InternalServerError();
-            }
+                return Return500(msgs);
 
-            SendLogEmail(msgs);
-            return Ok(msgs.ToJSON());
+            return ReturnOK(msgs);
         }
 
         private IHttpActionResult InvoicePaymentSucceeded(StripeEvent stripeEvent, SystemMessages msgs)

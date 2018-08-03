@@ -826,12 +826,18 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy)
+        public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants)
         {
             var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid())
-                .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
-            
+            Activity activity = null;
+
+            if (copywithregistrants.IsBoolean())
+                activity = Activity.LoadByUid(id.ToGuid())
+                    .CopyWithRegistrants(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
+            else
+                activity = Activity.LoadByUid(id.ToGuid())
+                    .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
+
             ViewBag.Messages = msgs;
             if (msgs.HasNoErrors())
             {
@@ -1573,9 +1579,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             var registration = registrant.AddRegistration(
                                 SessionVariables.CurrentAccount.ID.Value,
                                 activity.ActivityGroupId,
+                                RegistrationCompletionStatus.RequiresParentSignature,
                                 SessionVariables.LoggedInUser.ID.Value,
                                 amsgs, 
                                 dc: adc);
+
                             var ra = registrant.AddOrUpdateActivity(registration.ID.Value, af.ActivityId.Value, seatCount, waitingListSeatCount, applicationSeatCount, invitationSeatCount, declinedSeatCount, 0, amsgs, dc: adc);
 
                             for (var i = 0; i < headers.Count; i++)

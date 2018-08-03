@@ -462,9 +462,8 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }
-
-        [Obsolete]
-        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        
+        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -473,6 +472,7 @@ namespace AfterSchoolLibrary
                 AccountId = ownerAccountId,
                 RegistrantId = this.ID,
                 ActivityGroupId = activityGroupId,
+                CompletionStatusId = completionStatus,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUserId,
@@ -481,7 +481,8 @@ namespace AfterSchoolLibrary
             };
             msgs.AddRange(reg.Save(dc));
 
-            msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
+            if (FirstName.IsNotEmpty() && LastName.IsNotEmpty() && Email.IsNotEmpty())
+                msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
 
             return reg;
         }

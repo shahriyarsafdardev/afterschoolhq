@@ -294,6 +294,19 @@ else
                     <label>@UILabel.ActivityLabel(activityType) Name</label>
                     <input type="text" placeholder="Your @UILabel.ActivityLabel(activityType) Name" class="form-control" id="activitynamecopy" name="activitynamecopy" onfocus="this.select()">
                 </div>
+
+                <div class="form-group">
+                    <div class="am-checkbox inline">
+                        <input type="checkbox" class="form-control" value="1" name="copywithregistrants" id="copywithregistrants" />
+                        <label for="copywithregistrants">
+                            Copy with @UILabel.RegistrantLabel(true).ToLower()?
+                        </label>
+                    </div>
+                    <p class="text-muted">
+                        <em>This will automatically register all @UILabel.RegistrantLabel(true).ToLower() in the current @UILabel.ActivityLabel(ActivityType.Activity, false) for the new copied @UILabel.ActivityLabel(ActivityType.Activity, false).</em>
+                    </p>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
