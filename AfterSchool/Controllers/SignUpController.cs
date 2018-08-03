@@ -8,6 +8,7 @@ using BasicLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Controllers
 {
@@ -383,5 +384,171 @@ namespace AfterSchool.Controllers
             return View(user);
         }
 
+        [HttpGet]
+        public ActionResult Invite(string id)
+        {
+            var msgs = new SystemMessages();
+
+            if (!id.IsGuid())
+                msgs.Add("Invalid invite", MessageType.UserError);
+
+            var invitingAccount = Account.LoadByInviteCodeToShare(id.ToGuid(), msgs);
+
+            if (invitingAccount.IsEmpty())
+                msgs.Add("Invalid invite code", MessageType.UserError);
+
+            // auto accept invite
+            if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant && SessionVariables.CurrentAccount.ID != invitingAccount.ID)
+            {
+                invitingAccount.ApproveAccessToAccount(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser, msgs);
+
+                return LoginRedirect();
+            }
+
+            ViewBag.Messages = msgs;
+
+            return View(invitingAccount);
+        }
+
+        [HttpPost]
+        public ActionResult Invite(string id, string firstname, string lastname, string email, string password1, string password2)
+        {
+            var msgs = new SystemMessages();
+            WebUser user = null;
+
+            if (!id.IsGuid())           
+                msgs.Add("Invalid invitation code", MessageType.UserError);
+
+            var invitingAccount = Account.LoadByInviteCodeToShare(id.ToGuid());
+            if (invitingAccount.IsEmpty())
+                msgs.Add("Invalid invitation code", MessageType.UserError);
+
+            if (firstname.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (lastname.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (email.IsEmpty())
+                msgs.Add("Email is required", MessageType.UserError);
+            else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+            else if (!user.CanEmailBeUsed(email))
+                msgs.Add("This email has already been registered. Login if you already have an account.", MessageType.UserError);
+
+            if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
+                msgs.Add("Passwords are required and must match", MessageType.UserError);
+            else if (password1.Length < 8)
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
+                    {
+                        // create a new user, then take then to create a real provider account
+                        user = WebUserService.CreateNew(firstname, lastname, email, null, password1, true, true, false, false, null, amsgs, adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+
+                        if (!user.VerifiedAccount)
+                            msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(LoadSessionInfo(user));
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("createaccount", new { invitecode = invitingAccount.InviteCodeToShare });
+
+            ViewBag.Messages = msgs;
+            return View(invitingAccount);            
+        }
+
+        [HttpGet]
+        public ActionResult CreateAccount(string invitecode)
+        {
+            var msgs = new SystemMessages();
+
+            if (invitecode.IsGuid())
+                ViewBag.InvitingAccount = Account.LoadByInviteCodeToShare(invitecode.ToGuid(), msgs);
+
+            ViewBag.Messages = msgs;
+            return View(SessionVariables.LoggedInUser);
+        }
+
+        [HttpPost]
+        public ActionResult CreateAccount(string invitecode, string orgname, string email, string phone, string accounttype)
+        {
+            var msgs = new SystemMessages();
+            Account invitingAccount = null;
+            Account newAccount = null;
+
+            if (orgname.IsEmpty())
+                msgs.Add("Organization Name is required", MessageType.UserError);
+
+            if (email.IsEmpty())
+                msgs.Add("Email is required", MessageType.UserError);
+            else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Email must be valid (ex: name@domain.com)", MessageType.UserError);
+
+            if (phone.IsEmpty())
+                msgs.Add("Phone is required", MessageType.UserError);
+            else if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                msgs.Add("Phone must be a valid phone number", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        newAccount = AccountService.CreateNew(
+                            orgName: orgname,
+                            email: email,
+                            phone: phone,
+                            isActive: true,
+                            accountType: (AccountType)accounttype.ToInteger(),
+                            accountOwner: SessionVariables.LoggedInUser,
+                            packageId: Package.LoadByIsActiveByIsAfterSchool(true, true, amsgs, adc).Last().ID,
+                            packageBillingPeriod: BillingPeriodType.Month,
+                            loggedInUser: SessionVariables.LoggedInUser,
+                            isAfterSchool: true,
+                            createWithStripe: true,
+                            msgs: amsgs, 
+                            dc: adc);
+
+                        if (invitecode.IsGuid())
+                        {
+                            invitingAccount = Account.LoadByInviteCodeToShare(invitecode.ToGuid(), amsgs, adc);
+                            invitingAccount.ApproveAccessToAccount(newAccount, SessionVariables.LoggedInUser, amsgs, adc);
+                        }   
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        LoadSessionInfo(SessionVariables.LoggedInUser, newAccount);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return LoginRedirect();
+
+            ViewBag.Messages = msgs;
+            return View(SessionVariables.LoggedInUser);
+        }
     }
 }

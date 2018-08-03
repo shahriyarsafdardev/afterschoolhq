@@ -136,6 +136,15 @@
   <data name="SubscriptionPayment_Succeeded" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\SubscriptionPayment-Succeeded.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="VisitorAccount_Approved" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\visitoraccount-approved.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="VisitorAccount_Denied" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\visitoraccount-denied.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="VisitorAccount_Requested" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\visitoraccount-requested.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Welcome_Purchase" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\Welcome-Purchase.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
