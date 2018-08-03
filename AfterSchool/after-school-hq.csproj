@@ -1191,6 +1191,8 @@
     <Content Include="Views\Shared\Registration\_LoginModal.cshtml" />
     <Content Include="Views\SignUp\Invite.cshtml" />
     <Content Include="Views\Shared\Login\_SignUpForm.cshtml" />
+    <Content Include="Views\Login\Select.cshtml" />
+    <Content Include="Views\SignUp\CreateAccount.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

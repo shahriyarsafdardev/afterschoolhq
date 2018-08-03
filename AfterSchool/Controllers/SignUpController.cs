@@ -406,15 +406,16 @@ namespace AfterSchool.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.User = new WebUser();
 
             return View(invitingAccount);
         }
 
         [HttpPost]
-        public ActionResult Invite(string id, string firstname, string lastname, string email, string password1, string password2)
+        public ActionResult Invite(string id, string firstname, string lastname, string email, string phone, string password1, string password2)
         {
             var msgs = new SystemMessages();
-            WebUser user = null;
+            var user = new WebUser();
 
             if (!id.IsGuid())           
                 msgs.Add("Invalid invitation code", MessageType.UserError);
@@ -433,8 +434,15 @@ namespace AfterSchool.Controllers
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (!user.CanEmailBeUsed(email))
+            else if (WebUser.ExistsByEmail(email))
                 msgs.Add("This email has already been registered. Login if you already have an account.", MessageType.UserError);
+
+            if (phone.IsEmpty())
+                msgs.Add("Phone is required", MessageType.UserError);
+            else if (!phone.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
+                msgs.Add("Please enter a valid phone number", MessageType.UserError);
+            else if (WebUser.ExistsByPhone(phone))
+                msgs.Add("This phone has already been registered. Login if you already have an account.", MessageType.UserError);
 
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
@@ -443,11 +451,16 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
+                user.FirstName = firstname;
+                user.LastName = lastname;
+                user.Email = email;
+                user.Phone = phone;
+
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
                         // create a new user, then take then to create a real provider account
-                        user = WebUserService.CreateNew(firstname, lastname, email, null, password1, true, true, false, false, null, amsgs, adc);
+                        user = WebUserService.CreateNew(firstname, lastname, email, phone, password1, true, true, false, false, null, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -482,7 +495,10 @@ namespace AfterSchool.Controllers
                 ViewBag.InvitingAccount = Account.LoadByInviteCodeToShare(invitecode.ToGuid(), msgs);
 
             ViewBag.Messages = msgs;
-            return View(SessionVariables.LoggedInUser);
+            ViewBag.User = SessionVariables.LoggedInUser;
+            ViewBag.InviteCode = invitecode;
+
+            return View(new Account() { Email = SessionVariables.LoggedInUser.Email, Phone = SessionVariables.LoggedInUser.Phone });
         }
 
         [HttpPost]
@@ -507,6 +523,14 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
+                // if there are errors load the object to redisplay on the screen
+                newAccount = new Account()
+                {
+                    Name = orgname,
+                    Phone = phone,
+                    Email = email
+                };
+
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -548,7 +572,10 @@ namespace AfterSchool.Controllers
                 return LoginRedirect();
 
             ViewBag.Messages = msgs;
-            return View(SessionVariables.LoggedInUser);
+            ViewBag.User = SessionVariables.LoggedInUser;
+            ViewBag.InviteCode = invitecode;
+
+            return View(newAccount);
         }
     }
 }

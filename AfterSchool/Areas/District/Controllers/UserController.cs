@@ -188,7 +188,7 @@ namespace AfterSchool.Areas.District.Controllers
             if (msgs.HasNoErrors())
             {
                 SessionVariables.OriginalLoggedInUser = SessionVariables.LoggedInUser;
-                msgs.AddRange(LoadSessionInfo(user, false));
+                msgs.AddRange(LoadSessionInfo(user, null, false));
             }
 
             if (msgs.HasNoErrors())
