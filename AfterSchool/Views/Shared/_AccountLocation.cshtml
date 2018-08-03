@@ -39,6 +39,41 @@
                 </div>
             </div>
 
+            <div class="form-group @hideRelationship" id="hostaccount-div">
+                <label class="control-label col-sm-3">What is your relationship with this location?</label>
+                <div class="col-sm-9">
+                    <div class="am-radio">
+                        <input type="radio" id="mylocation-no" name="mylocation" class="form-control" required="required" value="" @(isMyLocation ? "" : "checked=\"checked\"") />
+                        <label for="mylocation-no">I provide an activity at this location</label>
+                    </div>
+                    <div class="am-radio inline">
+                        <input type="radio" id="mylocation-yes" name="mylocation" class="form-control" required="required" value="1" @(isMyLocation ? "checked=\"checked\"" : "") />
+                        <label for="mylocation-yes">I am an employee/associated with this location</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group @hideType" id="isschool-div">
+                <label class="control-label col-sm-3">What type of location is this?</label>
+                <div class="col-sm-9">
+                    <div class="am-checkbox">
+                        @foreach (var item in Enum.GetValues(typeof(LocationType)).Cast<LocationType>().Where(x => x != LocationType.NotSet))
+                        {
+                            <div class="am-radio">
+                                <input type="radio"
+                                       id="locationtype-@((int)item)"
+                                       name="locationtype"
+                                       class="form-control"
+                                       required="required"
+                                       value="@((int)item)"
+                                       @(item == location.LocationTypeId ? "checked=\"checked\"" : "") />
+                                <label for="locationtype-@((int)item)">@item.ToString().SplitByUpperCase()</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
             @{
             Html.RenderPartial(
               "~/Views/Shared/_Address.cshtml",
@@ -47,41 +82,6 @@
             }
 
         </div>
-
-        <div class="form-group @hideRelationship" id="hostaccount-div">
-            <label class="control-label col-sm-3">What is your relationship with this location?</label>
-            <div class="col-sm-9">
-                <div class="am-radio inline">
-                    <input type="radio" id="mylocation-no" name="mylocation" class="form-control" required="required" value="" @(isMyLocation ? "" : "checked=\"checked\"") />
-                    <label for="mylocation-no">I provide an activity at this location</label>
-                </div>
-                <div class="am-radio inline">
-                    <input type="radio" id="mylocation-yes" name="mylocation" class="form-control" required="required" value="1" @(isMyLocation ? "checked=\"checked\"" : "") />
-                    <label for="mylocation-yes">I am an employee/associated with this location</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group @hideType" id="isschool-div">
-            <label class="control-label col-sm-3">What type of location is this?</label>
-            <div class="col-sm-9">
-                <div class="am-checkbox">
-                    @foreach (var item in Enum.GetValues(typeof(LocationType)).Cast<LocationType>().Where(x => x != LocationType.NotSet))
-                    {
-                        <div class="am-radio inline">
-                            <input type="radio"
-                                   id="locationtype-@((int)item)"
-                                   name="locationtype"
-                                   class="form-control"
-                                   required="required"
-                                   value="@((int)item)"
-                                   @(item == location.LocationTypeId ? "checked=\"checked\"" : "") />
-                            <label for="locationtype-@((int)item)">@item.ToString().SplitByUpperCase()</label>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
+      
     </div>
 </div>
