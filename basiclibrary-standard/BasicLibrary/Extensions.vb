@@ -456,7 +456,7 @@ Public Module Extensions
     End Function
 
     <Extension()>
-    Public Function ToStringList(ByVal aArray() As String, Optional ByVal separator As String = ",") As String
+    Public Function ToStringList(ByVal aArray() As String, Optional ByVal separator As String = ",", Optional ByVal includeTrailing As Boolean = False) As String
         Return String.Join(separator, aArray)
     End Function
 

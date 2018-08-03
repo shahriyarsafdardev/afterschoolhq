@@ -1,0 +1,17 @@
+﻿<div>
+  <p>@Model.HostFirstName,</p>
+  
+  <p>
+      @Model.VisitorUserDisplayName from @Model.VisitorAccountName is requesting access to list after school activities on your @Model.HostAccountName activity home page. 
+  </p>
+  <p>
+    Approving this request will allow @Model.VisitorAccountName to list activities on your activity home page. This means it will be convenient for parents to find @Model.VisitorAccountName's activities and register their children.
+  </p>
+  <p>
+    Please <a href="@Model.LoginLink">login to your account</a> in order to approve or deny this request.
+  </p>
+  <p>
+    Tnanks!, <br />
+    @Model.ProductName
+  </p>
+</div>

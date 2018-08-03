@@ -320,6 +320,7 @@ property: AccountTypeId, AccountType, Int
 property: DefaultLocationId, int?, Int
 property: MinGradeLevelOffered, int?, Int
 property: MaxGradeLevelOffered, int?, Int
+property: InviteCodeToShare, Guid, UniqueIdentifier
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
@@ -328,6 +329,7 @@ loadmethod: Uid
 loadmethod: AccountTypeId, List<>
 loadmethod: StripeUserId
 loadmethod: StripeCustomerId
+loadmethod: InviteCodeToShare
 [end]
 
 [begin]

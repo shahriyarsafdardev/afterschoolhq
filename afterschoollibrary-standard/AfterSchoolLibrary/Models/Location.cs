@@ -189,10 +189,15 @@ namespace AfterSchoolLibrary
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.LogicalOperator = LogicalOperatorType.Or;
-            dq.Criterias.Add(ObjectMap["Name"], query, DatabaseCriteriaOperatorEnum.Like);
-            dq.Criterias.Add(ObjectMap["Address1"], query, DatabaseCriteriaOperatorEnum.LikeRight);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+
+            var sql = $@"
+                    select * from Location
+                    where 
+                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') or
+                        Contains(address1,'{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
+                ";
+            
+           return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static List<Location> LoadByLocationTypeIdByCityByState(LocationType LocationTypeId, string city, string state, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

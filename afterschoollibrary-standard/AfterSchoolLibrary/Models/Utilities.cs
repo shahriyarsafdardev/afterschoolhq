@@ -307,6 +307,7 @@ namespace AfterSchoolLibrary
             try
             {
                 msgs.AddRange(AdditionalData(dc));
+                msgs.AddRange(UpdateInviteCodes(dc));
                 //msgs.AddRange(UpdateRegistrations2(dc));
                 //msgs.AddRange(UpdateAccountFeatures(dc: dc));
                 //msgs.AddRange(UpdateLocations(dc: dc));
@@ -341,6 +342,23 @@ namespace AfterSchoolLibrary
             {
                 Database.EndTransaction(dc, msgs);
             }
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateInviteCodes(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var accounts = Account.Load(
+                criterias: new Hashtable() { { "InviteCodeToShare", DBNull.Value } },
+                msgs: msgs, 
+                dc: dc);
+
+            accounts.ForEach(account =>
+            {
+                account.InviteCodeToShare = Guid.NewGuid();
+                msgs.AddRange(account.Save(dc));
+            });
 
             return msgs;
         }

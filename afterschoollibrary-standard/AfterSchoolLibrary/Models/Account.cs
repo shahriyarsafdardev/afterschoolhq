@@ -46,6 +46,7 @@ namespace AfterSchoolLibrary
 		public int? DefaultLocationId { get { return (int?)MDV["DefaultLocationId"].Value; } set { MDV["DefaultLocationId"].Value = value; } }
 		public int? MinGradeLevelOffered { get { return (int?)MDV["MinGradeLevelOffered"].Value; } set { MDV["MinGradeLevelOffered"].Value = value; } }
 		public int? MaxGradeLevelOffered { get { return (int?)MDV["MaxGradeLevelOffered"].Value; } set { MDV["MaxGradeLevelOffered"].Value = value; } }
+		public Guid InviteCodeToShare { get { return (Guid)MDV["InviteCodeToShare"].Value; } set { MDV["InviteCodeToShare"].Value = value; } }
 		
 
         public Account()
@@ -57,6 +58,7 @@ namespace AfterSchoolLibrary
 			this.IsActive = false;
 			this.IsAfterSchool = false;
 			this.AccountTypeId = AccountType.NotSet;
+			this.InviteCodeToShare = Guid.NewGuid();
 			
         }
 
@@ -89,6 +91,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "DefaultLocationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MinGradeLevelOffered", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxGradeLevelOffered", System.Data.SqlDbType.Int);
+				_dp.Add(className, "InviteCodeToShare", System.Data.SqlDbType.UniqueIdentifier);
 				
                 return _dp;
             }
@@ -254,6 +257,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["MaxGradeLevelOffered"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["InviteCodeToShare"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -320,6 +327,14 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static Account LoadByInviteCodeToShare(Guid InviteCodeToShare, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["InviteCodeToShare"], InviteCodeToShare);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
 		
 
         #endregion
@@ -347,6 +362,14 @@ namespace AfterSchoolLibrary
                 return $"{Utilities.BaseUrl(true)}/{this.UniqueName.ToLower()}";
             }
 
+        }
+
+        public string HostAccountInviteUrl
+        {
+            get
+            {
+                return $"{Utilities.BaseUrl(true)}/signup/invite/{this.InviteCodeToShare}";
+            }
         }
 
         public bool HasPaymentCard

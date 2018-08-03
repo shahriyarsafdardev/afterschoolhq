@@ -1,0 +1,37 @@
+﻿@model List<Account>
+@{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    ViewBag.Title = "Select Account";
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+<div class="am-wrapper am-login">
+    <div class="am-content">
+        <div class="main-content">
+            <div class="login-container">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" height="80px" class="logo-img"></a>                        
+                    </div>
+                    <div class="panel-body">
+                        
+                        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+                        <div>
+                            Please select your account below
+                        </div>
+
+                        @foreach(var account in Model)
+                        {
+                            <a href="@Url.Action("select", new { id = account.Uid, returnurl = ViewBag.ReturnUrl })" class="btn btn-primary btn-xl btn-space btn-block">
+                                @account.Name &raquo;
+                            </a>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

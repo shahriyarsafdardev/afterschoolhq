@@ -1300,27 +1300,30 @@ namespace AfterSchoolLibrary
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static SystemMessages RequestAccessToAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static AccountRelationship RequestAccessToAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            AccountRelationship relationship = null;
 
             // Makes sure that the visitor has not been previously denied by the host
             if (!GetDeniedVisitorAccounts(hostAccount, visitorAccount.AccountTypeId, dc: dc).Contains(visitorAccount))
             {
-                msgs.AddRange(visitorAccount.AddHostAccount(
+                relationship = visitorAccount.AddHostAccount(
                     hostAccount,
                     hostPermissionType,
                     ApprovalStatus.Requested, 
                     loggedInUser, 
-                    dc));
+                    msgs,
+                    dc);
 
                 //TODO Notify Host account of request
-                if (msgs.HasNoErrors())
-                {
-                    //msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
-                }
+                if (msgs.HasNoErrors() && hostAccount.IsActive)
+                    msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
             }
-            return msgs;
+
+            msgs.Add("This account has already previously been denied", MessageType.UserError);
+            
+            return relationship;
         }
 
         /// <summary>
@@ -1331,16 +1334,24 @@ namespace AfterSchoolLibrary
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static SystemMessages ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static AccountRelationship ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            return ApproveAccessToAccount(hostAccount, visitorAccount, HostPermissionType.ApproveOnly, loggedInUser, msgs, dc);
+        }
 
-            msgs.AddRange(AccountRelationshipService.UpdateApprovalStatus(hostAccount, visitorAccount, ApprovalStatus.Approved, loggedInUser, dc));
+        public static AccountRelationship ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var relationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
 
-            // if (msgs.HasNoErrors())
-            // msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
+            if (relationship.IsNotEmpty())
+                msgs.AddRange(AccountRelationshipService.UpdateApprovalStatus(hostAccount, visitorAccount, ApprovalStatus.Approved, loggedInUser, dc));
+            else
+                relationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, hostPermissionType, loggedInUser, msgs, dc);
 
-            return msgs;
+            if (msgs.HasNoErrors())
+                msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
+
+            return relationship;
         }
 
         /// <summary>
@@ -1411,11 +1422,9 @@ namespace AfterSchoolLibrary
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static SystemMessages AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, DatabaseConnection dc = null)
+        private static AccountRelationship AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
-            AccountRelationshipService.CreateNew(
+            return AccountRelationshipService.CreateNew(
                     hostAccount,
                     visitorAccount,
                     approvalStatus,
@@ -1423,8 +1432,6 @@ namespace AfterSchoolLibrary
                     loggedInUser,
                     msgs,
                     dc);
-
-            return msgs;
         }
 
         public static SystemMessages CreateAfterSchoolAccount(string adminEmail, string adminPassword, string adminPhone, string accountName, DatabaseConnection dc = null)

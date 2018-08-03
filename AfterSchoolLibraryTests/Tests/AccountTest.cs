@@ -150,8 +150,9 @@ namespace AfterSchoolLibraryTests
             var webuser2 = WebUserFactory.CreateWithEmail("tes2t@test.com", msgs, dc);
             var hostaccount = AccountFactory.Create(webuser, msgs, dc);
             var visitoraccount = AccountFactory.Create(webuser2, msgs, dc);
+            var relationship = visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, msgs, dc);
 
-            Assert.True(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc: dc).HasNoErrors());
+            Assert.True(msgs.HasNoErrors());
         }
 
 
@@ -166,8 +167,8 @@ namespace AfterSchoolLibraryTests
             var visitorUser = WebUserFactory.CreateWithEmail("test2@test.com", msgs, dc);
             var hostaccount = AccountFactory.Create(hostUser, msgs, dc);
             var visitoraccount = AccountFactory.Create(visitorUser, msgs, dc);
-            msgs.AddRange(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc));
-            msgs.AddRange(hostaccount.ApproveAccessToAccount(visitoraccount, loggedInUser, dc));
+            var relationship1 = visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, msgs, dc);
+            var relationship2 = hostaccount.ApproveAccessToAccount(visitoraccount, loggedInUser, msgs, dc);
 
             Assert.True(msgs.HasNoErrors());
         }
@@ -223,7 +224,7 @@ namespace AfterSchoolLibraryTests
             var hostaccount = AccountFactory.Create(hostuser, msgs, dc);
             var visitoraccount = AccountFactory.Create(visitorUser, msgs, dc);
 
-            msgs.AddRange(visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc));
+            var relationship = visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, msgs, dc);
             msgs.AddRange(hostaccount.DenyAccessToAccount(visitoraccount, loggedInUser, dc));
 
             Assert.True(msgs.HasNoErrors());
@@ -244,8 +245,8 @@ namespace AfterSchoolLibraryTests
             var hostaccount = AccountFactory.Create(hostuser, msgs, dc);
             var visitoraccount = AccountFactory.Create(visitorUser, msgs, dc);
 
-            visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, dc);
-            hostaccount.DenyAccessToAccount(visitoraccount, loggedInUser, dc);
+            var relationship = visitoraccount.RequestAccessToAccount(hostaccount, HostPermissionType.ApproveOnly, loggedInUser, msgs, dc);
+            msgs.AddRange(hostaccount.DenyAccessToAccount(visitoraccount, loggedInUser, dc));
 
             Assert.Single(hostaccount.GetDeniedVisitorAccounts(visitoraccount.AccountTypeId, msgs, dc));
         }

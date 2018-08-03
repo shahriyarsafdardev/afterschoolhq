@@ -327,109 +327,111 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account Hostaccount)
+        public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account hostAccount)
         {
             var msgs = new SystemMessages();
+            var hostAccountOwner = hostAccount.GetAccountOwner(msgs);
+            var visitorAccountOwner = visitorAccount.GetAccountOwner(msgs);
 
             var model = new NameValueCollection()
             {
-                { "FirstName", visitorAccount.GetAccountOwner().DisplayName },
-                { "ProductName", visitorAccount.Name}
+                { "HostFirstName", hostAccountOwner.FirstName },
+                { "HostAccountName", hostAccount.Name},
+                { "VisitorAccountName", visitorAccount.Name },
+                { "VisitorUserDisplayName", visitorAccountOwner.DisplayName },
+                { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
+                { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
             };
 
-            var body = $"The after school provider {visitorAccount.Name} is  interested in becoming an activity provider for {Hostaccount.Name}," +
-                $"hop on ASHQ to accept their request! ";
-
-            var subject = $" {visitorAccount.Name} would like to request access to {Hostaccount.Name}'s after school";
+            var subject = $"{visitorAccount.Name} is requesting permission to list after school activities at your location";
+            var body = ProcessTemplate(
+               EmailTemplates.VisitorAccount_Requested,
+               model,
+               "visitoraccountrequested",
+               msgs
+               );
 
             var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: Email.SendGridAppEmailAddress(visitorAccount.IsAfterSchool),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(Hostaccount.Email),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(hostAccount.Email),
                 subject: subject,
                 body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(Hostaccount.IsAfterSchool)
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(hostAccount.IsAfterSchool)
                 );
 
             // send copy to enroll hq team
             SendGridHelper.SendMail(
                 fromEmail: Email.SendGridAppEmailAddress(visitorAccount.IsAfterSchool),
                 toEmail: Email.SendGridAppAdminEmailAddress,
-                subject: $" {visitorAccount.Name} would like to request access to {Hostaccount.Name}'s after school",
+                subject: subject,
                 body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(Hostaccount.IsAfterSchool)
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(hostAccount.IsAfterSchool)
                 );
 
             msgs.AddRange(mailMsgs);
             return msgs;
         }
 
-
-        public static SystemMessages SendApprovalNotificationToVisitor(Account visitorAccount, Account Hostaccount)
+        public static SystemMessages SendApprovalNotificationToVisitor(Account visitorAccount, Account hostAccount)
         {
             var msgs = new SystemMessages();
 
             var model = new NameValueCollection()
             {
-                { "FirstName", visitorAccount.GetAccountOwner().DisplayName },
-                { "ProductName", visitorAccount.Name}
-            };
+                { "FirstName", visitorAccount.GetAccountOwner(msgs).DisplayName },
+                { "HostAccountName", hostAccount.Name},
+                { "VisitorAccountName", visitorAccount.Name },
+                { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
+                { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
+            };            
 
-            var body = $"You have been approved by  {Hostaccount.Name} to become an activity provider," +
-                $"hop on ASHQ to set up your next after school activity!";
-
-            var subject = $"Approval to access {Hostaccount.Name}'s after school";
+            var subject = $"You have been approved to list activities at {hostAccount.Name}";
+            var body = ProcessTemplate(
+               EmailTemplates.VisitorAccount_Approved,
+               model,
+               "visitoraccountapproved",
+               msgs
+               );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(Hostaccount.IsAfterSchool),
+                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
-                );
-
-            // send copy to enroll hq team
-            SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(visitorAccount.IsAfterSchool),
-                toEmail: Email.SendGridAppAdminEmailAddress,
-                subject: $"Approval to access {Hostaccount.Name}'s after school",
-            body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(Hostaccount.IsAfterSchool)
                 );
 
             msgs.AddRange(mailMsgs);
             return msgs;
         }
 
-
-        public static SystemMessages SendDenialNotificationToVisitor(Account visitorAccount, Account Hostaccount)
+        public static SystemMessages SendDenialNotificationToVisitor(Account visitorAccount, Account hostAccount)
         {
             var msgs = new SystemMessages();
 
             var model = new NameValueCollection()
             {
-                { "FirstName", visitorAccount.GetAccountOwner().DisplayName },
-                { "ProductName", visitorAccount.Name}
+                { "FirstName", visitorAccount.GetAccountOwner(msgs).DisplayName },
+                { "HostAccountName", hostAccount.Name},
+                { "VisitorAccountName", visitorAccount.Name },
+                { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
+                { "LoginLink", $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login" }
             };
 
-            var body = $"You have been denied by  {Hostaccount.Name} to become an activity provider.";
-
-            var subject = $"Approval to access {Hostaccount.Name}'s after school was denied";
+            var subject = $"You have been denied to list activities at {hostAccount.Name}";
+            var body = ProcessTemplate(
+               EmailTemplates.VisitorAccount_Denied,
+               model,
+               "visitoraccountdenied",
+               msgs
+               );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(Hostaccount.IsAfterSchool),
+                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
-                );
-
-            // send copy to enroll hq team
-            SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(visitorAccount.IsAfterSchool),
-                toEmail: Email.SendGridAppAdminEmailAddress,
-                subject: $"Approval to access {Hostaccount.Name}'s after school was denied",
-            body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(Hostaccount.IsAfterSchool)
                 );
 
             msgs.AddRange(mailMsgs);

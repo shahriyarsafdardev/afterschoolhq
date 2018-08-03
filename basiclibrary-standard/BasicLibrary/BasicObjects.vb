@@ -294,7 +294,7 @@ Public Class BaseObject
                 If criterias.Values(i) Is DBNull.Value Then
                     criterias2.Add(New DataAccess.DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Is))
                     DatabaseQuery.UseParameterizedQuery = False
-                ElseIf TryCast(criterias(i).Value, IEnumerable) IsNot Nothing AndAlso criterias(i).Value.GetType IsNot GetType(String) Then
+                ElseIf criterias.Values(i).GetType IsNot GetType(String) AndAlso TryCast(criterias.Values(i), IEnumerable) IsNot Nothing Then
                     criterias2.Add(New DataAccess.DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In))
                 Else
                     criterias2.Add(New DataAccess.DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i)))

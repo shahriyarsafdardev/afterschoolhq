@@ -1,0 +1,90 @@
+﻿@model Account
+
+@{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    ViewBag.Title = "Sign Up";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var user = (WebUser)ViewBag.User;
+    var invitecode = (string)ViewBag.InviteCode;
+}
+
+<<div class="am-wrapper am-login am-signup">
+    <div class="am-content">
+        <div class="main-content">
+            <div class="login-container sign-up">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" height="80px" class="logo-img"></a>
+                    </div>
+                    <div class="panel-heading">
+                        <p>
+                            <span>
+                                Finish creating your account.
+                            </span>
+                        </p>
+                    </div>
+                    <div class="panel-body">
+
+                        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+                        <form action="@Url.Action("createaccount", "signup", new { invitecode })" parsley-validate="" novalidate="" method="post" class="form-horizontal">
+                            <div class="createaccount-form">
+
+
+                                <div class="form-group">
+                                    <div class="text-center">
+                                        <p class="text-medium-small text-white">
+                                            Choose your account type
+                                        </p>
+
+                                        @foreach (var accounttype in Enum.GetValues(typeof(AccountType)).Cast<AccountType>().Where(type => type == AccountType.School || type == AccountType.ActivityProvider))
+            {
+                            <div class="am-radio inline">
+                                <input type="radio" name="accounttype" id="accounttype-@((int)accounttype)" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#nick-handler" required="required" autocomplete="off" class="form-control" data-parsley-id="4" value="@((int)accounttype)" />
+                                <label for="accounttype-@((int)accounttype)">
+                                    <span class="text-white">@accounttype.ToString().SplitByUpperCase()</span>
+                                </label>
+                            </div>
+}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p>&nbsp;</p>
+                                </div>
+
+                                <div class="form-group">
+                                    <div id="nick-handler" class="input-group">
+                                        <span class="input-group-addon"><i class="icon s7-culture"></i></span>
+                                        <input type="text" name="orgname" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#nick-handler" required="required" placeholder="Organization Name" autocomplete="off" class="form-control" data-parsley-id="4" value="@Model.Name" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div id="email-handler" class="input-group">
+                                        <span class="input-group-addon"><i class="icon s7-mail"></i></span>
+                                        <input type="email" name="email" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#email-handler" required="required" placeholder="Organization E-mail" autocomplete="off" class="form-control" data-parsley-id="6" value="@Model.Email" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div id="phone-handler" class="input-group">
+                                        <span class="input-group-addon"><i class="icon s7-phone"></i></span>
+                                        <input type="text" name="phone" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#phone-handler" required="required" placeholder="Organization Phone" autocomplete="off" class="form-control" data-parsley-id="6" value="@Model.Phone" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p>&nbsp;</p>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-block btn-primary btn-lg">Create Account &raquo;</button>
+                        </form>
+
+                    </div>
+                </div>
+                <div class="text-center out-links"><a href="#">© @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+            </div>
+        </div>
+    </div>
+</div>
