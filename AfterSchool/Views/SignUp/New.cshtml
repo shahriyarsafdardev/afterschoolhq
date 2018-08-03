@@ -20,7 +20,7 @@
                         @Html.Raw(UI.RenderMessagesToHtml(msgs))
 
                         <form action="@Url.Action("new", "signup", new { id = ViewBag.Uid, a = ViewBag.AccountUid })" parsley-validate="" novalidate="" method="post" class="form-horizontal">
-                            @{ Html.RenderPartial("~/Views/Shared/Login/SignUpForm.cshtml", Model); }
+                            @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm.cshtml", Model); }
                         </form>
                     </div>
                 </div>
