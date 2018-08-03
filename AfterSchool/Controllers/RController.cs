@@ -62,7 +62,10 @@ namespace AfterSchool.Controllers
                 var hostedLocationIds = account.GetHostedLocations(msgs).Select(location => location.ID.Value).ToList();
                 account.GetApprovedVisitorAccounts(msgs).ForEach(visitor =>
                 {
-                    participationObjects.AddRange(visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs).Select(activity => activity.ToParticipationObject(msgs)));
+                    participationObjects.AddRange(
+                        visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs)
+                            .Select(activity =>  activity.ToParticipationObject(msgs))
+                            .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
                 });
 
                 participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.ToParticipationObject(msgs)));
