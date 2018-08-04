@@ -19,11 +19,11 @@
         Please verify your email address in order to publish activities. <a href="javascript:sendVerificationEmail()" class="white">Resend Email Verification Email &raquo;</a>
     </div>
 }
-@if (!SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser).IsVerified)
+@if ((new UserType[] { UserType.Administrator, UserType.Owner }).Contains(SessionVariables.AccountUserType) && !SessionVariables.CurrentAccount.GetStripeAccount(SessionVariables.LoggedInUser).IsVerified)
 {
-    <div class="trial-header text-center text-white bg-danger">
-        Finish setting up your account in order to accept payments. <a href="@Url.Action("paymentsentity", "account")" class="white">Setup Payments &raquo;</a>
-    </div>
+<div class="trial-header text-center text-white bg-danger">
+    Finish setting up your account in order to accept payments. <a href="@Url.Action("paymentsentity", "account")" class="white">Setup Payments &raquo;</a>
+</div>
 }
 
 <div class="page-head">
