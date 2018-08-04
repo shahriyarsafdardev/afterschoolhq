@@ -485,14 +485,9 @@ namespace AfterSchoolLibrary
             return user;
         }
 
-        public static SystemMessages SendLeagueInvite(this Account invitedAccount, WebUser invitedUser, WebUser loggedInUser, string customMessage = null, DatabaseConnection dc = null)
+        public static SystemMessages SendLeagueInvite(this Account invitedAccount, ActivityGroup activityGroup, WebUser sendingUser, string customMessage = null, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendLeagueAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
-        }
-
-        public static SystemMessages SendLeagueInvite(this Account invitedAccount, WebUser invitedUser, WebUser loggedInUser, string customMessage = null, DatabaseConnection dc = null)
-        {
-            return EmailHelper.SendLeagueAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
+            return EmailHelper.SendLeagueAccountInvitedEmail(invitedAccount, activityGroup, sendingUser, customMessage);
         }
 
         public static string GenerateUniqueName(string name, int? accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -697,7 +692,7 @@ namespace AfterSchoolLibrary
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    msgs.Add($"{package.Name} Package has been activated", MessageType.Success);
+                    // msgs.Add($"{package.Name} Package has been activated", MessageType.Success);
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {
@@ -1861,26 +1856,20 @@ namespace AfterSchoolLibrary
            return AccountActivityGroupService.CreateNew(account, activityGroup, InviteStatus.Invited, user);
         }
 
-        public static List<AccountActivityGroup> InviteSchoolsToLeague(List<Account> schools, ActivityGroup activityGroup, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<AccountActivityGroup> InviteSchoolsToLeague(List<Account> schools, ActivityGroup activityGroup, string customMessage, WebUser loggedInuser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            List<AccountActivityGroup> accountActivityGroups = new List<AccountActivityGroup>();
+            var accountActivityGroups = new List<AccountActivityGroup>();
 
             Database.ExecuteTransaction(
                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                       foreach(var school in schools)
-                       { 
-                          accountActivityGroups.Add(school.InviteSchoolToLeague(activityGroup, user));
-                       }
+                       schools.ForEach(school => accountActivityGroups.Add(school.InviteSchoolToLeague(activityGroup, loggedInuser, amsgs, adc)));
                    },
                    onSuccess: (SystemMessages smsgs) => {
-                       foreach(var school in schools)
-                       {
-                           var schoolUser = school.GetUsers().First();
-                           school.SendLeagueInvite(schoolUser,user);
-                       }
-
                        msgs.AddRange(smsgs);
-                       msgs.Add("Invites Sent Saved", MessageType.Success);
+
+                       schools.ForEach(school => {
+                           msgs.AddRange(school.SendLeagueInvite(activityGroup, loggedInuser, customMessage));
+                       });
                    },
                    onFailure: (SystemMessages fmsgs) => {
                        msgs.AddRange(fmsgs);

@@ -106,7 +106,7 @@ namespace AfterSchool.Areas.District.Controllers
                         msgs.AddRange(
                             SessionVariables.CurrentAccount.AddVisitorAccount(
                                 account, 
-                                HostPermissionType.Edit,
+                                HostPermissionType.ApproveOnly,
                                 ApprovalStatus.Approved, 
                                 SessionVariables.LoggedInUser, 
                                 adc

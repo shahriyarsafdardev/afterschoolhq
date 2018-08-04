@@ -1,92 +1,75 @@
-﻿@model List<AfterSchoolLibrary.Account>
+﻿@model ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var inviteUrl = Url.Action("invite", "school");
-    var schoolsToInvite = ViewBag.SchoolsToInvite;
+    var schoolsToInvite = (List<Account>)ViewBag.SchoolsToInvite;
     var currentSchools = (List<Account>)ViewBag.CurrentSchools;
     var schoolsPerColumn = (int)ViewBag.SchoolsPerColumn;
-    var activityGroupUid = ViewBag.ActivityGroupUid;
-
-
 }
 
 @{Html.RenderPartial("DistrictHeader");}
 
 <div class="main-content">
 
+    @{Html.RenderPartial("_LeagueHeader", Model);}
+
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h2><i class="s7-study"></i> Schools</h2>
+            <h2><i class="s7-study"></i> Invite Schools to @Model.Name</h2>
             <div class="clearfix"></div>
         </div>
         <div class="panel-body">
 
-            @if (Model.Any())
+            @if (!schoolsToInvite.Any())
             {
-                <div class="row">
-                    <div class="col-sm-4">
-                        <div class="widget widget-tile widget-bordered">
-                            <div class="data-info">
-                                <div data-toggle="counter" data-end="@Model.Count" data-decimals="0" data-suffix="" class="value">@Model.Count</div>
-                                <div class="desc">Schools In District</div>
-                            </div>
-                            <div class="icon"><span class="s7-study"></span></div>
-                        </div>
-                    </div>
-                </div>
-
-                if (Model.Count == 0)
-                {
-                    <p> You have no schools in your district, please go to Schools in the side bar and invite them there. </p>
-                }
-                else
-                {
-                    <form action="@Url.Action("inviteschool","league",new { uid = activityGroupUid } )" method="post" id="invite-schools-forms">
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">
-                                Select Schools<br />
-                                @*<a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>*@
-                            </label>
-                            <div class="col-sm-6">
-                                @for (int i = 0; i < 3; i++)
-                                {
-                                    <div class="col-md-4">
-                                        @foreach (var school in Model.Skip((i * schoolsPerColumn)).ToList().Take(schoolsPerColumn))
-                                        {
-                                            <div class="am-checkbox">
-                                                <input type="checkbox" onclick="toggleCheck(@school)" id="school-@school.ID.Value" name="school-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
-                                                <label for="school-@school.ID">@school.Name.MaxChars(20, "...")</label>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Invite Teams</button>
-                        </div>
-
-                    </form>
-
-                }
+                <p> You have no more schools to invite to your league. <a href="@Url.Action("invite", "school")">Invite more schools to join your district</a>?</p>
             }
             else
             {
-                <div class="widget">
-                    <div class="widget-head">
-                        <h1>Manage all of your schools here</h1>
-                    </div>
-                    <div class="widget-tile">
-                        <hr />
-                        <p>Looks like there aren't any schools that you can invite to this league. </p>
-                        <br/>
-                        <p>Do you want to add more schools to this league? <a href="@inviteUrl">Invite them here first.</a>  Then they will appear here.</p>
+                <form action="@Url.Action("inviteschool", "league",new { id = Model.Uid } )" method="post" id="invite-schools-forms" class="form-horizontal">
 
-
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Invite Message
+                        </label>
+                        <div class="col-sm-6">
+                            <textarea class="form-control" name="invitemessage" id="invitemessage">@Request["invitemessage"]</textarea>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Select Schools<br />
+                            <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                        </label>
+                        <div class="col-sm-6">
+                            @for (int i = 0; i < 3; i++)
+                            {
+                                <div class="col-md-4">
+                                    @foreach (var school in schoolsToInvite.Skip((i * schoolsPerColumn)).ToList().Take(schoolsPerColumn))
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" onclick="toggleCheck(@school)" id="school-@school.ID.Value" name="school-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
+                                            <label for="school-@school.ID">@school.Name.MaxChars(20, "...")</label>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                        </label>
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn btn-primary">Invite Schools</button>
+                        </div>
+                    </div>
+
+                </form>
+
             }
         </div>
     </div>

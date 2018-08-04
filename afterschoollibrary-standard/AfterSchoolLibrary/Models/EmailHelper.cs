@@ -327,9 +327,11 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages SendLeagueAccountInvitedEmail(WebUser invitedUser, Account invitedAccount, WebUser loggedInUser, string customMessage = null)
+        public static SystemMessages SendLeagueAccountInvitedEmail(Account invitedAccount, ActivityGroup activityGroup, WebUser sendingUser, string customMessage = null)
         {
             var msgs = new SystemMessages();
+            var invitedUser = invitedAccount.GetAccountOwner(msgs);
+            var sendingAccount = activityGroup.GetAccount(msgs);
 
             if (customMessage.IsNotEmpty())
                 customMessage = $"<p>{customMessage.Replace("\n", "<br />")}</p><hr />";
@@ -338,19 +340,23 @@ namespace AfterSchoolLibrary
             {
                 { "FirstName", invitedUser.FirstName },
                 { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
-                { "SupportEmail", Email.AppSupportEmailAddress(invitedAccount.IsAfterSchool) },
-                { "InviteUrl", invitedUser.GetInviteUrl(invitedAccount) },
-                { "CustomMessage", customMessage }
+                { "SenderDisplayName", sendingUser.DisplayName },
+                { "LoginLink", $"{Email.BaseUrl(invitedAccount.IsAfterSchool)}login" },
+                { "CustomMessage", customMessage },
+                { "RegistrationStartDate", activityGroup.GetCurrentOrNextRegistrationPeriod(msgs).StartDateTime.ToLongDateTimeString() },
+                { "RegistrationEndDate", activityGroup.GetCurrentOrNextRegistrationPeriod(msgs).EndDateTime.ToLongDateTimeString() },
+                { "ActivityHomePage", invitedAccount.HomePageUrl },
+                { "LeagueAccountName", sendingAccount.Name },
+                { "LeagueName", activityGroup.Name }
             };
 
+            var subject = $"{sendingUser.DisplayName} has invited you to join their league in {Utilities.AppName(invitedAccount.IsAfterSchool)}!";
             var body = ProcessTemplate(
-                EmailTemplates.Account_Invited,
+                EmailTemplates.LeagueSchool_Invited,
                 model,
-                "accountinvited",
+                "leagueschoolinvited",
                 msgs
                 );
-
-            var subject = $"{loggedInUser.DisplayName} has invited you to their league in  {Utilities.AppName(invitedAccount.IsAfterSchool)}!";
 
             var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: Email.SendGridAppEmailAddress(invitedAccount.IsAfterSchool),
@@ -364,7 +370,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account Hostaccount)
+        public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account hostAccount)
         {
             var msgs = new SystemMessages();
             var hostAccountOwner = hostAccount.GetAccountOwner(msgs);

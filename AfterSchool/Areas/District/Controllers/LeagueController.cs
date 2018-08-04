@@ -84,12 +84,64 @@ namespace AfterSchool.Areas.District.Controllers
             return View(group);
         }
 
+        public void PeriodViewBag(ActivityGroup group, SystemMessages msgs)
+        {
+            var defaultOpenDateTime = string.Format("{0} {1}", SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString(), "8:00 AM").ToDateTime();
+            var defaultCloseDateTime = string.Format("{0} {1}", SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString(), "12:00 AM").ToDateTime();
+
+            ViewBag.Periods = RegistrationPeriod.LoadByActivityGroupId(group.ID.Value).OrderBy(x => x.StartDateTime.Value).ToList();
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.DefaultOpenDateTime = defaultOpenDateTime;
+            ViewBag.DefaultCloseDateTime = defaultCloseDateTime;
+            ViewBag.Messages = msgs;
+        }
+
+        [HttpGet]
+        public ActionResult Periods(string id)
+        {
+            var account = SessionVariables.CurrentAccount;
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            PeriodViewBag(group, new SystemMessages());
+            return View(group);
+        }
+
+        [HttpPost]
+        public ActionResult PeriodEdit(string id, string period, string opendate, string opentime, string closedate, string closetime)
+        {
+            var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var regperiod = new RegistrationPeriod();
+
+            if (period.IsInteger())
+            {
+                regperiod = RegistrationPeriod.Load(period.ToInteger());
+            }
+            else
+            {
+                regperiod.CreatedBy = SessionVariables.LoggedInUser.ID.Value;
+                regperiod.CreateDate = DateTime.UtcNow;
+                regperiod.ActivityGroupId = group.ID;
+                regperiod.AccountId = SessionVariables.CurrentAccount.ID;
+            }
+
+            regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
+            regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
+            regperiod.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            regperiod.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(regperiod.Save());
+
+            PeriodViewBag(group, msgs);
+
+            return View("periods", group);
+        }
+
         private ActivityGroup LoadSchoolsViewBag(string id, string pn, string rpp)
         {
             var msgs = new SystemMessages() { };
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
-
             int pageNumber = 1;
             int recordsPerPage = 10;
 
@@ -121,8 +173,7 @@ namespace AfterSchool.Areas.District.Controllers
                 .ToList();
 
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
-
-            ViewBag.ActivityGroupUid = id;
+            
             ViewBag.Messages = new SystemMessages();
             ViewBag.PagingModel = new PagingModel()
             {
@@ -178,144 +229,6 @@ namespace AfterSchool.Areas.District.Controllers
             return View(group);
         }
 
-        [HttpGet]
-        public ActionResult EditSetup(string id, string group)
-        {
-            var activity = new Activity();
-            var isLeader = true;
-            var activePeriod = new RegistrationPeriod();
-            ActivityGroup activityGroup = null;
-
-            if (id.IsNumber() && id.ToInteger() > 0)
-            {
-                activity = Activity.Load(id.ToInteger());
-                activePeriod = activity.GetActiveRegistrationPeriod();
-                activityGroup = activity.GetActivityGroup();
-            }
-            else
-            {
-                activity = SessionVariables.CurrentAccount.GetDefaultNewActivity();
-
-                //this means a new activity is not being added to an existing enrollment group
-                if (!group.IsGuid())
-                {
-                    activePeriod = SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-                }
-                else
-                {
-                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                }
-            }
-
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.IsActivityLeader = isLeader;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ActiveMenu = "EditSetup";
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-            ViewBag.ActiveForm = activity.GetActiveActivityForm();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
-            ViewBag.ActivePeriod = activePeriod;
-            ViewBag.Group = activityGroup;
-
-            return View(activity);
-        }
-
-        [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
-        {
-            var msgs = new SystemMessages();
-            Activity activity = null;
-            ActivityGroup activityGroup = null;
-
-            var values = new Dictionary<string, object>()
-            {
-                { "name", name },
-                { "seatsavailable", seatsavailable },
-                { "waitinglistseats", waitinglistseats },
-                { "registrationperiod", registrationperiod },
-                { "registrationopendate", registrationopendate },
-                { "registrationopentime", registrationopentime },
-                { "registrationclosedate", registrationclosedate },
-                { "registrationclosetime", registrationclosetime },
-                { "registrationmodeid" , RegistrationMode.Register },
-                { "timezone", timezone },
-                { "form", form },
-                { "regmode", regmode },
-                { "group", group }
-            };
-
-            if (id.IsNumber() && id.ToInteger() > 0)
-            {
-                activity = Activity.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
-                    activityId: id,
-                    values: values,
-                    msgs: msgs
-                );
-                activityGroup = activity.GetActivityGroup();
-            }
-            else
-            {
-                //create initial form for account
-                if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                {
-                    var defaultForm = SessionVariables.CurrentAccount.GetDefaultForm();
-                    var newForm = defaultForm.Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
-                    if (msgs.HasNoErrors())
-                    {
-                        newForm.Name = (name + " form").MaxChars(100, "...");
-                        msgs.AddRange(newForm.Save());
-                        values.Add("form", newForm.ID.Value.ToString());
-                        //activity.AddFormAndActivitate(newForm, SessionVariables.LoggedInUser.ID.Value, false, msgs);
-                    }
-                }
-
-                activity = Activity.CreateNew(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
-                    values: values,
-                    msgs: msgs
-                );
-
-                if (msgs.HasNoErrors())
-                {
-                    UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
-                }
-            }
-
-            if (group.IsGuid())
-            {
-                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-            }
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
-            ViewBag.Group = activityGroup;
-            ViewBag.ActivePeriod = activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-            ViewBag.ActiveForm = activity.GetActiveActivityForm();
-
-            if (msgs.HasNoErrors())
-                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-
-            if (msgs.HasNoErrors())
-            {
-                switch (cmd)
-                {
-                    case "next":
-                        ViewBag.ActiveMenu = "EditRestrictions";
-                        return View("EditRestrictions", activity);
-                }
-            }
-
-            ViewBag.ActiveMenu = "EditSetup";
-            return View(activity);
-        }
-
         // GET: User
         [HttpGet]
         public ActionResult Teams(string id, string pn, string rpp)
@@ -348,276 +261,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             ViewBag.Activities = group.GetActivities();
             return View(group);
-        }
-
-        [ValidateInput(false)]
-        // GET: District/School
-        [HttpGet]
-        public ActionResult Schools(string id, string pn, string rpp)
-        {
-            var msgs = new SystemMessages() { };
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-
-
-            int pageNumber = 1;
-            int recordsPerPage = 10;
-
-            if (pn.IsNumber() && pn.ToInteger() > 0)
-                pageNumber = pn.ToInteger();
-
-            if (rpp.IsNumber() && rpp.ToInteger() > 0)
-                recordsPerPage = rpp.ToInteger();
-
-            var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-
-            int count = AccountActivityGroup.GetCount(
-                new System.Collections.Hashtable()
-                {
-                    { "activitygroupid", group.ID.Value}
-                },
-                msgs);
-
-            var invitedAccounts = AccountActivityGroup.Load(
-                new System.Collections.Hashtable()
-                {
-                    { "activitygroupid", group.ID.Value}
-                },
-                start,
-                length,
-                msgs)
-                .Select(accountActivityGroup => accountActivityGroup.GetAccount(msgs))
-                .ToList();
-
-            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
-
-            ViewBag.ActivityGroupUid = id;
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.PagingModel = new PagingModel()
-            {
-                TotalCount = count,
-                PageNumber = pageNumber,
-                RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
-            };
-
-            ViewBag.InvitedAccounts = invitedAccounts;
-            return group;
-        }
-
-        [ValidateInput(false)]
-        // GET: District/School
-        [HttpGet]
-        public ActionResult Schools(string id,string pn, string rpp)
-        {
-            var group = LoadSchoolsViewBag(id, pn, rpp);
-            return View(group);
-        }
-
-        [ValidateInput(false)]
-        // GET: District/School
-        [HttpGet]
-        public ActionResult Schedule(string id, string pn, string rpp)
-        {
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            int pageNumber = 1;
-            int recordsPerPage = 10;
-
-            if (pn.IsNumber() && pn.ToInteger() > 0)
-                pageNumber = pn.ToInteger();
-
-            if (rpp.IsNumber() && rpp.ToInteger() > 0)
-                recordsPerPage = rpp.ToInteger();
-
-            var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-
-            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.School);
-            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School, start, length);
-            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
-
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.PagingModel = new PagingModel()
-            {
-                TotalCount = count,
-                PageNumber = pageNumber,
-                RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
-            };
-            return View(group);
-        }
-
-        [HttpGet]
-        public ActionResult EditSetup(string id, string group)
-        {
-            var activity = new Activity();
-            var isLeader = true;
-            var activePeriod = new RegistrationPeriod();
-            ActivityGroup activityGroup = null;
-
-            if (id.IsNumber() && id.ToInteger() > 0)
-            {
-                activity = Activity.Load(id.ToInteger());
-                activePeriod = activity.GetActiveRegistrationPeriod();
-                activityGroup = activity.GetActivityGroup();
-            }
-            else
-            {
-                activity = SessionVariables.CurrentAccount.GetDefaultNewActivity();
-
-                //this means a new activity is not being added to an existing enrollment group
-                if (!group.IsGuid())
-                {
-                    activePeriod = SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-                }
-                else
-                {
-                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                }
-            }
-
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.IsActivityLeader = isLeader;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ActiveMenu = "EditSetup";
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-            ViewBag.ActiveForm = activity.GetActiveActivityForm();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
-            ViewBag.ActivePeriod = activePeriod;
-            ViewBag.Group = activityGroup;
-
-            return View(activity);
-        }
-
-        [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
-        {
-            var msgs = new SystemMessages();
-            Activity activity = null;
-            ActivityGroup activityGroup = null;
-
-            var values = new Dictionary<string, object>()
-            {
-                { "name", name },
-                { "seatsavailable", seatsavailable },
-                { "waitinglistseats", waitinglistseats },
-                { "registrationperiod", registrationperiod },
-                { "registrationopendate", registrationopendate },
-                { "registrationopentime", registrationopentime },
-                { "registrationclosedate", registrationclosedate },
-                { "registrationclosetime", registrationclosetime },
-                { "registrationmodeid" , RegistrationMode.Register },
-                { "timezone", timezone },
-                { "form", form },
-                { "regmode", regmode },
-                { "group", group }
-            };
-
-            if (id.IsNumber() && id.ToInteger() > 0)
-            {
-                activity = Activity.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
-                    activityId: id,
-                    values: values,
-                    msgs: msgs
-                );
-                activityGroup = activity.GetActivityGroup();
-            }
-            else
-            {
-                //create initial form for account
-                if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                {
-                    var defaultForm = SessionVariables.CurrentAccount.GetDefaultForm();
-                    var newForm = defaultForm.Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
-                    if (msgs.HasNoErrors())
-                    {
-                        newForm.Name = (name + " form").MaxChars(100, "...");
-                        msgs.AddRange(newForm.Save());
-                        values.Add("form", newForm.ID.Value.ToString());
-                        //activity.AddFormAndActivitate(newForm, SessionVariables.LoggedInUser.ID.Value, false, msgs);
-                    }
-                }
-
-                activity = Activity.CreateNew(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
-                    values: values,
-                    msgs: msgs
-                );
-
-                if (msgs.HasNoErrors())
-                {
-                    UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
-                }
-            }
-
-            if (group.IsGuid())
-            {
-                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-            }
-
-            ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
-            ViewBag.Group = activityGroup;
-            ViewBag.ActivePeriod = activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-            ViewBag.ActiveForm = activity.GetActiveActivityForm();
-
-            if (msgs.HasNoErrors())
-                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
-
-            if (msgs.HasNoErrors())
-            {
-                switch (cmd)
-                {
-                    case "next":
-                        ViewBag.ActiveMenu = "EditRestrictions";
-                        return View("EditRestrictions", activity);
-                }
-            }
-
-            ViewBag.ActiveMenu = "EditSetup";
-            return View(activity);
-        }
-
-        // GET: User
-        [HttpGet]
-        public ActionResult Teams(string id, string pn, string rpp)
-        {
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            int pageNumber = 1;
-            int recordsPerPage = 10;
-
-            if (pn.IsNumber() && pn.ToInteger() > 0)
-                pageNumber = pn.ToInteger();
-
-            if (rpp.IsNumber() && rpp.ToInteger() > 0)
-                recordsPerPage = rpp.ToInteger();
-
-            var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-
-            int userCount = SessionVariables.CurrentAccount.GetUserCount();
-            var teams = SessionVariables.CurrentAccount.GetActivities(UserType.ActivityLeader, WebUser.Load(SessionVariables.CurrentAccount.OwnerId.Value), null, null, null, null,null);
-            var totalPages = Math.Ceiling(userCount.ToDouble() / recordsPerPage).ToInteger();
-
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.PagingModel = new PagingModel()
-            {
-                TotalCount = userCount,
-                PageNumber = pageNumber,
-                RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
-            };
-
-            ViewBag.Activities = group.GetActivities();
-            return View(group);
-        }
+        }                        
 
         [ValidateInput(false)]
         [HttpGet]
@@ -703,26 +347,25 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 values.Add("schedule", schedule);
             }
-            else
-            {
-                var filteredParams = Request.Params.Filter("schedulerepeat-");
-                var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-                inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-                outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                values.Add("scheduledetails", scheduledetails);
-                values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
-                values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
-                values.Add("startdate", startdate);
-                values.Add("enddate", enddate);
-                values.Add("dailystarttime", dailystarttime);
-                values.Add("dailyendtime", dailyendtime);
-                values.Add("scheduledates", inSessionDates);
-                values.Add("scheduledatesclosed", outOfSessionDates);
-                values.Add("schedule", schedule);
-                values.Add("isongoing", isongoing);
-            }
-                var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+            var filteredParams = Request.Params.Filter("schedulerepeat-");
+            var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+            outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
+
+            values.Add("scheduledetails", scheduledetails);
+            values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
+            values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
+            values.Add("startdate", startdate);
+            values.Add("enddate", enddate);
+            values.Add("dailystarttime", dailystarttime);
+            values.Add("dailyendtime", dailyendtime);
+            values.Add("scheduledates", inSessionDates);
+            values.Add("scheduledatesclosed", outOfSessionDates);
+            values.Add("schedule", schedule);
+            values.Add("isongoing", isongoing);
+
+            var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -740,78 +383,58 @@ namespace AfterSchool.Areas.District.Controllers
             return View(league);
         }
 
-        private List<Account> LoadInviteSchoolViewBag(string pn, string rpp, string uid)
+        private List<Account> LoadInviteSchoolViewBag(ActivityGroup activityGroup, SystemMessages msgs)
         {
-            int pageNumber = 1;
-            int recordsPerPage = 10;
-
-            if (pn.IsNumber() && pn.ToInteger() > 0)
-                pageNumber = pn.ToInteger();
-
-            if (rpp.IsNumber() && rpp.ToInteger() > 0)
-                recordsPerPage = rpp.ToInteger();
-
-            var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-
-            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.School);
-            var schools = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School);
-            var activityGroup = ActivityGroup.LoadByUid(uid.ToGuid());
-            var accountActivityGroups = AccountActivityGroup.LoadByActivityGroupId(activityGroup.ID.Value);//.Where( s=> s.InviteStatusId != InviteStatus.NotSet);
+            var schools = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School, msgs);
+            var accountActivityGroups = AccountActivityGroup.LoadByActivityGroupId(activityGroup.ID.Value, msgs);
             var accountIds = accountActivityGroups.Select(a => a.AccountId.Value);
 
-            List<Account> notInivitedSchools = (List<Account>)schools.Where(s => !accountIds.Contains(s.ID.Value)).ToList();
+            List<Account> notInivitedSchools = schools.Where(s => !accountIds.Contains(s.ID.Value)).ToList();
 
             var invitedSchools = new List<Account>();
-          
-
-            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.CurrentSchools = invitedSchools;
             ViewBag.SchoolsPerColumn = (schools.Count / 3) > (schools.Count % 3) ? (schools.Count / 3) : (schools.Count % 3);
-            ViewBag.ActivityGroupUid = uid;
-           
-            ViewBag.PagingModel = new PagingModel()
-            {
-                TotalCount = count,
-                PageNumber = pageNumber,
-                RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
-            };
+
+            ViewBag.SchoolsToInvite = notInivitedSchools;
+
             return notInivitedSchools;
         }
 
         [HttpGet]
-        public ActionResult InviteSchool(string pn, string rpp, string uid)
+        public ActionResult InviteSchool(string id)
         {
             var msgs = new SystemMessages();
-            var schools = LoadInviteSchoolViewBag(pn, rpp, uid);
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+
+            LoadInviteSchoolViewBag(activityGroup, msgs);
+
             ViewBag.Messages = msgs;
-            return View(schools);
+
+            return View(activityGroup);
         }
 
         [HttpPost]
-        public ActionResult InviteSchool( string uid)
+        public ActionResult InviteSchool(string id, string invitemessage)
         {
             var msgs = new SystemMessages();
-            var schools = LoadInviteSchoolViewBag(null, null, uid);
-            var activityGroup = ActivityGroup.LoadByUid(uid.ToGuid());
-            List<Account> invitedSchools = new List<Account>();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            var schoolsToInvite = LoadInviteSchoolViewBag(activityGroup, msgs);
+            var invitedSchools = new List<Account>();
 
-            foreach(var school in schools)
-            {
+            schoolsToInvite.ForEach(school => {
                 if (Request[String.Format("school-{0}", school.ID.Value)].IsBoolean())
-                {
                     invitedSchools.Add(school);
-                }
-            }
+            });
 
-            AccountService.InviteSchoolsToLeague(invitedSchools, activityGroup, SessionVariables.LoggedInUser, msgs);
+            AccountService.InviteSchoolsToLeague(invitedSchools, activityGroup, invitemessage, SessionVariables.LoggedInUser, msgs);
 
-            var group = LoadSchoolsViewBag(activityGroup.Uid.ToString(), null, null);
+            if (msgs.HasNoErrors())
+                return RedirectToAction("schools", new { id = activityGroup.Uid });
 
             ViewBag.Messages = msgs;
-            return View("schools", activityGroup);
+
+            return View(activityGroup);
         }
 
     }

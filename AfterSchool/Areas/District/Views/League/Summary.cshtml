@@ -15,7 +15,7 @@
 
     var dates = registrations.OrderBy(x => x.CreateDate).Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
-    var addUrl = Url.Action("schools", "league", new { group = Model.Uid });
+    var addUrl = Url.Action("inviteschool", "league", new { id = Model.Uid });
 }
 
 @{Html.RenderPartial("DistrictHeader");}

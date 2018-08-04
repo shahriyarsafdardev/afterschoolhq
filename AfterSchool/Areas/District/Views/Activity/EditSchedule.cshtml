@@ -1,9 +1,8 @@
 ﻿@model AfterSchoolLibrary.Activity
 @{
     ViewBag.Title = ((Account)ViewBag.Account).Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
-    var activityId = (string)ViewBag.ActivityId;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -30,7 +29,17 @@
                     <button type="submit" class="btn btn-default pull-right btn-space"><i class="s7-diskette"></i> Save</button>
                     <button type="submit" class="btn btn-default pull-right btn-space" onclick="navigateActivity('@Url.Action("editschedule", "activity", new { id = Model.ID, cmd = "prev" })')">&laquo;</button>
 
-                    @{Html.RenderPartial("~/Views/Shared/_ActivityFormSchedule.cshtml", (ActivitySchedule)ViewBag.Schedule);}
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_ActivityFormSchedule.cshtml", 
+                            (ActivitySchedule)ViewBag.Schedule,
+                            new ViewDataDictionary()
+                            {
+                                { "ActivityType", (int)Model.ActivityTypeId },
+                                { "schedules", ViewBag.Schedules }
+                            }
+                            );
+                    }
 
                     <div class="form-group">
                         <div class="col-sm-2 col-sm-offset-3">

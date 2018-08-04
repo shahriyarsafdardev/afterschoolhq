@@ -98,10 +98,10 @@ else
                 <tr>
                     <th></th>
                     <th>
-                        @(activityGroupType == ActivityGroupType.Session ? "Session" : "League")
+                        @UILabel.ActivityGroupLabel(activityGroupType)
                     </th>
                     <th class="text-center">
-                        @(activityGroupType == ActivityGroupType.Session ? "Activities" : "Sports")
+                        @UILabel.ActivityLabel(activityGroupType, true)
                     </th>
                     <th></th>
                 </tr>

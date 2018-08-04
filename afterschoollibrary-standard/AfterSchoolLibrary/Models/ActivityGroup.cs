@@ -773,8 +773,10 @@ namespace AfterSchoolLibrary
                             group.FormId = form.ToString().ToInteger();
                         }
 
+                        if (isNew)
+                            group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, amsgs, adc);
+
                         group.AccountId = account.ID;
-                        group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, amsgs, adc);
                         group.LastModifiedDate = DateTime.UtcNow;
                         group.LastModifiedBy = loggedInUser.ID;
                         amsgs.AddRange(group.Save(adc));
@@ -783,10 +785,8 @@ namespace AfterSchoolLibrary
                         .ForEach(activity => {
                             activity.RegistrationModeId = group.RegistrationModeId;
                             activity.GenderRestriction = group.GenderRestriction;
-
-                            for (var i = group.MinGradeLevelId.Value; i <= group.MaxGradeLevelId.Value; i++)
-                                activity.AddGrade(i, loggedInUser.ID.Value, amsgs, adc);
-                            
+                            activity.GradeLevelStart = group.MinGradeLevelId;
+                            activity.GradeLevelEnd = group.MaxGradeLevelId;
                             amsgs.AddRange(activity.Save(adc));
                         });
 
@@ -816,25 +816,6 @@ namespace AfterSchoolLibrary
                                 loggedInUser.ID.Value,
                                 adc));
                         }
-
-                        //instances & schedule
-                        /*
-                        (amsgs.HasNoErrors())
-                        {
-                            activity.ScheduleRequiresAllDays = true;
-
-                            if (account.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0 && scheduledates.IsEmpty())
-                            {
-                                activity.ActivityScheduleId = schedule.ToInteger();
-                            }
-                            else if (scheduledates.IsNotEmpty())
-                            {
-                                amsgs.AddRange(activity.SetupSchedule(schedule, scheduledetails, repeatsweekly, startdate, enddate, dailystarttime, dailyendtime, scheduledates, account, loggedInUserId, adc));
-                            }
-
-                            amsgs.AddRange(activity.Save(adc));
-                        }
-                        */
 
                     },
                     onSuccess: (SystemMessages smsgs) =>

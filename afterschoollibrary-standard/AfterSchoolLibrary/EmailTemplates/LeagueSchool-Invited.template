@@ -1,0 +1,20 @@
+﻿<div>
+  <p>Hello @Model.FirstName,</p>
+  
+  @Model.CustomMessage
+
+  <p>
+      @Model.SenderDisplayName at @Model.LeagueAccountName has invited you to join @Model.LeagueName! 
+  </p>
+  <p>
+    You will be able to start registering your students by @Model.RegistrationStartDate. All teams must be submitted by @Model.RegistrationEndDate.
+  </p>
+  <p>
+    In order to join this league and get started you will need to <a href="@Model.LoginLink">login to your @Model.ProductName dashboard</a>. There you will be able to allow parents to register for your students on your <a href="@Model.ActivityHomePage">Activity Home Page</a>
+  </p>
+
+  <p>
+     Thanks!<br />
+     @Model.ProductName
+  </p>
+</div>
