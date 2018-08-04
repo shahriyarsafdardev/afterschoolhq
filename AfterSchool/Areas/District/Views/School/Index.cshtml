@@ -25,14 +25,7 @@
                         <div class="widget widget-tile widget-bordered">
                             <div class="data-info">
                                 <div data-toggle="counter" data-end="@Model.Count" data-decimals="0" data-suffix="" class="value">@Model.Count</div>
-                                @if (Model.Count == 1)
-                                {
-                                    <div class="desc">School in District</div>
-                                }
-                                else
-                                {
-                                    <div class="desc">Schools in District</div>
-                                }
+                                <div class="desc">School@(Model.Count > 1 ? "s" : "") in District</div>
                             </div>
                             <div class="icon"><span class="s7-study"></span></div>
                         </div>
@@ -52,7 +45,7 @@
                         {
                             <tr>
                                 <td>
-                                    <a href="#" class="btn btn-default">View</a>
+                                    <a href="#" class="btn btn-default hide">View</a>
                                 </td>
                                 <td>@account.Name</td>
                                 <td>@account.GetAccountOwner().DisplayName</td>

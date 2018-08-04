@@ -560,10 +560,18 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public int GetActivityCount(bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        public int GetActivityCount(bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return Activity.GetCountByAccountId(this.AccountId.Value, this.ID, isArchived, isDeleted, dc: dc);
+                return Activity.GetCountByActivityGroupId(this.ID.Value, isArchived, isDeleted, msgs, dc);
+
+            return 0;
+        }
+
+        public int GetActivityCountByAccountId(int accountId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.ID.HasValue)
+                return Activity.GetCountByAccountId(accountId, this.ID, isArchived, isDeleted, msgs, dc);
 
             return 0;
         }
@@ -588,29 +596,26 @@ namespace AfterSchoolLibrary
 
         public RegistrationPeriod GetNextRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-
+            var now = DateTime.UtcNow;
             return this.GetRegistrationPeriods(msgs, dc)
-                .Where(x => now < x.StartDateTime.Value)
-                .OrderBy(x => x.StartDateTime.Value)
+                .Where(period => now < period.StartDateTime.Value)
+                .OrderBy(period => period.StartDateTime.Value)
                 .FirstOrDefault();
         }
 
         public RegistrationPeriod GetCurrentRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-
+            var now = DateTime.UtcNow;
             return this.GetRegistrationPeriods(msgs, dc)
-                .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
+                .Where(period => period.StartDateTime.Value <= now && now <= period.EndDateTime.Value)
                 .FirstOrDefault();
         }
 
         public bool IsOpenNow(DatabaseConnection dc = null)
         {
-            var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-
+            var now = DateTime.UtcNow;
             return this.GetRegistrationPeriods(dc: dc)
-                .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
+                .Where(period => period.StartDateTime.Value <= now && now <= period.EndDateTime.Value)
                 .Any();
         }
 
@@ -624,8 +629,8 @@ namespace AfterSchoolLibrary
             if (!IsOpenNow(dc: dc))
             {
                 var periods = this.GetRegistrationPeriods(dc: dc);
-                var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-                return periods.Where(x => now < x.StartDateTime.Value).Any();
+                var now = DateTime.UtcNow;
+                return periods.Where(period => now < period.StartDateTime.Value).Any();
             }
             return false;
         }
@@ -634,7 +639,7 @@ namespace AfterSchoolLibrary
         {
             if (WillOpen(dc: dc))
             {
-                var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+                var now = DateTime.UtcNow;
                 var periods = this.GetRegistrationPeriods(dc: dc);
                 var period = periods.Where(x => x.StartDateTime.Value >= now && now <= x.EndDateTime.Value)
                     .OrderBy(x => x.StartDateTime.Value)
@@ -670,10 +675,7 @@ namespace AfterSchoolLibrary
         public TimeSpan WillCloseIn(DatabaseConnection dc = null)
         {
             if (IsOpenNow(dc: dc))
-            {
-                var now = this.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-                return this.GetCurrentRegistrationPeriod(dc: dc).EndDateTime.Value - now;
-            }
+                return this.GetCurrentRegistrationPeriod(dc: dc).EndDateTime.Value - DateTime.UtcNow;
 
             return new TimeSpan();
         }
@@ -710,7 +712,7 @@ namespace AfterSchoolLibrary
             if (regmode.IsEmpty())
                 msgs.Add("Registration Mode is required", MessageType.UserError);
 
-            if (form.IsEmpty())
+            if (activityGroupType == ActivityGroupType.Session && form.IsEmpty())
                 msgs.Add("Form is required", MessageType.UserError);
 
             var group = ActivityGroup.LoadByUid(activityGroupUid.ToGuid(), msgs, dc);
@@ -759,18 +761,23 @@ namespace AfterSchoolLibrary
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        if (form.ToString().ToInteger() == 0)
+                        if (form.IsNotEmpty())
                         {
-                            var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, amsgs, adc);
-                            var newForm = defaultForm.Copy(loggedInUser.ID.Value, account.ID.Value, amsgs, adc);
-                            newForm.Name = (group.Name + " Form").MaxChars(100, "...");
-                            amsgs.AddRange(newForm.Save(adc));
-
-                            group.FormId = newForm.ID;
-                        }
-                        else
-                        {
-                            group.FormId = form.ToString().ToInteger();
+                            if (form.ToString().ToInteger() == 0)
+                            {
+                                var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, amsgs, adc);
+                                var newForm = defaultForm.Copy(
+                                    loggedInUser.ID.Value, 
+                                    account.ID.Value, 
+                                    (group.Name + " Form").MaxChars(100, "..."), 
+                                    amsgs, 
+                                    adc);
+                                group.FormId = newForm.ID;
+                            }
+                            else
+                            {
+                                group.FormId = form.ToString().ToInteger();
+                            }
                         }
 
                         if (isNew)

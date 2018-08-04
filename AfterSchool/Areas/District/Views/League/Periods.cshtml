@@ -6,7 +6,7 @@
     var account = (Account)ViewBag.Account; 
 }
 
-@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@{Html.RenderPartial("DistrictHeader", Model.AccountId.ToString());}
 
 <div class="main-content">
 
@@ -62,17 +62,9 @@
                                     <td>@period.GetStatus()</td>
                                     <td class="text-center">@period.GetRegistrationCount()</td>
                                     <td>
-                                        <div class="btn-group">
-                                            @if (period.EndDateTime.Value > account.NowInAccountTimeZone() && !Model.IsArchived)
-                                            {
-                                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="modal-send" onclick="sendPeriod(@period.ID)">
-                                                    Invite All @UILabel.RegistrantLabel(true)
-                                                </button>
-                                                <a class="btn btn-default btn-sm" href="@Url.Action("inviteto", "contact", new { id = period.Uid, type = "period" })">
-                                                    Invite Contact List
-                                                </a>
-                                            }
-                                        </div>
+                                        <a class="btn btn-default btn-sm" href="@Url.Action("inviteschool", "league", new { id = Model.Uid })">
+                                            Invite Schools
+                                        </a>
                                     </td>
                                 </tr>
                             }
@@ -92,10 +84,21 @@
     </div>
 </div>
 
-@{ Html.RenderPartial("_EditRegistrationPeriodModal", Model); }
+@{ 
+    Html.RenderPartial(
+        "~/Views/Shared/_EditRegistrationPeriodModal.cshtml",
+        Model,
+        new ViewDataDictionary()
+        {
+            { "DefaultOpenDateTime", ViewBag.DefaultOpenDateTime },
+            { "DefaultCloseDateTime", ViewBag.DefaultCloseDateTime },
+            { "PostController", "league" }
+        }
+        );
+}
 
 <div id="modal-send" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-add" action="@Url.Action("periodnotify", "group", new { id = Model.Uid })" method="post">
+    <form id="form-add" action="@Url.Action("periodnotify", "league", new { id = Model.Uid })" method="post">
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
@@ -132,7 +135,7 @@
 </div>
 
 <div id="modal-send-custom" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-add" action="@Url.Action("periodnotifycustom", "group", new { id = Model.Uid })" method="post">
+    <form id="form-add" action="@Url.Action("periodnotifycustom", "league", new { id = Model.Uid })" method="post">
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>

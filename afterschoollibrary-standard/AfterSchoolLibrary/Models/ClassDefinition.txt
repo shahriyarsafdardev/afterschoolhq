@@ -566,6 +566,8 @@ loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|InviteStatusId, List<>
 loadmethod: AccountId|ActivityGroupId
+join: Account.ID, AccountActivityGroup.AccountId, InnerJoin
+joinproperty: Account.Name, string, NVarChar
 [end]
 
 [begin]

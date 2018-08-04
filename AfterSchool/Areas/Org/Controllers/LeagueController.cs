@@ -429,8 +429,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
             var account = SessionVariables.CurrentAccount;
-            bool isAccountActivityGroup = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
-            var accountActivityGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+            bool isAccountActivityGroup = activityGroup.HasAccountActivityGroup(account.ID.Value);
+            var accountActivityGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = account;
             ViewBag.IsAccountActivityGroup = isAccountActivityGroup;
@@ -450,8 +450,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
             var account = SessionVariables.CurrentAccount;
 
-            var isAccountActivityGroup = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
-            var accountActivityGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+            var isAccountActivityGroup = activityGroup.HasAccountActivityGroup(account.ID.Value);
+            var accountActivityGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
 
             if (isAccountActivityGroup)
             {
@@ -471,8 +471,8 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.isAccountActivty = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
-            ViewBag.AccountAcitivtyGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+            ViewBag.isAccountActivty = activityGroup.HasAccountActivityGroup(account.ID.Value);
+            ViewBag.AccountAcitivtyGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
             ViewBag.aagRegistrationURL = accountActivityGroup.GetRegistrationUrl(true);
             return View("publishdetail", activityGroup);
         }
@@ -485,8 +485,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
 
 
-            var isAccountActivityGroup = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
-            var accountActivityGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+            var isAccountActivityGroup = activityGroup.HasAccountActivityGroup(account.ID.Value);
+            var accountActivityGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
 
             if (isAccountActivityGroup)
             {
@@ -505,8 +505,8 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.isAccountActivty = activityGroup.hasAccountAcitivtyGroup(account.ID.Value);
-            ViewBag.AccountAcitivtyGroup = activityGroup.loadAccountActivityGroup(account.ID.Value);
+            ViewBag.isAccountActivty = activityGroup.HasAccountActivityGroup(account.ID.Value);
+            ViewBag.AccountAcitivtyGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
             ViewBag.aagRegistrationURL = accountActivityGroup.GetRegistrationUrl(true);
             return View("publishdetail", activityGroup);
         }

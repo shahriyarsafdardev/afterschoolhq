@@ -861,6 +861,7 @@
     <Content Include="Areas\District\Views\League\Teams.cshtml" />
     <Content Include="Areas\District\Views\League\InviteSchool.cshtml" />
     <Content Include="Areas\District\Views\League\Schedule.cshtml" />
+    <Content Include="Areas\District\Views\League\Periods.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1081,7 +1082,7 @@
     <Content Include="Areas\Org\Views\Group\Messages.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_ZendeskWidget.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_FormEditMenu.cshtml" />
-    <Content Include="Areas\Org\Views\Shared\_EditRegistrationPeriodModal.cshtml" />
+    <Content Include="Views\Shared\_EditRegistrationPeriodModal.cshtml" />
     <Content Include="Areas\Org\Views\Schedule\Edit.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_ActivityScheduleTitle.cshtml" />
     <Content Include="Areas\Org\Views\Activity\Index.cshtml" />

@@ -6,7 +6,8 @@
 
     decimal totalPaid = 0;
     int registrationCount = registrations.Count();
-    var activityCount = Model.GetActivityCount(Model.IsArchived, false);
+    var inviteCount = Model.GetLeagueInviteCount();
+    var teamCount = Model.GetActivityCount(false, false);
 
     if (registrations.Where(x => x.DatePaid.HasValue).Any())
     {
@@ -32,7 +33,7 @@
         </div>
         <div class="panel-body">
 
-            @if (activityCount == 0)
+            @if (inviteCount == 0)
             {
                 <div class="widget">
                     <div class="widget-head">
@@ -66,10 +67,10 @@
 
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
-                                    <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
-                                    <div class="desc">Total Paid</div>
+                                    <div data-end="@teamCount" data-decimals="0" data-suffix="" class="value">@teamCount</div>
+                                    <div class="desc">Team Count</div>
                                 </div>
-                                <div class="icon"><span class="s7-cash"></span></div>
+                                <div class="icon"><span class="s7-ball"></span></div>
                             </div>
 
                         </div>
@@ -90,10 +91,6 @@
                             </div>
                         }
 
-                    </div>
-
-                    <div class="col-md-4">
-                        @{ Html.RenderPartial("_Actions", actions, new ViewDataDictionary() { { "account", SessionVariables.CurrentAccount } }); }
                     </div>
 
                 </div>

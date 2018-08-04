@@ -5,6 +5,7 @@
     var schoolsToInvite = (List<Account>)ViewBag.SchoolsToInvite;
     var currentSchools = (List<Account>)ViewBag.CurrentSchools;
     var schoolsPerColumn = (int)ViewBag.SchoolsPerColumn;
+    var registrationPeriod = (RegistrationPeriod)ViewBag.RegistrationWindow;
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -25,6 +26,17 @@
             @if (!schoolsToInvite.Any())
             {
                 <p> You have no more schools to invite to your league. <a href="@Url.Action("invite", "school")">Invite more schools to join your district</a>?</p>
+            }
+            else if (registrationPeriod.IsEmpty())
+            {
+                <p>
+                    You don't have any currently open or opening soon @UILabel.RegistrationPeriodLabel(true).ToLower(). Without a @UILabel.RegistrationPeriodLabel().ToLower() Schools will not be able to register their teams.
+                </p>
+                <p>
+                    <a href="@Url.Action("periods", "league", new { id = Model.Uid })" class="btn btn-primary btn-lg">
+                        Add a @UILabel.RegistrationPeriodLabel() &raquo;
+                    </a>
+                </p>
             }
             else
             {
@@ -51,7 +63,7 @@
                                     @foreach (var school in schoolsToInvite.Skip((i * schoolsPerColumn)).ToList().Take(schoolsPerColumn))
                                     {
                                         <div class="am-checkbox">
-                                            <input type="checkbox" onclick="toggleCheck(@school)" id="school-@school.ID.Value" name="school-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
+                                            <input type="checkbox" id="school-@school.ID.Value" name="school-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
                                             <label for="school-@school.ID">@school.Name.MaxChars(20, "...")</label>
                                         </div>
                                     }
@@ -64,7 +76,7 @@
                         <label class="col-sm-3 control-label">
                         </label>
                         <div class="col-sm-6">
-                            <button type="submit" class="btn btn-primary">Invite Schools</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Invite Schools &raquo;</button>
                         </div>
                     </div>
 
@@ -77,13 +89,14 @@
 
 
 <script>
-    function toggleCheck(school) {
-        var cs = @currentSchools;
-        if (cs.Contains(school)) {
-            cr.Remove(school);
-        } else {
-            cr.Add(school);
-        }
-        @currentSchools = cr;
+    function selectAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', true);
+        });
+    }
+    function clearAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', false);
+        });
     }
 </script>

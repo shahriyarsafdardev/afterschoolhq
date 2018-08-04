@@ -91,11 +91,11 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (copyfrom.IsNumber())
                     form = Form.Load(copyfrom.ToInteger(), msgs)
-                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
+                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
                 else
                     form = SessionVariables.CurrentAccount
                         .GetDefaultForm(msgs)
-                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
+                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
             }
             else
             {

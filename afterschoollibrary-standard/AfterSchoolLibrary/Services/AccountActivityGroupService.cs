@@ -90,5 +90,6 @@ namespace AfterSchoolLibrary.Services
 
             return $"{Utilities.BaseUrl(isAfterSchool)}/{aag.GetAccount(msgs, dc).UniqueName.ToLower()}/league/{districtName}/{activityGroupName}";
         }
+        
     }
 }

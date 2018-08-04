@@ -279,14 +279,14 @@ namespace AfterSchoolLibrary
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Form CreateDefaultForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Form CreateDefaultForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var form = Form.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
 
-            msgs.AddRange(account.SetDefaultForm(form, loggedInUser, dc));
+            if (form.AccountId != formOwner.ID)
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Standard Reg Form", msgs, dc);
 
-            if (form.AccountId != account.ID)
-                form = form.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, dc);
+            msgs.AddRange(formOwner.SetDefaultForm(form, loggedInUser, dc));
 
             return form;
         }
@@ -485,14 +485,14 @@ namespace AfterSchoolLibrary
             return user;
         }
 
-        public static SystemMessages SendLeagueInvite(this Account invitedAccount, ActivityGroup activityGroup, WebUser sendingUser, string customMessage = null, DatabaseConnection dc = null)
+        public static SystemMessages SendLeagueInvite(int invitedAccountId, int activityGroupId, int sendingUserId, string customMessage = null)
         {
-            return EmailHelper.SendLeagueAccountInvitedEmail(invitedAccount, activityGroup, sendingUser, customMessage);
-        }
+            var msgs = new SystemMessages();
+            var invitedAccount = Account.Load(invitedAccountId, msgs);
+            var activityGroup = ActivityGroup.Load(activityGroupId, msgs);
+            var sendingUser = WebUser.Load(sendingUserId, msgs);
 
-        public static SystemMessages SendLeagueInvite(this Account invitedAccount, WebUser invitedUser, WebUser loggedInUser, string customMessage = null, DatabaseConnection dc = null)
-        {
-            return EmailHelper.SendLeagueAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
+            return EmailHelper.SendLeagueAccountInvitedEmail(invitedAccount, activityGroup, sendingUser, customMessage);
         }
 
         public static string GenerateUniqueName(string name, int? accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1871,10 +1871,6 @@ namespace AfterSchoolLibrary
                    },
                    onSuccess: (SystemMessages smsgs) => {
                        msgs.AddRange(smsgs);
-
-                       schools.ForEach(school => {
-                           msgs.AddRange(school.SendLeagueInvite(activityGroup, loggedInuser, customMessage));
-                       });
                    },
                    onFailure: (SystemMessages fmsgs) => {
                        msgs.AddRange(fmsgs);

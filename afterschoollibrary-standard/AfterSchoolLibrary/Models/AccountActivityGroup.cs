@@ -30,6 +30,7 @@ namespace AfterSchoolLibrary
 		public bool IsPublished { get { return (bool)MDV["IsPublished"].Value; } set { MDV["IsPublished"].Value = value; } }
 		public decimal? Cost { get { return (decimal?)MDV["Cost"].Value; } set { MDV["Cost"].Value = value; } }
 		public CostUnitType CostUnitTypeId { get { return (CostUnitType)MDV["CostUnitTypeId"].Value; } set { MDV["CostUnitTypeId"].Value = value; } }
+		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
         public AccountActivityGroup()
@@ -55,6 +56,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsPublished", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Cost", System.Data.SqlDbType.Money);
 				_dp.Add(className, "CostUnitTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
             }
@@ -72,6 +74,7 @@ namespace AfterSchoolLibrary
             get
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(AccountActivityGroup).Name);
+				dq.Joins.Add(Account.ObjectMap["ID"], AccountActivityGroup.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
 				
                 return dq;
             }

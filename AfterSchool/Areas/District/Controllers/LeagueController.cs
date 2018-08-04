@@ -9,6 +9,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary;
 using System.Collections.Specialized;
 using AfterSchoolLibrary.Services;
+using Hangfire;
 
 namespace AfterSchool.Areas.District.Controllers
 {   
@@ -137,6 +138,31 @@ namespace AfterSchool.Areas.District.Controllers
             return View("periods", group);
         }
 
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult PeriodNotify(string id, string period, string emailmessage)
+        {
+            var msgs = new SystemMessages();
+            var account = SessionVariables.CurrentAccount;
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var regperiod = RegistrationPeriod.Load(period.ToInteger());
+            var registrations = group.GetRegistrations(null, null, null);
+
+            BackgroundJob.Enqueue(() =>
+                RegistrationPeriod.NotifyRegistrants(
+                    regperiod.ID.Value,
+                    emailmessage,
+                    registrations.Select(x => x.ID.Value).ToList(),
+                    null)
+            );
+
+            msgs.Add("Your emails will be sent shortly", MessageType.Success);
+
+            PeriodViewBag(group, msgs);
+
+            return View("periods", group);
+        }
+
         private ActivityGroup LoadSchoolsViewBag(string id, string pn, string rpp)
         {
             var msgs = new SystemMessages() { };
@@ -161,16 +187,14 @@ namespace AfterSchool.Areas.District.Controllers
                 },
                 msgs);
 
-            var invitedAccounts = AccountActivityGroup.Load(
+            var invitedAccountActivityGroups = AccountActivityGroup.Load(
                 new System.Collections.Hashtable()
                 {
                     { "activitygroupid", group.ID.Value}
                 },
                 start,
                 length,
-                msgs)
-                .Select(accountActivityGroup => accountActivityGroup.GetAccount(msgs))
-                .ToList();
+                msgs);
 
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
             
@@ -183,7 +207,7 @@ namespace AfterSchool.Areas.District.Controllers
                 TotalPages = totalPages
             };
 
-            ViewBag.InvitedAccounts = invitedAccounts;
+            ViewBag.InvitedAccountActivityGroups = invitedAccountActivityGroups;
             return group;
         }
 
@@ -397,6 +421,7 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.SchoolsPerColumn = (schools.Count / 3) > (schools.Count % 3) ? (schools.Count / 3) : (schools.Count % 3);
 
             ViewBag.SchoolsToInvite = notInivitedSchools;
+            ViewBag.RegistrationWindow = activityGroup.GetCurrentOrNextRegistrationPeriod(msgs);
 
             return notInivitedSchools;
         }
@@ -427,7 +452,24 @@ namespace AfterSchool.Areas.District.Controllers
                     invitedSchools.Add(school);
             });
 
-            AccountService.InviteSchoolsToLeague(invitedSchools, activityGroup, invitemessage, SessionVariables.LoggedInUser, msgs);
+            AccountService.InviteSchoolsToLeague(invitedSchools, activityGroup, invitemessage, SessionVariables.LoggedInUser, msgs);            
+
+            if (msgs.HasNoErrors())
+            {
+                var activityGroupId = activityGroup.ID.Value;
+                var senderUserId = SessionVariables.LoggedInUser.ID.Value;
+
+                invitedSchools.ForEach(school => {
+                    var schoolId = school.ID.Value;
+
+                    BackgroundJob.Enqueue(() =>
+                        AccountService.SendLeagueInvite(schoolId, activityGroupId, senderUserId, invitemessage)
+                    );
+                });
+
+                msgs.Add("Your invites will be sent shortly", MessageType.Success);
+            }
+
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("schools", new { id = activityGroup.Uid });

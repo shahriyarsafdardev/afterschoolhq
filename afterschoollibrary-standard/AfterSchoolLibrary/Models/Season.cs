@@ -23,54 +23,55 @@ namespace AfterSchoolLibrary
             public List<List<TeamMatch>> Rounds { get; set; }
 
 
-            public Season GenerateSeason(ActivitySchedule shedule, ActivityGroup Leauge, int ByeCountPerTeam, SystemMessages msgs, DatabaseConnection dc)
-            {
-                var roundDates = shedule.GetInstances(false, msgs, dc);
-                var season = new Season() { ActivityGroup = Leauge, byesPerTeam = new List<KeyValuePair<int, int>>()};
-                var ByesInWeeks = WeeklyByeCountCalculator(roundDates.Count, Leauge.GetActivityCount(null, null, dc) * ByeCountPerTeam);
-                var datesForByes = MiddleOutSort(roundDates.Count);
-                var teams = Leauge.GetActivities(dc);
-                var byeCountPerWeekOrderedList = new List<KeyValuePair<int, int>>();
-                season.Rounds = new List<List<TeamMatch>>();
-                this.Rounds = new List<List<TeamMatch>>();
+        public Season GenerateSeason(ActivitySchedule schedule, ActivityGroup league, int ByeCountPerTeam, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var roundDates = schedule.GetInstances(false, msgs, dc);
+            var season = new Season() { ActivityGroup = league, byesPerTeam = new List<KeyValuePair<int, int>>() };
+            var ByesInWeeks = WeeklyByeCountCalculator(roundDates.Count, league.GetActivityCount(null, null, msgs, dc) * ByeCountPerTeam);
+            var datesForByes = MiddleOutSort(roundDates.Count);
+            var teams = league.GetActivities(dc);
+            var byeCountPerWeekOrderedList = new List<KeyValuePair<int, int>>();
+            season.Rounds = new List<List<TeamMatch>>();
+            this.Rounds = new List<List<TeamMatch>>();
+
             //initializes the bye counter
             foreach (Activity team in teams)
-                {
-                    season.byesPerTeam.Add(new KeyValuePair<int, int>(0, team.ID.Value));
-                }
-
-                this.byesPerTeam = season.byesPerTeam;
-
-                if (ByeCountPerTeam != 0)
-                {
-                    // divides the shedule so that every team has had a bye in the given fraction of the season
-                    var fraction = roundDates.Count / ByeCountPerTeam;
-                    //calculates the number of byes per week in decending order
-                    var ByeCountPerWeekUnordered = WeeklyByeCountCalculator(fraction, teams.Count);
-                    // orders the weeks from the middle out
-                    var Coorespondingweeks = MiddleOutSort(roundDates.Count);
-                    // the week is the key, the number of byes is the value
-
-                    for (int i = 0; i < Coorespondingweeks.Count; i++)
-                    {
-                        var ByeCountPerWeekOrdered = new KeyValuePair<int, int>(Coorespondingweeks[i], ByeCountPerWeekUnordered[i]);
-                        byeCountPerWeekOrderedList.Add(ByeCountPerWeekOrdered);
-                    }
-
-                }
-
-
-                    for (int i = 0; i < roundDates.Count; i++)
-                    {
-                        {
-                            var newRound = Round.NewRound(this, teams, roundDates[i], byeCountPerWeekOrderedList[i].Value, dc);
-                            season.Rounds.Add(newRound.Matches);
-                        }
-
-                    }
-                
-                return season;
+            {
+                season.byesPerTeam.Add(new KeyValuePair<int, int>(0, team.ID.Value));
             }
+
+            this.byesPerTeam = season.byesPerTeam;
+
+            if (ByeCountPerTeam != 0)
+            {
+                // divides the shedule so that every team has had a bye in the given fraction of the season
+                var fraction = roundDates.Count / ByeCountPerTeam;
+                //calculates the number of byes per week in decending order
+                var ByeCountPerWeekUnordered = WeeklyByeCountCalculator(fraction, teams.Count);
+                // orders the weeks from the middle out
+                var Coorespondingweeks = MiddleOutSort(roundDates.Count);
+                // the week is the key, the number of byes is the value
+
+                for (int i = 0; i < Coorespondingweeks.Count; i++)
+                {
+                    var ByeCountPerWeekOrdered = new KeyValuePair<int, int>(Coorespondingweeks[i], ByeCountPerWeekUnordered[i]);
+                    byeCountPerWeekOrderedList.Add(ByeCountPerWeekOrdered);
+                }
+
+            }
+
+
+            for (int i = 0; i < roundDates.Count; i++)
+            {
+                {
+                    var newRound = Round.NewRound(this, teams, roundDates[i], byeCountPerWeekOrderedList[i].Value, dc);
+                    season.Rounds.Add(newRound.Matches);
+                }
+
+            }
+
+            return season;
+        }
 
             public List<int> MiddleOutSort(int rounds)
             {

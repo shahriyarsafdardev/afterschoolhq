@@ -32,26 +32,26 @@
 </div>
 
 
-<div class="form-group">
-    <label class="col-md-3 control-label">
-        Registration Form <span class="text-danger">*</span>
-    </label>
-    <div class="col-md-6">
-        <select name="form" id="form" class="form-control" required>
-            <option value="">Select Form...</option>
-            <option value="0"> + New Form</option>
-            @foreach (var form in forms)
-            {
-                <option value="@form.ID" @(Model.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
-            }
-        </select>
-    </div>
-    <div class="col-md-3">
-        <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = Model.FormId })" id="editForm" target="_blank">Edit Form</a>
-    </div>
-</div>
 @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.SchoolDistrict)
 {
+    <div class="form-group">
+        <label class="col-md-3 control-label">
+            Registration Form <span class="text-danger">*</span>
+        </label>
+        <div class="col-md-6">
+            <select name="form" id="form" class="form-control" required>
+                <option value="">Select Form...</option>
+                <option value="0"> + New Form</option>
+                @foreach (var form in forms)
+                {
+                    <option value="@form.ID" @(Model.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = Model.FormId })" id="editForm" target="_blank">Edit Form</a>
+        </div>
+    </div>
 
     <div class="form-group">
         <label class="col-sm-3 control-label">Invite Only</label>
