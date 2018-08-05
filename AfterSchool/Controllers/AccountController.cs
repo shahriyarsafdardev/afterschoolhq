@@ -1049,7 +1049,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (participationObject.IsFree)
+                if (participationObject.IsFree || participationObject.RegistrationMode == RegistrationMode.Apply)
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
                 else
                     return RedirectToAction("payment", new { id = registration.Uid });
