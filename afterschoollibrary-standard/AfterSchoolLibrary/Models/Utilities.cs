@@ -312,7 +312,9 @@ namespace AfterSchoolLibrary
             try
             {
                 msgs.AddRange(AdditionalData(dc));
+                msgs.AddRange(UpdateActivityPayment(dc));
                 msgs.AddRange(UpdateInviteCodes(dc));
+                msgs.AddRange(UpdateTransactions(dc));
                 //msgs.AddRange(UpdateRegistrations2(dc));
                 //msgs.AddRange(UpdateAccountFeatures(dc: dc));
                 //msgs.AddRange(UpdateLocations(dc: dc));
@@ -347,6 +349,54 @@ namespace AfterSchoolLibrary
             {
                 Database.EndTransaction(dc, msgs);
             }
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateTransactions(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var transactions = Transaction.Load(
+                criterias: new Hashtable() { { "PlatformFlatFee", DBNull.Value } },
+                msgs: msgs,
+                dc: dc);
+
+            transactions.ForEach(transaction =>
+            {
+                var toAccount = Account.Load(transaction.BillerAccountId.Value, msgs, dc);
+                if (toAccount.IsNotEmpty())
+                {
+                    transaction.PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc);
+                    transaction.PlatformFlatFee = toAccount.GetPlatformFlatFee(msgs, dc);
+                    msgs.AddRange(transaction.Save(dc));
+                }
+            });
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateActivityPayment(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var payments = ActivityPayment.Load(
+                criterias: new Hashtable() { { "AccountId", DBNull.Value } },
+                msgs: msgs,
+                dc: dc);
+
+            payments.ForEach(payment =>
+            {
+                if (payment.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                {
+                    var activity = Activity.Load(payment.ParticipationObjectId.Value, msgs, dc);
+                    if (activity.IsNotEmpty())
+                    {
+                        payment.AccountId = activity.AccountId;
+                        msgs.AddRange(payment.Save(dc));
+                    }
+                }
+            });
 
             return msgs;
         }

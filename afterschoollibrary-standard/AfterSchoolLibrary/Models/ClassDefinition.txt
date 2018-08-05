@@ -629,11 +629,13 @@ description: keeps track of payments for an activity from a registrant/student
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: ActivityId, int?, Int
+property: AccountId, int?, Int
 property: Uid, Guid, UniqueIdentifier, required
 property: Amount, decimal?, Money
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 loadmethod: ActivityId, List<>
+loadmethod: AccountId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: Uid
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
@@ -1056,7 +1058,7 @@ serializable: true
 inherits: BasicObjectWithModified
 property: PackageId, int?, Int, required
 property: FeatureTypeId, FeatureType, Int
-property: Max, decimal?, Decimal
+property: Max, decimal?, Decimal "10,2"
 loadmethod: PackageId, List<>
 loadmethod: PackageId|FeatureTypeId
 [end]
@@ -1069,7 +1071,7 @@ serializable: true
 inherits: BasicObjectWithModified
 property: AccountPackageId, int?, Int, required
 property: FeatureTypeId, FeatureType, Int
-property: Max, decimal?, Decimal
+property: Max, decimal?, Decimal "10,2"
 loadmethod: AccountPackageId, List<>
 loadmethod: AccountPackageId|FeatureTypeId
 [end]
@@ -1296,8 +1298,8 @@ property: PaymentTypeId, PaymentType, Int, required
 property: Description, string, NVarChar "400", required
 property: Uid, Guid, UniqueIdentifier
 property: PurchaseId, int?, Int
-property: PercentPlatformFee, decimal?, Decimal "10,2"
-property: FlatPlatformFee, decimal?, Decimal "10,2"
+property: PlatformPercentFee, decimal?, Decimal "10,2"
+property: PlatformFlatFee, decimal?, Decimal "10,2"
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid

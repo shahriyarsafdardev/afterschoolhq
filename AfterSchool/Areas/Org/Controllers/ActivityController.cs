@@ -48,6 +48,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Actions = actions;
             ViewBag.Schedule = activity.GetSchedule();
+            ViewBag.TotalPaid = activity.GetTotalAmountPaid();
             return View(activity);
         }
 

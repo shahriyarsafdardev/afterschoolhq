@@ -1593,9 +1593,14 @@ namespace AfterSchoolLibrary
             return (totalAmountToCharge * percentageFee) + flatFee;
         }
 
-        public static decimal GetPlatformFeePercent(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetPlatformPercentFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+        }
+
+        public static decimal GetPlatformFlatFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
         }
 
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
@@ -1870,6 +1875,11 @@ namespace AfterSchoolLibrary
         public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountPaid(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetTotalPaidByAccount(account.ID.Value, msgs, dc);
         }
     }
 }

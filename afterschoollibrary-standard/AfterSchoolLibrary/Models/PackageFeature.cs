@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "PackageId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FeatureTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Max", System.Data.SqlDbType.Decimal);
+				_dp.Add(className, "Max", System.Data.SqlDbType.Decimal , "10,2");
 				
                 return _dp;
             }

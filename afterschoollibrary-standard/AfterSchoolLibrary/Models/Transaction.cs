@@ -40,8 +40,8 @@ namespace AfterSchoolLibrary
 		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public int? PurchaseId { get { return (int?)MDV["PurchaseId"].Value; } set { MDV["PurchaseId"].Value = value; } }
-		public decimal? PercentPlatformFee { get { return (decimal?)MDV["PercentPlatformFee"].Value; } set { MDV["PercentPlatformFee"].Value = value; } }
-		public decimal? FlatPlatformFee { get { return (decimal?)MDV["FlatPlatformFee"].Value; } set { MDV["FlatPlatformFee"].Value = value; } }
+		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
+		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
 		
 
         public Transaction()
@@ -67,8 +67,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "PurchaseId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "PercentPlatformFee", System.Data.SqlDbType.Decimal , "10,2");
-				_dp.Add(className, "FlatPlatformFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
 				
                 return _dp;
             }
@@ -181,11 +181,11 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PercentPlatformFee"]);
+			dps.Add(ObjectMap["PlatformPercentFee"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["FlatPlatformFee"]);
+			dps.Add(ObjectMap["PlatformFlatFee"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

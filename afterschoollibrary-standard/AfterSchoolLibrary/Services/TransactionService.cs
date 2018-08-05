@@ -27,6 +27,8 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                PlatformFlatFee = toAccount.GetPlatformFlatFee(msgs, dc),
+                PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc)
             };
             msgs.AddRange(transaction.Save(dc));
 
