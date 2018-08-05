@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "SubscriptionPlanId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar , "50");
 				
                 return _dp;
             }

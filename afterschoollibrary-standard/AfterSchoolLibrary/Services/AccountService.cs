@@ -1590,12 +1590,12 @@ namespace AfterSchoolLibrary
             var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
             var flatFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
 
-            return (totalAmountToCharge * percentageFee.ToDecimal()) + flatFee.ToDecimal();
+            return (totalAmountToCharge * percentageFee) + flatFee;
         }
 
         public static decimal GetPlatformFeePercent(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue().ToDecimal();
+            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
         }
 
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)

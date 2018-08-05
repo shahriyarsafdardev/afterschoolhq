@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary
                 _dp = BaseLocation.get_BaseObjectMap(className);
 				_dp.Add(className, "HostAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDefault", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "LocationTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;

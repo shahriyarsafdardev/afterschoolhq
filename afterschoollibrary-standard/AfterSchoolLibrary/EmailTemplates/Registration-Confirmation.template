@@ -1,0 +1,24 @@
+﻿<div>
+  <p>Hello @Model.FirstName,</p>
+  
+  @Model.CustomMessage
+
+  <table style="border: 0px;" border="0">
+    <tr>
+      <th style="padding: 10px;">
+        Student
+      </th>
+      <th style="padding: 10px;">
+        Activity
+      </th>
+      <th style="padding: 10px;">
+        Cost
+      </th>
+    </tr>
+    @Model.ActivityRows
+  </table>
+
+  <p>
+      @Model.ProductName
+  </p>
+</div>

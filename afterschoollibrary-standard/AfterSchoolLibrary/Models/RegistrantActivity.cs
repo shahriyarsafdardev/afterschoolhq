@@ -92,8 +92,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "OnWaitingList", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "DatePaid", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar, 100);
-				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfSeats", System.Data.SqlDbType.Int);

@@ -25,6 +25,15 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject)
+        {
+            var msgs = new SystemMessages();
+
+
+            return msgs;
+
+        }
+
         public static SystemMessages SendPasswordReset(WebUser user, PasswordResetToken token, bool isAfterSchool)
         {
             var msgs = new SystemMessages();

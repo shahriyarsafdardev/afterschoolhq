@@ -69,7 +69,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "DoesAutoRenew", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "TotalPeriods", System.Data.SqlDbType.Int);
-				_dp.Add(className, "StripePlanId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripePlanId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PlanTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
