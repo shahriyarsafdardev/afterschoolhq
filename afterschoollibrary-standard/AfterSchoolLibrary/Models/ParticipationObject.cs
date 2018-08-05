@@ -142,7 +142,7 @@ namespace AfterSchoolLibrary
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
 
-            IsFree = !aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal();
+            IsFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
         public string GetHomePageUrl(bool isAfterSchool = true)
@@ -218,6 +218,24 @@ namespace AfterSchoolLibrary
         public bool HasWaitingListSeatsAvailable()
         {
             return WaitingListSeatsRemaining.HasValue && WaitingListSeatsRemaining.Value > 0;
+        }
+
+        public string GetRegistrationThankYou(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (RegistrationMode == RegistrationMode.Apply)
+            {
+                if (ObjectType == ParticipationObjectType.ActivityGroup)
+                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                else
+                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+            }
+            else
+            {
+                if (ObjectType == ParticipationObjectType.ActivityGroup)
+                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                else
+                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+            }
         }
     }
 }

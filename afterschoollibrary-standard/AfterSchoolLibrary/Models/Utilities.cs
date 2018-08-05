@@ -207,6 +207,11 @@ namespace AfterSchoolLibrary
             return "http" + (Utilities.UseSSL() ? "s" : "") + "://" + HostName(isAfterSchool);
         }
 
+        public static string LoginUrl(bool isAfterSchool)
+        {
+            return $"{BaseUrl(isAfterSchool)}/login";
+        }
+
         public static bool UseSSL()
         {
             if (IsLocalHost)

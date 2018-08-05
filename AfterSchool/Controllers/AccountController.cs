@@ -1139,8 +1139,9 @@ namespace AfterSchool.Controllers
                         Registration = registration,
                         Registrant = SessionVariables.CurrentRegistrant
                     },
+                    sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.LoggedInUser,
-                    msgs: msgs);
+                    msgs: msgs);                
             }
 
             if (msgs.HasNoErrors())
@@ -1254,8 +1255,8 @@ namespace AfterSchool.Controllers
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
 
             // this should be moved into the library
-            if (SessionVariables.Cart.IsNotEmpty())
-                BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
+            //if (SessionVariables.Cart.IsNotEmpty())
+            //    BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
 
             // clear out session stuff after it sends confirmation, don't want to send on refresh
             ResetRegistrationSession();

@@ -761,6 +761,12 @@ namespace AfterSchoolLibrary
             return $"{custommessage}{activities}{accountInformation}";
         }
 
+        public static SystemMessages SendConfirmation(CheckoutObject checkoutObject, bool sendBcc, DatabaseConnection dc = null)
+        {
+            return EmailHelper.SendRegistrationConfirmed(checkoutObject, sendBcc);
+        }
+
+        [Obsolete]
         public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();

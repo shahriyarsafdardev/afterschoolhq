@@ -1035,7 +1035,7 @@ namespace AfterSchoolLibrary
 
         public Registrant GetParentOrGuardian(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByWebUserId(this.WebUserId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).First();
+            return Registrant.LoadByAccountId(this.AccountId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).FirstOrDefault();
         }
 
         public SystemMessages DeleteRegistrantActivity(int activityId, DatabaseConnection dc = null)
