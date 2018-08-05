@@ -89,19 +89,25 @@ namespace AfterSchoolLibrary.Services
             return SubscriptionPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, SubscriptionPlanType.Subscription, msgs, dc);
         }
 
-        public static bool HasAccountActivityGroup(this ActivityGroup activityGroup, int accountId)
+        public static bool HasAccountActivityGroup(this ActivityGroup activityGroup, int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountActivityGroup.LoadByAccountIdByActivityGroupId(accountId, activityGroup.ID.Value).IsNotEmpty();
+            if (activityGroup.AccountId != accountId)
+                return AccountActivityGroup.GetCount(
+                    new System.Collections.Hashtable()
+                    {
+                        { "AccountId", accountId },
+                        { "ActivityGroupId", activityGroup.ID.Value }
+                    },
+                    msgs,
+                    dc
+                    ) > 0;
+
+            return false;
         }
 
-        public static AccountActivityGroup LoadAccountActivityGroup(this ActivityGroup activityGroup, int accountId)
+        public static AccountActivityGroup GetAccountActivityGroup(this ActivityGroup activityGroup, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (activityGroup.HasAccountActivityGroup(accountId))
-            {
-                return AccountActivityGroup.LoadByAccountIdByActivityGroupId(accountId, activityGroup.ID.Value);
-            }
-
-            return null;
+            return activityGroup.AccountId != currentAccount.ID ? AccountActivityGroup.LoadByAccountIdByActivityGroupId(currentAccount.ID.Value, activityGroup.ID.Value, msgs) : null;
         }
 
         public static int GetLeagueInviteCount(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)

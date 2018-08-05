@@ -35,13 +35,10 @@
                         @(activityGroupType == ActivityGroupType.Session ? "Session" : "League")
                     </th>
                     <th class="text-center">
-                        @(activityGroupType == ActivityGroupType.Session ? "Activities" : "Sports")
+                        Teams
                     </th>
                     <th class="text-center">
-                        Schools
-                    </th>
-                    <th class="text-center">
-                        Start Date
+                        Team Registration Dates
                     </th>
                     <th class="text-center">
                         Accept/Decline
@@ -54,29 +51,41 @@
                 {
                     foreach (var pendingInvite in pendingInvites)
                     {
-                <tr>
-                    <td>
-                        <a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})" class="btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
-                    </td>
-                    <td><a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})">@pendingInvite.Name</a></td>
-                    <td class="text-center">@pendingInvite.GetActivityCount(false,false)</td>
-                    <td class="text-center">@pendingInvite.GetGroupProperties().Count</td>
-                    <td class="text-center">@( DateTime.Now.Add(pendingInvite.WillOpenIn()).ToLongDateString() )</td>
-                    <td>
-                        <div class="btn-group pull-right">
-                            <button class="btn btn-default btn-sm md-trigger"
-                                    data-modal="modal-accept"
-                                    onclick="acceptInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Accepted })')">
-                                <i class="s7-copy-file"></i> Accept
-                            </button>
-                            <button class="btn btn-default btn-sm md-trigger"
-                                    data-modal="modal-decline"
-                                    onclick="declineInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Declined })')">
-                                <i class="s7-albums"></i> Decline
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                        <tr>
+                            <td>
+                                <a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})" class=" hide btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
+                            </td>
+                            <td>@pendingInvite.Name</td>
+                            <td class="text-center">@pendingInvite.GetActivityCount(false,false)</td>
+                            <td class="text-center">
+                                @if (pendingInvite.IsOpenNow())
+                                {
+                                    <span>Will open in @pendingInvite.WillCloseIn().Days days @pendingInvite.WillCloseIn().Hours hrs</span>
+                                }
+                                else if (pendingInvite.WillOpen())
+                                {
+                                    <span>Will close in @pendingInvite.WillOpenIn().Days days @pendingInvite.WillOpenIn().Hours hrs</span>
+                                }
+                                else
+                                {
+                                    <span>Registration has closed</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group pull-right">
+                                    <button class="btn btn-default btn-sm md-trigger"
+                                            data-modal="modal-accept"
+                                            onclick="acceptInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Accepted })')">
+                                        <i class="s7-copy-file"></i> Accept
+                                    </button>
+                                    <button class="btn btn-default btn-sm md-trigger"
+                                            data-modal="modal-decline"
+                                            onclick="declineInvitation('@pendingInvite.Name', '@Url.Action("UpdateInvitation", controller, new { id = pendingInvite.ID.Value.ToString(), inviteStatus = InviteStatus.Declined })')">
+                                        <i class="s7-albums"></i> Decline
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     }
                 }
                 else

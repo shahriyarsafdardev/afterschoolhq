@@ -31,6 +31,10 @@ namespace AfterSchoolLibrary
 		public decimal? Cost { get { return (decimal?)MDV["Cost"].Value; } set { MDV["Cost"].Value = value; } }
 		public CostUnitType CostUnitTypeId { get { return (CostUnitType)MDV["CostUnitTypeId"].Value; } set { MDV["CostUnitTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
+		public string ActivityGroupUid { get { return (string)MDV["ActivityGroupUid"].Value; } }
+		public ActivityGroupType ActivityGroupActivityGroupTypeId { get { return (ActivityGroupType)MDV["ActivityGroupActivityGroupTypeId"].Value; } }
+		public string ActivityGroupUniqueName { get { return (string)MDV["ActivityGroupUniqueName"].Value; } }
+		public int? ActivityGroupAccountId { get { return (int?)MDV["ActivityGroupAccountId"].Value; } }
 		
 
         public AccountActivityGroup()
@@ -57,6 +61,10 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "Cost", System.Data.SqlDbType.Money);
 				_dp.Add(className, "CostUnitTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
+				_dp.Add(className, "ActivityGroupUid", typeof(ActivityGroup).Name, "Uid", System.Data.SqlDbType.NVarChar, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupActivityGroupTypeId", typeof(ActivityGroup).Name, "ActivityGroupTypeId", System.Data.SqlDbType.Int, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupUniqueName", typeof(ActivityGroup).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupAccountId", typeof(ActivityGroup).Name, "AccountId", System.Data.SqlDbType.Int, "ActivityGroup");
 				
                 return _dp;
             }
@@ -75,6 +83,7 @@ namespace AfterSchoolLibrary
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(AccountActivityGroup).Name);
 				dq.Joins.Add(Account.ObjectMap["ID"], AccountActivityGroup.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
+				dq.Joins.Add(ActivityGroup.ObjectMap["ID"], AccountActivityGroup.ObjectMap["ActivityGroupId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "ActivityGroup");
 				
                 return dq;
             }
@@ -218,6 +227,19 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
+        public bool IsPublishable
+        {
+            get
+            {
+                return HasRegistrationPeriods();
+            }
+        }
+
+        public bool HasRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrationPeriod.GetCount(new System.Collections.Hashtable() { { "AccountActivityGroupid", this.ID.Value } }, msgs, dc) > 0;
+        }
+
         public static List<AccountActivityGroup> LoadByAccountId(int AccountId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -267,7 +289,6 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }
-
         #endregion
     }
 }

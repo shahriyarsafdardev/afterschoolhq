@@ -739,7 +739,7 @@ namespace AfterSchoolLibrary
         {
             var stripeAccount = Billing.StripeHelper.CreateCustomAccount(account.Name, account.Email, msgs);
 
-            if(account.IsNotEmpty())
+            if(stripeAccount.IsNotEmpty())
             {
                 account.StripePublishableKey = stripeAccount.CustomAccountKeys.Publishable;
                 account.StripeSecretKey = stripeAccount.CustomAccountKeys.Secret;

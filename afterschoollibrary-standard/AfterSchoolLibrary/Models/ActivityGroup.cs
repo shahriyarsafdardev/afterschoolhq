@@ -346,7 +346,9 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return !IsArchived && !this.GetActivities().Where(x => !x.ActivityScheduleId.HasValue).Any();
+                return !IsArchived &&
+                    !this.GetActivities().Where(x => !x.ActivityScheduleId.HasValue).Any() &&
+                    this.GetRegistrationPeriods().Any();
             }
         }
 
@@ -1177,7 +1179,7 @@ namespace AfterSchoolLibrary
         {
             return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
         }
-
+        
         private ActivitySchedule _Schedule = null;
         public ActivitySchedule GetSchedule(bool reload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

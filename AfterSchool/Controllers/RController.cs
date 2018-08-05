@@ -105,7 +105,7 @@ namespace AfterSchool.Controllers
             return View(activity.ToParticipationObject());
         }
 
-        public ActionResult League(string accountname, string districtname, string activityname)
+        public ActionResult League(string accountname, string districtname, string leaguename)
         {
             RestartRegistrationSession();
 
@@ -116,13 +116,13 @@ namespace AfterSchool.Controllers
             SetRegistrationStartPage(account);
 
             var districtAccount = AfterSchoolLibrary.Account.LoadByUniqueName(districtname, msgs);
-            var activityGroup = AfterSchoolLibrary.ActivityGroup.LoadByAccountIdByUniqueName(districtAccount.ID.Value, activityname);
-            var accountActivityGroup = AfterSchoolLibrary.AccountActivityGroup.LoadByAccountIdByActivityGroupId(account.ID.Value, activityGroup.ID.Value);
+            var league = AfterSchoolLibrary.ActivityGroup.LoadByAccountIdByUniqueName(districtAccount.ID.Value, leaguename, msgs);
+            var aag = league.GetAccountActivityGroup(account, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
 
-            return View("activity",accountActivityGroup.ToParticipationObject());
+            return View("activity", aag.ToParticipationObject(msgs));
         }
 
         public ActionResult Register(string accountname, string activitytype, string activityname)

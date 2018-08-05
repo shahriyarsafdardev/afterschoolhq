@@ -568,6 +568,11 @@ loadmethod: AccountId|InviteStatusId, List<>
 loadmethod: AccountId|ActivityGroupId
 join: Account.ID, AccountActivityGroup.AccountId, InnerJoin
 joinproperty: Account.Name, string, NVarChar
+join: ActivityGroup.ID, AccountActivityGroup.ActivityGroupId, InnerJoin
+joinproperty: ActivityGroup.Uid, string, NVarChar
+joinproperty: ActivityGroup.ActivityGroupTypeId, ActivityGroupType, Int
+joinproperty: ActivityGroup.UniqueName, string, NVarChar
+joinproperty: ActivityGroup.AccountId, int?, Int
 [end]
 
 [begin]

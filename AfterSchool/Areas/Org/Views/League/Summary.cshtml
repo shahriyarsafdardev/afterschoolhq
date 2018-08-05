@@ -32,7 +32,7 @@
         </div>
         <div class="panel-body">
 
-          @if (activityCount == 0) 
+          @if (registrationCount == 0) 
             {
                 <div class="widget">
                     <div class="widget-head">
@@ -41,11 +41,13 @@
                     <div class="widget-tile">
                         <hr />
                         <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
-                        <p>You haven't created any @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true).ToLower()s for @Model.Name yet. In order to get started, <a href="@addUrl">add your first @UILabel.ActivityLabel(Model.ActivityGroupTypeId).ToLower()</a> for @Model.Name.</p>
-                        <p>&nbsp;</p>
                         <p>
-                            <a href="@addUrl" class="btn btn-primary btn-lg">Add Your First @UILabel.ActivityLabel(Model.ActivityGroupTypeId) &raquo;</a>
+                            No one has registered for your activity yet. 
+                            Create your <a href="@Url.Action("periods", "league", new { id = Model.Uid })">@UILabel.RegistrationPeriodLabel(true).ToLower()</a> 
+                            and then <a href="@Url.Action("publishdetail", "league", new { id = Model.Uid })">publish the league</a> to your 
+                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">activity home page</a> for @UILabel.RegistrantLabel(true).ToLower() to register.
                         </p>
+                        
                     </div>
                 </div>
             }

@@ -503,11 +503,6 @@ namespace AfterSchoolLibrary
             return $"{Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
         }
 
-        public string GetRegistrationPageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return $"{this.GetHomePageUrl(isAfterSchool, msgs, dc)}/register";
-        }
-
         public string HomePageUrl
         {
             get

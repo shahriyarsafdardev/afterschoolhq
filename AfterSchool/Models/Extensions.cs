@@ -261,6 +261,16 @@ namespace AfterSchool.Models
             return msgs;
         }
 
+        public static SystemMessages GetItemsRequiredToPublish(this AccountActivityGroup aag)
+        {
+            var msgs = new SystemMessages();
+
+            if (!aag.HasRegistrationPeriods())
+                msgs.Add($"<a href=\"/org/league/periods/{aag.ActivityGroupUid}\">Create at least one {UILabel.RegistrationPeriodLabel()}</a> in order to publish", MessageType.Error);
+
+            return msgs;
+        }
+
         public static string ToShortString(this List<GradeLevel> grades)
         {
             if (grades.Count > 1)

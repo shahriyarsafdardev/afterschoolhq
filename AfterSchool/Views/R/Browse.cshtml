@@ -86,7 +86,7 @@
              hasseatsremaining="@item.HasSeatsAvailable().ToString().ToLower()" 
              haswaitinglistremaining="@item.HasWaitingListSeatsAvailable().ToString().ToLower()"
              days="@ParticipationObjectUI.PrintDaysOfWeek(item)" 
-             location="@item.Location.ID"
+             location="@item.Location?.ID"
              gender="@((int)item.GenderRestriction)"
              name="@item.Name">
 
@@ -100,10 +100,13 @@
                             <span>
                                 @item.OwnerAccount.Name
                             </span>
-                            <span>
-                                @@
-                                @item.Location.Name
-                            </span>
+                            @if (item.Location.IsNotEmpty())
+                            {
+                                <span>
+                                    @@
+                                    @item.Location.Name
+                                </span>
+                            }
                         </p>
                     </div>
                     <div>

@@ -167,12 +167,12 @@ namespace AfterSchoolLibrary
 		{
 			return TeamMatch.Load(this.ID.Value, msgs, dc: dc);
 		}
-
-
+		
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
         public static List<TeamMatch> LoadByHomeAndAwayID(int HomeID, int AwayID, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

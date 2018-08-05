@@ -11,7 +11,7 @@
 
 @if (Model.RegistrationPeriod.IsOpen())
 {
-    <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
+    <a href="@Model.GetHomePageUrl()" class="btn btn-register">
         @Model.RegistrationMode.ToString() &raquo;
     </a>
 }

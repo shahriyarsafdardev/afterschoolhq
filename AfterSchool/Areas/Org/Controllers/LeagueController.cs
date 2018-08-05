@@ -81,9 +81,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index(string pn, string rpp, string archive)
         {
-            var groups = LoadIndexViewBag(pn, rpp, archive);
-            ViewBag.isExternalGroupsView = false;
-            return View(groups);
+            // var groups = LoadIndexViewBag(pn, rpp, archive);
+            // ViewBag.isExternalGroupsView = false;
+            return RedirectToAction("IndexExternal");
         }
 
         [HttpGet]
@@ -119,8 +119,16 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var defaultOpenDateTime = string.Format("{0} {1}", SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString(), "8:00 AM").ToDateTime();
             var defaultCloseDateTime = string.Format("{0} {1}", SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString(), "12:00 AM").ToDateTime();
+            var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
 
-            ViewBag.Periods = RegistrationPeriod.LoadByActivityGroupId(group.ID.Value).OrderBy(x => x.StartDateTime.Value).ToList();
+            if (aag.IsNotEmpty())
+            {
+                ViewBag.AccountActivityGroup = aag;
+                ViewBag.Periods = RegistrationPeriod.LoadByAccountActivityGroupId(aag.ID.Value).OrderBy(x => x.StartDateTime.Value).ToList();
+            }
+            else
+                ViewBag.Periods = RegistrationPeriod.LoadByActivityGroupId(group.ID.Value).OrderBy(x => x.StartDateTime.Value).ToList();
+            
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.DefaultOpenDateTime = defaultOpenDateTime;
@@ -149,6 +157,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var group = ActivityGroup.LoadByUid(id.ToGuid());
             var regperiod = new RegistrationPeriod();
+            var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
 
             if (period.IsInteger())
             {
@@ -156,9 +165,13 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
+                if (aag.IsNotEmpty())
+                    regperiod.AccountActivityGroupId = aag.ID;
+                else
+                    regperiod.ActivityGroupId = group.ID;
+
                 regperiod.CreatedBy = SessionVariables.LoggedInUser.ID.Value;
                 regperiod.CreateDate = DateTime.UtcNow;
-                regperiod.ActivityGroupId = group.ID;
                 regperiod.AccountId = SessionVariables.CurrentAccount.ID;
             }
 
@@ -427,19 +440,18 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PublishDetail(string id)
         {
-            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            var msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
             var account = SessionVariables.CurrentAccount;
-            bool isAccountActivityGroup = activityGroup.HasAccountActivityGroup(account.ID.Value);
-            var accountActivityGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
-            ViewBag.Messages = new SystemMessages();
+            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            ViewBag.Messages = msgs;
             ViewBag.Account = account;
-            ViewBag.IsAccountActivityGroup = isAccountActivityGroup;
-            
-            if (isAccountActivityGroup) 
-            {
-                ViewBag.AccountActivityGroup = accountActivityGroup;
-                ViewBag.aagRegistrationURL = accountActivityGroup.GetRegistrationUrl(true);
-            }
+            ViewBag.AccountActivityGroup = accountActivityGroup;
+
+            if (accountActivityGroup.IsNotEmpty()) 
+                ViewBag.aagRegistrationURL = accountActivityGroup.GetHomePageUrl(SessionVariables.IsAfterSchool.Value);
+
             return View(activityGroup);
         }
 
@@ -449,20 +461,15 @@ namespace AfterSchool.Areas.Org.Controllers
             SystemMessages msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
             var account = SessionVariables.CurrentAccount;
+            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
 
-            var isAccountActivityGroup = activityGroup.HasAccountActivityGroup(account.ID.Value);
-            var accountActivityGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
-
-            if (isAccountActivityGroup)
+            if (accountActivityGroup.IsNotEmpty())
             {
                 msgs.AddRange(accountActivityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+                ViewBag.aagRegistrationURL = accountActivityGroup.GetHomePageUrl(SessionVariables.IsAfterSchool.Value);
             }
             else
-            {
                 msgs.AddRange(activityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
-            }
-
-            
 
             if (msgs.HasNoErrors())
             {
@@ -470,33 +477,27 @@ namespace AfterSchool.Areas.Org.Controllers
                 UpdateSession(SessionActionType.ActivityGroupPublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
             }
 
+            ViewBag.AccountActivityGroup = accountActivityGroup;
             ViewBag.Messages = msgs;
-            ViewBag.isAccountActivty = activityGroup.HasAccountActivityGroup(account.ID.Value);
-            ViewBag.AccountAcitivtyGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
-            ViewBag.aagRegistrationURL = accountActivityGroup.GetRegistrationUrl(true);
+
             return View("publishdetail", activityGroup);
         }
 
         [HttpGet]
         public ActionResult Unpublish(string id)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
             var account = SessionVariables.CurrentAccount;
+            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
 
-
-            var isAccountActivityGroup = activityGroup.HasAccountActivityGroup(account.ID.Value);
-            var accountActivityGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
-
-            if (isAccountActivityGroup)
+            if (accountActivityGroup.IsNotEmpty())
             {
+                ViewBag.aagRegistrationURL = accountActivityGroup.GetHomePageUrl(SessionVariables.IsAfterSchool.Value);
                 msgs.AddRange(accountActivityGroup.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
             }
             else
-            {
                 msgs.AddRange(activityGroup.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
-            }
-
 
             if (msgs.HasNoErrors())
             {
@@ -504,10 +505,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 UpdateSession(SessionActionType.ActivityGroupUnpublish, SessionVariables.CurrentAccount.ID, activityGroup.ID);
             }
 
+            ViewBag.AccountActivityGroup = accountActivityGroup;
             ViewBag.Messages = msgs;
-            ViewBag.isAccountActivty = activityGroup.HasAccountActivityGroup(account.ID.Value);
-            ViewBag.AccountAcitivtyGroup = activityGroup.LoadAccountActivityGroup(account.ID.Value);
-            ViewBag.aagRegistrationURL = accountActivityGroup.GetRegistrationUrl(true);
+
             return View("publishdetail", activityGroup);
         }
     }
