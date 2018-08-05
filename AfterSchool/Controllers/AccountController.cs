@@ -75,8 +75,21 @@ namespace AfterSchool.Controllers
             var questions = GetStartedViewBag(regaccount, msgs);
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch(question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             if (password1.IsEmpty())
@@ -344,8 +357,21 @@ namespace AfterSchool.Controllers
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -443,37 +469,31 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var questions = AddEmergencyContactsViewBag(msgs);
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-            var emergencyContactPhone1 = "";
+            var phones = new List<string>();
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString().IfEmpty("").Trim();
-                var qvmNameIsEmpty = qvmName.IsEmpty();
-                if (question.IsRequired && qvmNameIsEmpty)
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
                 
-                //validate emegercy contact phone 1
-                if(question.QuestionDataTypeId == QuestionDataType.EmergencyContact1Phone)
+                switch (question.QuestionDataTypeId)
                 {
-                    emergencyContactPhone1 = qvmName;
-                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    {
-                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
-                    }
-                }
+                    case QuestionDataType.EmergencyContact1Phone:
+                    case QuestionDataType.EmergencyContact2Phone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
 
-                //validate emegercy contact phone 2
-                if (question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone && question.IsRequired)
-                {
-                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    {
-                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
-                    }
-                    if(qvmName == emergencyContactPhone1)
-                    {
-                        msgs.Add($"{question.Text} emergency contact phone numbers can't be the same", MessageType.UserError);
-                    }
+                        if (answer.IsNotEmpty())
+                            phones.Add(answer);
+
+                        break;
+
                 }
             });
+
+            if (phones.Count == 2 && phones[0] == phones[1])
+                msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
@@ -611,8 +631,21 @@ namespace AfterSchool.Controllers
             var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -802,18 +835,18 @@ namespace AfterSchool.Controllers
             var questions = AddHealthViewBag(msgs);
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name];
-                if (question.IsRequired && qvmName.IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantDoctorPhone:
-                        if (!qvmName.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx) && question.IsRequired)
-                        {
-                            msgs.Add($"{question.Text}, valid phone number is required", MessageType.UserError);
-                        }
-                      break;
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
                 }
             });
 
@@ -1049,7 +1082,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (participationObject.IsFree)
+                if (participationObject.IsFree || participationObject.RegistrationMode == RegistrationMode.Apply)
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
                 else
                     return RedirectToAction("payment", new { id = registration.Uid });
@@ -1075,9 +1108,14 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
 
-            // if not free and no option to pay later, redirect to payment screen
-            if (!participationObject.IsFree && !participationObject.AllowToPayLater)
-                return RedirectToAction("payment", new { id = registrationUid });
+            // if you can't pay later
+            if (!participationObject.AllowToPayLater)
+            {
+                // if it's not free and registration mode is not set to apply mode
+                // if it costs something and you're forced to register then you need to pay
+                if (!participationObject.IsFree && participationObject.RegistrationMode == RegistrationMode.Register)
+                    return RedirectToAction("payment", new { id = registrationUid });
+            }
 
             // need to actually register first :)
             if (!registrationUid.IsGuid())
