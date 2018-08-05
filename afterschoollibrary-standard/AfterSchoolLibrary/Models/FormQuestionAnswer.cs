@@ -62,9 +62,9 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar, 400);
+				_dp.Add(className, "Text", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "QuestionDataTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "QuestionText", System.Data.SqlDbType.NVarChar, 400);
+				_dp.Add(className, "QuestionText", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "FormQuestionQuestionDataTypeId", typeof(FormQuestion).Name, "QuestionDataTypeId", System.Data.SqlDbType.Int, "FormQuestion");
 				_dp.Add(className, "FormQuestionQuestionTypeId", typeof(FormQuestion).Name, "QuestionTypeId", System.Data.SqlDbType.Int, "FormQuestion");
 				_dp.Add(className, "FormQuestionFormId", typeof(FormQuestion).Name, "FormId", System.Data.SqlDbType.Int, "FormQuestion");

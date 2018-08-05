@@ -39,9 +39,9 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Session).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "IPAddress", System.Data.SqlDbType.NVarChar, 50);
-				_dp.Add(className, "UserAgent", System.Data.SqlDbType.NVarChar, 400);
-				_dp.Add(className, "UrlReferrer", System.Data.SqlDbType.NVarChar, 400);
+				_dp.Add(className, "IPAddress", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "UserAgent", System.Data.SqlDbType.NVarChar , "400");
+				_dp.Add(className, "UrlReferrer", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "LastActivity", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				

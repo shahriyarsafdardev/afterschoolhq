@@ -65,6 +65,7 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectTypeId = plan.ParticipationObjectTypeId,
                 Amount = amount,
                 RegistrantId = registrantSubscriptionPlan.RegistrantId,
+                AccountId = plan.PlanOwnerAccountId,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,

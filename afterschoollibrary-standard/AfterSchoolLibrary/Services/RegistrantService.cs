@@ -203,7 +203,7 @@ namespace AfterSchoolLibrary.Services
                 customerId: accountCustomer.Id,
                 planId: plan.StripePlanId,
                 sourceId: copiedSourceId,
-                platformFeePercent: toAccount.GetPlatformFeePercent(msgs, dc),
+                platformFeePercent: toAccount.GetPlatformPercentFee(msgs, dc),
                 trialEndDate: null,
                 stripeAccountId: toAccount.StripeUserId,
                 msgs: msgs);

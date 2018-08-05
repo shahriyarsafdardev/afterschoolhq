@@ -1,0 +1,5 @@
+﻿<tr>
+  <td style="padding: 10px;">@Model.Description</td>
+  <td style="padding: 10px;">@Model.Quantity</td>
+  <td style="padding: 10px;">@Model.Cost</td>
+</tr>

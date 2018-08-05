@@ -4,7 +4,7 @@
     var actions = (List<SessionAction>)ViewBag.Actions;
     var registrants = Model.GetRegistrantActivities();
     var schedule = (ActivitySchedule)ViewBag.Schedule;
-    decimal totalPaid = 0;
+    var totalPaid = (decimal)ViewBag.TotalPaid;
     int registrantCount = registrants.Sum(x => x.TotalSeats);
     int waitingListCount = registrants.Sum(x => x.NumberOfWaitingListSeats.Value);
 

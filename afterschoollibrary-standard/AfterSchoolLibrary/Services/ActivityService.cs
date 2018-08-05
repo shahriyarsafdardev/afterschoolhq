@@ -299,6 +299,7 @@ namespace AfterSchoolLibrary
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 Amount = amount,
                 RegistrantId = registrant.ID,
+                AccountId = activity.AccountId,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
@@ -413,6 +414,11 @@ namespace AfterSchoolLibrary
             }
 
             return msgs;
+        }
+
+        public static decimal GetTotalAmountPaid(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetTotalPaidByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
         }
     }
 }

@@ -39,7 +39,7 @@ name: WebUser
 serializable: true
 description: A login account. A person cannot login to the system without a WebUser account.
 inherits: BaseWebUser
-property: FacebookId, string, NVarChar(100)
+property: FacebookId, string, NVarChar "100"
 property: Uid, Guid, UniqueIdentifier, required
 property: IsActive, bool, Bit
 property: LastActivity, DateTime?, DateTime
@@ -65,16 +65,16 @@ property: AgeEnd, int?, Int
 property: GradeLevelStart, int?, Int
 property: GradeLevelEnd, int?, Int
 property: CostPerRegistrant, decimal?, Money
-property: CostDescription, string, NVarChar(1000)
+property: CostDescription, string, NVarChar "1000"
 property: AllowPreRegistration, bool, Bit
 property: Uid, Guid, UniqueIdentifier, required
-property: Details, string, NVarChar(4000)
-property: LocationDetails, string, NVarChar(4000)
-property: ScheduleDetails, string, NVarChar(4000)
-property: RegistrationTimeZone, string, NVarChar(30)
-property: ContactName, string, NVarChar(50)
-property: ContactPhone, string, NVarChar(50)
-property: ContactEmail, string, NVarChar(100)
+property: Details, string, NVarChar "4000"
+property: LocationDetails, string, NVarChar "4000"
+property: ScheduleDetails, string, NVarChar "4000"
+property: RegistrationTimeZone, string, NVarChar "30"
+property: ContactName, string, NVarChar "50"
+property: ContactPhone, string, NVarChar "50"
+property: ContactEmail, string, NVarChar "100"
 property: WaitingListSeats, int?, Int
 property: AcceptPayPal, bool, Bit
 property: AcceptCreditCard, bool, Bit
@@ -90,7 +90,7 @@ property: IsArchived, bool, Bit
 property: ActivityGroupId, int?, Int
 property: ActivityScheduleId, int?, Int
 property: ScheduleRequiresAllDays, bool, Bit
-property: UniqueName, string, NVarChar(100)
+property: UniqueName, string, NVarChar "100"
 property: IsTemplate, bool, Bit
 property: ActivitySectionId, int?, Int
 property: ActivityTypeId, ActivityType, Int, required
@@ -120,7 +120,7 @@ description: An account can have one or more Locations
 inherits: BaseLocation
 property: HostAccountId, int?, Int
 property: IsDefault, bool, Bit
-property: Details, string, NVarChar(4000)
+property: Details, string, NVarChar "4000"
 property: LocationTypeId, LocationType, Int
 baseproperty: Name, required
 baseproperty: Address1, required
@@ -152,7 +152,7 @@ description: Used to tag Activities/Teams, Sessions/Leagues in order to make it 
 inherits: BasicObjectWithModified
 property: ParentTagId, int?, Int
 property: AccountId, int?, Int
-property: Name, string, NVarChar(100), required
+property: Name, string, NVarChar "100", required
 loadmethod: Name
 loadmethod: Name|AccountId
 loadmethod: ParentTagId, List<>
@@ -179,10 +179,10 @@ type: Class
 name: ActivitySchedule
 description: The schedule an activity/team, session/league will follow. This is the schedule definition. Actual dates are stored in the ActivityInstance
 inherits: BasicObjectWithModified
-property: Name, string, NVarChar(100)
+property: Name, string, NVarChar "100"
 property: AccountId, int?, Int, required
 property: ActivityGroupId, int?, Int
-property: ScheduleDetails, string, NVarChar(4000)
+property: ScheduleDetails, string, NVarChar "4000"
 property: RepeatsWeekly, bool, Bit
 property: IsOngoing, bool, Bit
 property: StartDate, DateTime?, DateTime, required
@@ -259,7 +259,7 @@ property: ActivityId, int?, Int
 property: ActivityGroupId, int?, Int
 property: AccountId, int?, Int, required
 property: DateSent, DateTime?, DateTime
-property: Subject, string, NVarChar(150)
+property: Subject, string, NVarChar "150"
 property: Body, string, Text
 join: Activity.ID, ActivityId, LeftOuterJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
@@ -279,7 +279,7 @@ inherits: BasicObject
 property: ActivityMessageId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: DateSent, DateTime?, DateTime
-property: SendErrors, string, NVarChar(1000)
+property: SendErrors, string, NVarChar "1000"
 loadmethod: ActivityMessageId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: ActivityMessageId|RegistrantId
@@ -298,24 +298,24 @@ name: Account
 serializable: true
 description: The main organization and account holder in the system
 inherits: BaseCompany
-property: StripeAccessToken, string, NVarChar(100)
-property: StripePublishableKey, string, NVarChar(100)
-property: StripeSecretKey, string, NVarChar(100)
+property: StripeAccessToken, string, NVarChar "100"
+property: StripePublishableKey, string, NVarChar "100"
+property: StripeSecretKey, string, NVarChar "100"
 property: Uid, Guid, UniqueIdentifier, required
-property: UniqueName, string, NVarChar(50)
+property: UniqueName, string, NVarChar "50"
 property: OwnerId, int?, Int, , WebUser id that owns/created the account
 property: IsAdminAccount, bool, Bit
 property: IsActive, bool, Bit
 property: IsAfterSchool, bool, Bit
-property: StripeCustomerId, string, NVarChar(50)
-property: StripeDefaultCardId, string, NVarChar(50)
+property: StripeCustomerId, string, NVarChar "50"
+property: StripeDefaultCardId, string, NVarChar "50"
 property: DefaultFormId, int?, Int
-property: PayPalEmailAddress, string, NVarChar(100)
-property: StripeRefreshToken, string, NVarChar(100)
-property: StripeUserId, string, NVarChar(100)
-property: TimeZone, string, NVarChar(30)
-property: LogoUrl, string, NVarChar(400)
-property: LandingPageText, string, NVarChar(4000)
+property: PayPalEmailAddress, string, NVarChar "100"
+property: StripeRefreshToken, string, NVarChar "100"
+property: StripeUserId, string, NVarChar "100"
+property: TimeZone, string, NVarChar "30"
+property: LogoUrl, string, NVarChar "400"
+property: LandingPageText, string, NVarChar "4000"
 property: AccountTypeId, AccountType, Int
 property: DefaultLocationId, int?, Int
 property: MinGradeLevelOffered, int?, Int
@@ -338,37 +338,37 @@ name: StripeAccount
 description: Where legal details and other info is stored for the stripe account holder
 inherits: BasicObjectWithModified
 property: AccountId, int?, Int
-property: LegalEntityBusinessName, string, NVarChar(100)
-property: LegalEntityEIN, string, NVarChar(20)
-property: LegalEntitySSNLast4, string, NVarChar(4)
-property: LegalEntityFirstName, string, NVarChar(50)
-property: LegalEntityLastName, string, NVarChar(50)
+property: LegalEntityBusinessName, string, NVarChar "100"
+property: LegalEntityEIN, string, NVarChar "20"
+property: LegalEntitySSNLast4, string, NVarChar "4"
+property: LegalEntityFirstName, string, NVarChar "50"
+property: LegalEntityLastName, string, NVarChar "50"
 property: LegalEntityDOB, DateTime?, DateTime
-property: LegalEntityAddress1, string, NVarChar(100)
-property: LegalEntityAddress2, string, NVarChar(50)
-property: LegalEntityCity, string, NVarChar(100)
-property: LegalEntityState, string, NVarChar(50)
-property: LegalEntityPostalCode, string, NVarChar(20)
+property: LegalEntityAddress1, string, NVarChar "100"
+property: LegalEntityAddress2, string, NVarChar "50"
+property: LegalEntityCity, string, NVarChar "100"
+property: LegalEntityState, string, NVarChar "50"
+property: LegalEntityPostalCode, string, NVarChar "20"
 property: TOSAcceptanceDate, DateTime?, DateTime
-property: TOSAcceptanceIP, string, NVarChar(20)
-property: TOSAcceptanceUserAgent, string, NVarChar(400)
+property: TOSAcceptanceIP, string, NVarChar "20"
+property: TOSAcceptanceUserAgent, string, NVarChar "400"
 property: LegalEntityTypeId, LegalEntityType, Int
-property: BusinessPhone, string, NVarChar(20)
-property: SupportPhone, string, NVarChar(50)
-property: SupportEmail, string, NVarChar(100)
-property: BusinessUrl, string, NVarChar(100)
+property: BusinessPhone, string, NVarChar "20"
+property: SupportPhone, string, NVarChar "50"
+property: SupportEmail, string, NVarChar "100"
+property: BusinessUrl, string, NVarChar "100"
 property: RequiresFullSSN, bool, Bit
 property: VerificationStatusId, StripeVerificationStatus, Int
 property: ChargesEnabled, bool, Bit
-property: ChargesDisabledReason, string, NVarChar(400)
+property: ChargesDisabledReason, string, NVarChar "400"
 property: PayoutsEnabled, bool, Bit
-property: BankAccountId, string, NVarChar(50)
-property: BankName, string, NVarChar(50)
-property: BankLast4, string, NVarChar(4)
+property: BankAccountId, string, NVarChar "50"
+property: BankName, string, NVarChar "50"
+property: BankLast4, string, NVarChar "4"
 property: VerificationDueBy, DateTime?, DateTime
 property: RequiresDocument, bool, Bit
 property: RequiresAdditionalOwners, bool, Bit
-property: DocumentFileId, string, NVarChar(50)
+property: DocumentFileId, string, NVarChar "50"
 property: FailedDetailsCode, StripeVerificationFailedCode, Int
 loadmethod: AccountId
 [end]
@@ -422,7 +422,7 @@ property: AccountId, int?, Int
 property: ActivityGroupId, int?, Int
 property: ActivityId, int?, Int
 property: AccountPropertyTypeId, AccountPropertyType, Int
-property: Value, string, NVarChar(4000)
+property: Value, string, NVarChar "4000"
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityId, List<>
@@ -470,7 +470,7 @@ type: Class
 name: GradeLevel
 description: A simple list of grades, such as Kindergarten, 1st Grade, etc.
 inherits: BasicLookUpObject
-property: Abbreviation, string, NVarChar(50)
+property: Abbreviation, string, NVarChar "50"
 baseproperty: Name, required
 [end]
 
@@ -521,7 +521,7 @@ inherits: BasicLookUpObject
 description: Either a Session or a League. This object has many Activities or Teams. 
 property: AccountId, int?, Int, required
 property: RegistrationModeId, RegistrationMode, Int
-property: UniqueName, string, NVarChar(100)
+property: UniqueName, string, NVarChar "100"
 property: Uid, Guid, UniqueIdentifier, required
 property: FormId, int?, Int
 property: IsPublished, bool, Bit
@@ -629,11 +629,13 @@ description: keeps track of payments for an activity from a registrant/student
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: ActivityId, int?, Int
+property: AccountId, int?, Int
 property: Uid, Guid, UniqueIdentifier, required
 property: Amount, decimal?, Money
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 loadmethod: ActivityId, List<>
+loadmethod: AccountId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: Uid
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
@@ -680,8 +682,8 @@ property: RegistrationId, int?, Int
 property: Uid, Guid, UniqueIdentifier
 property: OnWaitingList, bool, Bit
 property: DatePaid, DateTime?, DateTime
-property: StripeChargeId, string, NVarChar(100)
-property: PayPalTransactionId, string, NVarChar(50)
+property: StripeChargeId, string, NVarChar "100"
+property: PayPalTransactionId, string, NVarChar "50"
 property: AmountPaid, decimal?, Money
 property: PaymentTypeId, PaymentType, Int
 property: NumberOfSeats, int?, Int
@@ -800,17 +802,17 @@ inherits: BasicObjectWithModified
 property: FormQuestionGroupId, int?, Int, required
 property: FormId, int?, Int, required
 property: IsTemplate, bool, Bit
-property: Text, string, NVarChar(400)
-property: Description, string, NVarChar(4000)
+property: Text, string, NVarChar "400"
+property: Description, string, NVarChar "4000"
 property: QuestionTypeId, QuestionType, Int
 property: QuestionDataTypeId, QuestionDataType, Int
 property: IsActive, bool, Bit
 property: IsRequired, bool, Bit
 property: IsLocked, bool, Bit
-property: Options, string, NVarChar(1000)
-property: Link, string, NVarChar(1000)
+property: Options, string, NVarChar "1000"
+property: Link, string, NVarChar "1000"
 property: DependsOnQuestionId, int?, Int
-property: DependsOnValues, string, NVarChar(400)
+property: DependsOnValues, string, NVarChar "400"
 property: DisplayOrder, int?, Int
 join: FormQuestionGroup.ID, FormQuestionGroupId, InnerJoin
 joinproperty: FormQuestionGroup.Name, string, NVarChar
@@ -848,9 +850,9 @@ property: FormQuestionId, int?, Int, required
 property: RegistrantId, int?, Int
 property: ActivityId, int?, Int
 property: RegistrationId, int?, Int
-property: Text, string, NVarChar(400)
+property: Text, string, NVarChar "400"
 property: QuestionDataTypeId, QuestionDataType, Int
-property: QuestionText, string, NVarChar(400), , Used to keep the question text just in case the question text changes on the original
+property: QuestionText, string, NVarChar "400", , Used to keep the question text just in case the question text changes on the original
 join: FormQuestion.ID, FormQuestionId, LeftOuterJoin
 join: Registration.ID, RegistrationId, LeftOuterJoin
 join: FormQuestionGroup.ID, FormQuestion.FormQuestionGroupId, LeftOuterJoin
@@ -882,14 +884,14 @@ property: RegistrationPeriodId, int?, Int
 property: AccountId, int?, Int
 property: Uid, Guid, UniqueIdentifier, required
 property: DatePaid, DateTime?, DateTime
-property: StripeChargeId, string, NVarChar(100)
-property: PayPalTransactionId, string, NVarChar(50)
+property: StripeChargeId, string, NVarChar "100"
+property: PayPalTransactionId, string, NVarChar "50"
 property: AmountPaid, decimal?, Money
 property: PaymentTypeId, PaymentType, Int
 property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
-property: ESignature, string, NVarChar(50)
+property: ESignature, string, NVarChar "50"
 property: CompletionStatusId, RegistrationCompletionStatus, Int
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
@@ -1036,7 +1038,7 @@ property: Uid, Guid, UniqueIdentifier
 property: TrialStartDate, DateTime?, DateTime
 property: TrialEndDate, DateTime?, DateTime
 property: IsActive, bool, Bit
-property: StripeSubscriptionId, string, NVarChar(50)
+property: StripeSubscriptionId, string, NVarChar "50"
 join: Package.ID, PackageId, InnerJoin
 joinproperty: Package.Name, string, NVarChar
 joinproperty: Package.Uid, Guid, UniqueIdentifier
@@ -1056,7 +1058,7 @@ serializable: true
 inherits: BasicObjectWithModified
 property: PackageId, int?, Int, required
 property: FeatureTypeId, FeatureType, Int
-property: Max, double?, Float
+property: Max, decimal?, Decimal "10,2"
 loadmethod: PackageId, List<>
 loadmethod: PackageId|FeatureTypeId
 [end]
@@ -1069,7 +1071,7 @@ serializable: true
 inherits: BasicObjectWithModified
 property: AccountPackageId, int?, Int, required
 property: FeatureTypeId, FeatureType, Int
-property: Max, double?, Float
+property: Max, decimal?, Decimal "10,2"
 loadmethod: AccountPackageId, List<>
 loadmethod: AccountPackageId|FeatureTypeId
 [end]
@@ -1079,8 +1081,8 @@ type: Class
 name: File
 description: Used to store files to an account. Such as a logo, etc. 
 inherits: BaseFile
-property: Label, string, NVarChar(50)
-property: Description, string, NVarChar(400)
+property: Label, string, NVarChar "50"
+property: Description, string, NVarChar "400"
 property: FileTypeId, FileType, Int
 property: AccountId, int?, Int
 loadmethod: AccountId, List<>
@@ -1111,9 +1113,9 @@ name: Session
 description: keeps track of a user session where a user is hitting our system and taking actions, basically data analytics inside of our system. Not sure if we should keep this, but good for keeping some basic updates of what is happening in the system. 
 serializable: true
 inherits: BasicObjectWithModified
-property: IPAddress, string, NVarChar(50)
-property: UserAgent, string, NVarChar(400)
-property: UrlReferrer, string, NVarChar(400)
+property: IPAddress, string, NVarChar "50"
+property: UserAgent, string, NVarChar "400"
+property: UrlReferrer, string, NVarChar "400"
 property: LastActivity, DateTime?, DateTime
 property: RegistrantId, int?, Int
 loadmethod: RegistrantId, List<>
@@ -1224,7 +1226,7 @@ property: TotalPeriods, int?, Int, required
 property: BillingPeriodTypeId, BillingPeriodType, Int
 property: CostPerPeriod, decimal?, Money, required
 property: IsActive, bool, Bit
-property: StripePlanId, string, NVarChar(50)
+property: StripePlanId, string, NVarChar "50"
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end-ignore]
@@ -1243,7 +1245,7 @@ property: BillingPeriodTypeId, BillingPeriodType, Int
 property: DoesAutoRenew, bool, Bit
 property: IsActive, bool, Bit
 property: TotalPeriods, int?, Int
-property: StripePlanId, string, NVarChar(50)
+property: StripePlanId, string, NVarChar "50"
 property: PlanTypeId, SubscriptionPlanType, Int
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
@@ -1275,7 +1277,7 @@ property: PurchaseId, int?, Int, required
 property: SubscriptionPlanId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
-property: StripeSubscriptionId, string, NVarChar(50)
+property: StripeSubscriptionId, string, NVarChar "50"
 loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>
@@ -1293,9 +1295,11 @@ property: Amount, decimal?, Money, required
 property: BillerAccountId, int?, Int, required
 property: PayerAccountId, int?, Int, required
 property: PaymentTypeId, PaymentType, Int, required
-property: Description, string, NVarChar(400), required
+property: Description, string, NVarChar "400", required
 property: Uid, Guid, UniqueIdentifier
 property: PurchaseId, int?, Int
+property: PlatformPercentFee, decimal?, Decimal "10,2"
+property: PlatformFlatFee, decimal?, Decimal "10,2"
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid
@@ -1384,8 +1388,8 @@ inherits: BasicObjectWithModified
 property: RegistrationId, int?, Int
 property: RegistrantId, int?, Int
 property: CouponId, int?, Int
-property: StripeToken, string, NVarChar(50)
-property: StripeSourceId, string, NVarChar(50)
+property: StripeToken, string, NVarChar "50"
+property: StripeSourceId, string, NVarChar "50"
 property: PurchaserAccountId, int?, Int
 property: NumberOfSeats, int?, Int
 property: LoggedInUserId, int?, Int

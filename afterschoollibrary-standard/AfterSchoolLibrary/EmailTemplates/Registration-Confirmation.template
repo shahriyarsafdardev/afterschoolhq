@@ -1,0 +1,53 @@
+﻿<div>
+  <p>Hello @Model.FirstName,</p>
+  
+  @Model.CustomMessage
+
+  <div style="margin: 20px">
+    <table style="border: 2px solid #f7f7f7; width: 600px;" border="0">
+      <thead>
+        <tr>
+          <th style="padding: 10px;">
+            Description
+          </th>
+          <th style="padding: 10px;">
+            Qty
+          </th>
+          <th style="padding: 10px;">
+            Cost
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @Model.BodyRows
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" style="font-weight: bold; text-align: right; padding: 10px;">
+            @Model.AmountDueOrPaid:
+          </td>
+          <td style="font-weight: bold; padding: 10px;">
+            @Model.TotalCost
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <p>
+    <a href="@Model.LoginLink">Login to your account to view more details about your registration.</a>
+  </p>
+  
+  <p>
+    If you have any questions or concerns about your registration status or please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+  </p>
+
+  <p>
+    This activity is provided by <a href="@Model.BillerAccountLink">@Model.BillerAccountName</a>.
+  </p>
+
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
+</div>

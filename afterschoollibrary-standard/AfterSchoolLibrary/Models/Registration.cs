@@ -69,14 +69,14 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "DatePaid", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar, 100);
-				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LastUpdated", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FirstRegistrationId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -761,6 +761,12 @@ namespace AfterSchoolLibrary
             return $"{custommessage}{activities}{accountInformation}";
         }
 
+        public static SystemMessages SendConfirmation(CheckoutObject checkoutObject, bool sendBcc, DatabaseConnection dc = null)
+        {
+            return EmailHelper.SendRegistrationConfirmed(checkoutObject, sendBcc);
+        }
+
+        [Obsolete]
         public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();

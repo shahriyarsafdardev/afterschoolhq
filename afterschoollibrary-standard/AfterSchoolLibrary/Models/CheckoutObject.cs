@@ -25,11 +25,22 @@ namespace AfterSchoolLibrary
             Products = new List<Product>();
         }
 
-        public decimal TotalCostToPurchase
+        public bool IsFree
         {
             get
             {
-                return RegistrationFee + ProductCost;
+                return ParticipationObject.IsFree;
+            }
+        }
+
+        public decimal TotalCostToPurchaseToday
+        {
+            get
+            {
+                if (PaymentPlan.IsNotEmpty())
+                    return PaymentPlanCostToday + SubscriptionCostToday;
+
+                return RegistrationFee + SubscriptionCostToday;
             }
         }
 

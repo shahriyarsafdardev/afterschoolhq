@@ -1590,12 +1590,17 @@ namespace AfterSchoolLibrary
             var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
             var flatFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
 
-            return (totalAmountToCharge * percentageFee.ToDecimal()) + flatFee.ToDecimal();
+            return (totalAmountToCharge * percentageFee) + flatFee;
         }
 
-        public static decimal GetPlatformFeePercent(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetPlatformPercentFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue().ToDecimal();
+            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+        }
+
+        public static decimal GetPlatformFlatFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
         }
 
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
@@ -1617,8 +1622,8 @@ namespace AfterSchoolLibrary
                 fromCustomerId: customerId,
                 destinationAccountId: toAccount.StripeUserId,
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
-                totalAmount: checkoutObject.TotalCostToPurchase,
-                platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.TotalCostToPurchase, msgs, dc),
+                totalAmount: checkoutObject.RegistrationFee,
+                platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.RegistrationFee, msgs, dc),
                 description: $"{checkoutObject.ParticipationObject.Name} registration",
                 statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
                 msgs: msgs
@@ -1721,26 +1726,44 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // mark as completed
-            msgs.AddRange(checkoutObject.Registration.FinalizeRegistration(loggedInUser, dc));
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // mark as completed
+                    amsgs.AddRange(checkoutObject.Registration.FinalizeRegistration(loggedInUser, adc));
 
-            // TODO: Allow user to register for multiple activities in one session at once
+                    // TODO: Allow user to register for multiple activities in one session at once
 
-            // add them to the activity
-            if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
-            {
-                var activity = ((Activity)checkoutObject.ParticipationObject.Object);
-                activity.ProcessRegistration(
-                    purchaseObject: checkoutObject,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
-            }
+                    // add them to the activity
+                    if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
+                    {
+                        var activity = ((Activity)checkoutObject.ParticipationObject.Object);
+                        activity.ProcessRegistration(
+                            purchaseObject: checkoutObject,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+                    }
 
-            // TODO: Add to an activity group if they are registering for a session
+                    // TODO: Add to an activity group if they are registering for a session
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
 
+                    if (sendConfirmationEmail)
+                        Registration.SendConfirmation(checkoutObject, true);
+
+                },
+                onFailure: (SystemMessages amsgs) =>
+                {
+                    msgs.AddRange(amsgs);
+                },
+                dc: dc
+            );
         }
 
         public static void ProcessRegistrationWithPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1751,7 +1774,13 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
 
-                    fromAccount.ProcessRegistrationWithoutPayment(toAccount, checkoutObject, loggedInUser, amsgs, adc);                    
+                    fromAccount.ProcessRegistrationWithoutPayment(
+                        toAccount: toAccount, 
+                        checkoutObject: checkoutObject, 
+                        sendConfirmationEmail: false, 
+                        loggedInUser: loggedInUser, 
+                        msgs: amsgs, 
+                        dc: adc);                    
 
                     // process payment by to account, includes registration fee and product purchases
                     // skip for payment plans and subscription plans
@@ -1797,6 +1826,8 @@ namespace AfterSchoolLibrary
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
+
+                    Registration.SendConfirmation(checkoutObject, true);
                 },
                 onFailure: (SystemMessages amsgs) =>
                 {
@@ -1844,6 +1875,11 @@ namespace AfterSchoolLibrary
         public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountPaid(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetTotalPaidByAccount(account.ID.Value, msgs, dc);
         }
     }
 }
