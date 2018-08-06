@@ -1258,10 +1258,16 @@ namespace AfterSchool.Controllers
             if (!registration.IsPaid(msgs))
             {
                 var participationObject = registration.GetParticipationObject(msgs);
+                var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+                var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
+                var parentAccount = parentRegistrant.GetAccount(msgs);
+
+                if (parentAccount.ID != SessionVariables.CurrentAccount.ID)
+                    return Logout(Request.Url.ToString());
 
                 SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
                 SessionVariables.Cart.AddCartItem(participationObject, msgs);
-                SessionVariables.CurrentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+                SessionVariables.CurrentRegistrant = currentRegistrant;
                 SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
 
                 return RedirectToAction("payment", new { id = registration.Uid });
