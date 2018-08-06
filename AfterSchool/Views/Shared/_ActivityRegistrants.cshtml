@@ -32,7 +32,6 @@
                 {
                     <th>Activity</th>
                 }
-                <th>Status</th>
                 <th class="text-center">Seat Index</th>
                 <th>Date Registered</th>
                 <th>Amount Paid</th>
@@ -61,7 +60,6 @@
                         {
                             <td>@ra.ActivityName</td>
                         }
-                        <td>@ra.RegistrationAssignmentTypeId.ToString()</td>
                         <td class="text-center">@ra.AssignmentSeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         <td>
@@ -77,6 +75,20 @@
                         @if (activity.IsNotEmpty())
                         {
                             <td>
+                                <select name="newassignmenttype" id="newassignmenttype" class="form-control">
+                                    @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                                    {
+                                        switch(assignmenttype)
+                                        {
+                                            case RegistrationAssignmentType.NotSet:
+                                                continue;
+                                        }
+                                        <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
+                                            @assignmenttype.ToString().SplitByUpperCase()
+                                        </option>
+                                    }
+                                </select>
+
                                 <button class="btn btn-primary btn-xs md-trigger btn-space hide" 
                                         data-modal="modal-waitinglist" 
                                         onclick="setWaitingListRegistrant('@ra.RegistrantName', '@Url.Action("waitinglist", "activity", new { id = ra.ID })', '@ra.TotalSeats')">
@@ -128,6 +140,8 @@
             <div class="modal-body form">
 
                 <p>
+                    
+
                     Move 
                     <select id="numbertomove" name="numbertomove" class="form-control"></select>
                     @UILabel.RegistrantLabel(true).ToLower()
@@ -148,6 +162,12 @@
 </div>
 
 <script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#newassignmenttype').change(function () {
+            location.href = '@Url.Action("moveregistrant", "activity", new { id = activity.Uid })';
+        });
+    }); 
+
     function setWaitingListRegistrant(name, url, totalSeats) {
         $('#registrant-name').html(name);
         $('#form-waitinglist').attr('action', url);

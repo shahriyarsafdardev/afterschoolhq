@@ -848,7 +848,7 @@ namespace AfterSchoolLibrary
 
                 switch (rat)
                 {
-                    case RegistrationAssignmentType.Application:
+                    case RegistrationAssignmentType.Applied:
                         raQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                         break;
                     case RegistrationAssignmentType.Declined:
@@ -886,7 +886,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -919,7 +919,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -955,7 +955,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -990,7 +990,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -1026,7 +1026,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -1276,7 +1276,7 @@ namespace AfterSchoolLibrary
 
                 switch (rat)
                 {
-                    case RegistrationAssignmentType.Application:
+                    case RegistrationAssignmentType.Applied:
                         registrantActivities = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0).ToList();
                         break;
                     case RegistrationAssignmentType.Declined:

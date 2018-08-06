@@ -541,7 +541,7 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
                     this.GetRegistrantActivities(dc: adc).ForEach(
-                        ra => amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Application, adc))
+                        ra => amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, adc))
                     );
                 },
                 onSuccess: (SystemMessages smsgs) =>

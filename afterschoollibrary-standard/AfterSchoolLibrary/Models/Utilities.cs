@@ -315,6 +315,7 @@ namespace AfterSchoolLibrary
                 msgs.AddRange(UpdateActivityPayment(dc));
                 msgs.AddRange(UpdateInviteCodes(dc));
                 msgs.AddRange(UpdateTransactions(dc));
+                msgs.AddRange(UpdateAssignmentType(dc));
                 //msgs.AddRange(UpdateRegistrations2(dc));
                 //msgs.AddRange(UpdateAccountFeatures(dc: dc));
                 //msgs.AddRange(UpdateLocations(dc: dc));
@@ -349,6 +350,33 @@ namespace AfterSchoolLibrary
             {
                 Database.EndTransaction(dc, msgs);
             }
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateAssignmentType(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var registrantActivities = RegistrantActivity.Load(
+                criterias: new Hashtable() { { "AssignmentTypeId", (int)RegistrationAssignmentType.NotSet } },
+                msgs: msgs,
+                dc: dc);
+
+            registrantActivities.ForEach(registrantActivity => {
+                if (registrantActivity.NumberOfSeats > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Reserved;
+                else if (registrantActivity.NumberOfWaitingListSeats > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.WaitingList;
+                else if (registrantActivity.NumberOfApplicationSeats > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Applied;
+                else if (registrantActivity.NumberOfInvitationSeats > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Invited;
+                else if (registrantActivity.NumberOfSeatsDeclined > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Declined;
+
+                msgs.AddRange(registrantActivity.Save(dc));
+            });
 
             return msgs;
         }

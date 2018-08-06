@@ -1241,7 +1241,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             switch(rat)
             {
-                case RegistrationAssignmentType.Application:
+                case RegistrationAssignmentType.Applied:
                     ras = ras.Where(x => x.NumberOfApplicationSeats > 0).OrderBy(x => x.ApplicationSeatIndex).ToList();
                     break;
                 case RegistrationAssignmentType.WaitingList:

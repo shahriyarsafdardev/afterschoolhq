@@ -232,34 +232,51 @@ namespace AfterSchoolLibrary
             return activity;
         }
 
-        private static Tuple<int, int, int> ProcessRegistrationSeats(this Activity activity, CheckoutObject purchaseObject, SystemMessages msgs, DatabaseConnection dc = null)
+        //private static Tuple<int, int, int> ProcessRegistrationSeats(this Activity activity, CheckoutObject purchaseObject, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    var seatsAvailable = activity.GetSeatsRemaining(msgs, dc);
+        //    var waitingListSeatsAvailable = activity.GetWaitingListSeatsRemaining(msgs, dc);
+
+        //    var reservedSeats = 0;
+        //    var waitingListSeats = 0;
+        //    var applicationSeats = 0;
+
+        //    if (activity.RegistrationModeId == RegistrationMode.Apply)
+        //        applicationSeats = purchaseObject.NumberOfSeats;
+        //    else if (seatsAvailable >= purchaseObject.NumberOfSeats)
+        //        reservedSeats = purchaseObject.NumberOfSeats;
+        //    else if (waitingListSeatsAvailable >= purchaseObject.NumberOfSeats)
+        //        waitingListSeats = purchaseObject.NumberOfSeats;
+
+        //    if (reservedSeats == 0 && waitingListSeats == 0 && applicationSeats == 0)
+        //    {
+        //        msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
+        //        return null;
+        //    }
+
+        //    return new Tuple<int, int, int>(reservedSeats, waitingListSeats, applicationSeats);
+        //}
+
+        private static RegistrationAssignmentType ProcessRegistrationSeats(this Activity activity, CheckoutObject purchaseObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var seatsAvailable = activity.GetSeatsRemaining(msgs, dc);
             var waitingListSeatsAvailable = activity.GetWaitingListSeatsRemaining(msgs, dc);
 
-            var reservedSeats = 0;
-            var waitingListSeats = 0;
-            var applicationSeats = 0;
-
             if (activity.RegistrationModeId == RegistrationMode.Apply)
-                applicationSeats = purchaseObject.NumberOfSeats;
+                return RegistrationAssignmentType.Applied;
             else if (seatsAvailable >= purchaseObject.NumberOfSeats)
-                reservedSeats = purchaseObject.NumberOfSeats;
+                return RegistrationAssignmentType.Reserved;
             else if (waitingListSeatsAvailable >= purchaseObject.NumberOfSeats)
-                waitingListSeats = purchaseObject.NumberOfSeats;
+                return RegistrationAssignmentType.WaitingList;
+            
+            msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
 
-            if (reservedSeats == 0 && waitingListSeats == 0 && applicationSeats == 0)
-            {
-                msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
-                return null;
-            }
-
-            return new Tuple<int, int, int>(reservedSeats, waitingListSeats, applicationSeats);
+            return RegistrationAssignmentType.NotSet;
         }
 
         public static void ProcessRegistration(this Activity activity, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var seats = activity.ProcessRegistrationSeats(purchaseObject, msgs, dc);
+            var assignmentType = activity.ProcessRegistrationSeats(purchaseObject, msgs, dc);
 
             if (msgs.HasErrors())
                 return;
@@ -274,12 +291,7 @@ namespace AfterSchoolLibrary
             var ra = accountRegistrant.AddOrUpdateActivity(
                 registrationId: purchaseObject.Registration.ID.Value,
                 activityId: purchaseObject.ParticipationObject.ObjectID.Value,
-                seats: seats.Item1,
-                waitingListSeats: seats.Item2,
-                applicationSeats: seats.Item3,
-                invitationSeats: 0,
-                declinedSeats: 0,
-                preferenceNumber: 1,
+                assignmentType: assignmentType,
                 registrationPeriodId: period?.ID.IfEmpty(0),
                 activityGroupId: activity.ActivityGroupId,
                 loggedInUserId: loggedInUser.ID.Value,

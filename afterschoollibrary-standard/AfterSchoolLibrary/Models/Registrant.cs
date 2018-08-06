@@ -521,13 +521,54 @@ namespace AfterSchoolLibrary
         {
             return Registration.GetCount(new Hashtable() { { "RegistrantId", this.ID.Value } }, dc: dc);
         }
+        
 
-        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddOrUpdateActivity(registrationId, activityId, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, 1, null, null, loggedInUserId, msgs, dc);
+            int seats = 0, waitingListSeats = 0, applicationSeats = 0, invitationSeats = 0, declinedSeats = 0;
+
+            switch(assignmentType)
+            {
+                case RegistrationAssignmentType.Applied:
+                    applicationSeats = 1;
+                    break;
+                case RegistrationAssignmentType.Declined:
+                    declinedSeats = 1;
+                    break;
+                case RegistrationAssignmentType.Invited:
+                    invitationSeats = 1;
+                    break;
+                case RegistrationAssignmentType.Reserved:
+                    seats = 1;
+                    break;
+                case RegistrationAssignmentType.WaitingList:
+                    waitingListSeats = 1;
+                    break;
+            }
+
+            return AddOrUpdateActivity(registrationId, activityId, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, assignmentType, 1, registrationPeriodId, activityGroupId, loggedInUserId, msgs, dc);
         }
 
-        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        [Obsolete]
+        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var assignmentType = RegistrationAssignmentType.NotSet;
+
+            if (seats > 0)
+                assignmentType = RegistrationAssignmentType.Reserved;
+            else if (waitingListSeats > 0)
+                assignmentType = RegistrationAssignmentType.WaitingList;
+            else if (applicationSeats > 0)
+                assignmentType = RegistrationAssignmentType.Applied;
+            else if (invitationSeats > 0)
+                assignmentType = RegistrationAssignmentType.Invited;
+            else if (declinedSeats > 0)
+                assignmentType = RegistrationAssignmentType.Declined;
+
+            return AddOrUpdateActivity(registrationId, activityId, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, assignmentType, 1, null, null, loggedInUserId, msgs, dc);
+        }
+
+        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             // var changingDays = false;
@@ -536,14 +577,16 @@ namespace AfterSchoolLibrary
 
             if (ra.IsEmpty())
             {
-                ra = new RegistrantActivity();
-                ra.ActivityId = activityId;
-                ra.RegistrantId = this.ID;
-                ra.RegistrationId = registrationId;
-                ra.ActivityGroupId = activityGroupId;
-                ra.RegistrationPeriodId = registrationPeriodId;
-                ra.CreateDate = DateTime.UtcNow;
-                ra.CreatedBy = loggedInUserId;
+                ra = new RegistrantActivity
+                {
+                    ActivityId = activityId,
+                    RegistrantId = this.ID,
+                    RegistrationId = registrationId,
+                    ActivityGroupId = activityGroupId,
+                    RegistrationPeriodId = registrationPeriodId,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId
+                };
                 // changingDays = true;
             }
             else
@@ -558,6 +601,7 @@ namespace AfterSchoolLibrary
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
             ra.PreferenceNumber = preferenceNumber;
+            ra.AssignmentTypeId = assignmentType;
 
             //set indexes
             //if (changingDays)
@@ -588,7 +632,7 @@ namespace AfterSchoolLibrary
 
                 if (applicationSeats > 0)
                     ra.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: RegistrationAssignmentType.Application, 
+                        rat: RegistrationAssignmentType.Applied, 
                         activityId: activityId, 
                         msgs: msgs, 
                         dc: dc) + 1;
