@@ -2,7 +2,7 @@
   <p>@Model.FirstName,</p>
   
   <p>
-    Thank your for @Model.Registering for @Model.ActivityName. In order to complete your registration and ensure your spot is secured, please <a href="">make an online payment</a> to @Model.BillerAccountName.    
+    Thank your for @Model.Registering for @Model.ActivityName. In order to complete your registration and ensure your spot is secured, please <a href="@Model.PaymentLink">make an online payment</a> to @Model.BillerAccountName.    
   </p>
 
   <p>

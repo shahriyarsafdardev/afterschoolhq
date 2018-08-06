@@ -19,7 +19,52 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult SendRegistrantInvoice(string id, string registrant)
+        public ActionResult MoveRegistrantAssignment(string id, string registrant, string assignmenttype)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
+            var newAssignmentType = (RegistrationAssignmentType)assignmenttype.ToInteger();
+
+            if (ra.IsNotEmpty())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        var reg = ra.ToRegistrant();
+                        reg.AddOrUpdateActivity(
+                            ra.RegistrationId.Value,
+                            activity.ID.Value,
+                            newAssignmentType,
+                            ra.RegistrationPeriodId,
+                            ra.ActivityGroupId,
+                            SessionVariables.LoggedInUser.ID.Value,
+                            msgs);
+
+                        // TODO: may change assignment to pending reserved if the user is unpaid, and then auto-send the invoice
+                        // For now won't do that.
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        WriteOutput(new { status = "ok" }, ResponseType.JSON);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                        HandleErrors(msgs, ResponseType.JSON);
+                    }
+                );
+            }
+
+            Response.End();
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult SendPaymentReminder(string id, string registrant)
         {
             var msgs = new SystemMessages();
             Response.Clear();
@@ -30,9 +75,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
 
                 if (ra.IsNotEmpty())
-                {
                     msgs.AddRange(ra.SendPaymentReminder());
-                }
 
                 WriteOutput(new { status = "ok" }, ResponseType.JSON);
             }
@@ -45,6 +88,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 HandleErrors(msgs, ResponseType.JSON);
             }
+
             Response.End();
 
             return View();

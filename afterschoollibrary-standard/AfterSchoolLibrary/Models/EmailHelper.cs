@@ -30,12 +30,52 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var registration = ra.GetRegistration();
+            var activity = ra.ToActivity(true);
+
+            msgs.AddRange(SendPaymentReminder(activity.ToParticipationObject(msgs), registration));
+
+            return msgs;
+        }
+
+        public static SystemMessages SendPaymentReminder(ParticipationObject participationObject, Registration registration)
+        {
+            var msgs = new SystemMessages();
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs);
-            var activity = ra.ToActivity(true);
+            var isAfterSchool = participationObject.OwnerAccount.IsAfterSchool;
+            var registering = "registering";      
 
+            if (participationObject.RegistrationMode == RegistrationMode.Apply)
+                registering = "applying";
 
+            var model = new NameValueCollection()
+            {
+                { "Registering", registering },
+                { "ActivityName",  participationObject.Name },
+                { "PaymentLink", $"{Utilities.BaseUrl(isAfterSchool)}/account/payment/{registration.Uid}" },
+                { "BillerAccountName", participationObject.OwnerAccount.Name },
+                { "ActivityContactName", participationObject.ContactName },
+                { "ActivityContactEmail", participationObject.ContactEmail },
+                { "ActivityContactPhone", participationObject.ContactPhone },
+                { "ProductName", Utilities.AppName(participationObject.OwnerAccount.IsAfterSchool) }
+            };
+
+            var subject = $"You have a payment due for {participationObject.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Payment_Reminder,
+                model,
+                "Payment_Reminder",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(participationObject.OwnerAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(participationObject.OwnerAccount.IsAfterSchool));
+
+            msgs.AddRange(mailMsgs);
 
             return msgs;
         }

@@ -1101,7 +1101,7 @@ namespace AfterSchoolLibrary
         
         public SystemMessages SendPaymentReminder()
         {
-            EmailHelper.SendPaymentReminder();
+            return EmailHelper.SendPaymentReminder(this);
         }
 
         #endregion

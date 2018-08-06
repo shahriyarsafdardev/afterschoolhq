@@ -28,17 +28,11 @@
             <tr>
                 <th></th>
                 <th>Name</th>
-                @if (activity.IsEmpty())
-                {
-                    <th>Activity</th>
-                }
                 <th class="text-center">Seat Index</th>
                 <th>Date Registered</th>
                 <th>Amount Paid</th>
-                @if (activity.IsNotEmpty())
-                {
-                    <th></th>
-                }
+                <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -56,10 +50,6 @@
                             }
                         </td>
                         <td>@ra.RegistrantName.IfBlank(ra.RegistrantEmail)</td>
-                        @if (activity.IsEmpty())
-                        {
-                            <td>@ra.ActivityName</td>
-                        }
                         <td class="text-center">@ra.AssignmentSeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         <td>
@@ -72,30 +62,31 @@
                                 @ra.GetAmountPaid().ToCurrency()
                             }
                         </td>
-                        @if (activity.IsNotEmpty())
-                        {
-                            <td>
-                                <select name="newassignmenttype" id="newassignmenttype" class="form-control">
-                                    @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                        <td>
+                            <select name="newassignmenttype" id="newassignmenttype" class="form-control">
+                                @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                                {
+                                    switch(assignmenttype)
                                     {
-                                        switch(assignmenttype)
-                                        {
-                                            case RegistrationAssignmentType.NotSet:
-                                                continue;
-                                        }
-                                        <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
-                                            @assignmenttype.ToString().SplitByUpperCase()
-                                        </option>
+                                        case RegistrationAssignmentType.NotSet:
+                                            continue;
                                     }
-                                </select>
-
-                                <button class="btn btn-primary btn-xs md-trigger btn-space hide" 
+                                    <option value="@((int)assignmenttype)" @(assignmenttype == ra.AssignmentTypeId ? "selected=\"selected\"" : "")>
+                                        @assignmenttype.ToString().SplitByUpperCase()
+                                    </option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            @if (ra.GetAmountPaid() == 0)
+                            {
+                                <button class="btn btn-primary btn-sm" 
                                         data-modal="modal-waitinglist" 
-                                        onclick="setWaitingListRegistrant('@ra.RegistrantName', '@Url.Action("waitinglist", "activity", new { id = ra.ID })', '@ra.TotalSeats')">
-                                    <i class="s7-edit"></i> Waiting List
+                                        onclick="sendPaymentReminder(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantDisplayName)')">
+                                    Send Payment Reminder
                                 </button>
-                            </td>
-                        }
+                            }
+                        </td>
                     </tr>
                 }
             }
@@ -167,6 +158,25 @@
             location.href = '@Url.Action("moveregistrant", "activity", new { id = activity.Uid })';
         });
     }); 
+
+    function sendPaymentReminder(registrant, registrantName) {
+        $.get(
+            `@Url.Action("sendpaymentreminder", "services", new { id = activity.Uid })?registrant=${registrant}`,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `A payment reminder email has been sent to ${registrantName}.`
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: `Error sending payment reminder email to ${registrantName}. Please <a href="mailto:@AfterSchoolLibrary.Email.AppSupportEmailAddress(SessionVariables.IsAfterSchool.Value)" class="white">contact support</a>.`
+                    });
+                }
+            }
+        );
+    }
 
     function setWaitingListRegistrant(name, url, totalSeats) {
         $('#registrant-name').html(name);
