@@ -41,12 +41,8 @@
                             </tr>
                         }
                         <tr>
-                            <td width="33%" class="text-right">Reserved Seats </td>
-                            <td>@Model.NumberOfSeats</td>
-                        </tr>
-                        <tr>
-                            <td width="33%" class="text-right">Waiting List Seats </td>
-                            <td>@Model.NumberOfWaitingListSeats</td>
+                            <td width="33%" class="text-right">Status</td>
+                            <td>@Model.AssignmentTypeId.ToString().SplitByUpperCase()</td>
                         </tr>
                     </table>
                 </div>
@@ -76,7 +72,7 @@
             </div>
         </div>
 
-        @if (Model.ActivityCostPerRegistrant > 0)
+        @if (Model.ActivityCostPerRegistrant > 0 && false)
         {
             <div class="panel panel-default">
                 <div class="panel-heading">
