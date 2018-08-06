@@ -97,21 +97,31 @@ namespace AfterSchoolLibrary
 
             var receiptRows = "";
             var regStatus = "";
+            var registeredOrApplied = "registered";
             var cost = "";
             var registrantActivity = checkoutObject.Registration.GetRegistrantActivities().First();
-            var registrationThankYou = participationObject.GetRegistrationThankYou(msgs);
+            var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs);
 
-            if (registrantActivity.NumberOfSeats > 0)
-                regStatus = "Reserved";
-            else if (registrantActivity.NumberOfWaitingListSeats > 0)
-                regStatus = "Waiting List";
-            else if (registrantActivity.NumberOfApplicationSeats > 0)
-                regStatus = "Applied";
+            switch(registrantActivity.AssignmentTypeId)
+            {
+                case RegistrationAssignmentType.Reserved:
+                    regStatus = "Reserved";
+                    break;
+                case RegistrationAssignmentType.WaitingList:
+                    regStatus = "Waiting List";
+                    break;
+                case RegistrationAssignmentType.Applied:
+                    regStatus = "Applied";
+                    registeredOrApplied = "applied";
+                    break;
+            }
 
             var description = $"{participationObject.Name} - {regStatus}";
             var amountDueOrPaid = "";
 
-            if (participationObject.RegistrationMode == RegistrationMode.Apply)
+            // if it's in apply mode, but the student could have been moved to registered even during apply mode registration
+            // so we should treat them as registered
+            if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
                 amountDueOrPaid = "Amount Due (If Confirmed)";
             else
                 amountDueOrPaid = "Amount Paid";
@@ -178,7 +188,7 @@ namespace AfterSchoolLibrary
                 { "CustomMessage", registrationThankYou }
             };
 
-            var subject = $"{registrant.FirstName} has ${participationObject.RegistrationMode.ToString()} for {participationObject.Name}!";
+            var subject = $"{registrant.FirstName} has {registeredOrApplied} for {participationObject.Name}!";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,

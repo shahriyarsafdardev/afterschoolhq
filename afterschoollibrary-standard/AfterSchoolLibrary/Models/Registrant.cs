@@ -571,6 +571,7 @@ namespace AfterSchoolLibrary
         public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var changingAssignment = false;
             // var changingDays = false;
 
             var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
@@ -587,14 +588,12 @@ namespace AfterSchoolLibrary
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId
                 };
-                // changingDays = true;
+                changingAssignment = true;
             }
             else
             {
-                /*
-                if (day != ra.Day)
-                    changingDays = true;
-                */
+                if (assignmentType != ra.AssignmentTypeId)
+                    changingAssignment = true;
             }
 
             // ra.Day = day;
@@ -604,17 +603,13 @@ namespace AfterSchoolLibrary
             ra.AssignmentTypeId = assignmentType;
 
             //set indexes
-            //if (changingDays)
-            //{
+            if (changingAssignment)
+            {
                 ra.NumberOfSeats = seats;
                 ra.NumberOfWaitingListSeats = waitingListSeats;
                 ra.NumberOfApplicationSeats = applicationSeats;
                 ra.NumberOfInvitationSeats = invitationSeats;
                 ra.NumberOfSeatsDeclined = declinedSeats;
-
-                //var days = new List<DayOfWeekASL>();
-                //if (day != DayOfWeekASL.NotSet)
-                //    days.Add(day);
 
                 if (seats > 0)
                     ra.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
@@ -636,7 +631,7 @@ namespace AfterSchoolLibrary
                         activityId: activityId, 
                         msgs: msgs, 
                         dc: dc) + 1;
-            // }
+            }
 
             msgs.AddRange(ra.Save(dc: dc));
 

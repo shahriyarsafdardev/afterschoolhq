@@ -64,7 +64,7 @@
                         </td>
                         <td>
                             <select name="newassignmenttype" 
-                                    id="newassignmenttype" 
+                                    id="newassignmenttype-@ra.ID" 
                                     class="form-control" 
                                     onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)">
 
@@ -87,6 +87,7 @@
                             {
                                 <button class="btn btn-default btn-sm" 
                                         data-modal="modal-waitinglist" 
+                                        id="btnsendinvoice-@ra.ID"
                                         onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
                                     Send Invoice
                                 </button>
@@ -161,8 +162,12 @@
 
     function moveRegistrantAssignment(registrant, registrantName, selectBox) {
         let newAssignment = selectBox.value;
-        let newAssignmentText = selectBox.options[selectBox.selectedIndex].Text;
+        let newAssignmentText = selectBox.options[selectBox.selectedIndex].text;
+        console.log(newAssignment, selectBox.selectedIndex, newAssignmentText)
+        moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText);
+    }
 
+    function moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText) {
         $.get(
             `@Url.Action("moveregistrantassignment", "services", new { id = activity.Uid })?registrant=${registrant}`,
             function (data) {
@@ -183,6 +188,8 @@
 
     function sendPaymentReminder(obj, registrant, registrantName) {
 
+        let objId = $(obj).attr('id').split('-')[1];
+
         $(obj).html('Sending...');
         $(obj).prop('disabled', true);
 
@@ -194,6 +201,9 @@
                         title: 'Success',
                         message: `A payment reminder email has been sent to ${registrantName}.`
                     });
+
+                    $(`#newassignmenttype-${objId}`).val(data.AssignmentType);
+
                 } else {
                     Notifications.showBar({
                         title: 'Error',

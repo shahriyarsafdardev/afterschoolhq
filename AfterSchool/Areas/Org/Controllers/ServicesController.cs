@@ -31,7 +31,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
+                    {   
                         var reg = ra.ToRegistrant();
                         reg.AddOrUpdateActivity(
                             ra.RegistrationId.Value,
@@ -45,6 +45,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         // TODO: may change assignment to pending reserved if the user is unpaid, and then auto-send the invoice
                         // For now won't do that.
+
+                       
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -78,11 +80,28 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var activity = Activity.LoadByUid(id.ToGuid(), msgs);
                 var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
+                var assignmentType = ra.AssignmentTypeId;
+
+                if (ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                {
+                    var reg = ra.ToRegistrant();
+
+                    assignmentType = RegistrationAssignmentType.ReservedPendingPayment;
+
+                    reg.AddOrUpdateActivity(
+                        ra.RegistrationId.Value,
+                        activity.ID.Value,
+                        assignmentType,
+                        ra.RegistrationPeriodId,
+                        ra.ActivityGroupId,
+                        SessionVariables.LoggedInUser.ID.Value,
+                        msgs);
+                }
 
                 if (ra.IsNotEmpty())
                     msgs.AddRange(ra.SendPaymentReminder());
 
-                WriteOutput(new { status = "ok" }, ResponseType.JSON);
+                WriteOutput(new { status = "ok", AssignmentType = (int)assignmentType }, ResponseType.JSON);
             }
             else
             {

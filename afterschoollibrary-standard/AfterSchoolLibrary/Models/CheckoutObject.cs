@@ -25,6 +25,14 @@ namespace AfterSchoolLibrary
             Products = new List<Product>();
         }
 
+        public bool IsPaying
+        {
+            get
+            {
+                return StripeToken.IsNotEmpty() || SourceId.IsNotEmpty();
+            }
+        }
+
         public bool IsFree
         {
             get

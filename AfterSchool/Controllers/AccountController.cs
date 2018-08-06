@@ -1246,8 +1246,7 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo, paymentoption);
         }
 
-        [HttpGet]
-        public ActionResult MakePayment(string id)
+        private ActionResult MakePaymentActionGet(string id)
         {
             var msgs = new SystemMessages();
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
@@ -1258,14 +1257,23 @@ namespace AfterSchool.Controllers
             // check if still owes money, load up variables
             if (!registration.IsPaid(msgs))
             {
-                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
-                SessionVariables.Cart.AddCartItem(registration.GetParticipationObject(msgs), msgs);
-                SessionVariables.CurrentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+                var participationObject = registration.GetParticipationObject(msgs);
 
-                return View("payment", new { id = registration.Uid });
+                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
+                SessionVariables.Cart.AddCartItem(participationObject, msgs);
+                SessionVariables.CurrentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+                SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
+
+                return RedirectToAction("payment", new { id = registration.Uid });
             }
-            
-            return View("thankyou", new { id = registration.Uid });
+
+            return RedirectToAction("thankyou", new { id = registration.Uid });
+        }
+
+        [HttpGet]
+        public ActionResult MakePayment(string id)
+        {
+            return HandleIsLoggedIn() ?? MakePaymentActionGet(id);
         }
 
         #endregion

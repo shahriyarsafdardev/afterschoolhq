@@ -220,9 +220,9 @@ namespace AfterSchoolLibrary
             return WaitingListSeatsRemaining.HasValue && WaitingListSeatsRemaining.Value > 0;
         }
 
-        public string GetRegistrationThankYou(SystemMessages msgs, DatabaseConnection dc = null)
+        public string GetRegistrationThankYou(RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (RegistrationMode == RegistrationMode.Apply)
+            if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
             {
                 if (ObjectType == ParticipationObjectType.ActivityGroup)
                     return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
