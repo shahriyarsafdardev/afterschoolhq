@@ -695,7 +695,7 @@ namespace AfterSchoolLibrary
             answer.LastModifiedBy = loggedInUserId;
             msgs.AddRange(answer.Save(dc));
 
-            msgs.AddRange(answer.UpdateRegistrantInfo(this, dc: dc));
+            msgs.AddRange(answer.UpdateRegistrantInfo(this, dc));
 
             return answer;
         }

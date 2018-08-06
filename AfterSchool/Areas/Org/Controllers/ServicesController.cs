@@ -40,7 +40,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             ra.RegistrationPeriodId,
                             ra.ActivityGroupId,
                             SessionVariables.LoggedInUser.ID.Value,
-                            msgs);
+                            amsgs,
+                            adc);
 
                         // TODO: may change assignment to pending reserved if the user is unpaid, and then auto-send the invoice
                         // For now won't do that.
@@ -56,6 +57,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         HandleErrors(msgs, ResponseType.JSON);
                     }
                 );
+            }
+            else
+            {
+                msgs.Add("Invalid data", MessageType.UserError);
             }
 
             Response.End();

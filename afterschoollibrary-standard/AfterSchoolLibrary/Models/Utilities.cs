@@ -204,12 +204,12 @@ namespace AfterSchoolLibrary
 
         public static string BaseUrl(bool isAfterSchool)
         {
-            return "http" + (Utilities.UseSSL() ? "s" : "") + "://" + HostName(isAfterSchool);
+            return $"http{(Utilities.UseSSL() ? "s" : "")}://{HostName(isAfterSchool)}";
         }
 
-        public static string LoginUrl(bool isAfterSchool)
-        {
-            return $"{BaseUrl(isAfterSchool)}/login";
+        public static string LoginUrl(bool isAfterSchool, string redirectUrl = null)
+        {            
+            return $"{BaseUrl(isAfterSchool)}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
         }
 
         public static bool UseSSL()
@@ -222,11 +222,11 @@ namespace AfterSchoolLibrary
 
         public static string BaseUrlHttp(bool isAfterSchool)
         {
-            return "http://" + HostName(isAfterSchool);
+            return $"http://{HostName(isAfterSchool)}";
         }
         public static string BaseUrlHttps(bool isAfterSchool)
         {
-            return "https://" + HostName(isAfterSchool);
+            return $"https://{HostName(isAfterSchool)}";
         }
         
         public static string AppNameEnrollHQ { get; set; }

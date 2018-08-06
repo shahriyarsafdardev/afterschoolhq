@@ -464,10 +464,10 @@ namespace AfterSchoolLibrary
                 FirstRegistrantId = this.RegistrantFirstRegistrantId
             };
         }
-        public Activity ToActivity(bool loadFromDb = false, DatabaseConnection dc = null)
+        public Activity ToActivity(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (loadFromDb)
-                return Activity.Load(this.ActivityId.Value, dc: dc);
+                return Activity.Load(this.ActivityId.Value, msgs, dc);
             else
                 return new Activity()
                 {

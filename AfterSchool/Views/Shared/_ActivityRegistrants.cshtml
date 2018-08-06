@@ -31,7 +31,7 @@
                 <th class="text-center">Seat Index</th>
                 <th>Date Registered</th>
                 <th>Amount Paid</th>
-                <th></th>
+                <th>Status</th>
                 <th></th>
             </tr>
         </thead>
@@ -63,7 +63,11 @@
                             }
                         </td>
                         <td>
-                            <select name="newassignmenttype" id="newassignmenttype" class="form-control">
+                            <select name="newassignmenttype" 
+                                    id="newassignmenttype" 
+                                    class="form-control" 
+                                    onchange="moveRegistrantAssignment(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)', this)">
+
                                 @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
                                 {
                                     switch(assignmenttype)
@@ -75,15 +79,16 @@
                                         @assignmenttype.ToString().SplitByUpperCase()
                                     </option>
                                 }
+
                             </select>
                         </td>
                         <td>
                             @if (ra.GetAmountPaid() == 0)
                             {
-                                <button class="btn btn-primary btn-sm" 
+                                <button class="btn btn-default btn-sm" 
                                         data-modal="modal-waitinglist" 
-                                        onclick="sendPaymentReminder(@ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantDisplayName)')">
-                                    Send Payment Reminder
+                                        onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
+                                    Send Invoice
                                 </button>
                             }
                         </td>
@@ -153,13 +158,34 @@
 </div>
 
 <script>
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('#newassignmenttype').change(function () {
-            location.href = '@Url.Action("moveregistrant", "activity", new { id = activity.Uid })';
-        });
-    }); 
 
-    function sendPaymentReminder(registrant, registrantName) {
+    function moveRegistrantAssignment(registrant, registrantName, selectBox) {
+        let newAssignment = selectBox.value;
+        let newAssignmentText = selectBox.options[selectBox.selectedIndex].Text;
+
+        $.get(
+            `@Url.Action("moveregistrantassignment", "services", new { id = activity.Uid })?registrant=${registrant}`,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `${registrantName}'s seat has been moved to ${newAssignmentText}.`
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: `Error updating the seat for ${registrantName}. Please <a href="mailto:@AfterSchoolLibrary.Email.AppSupportEmailAddress(SessionVariables.IsAfterSchool.Value)" class="white">contact support</a>.`
+                    });
+                }
+            }
+        );
+    }
+
+    function sendPaymentReminder(obj, registrant, registrantName) {
+
+        $(obj).html('Sending...');
+        $(obj).prop('disabled', true);
+
         $.get(
             `@Url.Action("sendpaymentreminder", "services", new { id = activity.Uid })?registrant=${registrant}`,
             function (data) {
@@ -174,17 +200,9 @@
                         message: `Error sending payment reminder email to ${registrantName}. Please <a href="mailto:@AfterSchoolLibrary.Email.AppSupportEmailAddress(SessionVariables.IsAfterSchool.Value)" class="white">contact support</a>.`
                     });
                 }
+                $(obj).html('Send Invoice');
+                $(obj).prop('disabled', false);
             }
         );
-    }
-
-    function setWaitingListRegistrant(name, url, totalSeats) {
-        $('#registrant-name').html(name);
-        $('#form-waitinglist').attr('action', url);
-
-        $('#numbertomove').html('');
-        for (var i = 1; i <= totalSeats; i++) {
-            $('#numbertomove').append('<option value="' + i + '">' + i + '</option>')
-        }
     }
 </script>

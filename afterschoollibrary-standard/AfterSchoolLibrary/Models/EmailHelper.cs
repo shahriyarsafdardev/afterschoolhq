@@ -51,9 +51,10 @@ namespace AfterSchoolLibrary
 
             var model = new NameValueCollection()
             {
+                { "FirstName", parentOrGuardian.FirstName },
                 { "Registering", registering },
                 { "ActivityName",  participationObject.Name },
-                { "PaymentLink", $"{Utilities.BaseUrl(isAfterSchool)}/account/payment/{registration.Uid}" },
+                { "PaymentLink", $"{Utilities.BaseUrl(isAfterSchool)}/account/makepayment/{registration.Uid}" },
                 { "BillerAccountName", participationObject.OwnerAccount.Name },
                 { "ActivityContactName", participationObject.ContactName },
                 { "ActivityContactEmail", participationObject.ContactEmail },
@@ -65,7 +66,7 @@ namespace AfterSchoolLibrary
             var body = ProcessTemplate(
                 EmailTemplates.Payment_Reminder,
                 model,
-                "Payment_Reminder",
+                "Payment_Reminder-1.01",
                 msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
@@ -177,7 +178,7 @@ namespace AfterSchoolLibrary
                 { "CustomMessage", registrationThankYou }
             };
 
-            var subject = $"{registrant.FirstName} has been registered for {participationObject.Name}!";
+            var subject = $"{registrant.FirstName} has ${participationObject.RegistrationMode.ToString()} for {participationObject.Name}!";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,

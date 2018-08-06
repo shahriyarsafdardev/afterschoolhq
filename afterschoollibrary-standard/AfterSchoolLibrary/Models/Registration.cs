@@ -357,7 +357,7 @@ namespace AfterSchoolLibrary
 
                     if (amsgs.HasNoErrors())
                     {
-                        var mergedFromActivities = mergedFrom.GetRegistrantActivities(adc);
+                        var mergedFromActivities = mergedFrom.GetRegistrantActivities(amsgs, adc);
 
                         foreach (var activity in mergedFromActivities)
                         {
@@ -372,7 +372,7 @@ namespace AfterSchoolLibrary
 
                         this.LastModifiedBy = loggedInUserId;
                         this.LastModifiedDate = DateTime.UtcNow;
-                        msgs.AddRange(this.Save(adc));
+                        amsgs.AddRange(this.Save(adc));
                     }
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -623,9 +623,9 @@ namespace AfterSchoolLibrary
             return RegistrationActivity.LoadByRegistrationId(this.ID.Value, dc: dc);
         }
 
-        public List<RegistrantActivity> GetRegistrantActivities(DatabaseConnection dc = null)
+        public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, dc: dc)
+            return RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, msgs, dc)
                     .Where(x => 
                         !x.ActivityIsDeleted && 
                         !x.ActivityIsArchived && 
@@ -1774,6 +1774,31 @@ namespace AfterSchoolLibrary
             msgs.AddRange(this.FindAndSetFirstRegistration(this.RegistrantFirstName, this.RegistrantLastName, this.RegistrantEmail, dc));
 
             return msgs;
+        }
+
+        public bool IsPaid(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+            if (registrantActivities.Any())
+                return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
+                    registrantActivities.First().ActivityId.Value, 
+                    ParticipationObjectType.Activity, 
+                    this.RegistrantId.Value, 
+                    msgs, 
+                    dc) > 0;
+
+            msgs.Add("Incomplete registration", MessageType.UserError);
+
+            return false;
+        }
+
+        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+            if (registrantActivities.Any())
+                return registrantActivities.First().ToActivity(true, msgs, dc).ToParticipationObject(msgs, dc);
+
+            return null;
         }
 
         #endregion
