@@ -26,6 +26,20 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendPaymentReminder(RegistrantActivity ra)
+        {
+            var msgs = new SystemMessages();
+            var registration = ra.GetRegistration();
+            var registrant = registration.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs);
+            var activity = ra.ToActivity(true);
+
+
+
+            return msgs;
+        }
+
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, bool sendBcc)
         {
             var msgs = new SystemMessages();

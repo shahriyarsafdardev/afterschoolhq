@@ -19,6 +19,38 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
+        public ActionResult SendRegistrantInvoice(string id, string registrant)
+        {
+            var msgs = new SystemMessages();
+            Response.Clear();
+
+            if (id.IsGuid())
+            {
+                var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+                var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
+
+                if (ra.IsNotEmpty())
+                {
+                    msgs.AddRange(ra.SendPaymentReminder());
+                }
+
+                WriteOutput(new { status = "ok" }, ResponseType.JSON);
+            }
+            else
+            {
+                msgs.Add("Invalid data", MessageType.UserError);
+            }
+
+            if (msgs.HasErrors())
+            {
+                HandleErrors(msgs, ResponseType.JSON);
+            }
+            Response.End();
+
+            return View();
+        }
+
+        [HttpGet]
         public ActionResult GetScheduleActivities(string id)
         {
             var msgs = new SystemMessages();

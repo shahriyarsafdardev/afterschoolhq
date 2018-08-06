@@ -1172,10 +1172,6 @@ namespace AfterSchool.Areas.Org.Controllers
                             ra.ActivityGroupId,
                             SessionVariables.LoggedInUser.ID.Value,
                             msgs);
-
-                        if (newAssignmentType == RegistrationAssignmentType.Reserved && ra.GetAmountPaid(amsgs, adc) == 0)
-                            ra.SendInvoice(amsgs, adc);
-
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1185,14 +1181,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         msgs.AddRange(fmsgs);
                     }
-                );
-
-               
-                
+                );                
             }
-            
 
-            return RedirectToAction("registrants", new { id })
+            return RedirectToAction("registrants", new { id });
         }
 
         [HttpPost]

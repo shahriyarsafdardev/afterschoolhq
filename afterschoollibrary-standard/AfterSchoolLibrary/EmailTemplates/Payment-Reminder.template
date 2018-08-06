@@ -1,0 +1,16 @@
+﻿<div>
+  <p>@Model.FirstName,</p>
+  
+  <p>
+    Thank your for @Model.Registering for @Model.ActivityName. In order to complete your registration and ensure your spot is secured, please <a href="">make an online payment</a> to @Model.BillerAccountName.    
+  </p>
+
+  <p>
+    If you have any questions or concerns about your registration status or please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+  </p>
+  
+  <p>
+      Thanks, <br />
+      @Model.ProductName
+  </p>
+</div>

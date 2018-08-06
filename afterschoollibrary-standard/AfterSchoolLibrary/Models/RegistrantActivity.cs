@@ -1097,7 +1097,12 @@ namespace AfterSchoolLibrary
                 this.RegistrantId.Value,
                 msgs,
                 dc);
-        }       
+        }  
+        
+        public SystemMessages SendPaymentReminder()
+        {
+            EmailHelper.SendPaymentReminder();
+        }
 
         #endregion
     }
