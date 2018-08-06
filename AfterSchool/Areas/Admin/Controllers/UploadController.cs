@@ -74,6 +74,10 @@ namespace AfterSchool.Areas.Admin.Controllers
         private string[] stateHeaders { get { return new string[] { "state", "statename" }; } }
         private string[] zipHeaders { get { return new string[] { "zip", "zipcode" }; } }
         private string[] websiteHeaders { get { return new string[] { "website", "site", "url", "webpage" }; } }
+        private string[] firstNameHeaders { get { return new string[] { "firstname", "fname", "first" }; } }
+        private string[] lastNameHeaders { get { return new string[] { "lastname", "lname", "last" }; } }
+        private string[] emailHeaders { get { return new string[] { "email", "emailaddress" }; } }
+
 
         private void AddHeaders(List<string[]> list)
         {
@@ -86,6 +90,9 @@ namespace AfterSchool.Areas.Admin.Controllers
             list.Add(zipHeaders);
             list.Add(websiteHeaders);
             list.Add(aptSuiteHeaders);
+            list.Add(firstNameHeaders);
+            list.Add(lastNameHeaders);
+            list.Add(emailHeaders);
         }
 
         private string ProcessImport(HttpPostedFileBase importfile, SystemMessages msgs)
@@ -125,7 +132,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                         foreach (var headerName in headerList)
                         {
-                            if(headerName.Contains(headerNoSpacesEtc) && field.IsNotBlank())
+                            if(headerName.Contains(headerNoSpacesEtc))
                             {
                                 row.Add(field);
                                 if (!headersWithData.Contains(headerNoSpacesEtc))
@@ -186,6 +193,14 @@ namespace AfterSchool.Areas.Admin.Controllers
                             {
                                 hasErrors = true;
                                 msgs.Add(String.Format("In csv, line: {1} \n {0} is not a valid phone number", field, rows.IndexOf(row)), MessageType.UserError);
+                            }
+                        }
+                        if (emailHeaders.Contains(headerName))
+                        {
+                            if(!field.IsBlank() && !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                            {
+                                hasErrors = true;
+                                msgs.Add(String.Format("In csv, line: {1} \n {0} is not a valid email", field, rows.IndexOf(row)), MessageType.UserError);
                             }
                         }
                       
@@ -260,60 +275,105 @@ namespace AfterSchool.Areas.Admin.Controllers
             var cityIndex = GetHeaderPostion(headersWithData, cityHeaders);
             var stateIndex = GetHeaderPostion(headersWithData, stateHeaders);
             var postalCodeIndex = GetHeaderPostion(headersWithData, zipHeaders);
-
-           
-
+            var phoneIndex = GetHeaderPostion(headersWithData, phoneHeaders);
+            var firstNameIndex = GetHeaderPostion(headersWithData, firstNameHeaders);
+            var lastNameIndex = GetHeaderPostion(headersWithData, lastNameHeaders);
+            var emailIndex = GetHeaderPostion(headersWithData, emailHeaders);
                
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
 
-
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    foreach (var row in rows)
                     {
+                        WebUser user = null;
+                        Account account = null;
+                        Account locationHostAccount = null;
 
-                        foreach (var row in rows)
+                        var schoolName = row.ElementAt(schoolIndex).Value;
+                        var schoolPhone = row.ElementAt(phoneIndex).Value;
+                        var address = row.ElementAt(addressIndex).Value;
+                        var address2 = "";
+                        if (address2Index > -1)
                         {
-                            var schoolName = row.ElementAt(schoolIndex).Value;
-                            var address = row.ElementAt(addressIndex).Value;
-                            var address2 = "";
-                            if (address2Index > -1)
-                            {
-                                address2 = row.ElementAt(address2Index).Value;
-                            }
-                            var city = row.ElementAt(cityIndex).Value;
-                            var state = row.ElementAt(stateIndex).Value;
-                            var postalCode = row.ElementAt(postalCodeIndex).Value;
-                            var country = "US";
-                            var locationType = LocationType.School;
+                            address2 = row.ElementAt(address2Index).Value;
+                        }
+                        var city = row.ElementAt(cityIndex).Value;
+                        var state = row.ElementAt(stateIndex).Value;
+                        var postalCode = row.ElementAt(postalCodeIndex).Value;
+                        var country = "US";
+                        var locationType = LocationType.School;
+                        var firstname = row.ElementAt(firstNameIndex).Value;
+                        var lastname = row.ElementAt(lastNameIndex).Value;
+                        var email = row.ElementAt(emailIndex).Value;
 
-                            // Add new Location
-                            LocationService.CreateNewWithValidation(
-                                schoolName,
-                                address,
-                                address2,
-                                city,
-                                state,
-                                postalCode,
-                                country,
-                                locationType,
-                                null,
-                                SessionVariables.CurrentAccount,
-                                SessionVariables.LoggedInUser,
-                                msgs);
+                        if(firstname.Length > 0)
+                        {
 
+                            user = WebUserService.InviteNew(
+                                firstName: firstname,
+                                lastName: lastname,
+                                email: email,
+                                loggedInUser: SessionVariables.LoggedInUser,
+                                msgs: amsgs,
+                                dc: adc
+                            );
+
+                            account = user.AddNewAccount(
+                                orgName: schoolName,
+                                phone: schoolPhone,
+                                isActive: true,
+                                accountType: AccountType.School,
+                                packageId: null,
+                                packageBillingPeriod: null,
+                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                                loggedInUser: SessionVariables.LoggedInUser,
+                                msgs: amsgs,
+                                dc: adc
+                            );
+
+                            locationHostAccount = account;
+                            // Adding the school to the district account so district can see details
+                            msgs.AddRange(
+                                SessionVariables.CurrentAccount.AddVisitorAccount(
+                                    account,
+                                    HostPermissionType.Edit,
+                                    ApprovalStatus.Approved,
+                                    SessionVariables.LoggedInUser,
+                                    adc
+                                )
+                            );
+                        } else
+                        {
+                            locationHostAccount = SessionVariables.CurrentAccount;
                         }
 
-
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
+                        // Add new Location
+                        LocationService.CreateNew(
+                            schoolName,
+                            address,
+                            address2,
+                            city,
+                            state,
+                            postalCode,
+                            country,
+                            locationType,
+                            locationHostAccount.ID.Value,
+                            SessionVariables.LoggedInUser,
+                            msgs);
                     }
-                );
+
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                }
+            );
 
             return msgs;
         }
