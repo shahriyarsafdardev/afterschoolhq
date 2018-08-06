@@ -1346,10 +1346,10 @@ namespace AfterSchool.Controllers
         private ActionResult HandleIsLoggedIn()
         {
             if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction("index", "login", new { returnurl = Request.Url.ToString() });
+                return Logout(Request.Url.ToString(), true);
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
-                return RedirectToAction("");
+                return Logout(Request.Url.ToString(), true);
 
             return null;
         }

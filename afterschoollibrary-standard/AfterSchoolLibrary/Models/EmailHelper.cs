@@ -66,7 +66,7 @@ namespace AfterSchoolLibrary
             var body = ProcessTemplate(
                 EmailTemplates.Payment_Reminder,
                 model,
-                "Payment_Reminder-1.01",
+                "Payment_Reminder-1.02",
                 msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
