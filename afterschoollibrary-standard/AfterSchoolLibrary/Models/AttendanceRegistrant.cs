@@ -253,7 +253,7 @@ namespace AfterSchoolLibrary
 
             var results = dq.Select();
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
@@ -271,7 +271,7 @@ namespace AfterSchoolLibrary
 
             var results = dq.Select();
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
@@ -289,7 +289,7 @@ namespace AfterSchoolLibrary
 
             var results = dq.Select();
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
@@ -325,7 +325,7 @@ namespace AfterSchoolLibrary
 
             var results = dq.Select();
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
