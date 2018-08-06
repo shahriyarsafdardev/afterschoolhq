@@ -1273,6 +1273,8 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("payment", new { id = registration.Uid });
             }
 
+            EmailHelper.SendEmail("darye@afterschoolhq.com", "Payment Redirect", msgs.RenderMessageList(MessageOutputType.Html), true);
+
             return RedirectToAction("thankyou", new { id = registration.Uid });
         }
 

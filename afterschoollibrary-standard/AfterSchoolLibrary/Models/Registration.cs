@@ -1778,14 +1778,33 @@ namespace AfterSchoolLibrary
 
         public bool IsPaid(SystemMessages msgs, DatabaseConnection dc = null)
         {
+            msgs.Add("Getting registrant activities", MessageType.Notice);
             var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+
+            msgs.Add($"Any registrantActivities: {registrantActivities.Any()}", MessageType.Notice);
+
             if (registrantActivities.Any())
-                return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                    registrantActivities.First().ActivityId.Value, 
-                    ParticipationObjectType.Activity, 
-                    this.RegistrantId.Value, 
-                    msgs, 
-                    dc) > 0;
+            {
+                msgs.Add("Get paid value", MessageType.Notice);
+                msgs.Add($"ActivityId: {registrantActivities.First().ActivityId}", MessageType.Notice);
+                msgs.Add($"RegistrantId: {this.RegistrantId.Value}", MessageType.Notice);
+
+                var value = ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
+                    registrantActivities.First().ActivityId.Value,
+                    ParticipationObjectType.Activity,
+                    this.RegistrantId.Value,
+                    msgs,
+                    dc);
+
+                msgs.Add($"value: {value}", MessageType.Notice);
+                msgs.Add($"value: {value}", MessageType.Notice);
+
+                var isPaid = value > 0;
+
+                msgs.Add($"value: {isPaid}", MessageType.Notice);
+
+                return isPaid;
+            }
 
             msgs.Add("Incomplete registration", MessageType.UserError);
 
