@@ -169,7 +169,7 @@
 
     function moveRegistrantAssignment2(registrant, registrantName, newAssignment, newAssignmentText) {
         $.get(
-            `@Url.Action("moveregistrantassignment", "services", new { id = activity.Uid })?registrant=${registrant}`,
+            `@Url.Action("moveregistrantassignment", "services", new { id = activity.Uid })?registrant=${registrant}&assignmenttype=${newAssignment}`,
             function (data) {
                 if (data && data.status == 'ok') {
                     Notifications.showBar({
