@@ -1778,35 +1778,15 @@ namespace AfterSchoolLibrary
 
         public bool IsPaid(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            msgs.Add($"Getting registrant activities", MessageType.Notice);
-            msgs.Add($"RegistrationId: ${this.ID}", MessageType.Notice);
-            msgs.Add($"RegistrationUid: ${this.Uid}", MessageType.Notice);
-            var registrantActivities = this.GetRegistrationActivities(msgs, dc);
-
-            msgs.Add($"Any registrantActivities: {registrantActivities.Any()}", MessageType.Notice);
-            msgs.Add($"Count registrantActivities: {registrantActivities.Count()}", MessageType.Notice);
+            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
 
             if (registrantActivities.Any())
-            {
-                msgs.Add("Get paid value", MessageType.Notice);
-                msgs.Add($"ActivityId: {registrantActivities.First().ActivityId}", MessageType.Notice);
-                msgs.Add($"RegistrantId: {this.RegistrantId.Value}", MessageType.Notice);
-
-                var value = ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
+                return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
                     registrantActivities.First().ActivityId.Value,
                     ParticipationObjectType.Activity,
                     this.RegistrantId.Value,
                     msgs,
-                    dc);
-
-                msgs.Add($"value: {value}", MessageType.Notice);
-
-                var isPaid = value > 0;
-
-                msgs.Add($"isPaid: {isPaid}", MessageType.Notice);
-
-                return isPaid;
-            }
+                    dc) > 0;
 
             msgs.Add("Incomplete registration", MessageType.UserError);
 
