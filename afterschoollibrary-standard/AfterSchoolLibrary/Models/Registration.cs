@@ -625,7 +625,7 @@ namespace AfterSchoolLibrary
 
         public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, msgs, dc)
+            return RegistrantActivity.LoadByRegistrationId(this.ID.Value, msgs, dc)
                     .Where(x => 
                         !x.ActivityIsDeleted && 
                         !x.ActivityIsArchived && 
@@ -1781,7 +1781,7 @@ namespace AfterSchoolLibrary
             msgs.Add($"Getting registrant activities", MessageType.Notice);
             msgs.Add($"RegistrationId: ${this.ID}", MessageType.Notice);
             msgs.Add($"RegistrationUid: ${this.Uid}", MessageType.Notice);
-            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+            var registrantActivities = this.GetRegistrationActivities(msgs, dc);
 
             msgs.Add($"Any registrantActivities: {registrantActivities.Any()}", MessageType.Notice);
             msgs.Add($"Count registrantActivities: {registrantActivities.Count()}", MessageType.Notice);
