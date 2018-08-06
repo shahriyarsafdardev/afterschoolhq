@@ -261,41 +261,47 @@ namespace AfterSchool.Areas.Admin.Controllers
             var stateIndex = GetHeaderPostion(headersWithData, stateHeaders);
             var postalCodeIndex = GetHeaderPostion(headersWithData, zipHeaders);
 
-            foreach ( var row in rows )
-            {
+           
 
-                var schoolName = row.ElementAt(schoolIndex).Value;
-                var address = row.ElementAt(addressIndex).Value;
-                var address2 = "";
-                if(address2Index > -1)
-                {
-                    address2 = row.ElementAt(address2Index).Value;
-                }
-                var city = row.ElementAt(cityIndex).Value;
-                var state = row.ElementAt(stateIndex).Value;
-                var postalCode = row.ElementAt(postalCodeIndex).Value;
-                var country = "US";
-                var locationType = LocationType.School;
+               
 
 
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        // Add new Location
-                        LocationService.CreateNewWithValidation(
-                            schoolName,
-                            address,
-                            address2,
-                            city,
-                            state,
-                            postalCode,
-                            country,
-                            locationType,
-                            null,
-                            SessionVariables.CurrentAccount,
-                            SessionVariables.LoggedInUser,
-                            msgs);
+
+                        foreach (var row in rows)
+                        {
+                            var schoolName = row.ElementAt(schoolIndex).Value;
+                            var address = row.ElementAt(addressIndex).Value;
+                            var address2 = "";
+                            if (address2Index > -1)
+                            {
+                                address2 = row.ElementAt(address2Index).Value;
+                            }
+                            var city = row.ElementAt(cityIndex).Value;
+                            var state = row.ElementAt(stateIndex).Value;
+                            var postalCode = row.ElementAt(postalCodeIndex).Value;
+                            var country = "US";
+                            var locationType = LocationType.School;
+
+                            // Add new Location
+                            LocationService.CreateNewWithValidation(
+                                schoolName,
+                                address,
+                                address2,
+                                city,
+                                state,
+                                postalCode,
+                                country,
+                                locationType,
+                                null,
+                                SessionVariables.CurrentAccount,
+                                SessionVariables.LoggedInUser,
+                                msgs);
+
+                        }
 
 
                     },
@@ -309,7 +315,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                     }
                 );
 
-            }
             return msgs;
         }
 
