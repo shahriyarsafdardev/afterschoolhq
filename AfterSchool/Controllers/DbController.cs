@@ -16,7 +16,7 @@ namespace AfterSchool.Controllers
     {
         public ActionResult Update(string id)
         {
-            if (Request.UserHostAddress == "::1" || true)
+            if (Request.UserHostAddress == "::1")
             {
                 var msgs = new SystemMessages();
 
@@ -24,6 +24,12 @@ namespace AfterSchool.Controllers
 
                 Response.Clear();
                 Response.Write(msgs.RenderMessageList(MessageOutputType.Text));
+                Response.End();
+            }
+            else
+            {
+                Response.Clear();
+                Response.Write(Request.UserHostAddress);
                 Response.End();
             }
             return View();
