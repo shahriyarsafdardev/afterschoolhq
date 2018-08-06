@@ -253,7 +253,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.RegistrantActivities = period.GetRegistrantActivities(registrations);
             ViewBag.ReservedSeats = period.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
             ViewBag.WaitingListSeats = period.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
-            ViewBag.ApplicationSeats = period.GetSeatCountByAssignmentType(RegistrationAssignmentType.Application);
+            ViewBag.ApplicationSeats = period.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
             ViewBag.ReturnUrl = Url.Action("registrations", "period", new { id = period.ID });
 
             ViewBag.PagingModel = new PagingModel()

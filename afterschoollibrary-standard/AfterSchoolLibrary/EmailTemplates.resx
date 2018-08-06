@@ -127,6 +127,9 @@
   <data name="Password_Reset" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\Password-Reset.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Payment_Reminder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\payment-reminder.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Registration_Confirmation" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\registration-confirmation.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

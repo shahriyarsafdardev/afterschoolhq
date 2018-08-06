@@ -26,6 +26,61 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendPaymentReminder(RegistrantActivity ra)
+        {
+            var msgs = new SystemMessages();
+            var registration = ra.GetRegistration();
+            var activity = ra.ToActivity(true);
+
+            msgs.AddRange(SendPaymentReminder(activity.ToParticipationObject(msgs), registration));
+
+            return msgs;
+        }
+
+        public static SystemMessages SendPaymentReminder(ParticipationObject participationObject, Registration registration)
+        {
+            var msgs = new SystemMessages();
+            var registrant = registration.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs);
+            var isAfterSchool = participationObject.OwnerAccount.IsAfterSchool;
+            var registering = "registering";      
+
+            if (participationObject.RegistrationMode == RegistrationMode.Apply)
+                registering = "applying";
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", parentOrGuardian.FirstName },
+                { "Registering", registering },
+                { "ActivityName",  participationObject.Name },
+                { "PaymentLink", $"{Utilities.BaseUrl(isAfterSchool)}/account/makepayment/{registration.Uid}" },
+                { "BillerAccountName", participationObject.OwnerAccount.Name },
+                { "ActivityContactName", participationObject.ContactName },
+                { "ActivityContactEmail", participationObject.ContactEmail },
+                { "ActivityContactPhone", participationObject.ContactPhone },
+                { "ProductName", Utilities.AppName(participationObject.OwnerAccount.IsAfterSchool) }
+            };
+
+            var subject = $"You have a payment due for {participationObject.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Payment_Reminder,
+                model,
+                "Payment_Reminder-1.02",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(participationObject.OwnerAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(participationObject.OwnerAccount.IsAfterSchool));
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, bool sendBcc)
         {
             var msgs = new SystemMessages();
@@ -42,21 +97,31 @@ namespace AfterSchoolLibrary
 
             var receiptRows = "";
             var regStatus = "";
+            var registeredOrApplied = "registered";
             var cost = "";
             var registrantActivity = checkoutObject.Registration.GetRegistrantActivities().First();
-            var registrationThankYou = participationObject.GetRegistrationThankYou(msgs);
+            var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs);
 
-            if (registrantActivity.NumberOfSeats > 0)
-                regStatus = "Reserved";
-            else if (registrantActivity.NumberOfWaitingListSeats > 0)
-                regStatus = "Waiting List";
-            else if (registrantActivity.NumberOfApplicationSeats > 0)
-                regStatus = "Applied";
+            switch(registrantActivity.AssignmentTypeId)
+            {
+                case RegistrationAssignmentType.Reserved:
+                    regStatus = "Reserved";
+                    break;
+                case RegistrationAssignmentType.WaitingList:
+                    regStatus = "Waiting List";
+                    break;
+                case RegistrationAssignmentType.Applied:
+                    regStatus = "Applied";
+                    registeredOrApplied = "applied";
+                    break;
+            }
 
             var description = $"{participationObject.Name} - {regStatus}";
             var amountDueOrPaid = "";
 
-            if (participationObject.RegistrationMode == RegistrationMode.Apply)
+            // if it's in apply mode, but the student could have been moved to registered even during apply mode registration
+            // so we should treat them as registered
+            if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
                 amountDueOrPaid = "Amount Due (If Confirmed)";
             else
                 amountDueOrPaid = "Amount Paid";
@@ -123,7 +188,7 @@ namespace AfterSchoolLibrary
                 { "CustomMessage", registrationThankYou }
             };
 
-            var subject = $"{registrant.FirstName} has been registered for {participationObject.Name}!";
+            var subject = $"{registrant.FirstName} has {registeredOrApplied} for {participationObject.Name}!";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,

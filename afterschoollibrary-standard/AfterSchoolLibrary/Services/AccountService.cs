@@ -1742,7 +1742,7 @@ namespace AfterSchoolLibrary
                     {
                         var activity = ((Activity)checkoutObject.ParticipationObject.Object);
                         activity.ProcessRegistration(
-                            purchaseObject: checkoutObject,
+                            checkoutObject: checkoutObject,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);

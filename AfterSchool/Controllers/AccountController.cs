@@ -1179,13 +1179,13 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return results;
 
             var msgs = new SystemMessages();
+            
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+            var registration = PaymentViewBag(id, participationObject, msgs);            
 
             // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
+            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs) && registration.IsPaid(msgs))
                 return RedirectToAction("select");
-
-            PaymentViewBag(id, participationObject, msgs);
 
             return View();
         }
@@ -1244,6 +1244,42 @@ namespace AfterSchool.Controllers
         public ActionResult Payment(string id, string source, string stripetoken, string savepaymentinfo, string paymentoption)
         {
             return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo, paymentoption);
+        }
+
+        private ActionResult MakePaymentActionGet(string id)
+        {
+            var msgs = new SystemMessages();
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+
+            if (registration.IsEmpty())
+                return View("");
+
+            // check if still owes money, load up variables
+            if (!registration.IsPaid(msgs))
+            {
+                var participationObject = registration.GetParticipationObject(msgs);
+                var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+                var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
+                var parentAccount = parentRegistrant.GetAccount(msgs);
+
+                if (parentAccount.ID != SessionVariables.CurrentAccount.ID)
+                    return Logout(Request.Url.ToString());
+
+                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
+                SessionVariables.Cart.AddCartItem(participationObject, msgs);
+                SessionVariables.CurrentRegistrant = currentRegistrant;
+                SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
+
+                return RedirectToAction("payment", new { id = registration.Uid });
+            }
+
+            return RedirectToAction("thankyou", new { id = registration.Uid });
+        }
+
+        [HttpGet]
+        public ActionResult MakePayment(string id)
+        {
+            return HandleIsLoggedIn() ?? MakePaymentActionGet(id);
         }
 
         #endregion
@@ -1310,10 +1346,10 @@ namespace AfterSchool.Controllers
         private ActionResult HandleIsLoggedIn()
         {
             if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction("");
+                return Logout(Request.Url.ToString(), true);
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
-                return RedirectToAction("");
+                return Logout(Request.Url.ToString(), true);
 
             return null;
         }

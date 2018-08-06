@@ -42,9 +42,9 @@
                                 <label for="paymentoption-0">Pay @participationObject.Cost.ToCurrency() Today</label>                                
                             </div>
 
-                            @foreach (var plan in participationObject.PaymentPlans)
+                            @foreach (var plan in participationObject.PaymentPlans.Where(plan => plan.IsActive))
                             {
-                                <div class="am-radio inline">
+                                <div class="am-radio">
                                     <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
                                     <label for="paymentoption-@plan.ID">
                                         Pay @plan.CostPerPeriod.ToCurrency() Today and

@@ -275,6 +275,26 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
+        public static decimal GetTotalPaidByParticipationObjectByRegistrant(int objectId, ParticipationObjectType objectType, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+            var sp = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["Amount"]);
+            sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
+            dq.SelectParameters.Add(sp);
+            dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)objectType);
+            dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
+            dq.Criterias.Add(ObjectMap["registrantId"], registrantId);
+
+            var results = dq.Select();
+            if (results.Rows.Any())
+                return dq.Select().Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
         #endregion
     }
 }
