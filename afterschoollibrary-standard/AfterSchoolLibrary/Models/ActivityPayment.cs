@@ -249,9 +249,9 @@ namespace AfterSchoolLibrary
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["accountId"], accountId);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToDecimal();
+                return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
         }
@@ -268,9 +268,9 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)objectType);
             dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToDecimal();
+                return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
         }
@@ -288,9 +288,9 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["participationObjectId"], objectId);
             dq.Criterias.Add(ObjectMap["registrantId"], registrantId);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToDecimal();
+                return results.Rows[0][0].ToString().ToDecimal();
 
             return 0;
         }

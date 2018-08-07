@@ -1271,7 +1271,7 @@ namespace AfterSchool.Controllers
                 SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
 
                 return RedirectToAction("payment", new { id = registration.Uid });
-            }
+            }            
 
             return RedirectToAction("thankyou", new { id = registration.Uid });
         }

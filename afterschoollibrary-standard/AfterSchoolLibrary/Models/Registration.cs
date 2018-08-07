@@ -625,7 +625,7 @@ namespace AfterSchoolLibrary
 
         public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, msgs, dc)
+            return RegistrantActivity.LoadByRegistrationId(this.ID.Value, msgs, dc)
                     .Where(x => 
                         !x.ActivityIsDeleted && 
                         !x.ActivityIsArchived && 
@@ -1779,12 +1779,13 @@ namespace AfterSchoolLibrary
         public bool IsPaid(SystemMessages msgs, DatabaseConnection dc = null)
         {
             var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+
             if (registrantActivities.Any())
                 return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                    registrantActivities.First().ActivityId.Value, 
-                    ParticipationObjectType.Activity, 
-                    this.RegistrantId.Value, 
-                    msgs, 
+                    registrantActivities.First().ActivityId.Value,
+                    ParticipationObjectType.Activity,
+                    this.RegistrantId.Value,
+                    msgs,
                     dc) > 0;
 
             msgs.Add("Incomplete registration", MessageType.UserError);
