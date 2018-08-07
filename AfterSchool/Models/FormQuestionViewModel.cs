@@ -65,7 +65,7 @@ namespace AfterSchool.Models
         {
             get
             {
-                return Question.IsRequired ? "<span class='text-danger'>*</span>" : " (optional)";
+                return Question.IsRequired ? "<span class='text-danger'>*</span>" : " <span class='text-muted'><em>(optional)</em></span>";
             }
         }
 
