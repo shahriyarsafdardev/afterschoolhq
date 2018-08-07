@@ -69,14 +69,14 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "DatePaid", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar, 100);
-				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LastUpdated", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FirstRegistrationId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -357,7 +357,7 @@ namespace AfterSchoolLibrary
 
                     if (amsgs.HasNoErrors())
                     {
-                        var mergedFromActivities = mergedFrom.GetRegistrantActivities(adc);
+                        var mergedFromActivities = mergedFrom.GetRegistrantActivities(amsgs, adc);
 
                         foreach (var activity in mergedFromActivities)
                         {
@@ -372,7 +372,7 @@ namespace AfterSchoolLibrary
 
                         this.LastModifiedBy = loggedInUserId;
                         this.LastModifiedDate = DateTime.UtcNow;
-                        msgs.AddRange(this.Save(adc));
+                        amsgs.AddRange(this.Save(adc));
                     }
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -623,9 +623,9 @@ namespace AfterSchoolLibrary
             return RegistrationActivity.LoadByRegistrationId(this.ID.Value, dc: dc);
         }
 
-        public List<RegistrantActivity> GetRegistrantActivities(DatabaseConnection dc = null)
+        public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, dc: dc)
+            return RegistrantActivity.LoadByRegistrationId(this.ID.Value, msgs, dc)
                     .Where(x => 
                         !x.ActivityIsDeleted && 
                         !x.ActivityIsArchived && 
@@ -761,6 +761,12 @@ namespace AfterSchoolLibrary
             return $"{custommessage}{activities}{accountInformation}";
         }
 
+        public static SystemMessages SendConfirmation(CheckoutObject checkoutObject, bool sendBcc, DatabaseConnection dc = null)
+        {
+            return EmailHelper.SendRegistrationConfirmed(checkoutObject, sendBcc);
+        }
+
+        [Obsolete]
         public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -842,7 +848,7 @@ namespace AfterSchoolLibrary
 
                 switch (rat)
                 {
-                    case RegistrationAssignmentType.Application:
+                    case RegistrationAssignmentType.Applied:
                         raQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                         break;
                     case RegistrationAssignmentType.Declined:
@@ -880,7 +886,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -913,7 +919,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -949,7 +955,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -984,7 +990,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -1020,7 +1026,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -1270,7 +1276,7 @@ namespace AfterSchoolLibrary
 
                 switch (rat)
                 {
-                    case RegistrationAssignmentType.Application:
+                    case RegistrationAssignmentType.Applied:
                         registrantActivities = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0).ToList();
                         break;
                     case RegistrationAssignmentType.Declined:
@@ -1768,6 +1774,32 @@ namespace AfterSchoolLibrary
             msgs.AddRange(this.FindAndSetFirstRegistration(this.RegistrantFirstName, this.RegistrantLastName, this.RegistrantEmail, dc));
 
             return msgs;
+        }
+
+        public bool IsPaid(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+
+            if (registrantActivities.Any())
+                return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
+                    registrantActivities.First().ActivityId.Value,
+                    ParticipationObjectType.Activity,
+                    this.RegistrantId.Value,
+                    msgs,
+                    dc) > 0;
+
+            msgs.Add("Incomplete registration", MessageType.UserError);
+
+            return false;
+        }
+
+        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+            if (registrantActivities.Any())
+                return registrantActivities.First().ToActivity(true, msgs, dc).ToParticipationObject(msgs, dc);
+
+            return null;
         }
 
         #endregion

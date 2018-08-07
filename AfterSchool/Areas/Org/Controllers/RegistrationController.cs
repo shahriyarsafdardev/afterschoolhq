@@ -219,7 +219,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var sat = SessionActionType.NotSet;
                 switch (ratTo)
                 {
-                    case RegistrationAssignmentType.Application:
+                    case RegistrationAssignmentType.Applied:
                         sat = SessionActionType.ActivityMoveToApplication;
                         break;
                     case RegistrationAssignmentType.Reserved:
@@ -280,6 +280,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var registrant = selectedRegistration.GetRegistrant();
             var regperiod = act.GetActiveRegistrationPeriod();            
             var msgs = new SystemMessages();
+            var assignmentType = (RegistrationAssignmentType)activityassignment.ToInteger();
 
             var seats = 0;
             var wlseats = 0;
@@ -287,7 +288,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var iseats = 0;
             var dseats = 0;
 
-            switch ((RegistrationAssignmentType)activityassignment.ToInteger())
+            switch (assignmentType)
             {
                 case RegistrationAssignmentType.Reserved:
                     seats = 1;
@@ -295,7 +296,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 case RegistrationAssignmentType.WaitingList:
                     wlseats = 1;
                     break;
-                case RegistrationAssignmentType.Application:
+                case RegistrationAssignmentType.Applied:
                     aseats = 1;
                     break;
                 case RegistrationAssignmentType.Invited:
@@ -314,7 +315,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrationPeriodId = regperiod.ID;
             }
 
-            registrant.AddOrUpdateActivity(selectedRegistration.ID.Value, activity.ToInteger(), seats, wlseats, aseats, iseats, dseats, choiceNumber, registrationPeriodId, act.ActivityGroupId, SessionVariables.LoggedInUser.ID.Value, msgs);
+            registrant.AddOrUpdateActivity(selectedRegistration.ID.Value, activity.ToInteger(), seats, wlseats, aseats, iseats, dseats, assignmentType, choiceNumber, registrationPeriodId, act.ActivityGroupId, SessionVariables.LoggedInUser.ID.Value, msgs);
 
             if (msgs.HasNoErrors())
             {

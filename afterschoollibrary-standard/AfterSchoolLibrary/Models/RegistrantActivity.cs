@@ -47,6 +47,7 @@ namespace AfterSchoolLibrary
 		public int? RegistrationPeriodId { get { return (int?)MDV["RegistrationPeriodId"].Value; } set { MDV["RegistrationPeriodId"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public int? Rating { get { return (int?)MDV["Rating"].Value; } set { MDV["Rating"].Value = value; } }
+		public RegistrationAssignmentType AssignmentTypeId { get { return (RegistrationAssignmentType)MDV["AssignmentTypeId"].Value; } set { MDV["AssignmentTypeId"].Value = value; } }
 		public string RegistrantEmail { get { return (string)MDV["RegistrantEmail"].Value; } }
 		public string RegistrantFirstName { get { return (string)MDV["RegistrantFirstName"].Value; } }
 		public string RegistrantLastName { get { return (string)MDV["RegistrantLastName"].Value; } }
@@ -76,6 +77,7 @@ namespace AfterSchoolLibrary
 			this.OnWaitingList = false;
 			this.PaymentTypeId = PaymentType.NotSet;
 			this.Day = DayOfWeekASL.NotSet;
+			this.AssignmentTypeId = RegistrationAssignmentType.NotSet;
 			
         }
 
@@ -92,8 +94,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "OnWaitingList", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "DatePaid", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar, 100);
-				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfSeats", System.Data.SqlDbType.Int);
@@ -109,6 +111,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RegistrationPeriodId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Rating", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AssignmentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -301,6 +304,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["Rating"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AssignmentTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -388,32 +395,21 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                if (this.NumberOfSeats > 0)
-                    return RegistrationAssignmentType.Reserved;
-                else if (this.NumberOfWaitingListSeats > 0)
-                    return RegistrationAssignmentType.WaitingList;
-                else if (this.NumberOfApplicationSeats > 0)
-                    return RegistrationAssignmentType.Application;
-                else if (this.NumberOfInvitationSeats > 0)
-                    return RegistrationAssignmentType.Invited;
-                else if (this.NumberOfSeatsDeclined > 0)
-                    return RegistrationAssignmentType.Declined;
-
-                return RegistrationAssignmentType.NotSet;
+                return this.AssignmentTypeId;
             }
         }
 
         public int? AssignmentSeatIndex
         {
             get
-            {
+            { 
                 switch (RegistrationAssignmentTypeId)
                 {
                     case RegistrationAssignmentType.Reserved:
                         return this.SeatIndex;
                     case RegistrationAssignmentType.WaitingList:
                         return this.WaitingListSeatIndex;
-                    case RegistrationAssignmentType.Application:
+                    case RegistrationAssignmentType.Applied:
                         return this.ApplicationSeatIndex;
                     default:
                         return 1;
@@ -468,10 +464,10 @@ namespace AfterSchoolLibrary
                 FirstRegistrantId = this.RegistrantFirstRegistrantId
             };
         }
-        public Activity ToActivity(bool loadFromDb = false, DatabaseConnection dc = null)
+        public Activity ToActivity(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (loadFromDb)
-                return Activity.Load(this.ActivityId.Value, dc: dc);
+                return Activity.Load(this.ActivityId.Value, msgs, dc);
             else
                 return new Activity()
                 {
@@ -558,7 +554,7 @@ namespace AfterSchoolLibrary
 
             switch (rat)
             {
-                case RegistrationAssignmentType.Application:
+                case RegistrationAssignmentType.Applied:
                     sp = new SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
                     break;
                 case RegistrationAssignmentType.Invited:
@@ -795,7 +791,7 @@ namespace AfterSchoolLibrary
             msgs.AddRange(this.AdjustSeatIndexesDuringRemoval(dc: dc));
             // msgs.AddRange(this.AdjustPreferencesDuringRemoval(dc: dc));
 
-            if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Application)
+            if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Applied)
             {
                 if (to == RegistrationAssignmentType.Reserved)
                 {
@@ -838,7 +834,7 @@ namespace AfterSchoolLibrary
                     this.WaitingListSeatIndex = null;
                     msgs.AddRange(this.Save(dc: dc));
                 }
-                else if (to == RegistrationAssignmentType.Application)
+                else if (to == RegistrationAssignmentType.Applied)
                 {
                     this.NumberOfApplicationSeats = this.NumberOfWaitingListSeats;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
@@ -871,7 +867,7 @@ namespace AfterSchoolLibrary
                     this.SeatIndex = null;
                     msgs.AddRange(this.Save(dc: dc));
                 }
-                else if (to == RegistrationAssignmentType.Application)
+                else if (to == RegistrationAssignmentType.Applied)
                 {
                     this.NumberOfApplicationSeats = this.NumberOfSeats;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
@@ -910,7 +906,7 @@ namespace AfterSchoolLibrary
                     this.NumberOfInvitationSeats = 0;
                     msgs.AddRange(this.Save(dc: dc));
                 }
-                else if (to == RegistrationAssignmentType.Application)
+                else if (to == RegistrationAssignmentType.Applied)
                 {
                     this.NumberOfApplicationSeats = this.NumberOfInvitationSeats;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
@@ -940,7 +936,7 @@ namespace AfterSchoolLibrary
                     this.NumberOfInvitationSeats = 0;
                     msgs.AddRange(this.Save(dc: dc));
                 }
-                else if (to == RegistrationAssignmentType.Application)
+                else if (to == RegistrationAssignmentType.Applied)
                 {
                     this.NumberOfApplicationSeats = this.NumberOfSeatsDeclined;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, activityId: this.ActivityId, dc: dc) + 1;
@@ -978,7 +974,7 @@ namespace AfterSchoolLibrary
 
             AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Reserved, -1, dc: dc);
             AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.WaitingList, -1, dc: dc);
-            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Application, -1, dc: dc);
+            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Applied, -1, dc: dc);
 
             return msgs;
         }
@@ -988,7 +984,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
             switch (rat)
             {
-                case RegistrationAssignmentType.Application:
+                case RegistrationAssignmentType.Applied:
                     this.ApplicationSeatIndex += amount;
                     break;
                 case RegistrationAssignmentType.Reserved:
@@ -1021,12 +1017,12 @@ namespace AfterSchoolLibrary
                             .ToList()
                             .ForEach(item => item.AdjustSeatIndex(this.NumberOfWaitingListSeats.Value * factor, RegistrationAssignmentType.WaitingList, dc: dc));
                     break;
-                case RegistrationAssignmentType.Application:
+                case RegistrationAssignmentType.Applied:
                     if (this.NumberOfApplicationSeats > 0)
                         ras
                             .Where(x => x.ApplicationSeatIndex > this.ApplicationSeatIndex)
                             .ToList()
-                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfApplicationSeats.Value * factor, RegistrationAssignmentType.Application, dc: dc));
+                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfApplicationSeats.Value * factor, RegistrationAssignmentType.Applied, dc: dc));
                     break;
             }
 
@@ -1077,7 +1073,7 @@ namespace AfterSchoolLibrary
             if (activity.ContactEmail.IsNotBlank() && account.Email.IsSameAs(activity.ContactEmail))
                 return new SystemMessages();
 
-            var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{activity.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Application, dc: dc)}</strong> applications</li></ul></p>";
+            var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{activity.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied, dc: dc)}</strong> applications</li></ul></p>";
 
             var message = $"<p>Hello {activity.ContactName},</p>{details}<p>{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
 
@@ -1095,14 +1091,18 @@ namespace AfterSchoolLibrary
 
         public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.LoadByParticipationObjectByRegistrant(
+            return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
                 this.ActivityId.Value,
                 ParticipationObjectType.Activity,
-                this.RegistrantId.Value, 
-                msgs, 
-                dc)
-                .Sum(payment => payment.Amount.Value);
-        }       
+                this.RegistrantId.Value,
+                msgs,
+                dc);
+        }  
+        
+        public SystemMessages SendPaymentReminder()
+        {
+            return EmailHelper.SendPaymentReminder(this);
+        }
 
         #endregion
     }

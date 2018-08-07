@@ -51,7 +51,7 @@
 
                     <div class="padding-v-20">
                         <button type="submit" id="btn-register" class="btn btn-register btn-lg">
-                            @if (Model.Cost == 0)
+                            @if (Model.IsFree || Model.RegistrationMode == RegistrationMode.Apply)
                             {
                                 @: Complete Registration &raquo;
                             }

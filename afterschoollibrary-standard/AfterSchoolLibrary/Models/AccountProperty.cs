@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountPropertyTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Value", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "Value", System.Data.SqlDbType.NVarChar , "4000");
 				
                 return _dp;
             }

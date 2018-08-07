@@ -204,7 +204,12 @@ namespace AfterSchoolLibrary
 
         public static string BaseUrl(bool isAfterSchool)
         {
-            return "http" + (Utilities.UseSSL() ? "s" : "") + "://" + HostName(isAfterSchool);
+            return $"http{(Utilities.UseSSL() ? "s" : "")}://{HostName(isAfterSchool)}";
+        }
+
+        public static string LoginUrl(bool isAfterSchool, string redirectUrl = null)
+        {            
+            return $"{BaseUrl(isAfterSchool)}/login{(redirectUrl.IsNotEmpty() ? $"?returnurl={HttpUtility.UrlEncode(redirectUrl)}" : "")}";
         }
 
         public static bool UseSSL()
@@ -217,11 +222,11 @@ namespace AfterSchoolLibrary
 
         public static string BaseUrlHttp(bool isAfterSchool)
         {
-            return "http://" + HostName(isAfterSchool);
+            return $"http://{HostName(isAfterSchool)}";
         }
         public static string BaseUrlHttps(bool isAfterSchool)
         {
-            return "https://" + HostName(isAfterSchool);
+            return $"https://{HostName(isAfterSchool)}";
         }
         
         public static string AppNameEnrollHQ { get; set; }
@@ -307,7 +312,10 @@ namespace AfterSchoolLibrary
             try
             {
                 msgs.AddRange(AdditionalData(dc));
+                msgs.AddRange(UpdateActivityPayment(dc));
                 msgs.AddRange(UpdateInviteCodes(dc));
+                msgs.AddRange(UpdateTransactions(dc));
+                msgs.AddRange(UpdateAssignmentType(dc));
                 //msgs.AddRange(UpdateRegistrations2(dc));
                 //msgs.AddRange(UpdateAccountFeatures(dc: dc));
                 //msgs.AddRange(UpdateLocations(dc: dc));
@@ -342,6 +350,81 @@ namespace AfterSchoolLibrary
             {
                 Database.EndTransaction(dc, msgs);
             }
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateAssignmentType(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var registrantActivities = RegistrantActivity.Load(
+                criterias: new Hashtable() { { "AssignmentTypeId", (int)RegistrationAssignmentType.NotSet } },
+                msgs: msgs,
+                dc: dc);
+
+            registrantActivities.ForEach(registrantActivity => {
+                if (registrantActivity.NumberOfSeats > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Reserved;
+                else if (registrantActivity.NumberOfWaitingListSeats > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.WaitingList;
+                else if (registrantActivity.NumberOfApplicationSeats > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Applied;
+                else if (registrantActivity.NumberOfInvitationSeats > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Invited;
+                else if (registrantActivity.NumberOfSeatsDeclined > 0)
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Declined;
+
+                msgs.AddRange(registrantActivity.Save(dc));
+            });
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateTransactions(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var transactions = Transaction.Load(
+                criterias: new Hashtable() { { "PlatformFlatFee", DBNull.Value } },
+                msgs: msgs,
+                dc: dc);
+
+            transactions.ForEach(transaction =>
+            {
+                var toAccount = Account.Load(transaction.BillerAccountId.Value, msgs, dc);
+                if (toAccount.IsNotEmpty())
+                {
+                    transaction.PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc);
+                    transaction.PlatformFlatFee = toAccount.GetPlatformFlatFee(msgs, dc);
+                    msgs.AddRange(transaction.Save(dc));
+                }
+            });
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateActivityPayment(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var payments = ActivityPayment.Load(
+                criterias: new Hashtable() { { "AccountId", DBNull.Value } },
+                msgs: msgs,
+                dc: dc);
+
+            payments.ForEach(payment =>
+            {
+                if (payment.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                {
+                    var activity = Activity.Load(payment.ParticipationObjectId.Value, msgs, dc);
+                    if (activity.IsNotEmpty())
+                    {
+                        payment.AccountId = activity.AccountId;
+                        msgs.AddRange(payment.Save(dc));
+                    }
+                }
+            });
 
             return msgs;
         }

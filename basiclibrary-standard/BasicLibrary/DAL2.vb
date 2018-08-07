@@ -260,9 +260,9 @@ Namespace DataAccess
                         sql.Append(" [")
                         sql.Append(objectMap(i).ParameterType.ToString)
                         sql.Append("]")
-                        If objectMap(i).Length.HasValue Then
+                        If objectMap(i).Length.IsNotEmpty Then
                             sql.Append("(")
-                            sql.Append(objectMap(i).Length.Value.ToString)
+                            sql.Append(objectMap(i).Length)
                             sql.Append(")")
                         End If
                         If objectMap(i).IsPrimaryKey Then
@@ -348,9 +348,9 @@ Namespace DataAccess
                         sql.Append(objectMap(i).ParameterNameEscaped)
                         sql.Append(" ")
                         sql.Append(objectMap(i).ParameterType.ToString)
-                        If objectMap(i).Length.HasValue Then
+                        If objectMap(i).Length.IsNotEmpty Then
                             sql.Append("(")
-                            sql.Append(objectMap(i).Length.Value.ToString)
+                            sql.Append(objectMap(i).Length)
                             sql.Append(")")
                         End If
 
@@ -1595,29 +1595,23 @@ Namespace DataAccess
         Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType) As Integer
             Return Me.Add(New DatabaseParameter(className, propertyName, parameterType))
         End Function
-        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal tableAlias As String) As Integer
-            Return Me.Add(New DatabaseParameter(className, propertyName, parameterType, tableAlias))
-        End Function
-        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal length As Integer) As Integer
+        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal length As String) As Integer
             Return Me.Add(New DatabaseParameter(className, propertyName, parameterType, length))
         End Function
-        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal length As Integer) As Integer
+        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal length As String) As Integer
             Return Me.Add(New DatabaseParameter(className, propertyName, tableName, parameterName, parameterType, length))
         End Function
-        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal length As Integer, ByVal tableAlias As String) As Integer
+        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal length As String, ByVal tableAlias As String) As Integer
             Return Me.Add(New DatabaseParameter(className, propertyName, parameterType, length, tableAlias))
         End Function
         Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType) As Integer
-            Return Me.Add(New DatabaseParameter(className, propertyName, tableName, propertyName, parameterType, New Integer?))
+            Return Me.Add(New DatabaseParameter(className, propertyName, tableName, propertyName, parameterType, ""))
         End Function
-        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType, ByVal length As Integer) As Integer
+        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType, ByVal length As String) As Integer
             Return Me.Add(New DatabaseParameter(className, propertyName, tableName, propertyName, parameterType, length))
         End Function
         Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType) As Integer
-            Return Me.Add(New DatabaseParameter(className, propertyName, tableName, parameterName, parameterType, New Integer?))
-        End Function
-        Public Overridable Function Add(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal tableAlias As String) As Integer
-            Return Me.Add(New DatabaseParameter(className, propertyName, tableName, parameterName, parameterType, New Integer?, tableAlias))
+            Return Me.Add(New DatabaseParameter(className, propertyName, tableName, parameterName, parameterType, ""))
         End Function
 
         Public Sub AddRange(ByVal items As DatabaseParameters)
@@ -1759,12 +1753,12 @@ Namespace DataAccess
             End Set
         End Property
 
-        Private _length As Integer?
-        Public Property Length() As Integer?
+        Private _length As String
+        Public Property Length() As String
             Get
                 Return _length
             End Get
-            Set(ByVal value As Integer?)
+            Set(ByVal value As String)
                 _length = value
             End Set
         End Property
@@ -1809,7 +1803,7 @@ Namespace DataAccess
         Public Sub New()
 
         End Sub
-        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal length As Integer?)
+        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal length As String)
             Me.New()
             Me.ClassName = className
             Me.PropertyName = propertyName
@@ -1818,7 +1812,7 @@ Namespace DataAccess
             Me.ParameterType = parameterType
             Me.Length = length
         End Sub
-        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal length As Integer?, ByVal tableAlias As String)
+        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal length As String, ByVal tableAlias As String)
             Me.New(className, propertyName, tableName, parameterName, parameterType, length)
             Me.TableAlias = tableAlias
         End Sub
@@ -1829,13 +1823,13 @@ Namespace DataAccess
             Me.TableName = tableName
             Me.ParameterName = parameterName
             Me.ParameterType = parameterType
-            Me.Length = New Integer?
+            Me.Length = ""
         End Sub
-        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType, ByVal length As Integer?, ByVal tableAlias As String)
+        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType, ByVal length As String, ByVal tableAlias As String)
             Me.New(className, propertyName, tableName, parameterType, length)
             Me.TableAlias = tableAlias
         End Sub
-        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType, ByVal length As Integer?)
+        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType, ByVal length As String)
             Me.New()
             Me.ClassName = className
             Me.PropertyName = propertyName
@@ -1844,10 +1838,6 @@ Namespace DataAccess
             Me.ParameterType = parameterType
             Me.Length = length
         End Sub
-        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType, ByVal tableAlias As String)
-            Me.New(className, propertyName, tableName, parameterType)
-            Me.TableAlias = tableAlias
-        End Sub
         Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType)
             Me.New()
             Me.ClassName = className
@@ -1855,20 +1845,16 @@ Namespace DataAccess
             Me.TableName = tableName
             Me.ParameterName = propertyName
             Me.ParameterType = parameterType
-            Me.Length = New Integer?
-        End Sub
-        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal tableAlias As String)
-            Me.New(className, propertyName, parameterType)
-            Me.TableAlias = tableAlias
+            Me.Length = ""
         End Sub
         Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType)
-            Me.New(className, propertyName, className, propertyName, parameterType, New Integer?)
+            Me.New(className, propertyName, className, propertyName, parameterType, "")
         End Sub
-        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal length As Integer, ByVal tableAlias As String)
+        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal length As String, ByVal tableAlias As String)
             Me.New(className, propertyName, className, propertyName, parameterType, length)
             Me.TableAlias = tableAlias
         End Sub
-        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal length As Integer)
+        Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal length As String)
             Me.New(className, propertyName, className, propertyName, parameterType, length)
         End Sub
         Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal parameterType As SqlDbType, ByVal isPrimaryKey As Boolean)
@@ -1878,11 +1864,11 @@ Namespace DataAccess
             Me.New(className, propertyName, className, propertyName, parameterType, isPrimaryKey, doNotInsert, doNotUpdate)
         End Sub
         Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal isPrimaryKey As Boolean)
-            Me.New(className, propertyName, tableName, parameterName, parameterType, New Integer?)
+            Me.New(className, propertyName, tableName, parameterName, parameterType, "")
             Me.IsPrimaryKey = isPrimaryKey
         End Sub
         Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterType As SqlDbType, ByVal isPrimaryKey As Boolean)
-            Me.New(className, propertyName, tableName, propertyName, parameterType, New Integer?)
+            Me.New(className, propertyName, tableName, propertyName, parameterType, "")
             Me.IsPrimaryKey = isPrimaryKey
         End Sub
         Public Sub New(ByVal className As String, ByVal propertyName As String, ByVal tableName As String, ByVal parameterName As String, ByVal parameterType As SqlDbType, ByVal isPrimaryKey As Boolean, ByVal doNotInsert As Boolean, ByVal doNotUpdate As Boolean)

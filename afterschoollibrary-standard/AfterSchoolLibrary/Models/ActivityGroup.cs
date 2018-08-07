@@ -69,7 +69,7 @@ namespace AfterSchoolLibrary
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationModeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsPublished", System.Data.SqlDbType.Bit);
@@ -545,7 +545,7 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                 {
                     this.GetRegistrantActivities(dc: adc).ForEach(
-                        ra => amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Application, adc))
+                        ra => amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, adc))
                     );
                 },
                 onSuccess: (SystemMessages smsgs) =>

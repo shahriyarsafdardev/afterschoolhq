@@ -862,6 +862,8 @@
     <Content Include="Areas\District\Views\League\InviteSchool.cshtml" />
     <Content Include="Areas\District\Views\League\Schedule.cshtml" />
     <Content Include="Areas\District\Views\League\Periods.cshtml" />
+    <Content Include="Areas\Org\Views\Services\MoveRegistrantAssignment.cshtml" />
+    <Content Include="Areas\Org\Views\Services\SendPaymentReminder.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1291,6 +1293,7 @@
     <Content Include="Views\Login\Select.cshtml" />
     <Content Include="Views\SignUp\CreateAccount.cshtml" />
     <Content Include="Views\Shared\_Teams.cshtml" />
+    <Content Include="Views\Account\MakePayment.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

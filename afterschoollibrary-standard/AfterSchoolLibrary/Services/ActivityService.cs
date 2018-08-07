@@ -232,34 +232,61 @@ namespace AfterSchoolLibrary
             return activity;
         }
 
-        private static Tuple<int, int, int> ProcessRegistrationSeats(this Activity activity, CheckoutObject purchaseObject, SystemMessages msgs, DatabaseConnection dc = null)
+        //private static Tuple<int, int, int> ProcessRegistrationSeats(this Activity activity, CheckoutObject purchaseObject, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    var seatsAvailable = activity.GetSeatsRemaining(msgs, dc);
+        //    var waitingListSeatsAvailable = activity.GetWaitingListSeatsRemaining(msgs, dc);
+
+        //    var reservedSeats = 0;
+        //    var waitingListSeats = 0;
+        //    var applicationSeats = 0;
+
+        //    if (activity.RegistrationModeId == RegistrationMode.Apply)
+        //        applicationSeats = purchaseObject.NumberOfSeats;
+        //    else if (seatsAvailable >= purchaseObject.NumberOfSeats)
+        //        reservedSeats = purchaseObject.NumberOfSeats;
+        //    else if (waitingListSeatsAvailable >= purchaseObject.NumberOfSeats)
+        //        waitingListSeats = purchaseObject.NumberOfSeats;
+
+        //    if (reservedSeats == 0 && waitingListSeats == 0 && applicationSeats == 0)
+        //    {
+        //        msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
+        //        return null;
+        //    }
+
+        //    return new Tuple<int, int, int>(reservedSeats, waitingListSeats, applicationSeats);
+        //}
+
+        private static RegistrationAssignmentType ProcessRegistrationSeats(this Activity activity, CheckoutObject checkoutObject, RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var seatsAvailable = activity.GetSeatsRemaining(msgs, dc);
             var waitingListSeatsAvailable = activity.GetWaitingListSeatsRemaining(msgs, dc);
+            var isPendingOrReserved = ra.IsNotEmpty() && (ra.AssignmentTypeId == RegistrationAssignmentType.Reserved || ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment);
 
-            var reservedSeats = 0;
-            var waitingListSeats = 0;
-            var applicationSeats = 0;
-
-            if (activity.RegistrationModeId == RegistrationMode.Apply)
-                applicationSeats = purchaseObject.NumberOfSeats;
-            else if (seatsAvailable >= purchaseObject.NumberOfSeats)
-                reservedSeats = purchaseObject.NumberOfSeats;
-            else if (waitingListSeatsAvailable >= purchaseObject.NumberOfSeats)
-                waitingListSeats = purchaseObject.NumberOfSeats;
-
-            if (reservedSeats == 0 && waitingListSeats == 0 && applicationSeats == 0)
+            // if they're paying for a registration they already completed
+            if (isPendingOrReserved)
             {
-                msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
-                return null;
+                return RegistrationAssignmentType.Reserved;
             }
+            else
+            {
+                if (activity.RegistrationModeId == RegistrationMode.Apply)
+                    return RegistrationAssignmentType.Applied;
+                else if (seatsAvailable >= checkoutObject.NumberOfSeats)
+                    return RegistrationAssignmentType.Reserved;
+                else if (waitingListSeatsAvailable >= checkoutObject.NumberOfSeats)
+                    return RegistrationAssignmentType.WaitingList;
+            }
+            
+            msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
 
-            return new Tuple<int, int, int>(reservedSeats, waitingListSeats, applicationSeats);
+            return RegistrationAssignmentType.NotSet;
         }
 
-        public static void ProcessRegistration(this Activity activity, CheckoutObject purchaseObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistration(this Activity activity, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var seats = activity.ProcessRegistrationSeats(purchaseObject, msgs, dc);
+            var ra = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
+            var assignmentType = activity.ProcessRegistrationSeats(checkoutObject, ra, msgs, dc);
 
             if (msgs.HasErrors())
                 return;
@@ -268,18 +295,13 @@ namespace AfterSchoolLibrary
             var period = activity.GetCurrentRegistrationPeriod(msgs, dc);
 
             // get the registrant record that was created just for the account
-            var accountRegistrant = purchaseObject.Registration.GetRegistrant(msgs, dc);
+            var accountRegistrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
 
-            // add the registrant to the activity
-            var ra = accountRegistrant.AddOrUpdateActivity(
-                registrationId: purchaseObject.Registration.ID.Value,
-                activityId: purchaseObject.ParticipationObject.ObjectID.Value,
-                seats: seats.Item1,
-                waitingListSeats: seats.Item2,
-                applicationSeats: seats.Item3,
-                invitationSeats: 0,
-                declinedSeats: 0,
-                preferenceNumber: 1,
+            // add or update the registrant for the activity
+            ra = accountRegistrant.AddOrUpdateActivity(
+                registrationId: checkoutObject.Registration.ID.Value,
+                activityId: checkoutObject.ParticipationObject.ObjectID.Value,
+                assignmentType: assignmentType,
                 registrationPeriodId: period?.ID.IfEmpty(0),
                 activityGroupId: activity.ActivityGroupId,
                 loggedInUserId: loggedInUser.ID.Value,
@@ -288,7 +310,7 @@ namespace AfterSchoolLibrary
 
             // add registration activity
             // registration already created when the parent did the e-signature
-            purchaseObject.Registration.AddActivity(activity, loggedInUser.ID.Value, msgs, dc);
+            checkoutObject.Registration.AddActivity(activity, loggedInUser.ID.Value, msgs, dc);
         }
         
         public static ActivityPayment AddPayment(this Activity activity, decimal amount, Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -299,6 +321,7 @@ namespace AfterSchoolLibrary
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 Amount = amount,
                 RegistrantId = registrant.ID,
+                AccountId = activity.AccountId,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
@@ -413,6 +436,11 @@ namespace AfterSchoolLibrary
             }
 
             return msgs;
+        }
+
+        public static decimal GetTotalAmountPaid(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetTotalPaidByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
         }
     }
 }

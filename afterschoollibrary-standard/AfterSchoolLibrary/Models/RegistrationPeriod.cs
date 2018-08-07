@@ -473,7 +473,7 @@ namespace AfterSchoolLibrary
                 {
                     this.GetRegistrantActivities(dc: adc)
                         .ForEach(ra => 
-                            msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Application, adc))
+                            msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, adc))
                         );
                 },
                 onSuccess: (SystemMessages smsgs) =>

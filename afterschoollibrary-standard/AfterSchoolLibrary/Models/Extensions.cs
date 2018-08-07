@@ -71,6 +71,9 @@ namespace AfterSchoolLibrary
                     break;
             }
 
+            if (finalSlug.IsEmpty())
+                finalSlug = aString.MaxChars(maxChars);
+
             return finalSlug;
         }
 
