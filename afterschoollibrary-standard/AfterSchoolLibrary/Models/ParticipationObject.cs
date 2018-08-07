@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary
         {
             Object = aag;
             var activityGroup = aag.GetActivityGroup(msgs, dc);
-            ObjectID = activityGroup.ID;
+            ObjectID = aag.ID;
             ObjectType = ParticipationObjectType.AccountActivityGroup;
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
@@ -138,6 +138,9 @@ namespace AfterSchoolLibrary
             RegistrationMode = activityGroup.RegistrationModeId;
             Form = activityGroup.GetForm(msgs, dc);
             OwnerAccount = aag.GetAccount(msgs, dc);
+            ContactName = aag.ContactName;
+            ContactEmail = aag.ContactEmail;
+            ContactPhone = aag.ContactPhone;
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
 
@@ -159,6 +162,11 @@ namespace AfterSchoolLibrary
                     return ((AccountActivityGroup)this.Object).GetHomePageUrl(isAfterSchool);
             }
             return "";
+        }
+
+        public string GetRegistrationPageUrl(bool isAfterSchool = true)
+        {
+            return $"{GetHomePageUrl(isAfterSchool)}/register";
         }
 
         public bool IsSport()
@@ -216,17 +224,17 @@ namespace AfterSchoolLibrary
         {
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
             {
-                if (ObjectType == ParticipationObjectType.ActivityGroup)
-                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
-                else
+                if (ObjectType == ParticipationObjectType.Activity)
                     return ((Activity)Object).GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                else
+                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
             }
             else
             {
-                if (ObjectType == ParticipationObjectType.ActivityGroup)
-                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
-                else
+                if (ObjectType == ParticipationObjectType.Activity)
                     return ((Activity)Object).GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                else
+                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
             }
         }
     }

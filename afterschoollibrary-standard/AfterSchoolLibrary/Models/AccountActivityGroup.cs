@@ -255,7 +255,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return HasRegistrationPeriods();
+                return HasRegistrationPeriods() && ContactEmail.IsNotEmpty() && ContactPhone.IsNotEmpty() && ContactName.IsNotEmpty() && FormId.HasValue;
             }
         }
 
@@ -313,6 +313,12 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }
+
+        public ParticipationObject ToParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ParticipationObject(this, msgs, dc);
+        }
+
         #endregion
     }
 }

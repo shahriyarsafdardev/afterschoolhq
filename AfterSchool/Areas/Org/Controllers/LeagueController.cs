@@ -427,11 +427,12 @@ namespace AfterSchool.Areas.Org.Controllers
                             aag.FormId = form.ToString().ToInteger();
                         }
 
-                        msgs.AddRange(aag.Save());
+                        amsgs.AddRange(aag.Save(adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
+                        msgs.Add("Saved successfully", MessageType.Success);
                     },
                     onFailure: (SystemMessages fmsgs) =>
                     {
@@ -467,6 +468,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
+            ViewBag.AccountActivityGroup = aag;
 
             return View(league);
         }

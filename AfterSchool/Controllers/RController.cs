@@ -139,9 +139,29 @@ namespace AfterSchool.Controllers
 
             if (SessionVariables.CurrentRegistrant.IsEmpty())
                 return RedirectToAction("getstarted", "account", new { area = "", regaccount = account.Uid });
-            else
-                return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
-            
+
+            return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
+        }
+
+        public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
+            var activityGroupType = activitygrouptype.ParseEnum<ActivityGroupType>();
+            var externalAccount = AfterSchoolLibrary.Account.LoadByUniqueName(externalaccountname, msgs);
+            var activityGroup = ActivityGroup.LoadByAccountIdByUniqueName(externalAccount.ID.Value, group, msgs);
+            var aag = activityGroup.GetAccountActivityGroup(currentAccount, msgs);
+            var participationObject = aag.ToParticipationObject(msgs);
+
+            SetRegistrationStartPage(currentAccount);
+
+            SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
+            SessionVariables.Cart.AddCartItem(participationObject, msgs);
+
+            if (SessionVariables.CurrentRegistrant.IsEmpty())
+                return RedirectToAction("getstarted", "account", new { area = "", regaccount = currentAccount.Uid });
+
+            return RedirectToAction("register", "account", new { area = "", regaccount = currentAccount.Uid });
         }
     }
 }

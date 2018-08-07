@@ -40,12 +40,16 @@
                     </div>
                     <div class="widget-tile">
                         <hr />
-                        <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
-                        <p>
-                            No one has registered for your activity yet. 
-                            Create your <a href="@Url.Action("periods", "league", new { id = Model.Uid })">@UILabel.RegistrationPeriodLabel(true).ToLower()</a> 
-                            and then <a href="@Url.Action("publishdetail", "league", new { id = Model.Uid })">publish the league</a> to your 
-                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">activity home page</a> for @UILabel.RegistrantLabel(true).ToLower() to register.
+                        <p>Welcome @SessionVariables.LoggedInUser.FirstName!</p>
+                        <p>                            
+                            <ol>
+                                <li><a href="@Url.Action("edit", "league", new { id = Model.Uid })">Setup final details</a> to enable parents to register</li>
+                                <li>Create your <a href="@Url.Action("periods", "league", new { id = Model.Uid })">@UILabel.RegistrationPeriodLabel(true).ToLower()</a></li>
+                                <li>
+                                    <a href="@Url.Action("publishdetail", "league", new { id = Model.Uid })">publish the league</a> to your
+                                    <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">activity home page</a> for @UILabel.RegistrantLabel(true).ToLower() to register.
+                                </li>
+                            </ol>
                         </p>
                         
                     </div>

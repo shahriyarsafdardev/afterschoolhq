@@ -45,11 +45,11 @@
         </label>
         <div class="col-md-6">
             <select name="form" id="form" class="form-control" required>
-                <option value="">Select Form...</option>
-                <option value="0"> + New Form</option>
+                <option value="">Select Registration Form...</option>
+                <option value="0"> + New Registration Form</option>
                 @foreach (var form in forms)
                 {
-                    <option value="@form.ID" @(Model.FormId == formId ? " selected=\"selected\" " : "")>@form.Name</option>
+                    <option value="@form.ID" @(formId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
                 }
             </select>
         </div>

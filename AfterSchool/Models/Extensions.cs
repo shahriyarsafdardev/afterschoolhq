@@ -266,7 +266,16 @@ namespace AfterSchool.Models
             var msgs = new SystemMessages();
 
             if (!aag.HasRegistrationPeriods())
-                msgs.Add($"<a href=\"/org/league/periods/{aag.ActivityGroupUid}\">Create at least one {UILabel.RegistrationPeriodLabel()}</a> in order to publish", MessageType.Error);
+                msgs.Add($"<a href=\"/org/league/periods/{aag.ActivityGroupUid}\">Create at least one {UILabel.RegistrationPeriodLabel()}</a> in order to publish", MessageType.UserError);
+
+            if (aag.FormId.IsEmpty())
+                msgs.Add($"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Select a registration form</a> in order to publish", MessageType.UserError);
+            if (aag.ContactName.IsEmpty())
+                msgs.Add($"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Name</a> is required in order to publish", MessageType.UserError);
+            if (aag.ContactPhone.IsEmpty())
+                msgs.Add($"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Phone</a> is required in order to publish", MessageType.UserError);
+            if (aag.ContactEmail.IsEmpty())
+                msgs.Add($"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Email</a> is required in order to publish", MessageType.UserError);
 
             return msgs;
         }
