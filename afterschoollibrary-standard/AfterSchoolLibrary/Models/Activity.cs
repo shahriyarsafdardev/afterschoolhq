@@ -1916,7 +1916,9 @@ namespace AfterSchoolLibrary
             {
                 // make sure we setup a relationship
                 var actualLocation = Location.Load(location.ToInteger(), msgs, dc);
-                if (actualLocation.HostAccountId.HasValue)
+
+                // don't need to ask permission for your own location
+                if (actualLocation.HostAccountId.HasValue && actualLocation.HostAccountId != this.AccountId)
                 {
                     var locationOwner = Account.Load(actualLocation.HostAccountId.Value, msgs, dc);
                     var visitorAccount = this.GetAccount(msgs, dc);

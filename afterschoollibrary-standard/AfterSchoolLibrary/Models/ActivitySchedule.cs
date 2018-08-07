@@ -487,7 +487,7 @@ namespace AfterSchoolLibrary
         public List<DayOfWeekASL> GetDaysOfTheWeek(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.GetInstances(false, msgs, dc).IsNotEmpty())
-                return this.GetInstances(false, msgs, dc).Select(x => x.Day).Distinct().ToList();
+                return this.GetInstances(false, msgs, dc).Where(instance => instance.InstanceTypeId == InstanceType.InSession).Select(x => x.Day).Distinct().ToList();
 
             return new List<DayOfWeekASL>();
         }
