@@ -166,7 +166,7 @@ else
                             }
                             @if (account.HasFeature(FeatureType.AllowApplications))
                             {
-                                <td class="text-center">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Application)</td>
+                                <td class="text-center">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied)</td>
                             }
                             <td>
                                 <div class="btn-group pull-right">
@@ -205,7 +205,7 @@ else
                 else
                 {
                     <tr>
-                        <td colspan="8">There are no @UILabel.ActivityLabel(activityType, true).ToLower(). Please <a href="@addUrl">add new @UILabel.ActivityLabel(activityType).ToLower()</a></td>
+                        <td colspan="8">No teams have been submitted yet.</td>
                     </tr>
                 }
             </tbody>

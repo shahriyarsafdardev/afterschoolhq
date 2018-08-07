@@ -25,6 +25,10 @@
                 <i class="s7-graph2"></i> Summary
             </a>
            
+            <a href="@Url.Action("edit", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">
+                <i class="s7-edit"></i> Edit Setup
+            </a>
+           
             <a href="@Url.Action("periods", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
                 <i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)
             </a>

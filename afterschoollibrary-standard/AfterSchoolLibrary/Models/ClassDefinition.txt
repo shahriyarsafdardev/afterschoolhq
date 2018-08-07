@@ -561,6 +561,10 @@ property: InviteStatusId, InviteStatus, Int
 property: IsPublished, bool, Bit
 property: Cost, decimal?, Money
 property: CostUnitTypeId, CostUnitType, Int
+property: ContactName, string, NVarChar "50"
+property: ContactPhone, string, NVarChar "50"
+property: ContactEmail, string, NVarChar "100"
+property: FormId, int?, Int
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsPublished, List<>

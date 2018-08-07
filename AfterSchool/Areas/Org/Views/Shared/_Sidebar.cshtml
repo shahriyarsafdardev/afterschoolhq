@@ -15,7 +15,7 @@
                 {
                     <li><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
                 }
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups) && SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
+                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider && SessionVariables.CurrentAccount.GetExternalLeagueCount() > 0)
                 {
                     <li><a href="@Url.Action("indexexternal", "league")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
                 }

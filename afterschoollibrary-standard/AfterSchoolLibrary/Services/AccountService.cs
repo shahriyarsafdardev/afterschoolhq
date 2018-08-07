@@ -191,7 +191,18 @@ namespace AfterSchoolLibrary
                 msgs,
                 dc);
         }
-        
+
+        public static int GetExternalLeagueInviteCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountActivityGroup.GetCount(
+                new Hashtable() {
+                    { "AccountId", account.ID.Value },
+                    { "InviteStatusId", (int)InviteStatus.Invited }
+                },
+                msgs,
+                dc);
+        }
+
         public static List<ActivityGroup> GetSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.Session, msgs, dc);
