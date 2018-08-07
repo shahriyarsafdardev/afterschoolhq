@@ -8,7 +8,7 @@
     <div class="panel panel-default">
         <div class="panel-body bg-info">
             <p class="text-center text-medium">
-                Missing a registration? Contact us at <a href="mailto:support@enrollhq.zendesk.com">support@enrollhq.zendesk.com</a>
+                Missing a registration? Contact us at <a href="mailto:support@afterschoolhq.zendesk.com">support@afterschoolhq.zendesk.com</a>
             </p>
         </div>
     </div>
@@ -39,15 +39,24 @@
             </div>
             <div class="panel-body"> 
                 <div class="col-md-6">
-                    <h3>Registration Information</h3>
                     <table class="table-condensed">
-                        @foreach (var answer in answers)
+                        @foreach (var group in answers.DistinctBy(x => x.FormQuestionFormQuestionGroupId).Select(answer => answer.ToFormQuestionGroup()).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))
                         {
                             <tr>
-                                <td>@answer.QuestionDataTypeId.ToString().SplitByUpperCase().Remove("Registrant")</td>
-                                <td>@answer.Text</td>
+                                <td colspan="2" class="text-medium">
+                                    @group.Name
+                                </td>
                             </tr>
+
+                            foreach (var answer in answers.Where(answer => answer.FormQuestionFormQuestionGroupId == group.ID).OrderBy(answer => answer.FormQuestionDisplayOrder))
+                            {
+                                <tr>
+                                    <td>@answer.QuestionText</td>
+                                    <td>@answer.Text</td>
+                                </tr>
+                            }
                         }
+                        
                     </table>
                 </div>       
                 <div class="col-md-6">

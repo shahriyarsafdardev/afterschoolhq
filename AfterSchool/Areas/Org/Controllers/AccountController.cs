@@ -416,7 +416,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
-            stripeAccount.GetLatestStripeAccountDetails(SessionVariables.CurrentAccount, msgs);
+
+            if (stripeAccount.TOSAcceptanceDate.HasValue)
+                stripeAccount.GetLatestStripeAccountDetails(SessionVariables.CurrentAccount, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -466,7 +468,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (stripeAccount.RequiresFullSSN)
             {
-                msgs.Add("SSN is required", MessageType.UserError);
+                if (ssn.IsEmpty())
+                    msgs.Add("SSN is required", MessageType.UserError);
 
                 if (!ssn.LastChars(4).IsSameAs(ssnLast4))
                     msgs.Add("SSN and Last 4 of SSN must match", MessageType.UserError);
@@ -734,15 +737,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 emails.Split(',')
                     .Select(x => x.Trim())
                     .ToList()
-                    .ForEach(email => msgs.AddRange(
+                    .ForEach(email => 
                         SessionVariables.CurrentAccount.InviteUser(
                             "", 
                             "", 
                             email, 
                             Request.Params["message"], 
                             (UserType)usertype.ToInteger(), 
-                            SessionVariables.LoggedInUser)
-                     ));
+                            SessionVariables.LoggedInUser,
+                            msgs)
+                     );
 
             if (msgs.HasNoErrors())
                 msgs.Add("All invites have been sent", MessageType.Success);
@@ -753,6 +757,38 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Members = members;
             ViewBag.NeedToUpgrade = members.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).GetMaxValue();
             return View("Team", SessionVariables.CurrentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult Visitors()
+        {
+            var msgs = new SystemMessages();
+
+            ViewBag.RequestingVisitors = SessionVariables.CurrentAccount.GetRequestedVisitorAccounts(null, msgs);
+            ViewBag.ApprovedVisitors = SessionVariables.CurrentAccount.GetApprovedVisitorAccounts(msgs);
+            ViewBag.Messages = msgs;
+
+            return View(SessionVariables.CurrentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult ApproveVisitor(string id)
+        {
+            var msgs = new SystemMessages();
+            var accountRelationship = AccountRelationship.Load(id.ToInteger(), msgs);
+            msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Approved, SessionVariables.LoggedInUser));
+
+            return RedirectToAction("visitors");
+        }
+
+        [HttpGet]
+        public ActionResult DenyVisitor(string id)
+        {
+            var msgs = new SystemMessages();
+            var accountRelationship = AccountRelationship.Load(id.ToInteger(), msgs);
+            msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Denied, SessionVariables.LoggedInUser));
+
+            return RedirectToAction("visitors");
         }
     }
 }

@@ -128,7 +128,12 @@ namespace AfterSchool.Models
 
         protected ActionResult LoginRedirect(Account registrationAccount = null)
         {
-            if (SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
+            if (SessionVariables.CurrentAccount.IsEmpty())
+            {
+                // take to account creation screen
+                return RedirectToAction("createaccount", "signup");
+            }
+            else if (SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
@@ -158,28 +163,30 @@ namespace AfterSchool.Models
             return RedirectToAction("index", "login", new { area = "" });
         }
 
-        protected SystemMessages LoadSessionInfo(WebUser user, bool doRememberMe = false)
+        protected SystemMessages LoadSessionInfo(WebUser user, Account account = null, bool doRememberMe = false)
         {
             var msgs = new SystemMessages();
 
             SessionVariables.LoggedInUser = user;
-            var awus = AccountWebUser.LoadByWebUserIdByIsActive(user.ID.Value, true);
 
-            if (awus.Any())
+            if (account.IsNotEmpty())
             {
-                if (awus.Where(x => x.IsDefault).Any())
-                {
-                    SessionVariables.CurrentAccount = awus.Where(x => x.IsDefault).First().ToAccount(true);
-                    SessionVariables.AccountUserType = awus.Where(x => x.IsDefault).First().UserTypeId;
-                }
-                else
+                SessionVariables.CurrentAccount = account;
+                SessionVariables.AccountUserType = SessionVariables.LoggedInUser.GetUserType(account);
+            }
+            else
+            {
+                var awus = AccountWebUser.LoadByWebUserIdByIsActive(user.ID.Value, true);
+
+                if (awus.Count == 1)
                 {
                     SessionVariables.CurrentAccount = awus.First().ToAccount(true);
                     SessionVariables.AccountUserType = awus.First().UserTypeId;
                 }
-
-                SessionVariables.AccountPackage = SessionVariables.CurrentAccount.GetActiveAccountPackage();                            
             }
+
+            if (SessionVariables.CurrentAccount.IsNotEmpty())
+                SessionVariables.AccountPackage = SessionVariables.CurrentAccount.GetActiveAccountPackage();
 
             //set login cookies
             if (doRememberMe)
@@ -201,7 +208,7 @@ namespace AfterSchool.Models
             return msgs;
         }
 
-        internal ActionResult Logout()
+        internal ActionResult Logout(string returnUrl = null, bool goToLoginScreenBeforeReturn = false)
         {
             SessionVariables.LoggedInUser = null;
             SessionVariables.OriginalLoggedInUser = null;
@@ -225,8 +232,11 @@ namespace AfterSchool.Models
                 cookieUser.Value = null;
                 Response.SetCookie(cookieUser);
             }
- 
-            return RedirectToAction("index", "Login");
+
+            if (returnUrl.IsNotEmpty() && !goToLoginScreenBeforeReturn)
+                return Redirect(returnUrl);
+
+            return RedirectToAction("index", "Login", new { returnurl = returnUrl });
         }
     }
 }

@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary
                 _dp = BaseLocation.get_BaseObjectMap(className);
 				_dp.Add(className, "HostAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDefault", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "LocationTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
@@ -189,10 +189,15 @@ namespace AfterSchoolLibrary
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.LogicalOperator = LogicalOperatorType.Or;
-            dq.Criterias.Add(ObjectMap["Name"], query, DatabaseCriteriaOperatorEnum.Like);
-            dq.Criterias.Add(ObjectMap["Address1"], query, DatabaseCriteriaOperatorEnum.LikeRight);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+
+            var sql = $@"
+                    select * from Location
+                    where 
+                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') or
+                        Contains(address1,'{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
+                ";
+            
+           return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static List<Location> LoadByLocationTypeIdByCityByState(LocationType LocationTypeId, string city, string state, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)

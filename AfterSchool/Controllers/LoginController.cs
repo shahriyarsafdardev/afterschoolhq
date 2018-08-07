@@ -36,7 +36,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string username, string password, string regaccount)
+        public ActionResult Index(string username, string password, string returnurl)
         {
             var msgs = new SystemMessages();
 
@@ -60,19 +60,56 @@ namespace AfterSchool.Controllers
                 if (user.IsEmpty())
                     msgs.Add("Invalid username and/or password", MessageType.UserError);
                 else
-                    msgs.AddRange(LoadSessionInfo(user, !Request.Params["remember"].IsEmpty()));
+                    msgs.AddRange(LoadSessionInfo(user, null, !Request.Params["remember"].IsEmpty()));
             }
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
             {
-                var registrationAccount = regaccount.IsGuid() ? Account.LoadByUid(regaccount.ToGuid()) : null;
-                return LoginRedirect(registrationAccount);
+                // select account
+                if (SessionVariables.CurrentAccount.IsEmpty())
+                    return RedirectToAction("select", "login", new { returnurl });
+
+                if (returnurl.IsNotEmpty())
+                    return Redirect(returnurl);
+
+                return LoginRedirect();
             }
-            else
-                return View();
-        }        
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult Select(string returnurl)
+        {
+            ViewBag.ReturnUrl = returnurl;
+            ViewBag.Messages = new SystemMessages();
+            return View(SessionVariables.LoggedInUser.GetAccounts());
+        }
+
+        [HttpGet]
+        public ActionResult Select(string id, string returnurl)
+        {
+            var msgs = new SystemMessages();
+            Account account = null;
+
+            if (id.IsGuid())
+                account = Account.LoadByUid(id.ToGuid(), msgs);
+
+            if (account.IsNotEmpty())
+            {
+                LoadSessionInfo(SessionVariables.LoggedInUser, account);
+
+                if (returnurl.IsNotEmpty())
+                    return Redirect(returnurl);
+
+                return LoginRedirect();
+            }
+
+            ViewBag.Messages = msgs;
+            return View(SessionVariables.LoggedInUser.GetAccounts());
+        }
 
         [HttpGet]
         public ActionResult ResetPassword()
@@ -88,17 +125,14 @@ namespace AfterSchool.Controllers
             WebUser user = null;
 
             if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-            {
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
                 user = WebUser.LoadByEmail(email);
+
                 if (user.IsNotEmpty())
-                {
                     msgs.AddRange(user.SendPasswordResetToken(SessionVariables.IsAfterSchool.Value));
-                }
                 
                 msgs.Add("If an account exists for your email address, you will receive an email momentarily to reset your password", MessageType.Success);
             }
@@ -113,9 +147,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
 
             if (!PasswordResetToken.ExistsAndIsValidByUid(token.ToGuid()))
-            {
                 msgs.Add("Invalid reset token", MessageType.UserError);
-            }
 
             ViewBag.Messages = msgs;
             return View();

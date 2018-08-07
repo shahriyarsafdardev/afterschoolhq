@@ -37,9 +37,6 @@ namespace AfterSchoolLibrary
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		public bool DoesAutoRenew { get { return (bool)MDV["DoesAutoRenew"].Value; } set { MDV["DoesAutoRenew"].Value = value; } }
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
 		public int? TotalPeriods { get { return (int?)MDV["TotalPeriods"].Value; } set { MDV["TotalPeriods"].Value = value; } }
 		public string StripePlanId { get { return (string)MDV["StripePlanId"].Value; } set { MDV["StripePlanId"].Value = value; } }
 		public SubscriptionPlanType PlanTypeId { get { return (SubscriptionPlanType)MDV["PlanTypeId"].Value; } set { MDV["PlanTypeId"].Value = value; } }
@@ -72,7 +69,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "DoesAutoRenew", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "TotalPeriods", System.Data.SqlDbType.Int);
-				_dp.Add(className, "StripePlanId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripePlanId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PlanTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
@@ -133,8 +130,6 @@ namespace AfterSchoolLibrary
 				msgs.Add("PlanOwnerAccountId is required on SubscriptionPlan object", MessageType.Error);
 			if (this.CostPerPeriod.IsEmpty())
 				msgs.Add("CostPerPeriod is required on SubscriptionPlan object", MessageType.Error);
-			if (this.TotalPeriods.IsEmpty())
-				msgs.Add("TotalPeriods is required on SubscriptionPlan object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(SubscriptionPlan).Name));
@@ -269,9 +264,9 @@ namespace AfterSchoolLibrary
             return Account.Load(this.PlanOwnerAccountId.Value, msgs, dc);
         }
 
-        public string GetNickName(Activity activity)
+        public string GetNickName(string participationObjectName)
         {
-            return $"{activity.Name} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
+            return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
         }
 
         private SubscriptionPlan CopyFields()
@@ -279,7 +274,6 @@ namespace AfterSchoolLibrary
             return new SubscriptionPlan()
             {
                 ParticipationObjectTypeId = this.ParticipationObjectTypeId,
-                ParticipationObjectId = this.ParticipationObjectId,
                 PlanOwnerAccountId = this.PlanOwnerAccountId,
                 CostPerPeriod = this.CostPerPeriod,
                 BillingPeriodTypeId = this.BillingPeriodTypeId,
@@ -331,18 +325,37 @@ namespace AfterSchoolLibrary
             if (msgs.HasErrors())
                 return msgs;
 
-            var activity = this.GetActivity(msgs, dc);
-            var account = activity.GetAccount(msgs, dc);
+            Account account = null;
+            string uid = "";
+            string name = "";
+            string uniqueName = "";
+
+            if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+            {
+                var activity = this.GetActivity(msgs, dc);
+                account = activity.GetAccount(msgs, dc);
+                uid = activity.Uid.ToString();
+                name = activity.Name;
+                uniqueName = activity.UniqueName;
+            }
+            else
+            {
+                var activityGroup = this.GetActivityGroup(msgs, dc);
+                account = activityGroup.GetAccount(msgs, dc);
+                uid = activityGroup.Uid.ToString();
+                name = activityGroup.Name;
+                uniqueName = activityGroup.UniqueName;
+            }
 
             // do stripe
-            Stripe.StripeProduct product = Billing.StripeHelper.GetProduct(activity.Uid.ToString(), account.StripeUserId, msgs);
+            Stripe.StripeProduct product = Billing.StripeHelper.GetProduct(uid, account.StripeUserId, msgs);
 
             if (product.IsEmpty())
             {
                 product = Billing.StripeHelper.CreateProduct(
-                    activity.Uid.ToString(),
-                    activity.Name,
-                    activity.UniqueName,
+                    uid,
+                    name,
+                    uniqueName,
                     this.IsActive,
                     account.StripeUserId,
                     msgs);
@@ -365,7 +378,7 @@ namespace AfterSchoolLibrary
                     null,
                     this.CostPerPeriod.Value,
                     this.BillingPeriodTypeId,
-                    this.GetNickName(activity),
+                    this.GetNickName(name),
                     account.StripeUserId,
                     msgs
                     );

@@ -46,11 +46,11 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
-                        <button type="submit" class="btn btn-primary">Invite</button>
                         @if(ViewBag.ReturnUrl != null)
                         {
-                            <a href="@ViewBag.ReturnUrl" class="btn btn-default pull-right">Return <i class="icon icon-right s7-right-arrow"></i></a>
+                            <a href="@ViewBag.ReturnUrl" class="btn btn-default">Return <i class="icon icon-right s7-right-arrow"></i></a>
                         }
+                        <button type="submit" class="btn btn-primary pull-right">Invite</button>
                     </div>
                 </div>
             </form>

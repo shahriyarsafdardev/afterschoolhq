@@ -311,6 +311,7 @@ Public Class SystemMessages
                             Dim temp As String = Me(i).Text
                             If Me(i).Exception IsNot Nothing Then
                                 temp &= " " & Me(i).Exception.Message
+                                temp &= " " & Me(i).Exception.StackTrace
                             End If
                             tempHolder &= temp & ","
                             rtn &= Me(i).MessageType.ToString.SplitByUpperCase & " - " & temp & vbCrLf
@@ -319,6 +320,22 @@ Public Class SystemMessages
                 Next
             Case MessageOutputType.Json
                 rtn = Newtonsoft.Json.JsonConvert.SerializeObject(Me._items)
+
+            Case MessageOutputType.Html
+                Dim pMessageTypes As MessageType() = New MessageType() {messageType}
+                Dim tempHolder As String = ""
+                For i As Integer = 0 To Me.Count - 1
+                    If Array.IndexOf(pMessageTypes, Me(i).MessageType) > -1 OrElse (pMessageTypes.Count = 1 AndAlso pMessageTypes(0) = MessageType.NotSet) Then
+                        'If tempHolder.Contains(Me(i).Text & ",") = False Then
+                        Dim temp As String = "<p>" & Me(i).Text & "<br />"
+                        If Me(i).Exception IsNot Nothing Then
+                            temp &= Me(i).Exception.Message & "<br />"
+                            temp &= Me(i).Exception.StackTrace & "<br />"
+                        End If
+                        rtn &= Me(i).MessageType.ToString.SplitByUpperCase & "<br />" & temp & "</p>"
+                        'End If
+                    End If
+                Next
         End Select
 
         Return rtn
@@ -879,7 +896,7 @@ End Class
 Public Class Utilities
 
     Public Const EmailRegEx As String = "^([a-zA-Z0-9_\-\.\+]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
-    Public Const PhoneRegEx As String = "^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$"
+    Public Const PhoneRegEx As String = "^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:(\s*(\(?[2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\)?\s*)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})$"
     Public Const DomainRegEx As String = "^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$"
     Public Const SpecialCharsRegEx As String = "[^\w-\.]+"
     Public Const SpecialCharsRegExAllowWhiteSpace As String = "[^\w^\s-\.]+"

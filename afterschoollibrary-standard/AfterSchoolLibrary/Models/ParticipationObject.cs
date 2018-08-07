@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary
         public string CostDescription { get; set; }
 
         private ActivityType? ActivityType { get; set; }
-        private ActivityGroupType? ActivityGroupType { get; set; }
+        private ActivityGroupType? ActivityGroupType { get; set; }       
 
         public ParticipationObject(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -142,7 +142,7 @@ namespace AfterSchoolLibrary
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
 
-            IsFree = !aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal();
+            IsFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
         public string GetHomePageUrl(bool isAfterSchool = true)
@@ -218,6 +218,24 @@ namespace AfterSchoolLibrary
         public bool HasWaitingListSeatsAvailable()
         {
             return WaitingListSeatsRemaining.HasValue && WaitingListSeatsRemaining.Value > 0;
+        }
+
+        public string GetRegistrationThankYou(RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
+            {
+                if (ObjectType == ParticipationObjectType.ActivityGroup)
+                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                else
+                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+            }
+            else
+            {
+                if (ObjectType == ParticipationObjectType.ActivityGroup)
+                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                else
+                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+            }
         }
     }
 }

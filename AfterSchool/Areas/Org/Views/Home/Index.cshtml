@@ -3,7 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var actions = (List<SessionAction>)ViewBag.Actions;
     var registrations = Model.GetCurrentRegistrations();
-    decimal totalPaid = 0;
+    var totalPaid = (decimal)ViewBag.TotalPaid;
     int registrationCount = Registration.TotalCurrentRegistrationsCount(Model.ID.Value);
     var activityCount = Model.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, null, false);
     var dates = registrations.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
@@ -13,6 +13,7 @@
     var totalPossible = Model.GetAttendancePossibleCount();
     var totalAbsent = totalPossible - totalPresent;
     var attendanceRate = "0";
+    var hasVisitorAccountsToApprove = (bool)ViewBag.HasVisitorAccountsToApprove;
 
     if (totalPresent > 0)
     {
@@ -32,7 +33,21 @@
         <div class="panel-heading">
             Welcome @SessionVariables.LoggedInUser.FirstName!
         </div>
-        <div class="panel-body">
+        <div class="panel-body">            
+
+            @if (hasVisitorAccountsToApprove)
+            {
+                <div role="alert" class="alert alert-info alert-icon">
+                    <div class="icon">
+                        <span class="s7-check-circle"></span>
+                    </div>
+                    <div class="message">
+                        <p class="text-center">
+                            You have new providers requesting permission to post @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() to your page. <a href="@Url.Action("visitors", "account")">Review providers</a>.
+                        </p>
+                    </div>
+                </div>
+            }
 
             @if (activityCount == 0)
             {

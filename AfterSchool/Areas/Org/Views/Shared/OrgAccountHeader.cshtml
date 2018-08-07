@@ -27,18 +27,23 @@
 }
 
 <div class="page-head">
-    <div class="pull-right">
-        <p>
-            Logged in as: @SessionVariables.LoggedInUser.DisplayName
-        </p>
-    </div>
-    <h2>
-        @SessionVariables.CurrentAccount.Name
-        @if (SessionVariables.CurrentAccount.UniqueName.IsNotBlank())
-        {
-            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank"><i class="s7-link" data-toggle="popover" data-trigger="hover" data-content="Go to your public @UILabel.ProductName() home page"></i></a>
-        }
-    </h2>
+    <div class="row">
+        <div class="col-md-5">
+            <h2>
+                @SessionVariables.CurrentAccount.Name
+            </h2>
+        </div>
+        <div class="col-md-2">
+            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank" class="btn btn-primary">
+                View Activity Home Page
+            </a>
+        </div>
+        <div class="col-md-2 col-md-offset-3">
+            <div class="pull-right">
+                Logged in as: <a href="@Url.Action("edit", "user")">@SessionVariables.LoggedInUser.DisplayName</a> <br />
+            </div>
+        </div>
+    </div>    
 </div>
 
 <script>

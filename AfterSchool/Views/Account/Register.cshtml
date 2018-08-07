@@ -14,8 +14,10 @@
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml"); }
+
 <div class="reg-header">
-    <h1>Register @SessionVariables.CurrentRegistrant.DisplayName for @Model.Name</h1>
+    <h1>Registering <u>@SessionVariables.CurrentRegistrant.FirstName</u> for <u>@Model.Name</u></h1>
 </div>
 
 <div>
@@ -32,8 +34,8 @@
                     @foreach (var group in groups)
                     {
                         Html.RenderPartial(
-                            "~/Views/Shared/Form/_Group.cshtml", 
-                            group, 
+                            "~/Views/Shared/Form/_Group.cshtml",
+                            group,
                             new ViewDataDictionary() { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
                     }
 
@@ -48,8 +50,8 @@
                     </div>
 
                     <div class="padding-v-20">
-                        <button type="submit" id="btn-register" class="btn btn-xl center-block btn-register btn-register-xl">
-                            @if (Model.Cost == 0)
+                        <button type="submit" id="btn-register" class="btn btn-register btn-lg">
+                            @if (Model.IsFree || Model.RegistrationMode == RegistrationMode.Apply)
                             {
                                 @: Complete Registration &raquo;
                             }
@@ -58,6 +60,11 @@
                                 @: E-Sign and Continue to Payment &raquo;
                             }
                         </button>
+                        <div class="row">
+                            <div class="padding-v-20 text-center">
+                                <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a> &bull; <a href="@Url.Action("select", "account")" class="text-muted">Select a different child</a>
+                            </div>
+                        </div>
                     </div>
                 </form>
 

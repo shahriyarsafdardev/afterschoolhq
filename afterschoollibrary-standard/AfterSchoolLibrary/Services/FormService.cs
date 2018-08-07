@@ -33,7 +33,7 @@ namespace AfterSchoolLibrary.Services
 
             var questions = new List<QuestionHolder>();
             questions.AddRange(CreateStudentInformationGroup());
-            questions.AddRange(CreateStudentContactInformationGroup());
+            // questions.AddRange(CreateStudentContactInformationGroup());
             questions.AddRange(CreateStudentAddressGroup());
             questions.AddRange(CreateParent1InformationGroup());
             questions.AddRange(CreateParent1AddressGroup());

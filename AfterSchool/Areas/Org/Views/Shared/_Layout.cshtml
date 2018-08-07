@@ -26,9 +26,42 @@
         </div>
         @*@Html.Partial("_RightSideBar")*@
     </div>
-    
+
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
 
     @RenderSection("scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+
+            $('form').submit(function () {
+                $(this).find('button[type="submit"]').prop('disabled', true);
+                $(this).find('button[type="submit"]').html('...');
+                $("#modal-saving").addClass("md-show");
+                $('#saving-text').html('Saving...');
+            });
+
+            $('a').click(function () {
+                if ($(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
+                    $("#modal-saving").addClass("md-show");
+                    $('#saving-text').html('Loading...');
+                }
+            });
+
+        });
+    </script>
+
+    <div id="modal-saving" class="md-modal modal-container modal-full-color modal-full-color-success modal-effect-8" style="perspective: 1300px;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div style="background-image: url(/assets/img/spinner.gif); background-position: center; width: 600px; height: 300px;">
+                </div>
+                <div class="text-center hide">
+                    <h3 id="saving-text">Saving...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

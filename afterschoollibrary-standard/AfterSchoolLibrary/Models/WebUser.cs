@@ -50,7 +50,7 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(WebUser).Name;
                 _dp = BaseWebUser.get_BaseObjectMap(className);
-				_dp.Add(className, "FacebookId", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "FacebookId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "LastActivity", System.Data.SqlDbType.DateTime);

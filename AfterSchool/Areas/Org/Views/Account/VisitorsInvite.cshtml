@@ -1,0 +1,26 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var requestingVisitors = (List<Account>)ViewBag.RequestingVisitors;
+    var approvedVisitors = (List<Account>)ViewBag.ApprovedVisitors;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model);}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-edit"></i> Settings - Invite Provider
+        </div>
+        <div class="panel-body">
+
+           
+
+        </div>
+    </div>
+</div>

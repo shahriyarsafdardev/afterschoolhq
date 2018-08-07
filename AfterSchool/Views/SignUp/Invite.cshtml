@@ -1,0 +1,48 @@
+﻿@model Account
+
+@{
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    ViewBag.Title = "Sign Up";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var user = (WebUser)ViewBag.User;
+}
+
+<<div class="am-wrapper am-login am-signup">
+    <div class="am-content">
+        <div class="main-content">
+            <div class="login-container sign-up">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" height="80px" class="logo-img"></a>
+                        
+                    </div>
+                    <div class="panel-heading">
+                        <p>
+                            <span>
+                                Thanks for accepting an invite to share your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() with @Model.Name
+                            </span>
+                        </p>
+                        <p>
+                            <span>
+                                Already have an @UILabel.ProductName() account? <br />
+                                <a href="@Url.Action("index", "login", new { returnUrl = Url.Action("invite", "signup", new { id = Model.InviteCodeToShare }) })">
+                                    Login to accept the invite &raquo;
+                                </a>
+                            </span>
+                        </p>
+                        <p><span>No login account? No worries you can create your @UILabel.ProductName() account below.</span></p>
+                    </div>
+                    <div class="panel-body">
+
+                        @Html.Raw(UI.RenderMessagesToHtml(msgs))
+
+                        <form action="@Url.Action("invite", "signup", new { id = Model.InviteCodeToShare })" parsley-validate="" novalidate="" method="post" class="form-horizontal">
+                            @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm.cshtml", user, new ViewDataDictionary() { { "showphone", true } }); }
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center out-links"><a href="#">© @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+            </div>
+        </div>
+    </div>
+</div>

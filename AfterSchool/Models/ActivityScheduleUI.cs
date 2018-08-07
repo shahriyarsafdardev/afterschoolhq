@@ -91,8 +91,8 @@ namespace AfterSchool.Models
                         {
                             scheduleDates.Add(new DateRange()
                             {
-                                StartDate = $"{meetingStart.ToShortDateString()} {dailystarttime}".ToDateTime(),
-                                EndDate = $"{meetingEnd.ToShortDateString()} {dailyendtime}".ToDateTime(),
+                                StartDate = meetingStart,
+                                EndDate = meetingEnd
                             });
                         }
                     }

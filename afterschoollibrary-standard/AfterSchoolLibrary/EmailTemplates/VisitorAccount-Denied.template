@@ -1,0 +1,14 @@
+﻿<div>
+  <p>@Model.FirstName,</p>
+  
+  <p>
+      Unfortunately, @Model.VisitorAccountName has been denied to list activities on the @Model.HostAccountName activity home page.
+  </p>
+
+  <p>
+      If you have any questions about this you can follow up with your contact @Model.HostAccountName.
+  </p>
+  <p>
+      @Model.ProductName
+  </p>
+</div>

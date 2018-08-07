@@ -46,8 +46,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "CouponId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "StripeToken", System.Data.SqlDbType.NVarChar, 50);
-				_dp.Add(className, "StripeSourceId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeToken", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "StripeSourceId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PurchaserAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "NumberOfSeats", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LoggedInUserId", System.Data.SqlDbType.Int);

@@ -12,7 +12,7 @@
     @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model);}
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="s7-edit"></i> Account - Default Location
+            <i class="s7-edit"></i> Settings - Company Office
         </div>
         <div class="panel-body">
 
@@ -20,10 +20,14 @@
 
                 <form method="post" action="@Url.Action("location", "account")" class="form-horizontal">
                     <div class="col-md-9 col-md-offset-3">
-                        <p class="padding-20">
-                            The default location is used to make creating your new activities easier. If you typically meet at one location, this will keep you from entering your address over and over again.
+                        <p>
+                           Please enter your business location. If you don't have one, you can enter your default location for after school @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
                         </p>
+                        <p>Keep in mind your location may be published. Do not put your private home address in this area.</p>
                     </div>
+                    <p>
+
+                    </p>
 
                     @{ 
                         Html.RenderPartial(

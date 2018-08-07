@@ -96,6 +96,10 @@ div.border-light-gray {
     font-size: 1.0em;
 }
 
+.side-menu-logo{
+    margin: 15px 27px;
+    width: 50px;
+}
 
 /* DIVS */
 .rounded-corners {
@@ -506,6 +510,17 @@ div.filter-full-width > span {
     margin: 0;
     padding-left: 20px;
     padding-right: 20px;
+}
+
+.panel-alt6 .panel-heading, .panel-full-alt6 .panel-heading {
+    background-color: #2f3c40;
+    margin: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.panel-full-dark {
+    background-color: #2f3c40;
 }
 
 /* new */

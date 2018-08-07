@@ -9,6 +9,13 @@ namespace AfterSchool
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            //routes.RouteExistingFiles = true;
+            //routes.MapRoute(
+            //    name: "StaticFileRoute",
+            //    url: "home/{*file}",
+            //    defaults: new { controller = "Home", action = "HandleStatic", area = "" }
+            //);
+
             routes.MapRoute(
                 "HomePage",
                 "",

@@ -19,6 +19,106 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
+        public ActionResult MoveRegistrantAssignment(string id, string registrant, string assignmenttype)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
+            var newAssignmentType = (RegistrationAssignmentType)assignmenttype.ToInteger();
+
+            if (ra.IsNotEmpty())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {   
+                        var reg = ra.ToRegistrant();
+                        reg.AddOrUpdateActivity(
+                            ra.RegistrationId.Value,
+                            activity.ID.Value,
+                            newAssignmentType,
+                            ra.RegistrationPeriodId,
+                            ra.ActivityGroupId,
+                            SessionVariables.LoggedInUser.ID.Value,
+                            amsgs,
+                            adc);
+
+                        // TODO: may change assignment to pending reserved if the user is unpaid, and then auto-send the invoice
+                        // For now won't do that.
+
+                       
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        WriteOutput(new { status = "ok" }, ResponseType.JSON);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                        HandleErrors(msgs, ResponseType.JSON);
+                    }
+                );
+            }
+            else
+            {
+                msgs.Add("Invalid data", MessageType.UserError);
+            }
+
+            Response.End();
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult SendPaymentReminder(string id, string registrant)
+        {
+            var msgs = new SystemMessages();
+            Response.Clear();
+
+            if (id.IsGuid())
+            {
+                var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+                var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
+                var assignmentType = ra.AssignmentTypeId;
+
+                if (ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                {
+                    var reg = ra.ToRegistrant();
+
+                    assignmentType = RegistrationAssignmentType.ReservedPendingPayment;
+
+                    reg.AddOrUpdateActivity(
+                        ra.RegistrationId.Value,
+                        activity.ID.Value,
+                        assignmentType,
+                        ra.RegistrationPeriodId,
+                        ra.ActivityGroupId,
+                        SessionVariables.LoggedInUser.ID.Value,
+                        msgs);
+                }
+
+                if (ra.IsNotEmpty())
+                    msgs.AddRange(ra.SendPaymentReminder());
+
+                WriteOutput(new { status = "ok", AssignmentType = (int)assignmentType }, ResponseType.JSON);
+            }
+            else
+            {
+                msgs.Add("Invalid data", MessageType.UserError);
+            }
+
+            if (msgs.HasErrors())
+            {
+                HandleErrors(msgs, ResponseType.JSON);
+            }
+
+            Response.End();
+
+            return View();
+        }
+
+        [HttpGet]
         public ActionResult GetScheduleActivities(string id)
         {
             var msgs = new SystemMessages();

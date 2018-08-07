@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class PackageService
     {       
-        public static PackageFeature AddFeature(this Package package, FeatureType featureType, float maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static PackageFeature AddFeature(this Package package, FeatureType featureType, decimal maxValue, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -66,7 +66,7 @@ namespace AfterSchoolLibrary.Services
 
             foreach (var item in Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>())
             {
-                var maxValue = 1.ToFloat();
+                var maxValue = 1.ToDecimal();
 
                 switch (item)
                 {
@@ -81,10 +81,10 @@ namespace AfterSchoolLibrary.Services
                         maxValue = 1000;
                         break;
                     case FeatureType.PaymentsPercentageFee:
-                        maxValue = .01.ToFloat(); // means 1 percent
+                        maxValue = .05.ToDecimal(); // means 5 percent
                         break;
                     case FeatureType.PaymentsPercentageFlatFee:
-                        maxValue = .99.ToFloat();
+                        maxValue = .99.ToDecimal();
                         break;
                 }
 

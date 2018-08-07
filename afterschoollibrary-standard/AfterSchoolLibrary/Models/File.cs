@@ -39,8 +39,8 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(File).Name;
                 _dp = BaseFile.get_BaseObjectMap(className);
-				_dp.Add(className, "Label", System.Data.SqlDbType.NVarChar, 50);
-				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar, 400);
+				_dp.Add(className, "Label", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "FileTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				

@@ -75,8 +75,21 @@ namespace AfterSchool.Controllers
             var questions = GetStartedViewBag(regaccount, msgs);
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch(question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             if (password1.IsEmpty())
@@ -110,8 +123,8 @@ namespace AfterSchool.Controllers
                         user = WebUserService.CreateNew(
                             firstName: firstName.Value,
                             lastName: lastName.Value,
-                            email: email.Value,
-                            phone: phone.Value,
+                            email: email.Value.Trim(),
+                            phone: phone.Value.Trim(),
                             password: password1,
                             isActive: true,
                             isRegistered: true,
@@ -146,7 +159,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             registrant.AddAnswer(
-                                answerText: qvm.Value, 
+                                answerText: qvm.Value.IfEmpty("").Trim(), 
                                 question: qvm.Question, 
                                 loggedInUserId: user.ID.Value, 
                                 msgs: amsgs, 
@@ -244,122 +257,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             parentRegistrant.AddAnswer(
-                                answerText: qvm.Value,
-                                question: qvm.Question,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                                msgs: amsgs,
-                                dc: adc);
-                        });
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
-            }
-
-            if (msgs.HasNoErrors())
-                return RedirectToAction("addemergencycontacts");
-
-            ViewBag.Messages = msgs;
-
-            return View(qvms);
-        }
-
-        #endregion
-
-        #region AddEmergencyContacts
-
-        private List<FormQuestion> AddEmergencyContactsViewBag(SystemMessages msgs)
-        {
-            var form = GetAdministratorAccountForm(msgs);
-            var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
-                .Where(group => 
-                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 || 
-                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
-                .ToList();
-            var questions = new List<FormQuestion>();
-
-            emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
-            questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
-                .ToList()
-                .ForEach(question => { question.IsRequired = true; });
-
-            ViewBag.Cart = SessionVariables.Cart;
-
-            return questions;
-        }
-
-        [HttpGet]
-        public ActionResult AddEmergencyContacts()
-        {
-            var results = CheckRedirect();
-            if (results.IsNotEmpty()) return results;
-
-            var msgs = new SystemMessages();
-            var questions = AddEmergencyContactsViewBag(msgs);
-
-            ViewBag.Messages = msgs;
-
-            return View(questions.Select(question => question.ToFormQuestionViewModel()).ToList());
-        }
-
-        [HttpPost]
-        public ActionResult AddEmergencyContacts(string id)
-        {
-            var msgs = new SystemMessages();
-            var questions = AddEmergencyContactsViewBag(msgs);
-            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-            var emergencyContactPhone1 = "";
-
-            questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString();
-                var qvmNameIsEmpty = qvmName.IsEmpty();
-                if (question.IsRequired && qvmNameIsEmpty)
-                    msgs.Add($"{question.Text} is required", MessageType.UserError);
-                
-                //validate emegercy contact phone 1
-                if(question.QuestionDataTypeId == QuestionDataType.EmergencyContact1Phone)
-                {
-                    emergencyContactPhone1 = qvmName;
-                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    {
-                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
-                    }
-                }
-
-                //validate emegercy contact phone 2
-                if (question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone && question.IsRequired)
-                {
-                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    {
-                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
-                    }
-                    if(qvmName == emergencyContactPhone1)
-                    {
-                        msgs.Add($"{question.Text} emergency contact phone numbers can't be the same", MessageType.UserError);
-                    }
-                }
-            });
-
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-
-            if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        // add answers to parent registrant record
-                        // will be used later to copy information over to student records
-                        qvms.ForEach(qvm =>
-                        {
-                            parentRegistrant.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -459,8 +357,21 @@ namespace AfterSchool.Controllers
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -488,7 +399,116 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             otherParent.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.IfEmpty("").Trim(),
+                                question: qvm.Question,
+                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("addemergencycontacts");
+
+            ViewBag.Messages = msgs;
+
+            return View(qvms);
+        }
+
+        #endregion
+
+        #region AddEmergencyContacts
+
+        private List<FormQuestion> AddEmergencyContactsViewBag(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
+                .Where(group => 
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 || 
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
+                .ToList();
+            var questions = new List<FormQuestion>();
+
+            emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
+            questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
+                .ToList()
+                .ForEach(question => { question.IsRequired = true; });
+
+            ViewBag.Cart = SessionVariables.Cart;
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult AddEmergencyContacts()
+        {
+            var results = CheckRedirect();
+            if (results.IsNotEmpty()) return results;
+
+            var msgs = new SystemMessages();
+            var questions = AddEmergencyContactsViewBag(msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(questions.Select(question => question.ToFormQuestionViewModel()).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult AddEmergencyContacts(string id)
+        {
+            var msgs = new SystemMessages();
+            var questions = AddEmergencyContactsViewBag(msgs);
+            var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
+            var phones = new List<string>();
+
+            questions.ForEach(question => {
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+                
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.EmergencyContact1Phone:
+                    case QuestionDataType.EmergencyContact2Phone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
+
+                        if (answer.IsNotEmpty())
+                            phones.Add(answer);
+
+                        break;
+
+                }
+            });
+
+            if (phones.Count == 2 && phones[0] == phones[1])
+                msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // add answers to parent registrant record
+                        // will be used later to copy information over to student records
+                        qvms.ForEach(qvm =>
+                        {
+                            parentRegistrant.AddAnswer(
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -611,8 +631,21 @@ namespace AfterSchool.Controllers
             var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -642,7 +675,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             student.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -660,7 +693,7 @@ namespace AfterSchool.Controllers
                             .ForEach(answer =>
                             {
                                 student.AddAnswer(
-                                    answerText: answer.Text,
+                                    answerText: answer.Text.IfEmpty("").Trim(),
                                     question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
                                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                     msgs: amsgs,
@@ -692,28 +725,31 @@ namespace AfterSchool.Controllers
                                amsgs,
                                adc);
                         }
-                        
-                        // get parent 2 info
-                        var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
-                        {
-                            { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent2FirstName },
-                            { QuestionDataType.RegistrantLastName,  QuestionDataType.Parent2LastName },
-                            { QuestionDataType.RegistrantEmail,  QuestionDataType.Parent2Email },
-                            { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent2HomePhone },
-                            { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent2MobilePhone },
-                            { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent2WorkPhone },
-                        };
 
-                        foreach (var key in parent2Map.Keys)
+                        if (parentRegistrant2.IsNotEmpty())
                         {
-                            student.MapAndAddAnswer(
-                               allquestions,
-                               parentRegistrant2,
-                               key,
-                               parent2Map[key],
-                               SessionVariables.LoggedInUser,
-                               amsgs,
-                               adc);
+                            // get parent 2 info
+                            var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
+                            {
+                                { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent2FirstName },
+                                { QuestionDataType.RegistrantLastName,  QuestionDataType.Parent2LastName },
+                                { QuestionDataType.RegistrantEmail,  QuestionDataType.Parent2Email },
+                                { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent2HomePhone },
+                                { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent2MobilePhone },
+                                { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent2WorkPhone },
+                            };
+
+                            foreach (var key in parent2Map.Keys)
+                            {
+                                student.MapAndAddAnswer(
+                                   allquestions,
+                                   parentRegistrant2,
+                                   key,
+                                   parent2Map[key],
+                                   SessionVariables.LoggedInUser,
+                                   amsgs,
+                                   adc);
+                            }
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>
@@ -799,18 +835,18 @@ namespace AfterSchool.Controllers
             var questions = AddHealthViewBag(msgs);
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name];
-                if (question.IsRequired && qvmName.IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantDoctorPhone:
-                        if (!qvmName.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx) && question.IsRequired)
-                        {
-                            msgs.Add($"{question.Text}, valid phone number is required", MessageType.UserError);
-                        }
-                      break;
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
                 }
             });
 
@@ -827,7 +863,7 @@ namespace AfterSchool.Controllers
                         qvms.ForEach(qvm =>
                         {
                             SessionVariables.CurrentRegistrant.AddAnswer(
-                                answerText: qvm.Value,
+                                answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
@@ -846,7 +882,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("select");
+                return RedirectToAction("register");
 
             ViewBag.Student = SessionVariables.CurrentRegistrant;
             ViewBag.Messages = msgs;
@@ -1046,7 +1082,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (participationObject.IsFree)
+                if (participationObject.IsFree || participationObject.RegistrationMode == RegistrationMode.Apply)
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
                 else
                     return RedirectToAction("payment", new { id = registration.Uid });
@@ -1072,9 +1108,14 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
 
-            // if not free and no option to pay later, redirect to payment screen
-            if (!participationObject.IsFree && !participationObject.AllowToPayLater)
-                return RedirectToAction("payment", new { id = registrationUid });
+            // if you can't pay later
+            if (!participationObject.AllowToPayLater)
+            {
+                // if it's not free and registration mode is not set to apply mode
+                // if it costs something and you're forced to register then you need to pay
+                if (!participationObject.IsFree && participationObject.RegistrationMode == RegistrationMode.Register)
+                    return RedirectToAction("payment", new { id = registrationUid });
+            }
 
             // need to actually register first :)
             if (!registrationUid.IsGuid())
@@ -1098,8 +1139,9 @@ namespace AfterSchool.Controllers
                         Registration = registration,
                         Registrant = SessionVariables.CurrentRegistrant
                     },
+                    sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.LoggedInUser,
-                    msgs: msgs);
+                    msgs: msgs);                
             }
 
             if (msgs.HasNoErrors())
@@ -1137,13 +1179,13 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return results;
 
             var msgs = new SystemMessages();
+            
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+            var registration = PaymentViewBag(id, participationObject, msgs);            
 
             // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
+            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs) && registration.IsPaid(msgs))
                 return RedirectToAction("select");
-
-            PaymentViewBag(id, participationObject, msgs);
 
             return View();
         }
@@ -1169,7 +1211,7 @@ namespace AfterSchool.Controllers
                 SubscriptionPlan paymentPlan = null;
 
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
-                    paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
+                    paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);                
 
                 SessionVariables.CurrentAccount.ProcessRegistrationWithPayment(
                     toAccount: participationObject.OwnerAccount,
@@ -1179,12 +1221,12 @@ namespace AfterSchool.Controllers
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         PaymentPlan = paymentPlan,
+                        SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         Products = new List<Product>(),
                         Purchaser = SessionVariables.CurrentAccount,
                         Registration = registration,
                         StripeToken = stripetoken,
                         SourceId = sourceId,
-                        SubscriptionPlan = null,
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
                         Registrant = SessionVariables.CurrentRegistrant
                     },
@@ -1204,6 +1246,42 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo, paymentoption);
         }
 
+        private ActionResult MakePaymentActionGet(string id)
+        {
+            var msgs = new SystemMessages();
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+
+            if (registration.IsEmpty())
+                return View("");
+
+            // check if still owes money, load up variables
+            if (!registration.IsPaid(msgs))
+            {
+                var participationObject = registration.GetParticipationObject(msgs);
+                var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+                var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
+                var parentAccount = parentRegistrant.GetAccount(msgs);
+
+                if (parentAccount.ID != SessionVariables.CurrentAccount.ID)
+                    return Logout(Request.Url.ToString());
+
+                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
+                SessionVariables.Cart.AddCartItem(participationObject, msgs);
+                SessionVariables.CurrentRegistrant = currentRegistrant;
+                SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
+
+                return RedirectToAction("payment", new { id = registration.Uid });
+            }            
+
+            return RedirectToAction("thankyou", new { id = registration.Uid });
+        }
+
+        [HttpGet]
+        public ActionResult MakePayment(string id)
+        {
+            return HandleIsLoggedIn() ?? MakePaymentActionGet(id);
+        }
+
         #endregion
 
         #region ThankYou
@@ -1213,8 +1291,8 @@ namespace AfterSchool.Controllers
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
 
             // this should be moved into the library
-            if (SessionVariables.Cart.IsNotEmpty())
-                BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
+            //if (SessionVariables.Cart.IsNotEmpty())
+            //    BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
 
             // clear out session stuff after it sends confirmation, don't want to send on refresh
             ResetRegistrationSession();
@@ -1268,10 +1346,10 @@ namespace AfterSchool.Controllers
         private ActionResult HandleIsLoggedIn()
         {
             if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction("");
+                return Logout(Request.Url.ToString(), true);
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
-                return RedirectToAction("");
+                return Logout(Request.Url.ToString(), true);
 
             return null;
         }

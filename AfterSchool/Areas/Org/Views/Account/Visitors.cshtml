@@ -1,0 +1,133 @@
+﻿@model AfterSchoolLibrary.Account
+@{
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var requestingVisitors = (List<Account>)ViewBag.RequestingVisitors;
+    var approvedVisitors = (List<Account>)ViewBag.ApprovedVisitors;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model);}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-edit"></i> Settings - Provider Accounts
+        </div>
+        <div class="panel-body">
+
+            <div role="alert" class="alert alert-success alert-icon">
+                <div class="icon">
+                    <span class="s7-check-circle"></span>
+                </div>
+                <div class="message">
+                    <p class="text-center">
+                        Invite Providers to create an account to list their @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() on your @UILabel.ActivityLabel(ActivityType.Activity).ToLower() home page.<br />
+
+                        Invite Link to Share with providers: <a href="@Model.HostAccountInviteUrl" target="_blank">@Model.HostAccountInviteUrl</a>
+                    </p>
+                </div>
+            </div>
+
+            @if (requestingVisitors.Any())
+            {
+                <div class="panel">
+                    <div class="panel-heading">
+                        Requests
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Account</th>
+                                        <th>Contact</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Date Requested</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(var visitor in requestingVisitors)
+                                    {
+                                        var user = visitor.GetAccountOwner();
+                                        var request = visitor.GetRequestForAccount(SessionVariables.CurrentAccount);
+
+                                        <tr>
+                                            <td><a href="@visitor.HomePageUrl" target="_blank">@visitor.Name</a></td>
+                                            <td>@user.DisplayName</td>
+                                            <td><a href="mailto:@user.Email">@user.Email</a></td>
+                                            <td>@user.Phone</td>
+                                            <td>@request.CreateDate.ToShortDateString()</td>
+                                            <td>
+                                                <a href="@Url.Action("approvevisitor", "account", new { id = request.ID })" class="btn btn-primary">
+                                                    <i class="s7-check-cirle"></i>
+                                                    Approve
+                                                </a>
+                                                <a href="@Url.Action("denyvisitor", "account", new { id = request.ID })" class="btn btn-danger">
+                                                    <i class="s7-close-cirle"></i>
+                                                    Deny
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="panel">
+                <div class="panel-heading">
+                    Approved Accounts
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Contact</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (approvedVisitors.Any())
+                                {
+                                    foreach (var visitor in approvedVisitors)
+                                    {
+                                        var user = visitor.GetAccountOwner();
+                                        var request = visitor.GetRequestForAccount(SessionVariables.CurrentAccount);
+
+                                        <tr>
+                                            <td><a href="@visitor.HomePageUrl" target="_blank">@visitor.Name</a></td>
+                                            <td>@user.DisplayName</td>
+                                            <td><a href="mailto:@user.Email">@user.Email</a></td>
+                                            <td>@user.Phone</td>
+                                            <td>
+                                                <a href="@Url.Action("denyvisitor", "account")" class="btn btn-default">Deny</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5">There are no approved providers</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

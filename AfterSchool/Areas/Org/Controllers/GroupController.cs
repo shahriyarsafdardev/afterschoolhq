@@ -353,7 +353,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.RegistrantActivities = group.GetRegistrantActivities(registrations);
             ViewBag.ReservedSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
             ViewBag.WaitingListSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
-            ViewBag.ApplicationSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Application);
+            ViewBag.ApplicationSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
             ViewBag.ReturnUrl = Url.Action("registrations", "group", new { id = group.Uid });
         }
         
@@ -568,7 +568,7 @@ namespace AfterSchool.Areas.Org.Controllers
             switch (nextStep)
             {
                 case 1:
-                    var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Application) > 0).ToList();
+                    var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) > 0).ToList();
                     ViewBag.Periods = periods;
                     break;
                 case 2:
@@ -614,7 +614,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Application) > 0).ToList();
+            var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) > 0).ToList();
             ViewBag.Periods = periods;
 
             ViewBag.Messages = msgs;

@@ -69,14 +69,14 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "DatePaid", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar, 100);
-				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LastUpdated", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FirstRegistrationId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -357,7 +357,7 @@ namespace AfterSchoolLibrary
 
                     if (amsgs.HasNoErrors())
                     {
-                        var mergedFromActivities = mergedFrom.GetRegistrantActivities(adc);
+                        var mergedFromActivities = mergedFrom.GetRegistrantActivities(amsgs, adc);
 
                         foreach (var activity in mergedFromActivities)
                         {
@@ -372,7 +372,7 @@ namespace AfterSchoolLibrary
 
                         this.LastModifiedBy = loggedInUserId;
                         this.LastModifiedDate = DateTime.UtcNow;
-                        msgs.AddRange(this.Save(adc));
+                        amsgs.AddRange(this.Save(adc));
                     }
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -389,13 +389,23 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        internal static List<int> ValidCompletionStatus
+        {
+            get
+            {
+                return new List<int>() { (int)RegistrationCompletionStatus.Completed, (int)RegistrationCompletionStatus.RequiresParentSignature };
+            }
+        } 
+
         public static List<Registration> LoadFirstRegistrations(int accountId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
+            var completionStatus = new List<int>() { (int)RegistrationCompletionStatus.Completed, (int)RegistrationCompletionStatus.RequiresParentSignature };
+
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
@@ -411,7 +421,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], this.AccountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName.Trim());
             dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName.Trim());
@@ -506,7 +516,7 @@ namespace AfterSchoolLibrary
 		                        r.ID = {this.FirstRegistrationId.IfEmpty(0)} or
 		                        r.FirstRegistrationId = {this.ID} or
 		                        r.ID = {this.ID}
-	                        ) and r.CompletionStatusId = {(int)RegistrationCompletionStatus.Completed}";
+	                        ) and r.CompletionStatusId in ({ValidCompletionStatus.ToArray().ToStringArray().ToStringList()})";
 
             var registrations = dq.ExecuteSelect(sql).AsEnumerable().ToList().ConvertAll(LoadObject);
 
@@ -613,9 +623,9 @@ namespace AfterSchoolLibrary
             return RegistrationActivity.LoadByRegistrationId(this.ID.Value, dc: dc);
         }
 
-        public List<RegistrantActivity> GetRegistrantActivities(DatabaseConnection dc = null)
+        public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, dc: dc)
+            return RegistrantActivity.LoadByRegistrationId(this.ID.Value, msgs, dc)
                     .Where(x => 
                         !x.ActivityIsDeleted && 
                         !x.ActivityIsArchived && 
@@ -751,6 +761,12 @@ namespace AfterSchoolLibrary
             return $"{custommessage}{activities}{accountInformation}";
         }
 
+        public static SystemMessages SendConfirmation(CheckoutObject checkoutObject, bool sendBcc, DatabaseConnection dc = null)
+        {
+            return EmailHelper.SendRegistrationConfirmed(checkoutObject, sendBcc);
+        }
+
+        [Obsolete]
         public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -802,7 +818,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 
             // aggregate related registrations
@@ -832,7 +848,7 @@ namespace AfterSchoolLibrary
 
                 switch (rat)
                 {
-                    case RegistrationAssignmentType.Application:
+                    case RegistrationAssignmentType.Applied:
                         raQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                         break;
                     case RegistrationAssignmentType.Declined:
@@ -870,7 +886,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -903,7 +919,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -939,7 +955,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -974,7 +990,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -1010,7 +1026,7 @@ namespace AfterSchoolLibrary
 
                     switch (rat)
                     {
-                        case RegistrationAssignmentType.Application:
+                        case RegistrationAssignmentType.Applied:
                             aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
                             break;
                         case RegistrationAssignmentType.Declined:
@@ -1141,7 +1157,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -1154,7 +1170,7 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], (int)RegistrationCompletionStatus.Completed);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -1260,7 +1276,7 @@ namespace AfterSchoolLibrary
 
                 switch (rat)
                 {
-                    case RegistrationAssignmentType.Application:
+                    case RegistrationAssignmentType.Applied:
                         registrantActivities = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0).ToList();
                         break;
                     case RegistrationAssignmentType.Declined:
@@ -1562,7 +1578,7 @@ namespace AfterSchoolLibrary
                         from Registration r
                         where 
                         accountId = {accountId} and
-                        completionStatusId = {(int)RegistrationCompletionStatus.Completed} and
+                        completionStatusId in ({ValidCompletionStatus.ToArray().ToStringArray().ToStringList()}) and
                         (
                             select count(ra.id) 
                             from RegistrationActivity ra
@@ -1586,7 +1602,7 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
-        public static List<Registration> LoadCurrentByAccountId(int AccountId, DatabaseConnection dc = null)
+        public static List<Registration> LoadCurrentByAccountId(int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1624,7 +1640,7 @@ namespace AfterSchoolLibrary
 	                    ) and
 	                    r.AccountId = {0}", AccountId);
 
-            return dq.ExecuteSelect(sql).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public SystemMessages DeleteWithRelatedRecords(DatabaseConnection dc = null)
@@ -1758,6 +1774,32 @@ namespace AfterSchoolLibrary
             msgs.AddRange(this.FindAndSetFirstRegistration(this.RegistrantFirstName, this.RegistrantLastName, this.RegistrantEmail, dc));
 
             return msgs;
+        }
+
+        public bool IsPaid(SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+
+            if (registrantActivities.Any())
+                return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
+                    registrantActivities.First().ActivityId.Value,
+                    ParticipationObjectType.Activity,
+                    this.RegistrantId.Value,
+                    msgs,
+                    dc) > 0;
+
+            msgs.Add("Incomplete registration", MessageType.UserError);
+
+            return false;
+        }
+
+        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+            if (registrantActivities.Any())
+                return registrantActivities.First().ToActivity(true, msgs, dc).ToParticipationObject(msgs, dc);
+
+            return null;
         }
 
         #endregion

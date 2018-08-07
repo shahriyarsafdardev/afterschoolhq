@@ -21,9 +21,9 @@ namespace AfterSchool.Controllers
         /// the question is where did they start and how do we get them back there?
         /// </summary>
         /// <param name="account"></param>
-        private void SetRegistrationStartPage(Account account)
+        private void SetRegistrationStartPage(Account account, bool forceReset = false)
         {
-            if (SessionVariables.RegistrationStartPageAccount.IsEmpty())
+            if (SessionVariables.RegistrationStartPageAccount.IsEmpty() || forceReset)
                 SessionVariables.RegistrationStartPageAccount = account;
         }
 
@@ -36,18 +36,20 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Account(string accountname)
         {
+            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname);
+            RestartRegistrationSession();
+            SetRegistrationStartPage(account, true);
             return Redirect($"/{accountname}/browse");            
         }
 
         [HttpGet]
         public ActionResult Browse(string accountname)
         {
-            RestartRegistrationSession();
-
             var msgs = new SystemMessages();
-            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
+            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname);
 
-            SetRegistrationStartPage(account);
+            RestartRegistrationSession();
+            SetRegistrationStartPage(account, true);
 
             var participationObjects = new List<ParticipationObject>();
             var sessions = new List<ActivityGroup>();
@@ -60,7 +62,10 @@ namespace AfterSchool.Controllers
                 var hostedLocationIds = account.GetHostedLocations(msgs).Select(location => location.ID.Value).ToList();
                 account.GetApprovedVisitorAccounts(msgs).ForEach(visitor =>
                 {
-                    participationObjects.AddRange(visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs).Select(activity => activity.ToParticipationObject(msgs)));
+                    participationObjects.AddRange(
+                        visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs)
+                            .Select(activity =>  activity.ToParticipationObject(msgs))
+                            .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
                 });
 
                 participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.ToParticipationObject(msgs)));

@@ -93,6 +93,36 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Payment_Reminder {
+            get {
+                object obj = ResourceManager.GetObject("Payment_Reminder", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Registration_Confirmation {
+            get {
+                object obj = ResourceManager.GetObject("Registration_Confirmation", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Registration_Confirmation_Rows {
+            get {
+                object obj = ResourceManager.GetObject("Registration_Confirmation_Rows", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] StripeAccount_Verified {
             get {
                 object obj = ResourceManager.GetObject("StripeAccount_Verified", resourceCulture);
@@ -116,6 +146,36 @@ namespace AfterSchoolLibrary {
         internal static byte[] SubscriptionPayment_Succeeded {
             get {
                 object obj = ResourceManager.GetObject("SubscriptionPayment_Succeeded", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] VisitorAccount_Approved {
+            get {
+                object obj = ResourceManager.GetObject("VisitorAccount_Approved", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] VisitorAccount_Denied {
+            get {
+                object obj = ResourceManager.GetObject("VisitorAccount_Denied", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] VisitorAccount_Requested {
+            get {
+                object obj = ResourceManager.GetObject("VisitorAccount_Requested", resourceCulture);
                 return ((byte[])(obj));
             }
         }

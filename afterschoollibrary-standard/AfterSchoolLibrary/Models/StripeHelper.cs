@@ -81,8 +81,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Error getting stripe account", MessageType.Error);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error getting payment account", MessageType.UserError);
             }
 
             return account;
@@ -112,8 +112,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Error creating stripe account", MessageType.Error);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error creating payment account", MessageType.UserError);
             }
 
             return account;
@@ -142,8 +142,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Error updating stripe account", MessageType.Error);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error updating payment account", MessageType.UserError);
             }
 
             return account;
@@ -205,8 +205,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Error updating stripe account", MessageType.Error);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error updating payment account", MessageType.UserError);
             }
 
             return account;
@@ -252,63 +252,9 @@ namespace AfterSchoolLibrary.Billing
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Error updating stripe account", MessageType.Error);
+                msgs.Add("Error updating payment account", MessageType.UserError);
             }
         }
-
-        //BusinessName = "",
-        //        BusinessUrl = "",
-        //        Country = "US",
-        //        DefaultCurrency = "usd",
-        //        Type = StripeAccountType.Custom.ToString().ToLower(),
-        //        Email = "",
-        //        SupportEmail = "",
-        //        SupportPhone = "",
-        //        SupportUrl = "",
-        //        StatementDescriptor = "",
-        //        ProductDescription = "",
-        //        PayoutStatementDescriptor = "",
-        //        TosAcceptanceDate = "",
-        //        TosAcceptanceUserAgent = "",
-        //        TosAcceptanceIp = "",
-        //        DebitNegativeBalances = true,
-        //        DeclineChargeOnCvcFailure = true,
-        //        TransferScheduleInterval = "",
-        //        ExternalBankAccount = new StripeAccountBankAccountOptions()
-        //{
-        //    AccountHolderName = "",
-        //            AccountHolderType = "",
-        //            AccountNumber = "",
-        //            Country = "US",
-        //            Currency = "usd",
-        //            RoutingNumber = ""
-        //        },
-        //        LegalEntity = new StripeAccountLegalEntityOptions()
-        //{
-        //    AddressCity = "",
-        //            AddressLine1 = "",
-        //            AddressLine2 = "",
-        //            AddressPostalCode = "",
-        //            AddressState = "",
-        //            AddressTwoLetterCountry = "US",
-        //            BusinessName = "",
-        //            BusinessTaxId = "",
-        //            BirthDay = "",
-        //            BirthMonth = "",
-        //            BirthYear = "",
-        //            FirstName = "",
-        //            LastName = "",
-        //            PersonalAddressCity = "",
-        //            PersonalAddressLine1 = "",
-        //            PersonalAddressLine2 = "",
-        //            PersonalAddressState = "",
-        //            PersonalAddressPostalCode = "",
-        //            PersonalAddressTwoLetterCountry = "US",
-        //            PersonalIdNumber = "",
-        //            PhoneNumber = "",
-        //            SSNLast4 = "",
-
-        //        },
 
         #endregion
 
@@ -336,7 +282,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe file was not uploaded", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"payment account file was not uploaded", MessageType.UserError);
             }
 
             return fileUpload;
@@ -376,7 +323,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe product was not created", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Product was not created", MessageType.UserError);
             }
 
             return product;
@@ -402,11 +350,12 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                product = GetProductService().Update(product.Id, options, requestOptions);
+                product = GetProductService().Update(productId, options, requestOptions);
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe product ({product.Id}) was not updated", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Product ({productId}) was not updated", MessageType.UserError);
             }
 
             return product;
@@ -425,11 +374,12 @@ namespace AfterSchoolLibrary.Billing
                 var result = GetProductService().Delete(productId, requestOptions);
 
                 if (!result.Deleted)
-                    msgs.Add($"Stripe product ({productId}) was not deleted", MessageType.Error);
+                    msgs.Add($"Product ({productId}) was not deleted", MessageType.UserError);
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe product ({productId}) was not deleted", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Product ({productId}) was not deleted", MessageType.UserError);
             }
 
             return msgs;
@@ -506,7 +456,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch(StripeException ex)
             {
-                msgs.Add($"Stripe plan was not created", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Plan was not created", MessageType.UserError);
             }
 
             return plan;
@@ -534,7 +485,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe plan ({planId}) was not updated", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Plan ({planId}) was not updated", MessageType.UserError);
             }
 
             return plan;
@@ -553,11 +505,12 @@ namespace AfterSchoolLibrary.Billing
                 var result = GetPlanService().Delete(planId, requestOptions);
 
                 if (!result.Deleted)
-                    msgs.Add($"Stripe plan ({planId}) was not deleted", MessageType.Error);
+                    msgs.Add($"Plan ({planId}) was not deleted", MessageType.UserError);
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe plan ({planId}) was not deleted", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Plan ({planId}) was not deleted", MessageType.UserError);
             }
 
             return msgs;
@@ -620,7 +573,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe customer was not created", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer was not created", MessageType.UserError);
             }
 
             return customer;
@@ -647,7 +601,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe customer was not created", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer was not created", MessageType.UserError);
             }
 
             return customer;
@@ -671,7 +626,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe customer ({customerId}) was not updated", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
             }
 
             return msgs;
@@ -699,7 +655,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe customer ({customerId}) was not updated", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
             }
 
             return customer;
@@ -718,11 +675,12 @@ namespace AfterSchoolLibrary.Billing
                 var result = GetCustomerService().Delete(customerId, requestOptions);
 
                 if (!result.Deleted)
-                    msgs.Add($"Stripe customer ({customerId}) was not deleted", MessageType.Error);
+                    msgs.Add($"Customer ({customerId}) was not deleted", MessageType.UserError);
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe customer ({customerId}) was not deleted", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer ({customerId}) was not deleted", MessageType.UserError);
             }
 
             return msgs;
@@ -769,7 +727,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe customer ({customerId}) was not updated", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
             }
 
             return msgs;
@@ -809,8 +768,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add($"Stripe subscription was not created", MessageType.Error);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Subscription was not created", MessageType.UserError);
             }
 
             return subscription;
@@ -871,7 +830,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe subscription ({subscriptionId}) was not cancelled", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Subscription ({subscriptionId}) was not updated", MessageType.UserError);
             }
 
             return subscription;
@@ -896,7 +856,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Stripe subscription ({subscriptionId}) was not cancelled", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Subscription ({subscriptionId}) was not cancelled", MessageType.UserError);
             }
 
             return msgs;
@@ -1094,8 +1055,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add($"Stripe source was not created", MessageType.Error);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Payment source was not created", MessageType.UserError);
             }
 
             return source;
@@ -1124,8 +1085,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add($"Stripe source was not created", MessageType.Error);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Payment source was not created", MessageType.UserError);
             }
 
             return source;
@@ -1141,7 +1102,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Cannot get list of sources", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Cannot get list of payment sources", MessageType.UserError);
             }
 
             return cards;
@@ -1149,18 +1111,18 @@ namespace AfterSchoolLibrary.Billing
 
         public static StripeSource GetSource(string sourceId, SystemMessages msgs)
         {
-            var card = new StripeSource();
+            var source = new StripeSource();
 
             try
             {
-                card = GetSourceService().Get(sourceId);
+                source = GetSourceService().Get(sourceId);
             }
             catch (StripeException ex)
             {
-                msgs.Add($"Source id ({sourceId}) not found", MessageType.Error, ex);
+
             }
 
-            return card;
+            return source;
         }
 
         #endregion
@@ -1197,8 +1159,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add("Error charging payment source", MessageType.Error, ex);
-                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error charging payment source", MessageType.UserError);
             }
 
             return charge;
@@ -1221,7 +1183,8 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add("Error retrieving charges", MessageType.Error, ex);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error retrieving charges", MessageType.UserError);
             }
 
             return charges;

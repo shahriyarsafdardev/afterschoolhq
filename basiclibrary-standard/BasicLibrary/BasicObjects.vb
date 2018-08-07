@@ -294,6 +294,8 @@ Public Class BaseObject
                 If criterias.Values(i) Is DBNull.Value Then
                     criterias2.Add(New DataAccess.DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Is))
                     DatabaseQuery.UseParameterizedQuery = False
+                ElseIf criterias.Values(i).GetType IsNot GetType(String) AndAlso TryCast(criterias.Values(i), IEnumerable) IsNot Nothing Then
+                    criterias2.Add(New DataAccess.DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In))
                 Else
                     criterias2.Add(New DataAccess.DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i)))
                 End If
@@ -761,8 +763,8 @@ Public MustInherit Class BasicLookUpObject
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BasicObjectWithModified.BaseObjectMap(className, tableName)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Description", tableName, SqlDbType.NVarChar, 400))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Description", tableName, SqlDbType.NVarChar, "400"))
             Return _databaseParameters
         End Get
     End Property
@@ -829,12 +831,12 @@ Public MustInherit Class BaseAddress
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BasicObjectWithModified.BaseObjectMap(className, tableName)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Address1", tableName, SqlDbType.NVarChar, 100))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Address2", tableName, SqlDbType.NVarChar, 100))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "City", tableName, SqlDbType.NVarChar, 100))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "State", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "PostalCode", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Country", tableName, SqlDbType.NVarChar, 100))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Address1", tableName, SqlDbType.NVarChar, "100"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Address2", tableName, SqlDbType.NVarChar, "100"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "City", tableName, SqlDbType.NVarChar, "100"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "State", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "PostalCode", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Country", tableName, SqlDbType.NVarChar, "100"))
             Return _databaseParameters
         End Get
     End Property
@@ -957,8 +959,8 @@ Public MustInherit Class BaseLocation
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BaseAddress.BaseObjectMap(className, tableName)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Description", tableName, SqlDbType.NVarChar, 100))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Description", tableName, SqlDbType.NVarChar, "100"))
             Return _databaseParameters
         End Get
     End Property
@@ -1039,11 +1041,11 @@ Public MustInherit Class BaseCompany
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BaseAddress.BaseObjectMap(className, tableName)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Phone", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Email", tableName, SqlDbType.NVarChar, 100))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Fax", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Website", tableName, SqlDbType.NVarChar, 100))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Name", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Phone", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Email", tableName, SqlDbType.NVarChar, "100"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Fax", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Website", tableName, SqlDbType.NVarChar, "100"))
             Return _databaseParameters
         End Get
     End Property
@@ -1205,10 +1207,10 @@ Public MustInherit Class BasePerson
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BasicObjectWithModified.BaseObjectMap(className)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "FirstName", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "LastName", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Email", tableName, SqlDbType.NVarChar, 100))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Phone", tableName, SqlDbType.NVarChar, 50))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "FirstName", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "LastName", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Email", tableName, SqlDbType.NVarChar, "100"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Phone", tableName, SqlDbType.NVarChar, "50"))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "DateOfBirth", tableName, SqlDbType.DateTime))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "GenderId", tableName, SqlDbType.Int))
             Return _databaseParameters
@@ -1305,14 +1307,14 @@ Public MustInherit Class BaseWebUser
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BasePerson.BaseObjectMap(className)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Username", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Password", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "ImageUrl", tableName, SqlDbType.NVarChar, 400))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenId", tableName, SqlDbType.NVarChar, 400))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenIdProviderUrl", tableName, SqlDbType.NVarChar, 400))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Username", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Password", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "ImageUrl", tableName, SqlDbType.NVarChar, "400"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenId", tableName, SqlDbType.NVarChar, "400"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenIdProviderUrl", tableName, SqlDbType.NVarChar, "400"))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "LastLogin", tableName, SqlDbType.DateTime))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "TimeZoneId", tableName, SqlDbType.Float))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "ProfileUrl", tableName, SqlDbType.NVarChar, 400))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "ProfileUrl", tableName, SqlDbType.NVarChar, "400"))
             Return _databaseParameters
         End Get
     End Property
@@ -1395,13 +1397,13 @@ Public MustInherit Class BaseContact
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BasePerson.BaseObjectMap(className)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Prefix", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "MiddleName", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Suffix", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Website", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Company", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "JobTitle", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Notes", tableName, SqlDbType.NVarChar, 400))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Prefix", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "MiddleName", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Suffix", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Website", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Company", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "JobTitle", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Notes", tableName, SqlDbType.NVarChar, "400"))
             Return _databaseParameters
         End Get
     End Property
@@ -1469,12 +1471,12 @@ Public MustInherit Class BaseContactWithAddress
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BaseContact.BaseObjectMap(className, tableName)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Address1", tableName, SqlDbType.NVarChar, 100))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Address2", tableName, SqlDbType.NVarChar, 100))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "City", tableName, SqlDbType.NVarChar, 100))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "State", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "PostalCode", tableName, SqlDbType.NVarChar, 50))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Country", tableName, SqlDbType.NVarChar, 100))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Address1", tableName, SqlDbType.NVarChar, "100"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Address2", tableName, SqlDbType.NVarChar, "100"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "City", tableName, SqlDbType.NVarChar, "100"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "State", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "PostalCode", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Country", tableName, SqlDbType.NVarChar, "100"))
             Return _databaseParameters
         End Get
     End Property
@@ -1540,8 +1542,8 @@ Public MustInherit Class BaseFile
         Get
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BasicObjectWithModified.BaseObjectMap(className)
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Filename", tableName, SqlDbType.NVarChar, 400))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "FileLocation", tableName, SqlDbType.NVarChar, 1000))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Filename", tableName, SqlDbType.NVarChar, "400"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "FileLocation", tableName, SqlDbType.NVarChar, "1000"))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "FileSizeInBytes", tableName, SqlDbType.Int))
             Return _databaseParameters
         End Get
@@ -1623,7 +1625,7 @@ Public MustInherit Class BaseEvent
             _databaseParameters = BasicLookUpObject.BaseObjectMap(className)
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "StartDateTime", tableName, SqlDbType.DateTime))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "EndDateTime", tableName, SqlDbType.DateTime))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Location", tableName, SqlDbType.NVarChar, 400))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Location", tableName, SqlDbType.NVarChar, "400"))
             Return _databaseParameters
         End Get
     End Property
@@ -1671,7 +1673,7 @@ Public MustInherit Class BaseEventWithAddress
             _databaseParameters = BaseCompany.BaseObjectMap(className)
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "StartDateTime", tableName, SqlDbType.DateTime))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "EndDateTime", tableName, SqlDbType.DateTime))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Description", tableName, SqlDbType.NVarChar, 1000))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Description", tableName, SqlDbType.NVarChar, "1000"))
             Return _databaseParameters
         End Get
     End Property

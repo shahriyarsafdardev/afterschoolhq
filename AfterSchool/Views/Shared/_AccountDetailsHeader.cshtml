@@ -13,6 +13,14 @@
             <a href="@Url.Action("style", "account")" class="hide btn btn-alt6@(actionName == "style" ? "-active" : "")">Content</a>
             <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>
             <a href="@Url.Action("paymentsentity", "account")" class="btn btn-alt6@(actionName == "paymentsentity" ? "-active" : "")">Accept Payments</a>
+            @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
+            {
+                <a href="@Url.Action("visitors", "account")" class="btn btn-alt6@(actionName == "visitors" ? "-active" : "")">Providers</a>
+            }
+            else
+            {
+                <a href="@Url.Action("hosts", "account")" class="hide btn btn-alt6@(actionName == "visitors" ? "-active" : "")">Schools</a>
+            }
             <a href="@Url.Action("newbilling", "account")" class="hide btn btn-alt6@(actionName == "newbilling" ? "-active" : "")">Packages</a>
             <a href="@Url.Action("billing", "account")" class="hide btn btn-alt6@(actionName == "billing" ? "-active" : "")">Billing</a>
             @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
@@ -26,6 +34,14 @@
                 <option value="@Url.Action("edit", "account")">Details</option>
                 <option value="@Url.Action("location", "account")">Location</option>
                 <option value="@Url.Action("paymentsentity", "account")">Accept Payments</option>
+                @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
+                {
+                    <option value="@Url.Action("visitors", "account")">Providers</option>
+                }
+                else
+                {
+
+                }
                 @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
                 {
                     <option value="@Url.Action("features", "account")">Features</option>

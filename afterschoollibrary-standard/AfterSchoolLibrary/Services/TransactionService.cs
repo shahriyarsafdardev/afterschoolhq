@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Services
 
             var transaction = new Transaction()
             {
-                Amount = checkoutObject.TotalCostToPurchase,
+                Amount = checkoutObject.RegistrationFee,
                 BillerAccountId = toAccount.ID.Value,
                 Description = $"{checkoutObject.ParticipationObject.Name} registration",
                 PayerAccountId = fromAccount.ID,
@@ -27,6 +27,8 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                PlatformFlatFee = toAccount.GetPlatformFlatFee(msgs, dc),
+                PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc)
             };
             msgs.AddRange(transaction.Save(dc));
 

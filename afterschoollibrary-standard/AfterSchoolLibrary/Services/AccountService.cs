@@ -471,18 +471,18 @@ namespace AfterSchoolLibrary
             return EmailHelper.SendAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
         }
 
-        public static SystemMessages InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static WebUser InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if(msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var wu = account.AddUser(firstName, lastName, email, ut, loggedInUser.ID.Value, msgs, dc);
+            var user = account.AddUser(firstName, lastName, email, ut, loggedInUser.ID.Value, msgs, dc);
             if (msgs.HasNoErrors())
-                msgs.AddRange(wu.SendInviteToAccount(account, message, loggedInUser, dc: dc));
+                msgs.AddRange(user.SendInviteToAccount(account, message, loggedInUser, dc: dc));
             
             if (msgs.HasErrors())
                 msgs.Add($"An invitation was not sent to ${email.Trim()}, a system error has occurred", MessageType.UserError);       
 
-            return msgs;
+            return user;
         }
 
         public static string GenerateUniqueName(string name, int? accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1052,17 +1052,17 @@ namespace AfterSchoolLibrary
             return AccountProperty.LoadByAccountIdByAccountPropertyTypeId(account.ID.Value, propertyType, dc: dc);
         }
 
-        public static List<Registration> GetRegistrations(this Account account, DatabaseConnection dc = null)
+        public static List<Registration> GetRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadByAccountId(account.ID.Value, dc: dc)
-                .Where(x => x.CompletionStatusId == RegistrationCompletionStatus.Completed)
+            return Registration.LoadByAccountId(account.ID.Value, msgs, dc)
+                .Where(registration => Registration.ValidCompletionStatus.Contains((int)registration.CompletionStatusId))
                 .ToList();
         }
 
-        public static List<Registration> GetCurrentRegistrations(this Account account, DatabaseConnection dc = null)
+        public static List<Registration> GetCurrentRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadCurrentByAccountId(account.ID.Value, dc: dc)
-                .Where(x=> x.CompletionStatusId == RegistrationCompletionStatus.Completed)
+            return Registration.LoadCurrentByAccountId(account.ID.Value, msgs, dc)
+                .Where(registration => Registration.ValidCompletionStatus.Contains((int)registration.CompletionStatusId))
                 .ToList();
         }
 
@@ -1071,7 +1071,7 @@ namespace AfterSchoolLibrary
             return Registration.Load(
                 new Hashtable() {
                     { "AccountId", account.ID.Value },
-                    { "CompletionStatusId", RegistrationCompletionStatus.Completed }
+                    { "CompletionStatusId", Registration.ValidCompletionStatus }
                 }, 
                 start, 
                 length, 
@@ -1189,7 +1189,7 @@ namespace AfterSchoolLibrary
 
         public static int GetVisitorAccountsCount(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountTypeId", (int)accountType } }, msgs, dc);
+            return AccountRelationship.GetCount(new Hashtable() { { "HostAccountId", hostAccount.ID.Value }, { "AccountAccountTypeId", (int)accountType } }, msgs, dc);
         }
 
         public static List<Account> GetHostAccounts(this Account account, DatabaseConnection dc = null)
@@ -1200,11 +1200,29 @@ namespace AfterSchoolLibrary
         }
 
         //Gets the accounts that are requesting the host's approval
-        public static List<Account> GetRequestedVisitorAccounts(this Account hostAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Account> GetRequestedVisitorAccounts(this Account hostAccount, AccountType? accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountRelationship.LoadByRequested(hostAccount.ID.Value, accountType, msgs, dc)
                 .Select(accountRelationship => accountRelationship.GetVisitorAccount(msgs, dc))
                 .ToList();
+        }
+
+        public static AccountRelationship GetRequestForAccount(this Account visitorAccount, Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc= null)
+        {
+            return AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
+        }
+
+        //Gets the accounts that are requesting the host's approval
+        public static int GetRequestedVisitorAccountsCount(this Account hostAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountRelationship.GetCount(
+                new Hashtable()
+                {
+                    { "HostAccountId", hostAccount.ID.Value },
+                    { "ApprovalStatusId", (int)ApprovalStatus.Requested }
+                }, 
+                msgs, 
+                dc);
         }
 
         //Gets the accounts that the host has approved
@@ -1282,27 +1300,30 @@ namespace AfterSchoolLibrary
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static SystemMessages RequestAccessToAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static AccountRelationship RequestAccessToAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            AccountRelationship relationship = null;
 
             // Makes sure that the visitor has not been previously denied by the host
             if (!GetDeniedVisitorAccounts(hostAccount, visitorAccount.AccountTypeId, dc: dc).Contains(visitorAccount))
             {
-                msgs.AddRange(visitorAccount.AddHostAccount(
+                relationship = visitorAccount.AddHostAccount(
                     hostAccount,
                     hostPermissionType,
                     ApprovalStatus.Requested, 
                     loggedInUser, 
-                    dc));
+                    msgs,
+                    dc);
 
                 //TODO Notify Host account of request
-                if (msgs.HasNoErrors())
-                {
-                    //msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
-                }
+                if (msgs.HasNoErrors() && hostAccount.IsActive)
+                    msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
             }
-            return msgs;
+
+            msgs.Add("This account has already previously been denied", MessageType.UserError);
+            
+            return relationship;
         }
 
         /// <summary>
@@ -1313,16 +1334,24 @@ namespace AfterSchoolLibrary
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static SystemMessages ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static AccountRelationship ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            return ApproveAccessToAccount(hostAccount, visitorAccount, HostPermissionType.ApproveOnly, loggedInUser, msgs, dc);
+        }
 
-            msgs.AddRange(AccountRelationshipService.UpdateApprovalStatus(hostAccount, visitorAccount, ApprovalStatus.Approved, loggedInUser, dc));
+        public static AccountRelationship ApproveAccessToAccount(this Account hostAccount, Account visitorAccount, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var relationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
 
-            // if (msgs.HasNoErrors())
-            // msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
+            if (relationship.IsNotEmpty())
+                msgs.AddRange(AccountRelationshipService.UpdateApprovalStatus(hostAccount, visitorAccount, ApprovalStatus.Approved, loggedInUser, dc));
+            else
+                relationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, hostPermissionType, loggedInUser, msgs, dc);
 
-            return msgs;
+            if (msgs.HasNoErrors())
+                msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
+
+            return relationship;
         }
 
         /// <summary>
@@ -1393,11 +1422,9 @@ namespace AfterSchoolLibrary
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static SystemMessages AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, DatabaseConnection dc = null)
+        private static AccountRelationship AddHostAccount(this Account visitorAccount, Account hostAccount, HostPermissionType hostPermissionType, ApprovalStatus approvalStatus, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
-            AccountRelationshipService.CreateNew(
+            return AccountRelationshipService.CreateNew(
                     hostAccount,
                     visitorAccount,
                     approvalStatus,
@@ -1405,8 +1432,6 @@ namespace AfterSchoolLibrary
                     loggedInUser,
                     msgs,
                     dc);
-
-            return msgs;
         }
 
         public static SystemMessages CreateAfterSchoolAccount(string adminEmail, string adminPassword, string adminPhone, string accountName, DatabaseConnection dc = null)
@@ -1565,12 +1590,95 @@ namespace AfterSchoolLibrary
             var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
             var flatFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
 
-            return (totalAmountToCharge * percentageFee.ToDecimal()) + flatFee.ToDecimal();
+            return (totalAmountToCharge * percentageFee) + flatFee;
         }
 
-        public static decimal GetPlatformFeePercent(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetPlatformPercentFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue().ToDecimal();
+            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+        }
+
+        public static decimal GetPlatformFlatFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
+        }
+
+        internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
+        {
+            var source = Billing.StripeHelper.CreateSource(stripeToken, msgs);
+            msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+            return source.Id;
+        }
+
+        internal static Stripe.StripeCharge CreateStripeChargeDuringCheckout(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // if stripe token then don't send customer id
+            string customerId = null;
+
+            if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
+                customerId = fromAccount.StripeCustomerId;
+
+            var charge = Billing.StripeHelper.CreateCharge(
+                fromCustomerId: customerId,
+                destinationAccountId: toAccount.StripeUserId,
+                tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
+                totalAmount: checkoutObject.RegistrationFee,
+                platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.RegistrationFee, msgs, dc),
+                description: $"{checkoutObject.ParticipationObject.Name} registration",
+                statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
+                msgs: msgs
+                );
+
+            return charge;
+        }
+
+        internal static Purchase AddPurchase(this Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return PurchaseService.CreateNew(
+                    purchasingAccount: fromAccount,
+                    checkoutObject: checkoutObject,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+        }
+
+        internal static Transaction AddTransaction(this Account fromAccount, Account toAccount, Purchase purchase, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return TransactionService.CreateNew(
+                    fromAccount,
+                    toAccount,
+                    checkoutObject,
+                    purchase.ID,
+                    loggedInUser,
+                    msgs,
+                    dc);
+        }
+
+        internal static string CopyStripeSourceToAccount(this Account fromAccount, Account toAccount, string stripeToken, SystemMessages msgs)
+        {
+            // stripe stuff
+            // create payment source if not already existent on the user
+            var sourceId = "";
+            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+
+            if (customer.DefaultSourceId.IsEmpty())
+            {
+                var source = Billing.StripeHelper.CreateSource(stripeToken, msgs);
+                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+                sourceId = source.Id;
+            }
+            else
+            {
+                sourceId = customer.DefaultSourceId;
+            }
+
+            // what happens if the same registrant gets another payment plan?
+            // Create a new customer? For now YES, it doesn't really matter I don't think
+
+            // get shared source
+            var copiedSource = Billing.StripeHelper.CreateSourceFromOriginal(customer.Id, sourceId, toAccount.StripeUserId, msgs);
+
+            return copiedSource.Id;
         }
 
         private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -1585,56 +1693,23 @@ namespace AfterSchoolLibrary
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
             if (msgs.HasNoErrors() && checkoutObject.SavePaymentInfo)
-            {
-                var source = Billing.StripeHelper.CreateSource(checkoutObject.StripeToken, msgs);
-                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
-                checkoutObject.SourceId = source.Id;
-            }
+                checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
             // don't process charge if the user is using a payment plan
-            if (msgs.HasNoErrors() && checkoutObject.PaymentPlan.IsEmpty())
-            {
-                // if stripe token then don't send customer id
-                string customerId = null;
-
-                if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
-                    customerId = fromAccount.StripeCustomerId;
-
-                var charge = Billing.StripeHelper.CreateCharge(
-                    fromCustomerId: customerId,
-                    destinationAccountId: toAccount.StripeUserId,
-                    tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
-                    totalAmount: checkoutObject.TotalCostToPurchase,
-                    platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.TotalCostToPurchase, msgs, dc),
-                    description: $"{checkoutObject.ParticipationObject.Name} registration",
-                    statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
-                    msgs: msgs
-                    );
-            }
+            if (msgs.HasNoErrors())
+                fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
             if (msgs.HasNoErrors())
             {
                 // tracks the whole purchase, could contain multiple activities/activity groups
-                var purchase = PurchaseService.CreateNew(
-                    purchasingAccount: fromAccount,
-                    checkoutObject: checkoutObject,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
+                var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
 
                 // charge successful so I need to create a transaction
-                var transaction = TransactionService.CreateNew(
-                    fromAccount,
-                    toAccount,
-                    checkoutObject,
-                    purchase.ID,
-                    loggedInUser,
-                    msgs,
-                    dc);
+                var transaction = fromAccount.AddTransaction(toAccount, purchase, checkoutObject, loggedInUser, msgs, dc);
 
                 // need to track a payment for each activity/activitygroup
                 if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
@@ -1642,35 +1717,53 @@ namespace AfterSchoolLibrary
                     // TODO: How much does a user pay for an activity if a coupon is used to purchase multiple activities at once?
                     var activity = (Activity)checkoutObject.ParticipationObject.Object;
                     var payment = activity.AddPayment(
-                        amount: activity.CostPerRegistrant.Value * checkoutObject.NumberOfSeats, 
-                        registrant: checkoutObject.Registration.GetRegistrant(msgs, dc), 
-                        loggedInUser: loggedInUser, 
-                        msgs: msgs, 
+                        amount: activity.CostPerRegistrant.Value * checkoutObject.NumberOfSeats,
+                        registrant: checkoutObject.Registration.GetRegistrant(msgs, dc),
+                        loggedInUser: loggedInUser,
+                        msgs: msgs,
                         dc: dc);
                 }
             }
         }
 
-        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // mark as completed
-            msgs.AddRange(checkoutObject.Registration.FinalizeRegistration(loggedInUser, dc));
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // mark as completed
+                    amsgs.AddRange(checkoutObject.Registration.FinalizeRegistration(loggedInUser, adc));
 
-            // TODO: Allow user to register for multiple activities in one session at once
+                    // TODO: Allow user to register for multiple activities in one session at once
 
-            // add them to the activity
-            if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
-            {
-                var activity = ((Activity)checkoutObject.ParticipationObject.Object);
-                activity.ProcessRegistration(
-                    purchaseObject: checkoutObject,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
-            }
+                    // add them to the activity
+                    if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
+                    {
+                        var activity = ((Activity)checkoutObject.ParticipationObject.Object);
+                        activity.ProcessRegistration(
+                            checkoutObject: checkoutObject,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+                    }
 
-            // TODO: Add to an activity group if they are registering for a session
+                    // TODO: Add to an activity group if they are registering for a session
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
 
+                    if (sendConfirmationEmail)
+                        Registration.SendConfirmation(checkoutObject, true);
+
+                },
+                onFailure: (SystemMessages amsgs) =>
+                {
+                    msgs.AddRange(amsgs);
+                },
+                dc: dc
+            );
         }
 
         public static void ProcessRegistrationWithPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1681,10 +1774,18 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
 
-                    fromAccount.ProcessRegistrationWithoutPayment(toAccount, checkoutObject, loggedInUser, amsgs, adc);                    
+                    fromAccount.ProcessRegistrationWithoutPayment(
+                        toAccount: toAccount, 
+                        checkoutObject: checkoutObject, 
+                        sendConfirmationEmail: false, 
+                        loggedInUser: loggedInUser, 
+                        msgs: amsgs, 
+                        dc: adc);                    
 
                     // process payment by to account, includes registration fee and product purchases
-                    toAccount.ProcessRegistrationFeeAndProducts(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
+                    // skip for payment plans and subscription plans
+                    if (checkoutObject.PaymentPlan.IsEmpty() && checkoutObject.SubscriptionPlan.IsEmpty())
+                        toAccount.ProcessRegistrationFeeAndProducts(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the Registration Fee
 
@@ -1693,6 +1794,7 @@ namespace AfterSchoolLibrary
                     var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
                     // if they have a subscription plan
+                    // will also process registration fees
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                     {
                         var rpp = accountRegistrant.StartSubscriptionPlan(
@@ -1700,6 +1802,7 @@ namespace AfterSchoolLibrary
                             toAccount: toAccount,
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
+                            subscriptionPlanType: SubscriptionPlanType.Subscription,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -1713,6 +1816,7 @@ namespace AfterSchoolLibrary
                             toAccount: toAccount,
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
+                            subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -1722,6 +1826,8 @@ namespace AfterSchoolLibrary
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
+
+                    Registration.SendConfirmation(checkoutObject, true);
                 },
                 onFailure: (SystemMessages amsgs) =>
                 {
@@ -1768,6 +1874,11 @@ namespace AfterSchoolLibrary
         public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountPaid(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetTotalPaidByAccount(account.ID.Value, msgs, dc);
         }
     }
 }

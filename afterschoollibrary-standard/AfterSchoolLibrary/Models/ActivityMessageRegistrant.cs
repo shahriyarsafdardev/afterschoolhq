@@ -53,7 +53,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityMessageId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateSent", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "SendErrors", System.Data.SqlDbType.NVarChar, 1000);
+				_dp.Add(className, "SendErrors", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");

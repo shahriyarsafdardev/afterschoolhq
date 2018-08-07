@@ -280,14 +280,14 @@ namespace AfterSchoolLibrary.Services
             else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email must valid", MessageType.UserError);
             else if (WebUser.ExistsByEmail(email))
-                msgs.Add("Email is already in use by another user", MessageType.UserError);
+                msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
 
             if (phone.IsEmpty())
                 msgs.Add("Phone is required", MessageType.UserError);
             else if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                 msgs.Add("Phone must be valid", MessageType.UserError);
             else if (WebUser.ExistsByPhone(phone))
-                msgs.Add("Phone is already in use by another user", MessageType.UserError);
+                msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
 
             if (password.IsNotEmpty() && password.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
@@ -339,7 +339,7 @@ namespace AfterSchoolLibrary.Services
         public static Account AddNewRegistrantAccount(this WebUser accountOwner, bool isActive, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
-                orgName: accountOwner.DisplayName,
+                orgName: $"{accountOwner.LastName} Family",
                 email: accountOwner.Email,
                 phone: accountOwner.Phone,
                 isActive: isActive,

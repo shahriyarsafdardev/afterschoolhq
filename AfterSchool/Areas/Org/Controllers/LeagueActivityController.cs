@@ -1241,7 +1241,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             switch(rat)
             {
-                case RegistrationAssignmentType.Application:
+                case RegistrationAssignmentType.Applied:
                     ras = ras.Where(x => x.NumberOfApplicationSeats > 0).OrderBy(x => x.ApplicationSeatIndex).ToList();
                     break;
                 case RegistrationAssignmentType.WaitingList:
@@ -1700,7 +1700,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             // TODO: need to verify if this really should be the master account. What is master
                             var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
-                            var registration = registrant.AddRegistration(SessionVariables.CurrentAccount.ID.Value, activity.ActivityGroupId, SessionVariables.LoggedInUser.ID.Value, amsgs, adc);
+
+                            var registration = registrant.AddRegistration(
+                                SessionVariables.CurrentAccount.ID.Value, 
+                                activity.ActivityGroupId, 
+                                RegistrationCompletionStatus.RequiresParentSignature,
+                                SessionVariables.LoggedInUser.ID.Value, 
+                                amsgs, 
+                                adc);
+
                             var ra = registrant.AddOrUpdateActivity(registration.ID.Value, af.ActivityId.Value, seatCount, waitingListSeatCount, applicationSeatCount, invitationSeatCount, declinedSeatCount, 0, amsgs, dc: adc);
 
                             for (var i = 0; i < headers.Count; i++)

@@ -39,6 +39,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 10);            
             ViewBag.Messages = new SystemMessages();
             ViewBag.Actions = actions;
+            ViewBag.HasVisitorAccountsToApprove = SessionVariables.CurrentAccount.GetRequestedVisitorAccountsCount() > 0;
+            ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountPaid();
             return View(account);
         }
     }

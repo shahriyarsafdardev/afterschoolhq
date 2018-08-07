@@ -35,7 +35,7 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(GradeLevel).Name;
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
-				_dp.Add(className, "Abbreviation", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "Abbreviation", System.Data.SqlDbType.NVarChar , "50");
 				
                 return _dp;
             }

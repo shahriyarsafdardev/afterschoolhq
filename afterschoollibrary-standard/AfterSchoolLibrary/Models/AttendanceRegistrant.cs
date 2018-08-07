@@ -39,7 +39,7 @@ namespace AfterSchoolLibrary
 		public RegistrantType RegistrantRegistrantTypeId { get { return (RegistrantType)MDV["RegistrantRegistrantTypeId"].Value; } }
 		public int? RegistrantAccountId { get { return (int?)MDV["RegistrantAccountId"].Value; } }
 		public int? AttendanceActivityId { get { return (int?)MDV["AttendanceActivityId"].Value; } }
-		public int? AttendanceIsCompleted { get { return (int?)MDV["AttendanceIsCompleted"].Value; } }
+		public bool AttendanceIsCompleted { get { return (bool)MDV["AttendanceIsCompleted"].Value; } }
 		
 
         public AttendanceRegistrant()
@@ -73,7 +73,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RegistrantRegistrantTypeId", typeof(Registrant).Name, "RegistrantTypeId", System.Data.SqlDbType.Int, "Registrant");
 				_dp.Add(className, "RegistrantAccountId", typeof(Registrant).Name, "AccountId", System.Data.SqlDbType.Int, "Registrant");
 				_dp.Add(className, "AttendanceActivityId", typeof(Attendance).Name, "ActivityId", System.Data.SqlDbType.Int, "Attendance");
-				_dp.Add(className, "AttendanceIsCompleted", typeof(Attendance).Name, "IsCompleted", System.Data.SqlDbType.Int, "Attendance");
+				_dp.Add(className, "AttendanceIsCompleted", typeof(Attendance).Name, "IsCompleted", System.Data.SqlDbType.Bit, "Attendance");
 				
                 return _dp;
             }
@@ -250,10 +250,11 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
+            dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
             var results = dq.Select();
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
@@ -268,10 +269,11 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
+            dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
             var results = dq.Select();
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
@@ -286,10 +288,11 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
+            dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
             var results = dq.Select();
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
@@ -304,6 +307,7 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
+            dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
             var results = dq.Select();
             if (results.Rows.Any())
@@ -322,10 +326,11 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["RegistrantAccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
             var results = dq.Select();
             if (results.Rows.Any())
-                return dq.Select().Rows[0][0].ToString().ToInteger();
+                return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
@@ -340,6 +345,7 @@ namespace AfterSchoolLibrary
             sp.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["RegistrantAccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
             var results = dq.Select();
             if (results.Rows.Any())
