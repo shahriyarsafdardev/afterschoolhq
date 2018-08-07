@@ -41,7 +41,6 @@
                     <input type="text" name="locationname" id="locationname" value="" class="form-control" />
                 </div>
             </div>
-
             
             <div class="form-group @hideRelationship" id="hostaccount-div">
                 <label class="control-label col-sm-3">What is your relationship with this location?</label>
@@ -68,7 +67,6 @@
                                        id="locationtype-@((int)item)" 
                                        name="locationtype" 
                                        class="form-control location-type" 
-                                       @*required="required"*@ 
                                        value="@((int)item)" 
                                        @(item == location.LocationTypeId ? "checked=\"checked\"" : "") />
                                 <label for="locationtype-@((int)item)">@item.ToString().SplitByUpperCase()</label>
@@ -93,6 +91,26 @@
                 });
             }
 
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Room Number / Specific Instructions
+            </label>
+            <div class="col-sm-9">
+                @{
+                    Html.RenderPartial(
+                     "~/Views/Shared/_TextEditor.cshtml",
+                     Model.LocationDetails,
+                     new ViewDataDictionary() {
+                            //{ "required", true },
+                            { "name", "locationdetails" },
+                            { "id", "locationdetails" }
+                     }
+                     );
+                }
+                <p class="text-muted"><em>Enter your room number or any special instructions or information about the location? Such as pick up or drop off locations?</em></p>
+            </div>
         </div>
 
 
