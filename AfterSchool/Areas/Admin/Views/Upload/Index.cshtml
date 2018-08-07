@@ -39,6 +39,14 @@
                                 </label>
                                 <input type="file" class="form-control" name="csvfile" id="csvfile"  />
                             </div>
+                            <div class="form-group">
+                                <div class="col-sm-3 control-label">
+                                    Invite Message
+                                </div>
+                                <div class="col-sm-6">
+                                    <textarea class="form-control" rows="4" cols="100" name="invite-message" id="invite-message">@Request["invite-message"]</textarea>
+                                </div>
+                            </div>
                             @if (showSubmit)
                             {
                                 <div class="form-group">
