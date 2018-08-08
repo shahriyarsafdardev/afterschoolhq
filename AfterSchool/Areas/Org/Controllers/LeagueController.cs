@@ -183,8 +183,6 @@ namespace AfterSchool.Areas.Org.Controllers
             msgs.AddRange(regperiod.Save());
 
             PeriodViewBag(group, msgs);
-            
-            ViewData["PostController"] = "league";
 
             return View("periods", group);
         }
