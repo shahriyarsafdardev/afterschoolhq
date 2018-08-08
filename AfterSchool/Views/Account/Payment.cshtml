@@ -208,7 +208,7 @@
                         </div>
                     </div>
 
-                    <div id="block-payment-info" style="position:absolute; top: 0px; left: 0px;" class="text-center padding-20">
+                    <div id="block-payment-info" style="position:absolute; top: 0px; left: 0px;" class="text-center padding-20 hide">
                         <span style="vertical-align: middle; display: inline-block; line-height: 40px;" class="text-white text-medium">
                             @participationObject.OwnerAccount.Name is not setup to accept online payments at this time. <br />
                             Please pay in person via check or cash at your earliest convenience.<br /><br />
@@ -288,6 +288,7 @@
         });
 
         if (@accountCanAcceptPayments.ToString().ToLower() == false) {
+            $('#block-payment-info').removeClass('hide');
             sizePaymentBlock();
         }
 
