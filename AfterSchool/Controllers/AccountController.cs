@@ -579,6 +579,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.School = schoolLocation;
+            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count == 0;
 
             return questions;
         }
@@ -798,6 +799,7 @@ namespace AfterSchool.Controllers
             });
 
             ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
 
             return questions;
         }
