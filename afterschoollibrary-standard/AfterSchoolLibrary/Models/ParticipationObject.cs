@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary
         {
             Object = aag;
             var activityGroup = aag.GetActivityGroup(msgs, dc);
-            ObjectID = activityGroup.ID;
+            ObjectID = aag.ID;
             ObjectType = ParticipationObjectType.AccountActivityGroup;
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
@@ -138,13 +138,16 @@ namespace AfterSchoolLibrary
             RegistrationMode = activityGroup.RegistrationModeId;
             Form = activityGroup.GetForm(msgs, dc);
             OwnerAccount = aag.GetAccount(msgs, dc);
+            ContactName = aag.ContactName;
+            ContactEmail = aag.ContactEmail;
+            ContactPhone = aag.ContactPhone;
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
 
-            IsFree = !aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal();
+            IsFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
         public string GetHomePageUrl(bool isAfterSchool = true)
@@ -159,6 +162,11 @@ namespace AfterSchoolLibrary
                     return ((AccountActivityGroup)this.Object).GetHomePageUrl(isAfterSchool);
             }
             return "";
+        }
+
+        public string GetRegistrationPageUrl(bool isAfterSchool = true)
+        {
+            return $"{GetHomePageUrl(isAfterSchool)}/register";
         }
 
         public bool IsSport()
@@ -210,6 +218,24 @@ namespace AfterSchoolLibrary
         public bool HasWaitingListSeatsAvailable()
         {
             return WaitingListSeatsRemaining.HasValue && WaitingListSeatsRemaining.Value > 0;
+        }
+
+        public string GetRegistrationThankYou(RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
+            {
+                if (ObjectType == ParticipationObjectType.Activity)
+                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                else
+                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+            }
+            else
+            {
+                if (ObjectType == ParticipationObjectType.Activity)
+                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                else
+                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+            }
         }
     }
 }

@@ -61,10 +61,10 @@ namespace AfterSchoolLibrary
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(ActivitySchedule).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "Name", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "Name", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ScheduleDetails", System.Data.SqlDbType.NVarChar, 4000);
+				_dp.Add(className, "ScheduleDetails", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "RepeatsWeekly", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsOngoing", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
@@ -487,7 +487,7 @@ namespace AfterSchoolLibrary
         public List<DayOfWeekASL> GetDaysOfTheWeek(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.GetInstances(false, msgs, dc).IsNotEmpty())
-                return this.GetInstances(false, msgs, dc).Select(x => x.Day).Distinct().ToList();
+                return this.GetInstances(false, msgs, dc).Where(instance => instance.InstanceTypeId == InstanceType.InSession).Select(x => x.Day).Distinct().ToList();
 
             return new List<DayOfWeekASL>();
         }

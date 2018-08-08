@@ -31,50 +31,34 @@
             <a href="@Url.Action("teams", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "teams" ? "-active" : "")">
                 <i class="s7-users"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
             </a>
-            <a href="@Url.Action("schedule", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "schedule" ? "-active" : "")">
+            <a href="@Url.Action("schedule", "league", new {id = Model.Uid})" class="btn hide btn-alt6@(actionName == "schedule" ? "-active" : "")">
                 <i class="s7-date"></i> Schedule
             </a>
 
-            @if (activityCount > 0 || Model.IsPublished)
-    {
-        <a href="@Url.Action("registrations", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "registrations" ? "-active" : "")">
-            <i class="s7-user"></i> @UILabel.RegistrantLabel(true)
-        </a>
-        <div class="btn-group">
-            <button type="button" data-toggle="dropdown" class="btn btn-alt6 dropdown-toggle" aria-expanded="false">
-                More... <span class="caret"></span>
-            </button>
-            <ul role="menu" class="dropdown-menu" id="list-add-menu">
-                <li>
-                    <a href="@Url.Action("schedules", "group", new {id = Model.Uid})">
-                        <i class="s7-date"></i> Schedules
-                    </a>
-                </li>
-                <li>
-                    <a href="@Url.Action("invited", "group", new {id = Model.Uid})">
-                        <!-- class="btn btn-alt6@(actionName == "invited" ? "-active" : "")"-->
-                        <i class="s7-user"></i> Invitations
-                    </a>
-                </li>
-                <li>
-                    <a href="@Url.Action("messages", "group", new {id = Model.Uid})">
-                        <!-- class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"-->
-                        <i class="s7-mail"></i> Messaging
-                    </a>
-                </li>
-                @if (Model.RegistrationModeId == RegistrationMode.Apply && SessionVariables.AccountPackage.HasFeature(FeatureType.Lottery))
-        {
-            <li>
-                <a href="@Url.Action("placement", "group", new { id = Model.Uid })">
-                    <!-- class="btn btn-alt6@(actionName == "placement" ? "-active" : "")"-->
-                    Lottery
+            @if (activityCount > 0 || Model.IsPublished || true)
+            {
+                <a href="@Url.Action("registrations", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "registrations" ? "-active" : "")">
+                    <i class="s7-user"></i> @UILabel.RegistrantLabel(true)
                 </a>
-            </li>
-}
-            </ul>
-        </div>
-}
-            <a href="@Url.Action("publishdetail", "group", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish</a>
+                <div class="btn-group">
+                    <button type="button" data-toggle="dropdown" class="btn btn-alt6 dropdown-toggle" aria-expanded="false">
+                        More... <span class="caret"></span>
+                    </button>
+                    <ul role="menu" class="dropdown-menu" id="list-add-menu">
+                        <li>
+                            <a href="@Url.Action("schedules", "group", new {id = Model.Uid})">
+                                <i class="s7-date"></i> Schedules
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("messages", "group", new {id = Model.Uid})">
+                                <i class="s7-mail"></i> Messaging
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            }
+            <a href="@Url.Action("publishdetail", "group", new { id = Model.Uid })" class="hide btn @publishClass"><i class="s7-link"></i> Publish</a>
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="location.href=this.value;">

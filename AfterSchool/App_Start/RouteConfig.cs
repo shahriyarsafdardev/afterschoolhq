@@ -111,6 +111,19 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
+                "LeagueRegister",
+                "{accountname}/{activitygrouptype}/{externalaccountname}/{group}/register",
+                new
+                {
+                    controller = "r",
+                    action = "registerleague",
+                    accountname = UrlParameter.Optional,
+                    activitygrouptype = UrlParameter.Optional,
+                    externalaccount = UrlParameter.Optional,
+                    group = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
                 "AccountHome",
                 "{accountname}",
                 new { controller = "r", action = "account", accountname = UrlParameter.Optional });

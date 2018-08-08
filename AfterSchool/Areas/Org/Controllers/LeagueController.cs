@@ -9,6 +9,7 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using System.Collections.Specialized;
 using Hangfire;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -275,7 +276,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.RegistrantActivities = group.GetRegistrantActivities(registrations);
             ViewBag.ReservedSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
             ViewBag.WaitingListSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
-            ViewBag.ApplicationSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Application);
+            ViewBag.ApplicationSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
             ViewBag.ReturnUrl = Url.Action("registrations", "league", new { id = group.Uid });
         }
 
@@ -355,52 +356,119 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id)
         {
+            var msgs = new SystemMessages();
+
             var league = new ActivityGroup()
             {
                 ActivityGroupTypeId = ActivityGroupType.League,
-                RegistrationModeId = RegistrationMode.Register,
+                RegistrationModeId = RegistrationMode.Apply,
             };
 
             if (id.IsGuid())
-                league = ActivityGroup.LoadByUid(id.ToGuid());
+                league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
+            ViewBag.AccountActivityGroup = aag;
 
             return View(league);
         }
 
         [HttpPost]
-        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade)
+        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string contactname, string contactphone, string contactemail)
         {
             var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
 
-            var values = new Dictionary<string, object>()
+            if (aag.IsNotEmpty())
             {
-                { "name", name },
-                { "description", description },
-                { "regmode", regmode },
-                { "form", form },
-                { "isinviteonly", isinviteonly },
-                { "genderrestrictions", genderrestrictions },
-                { "mingrade", mingrade },
-                { "maxgrade", maxgrade }
-            };
+                if (!form.IsNumber())
+                    msgs.Add("Form is required", MessageType.UserError);
 
-            var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+                if (contactname.IsEmpty())
+                    msgs.Add("Contact name is required", MessageType.UserError);
 
-            if (msgs.HasNoErrors())
+                if (contactphone.IsEmpty())
+                    msgs.Add("Contact phone is required", MessageType.UserError);
+                else if (!contactphone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    msgs.Add("Please enter a valid phone number", MessageType.UserError);
+
+                if (contactemail.IsEmpty())
+                    msgs.Add("Contact email is required", MessageType.UserError);
+                else if (!contactemail.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                    msgs.Add("Please enter a valid email", MessageType.UserError);
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        aag.ContactEmail = contactemail;
+                        aag.ContactPhone = contactphone;
+                        aag.ContactName = contactname;
+
+                        if (form.ToString().ToInteger() == 0)
+                        {
+                            var defaultForm = SessionVariables.CurrentAccount.GetOrCreateDefaultForm(SessionVariables.LoggedInUser, amsgs, adc);
+                            var newForm = defaultForm.Copy(
+                                SessionVariables.LoggedInUser.ID.Value,
+                                SessionVariables.CurrentAccount.ID.Value,
+                                (league.Name + " Form").MaxChars(100, "..."),
+                                amsgs,
+                                adc);
+                            aag.FormId = newForm.ID;
+                        }
+                        else
+                        {
+                            aag.FormId = form.ToString().ToInteger();
+                        }
+
+                        amsgs.AddRange(aag.Save(adc));
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        msgs.Add("Saved successfully", MessageType.Success);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+                
+            }
+            else
             {
-                msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
-                UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: league.ID);
+                var values = new Dictionary<string, object>()
+                {
+                    { "name", name },
+                    { "description", description },
+                    { "regmode", regmode },
+                    { "form", form },
+                    { "isinviteonly", isinviteonly },
+                    { "genderrestrictions", genderrestrictions },
+                    { "mingrade", mingrade },
+                    { "maxgrade", maxgrade }
+                };
+
+                league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+
+                if (msgs.HasNoErrors())
+                {
+                    msgs.Add($"{UILabel.ActivityGroupLabel(league.ActivityGroupTypeId)} Saved", MessageType.Success);
+                    UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: league.ID);
+                }
             }
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
+            ViewBag.AccountActivityGroup = aag;
 
             return View(league);
         }
@@ -429,12 +497,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, id.ToInteger());
+            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, id.ToInteger(), msgs);
             msgs.AddRange(accountActivityGroup.UpdateInvitationStatus(inviteStatus, SessionVariables.CurrentAccount.ID.Value));
 
-            var groups = LoadIndexViewBag();
-
-            return View("Index",groups);
+            return RedirectToAction("IndexExternal", new { id });
         }
 
         [HttpGet]

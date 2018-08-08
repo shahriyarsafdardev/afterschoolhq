@@ -50,7 +50,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateSent", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "Subject", System.Data.SqlDbType.NVarChar, 150);
+				_dp.Add(className, "Subject", System.Data.SqlDbType.NVarChar , "150");
 				_dp.Add(className, "Body", System.Data.SqlDbType.Text);
 				_dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");

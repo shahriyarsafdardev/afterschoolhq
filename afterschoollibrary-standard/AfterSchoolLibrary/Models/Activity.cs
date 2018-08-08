@@ -110,16 +110,16 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "GradeLevelStart", System.Data.SqlDbType.Int);
 				_dp.Add(className, "GradeLevelEnd", System.Data.SqlDbType.Int);
 				_dp.Add(className, "CostPerRegistrant", System.Data.SqlDbType.Money);
-				_dp.Add(className, "CostDescription", System.Data.SqlDbType.NVarChar, 1000);
+				_dp.Add(className, "CostDescription", System.Data.SqlDbType.NVarChar , "1000");
 				_dp.Add(className, "AllowPreRegistration", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar, 4000);
-				_dp.Add(className, "LocationDetails", System.Data.SqlDbType.NVarChar, 4000);
-				_dp.Add(className, "ScheduleDetails", System.Data.SqlDbType.NVarChar, 4000);
-				_dp.Add(className, "RegistrationTimeZone", System.Data.SqlDbType.NVarChar, 30);
-				_dp.Add(className, "ContactName", System.Data.SqlDbType.NVarChar, 50);
-				_dp.Add(className, "ContactPhone", System.Data.SqlDbType.NVarChar, 50);
-				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
+				_dp.Add(className, "LocationDetails", System.Data.SqlDbType.NVarChar , "4000");
+				_dp.Add(className, "ScheduleDetails", System.Data.SqlDbType.NVarChar , "4000");
+				_dp.Add(className, "RegistrationTimeZone", System.Data.SqlDbType.NVarChar , "30");
+				_dp.Add(className, "ContactName", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "ContactPhone", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "WaitingListSeats", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AcceptPayPal", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AcceptCreditCard", System.Data.SqlDbType.Bit);
@@ -135,7 +135,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ScheduleRequiresAllDays", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "IsTemplate", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivitySectionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityTypeId", System.Data.SqlDbType.Int);
@@ -701,11 +701,11 @@ namespace AfterSchoolLibrary
             {
                 totalErrors++;
             }
-            totalFields++;
-            if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
-            {
-                totalErrors++;
-            }
+            //totalFields++;
+            //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
+            //{
+            //    totalErrors++;
+            //}
             if (!this.ActivityGroupId.HasValue)
             {
                 totalFields++;
@@ -1572,10 +1572,10 @@ namespace AfterSchoolLibrary
                 // activity.RegistrationModeId = RegistrationMode.Register;
             }
 
-            if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard && !activity.AcceptPayPal && !activity.AllowToPayLater)
-            {
-                msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
-            }
+            //if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard &&!activity.AllowToPayLater)
+            //{
+            //    msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
+            //}
 
             if (msgs.HasNoErrors())
             {
@@ -1922,7 +1922,9 @@ namespace AfterSchoolLibrary
             {
                 // make sure we setup a relationship
                 var actualLocation = Location.Load(location.ToInteger(), msgs, dc);
-                if (actualLocation.HostAccountId.HasValue)
+
+                // don't need to ask permission for your own location
+                if (actualLocation.HostAccountId.HasValue && actualLocation.HostAccountId != this.AccountId)
                 {
                     var locationOwner = Account.Load(actualLocation.HostAccountId.Value, msgs, dc);
                     var visitorAccount = this.GetAccount(msgs, dc);

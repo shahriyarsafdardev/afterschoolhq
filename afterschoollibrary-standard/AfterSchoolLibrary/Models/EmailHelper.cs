@@ -4,6 +4,7 @@ using System.Reflection;
 using System.IO;
 using System.Collections.Specialized;
 using AfterSchoolLibrary.Services;
+using System.Linq;
 
 namespace AfterSchoolLibrary
 {
@@ -19,6 +20,196 @@ namespace AfterSchoolLibrary
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
                 );
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+        public static SystemMessages SendPaymentReminder(RegistrantActivity ra)
+        {
+            var msgs = new SystemMessages();
+            var registration = ra.GetRegistration();
+            var activity = ra.ToActivity(true);
+
+            msgs.AddRange(SendPaymentReminder(activity.ToParticipationObject(msgs), registration));
+
+            return msgs;
+        }
+
+        public static SystemMessages SendPaymentReminder(ParticipationObject participationObject, Registration registration)
+        {
+            var msgs = new SystemMessages();
+            var registrant = registration.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs);
+            var isAfterSchool = participationObject.OwnerAccount.IsAfterSchool;
+            var registering = "registering";      
+
+            if (participationObject.RegistrationMode == RegistrationMode.Apply)
+                registering = "applying";
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", parentOrGuardian.FirstName },
+                { "Registering", registering },
+                { "ActivityName",  participationObject.Name },
+                { "PaymentLink", $"{Utilities.BaseUrl(isAfterSchool)}/account/makepayment/{registration.Uid}" },
+                { "BillerAccountName", participationObject.OwnerAccount.Name },
+                { "ActivityContactName", participationObject.ContactName },
+                { "ActivityContactEmail", participationObject.ContactEmail },
+                { "ActivityContactPhone", participationObject.ContactPhone },
+                { "ProductName", Utilities.AppName(participationObject.OwnerAccount.IsAfterSchool) }
+            };
+
+            var subject = $"You have a payment due for {participationObject.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Payment_Reminder,
+                model,
+                "Payment_Reminder-1.02",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(participationObject.OwnerAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(participationObject.OwnerAccount.IsAfterSchool));
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+        public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, bool sendBcc)
+        {
+            var msgs = new SystemMessages();
+            var isAfterSchool = checkoutObject.Purchaser.IsAfterSchool;
+            var purchaserAccount = checkoutObject.Purchaser;
+            var purchaser = checkoutObject.Purchaser.GetAccountOwner(msgs);
+            var participationObject = checkoutObject.ParticipationObject;
+            var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
+            var billingAccountOwner = billingAccount.GetAccountOwner(msgs);
+            var paymentPlan = checkoutObject.PaymentPlan;
+            var subscription = checkoutObject.SubscriptionPlan;
+            var registrant = checkoutObject.Registrant;
+            var parentOrGuardian = registrant.GetParentOrGuardian(msgs);
+
+            var receiptRows = "";
+            var regStatus = "";
+            var registeredOrApplied = "registered";
+            var cost = "";
+            var registrantActivity = checkoutObject.Registration.GetRegistrantActivities().First();
+            var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs);
+
+            switch(registrantActivity.AssignmentTypeId)
+            {
+                case RegistrationAssignmentType.Reserved:
+                    regStatus = "Reserved";
+                    break;
+                case RegistrationAssignmentType.WaitingList:
+                    regStatus = "Waiting List";
+                    break;
+                case RegistrationAssignmentType.Applied:
+                    regStatus = "Applied";
+                    registeredOrApplied = "applied";
+                    break;
+            }
+
+            var description = $"{participationObject.Name} - {regStatus}";
+            var amountDueOrPaid = "";
+
+            // if it's in apply mode, but the student could have been moved to registered even during apply mode registration
+            // so we should treat them as registered
+            if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
+                amountDueOrPaid = "Amount Due (If Confirmed)";
+            else
+                amountDueOrPaid = "Amount Paid";
+
+            // show this if no subscription plan, if there's a reg fee or there's a payment plan
+            if (checkoutObject.IsFree || participationObject.Cost > 0.ToDecimal() || paymentPlan.IsNotEmpty())
+            {
+                if (checkoutObject.IsFree)
+                    cost = "FREE";
+                else if (checkoutObject.PaymentPlan.IsNotEmpty())
+                    cost = $"{checkoutObject.PaymentPlanCostToday.ToCurrency()} today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                else
+                    cost = $"{participationObject.Cost.ToCurrency()} - Registration fee";
+
+                // add registration fee row
+                var registrationFeeModel = new NameValueCollection()
+                {
+                    { "Description", description },
+                    { "Quantity",  "1"},
+                    { "Cost", cost }
+                };
+
+                receiptRows += ProcessTemplate(
+                    EmailTemplates.Registration_Confirmation_Rows,
+                    registrationFeeModel,
+                    "Registration_Confirmation_Rows",
+                    msgs);
+            }
+
+            // add subscription row
+            if (subscription.IsNotEmpty())
+            {
+                description = $"Subscription for {participationObject.Name}";
+                cost = $"{subscription.CostPerPeriod.ToCurrency()} per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
+
+                // add registration fee row
+                var subscriptionFeeModel = new NameValueCollection()
+                {
+                    { "Description", description },
+                    { "Quantity",  "1"},
+                    { "Cost", cost }
+                };
+
+                receiptRows += ProcessTemplate(
+                    EmailTemplates.Registration_Confirmation_Rows,
+                    subscriptionFeeModel,
+                    "Registration_Confirmation_Rows",
+                    msgs);
+            };
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", purchaser.FirstName },
+                { "ProductName", Utilities.AppName(isAfterSchool) },
+                { "LoginLink", $"{Utilities.LoginUrl(isAfterSchool)}" },
+                { "ActivityContactEmail",  participationObject.ContactEmail},
+                { "ActivityContactPhone",  participationObject.ContactPhone},
+                { "ActivityContactName",  participationObject.ContactName},
+                { "BillerAccountName", billingAccount.Name },
+                { "BillerAccountLink", billingAccount.HomePageUrl },
+                { "AmountDueOrPaid", amountDueOrPaid },
+                { "TotalCost", checkoutObject.TotalCostToPurchaseToday.ToCurrency() },
+                { "BodyRows", receiptRows },
+                { "CustomMessage", registrationThankYou }
+            };
+
+            var subject = $"{registrant.FirstName} has {registeredOrApplied} for {participationObject.Name}!";
+            var body = ProcessTemplate(
+                EmailTemplates.Registration_Confirmation,
+                model,
+                "Registration_Confirmation",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool));
+
+            // send bcc
+            if (sendBcc)
+                SendGridHelper.SendMail(
+                    fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(billingAccountOwner.Email),
+                    subject: $"New Registration CC: {subject}",
+                    body: body,
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool));
 
             msgs.AddRange(mailMsgs);
 

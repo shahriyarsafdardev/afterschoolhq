@@ -75,8 +75,21 @@ namespace AfterSchool.Controllers
             var questions = GetStartedViewBag(regaccount, msgs);
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch(question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             if (password1.IsEmpty())
@@ -344,8 +357,21 @@ namespace AfterSchool.Controllers
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -443,37 +469,31 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var questions = AddEmergencyContactsViewBag(msgs);
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-            var emergencyContactPhone1 = "";
+            var phones = new List<string>();
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name].ToString().IfEmpty("").Trim();
-                var qvmNameIsEmpty = qvmName.IsEmpty();
-                if (question.IsRequired && qvmNameIsEmpty)
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
                 
-                //validate emegercy contact phone 1
-                if(question.QuestionDataTypeId == QuestionDataType.EmergencyContact1Phone)
+                switch (question.QuestionDataTypeId)
                 {
-                    emergencyContactPhone1 = qvmName;
-                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    {
-                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
-                    }
-                }
+                    case QuestionDataType.EmergencyContact1Phone:
+                    case QuestionDataType.EmergencyContact2Phone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
 
-                //validate emegercy contact phone 2
-                if (question.QuestionDataTypeId == QuestionDataType.EmergencyContact2Phone && question.IsRequired)
-                {
-                    if (!qvmName.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    {
-                        msgs.Add($"{question.Text} is requires a valid phone number", MessageType.UserError);
-                    }
-                    if(qvmName == emergencyContactPhone1)
-                    {
-                        msgs.Add($"{question.Text} emergency contact phone numbers can't be the same", MessageType.UserError);
-                    }
+                        if (answer.IsNotEmpty())
+                            phones.Add(answer);
+
+                        break;
+
                 }
             });
+
+            if (phones.Count == 2 && phones[0] == phones[1])
+                msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
@@ -550,17 +570,16 @@ namespace AfterSchool.Controllers
                     }
                 });
 
-            var account = participationObject.OwnerAccount;
-            var location = participationObject.Location;
-            //var schools = new List<Location>();
+            var schoolLocation = new Location();
 
-            //if (location.IsNotEmpty())
-            //    schools = Location.LoadByLocationTypeIdByCityByState(LocationType.School, location?.City, location?.State, msgs);
+            if (SessionVariables.RegistrationStartPageAccount.AccountTypeId == AccountType.School)
+            {
+                schoolLocation = SessionVariables.RegistrationStartPageAccount.GetDefaultLocation(msgs);
+            }
 
-            ViewBag.Account = account;
             ViewBag.Cart = SessionVariables.Cart;
-            ViewBag.School = new Location();
-            ViewBag.SchoolLocation = SessionVariables.CurrentAccount.GetDefaultLocation();
+            ViewBag.School = schoolLocation;
+            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count == 0;
 
             return questions;
         }
@@ -611,8 +630,21 @@ namespace AfterSchool.Controllers
             var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
 
             questions.ForEach(question => {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -767,6 +799,7 @@ namespace AfterSchool.Controllers
             });
 
             ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
 
             return questions;
         }
@@ -802,18 +835,18 @@ namespace AfterSchool.Controllers
             var questions = AddHealthViewBag(msgs);
 
             questions.ForEach(question => {
-                var qvmName = Request[question.ToFormQuestionViewModel().Name];
-                if (question.IsRequired && qvmName.IsEmpty())
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantDoctorPhone:
-                        if (!qvmName.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx) && question.IsRequired)
-                        {
-                            msgs.Add($"{question.Text}, valid phone number is required", MessageType.UserError);
-                        }
-                      break;
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
                 }
             });
 
@@ -1049,7 +1082,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (participationObject.IsFree)
+                if (participationObject.IsFree || participationObject.RegistrationMode == RegistrationMode.Apply)
                     return RedirectToAction("finalizeregistration", new { id = registration.Uid });
                 else
                     return RedirectToAction("payment", new { id = registration.Uid });
@@ -1075,9 +1108,17 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
 
-            // if not free and no option to pay later, redirect to payment screen
-            if (!participationObject.IsFree && !participationObject.AllowToPayLater)
-                return RedirectToAction("payment", new { id = registrationUid });
+            var stripeAccount = participationObject.OwnerAccount.GetStripeAccount(msgs);
+            var canAcceptPayments = stripeAccount.IsNotEmpty() ? stripeAccount.IsVerified : false;
+
+            // if you can't pay later
+            if (!participationObject.AllowToPayLater && canAcceptPayments)
+            {
+                // if it's not free and registration mode is not set to apply mode
+                // if it costs something and you're forced to register then you need to pay
+                if (!participationObject.IsFree && participationObject.RegistrationMode == RegistrationMode.Register)
+                    return RedirectToAction("payment", new { id = registrationUid });
+            }
 
             // need to actually register first :)
             if (!registrationUid.IsGuid())
@@ -1101,8 +1142,9 @@ namespace AfterSchool.Controllers
                         Registration = registration,
                         Registrant = SessionVariables.CurrentRegistrant
                     },
+                    sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.LoggedInUser,
-                    msgs: msgs);
+                    msgs: msgs);                
             }
 
             if (msgs.HasNoErrors())
@@ -1131,6 +1173,9 @@ namespace AfterSchool.Controllers
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
 
+            var stripeAccount = participationObject.OwnerAccount.GetStripeAccount(msgs);
+            ViewBag.AccountCanAcceptPayments = stripeAccount.IsNotEmpty() ? stripeAccount.IsVerified : false;
+
             return registration;
         }
 
@@ -1140,13 +1185,13 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return results;
 
             var msgs = new SystemMessages();
+            
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+            var registration = PaymentViewBag(id, participationObject, msgs);            
 
             // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
+            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs) && registration.IsPaid(msgs))
                 return RedirectToAction("select");
-
-            PaymentViewBag(id, participationObject, msgs);
 
             return View();
         }
@@ -1207,6 +1252,42 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo, paymentoption);
         }
 
+        private ActionResult MakePaymentActionGet(string id)
+        {
+            var msgs = new SystemMessages();
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+
+            if (registration.IsEmpty())
+                return View("");
+
+            // check if still owes money, load up variables
+            if (!registration.IsPaid(msgs))
+            {
+                var participationObject = registration.GetParticipationObject(msgs);
+                var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+                var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
+                var parentAccount = parentRegistrant.GetAccount(msgs);
+
+                if (parentAccount.ID != SessionVariables.CurrentAccount.ID)
+                    return Logout(Request.Url.ToString());
+
+                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
+                SessionVariables.Cart.AddCartItem(participationObject, msgs);
+                SessionVariables.CurrentRegistrant = currentRegistrant;
+                SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
+
+                return RedirectToAction("payment", new { id = registration.Uid });
+            }            
+
+            return RedirectToAction("thankyou", new { id = registration.Uid });
+        }
+
+        [HttpGet]
+        public ActionResult MakePayment(string id)
+        {
+            return HandleIsLoggedIn() ?? MakePaymentActionGet(id);
+        }
+
         #endregion
 
         #region ThankYou
@@ -1216,8 +1297,8 @@ namespace AfterSchool.Controllers
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
 
             // this should be moved into the library
-            if (SessionVariables.Cart.IsNotEmpty())
-                BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
+            //if (SessionVariables.Cart.IsNotEmpty())
+            //    BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
 
             // clear out session stuff after it sends confirmation, don't want to send on refresh
             ResetRegistrationSession();
@@ -1271,10 +1352,10 @@ namespace AfterSchool.Controllers
         private ActionResult HandleIsLoggedIn()
         {
             if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
-                return RedirectToAction("");
+                return Logout(Request.Url.ToString(), true);
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
-                return RedirectToAction("");
+                return Logout(Request.Url.ToString(), true);
 
             return null;
         }

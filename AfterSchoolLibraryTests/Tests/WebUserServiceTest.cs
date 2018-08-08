@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests.Tests
                             firstName: "jeff",
                             lastName: "gordon",
                             email: "jeff@gordon.com",
-                            phone: "111-111-1111",
+                            phone: "317-224-3123",
                             password: null,
                             isActive: false,
                             isRegistered: false,

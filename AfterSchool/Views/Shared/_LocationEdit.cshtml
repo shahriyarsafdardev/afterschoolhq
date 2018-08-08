@@ -75,7 +75,13 @@
                 $('#isschool').prop('checked', true);
             }
 
-            if (hostAccount.length > 0 && hostAccount != @accountId) {
+            // console.log(@accountId, hostAccount);
+
+            if (hostAccount.length > 0 && hostAccount != "@accountId") {
+
+                // console.log('dont own this');
+
+                // $('#add-location').addClass('hide');
                 $('#hostaccount-div').addClass('hide');
                 $('#isschool-div').addClass('hide');
 
@@ -83,11 +89,15 @@
                 $('.location-type').removeAttr('required');
 
             } else {
+
+                // console.log('do own this');
+
+                // $('#add-location').removeClass('hide');
                 $('#hostaccount-div').removeClass('hide');
                 $('#isschool-div').removeClass('hide');
 
-                $('.my-location').attr('required', 'required');
-                $('.location-type').attr('required', 'required');
+                $('.my-location').removeAttr('required');
+                $('.location-type').removeAttr('required');
 
                 if (hostAccount.length > 0 && hostAccount == @accountId) {
                     $('#mylocation').prop('checked', true);
@@ -102,6 +112,8 @@
             $('#hostaccount').val('');
             $('#hostaccount-div').removeClass('hide');
             $('#isschool-div').removeClass('hide');
+            $('.my-location').attr('required', 'required');
+            $('.location-type').attr('required', 'required');
         }
     }
 

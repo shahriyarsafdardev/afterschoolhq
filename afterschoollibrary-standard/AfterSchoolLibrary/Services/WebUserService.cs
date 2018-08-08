@@ -146,7 +146,7 @@ namespace AfterSchoolLibrary.Services
                 );
 
             string username = $"{firstName} {lastName}";
-            string origUniqueName = reg.Replace(username, "").MaxChars(25);
+            string origUniqueName = reg.Replace(username.MaxChars(25), "");
             string uniqueName = origUniqueName;
             var duplicate = WebUser.LoadByUsername(uniqueName, msgs, dc);
             int count = 1;
@@ -280,14 +280,14 @@ namespace AfterSchoolLibrary.Services
             else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email must valid", MessageType.UserError);
             else if (WebUser.ExistsByEmail(email))
-                msgs.Add("Email is already in use by another user", MessageType.UserError);
+                msgs.Add("Email is already in use, do you already have an account?", MessageType.UserError);
 
             if (phone.IsEmpty())
                 msgs.Add("Phone is required", MessageType.UserError);
             else if (!phone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                 msgs.Add("Phone must be valid", MessageType.UserError);
             else if (WebUser.ExistsByPhone(phone))
-                msgs.Add("Phone is already in use by another user", MessageType.UserError);
+                msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
 
             if (password.IsNotEmpty() && password.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);

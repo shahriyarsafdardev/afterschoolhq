@@ -48,6 +48,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Actions = actions;
             ViewBag.Schedule = activity.GetSchedule();
+            ViewBag.TotalPaid = activity.GetTotalAmountPaid();
             return View(activity);
         }
 
@@ -1114,7 +1115,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             switch (rat)
             {
-                case RegistrationAssignmentType.Application:
+                case RegistrationAssignmentType.Applied:
                     ras = ras.Where(x => x.NumberOfApplicationSeats > 0).OrderBy(x => x.ApplicationSeatIndex).ToList();
                     break;
                 case RegistrationAssignmentType.WaitingList:
@@ -1139,6 +1140,44 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Registrants = ras;
             ViewBag.AssignmentType = rat;
             return View(activity);
+        }
+
+        [HttpGet]
+        public ActionResult MoveRegistrant(string id, string registrant, string assignmenttype)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
+            var newAssignmentType = (RegistrationAssignmentType)assignmenttype.ToInteger();
+
+            if (ra.IsNotEmpty())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        var reg = ra.ToRegistrant();
+                        reg.AddOrUpdateActivity(
+                            ra.RegistrationId.Value,
+                            activity.ID.Value,
+                            newAssignmentType,
+                            ra.RegistrationPeriodId,
+                            ra.ActivityGroupId,
+                            SessionVariables.LoggedInUser.ID.Value,
+                            msgs);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );                
+            }
+
+            return RedirectToAction("registrants", new { id });
         }
 
         [HttpPost]

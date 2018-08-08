@@ -68,7 +68,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "TrialStartDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "TrialEndDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar, 50);
+				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PackageName", typeof(Package).Name, "Name", System.Data.SqlDbType.NVarChar, "Package");
 				_dp.Add(className, "PackageUid", typeof(Package).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "Package");
 				_dp.Add(className, "PackagePrice", typeof(Package).Name, "Price", System.Data.SqlDbType.Money, "Package");

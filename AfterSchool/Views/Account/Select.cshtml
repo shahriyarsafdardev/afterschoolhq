@@ -5,6 +5,15 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
+
+    var registered = "Registered";
+    var register = "Register";
+
+    if (participationObject.RegistrationMode == RegistrationMode.Apply)
+    {
+        register = "Apply";
+        registered = "Applied";
+    }
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -23,7 +32,7 @@
     @foreach (var registrant in Model)
     {
         var isRegistered = registrant.IsRegisteredFor(participationObject);
-        var btnText = isRegistered ? "Already Registered" : "Register";
+        var btnText = isRegistered ? $"Already {registered}" : register;
         var disabledText = isRegistered ? " disabled=\"disabled\" " : "";
 
         <div class="col-sm-12 col-md-6 col-lg-4">

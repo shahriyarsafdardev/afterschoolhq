@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "ParentTagId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Name", System.Data.SqlDbType.NVarChar, 100);
+				_dp.Add(className, "Name", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }

@@ -82,10 +82,22 @@
                             <p>
                                 Registration Fee payment options:
                                 <ul>
-                                    <li>1 payment of @ParticipationObjectUI.PrintRegistrationFee(Model), or</li>
+                                    <li>
+                                        1 payment of @ParticipationObjectUI.PrintRegistrationFee(Model)
+                                        @if(Model.PaymentPlans.Any())
+                                        {
+                                            <span>, or</span>
+                                        }
+                                    </li>
                                     @foreach (var plan in Model.PaymentPlans)
                                     {
-                                        <li>@plan.TotalPeriods payments of @plan.CostPerPeriod.ToCurrency() each @plan.BillingPeriodTypeId.ToString(), or</li>
+                                        <li>
+                                            @plan.TotalPeriods payments of @plan.CostPerPeriod.ToCurrency() each @plan.BillingPeriodTypeId.ToString()
+                                            @if (plan.ID != Model.PaymentPlans.Last().ID)
+                                            {
+                                                <span>, or</span>
+                                            }
+                                        </li>
                                     }
                                 </ul>
                             </p>      
