@@ -1572,10 +1572,10 @@ namespace AfterSchoolLibrary
                 // activity.RegistrationModeId = RegistrationMode.Register;
             }
 
-            if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard && !activity.AcceptPayPal && !activity.AllowToPayLater)
-            {
-                msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
-            }
+            //if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard &&!activity.AllowToPayLater)
+            //{
+            //    msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
+            //}
 
             if (msgs.HasNoErrors())
             {
