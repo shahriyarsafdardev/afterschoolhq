@@ -1108,8 +1108,11 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
 
+            var stripeAccount = participationObject.OwnerAccount.GetStripeAccount(msgs);
+            var canAcceptPayments = stripeAccount.IsNotEmpty() ? stripeAccount.IsVerified : false;
+
             // if you can't pay later
-            if (!participationObject.AllowToPayLater)
+            if (!participationObject.AllowToPayLater && canAcceptPayments)
             {
                 // if it's not free and registration mode is not set to apply mode
                 // if it costs something and you're forced to register then you need to pay
@@ -1169,6 +1172,9 @@ namespace AfterSchool.Controllers
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
+
+            var stripeAccount = participationObject.OwnerAccount.GetStripeAccount(msgs);
+            ViewBag.AccountCanAcceptPayments = stripeAccount.IsNotEmpty() ? stripeAccount.IsVerified : false;
 
             return registration;
         }
