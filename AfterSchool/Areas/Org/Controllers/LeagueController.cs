@@ -309,6 +309,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 isArchived = archive.ToInteger().ToBoolean();
             }
 
+            var accountAcitivtyGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, group.ID.Value);
+
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
             var account = SessionVariables.CurrentAccount;
