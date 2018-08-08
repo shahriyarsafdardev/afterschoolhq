@@ -25,7 +25,7 @@
                     <div class="col-md-10">
                         <select name="activityinstance" id="activityinstance" class="form-control">
                             <option value="">Select...</option>
-                            @foreach(var instance in schedule.GetInstances())
+                            @foreach(var instance in schedule.GetInstances().DistinctBy(instance => instance.ID))
                             {
                                 <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
                                     @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
