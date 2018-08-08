@@ -45,11 +45,7 @@ namespace AfterSchoolLibrary
 		public string ContactPhone { get { return (string)MDV["ContactPhone"].Value; } set { MDV["ContactPhone"].Value = value; } }
 		public string ContactEmail { get { return (string)MDV["ContactEmail"].Value; } set { MDV["ContactEmail"].Value = value; } }
 		public int? WaitingListSeats { get { return (int?)MDV["WaitingListSeats"].Value; } set { MDV["WaitingListSeats"].Value = value; } }
-		public bool AcceptPayPal { get { return (bool)MDV["AcceptPayPal"].Value; } set { MDV["AcceptPayPal"].Value = value; } }
-		public bool AcceptCreditCard { get { return (bool)MDV["AcceptCreditCard"].Value; } set { MDV["AcceptCreditCard"].Value = value; } }
-		public int? ParentActivityId { get { return (int?)MDV["ParentActivityId"].Value; } set { MDV["ParentActivityId"].Value = value; } }
 		public bool AllowToPayLater { get { return (bool)MDV["AllowToPayLater"].Value; } set { MDV["AllowToPayLater"].Value = value; } }
-		public bool AllowOrganizationRegistration { get { return (bool)MDV["AllowOrganizationRegistration"].Value; } set { MDV["AllowOrganizationRegistration"].Value = value; } }
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
 		public RegistrationMode RegistrationModeId { get { return (RegistrationMode)MDV["RegistrationModeId"].Value; } set { MDV["RegistrationModeId"].Value = value; } }
 		public int? LocationId { get { return (int?)MDV["LocationId"].Value; } set { MDV["LocationId"].Value = value; } }
@@ -58,9 +54,7 @@ namespace AfterSchoolLibrary
 		public bool IsArchived { get { return (bool)MDV["IsArchived"].Value; } set { MDV["IsArchived"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
-		public bool ScheduleRequiresAllDays { get { return (bool)MDV["ScheduleRequiresAllDays"].Value; } set { MDV["ScheduleRequiresAllDays"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
-		public bool IsTemplate { get { return (bool)MDV["IsTemplate"].Value; } set { MDV["IsTemplate"].Value = value; } }
 		public int? ActivitySectionId { get { return (int?)MDV["ActivitySectionId"].Value; } set { MDV["ActivitySectionId"].Value = value; } }
 		/// <summary>
 		/// Required.
@@ -69,7 +63,6 @@ namespace AfterSchoolLibrary
 		public DateTime? DateSubmittedToActivityGroup { get { return (DateTime?)MDV["DateSubmittedToActivityGroup"].Value; } set { MDV["DateSubmittedToActivityGroup"].Value = value; } }
 		public int? AccountActivityGroupId { get { return (int?)MDV["AccountActivityGroupId"].Value; } set { MDV["AccountActivityGroupId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
-		public string AccountPayPalEmailAddress { get { return (string)MDV["AccountPayPalEmailAddress"].Value; } }
 		public string AccountStripePublishableKey { get { return (string)MDV["AccountStripePublishableKey"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
@@ -82,17 +75,12 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.AllowPreRegistration = false;
 			this.Uid = Guid.NewGuid();
-			this.AcceptPayPal = false;
-			this.AcceptCreditCard = false;
 			this.AllowToPayLater = false;
-			this.AllowOrganizationRegistration = false;
 			this.GenderRestriction = GenderRestrictionType.None;
 			this.RegistrationModeId = RegistrationMode.NotSet;
 			this.IsDeleted = false;
 			this.IsPublished = false;
 			this.IsArchived = false;
-			this.ScheduleRequiresAllDays = false;
-			this.IsTemplate = false;
 			this.ActivityTypeId = ActivityType.NotSet;
 			
         }
@@ -122,11 +110,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ContactPhone", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "WaitingListSeats", System.Data.SqlDbType.Int);
-				_dp.Add(className, "AcceptPayPal", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "AcceptCreditCard", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "ParentActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AllowToPayLater", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "AllowOrganizationRegistration", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationModeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LocationId", System.Data.SqlDbType.Int);
@@ -135,15 +119,12 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsArchived", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ScheduleRequiresAllDays", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "IsTemplate", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "ActivitySectionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateSubmittedToActivityGroup", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
-				_dp.Add(className, "AccountPayPalEmailAddress", typeof(Account).Name, "PayPalEmailAddress", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountStripePublishableKey", typeof(Account).Name, "StripePublishableKey", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
@@ -304,23 +285,7 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AcceptPayPal"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AcceptCreditCard"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ParentActivityId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AllowToPayLater"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AllowOrganizationRegistration"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -356,15 +321,7 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ScheduleRequiresAllDays"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["UniqueName"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsTemplate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -424,14 +381,6 @@ namespace AfterSchoolLibrary
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-		}
-
-		public static List<Activity> LoadByParentActivityId(int ParentActivityId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ParentActivityId"], ParentActivityId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		public static List<Activity> LoadByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -773,28 +722,28 @@ namespace AfterSchoolLibrary
             this.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(this.Save(dc: dc));
             
-            // DEPRECATED
-            if (!this.IsChildActivity)
-            {
-                var childActivities = this.GetChildActivities(dc: dc);
-                foreach (var a in childActivities)
-                {
-                    msgs.AddRange(a.SetIsPublished(isPublished, loggedInUserId, dc: dc));
-                }
-            }
+            //// DEPRECATED
+            //if (!this.IsChildActivity)
+            //{
+            //    var childActivities = this.GetChildActivities(dc: dc);
+            //    foreach (var a in childActivities)
+            //    {
+            //        msgs.AddRange(a.SetIsPublished(isPublished, loggedInUserId, dc: dc));
+            //    }
+            //}
 
             return msgs;
         }
 
-        public bool IsChildActivity { get { return this.ParentActivityId.HasValue; } }
+        //public bool IsChildActivity { get { return this.ParentActivityId.HasValue; } }
 
-        public Activity GetParentActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (this.ParentActivityId.HasValue)
-                return Activity.Load(this.ParentActivityId.Value, msgs, dc);
+        //public Activity GetParentActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    if (this.ParentActivityId.HasValue)
+        //        return Activity.Load(this.ParentActivityId.Value, msgs, dc);
 
-            return null;
-        }
+        //    return null;
+        //}
 
         private List<ActivityDay> _Days = null;
         [Obsolete]
@@ -829,9 +778,9 @@ namespace AfterSchoolLibrary
             var ras = new List<RegistrantActivity>();
 
             if (includeInvited)
-                ras = RegistrantActivity.LoadByActivityId(this.ID.Value, msgs, dc).ToList();
+                ras = RegistrantActivity.LoadByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).ToList();
             else
-                ras = RegistrantActivity.LoadByActivityId(this.ID.Value, msgs, dc).Where(x =>
+                ras = RegistrantActivity.LoadByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).Where(x =>
                     x.NumberOfApplicationSeats.HasValue ||
                     x.NumberOfSeats.HasValue ||
                     x.NumberOfWaitingListSeats.HasValue
@@ -847,7 +796,7 @@ namespace AfterSchoolLibrary
 
         public int GetRegistrantCountByApplicationType(RegistrationAssignmentType rat, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, activityId: this.ID, msgs: msgs, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, participationObjectId: this.ID, participationObjectType: ParticipationObjectType.Activity, msgs: msgs, dc: dc);
         }
 
         public bool IsFull(DatabaseConnection dc = null)
@@ -1021,8 +970,8 @@ namespace AfterSchoolLibrary
                 State = this.State,
                 Uid = Guid.NewGuid(),
                 WaitingListSeats = this.WaitingListSeats,
-                AcceptPayPal = this.AcceptPayPal,
-                AcceptCreditCard = this.AcceptCreditCard,
+                //AcceptPayPal = this.AcceptPayPal,
+                //AcceptCreditCard = this.AcceptCreditCard,
                 CostPerRegistrant = this.CostPerRegistrant,
                 CostDescription = this.CostDescription,
                 GenderRestriction = this.GenderRestriction,
@@ -1030,7 +979,7 @@ namespace AfterSchoolLibrary
                 GradeLevelEnd = this.GradeLevelEnd,
                 AgeStart = this.AgeStart,
                 AgeEnd = this.AgeEnd,
-                AllowOrganizationRegistration = this.AllowOrganizationRegistration,
+                //AllowOrganizationRegistration = this.AllowOrganizationRegistration,
                 AllowPreRegistration = this.AllowPreRegistration,
                 AllowToPayLater = this.AllowToPayLater,
                 Website = this.Website,
@@ -1042,34 +991,34 @@ namespace AfterSchoolLibrary
             };
         }
 
-        [Obsolete]
-        public List<Activity> GetChildActivities(DatabaseConnection dc = null)
-        {
-            return Activity.LoadByParentActivityId(this.ID.Value, dc: dc);
-        }
+        //[Obsolete]
+        //public List<Activity> GetChildActivities(DatabaseConnection dc = null)
+        //{
+        //    return Activity.LoadByParentActivityId(this.ID.Value, dc: dc);
+        //}
 
-        [Obsolete]
-        public Activity CreateChild(string newName, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //[Obsolete]
+        //public Activity CreateChild(string newName, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var activity = this.CopyFields();
-            activity.Name = newName;
-            activity.ParentActivityId = this.ID;
-            activity.CreateDate = DateTime.UtcNow;
-            activity.CreatedBy = loggedInUserId;
-            activity.LastModifiedDate = DateTime.UtcNow;
-            activity.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(activity.Save(dc: dc));
+        //    var activity = this.CopyFields();
+        //    activity.Name = newName;
+        //    activity.ParentActivityId = this.ID;
+        //    activity.CreateDate = DateTime.UtcNow;
+        //    activity.CreatedBy = loggedInUserId;
+        //    activity.LastModifiedDate = DateTime.UtcNow;
+        //    activity.LastModifiedBy = loggedInUserId;
+        //    msgs.AddRange(activity.Save(dc: dc));
 
-            //link activity with form for the parent activity
-            var parentActivityForm = this.GetActiveActivityForm(dc: dc);
-            activity.AddFormAndActivitate(parentActivityForm.ToForm(true, dc: dc), loggedInUserId, parentActivityForm.IsPublished, msgs, dc: dc);
+        //    //link activity with form for the parent activity
+        //    var parentActivityForm = this.GetActiveActivityForm(dc: dc);
+        //    activity.AddFormAndActivitate(parentActivityForm.ToForm(true, dc: dc), loggedInUserId, parentActivityForm.IsPublished, msgs, dc: dc);
 
-            //will use same team permissions as parent
+        //    //will use same team permissions as parent
 
-            return activity;
-        }
+        //    return activity;
+        //}
 
         public Activity CopyWithRegistrants(string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -1222,7 +1171,7 @@ namespace AfterSchoolLibrary
                             var newRegistrantActivity = new RegistrantActivity()
                             {
                                 ActivityGroupId = this.ActivityGroupId,
-                                ActivityId = copy.ID,
+                                //ActivityId = copy.ID,
                                 CreateDate = DateTime.UtcNow,
                                 CreatedBy = loggedInUserId,
                                 ApplicationSeatIndex = registrantActivity.ApplicationSeatIndex,
@@ -1484,7 +1433,7 @@ namespace AfterSchoolLibrary
                     WaitingListSeats = waitinglistseats.ToString().ToInteger(),
                     AccountId = account.ID,
                     LocationId = account.DefaultLocationId,
-                    AcceptCreditCard = true
+                    //AcceptCreditCard = true
                 };
 
                 if (group.IsEmpty() && !form.IsNumber())
@@ -1561,22 +1510,22 @@ namespace AfterSchoolLibrary
                 activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
             }
             
-            if (acceptcreditcard.IsNotEmpty() && acceptcreditcard.ToString().IsBoolean())
-            {
-                activity.AcceptCreditCard = acceptcreditcard.ToString().ToBoolean();
-            }
-            if (acceptpaypal.IsNotEmpty() && acceptpaypal.ToString().IsBoolean())
-            {
-                activity.AcceptPayPal = acceptpaypal.ToString().ToBoolean();
-            }
+            //if (acceptcreditcard.IsNotEmpty() && acceptcreditcard.ToString().IsBoolean())
+            //{
+            //    activity.AcceptCreditCard = acceptcreditcard.ToString().ToBoolean();
+            //}
+            //if (acceptpaypal.IsNotEmpty() && acceptpaypal.ToString().IsBoolean())
+            //{
+            //    activity.AcceptPayPal = acceptpaypal.ToString().ToBoolean();
+            //}
             if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
             {
                 activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
             }
-            if (alloworganization.IsNotEmpty() && alloworganization.ToString().IsBoolean())
-            {
-                activity.AllowOrganizationRegistration = alloworganization.ToString().ToBoolean();
-            }
+            //if (alloworganization.IsNotEmpty() && alloworganization.ToString().IsBoolean())
+            //{
+            //    activity.AllowOrganizationRegistration = alloworganization.ToString().ToBoolean();
+            //}
             if (regmode.IsNumber())
             {
                 activity.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
@@ -1624,7 +1573,7 @@ namespace AfterSchoolLibrary
                         if (!activity.ActivityGroupId.HasValue)
                         {
                             //copy form
-                            if (amsgs.HasNoErrors() && !activity.IsChildActivity && form.IsNumber())
+                            if (amsgs.HasNoErrors() && form.IsNumber())
                             {
                                 amsgs.AddRange(activity.SetupNewForm(form.ToString().ToInteger(), account, loggedInUserId, adc));
                             }
@@ -1765,7 +1714,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            this.ScheduleRequiresAllDays = true;
+            // this.ScheduleRequiresAllDays = true;
 
             var newSchedule = Services.ActivityScheduleService.SetupSchedule(
                 this.AccountId.Value,
@@ -2185,19 +2134,19 @@ namespace AfterSchoolLibrary
                     //link form to activity
                     this.AddFormAndActivitate(newForm, loggedInUserId, isPublished, msgs, dc: dc);
 
-                    //add to children
-                    var children = this.GetChildActivities(dc: dc);
-                    foreach (var child in children)
-                    {
-                        //deactivate old form
-                        var childActiveForm = child.GetActiveActivityForm(dc: dc);
-                        if (childActiveForm.IsNotEmpty())
-                        {
-                            childActiveForm.IsActive = false;
-                            msgs.AddRange(childActiveForm.Save(dc: dc));
-                        }
-                        child.AddFormAndActivitate(newForm, loggedInUserId, isPublished, msgs, dc: dc);
-                    }
+                    ////add to children
+                    //var children = this.GetChildActivities(dc: dc);
+                    //foreach (var child in children)
+                    //{
+                    //    //deactivate old form
+                    //    var childActiveForm = child.GetActiveActivityForm(dc: dc);
+                    //    if (childActiveForm.IsNotEmpty())
+                    //    {
+                    //        childActiveForm.IsActive = false;
+                    //        msgs.AddRange(childActiveForm.Save(dc: dc));
+                    //    }
+                    //    child.AddFormAndActivitate(newForm, loggedInUserId, isPublished, msgs, dc: dc);
+                    //}
                 }
             }
 

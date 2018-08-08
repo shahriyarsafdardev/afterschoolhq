@@ -557,7 +557,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             // delete previous relationships to old registration
-            msgs.AddRange(ra.DeleteRegistrationActivity(dc: dc));
+            //msgs.AddRange(ra.DeleteRegistrationActivity(dc: dc));
 
             // move to new registrant and registration
             ra.RegistrantId = this.RegistrantId;
@@ -568,35 +568,35 @@ namespace AfterSchoolLibrary
 
             // add to this registration record 
             // TODO: hopefully will remove this in the future, the whole registration activity object :(
-            this.AddActivity(ra.ActivityId.Value, loggedInUserId, msgs, dc);
+            //this.AddActivity(ra.ActivityId.Value, loggedInUserId, msgs, dc);
 
             return msgs;
         }
 
-        public RegistrationActivity AddActivity(int activityId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //public RegistrationActivity AddActivity(int activityId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var ra = RegistrationActivity.LoadByActivityIdByRegistrationId(activityId, this.ID.Value, dc: dc);
-            if (ra.IsEmpty())
-            {
-                ra = new RegistrationActivity
-                {
-                    ActivityId = activityId,
-                    RegistrationId = this.ID,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId
-                };
-                msgs.AddRange(ra.Save(dc));
-            }
+        //    var ra = RegistrationActivity.LoadByActivityIdByRegistrationId(activityId, this.ID.Value, dc: dc);
+        //    if (ra.IsEmpty())
+        //    {
+        //        ra = new RegistrationActivity
+        //        {
+        //            ActivityId = activityId,
+        //            RegistrationId = this.ID,
+        //            CreateDate = DateTime.UtcNow,
+        //            CreatedBy = loggedInUserId
+        //        };
+        //        msgs.AddRange(ra.Save(dc));
+        //    }
 
-            return ra;
-        }
+        //    return ra;
+        //}
 
-        public RegistrationActivity AddActivity(Activity activity, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AddActivity(activity.ID.Value, loggedInUserId, msgs, dc);
-        }
+        //public RegistrationActivity AddActivity(Activity activity, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    return AddActivity(activity.ID.Value, loggedInUserId, msgs, dc);
+        //}
 
         public Account GetAccount(DatabaseConnection dc = null)
         {
@@ -618,10 +618,10 @@ namespace AfterSchoolLibrary
             return Registrant.Load(this.RegistrantId.Value, msgs, dc);
         }
 
-        public List<RegistrationActivity> GetRegistrationActivities(DatabaseConnection dc = null)
-        {
-            return RegistrationActivity.LoadByRegistrationId(this.ID.Value, dc: dc);
-        }
+        //public List<RegistrationActivity> GetRegistrationActivities(DatabaseConnection dc = null)
+        //{
+        //    return RegistrationActivity.LoadByRegistrationId(this.ID.Value, dc: dc);
+        //}
 
         public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

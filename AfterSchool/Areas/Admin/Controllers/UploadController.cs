@@ -392,7 +392,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                    var usersAndAccounts = users.Zip(accounts, (u, a) => new { user = u, account = a });
                    foreach (var userAndAccount in usersAndAccounts)
                    {
-                       msgs.AddRange(userAndAccount.account.SendInvitedEmail(userAndAccount.user, SessionVariables.LoggedInUser, inviteMessage));
+                       // don't send invites just yet
+                       // msgs.AddRange(userAndAccount.account.SendInvitedEmail(userAndAccount.user, SessionVariables.LoggedInUser, inviteMessage));
                    }
                },
                onFailure: (SystemMessages fmsgs) =>

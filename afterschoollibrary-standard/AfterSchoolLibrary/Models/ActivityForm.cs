@@ -347,8 +347,8 @@ namespace AfterSchoolLibrary
                     City = this.ActivityCity,
                     State = this.ActivityState,
                     PostalCode = this.ActivityPostalCode,
-                    AcceptCreditCard = this.ActivityAcceptCreditCard,
-                    AcceptPayPal = this.ActivityAcceptPayPal,
+                    //AcceptCreditCard = this.ActivityAcceptCreditCard,
+                    //AcceptPayPal = this.ActivityAcceptPayPal,
                     CostPerRegistrant = this.ActivityCostPerRegistrant,
                     CostDescription = this.ActivityCostDescription,
                     AccountId = this.AccountId,
@@ -412,7 +412,7 @@ namespace AfterSchoolLibrary
 
         public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, activityId: this.ActivityId, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, participationObjectId: this.ActivityId, participationObjectType: ParticipationObjectType.Activity, dc: dc);
         }
 
         public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
@@ -424,19 +424,19 @@ namespace AfterSchoolLibrary
             this.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(this.Save(dc: dc));
             
-            var activity = this.ToActivity(true, dc: dc);
-            if (!activity.IsChildActivity)
-            {
-                var childActivities = activity.GetChildActivities(dc: dc);
-                foreach (var a in childActivities)
-                {
-                    var af = a.GetActiveActivityForm(dc: dc);
-                    if (af.IsNotEmpty())
-                    {
-                        msgs.AddRange(af.SetIsPublished(isPublished, loggedInUserId, dc: dc));
-                    }
-                }
-            }
+            //var activity = this.ToActivity(true, dc: dc);
+            //if (!activity.IsChildActivity)
+            //{
+            //    var childActivities = activity.GetChildActivities(dc: dc);
+            //    foreach (var a in childActivities)
+            //    {
+            //        var af = a.GetActiveActivityForm(dc: dc);
+            //        if (af.IsNotEmpty())
+            //        {
+            //            msgs.AddRange(af.SetIsPublished(isPublished, loggedInUserId, dc: dc));
+            //        }
+            //    }
+            //}
 
             return msgs;
         }
