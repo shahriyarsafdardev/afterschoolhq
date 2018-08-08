@@ -200,10 +200,10 @@ namespace AfterSchool.Models
                 msgs.AddRange(locationMsgs);
             }
 
-            if (activity.CostPerRegistrant.HasValue && activity.CostPerRegistrant.Value > 0 && !activity.AllowToPayLater && !activity.AcceptCreditCard)
-            {
-                paymentMsgs.Add("Payment Information: Either accept credit cards or allow to pay later", MessageType.UserError);
-            }
+            //if (activity.CostPerRegistrant.HasValue && activity.CostPerRegistrant.Value > 0 && !activity.AllowToPayLater && !activity.AcceptCreditCard)
+            //{
+            //    paymentMsgs.Add("Payment Information: Either accept credit cards or allow to pay later", MessageType.UserError);
+            //}
             if (paymentMsgs.HasErrors())
             {
                 paymentMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editcost/{activity.Uid}\" class=\"publish-error-title\">Payment</a>", MessageType.UserError));

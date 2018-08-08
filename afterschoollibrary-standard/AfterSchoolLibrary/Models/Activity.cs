@@ -701,11 +701,11 @@ namespace AfterSchoolLibrary
             {
                 totalErrors++;
             }
-            totalFields++;
-            if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
-            {
-                totalErrors++;
-            }
+            //totalFields++;
+            //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
+            //{
+            //    totalErrors++;
+            //}
             if (!this.ActivityGroupId.HasValue)
             {
                 totalFields++;
