@@ -211,6 +211,11 @@ namespace AfterSchoolLibrary
             };
         }
 
+        public ActivityInstance GetActivityInstance(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityInstance.Load(this.ActivityInstanceId.Value, msgs, dc);
+        }
+
         public List<AttendanceRegistrant> GetAttendanceRegistrants(DatabaseConnection dc = null)
         {
             return AttendanceRegistrant.LoadByAttendanceId(this.ID.Value, dc: dc);

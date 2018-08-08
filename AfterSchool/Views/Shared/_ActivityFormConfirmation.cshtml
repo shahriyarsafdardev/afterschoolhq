@@ -10,29 +10,37 @@
     <div class="panel-body">
 
         @foreach (var item in properties.Select(x => x.AccountPropertyTypeId))
-        {
-            if(
-                (item == AccountPropertyType.ApplicationThankYouEmail && Model.RegistrationModeId == RegistrationMode.Apply) || 
-                (item == AccountPropertyType.RegistrationThankYouEmail && Model.RegistrationModeId == RegistrationMode.Register))
-            { 
-                <div class="form-group">
-                    <label class="col-md-3 control-label">
-                        @item.ToString().SplitByUpperCase()
-                    </label>
-                    <div class="col-md-9">
-                        @{ Html.RenderPartial(
-                                   "~/Views/Shared/_TextEditor.cshtml",
-                                   properties.Find(x => x.AccountPropertyTypeId == item).Value,
-                                   new ViewDataDictionary()
-                                   {
-                                      { "id",  @item.ToString().ToLower() },
-                                      { "name",  @item.ToString().ToLower() },
-                                      { "required",  true }
-                                   }
-                                   ); }                   
-                    </div>
+        {   
+            <div class="form-group">
+                <label class="col-md-3 control-label">
+                    @item.ToString().SplitByUpperCase()
+                </label>
+                <div class="col-md-9">
+                    @{ Html.RenderPartial(
+                                "~/Views/Shared/_TextEditor.cshtml",
+                                properties.Find(x => x.AccountPropertyTypeId == item).Value,
+                                new ViewDataDictionary()
+                                {
+                                    { "id",  @item.ToString().ToLower() },
+                                    { "name",  @item.ToString().ToLower() },
+                                    { "required",  true }
+                                }
+                                ); }   
+                    
+                    <p class="text-muted">
+                        <em>
+                            @if (item == AccountPropertyType.ApplicationThankYouEmail)
+                            {
+                                <span>This thank you message is sent when the @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() is set to 'Apply' Mode.</span>
+                            }
+                            else if (item == AccountPropertyType.RegistrationThankYouEmail)
+                            {
+                                <span>This thank you message is sent when the @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() is set to 'Register' Mode.</span>
+                            }
+                        </em>
+                    </p>
                 </div>
-            }
+            </div>
         }
         
     </div>
