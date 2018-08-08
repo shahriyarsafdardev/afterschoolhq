@@ -252,6 +252,7 @@
     <Compile Include="Areas\Admin\Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin\Controllers\PackageController.cs" />
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
+    <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
     <Compile Include="Areas\District\Controllers\LeagueController.cs" />
     <Compile Include="Areas\District\Controllers\MessageController.cs" />
@@ -823,6 +824,9 @@
     <Content Include="Areas\Org\Views\League\PublishDetail.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsBank.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsEntity.cshtml" />
+    <Content Include="Areas\Org\Views\Account\PaymentsTOS.cshtml" />
+    <Content Include="Areas\Admin\Views\Upload\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Upload\LocationsSubmitted.cshtml" />
     <Content Include="Areas\StripeHooks\Views\web.config" />
     <Content Include="Areas\Org\Views\Account\Visitors.cshtml" />
     <Content Include="Areas\Org\Views\Account\VisitorsInvite.cshtml" />
