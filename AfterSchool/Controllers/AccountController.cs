@@ -570,17 +570,15 @@ namespace AfterSchool.Controllers
                     }
                 });
 
-            var account = participationObject.OwnerAccount;
-            var location = participationObject.Location;
-            //var schools = new List<Location>();
+            var schoolLocation = new Location();
 
-            //if (location.IsNotEmpty())
-            //    schools = Location.LoadByLocationTypeIdByCityByState(LocationType.School, location?.City, location?.State, msgs);
+            if (SessionVariables.RegistrationStartPageAccount.AccountTypeId == AccountType.School)
+            {
+                schoolLocation = SessionVariables.RegistrationStartPageAccount.GetDefaultLocation(msgs);
+            }
 
-            ViewBag.Account = account;
             ViewBag.Cart = SessionVariables.Cart;
-            ViewBag.School = new Location();
-            ViewBag.SchoolLocation = SessionVariables.CurrentAccount.GetDefaultLocation();
+            ViewBag.School = schoolLocation;
 
             return questions;
         }
