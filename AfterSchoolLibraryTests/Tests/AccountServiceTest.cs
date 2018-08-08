@@ -49,5 +49,16 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(accountCount + 1, Account.GetCount(msgs: msgs, dc: dc));
         }
+
+        [Theory]
+        [InlineData("My Sample Account", "MySampleAccount")]
+        [InlineData("My Sample Account Rocks Bud Boy", "MySampleAccountRocksBud")]
+        [InlineData("My!@#$%^&*()-_+<>/,.?[]{}\\|'\":;~`", "My-_")]
+        public void GenerateUniqueName(string input, string expectedOutput)
+        {
+            var output = AccountService.GenerateUniqueName(input, null, msgs, dc);
+
+            Assert.Equal(expectedOutput, output);
+        }
     }
 }

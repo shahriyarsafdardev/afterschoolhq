@@ -29,7 +29,7 @@ namespace AfterSchoolLibrary
             //unique name
             var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-            var origUniqueName = name.GetMaxWords(25);
+            var origUniqueName = reg.Replace(name.GetMaxWords(25), "");
             string uniqueName = origUniqueName;
             var duplicate = Activity.LoadByUniqueNameByAccountId(uniqueName, accountId.Value, msgs, dc);
             int count = 1;

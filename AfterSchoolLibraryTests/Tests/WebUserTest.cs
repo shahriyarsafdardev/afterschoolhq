@@ -103,9 +103,9 @@ namespace AfterSchoolLibraryTests
         [InlineData("test1@test.com", "test2@test.com", false)]
         public void ExistsByEmailTest(string email1, string testEmail, bool result)
         {
-            var user = Factories.WebUserFactory.CreateWithEmail(email1, msgs, dc: dc);
+            var user = Factories.WebUserFactory.CreateWithEmail(email1, msgs, dc);
 
-            Assert.True(WebUser.ExistsByEmail(testEmail, dc: dc) == result);
+            Assert.Equal(result, WebUser.ExistsByEmail(testEmail, msgs, dc));
         }
 
         [Fact(DisplayName = "Check if UID exists in webuser table - passing")]

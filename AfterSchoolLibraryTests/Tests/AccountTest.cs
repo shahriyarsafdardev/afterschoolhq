@@ -159,7 +159,7 @@ namespace AfterSchoolLibraryTests
         /// <summary>
         /// Will see if the RequestAccessToAccountTest() function will return a message with no Errors
         /// </summary>
-        [Fact(DisplayName = "Approve Provider Access to a Host Account")]
+        [Fact(DisplayName = "Approve Provider Access to a Host Account", Skip = "Need to set all variables for email to work")]
         public void ApproveAccessToAccountTest()
         {
             var loggedInUser = WebUserFactory.Create(msgs, dc);

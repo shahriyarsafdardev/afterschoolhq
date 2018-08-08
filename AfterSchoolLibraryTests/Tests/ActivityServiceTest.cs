@@ -115,6 +115,17 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(activity.ID);
         }
 
+        [Theory]
+        [InlineData("My Sample Account", "MySampleAccount")]
+        [InlineData("My Sample Account Rocks Bud Boy", "MySampleAccountRocksBud")]
+        [InlineData("My!@#$%^&*()-_+<>/,.?[]{}\\|'\":;~`", "My-_")]
+        public void GenerateUniqueName(string input, string expectedOutput)
+        {
+            var output = ActivityService.GenerateUniqueName(input, null, ActivityOwnerAccount.ID, msgs, dc);
+
+            Assert.Equal(expectedOutput, output);
+        }
+
         //[Fact]
         //public void UpdateTest()
         //{
