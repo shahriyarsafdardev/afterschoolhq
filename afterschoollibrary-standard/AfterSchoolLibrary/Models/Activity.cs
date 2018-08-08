@@ -67,6 +67,7 @@ namespace AfterSchoolLibrary
 		/// </summary>
 		public ActivityType ActivityTypeId { get { return (ActivityType)MDV["ActivityTypeId"].Value; } set { MDV["ActivityTypeId"].Value = value; } }
 		public DateTime? DateSubmittedToActivityGroup { get { return (DateTime?)MDV["DateSubmittedToActivityGroup"].Value; } set { MDV["DateSubmittedToActivityGroup"].Value = value; } }
+		public int? AccountActivityGroupId { get { return (int?)MDV["AccountActivityGroupId"].Value; } set { MDV["AccountActivityGroupId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountPayPalEmailAddress { get { return (string)MDV["AccountPayPalEmailAddress"].Value; } }
 		public string AccountStripePublishableKey { get { return (string)MDV["AccountStripePublishableKey"].Value; } }
@@ -140,6 +141,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivitySectionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateSubmittedToActivityGroup", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountPayPalEmailAddress", typeof(Account).Name, "PayPalEmailAddress", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountStripePublishableKey", typeof(Account).Name, "StripePublishableKey", System.Data.SqlDbType.NVarChar, "Account");
@@ -377,6 +379,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["DateSubmittedToActivityGroup"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountActivityGroupId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -433,6 +439,14 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadByAccountActivityGroupId(int AccountActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
