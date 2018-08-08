@@ -1394,6 +1394,7 @@ namespace AfterSchoolLibrary
             var paymentplancost = values.GetValueOrDefault("paymentplancost");
             var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
             var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
+            var accountactivitygroup = values.GetValueOrDefault("accountactivitygroup");
 
             if (activityId.IsNumber() == false || activityId.ToInteger() == 0)
             {
@@ -1584,6 +1585,11 @@ namespace AfterSchoolLibrary
             else
             {
                 // activity.RegistrationModeId = RegistrationMode.Register;
+            }
+
+            if(accountactivitygroup.IsNotEmpty())
+            {
+                activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
             }
 
             //if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard &&!activity.AllowToPayLater)

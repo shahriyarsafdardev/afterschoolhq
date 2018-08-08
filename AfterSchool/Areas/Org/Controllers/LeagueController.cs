@@ -309,7 +309,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 isArchived = archive.ToInteger().ToBoolean();
             }
 
-            var accountAcitivtyGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, group.ID.Value);
+            var accountAcitivtyGroup = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -319,8 +319,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var finalActivities = activities.OrderBy(x => x.Name).ToList();
 
+
+           var reallyFinalActivities = Activity.LoadByAccountActivityGroupId(accountAcitivtyGroup.ID.Value);
+
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Activities = finalActivities;
+            ViewBag.Activities = reallyFinalActivities;
             ViewBag.NeedToUpgrade = finalActivities.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.Messages = new SystemMessages();
             ViewBag.HasArchivedActivities = group.GetActivityCount(true, false) > 0;
@@ -485,6 +488,30 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
             activity.DateSubmittedToActivityGroup = DateTime.UtcNow;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            msgs.AddRange(activity.Save());
+
+
+            if (msgs.HasNoErrors())
+            {
+                var account = SessionVariables.CurrentAccount;
+               //haost account 
+            }
+
+            var group = activity.GetActivityGroup();
+            LoadLeagueActivityViewBag(group, id, pn, rpp, archive);
+            return View("LeagueActivities", group);
+        }
+
+        [HttpGet]
+        public ActionResult RetractFromDistrict(string id, string pn, string rpp, string archive)
+        {
+            var msgs = new SystemMessages();
+
+            var activity = Activity.LoadByUid(id.ToGuid());
+
+            activity.DateSubmittedToActivityGroup = null;
             activity.LastModifiedDate = DateTime.UtcNow;
             activity.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
             msgs.AddRange(activity.Save());

@@ -160,6 +160,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var isLeader = true;
             var activePeriod = new RegistrationPeriod();
             ActivityGroup activityGroup = null;
+         
 
             if (id.IsGuid())
             {
@@ -193,6 +194,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
             ViewBag.ActivePeriod = activePeriod;
             ViewBag.Group = activityGroup;
+            ViewBag.AccountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount);
             ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
 
             return View(activity);
@@ -204,6 +206,14 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = null;
             ActivityGroup activityGroup = null;
+            var vb = ViewBag;
+            string accountActivityGroup = null;
+
+            if (group.IsGuid())
+            {
+                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
+                accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount).ID.Value.ToString();
+            }
 
             var values = new Dictionary<string, object>()
             {
@@ -219,6 +229,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "form", form },
                 { "regmode", regmode },
                 { "group", group },
+                { "accountactivitygroup", accountActivityGroup },
                 { "description", description }
             };
 
@@ -258,10 +269,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            if (group.IsGuid())
-            {
-                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-            }
+           
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;

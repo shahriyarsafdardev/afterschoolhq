@@ -1,0 +1,8 @@
+﻿<div>
+  <p>Notification from AfterSchool HQ</p>
+  
+  <p>
+      @Model.OrgName has submitted their team, @Model.ActivityName, to @Model.LeagueName!
+  </p>
+  
+</div>

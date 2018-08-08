@@ -672,6 +672,47 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendTeamSubmmittedToDistrictNotifitication(Account visitorAccount, Account hostAccount, Activity activity, ActivityGroup activityGroup)
+        {
+            var msgs = new SystemMessages();
+
+               var model = new NameValueCollection()
+            {
+                { "OrgName", visitorAccount.Name},
+                { "ActivityName", activity.Name },
+                { "LeagueName", activityGroup.Name },
+             
+            };
+
+            var subject = $"{activity.Name} has been submitted for {activityGroup.Name}";
+            var body = ProcessTemplate(
+               EmailTemplates.TeamSubmittedToDistrict_Notification,
+               model,
+               "teamsubmittedtodistrict",
+               msgs
+               );
+
+            var mailMsgsHost = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(hostAccount.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                );
+            var mailMsgsVisitor = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgsHost);
+            msgs.AddRange(mailMsgsVisitor);
+            return msgs;
+        }
+
+
         private static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
