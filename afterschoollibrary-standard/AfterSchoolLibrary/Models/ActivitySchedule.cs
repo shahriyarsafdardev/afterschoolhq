@@ -254,7 +254,17 @@ namespace AfterSchoolLibrary
 
             return _instances ?? new List<ActivityInstance>();
         }
-        
+
+        public List<ActivityInstance> GetInSessionInstances(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetInstances(msgs: msgs, dc: dc).Where(instance => instance.InstanceTypeId == InstanceType.InSession).ToList();
+        }
+
+        public List<ActivityInstance> GetOutSessionInstances(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetInstances(msgs: msgs, dc: dc).Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).ToList();
+        }
+
         public static ActivitySchedule LoadByAccountIdByName(int AccountId, string Name, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
