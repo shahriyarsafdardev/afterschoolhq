@@ -95,6 +95,7 @@ property: IsTemplate, bool, Bit
 property: ActivitySectionId, int?, Int
 property: ActivityTypeId, ActivityType, Int, required
 property: DateSubmittedToActivityGroup, DateTime?, DateTime
+property: AccountActivityGroupId, int?, Int
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
@@ -109,6 +110,7 @@ loadmethod: LocationId, List<>
 loadmethod: Uid
 loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: AccountActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
 loadmethod: UniqueName|AccountId
 [end]
@@ -561,11 +563,22 @@ property: InviteStatusId, InviteStatus, Int
 property: IsPublished, bool, Bit
 property: Cost, decimal?, Money
 property: CostUnitTypeId, CostUnitType, Int
+property: ContactName, string, NVarChar "50"
+property: ContactPhone, string, NVarChar "50"
+property: ContactEmail, string, NVarChar "100"
+property: FormId, int?, Int
 loadmethod: AccountId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: AccountId|InviteStatusId, List<>
 loadmethod: AccountId|ActivityGroupId
+join: Account.ID, AccountActivityGroup.AccountId, InnerJoin
+joinproperty: Account.Name, string, NVarChar
+join: ActivityGroup.ID, AccountActivityGroup.ActivityGroupId, InnerJoin
+joinproperty: ActivityGroup.Uid, string, NVarChar
+joinproperty: ActivityGroup.ActivityGroupTypeId, ActivityGroupType, Int
+joinproperty: ActivityGroup.UniqueName, string, NVarChar
+joinproperty: ActivityGroup.AccountId, int?, Int
 [end]
 
 [begin]

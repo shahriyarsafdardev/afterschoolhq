@@ -45,8 +45,10 @@ namespace AfterSchoolLibraryTests
 
             Assert.Equal(startCount + 1, Activity.GetCount(msgs: msgs, dc: dc));
         }
-        //Saves the Account in the DB, returns messages that will send errors if this is not recorded 
-        // in the DB properly
+        /// <summary>
+        /// Saves the Account in the DB, returns messages that will send errors if this is not recorded 
+        /// in the DB properly
+        /// </summary>
         [Fact]
         public void SaveTest()
         {
@@ -56,7 +58,9 @@ namespace AfterSchoolLibraryTests
 
             Assert.True(activity.Save(dc: dc).HasNoErrors());
         }
-        //Removes the Activity from the DB, it should not be able to be loaded from the DB afterwards
+        /// <summary>
+        /// Removes the Activity from the DB, it should not be able to be loaded from the DB afterwards
+        /// </summary>
         [Fact]
         public void DeleteTest()
         {
@@ -67,7 +71,9 @@ namespace AfterSchoolLibraryTests
             Assert.Null(Activity.Load(activity.ID.Value, dc: dc));
         }        
 
-        //Loads the activity from the DB (using it's ID) and returns it.
+        /// <summary>
+        /// Loads the activity from the DB (using it's ID) and returns it.
+        /// </summary>
         [Fact]
         public void ReloadTest()
         {
@@ -116,8 +122,10 @@ namespace AfterSchoolLibraryTests
 
             Assert.NotNull(Activity.LoadByUid(activity.Uid, dc: dc));
         }
-        // activity groups are collections of activities, this methos will load a list of 
-        // the activities in a group from the DB
+        /// <summary>
+        /// activity groups are collections of activities, this methos will load a list of 
+        /// the activities in a group from the DB
+        /// </summary>
         [Fact]
         public void LoadByActivityGroupIdTest()
         {
@@ -151,7 +159,9 @@ namespace AfterSchoolLibraryTests
             activity.Save(dc: dc);
             Assert.NotNull(Activity.LoadByUniqueNameByAccountId(activity.UniqueName, account.ID.Value, dc: dc));
         }
-        // Loads using a List of Activity Ids
+        /// <summary>
+        /// Loads using a List of Activity Ids
+        /// </summary>
         [Fact]
         public void LoadListTest()
         {
@@ -168,7 +178,9 @@ namespace AfterSchoolLibraryTests
         // One account can set up multiple activities 
         // *the only required fields are the accounts ID and the DB conection,
         // you can filter the results using the additional feilds*
-        // This will get the number of Activitiess under one Account
+        /// <summary>
+        /// Should get the number of Activitiess under one Account *you can filter the results using the additional feilds*
+        /// </summary>
         [Fact]
         public void GetCountByAccountIdTest()
         {
@@ -181,14 +193,16 @@ namespace AfterSchoolLibraryTests
             Assert.Equal(1, Activity.GetCountByAccountId(account.ID.Value, activity.ActivityGroupId.Value, null, null, dc: dc));
         }
 
-        // This loads the Activities under one Account, very similar to the above
+        /// <summary>
+        /// loads the Activities under one Account and should return a list of one Account
+        /// </summary>
         [Fact]
         public void LoadByAccountIdLongTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            Assert.NotNull(Activity.LoadByAccountId(account.ID.Value, null, true, false, 0, 100, dc: dc));
+            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, false, false, 0, 100, msgs, dc));
         }
 
         [Fact]
@@ -212,7 +226,9 @@ namespace AfterSchoolLibraryTests
         }
         */
 
-        // Gets the number of ActivitiyDays associated with the activity
+        /// <summary>
+        /// Gets one ActivitiyDay associated with an activity
+        /// </summary>
         [Fact]
         public void GetDaysTest()
         {
@@ -224,8 +240,10 @@ namespace AfterSchoolLibraryTests
             d.Save(dc: dc);
             Assert.Equal(1, activity.GetDays(dc: dc).Count);
         }
-        // Gets the days of the week that the activity repeats on weekly
-        [Fact]
+        /// <summary>
+        /// Gets the days of the week that the activity repeats on weekly
+        /// </summary>
+        [Fact(Skip = "Need to update")]
         public void GetDaysOfTheWeekTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
@@ -249,7 +267,7 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetDaysOfTheWeek(dc: dc));
         }
-
+        
         /// <summary>
         /// Returns a list of the registrants that have "signed up" for the activity
         /// </summary>
@@ -312,10 +330,12 @@ namespace AfterSchoolLibraryTests
             var debug = activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc);
             Assert.Equal(1, activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc));
         }
-        
-        //returns if an activity is full or not (checks the SeatsAvaible feild)
-        
-        //weird error with DeBugging
+
+        /// <summary>
+        /// returns if an activity is full or not (checks the SeatsAvaible feild)
+        /// </summary>
+
+        //TODO weird error with DeBugging
         [Fact]
         public void isFullTest()
         {
@@ -328,7 +348,9 @@ namespace AfterSchoolLibraryTests
             Assert.False(activity.IsFull(dc: dc));
         }
 
-        //returns bolean (if Waitinglistseats = 10 and registration type)
+        /// <summary>
+        /// returns boolean (if Waitinglistseats = 10 and registration type)
+        /// </summary>
         //TODO add registrant to waitlist
         [Fact]
         public void isWaitingListFullTest()
@@ -341,8 +363,10 @@ namespace AfterSchoolLibraryTests
             Assert.True(activity.IsWaitingListFull(dc: dc)); //0 open with 0 on waiting list means full
         }
 
-        // difference between grade and grade level?
-        // returns true if the activity his for students of the passed in gradelevel
+        // TODO difference between grade and grade level?
+        /// <summary>
+        /// Returns true if an activity has a given gradelevel
+        /// </summary>
         [Fact]
         public void HasGradeLevelTest()
         {
@@ -405,7 +429,9 @@ namespace AfterSchoolLibraryTests
             Assert.Equal(activityWebUser.ToString(), activity.GetTeamMembers(dc: dc).ElementAt(0).ToString());
         }
 
-        //returns a list of all forms ascociated with that activity
+        /// <summary>
+        /// returns a list of all forms ascociated with that activity
+        /// </summary>
         [Fact]
         public void GetFormsTest()
         {
@@ -419,7 +445,9 @@ namespace AfterSchoolLibraryTests
         }
 
 
-        // Same as above, but they must also be active (not to be confused with a simple activity form)
+        /// <summary>
+        /// Same as above, but they must also be active (not to be confused with a simple activity form)
+        /// </summary>
         [Fact]
         public void GetActiveFormTest()
         {
@@ -433,7 +461,10 @@ namespace AfterSchoolLibraryTests
 
             Assert.NotNull(activity.GetActiveForm(dc: dc));
         }
-        // Returns a list of the activity forms
+
+        /// <summary>
+        /// Returns a list of the activity forms
+        /// </summary>
         [Fact]
         public void GetActivityFormsTest()
         {
@@ -446,7 +477,9 @@ namespace AfterSchoolLibraryTests
             Assert.Single(activity.GetActivityForms(dc: dc));
         }
 
-        // Returns a list of the Attendance objects asociated with this activity.
+        /// <summary>
+        /// Returns a list of the Attendance objects asociated with this activity.
+        /// </summary>
         [Fact]
         public void GetAttendanceTest()
         {
@@ -463,7 +496,9 @@ namespace AfterSchoolLibraryTests
             Assert.Single(activity.GetAttendance(dc: dc));
         }
 
-        // does the same as above as long as the attendace has been completed
+        /// <summary>
+        /// Returns a list of the Attendance objects asociated with this activity that are completed.
+        /// </summary>
         [Fact]
         public void GetCompletedAttendanceTest()
         {
@@ -480,8 +515,10 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetCompletedAttendance(dc: dc));
         }
-        // returns the numberof attendance objects asociated with the activity that have been marked as present
-        [Fact]
+        /// <summary>
+        /// returns the numberof attendance objects asociated with the activity that have been marked as present
+        /// </summary>
+        [Fact(Skip = "Need to update")]
         public void GetAttendancePresentCountTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
@@ -500,7 +537,7 @@ namespace AfterSchoolLibraryTests
             Assert.Equal(1, activity.GetAttendancePresentCount(dc: dc));
         }
         
-        [Fact]
+        [Fact(Skip = "Need to update")]
         public void GetAttendancePossibleCountTest()
         {
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
@@ -543,8 +580,10 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetAttendanceByDate(date, dc: dc));
         }
-        // gets the Activity Registration Periods for the current activity
-        // activity registration periods contain more methods that DO things
+
+        /// <summary>
+        /// returns a list of activity Registration Periods
+        /// </summary>
         [Fact]
         public void GetActivityRegistrationPeriodsTest()
         {
@@ -557,7 +596,6 @@ namespace AfterSchoolLibraryTests
 
             Assert.Single(activity.GetActivityRegistrationPeriods(dc: dc));
         }
-        // Registration periods hold more of the fields of a registration
         [Fact]
         public void GetRegistrationPeriodsTest()
         {
@@ -733,10 +771,10 @@ namespace AfterSchoolLibraryTests
         [Fact]
         public void HasAdressTest()
         {
-            var a = new Activity() { };
-            a.Save(dc: dc);
+            var activity = new Activity() { };
+            activity.Save(dc: dc);
 
-            Assert.False(a.HasAddress);
+            Assert.False(activity.HasAddress);
         }
 
         [Fact(Skip = "Need to add this test in the future")]

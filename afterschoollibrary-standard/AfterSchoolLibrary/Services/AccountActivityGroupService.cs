@@ -44,11 +44,6 @@ namespace AfterSchoolLibrary.Services
             return ActivityGroup.Load(aag.ActivityGroupId.Value, msgs, dc);
         }
 
-        public static ParticipationObject ToParticipationObject(this AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return new ParticipationObject(aag, msgs, dc);
-        }
-
         public static RegistrationPeriod GetCurrentOrNextRegistrationPeriod(this AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var period = aag.GetCurrentRegistrationPeriod(msgs, dc);
@@ -80,6 +75,12 @@ namespace AfterSchoolLibrary.Services
         public static Account GetAccount(this AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Account.Load(aag.AccountId.Value, msgs, dc);
+        }
+
+        public static string GetHomePageUrl(this AccountActivityGroup aag, bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var externalAccount = Account.Load(aag.ActivityGroupAccountId.Value, msgs, dc);
+            return $"{Utilities.BaseUrl(isAfterSchool)}/{aag.GetAccount(msgs, dc).UniqueName.ToLower()}/{aag.ActivityGroupActivityGroupTypeId.ToString().ToLower()}/{externalAccount.UniqueName}/{aag.ActivityGroupUniqueName.ToLower()}";
         }
     }
 }

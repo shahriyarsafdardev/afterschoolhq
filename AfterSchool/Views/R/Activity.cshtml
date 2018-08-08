@@ -45,12 +45,15 @@
                     </p>
                 </div>
 
-                <div class="activity-detail-block">
-                    <h3>Location <a href="@Model.Location.GetGoogleMapsLink()" target="_blank"><i class="s7-map-marker"></i></a></h3>
-                    <p>
-                        <a href="@Model.Location.GetGoogleMapsLink()" target="_blank">@ParticipationObjectUI.PrintLocation(Model)</a>
-                    </p>
-                </div>
+                @if (Model.Location.IsNotEmpty())
+                {
+                    <div class="activity-detail-block">
+                        <h3>Location <a href="@Model.Location.GetGoogleMapsLink()" target="_blank"><i class="s7-map-marker"></i></a></h3>
+                        <p>
+                            <a href="@Model.Location.GetGoogleMapsLink()" target="_blank">@ParticipationObjectUI.PrintLocation(Model)</a>
+                        </p>
+                    </div>
+                }
 
                 <div class="activity-detail-block">
                     <h3>

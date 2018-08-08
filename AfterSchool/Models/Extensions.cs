@@ -200,10 +200,10 @@ namespace AfterSchool.Models
                 msgs.AddRange(locationMsgs);
             }
 
-            if (activity.CostPerRegistrant.HasValue && activity.CostPerRegistrant.Value > 0 && !activity.AllowToPayLater && !activity.AcceptCreditCard)
-            {
-                paymentMsgs.Add("Payment Information: Either accept credit cards or allow to pay later", MessageType.UserError);
-            }
+            //if (activity.CostPerRegistrant.HasValue && activity.CostPerRegistrant.Value > 0 && !activity.AllowToPayLater && !activity.AcceptCreditCard)
+            //{
+            //    paymentMsgs.Add("Payment Information: Either accept credit cards or allow to pay later", MessageType.UserError);
+            //}
             if (paymentMsgs.HasErrors())
             {
                 paymentMsgs.Insert(0, new SystemMessage($"<a href=\"/org/activity/editcost/{activity.Uid}\" class=\"publish-error-title\">Payment</a>", MessageType.UserError));
@@ -257,6 +257,25 @@ namespace AfterSchool.Models
             {
                 msgs.Add($"<a href=\"/org/group/restore/{group.Uid}\">Restore {group.Name}</a>. It is currently archived", MessageType.Error);
             }
+
+            return msgs;
+        }
+
+        public static SystemMessages GetItemsRequiredToPublish(this AccountActivityGroup aag)
+        {
+            var msgs = new SystemMessages();
+
+            if (!aag.HasRegistrationPeriods())
+                msgs.Add($"<a href=\"/org/league/periods/{aag.ActivityGroupUid}\">Create at least one {UILabel.RegistrationPeriodLabel()}</a> in order to publish", MessageType.UserError);
+
+            if (aag.FormId.IsEmpty())
+                msgs.Add($"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Select a registration form</a> in order to publish", MessageType.UserError);
+            if (aag.ContactName.IsEmpty())
+                msgs.Add($"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Name</a> is required in order to publish", MessageType.UserError);
+            if (aag.ContactPhone.IsEmpty())
+                msgs.Add($"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Phone</a> is required in order to publish", MessageType.UserError);
+            if (aag.ContactEmail.IsEmpty())
+                msgs.Add($"<a href=\"/org/league/edit/{aag.ActivityGroupUid}\">Contact Email</a> is required in order to publish", MessageType.UserError);
 
             return msgs;
         }

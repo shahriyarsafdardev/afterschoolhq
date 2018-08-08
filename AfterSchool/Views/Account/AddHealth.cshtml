@@ -5,6 +5,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var cart = (Cart)ViewBag.Cart;
     var student = (Registrant)ViewBag.Student;
+    var showStepNumber = (bool)ViewBag.ShowStepNumber;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -28,7 +29,19 @@
             <div class="panel-body">
 
                 <div>
-                    <h3 class="text-center reg-instructions"><strong>Health Information</strong></h3>
+
+                    <div class="text-center reg-instructions">
+                        <p>
+                            <strong>
+                                @if (showStepNumber)
+                                {
+                                    <span>Step 6 of 6: </span>
+                                }
+                                Health Information
+                            </strong>
+                        </p>
+                    </div>
+
                     <p class="text-center reg-login">Please add health information for: @student.DisplayName</p>
                     <form class="form-horizontal" id="add-health-form" method="post" action="@Url.Action("addhealth", "account")">
                         @foreach (var qvm in Model)

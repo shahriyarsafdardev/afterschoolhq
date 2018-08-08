@@ -3,15 +3,31 @@
     var m = Model;
     ViewBag.Title = Model.AccountName;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var publishMsgs = Model.GetItemsRequiredToPublish();
     var group = Model;
 
-    var publishUrl = "#";
+    var accountActivityGroup = (AccountActivityGroup)ViewBag.AccountActivityGroup;
+    var aagRegistrationURL = ViewBag.aagRegistrationURL.ToString();
+    SystemMessages publishMsgs = null;
+    string publishUrl = "";
     var btnDisabled = "disabled";
-    if (Model.IsPublishable)
+
+    if (accountActivityGroup.IsNotEmpty())
     {
-        publishUrl = Url.Action("publish", "league", new { id = Model.Uid });
-        btnDisabled = "";
+        publishMsgs = accountActivityGroup.GetItemsRequiredToPublish();
+        if (accountActivityGroup.IsPublishable)
+        {
+            publishUrl = Url.Action("publish", "league", new { id = Model.Uid });
+            btnDisabled = "";
+        }
+    }
+    else
+    {
+        publishMsgs = Model.GetItemsRequiredToPublish();
+        if (Model.IsPublishable)
+        {
+            publishUrl = Url.Action("publish", "league", new { id = Model.Uid });
+            btnDisabled = "";
+        }
     }
 }
 
@@ -36,7 +52,18 @@
                         {
                             if (SessionVariables.LoggedInUser.VerifiedAccount)
                             {
-                                if (!Model.IsPublished)
+                                if (accountActivityGroup.IsNotEmpty())
+                                {
+                                    if (!accountActivityGroup.IsPublished)
+                                    {
+                                        <a href="@publishUrl" class="btn btn-success btn-space @btnDisabled">Publish Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) <i class="s7-right-arrow"></i></a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-default btn-space md-trigger" data-modal="modal-unpublish">Unpublish Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) <i class="s7-right-arrow"></i></button>
+                                    }
+                                }
+                                else if (!Model.IsPublished)
                                 {
                                     <a href="@publishUrl" class="btn btn-success btn-space @btnDisabled">Publish Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) <i class="s7-right-arrow"></i></a>
                                 }
@@ -59,19 +86,37 @@
                 <div class="panel-body">
                     <div class="widget col-md-10 col-md-offset-1">
                         <div class="widget-head">
-                            @if (Model.IsPublishable)
+                            @if (accountActivityGroup.IsNotEmpty() && accountActivityGroup.IsPublishable)
                             {
-                                if (Model.IsPublished)
+                                if (accountActivityGroup.IsPublished)
                                 {
 
-                                    <p class="text-success text-xlarge">
+                                    <p class="text-success text-large">
                                         <i class="s7-check-circle"></i>
                                         Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) is published :)
                                     </p>
                                 }
                                 else
                                 {
-                                    <p class="text-warning text-xlarge">
+                                    <p class="text-warning text-large">
+                                        <i class="s7-next-2"></i>
+                                        Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) is ready to publish
+                                    </p>
+                                }
+                            }
+                            else if (Model.IsPublishable)
+                            {
+                                if (Model.IsPublished)
+                                {
+
+                                    <p class="text-success text-large">
+                                        <i class="s7-check-circle"></i>
+                                        Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) is published :)
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="text-warning text-large">
                                         <i class="s7-next-2"></i>
                                         Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) is ready to publish
                                     </p>
@@ -79,7 +124,7 @@
                             }
                             else
                             {
-                                <p class="text-danger text-xlarge">
+                                <p class="text-danger text-large">
                                     <i class="s7-close-circle"></i>
                                     Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) is <em>not</em> ready to publish
                                 </p>
@@ -112,9 +157,19 @@
                                             <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
                                         </td>
                                     </tr>
-                                    @if (Model.IsPublished)
+                                    @if (Model.IsPublished || (accountActivityGroup.IsNotEmpty() && accountActivityGroup.IsPublished))
                                     {
-                                        if (Model.ID.HasValue)
+                                        if (accountActivityGroup.IsNotEmpty())
+                                        {
+                                            <tr>
+                                                <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) URL</td>
+                                                <td>
+                                                    <a href="@aagRegistrationURL" target="_blank">@aagRegistrationURL</a>
+                                                    <a href="@aagRegistrationURL" target="_blank"><i class="s7-link"></i></a>
+                                                </td>
+                                            </tr>
+                                        }
+                                        else if (Model.ID.HasValue)
                                         {
                                             <tr>
                                                 <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) URL</td>

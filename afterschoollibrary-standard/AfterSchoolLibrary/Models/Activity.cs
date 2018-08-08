@@ -67,6 +67,7 @@ namespace AfterSchoolLibrary
 		/// </summary>
 		public ActivityType ActivityTypeId { get { return (ActivityType)MDV["ActivityTypeId"].Value; } set { MDV["ActivityTypeId"].Value = value; } }
 		public DateTime? DateSubmittedToActivityGroup { get { return (DateTime?)MDV["DateSubmittedToActivityGroup"].Value; } set { MDV["DateSubmittedToActivityGroup"].Value = value; } }
+		public int? AccountActivityGroupId { get { return (int?)MDV["AccountActivityGroupId"].Value; } set { MDV["AccountActivityGroupId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountPayPalEmailAddress { get { return (string)MDV["AccountPayPalEmailAddress"].Value; } }
 		public string AccountStripePublishableKey { get { return (string)MDV["AccountStripePublishableKey"].Value; } }
@@ -140,6 +141,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivitySectionId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateSubmittedToActivityGroup", System.Data.SqlDbType.DateTime);
+				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountPayPalEmailAddress", typeof(Account).Name, "PayPalEmailAddress", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountStripePublishableKey", typeof(Account).Name, "StripePublishableKey", System.Data.SqlDbType.NVarChar, "Account");
@@ -377,6 +379,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["DateSubmittedToActivityGroup"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountActivityGroupId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -433,6 +439,14 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadByAccountActivityGroupId(int AccountActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -503,11 +517,6 @@ namespace AfterSchoolLibrary
             return $"{Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
         }
 
-        public string GetRegistrationPageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return $"{this.GetHomePageUrl(isAfterSchool, msgs, dc)}/register";
-        }
-
         public string HomePageUrl
         {
             get
@@ -549,12 +558,16 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private static DatabaseQuery LoadByAccountIdQuery(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        private static DatabaseQuery LoadByAccountIdQuery(int? accountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.UseParameterizedQuery = false;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+
+            if (accountId.HasValue)
+            {
+                dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+            }
             if (activityGroupId.HasValue)
             {
                 dq.Criterias.Add(ObjectMap["activityGroupId"], activityGroupId.Value);
@@ -595,9 +608,16 @@ namespace AfterSchoolLibrary
             return dq;
         }
 
-        public static int GetCountByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        public static int GetCountByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc: dc).GetCount();
+            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc);
+            return dq.GetCount(msgs);
+        }
+
+        public static int GetCountByActivityGroupId(int? activityGroupId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = LoadByAccountIdQuery(null, activityGroupId, isArchived, isDeleted, dc);
+            return dq.GetCount(msgs);
         }
 
         public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -695,11 +715,11 @@ namespace AfterSchoolLibrary
             {
                 totalErrors++;
             }
-            totalFields++;
-            if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
-            {
-                totalErrors++;
-            }
+            //totalFields++;
+            //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
+            //{
+            //    totalErrors++;
+            //}
             if (!this.ActivityGroupId.HasValue)
             {
                 totalFields++;
@@ -1098,9 +1118,9 @@ namespace AfterSchoolLibrary
                         if (useSameForm)
                             formToCopy = this.GetActiveForm(adc);
                         else
-                            formToCopy = account.GetDefaultForm(msgs, adc);
+                            formToCopy = account.GetDefaultForm(amsgs, adc);
 
-                        var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, amsgs, dc: adc);
+                        var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, null, amsgs, dc: adc);
                         copy.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, dc: adc);
                     }
 
@@ -1248,7 +1268,7 @@ namespace AfterSchoolLibrary
             {
                 var account = this.GetAccount(dc: dc);
                 var formToCopy = account.GetDefaultForm(dc: dc);
-                var newForm = formToCopy.Copy(loggedInUserId, this.AccountId.Value, msgs, dc: dc);
+                var newForm = formToCopy.Copy(loggedInUserId, this.AccountId.Value, null, msgs, dc: dc);
                 var af = this.AddFormAndActivitate(newForm, loggedInUserId, false, msgs, dc: dc);
 
                 account.DefaultFormId = af.FormId;
@@ -1566,10 +1586,10 @@ namespace AfterSchoolLibrary
                 // activity.RegistrationModeId = RegistrationMode.Register;
             }
 
-            if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard && !activity.AcceptPayPal && !activity.AllowToPayLater)
-            {
-                msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
-            }
+            //if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard &&!activity.AllowToPayLater)
+            //{
+            //    msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
+            //}
 
             if (msgs.HasNoErrors())
             {
@@ -2150,7 +2170,7 @@ namespace AfterSchoolLibrary
                 {
                     //if creating a new form, copy from the default form
                     var defaultForm = account.GetDefaultForm(dc: dc);
-                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, dc: dc);
+                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, null, msgs, dc: dc);
                     newForm.Name = (this.Name + " Form").MaxChars(100, "...");
                     msgs.AddRange(newForm.Save(dc: dc));
                 }

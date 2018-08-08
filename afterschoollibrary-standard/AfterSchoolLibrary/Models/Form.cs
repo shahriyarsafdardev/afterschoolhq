@@ -190,8 +190,8 @@ namespace AfterSchoolLibrary
         /// <returns></returns>
         public static Form GetOrCreateAfterSchoolAccountTemplateForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AccountService.GetAfterSchoolAccount(msgs, dc);
-            return Form.GetLatestTemplateForm(accountId: account.ID.Value, msgs: msgs, dc: dc) ?? 
+            var afterSchoolAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
+            return Form.GetLatestTemplateForm(accountId: afterSchoolAccount.ID.Value, msgs: msgs, dc: dc) ?? 
                 Services.FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
         }
 
@@ -227,13 +227,13 @@ namespace AfterSchoolLibrary
             return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", this.ID.Value } }, msgs, dc);
         }
 
-        public Form Copy(int loggedInUserId, int newAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Form Copy(int loggedInUserId, int newAccountId, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var form = new Form
             {
-                Name = this.Name,
+                Name = formName.IfEmpty(this.Name),
                 Description = this.Description,
                 LastModifiedDate = DateTime.UtcNow,
                 CreateDate = DateTime.UtcNow,

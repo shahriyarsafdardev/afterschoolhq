@@ -146,7 +146,7 @@ namespace AfterSchoolLibrary.Services
                 );
 
             string username = $"{firstName} {lastName}";
-            string origUniqueName = reg.Replace(username, "").MaxChars(25);
+            string origUniqueName = reg.Replace(username.MaxChars(25), "");
             string uniqueName = origUniqueName;
             var duplicate = WebUser.LoadByUsername(uniqueName, msgs, dc);
             int count = 1;

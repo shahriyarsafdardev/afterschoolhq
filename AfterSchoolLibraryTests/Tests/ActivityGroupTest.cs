@@ -82,7 +82,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(activityGroup.ID, activityGroup.Reload(msgs, dc).ID);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Invite account to join league or session")]
         public void InviteAccountTest()
         {
             var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
@@ -93,6 +93,17 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(msgs.HasNoErrors());
 
+        }
+
+        [Theory(DisplayName = "Generate Unique Name")]
+        [InlineData("My Sample Account", "MySampleAccount")]
+        [InlineData("My Sample Account Rocks Bud Boy", "MySampleAccountRocksBud")]
+        [InlineData("My!@#$%^&*()-_+<>/,.?[]{}\\|'\":;~`", "My-_")]
+        public void GenerateUniqueName(string input, string expectedOutput)
+        {
+            var output = ActivityGroup.GenerateUniqueName(input, null, ActivityGroupOwner.ID, msgs, dc);
+
+            Assert.Equal(expectedOutput, output);
         }
     }
 }

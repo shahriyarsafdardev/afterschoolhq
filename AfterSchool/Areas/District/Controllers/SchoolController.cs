@@ -82,16 +82,10 @@ namespace AfterSchool.Areas.District.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.CreateNew(
+                        user = WebUserService.InviteNew(
                             firstName: firstname,
                             lastName: lastname,
                             email: email,
-                            phone: null,
-                            password: null,
-                            isActive: false,
-                            isRegistered: false,
-                            isVerified: false,
-                            allowTextMessages: false,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -101,8 +95,8 @@ namespace AfterSchool.Areas.District.Controllers
                             phone: null,
                             isActive: true,
                             accountType: AccountType.School,
-                            packageId: null,
-                            packageBillingPeriod: null,
+                            packageId: Package.Load().First().ID.Value,
+                            packageBillingPeriod: BillingPeriodType.Month,
                             isAfterSchool: SessionVariables.IsAfterSchool.Value,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
@@ -112,7 +106,7 @@ namespace AfterSchool.Areas.District.Controllers
                         msgs.AddRange(
                             SessionVariables.CurrentAccount.AddVisitorAccount(
                                 account, 
-                                HostPermissionType.Edit,
+                                HostPermissionType.ApproveOnly,
                                 ApprovalStatus.Approved, 
                                 SessionVariables.LoggedInUser, 
                                 adc

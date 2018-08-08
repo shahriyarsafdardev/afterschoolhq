@@ -173,7 +173,30 @@ namespace AfterSchoolLibrary
         #endregion
 
 		#region "UserDefined"
+        public static List<TeamMatch> LoadByHomeAndAwayID(int HomeID, int AwayID, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HomeTeamId"], HomeID);
+            dq.Criterias.Add(ObjectMap["AwayTeamId"], AwayID);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
+        public static List<TeamMatch> LoadByHomeID(int HomeID, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["HomeTeamId"], HomeID);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<TeamMatch> LoadByAwayID(int AwayID, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AwayTeamId"], AwayID);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
         #endregion
     }
 }

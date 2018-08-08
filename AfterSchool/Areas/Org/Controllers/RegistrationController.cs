@@ -255,7 +255,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var act = Activity.LoadByUid(activity.ToGuid());
+                var act = Activity.Load(activity.ToInteger());
 
                 msgs.AddRange(selectedRegistration.WasUpdated());
 

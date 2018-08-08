@@ -570,17 +570,16 @@ namespace AfterSchool.Controllers
                     }
                 });
 
-            var account = participationObject.OwnerAccount;
-            var location = participationObject.Location;
-            //var schools = new List<Location>();
+            var schoolLocation = new Location();
 
-            //if (location.IsNotEmpty())
-            //    schools = Location.LoadByLocationTypeIdByCityByState(LocationType.School, location?.City, location?.State, msgs);
+            if (SessionVariables.RegistrationStartPageAccount.AccountTypeId == AccountType.School)
+            {
+                schoolLocation = SessionVariables.RegistrationStartPageAccount.GetDefaultLocation(msgs);
+            }
 
-            ViewBag.Account = account;
             ViewBag.Cart = SessionVariables.Cart;
-            ViewBag.School = new Location();
-            ViewBag.SchoolLocation = SessionVariables.CurrentAccount.GetDefaultLocation();
+            ViewBag.School = schoolLocation;
+            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count == 0;
 
             return questions;
         }
@@ -800,6 +799,7 @@ namespace AfterSchool.Controllers
             });
 
             ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count < 2;
 
             return questions;
         }
@@ -1108,8 +1108,11 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
 
+            var stripeAccount = participationObject.OwnerAccount.GetStripeAccount(msgs);
+            var canAcceptPayments = stripeAccount.IsNotEmpty() ? stripeAccount.IsVerified : false;
+
             // if you can't pay later
-            if (!participationObject.AllowToPayLater)
+            if (!participationObject.AllowToPayLater && canAcceptPayments)
             {
                 // if it's not free and registration mode is not set to apply mode
                 // if it costs something and you're forced to register then you need to pay
@@ -1169,6 +1172,9 @@ namespace AfterSchool.Controllers
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
+
+            var stripeAccount = participationObject.OwnerAccount.GetStripeAccount(msgs);
+            ViewBag.AccountCanAcceptPayments = stripeAccount.IsNotEmpty() ? stripeAccount.IsVerified : false;
 
             return registration;
         }

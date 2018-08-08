@@ -1,0 +1,80 @@
+@model  ActivityGroup
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var invitedAccountActivityGroups = (List<AccountActivityGroup>)ViewBag.InvitedAccountActivityGroups;
+    var inviteUrl = Url.Action("inviteschool", "league", new { id = Model.Uid });
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{Html.RenderPartial("_LeagueHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a href=@inviteUrl class="btn btn-default"><i class="s7-plus"></i> Invite School</a>
+            </div>
+            <h2><i class="s7-study"></i> Schools</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+
+            @if (invitedAccountActivityGroups.Any())
+            {
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="widget widget-tile widget-bordered">
+                            <div class="data-info">
+                                <div data-toggle="counter" data-end="@invitedAccountActivityGroups.Count" data-decimals="0" data-suffix="" class="value">
+                                    @invitedAccountActivityGroups.Count
+                                </div>
+                                <div class="desc">School@(invitedAccountActivityGroups.Count > 1 ? "s" : "") Invited</div>
+                            </div>
+                            <div class="icon"><span class="s7-study"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th></th>
+                            <th>School</th>
+                            <th>Status</th>
+                            <th class="text-center">Teams Registered</th>
+                        </tr>
+                        @foreach (var aag in invitedAccountActivityGroups)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="#" class="hide btn btn-default">View</a>
+                                </td>
+                                <td>@aag.AccountName</td>
+                                <td>@aag.InviteStatusId.ToString().SplitByUpperCase()</td>
+                                <td class="text-center">@Model.GetActivityCountByAccountId(aag.AccountId.Value, false, false)</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="widget">
+                    <div class="widget-head">
+                        <h1>Manage all of your schools here</h1>
+                    </div>
+                    <div class="widget-tile">
+                        <hr />
+                        <p>You haven't invited any schools to your league yet. In order to get started, <a href="@inviteUrl">invite your first school</a>.</p>
+                        <p>&nbsp;</p>
+                        <p>
+                            <a href="@inviteUrl" class="btn btn-primary btn-lg">Invite Your First School &raquo;</a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

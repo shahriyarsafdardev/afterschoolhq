@@ -3,7 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
 
     var periods = (List<RegistrationPeriod>)ViewBag.Periods;
-    var account = (Account)ViewBag.Account; 
+    var account = (Account)ViewBag.Account;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -29,30 +29,29 @@
                 </div>
             </div>
 
-           <div class="table-responsive">
-               <table class="table table-striped">
-                   <thead>
-                       <tr>
-                           <th></th>
-                           <th>Open Date</th>
-                           <th>Close Date</th>
-                           <th>Status</th>
-                           <th class="text-center">Registrations</th>
-                           <th></th>
-                       </tr>
-                   </thead>
-                   <tbody>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Open Date</th>
+                            <th>Close Date</th>
+                            <th>Status</th>
+                            <th class="text-center">Registrations</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         @if (periods.Count > 0)
                         {
                             foreach (var period in periods)
                             {
                                 <tr>
                                     <td>
-                                        <button 
-                                            type="button" 
-                                            class="btn btn-default btn-sm md-trigger" 
-                                            data-modal="modal-add" 
-                                            onclick="editPeriod('@period.ID', '@period.StartDateTime.ToShortDateString()', '@period.StartDateTime.ToShortTimeString().ToLower()', '@period.EndDateTime.ToShortDateString()', '@period.EndDateTime.ToShortTimeString().ToLower()')">
+                                        <button type="button"
+                                                class="btn btn-default btn-sm md-trigger"
+                                                data-modal="modal-add"
+                                                onclick="editPeriod('@period.ID', '@period.StartDateTime.ToShortDateString()', '@period.StartDateTime.ToShortTimeString().ToLower()', '@period.EndDateTime.ToShortDateString()', '@period.EndDateTime.ToShortTimeString().ToLower()')">
                                             Edit
                                         </button>
                                     </td>
@@ -81,21 +80,28 @@
                             <tr>
                                 <td colspan="4">You haven't created any @UILabel.RegistrationPeriodLabel(true).ToLower()</td>
                             </tr>
-                       }
-                       
-                   </tbody>
-               </table>
-           </div>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
 
         </div>
     </div>
 </div>
 
-@{ Html.RenderPartial("_EditRegistrationPeriodModal", Model, new ViewDataDictionary() {
-       { "PostController", "league" },
-       { "DefaultOpenDateTime", ViewBag.DefaultOpenDateTime },
-       { "DefaultCloseDateTime", ViewBag.DefaultCloseDateTime }
-   }); }
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/_EditRegistrationPeriodModal.cshtml",
+        Model,
+        new ViewDataDictionary()
+        {
+            { "DefaultOpenDateTime", ViewBag.DefaultOpenDateTime },
+            { "DefaultCloseDateTime", ViewBag.DefaultCloseDateTime },
+            { "PostController", "league" }
+        }
+        );
+}
 
 <div id="modal-send" class="md-modal colored-header custom-width md-effect-9">
     <form id="form-add" action="@Url.Action("periodnotify", "league", new { id = Model.Uid })" method="post">
@@ -110,15 +116,15 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-12">
-                        @{ 
+                        @{
                             Html.RenderPartial(
                                 "~/Views/Shared/_TextEditor.cshtml",
                                 "",
                                 new ViewDataDictionary()
                                 {
-                                    { "required", false },
-                                    { "id", "emailmessage" },
-                                    { "name", "emailmessage" }
+                                                    { "required", false },
+                                                    { "id", "emailmessage" },
+                                                    { "name", "emailmessage" }
                                 }
                             );
                         }
@@ -153,9 +159,9 @@
                                 "",
                                 new ViewDataDictionary()
                                 {
-                                    { "required", false },
-                                    { "id", "emailmessage" },
-                                    { "name", "emailmessage" }
+                                                    { "required", false },
+                                                    { "id", "emailmessage" },
+                                                    { "name", "emailmessage" }
                                 }
                             );
                         }
@@ -172,7 +178,7 @@
 </div>
 
 <script>
-    function sendPeriod(id){
+    function sendPeriod(id) {
         $('#period-notify').val(id);
     }
 </script>
