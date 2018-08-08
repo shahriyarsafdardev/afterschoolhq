@@ -511,7 +511,7 @@ namespace AfterSchoolLibrary
             //unique name
             var reg = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
 
-            var origUniqueName = name.GetMaxWords(25);
+            var origUniqueName = reg.Replace(name.GetMaxWords(25), "");
             var uniqueName = origUniqueName;
             var duplicate = Account.LoadByUniqueName(uniqueName, msgs, dc);
             var count = 1;
@@ -1332,8 +1332,8 @@ namespace AfterSchoolLibrary
                 relationship = visitorAccount.AddHostAccount(
                     hostAccount,
                     hostPermissionType,
-                    ApprovalStatus.Requested, 
-                    loggedInUser, 
+                    ApprovalStatus.Requested,
+                    loggedInUser,
                     msgs,
                     dc);
 
@@ -1341,8 +1341,10 @@ namespace AfterSchoolLibrary
                 if (msgs.HasNoErrors() && hostAccount.IsActive)
                     msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
             }
-
-            msgs.Add("This account has already previously been denied", MessageType.UserError);
+            else
+            {
+                msgs.Add("This account has already previously been denied", MessageType.UserError);
+            }
             
             return relationship;
         }

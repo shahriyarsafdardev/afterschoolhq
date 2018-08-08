@@ -424,25 +424,24 @@ namespace AfterSchoolLibrary
             return dq.GetCount(msgs) > 0;
         }
 
-        public static string GenerateUniqueName(int accountId, string name, SystemMessages msgs, DatabaseConnection dc = null)
+        public static string GenerateUniqueName(string name, int? activityGroupId, int? accountId, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            //unique name
             var reg = new System.Text.RegularExpressions.Regex(
                 BasicLibrary.Utilities.UrlFriendlyRegEx, 
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline
-                );
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
 
-            var origUniqueName = name.GetMaxWords(25);
-            var uniqueName = origUniqueName;
-            var duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, msgs, dc);
-            var count = 1;
-
-            while (!duplicate.IsEmpty() && duplicate.ID != accountId)
+            var origUniqueName = reg.Replace(name.GetMaxWords(25), "");
+            string uniqueName = origUniqueName;
+            var duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId.Value, uniqueName, msgs, dc);
+            int count = 1;
+            while (duplicate.IsNotEmpty() && duplicate.ID != activityGroupId)
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
-                duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId, uniqueName, msgs, dc);
+                duplicate = ActivityGroup.LoadByAccountIdByUniqueName(accountId.Value, uniqueName, msgs, dc);
             }
-            return uniqueName;            
+            return uniqueName;
         }
 
         private List<RegistrationPeriod> _RegistrationPeriods = null;
@@ -782,10 +781,11 @@ namespace AfterSchoolLibrary
                             }
                         }
 
-                        if (isNew)
-                            group.UniqueName = ActivityGroup.GenerateUniqueName(group.AccountId.Value, group.Name, amsgs, adc);
-
                         group.AccountId = account.ID;
+
+                        if (isNew)
+                            group.UniqueName = ActivityGroup.GenerateUniqueName(group.Name, group.ID, group.AccountId, amsgs, adc);
+
                         group.LastModifiedDate = DateTime.UtcNow;
                         group.LastModifiedBy = loggedInUser.ID;
                         amsgs.AddRange(group.Save(adc));
@@ -1127,7 +1127,7 @@ namespace AfterSchoolLibrary
                         IsPublished = false,
                         Name = newName,
                         RegistrationModeId = this.RegistrationModeId,
-                        UniqueName = ActivityGroup.GenerateUniqueName(this.AccountId.Value, newName, amsgs, adc),
+                        UniqueName = ActivityGroup.GenerateUniqueName(newName, null, this.AccountId, amsgs, adc),
                         ActivityGroupTypeId = this.ActivityGroupTypeId,
                         ActivityScheduleId = this.ActivityScheduleId,
                         GenderRestriction = this.GenderRestriction,
