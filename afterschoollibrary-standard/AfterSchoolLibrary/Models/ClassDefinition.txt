@@ -95,6 +95,7 @@ property: IsTemplate, bool, Bit
 property: ActivitySectionId, int?, Int
 property: ActivityTypeId, ActivityType, Int, required
 property: DateSubmittedToActivityGroup, DateTime?, DateTime
+property: AccountActivityGroupId, int?, Int
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
@@ -109,6 +110,7 @@ loadmethod: LocationId, List<>
 loadmethod: Uid
 loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: AccountActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
 loadmethod: UniqueName|AccountId
 [end]
