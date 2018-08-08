@@ -11,7 +11,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="pull-right">
-                <a href="#" class="btn btn-default"><i class="s7-plus"></i> Invite School</a>
+                <a href=@inviteUrl class="btn btn-default"><i class="s7-plus"></i> Invite School</a>
             </div>
             <h2><i class="s7-study"></i> Schools</h2>
             <div class="clearfix"></div>
@@ -25,7 +25,7 @@
                         <div class="widget widget-tile widget-bordered">
                             <div class="data-info">
                                 <div data-toggle="counter" data-end="@Model.Count" data-decimals="0" data-suffix="" class="value">@Model.Count</div>
-                                <div class="desc">Schools Registered</div>
+                                <div class="desc">School@(Model.Count > 1 ? "s" : "") in District</div>
                             </div>
                             <div class="icon"><span class="s7-study"></span></div>
                         </div>
@@ -38,17 +38,19 @@
                             <th></th>
                             <th>School</th>
                             <th>Contact</th>
-                            <th></th>
+                            <th>Grades Offered</th>
+                            <th>Leagues Participating</th>
                         </tr>
                         @foreach (var account in Model)
                         {
                             <tr>
                                 <td>
-                                    <a href="#" class="btn btn-default">View</a>
+                                    <a href="#" class="btn btn-default hide">View</a>
                                 </td>
                                 <td>@account.Name</td>
                                 <td>@account.GetAccountOwner().DisplayName</td>
-                                <td></td>
+                                <td>Grades</td>
+                                <td>@account.GetLeagueCount(true)</td>
                             </tr>
                         }               
                     </table>
@@ -62,7 +64,7 @@
                     </div>
                     <div class="widget-tile">
                         <hr />
-                        <p>You haven't invited any schools yet. In order to get started, <a href="@inviteUrl">invite your first school</a>.</p>
+                        <p>You haven't invited any schools to your district yet. In order to get started, <a href="@inviteUrl">invite your first school</a>.</p>
                         <p>&nbsp;</p>
                         <p>
                             <a href="@inviteUrl" class="btn btn-primary btn-lg">Invite Your First School &raquo;</a>

@@ -9,6 +9,8 @@
     <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
     <title>@UILabel.ProductName()</title>
     @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
+    @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}
+    @{Html.RenderPartial("~/Views/Shared/_MediumEditorScripts.cshtml");}
 </head>
 <body>
     <div class="am-wrapper notopmenu">
@@ -21,9 +23,10 @@
             @RenderBody()
         </div>
         @*
-        @Html.Partial("_RightSideBar")
+            @Html.Partial("_RightSideBar")
         *@
     </div>
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
+    @RenderSection("scripts", required: false)
 </body>
 </html>

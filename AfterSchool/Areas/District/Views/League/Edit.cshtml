@@ -3,6 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var forms = (List<Form>)ViewBag.Forms;
+    var schedule = (ActivitySchedule)ViewBag.Schedule;
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -23,7 +24,20 @@
 
                 <form id="form1" method="post" action="@Url.Action("edit", "league", new { id = Model.Uid })" class="form-horizontal">
 
-                    @{ Html.RenderPartial("~/Views/Shared/_ActivityGroupEdit.cshtml", Model); }
+                    @{ Html.RenderPartial("~/Views/Shared/_ActivityGroupEdit.cshtml", Model); }                    
+
+                    @{
+                        Html.RenderPartial
+                        (
+                            "~/Views/Shared/_ActivityFormSchedule.cshtml",
+                            schedule,
+                            new ViewDataDictionary()
+                            {
+                                { "ActivityGroupType", (int)ActivityGroupType.League },
+                                { "schedules", ViewBag.Schedules }
+                            }
+                        );
+                    }
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>

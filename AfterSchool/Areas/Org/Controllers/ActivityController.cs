@@ -198,14 +198,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                 {
                     var defaultForm = SessionVariables.CurrentAccount.GetDefaultForm();
-                    var newForm = defaultForm.Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, msgs);
+                    var newForm = defaultForm.Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
                     if (msgs.HasNoErrors())
-                    {
-                        newForm.Name = (name + " form").MaxChars(100, "...");
-                        msgs.AddRange(newForm.Save());
                         values.Add("form", newForm.ID.Value.ToString());
-                        //activity.AddFormAndActivitate(newForm, SessionVariables.LoggedInUser.ID.Value, false, msgs);
-                    }
                 }
 
                 activity = Activity.CreateNew(
@@ -222,9 +217,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (group.IsGuid())
-            {
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-            }
 
             LoadEditSetupViewBag(activity, null, msgs);
             ViewBag.Group = activityGroup;

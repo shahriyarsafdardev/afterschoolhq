@@ -214,6 +214,16 @@ namespace AfterSchoolLibrary
         }
 
         [NonSerialized]
+        private AccountActivityGroup _AccountActivityGroup = null;
+        public AccountActivityGroup GetAccountActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (_AccountActivityGroup.IsEmpty())
+                _AccountActivityGroup = AccountActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
+
+            return _AccountActivityGroup;
+        }
+
+        [NonSerialized]
         private ParticipationObject _ParticipationObject = null;
         public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -223,6 +233,8 @@ namespace AfterSchoolLibrary
                     _ParticipationObject = this.GetActivity(msgs, dc).ToParticipationObject(msgs, dc);
                 else if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
                     _ParticipationObject = this.GetActivityGroup(msgs, dc).ToParticipationObject(msgs, dc);
+                else if (this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
+                    _ParticipationObject = this.GetAccountActivityGroup(msgs, dc).ToParticipationObject(msgs, dc);
             }
 
             return _ParticipationObject;

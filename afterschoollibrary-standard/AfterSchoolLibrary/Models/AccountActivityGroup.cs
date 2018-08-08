@@ -30,6 +30,15 @@ namespace AfterSchoolLibrary
 		public bool IsPublished { get { return (bool)MDV["IsPublished"].Value; } set { MDV["IsPublished"].Value = value; } }
 		public decimal? Cost { get { return (decimal?)MDV["Cost"].Value; } set { MDV["Cost"].Value = value; } }
 		public CostUnitType CostUnitTypeId { get { return (CostUnitType)MDV["CostUnitTypeId"].Value; } set { MDV["CostUnitTypeId"].Value = value; } }
+		public string ContactName { get { return (string)MDV["ContactName"].Value; } set { MDV["ContactName"].Value = value; } }
+		public string ContactPhone { get { return (string)MDV["ContactPhone"].Value; } set { MDV["ContactPhone"].Value = value; } }
+		public string ContactEmail { get { return (string)MDV["ContactEmail"].Value; } set { MDV["ContactEmail"].Value = value; } }
+		public int? FormId { get { return (int?)MDV["FormId"].Value; } set { MDV["FormId"].Value = value; } }
+		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
+		public string ActivityGroupUid { get { return (string)MDV["ActivityGroupUid"].Value; } }
+		public ActivityGroupType ActivityGroupActivityGroupTypeId { get { return (ActivityGroupType)MDV["ActivityGroupActivityGroupTypeId"].Value; } }
+		public string ActivityGroupUniqueName { get { return (string)MDV["ActivityGroupUniqueName"].Value; } }
+		public int? ActivityGroupAccountId { get { return (int?)MDV["ActivityGroupAccountId"].Value; } }
 		
 
         public AccountActivityGroup()
@@ -55,6 +64,15 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "IsPublished", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Cost", System.Data.SqlDbType.Money);
 				_dp.Add(className, "CostUnitTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ContactName", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "ContactPhone", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "FormId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
+				_dp.Add(className, "ActivityGroupUid", typeof(ActivityGroup).Name, "Uid", System.Data.SqlDbType.NVarChar, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupActivityGroupTypeId", typeof(ActivityGroup).Name, "ActivityGroupTypeId", System.Data.SqlDbType.Int, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupUniqueName", typeof(ActivityGroup).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupAccountId", typeof(ActivityGroup).Name, "AccountId", System.Data.SqlDbType.Int, "ActivityGroup");
 				
                 return _dp;
             }
@@ -72,6 +90,8 @@ namespace AfterSchoolLibrary
             get
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(AccountActivityGroup).Name);
+				dq.Joins.Add(Account.ObjectMap["ID"], AccountActivityGroup.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
+				dq.Joins.Add(ActivityGroup.ObjectMap["ID"], AccountActivityGroup.ObjectMap["ActivityGroupId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "ActivityGroup");
 				
                 return dq;
             }
@@ -156,6 +176,22 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["CostUnitTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactName"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactPhone"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactEmail"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["FormId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -215,6 +251,19 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
+        public bool IsPublishable
+        {
+            get
+            {
+                return HasRegistrationPeriods() && ContactEmail.IsNotEmpty() && ContactPhone.IsNotEmpty() && ContactName.IsNotEmpty() && FormId.HasValue;
+            }
+        }
+
+        public bool HasRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrationPeriod.GetCount(new System.Collections.Hashtable() { { "AccountActivityGroupid", this.ID.Value } }, msgs, dc) > 0;
+        }
+
         public static List<AccountActivityGroup> LoadByAccountId(int AccountId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -251,6 +300,23 @@ namespace AfterSchoolLibrary
         public static bool IsExternalLeague(int accountId, int activityGroupId)
         {
             return AccountActivityGroup.LoadByAccountId(accountId).Where(aag => aag.ActivityGroupId == activityGroupId).Count() > 0;
+        }
+
+        public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            this.IsPublished = isPublished;
+            this.LastModifiedBy = loggedInUserId;
+            this.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(this.Save(dc: dc));
+
+            return msgs;
+        }
+
+        public ParticipationObject ToParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ParticipationObject(this, msgs, dc);
         }
 
         #endregion

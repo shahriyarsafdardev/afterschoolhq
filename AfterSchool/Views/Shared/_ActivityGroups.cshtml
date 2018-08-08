@@ -1,4 +1,4 @@
-﻿@model List<ActivityGroup>
+@model List<ActivityGroup>
 @{
     var activityGroupType = (ActivityGroupType)ViewBag.ActivityGroupType;
     var paging = (PagingModel)ViewBag.PagingModel;
@@ -86,10 +86,6 @@ else
             </div>
         </div>
     }
-    else
-    {
-        <p>@UILabel.ActivityGroupLabel(activityGroupType, true) that @SessionVariables.CurrentAccount.Name is participating in</p>
-    }
 
 
     <div class="table-responsive">
@@ -98,10 +94,10 @@ else
                 <tr>
                     <th></th>
                     <th>
-                        @(activityGroupType == ActivityGroupType.Session ? "Session" : "League")
+                        @UILabel.ActivityGroupLabel(activityGroupType)
                     </th>
                     <th class="text-center">
-                        @(activityGroupType == ActivityGroupType.Session ? "Activities" : "Sports")
+                        @UILabel.ActivityLabel(activityGroupType, true)
                     </th>
                     <th></th>
                 </tr>

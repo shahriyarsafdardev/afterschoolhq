@@ -503,11 +503,6 @@ namespace AfterSchoolLibrary
             return $"{Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
         }
 
-        public string GetRegistrationPageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return $"{this.GetHomePageUrl(isAfterSchool, msgs, dc)}/register";
-        }
-
         public string HomePageUrl
         {
             get
@@ -549,12 +544,16 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private static DatabaseQuery LoadByAccountIdQuery(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        private static DatabaseQuery LoadByAccountIdQuery(int? accountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.UseParameterizedQuery = false;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+
+            if (accountId.HasValue)
+            {
+                dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+            }
             if (activityGroupId.HasValue)
             {
                 dq.Criterias.Add(ObjectMap["activityGroupId"], activityGroupId.Value);
@@ -595,9 +594,16 @@ namespace AfterSchoolLibrary
             return dq;
         }
 
-        public static int GetCountByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        public static int GetCountByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc: dc).GetCount();
+            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc);
+            return dq.GetCount(msgs);
+        }
+
+        public static int GetCountByActivityGroupId(int? activityGroupId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = LoadByAccountIdQuery(null, activityGroupId, isArchived, isDeleted, dc);
+            return dq.GetCount(msgs);
         }
 
         public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1098,9 +1104,9 @@ namespace AfterSchoolLibrary
                         if (useSameForm)
                             formToCopy = this.GetActiveForm(adc);
                         else
-                            formToCopy = account.GetDefaultForm(msgs, adc);
+                            formToCopy = account.GetDefaultForm(amsgs, adc);
 
-                        var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, amsgs, dc: adc);
+                        var newForm = formToCopy.Copy(loggedInUserId, copy.AccountId.Value, null, amsgs, dc: adc);
                         copy.AddFormAndActivitate(newForm, loggedInUserId, false, amsgs, dc: adc);
                     }
 
@@ -1248,7 +1254,7 @@ namespace AfterSchoolLibrary
             {
                 var account = this.GetAccount(dc: dc);
                 var formToCopy = account.GetDefaultForm(dc: dc);
-                var newForm = formToCopy.Copy(loggedInUserId, this.AccountId.Value, msgs, dc: dc);
+                var newForm = formToCopy.Copy(loggedInUserId, this.AccountId.Value, null, msgs, dc: dc);
                 var af = this.AddFormAndActivitate(newForm, loggedInUserId, false, msgs, dc: dc);
 
                 account.DefaultFormId = af.FormId;
@@ -2150,7 +2156,7 @@ namespace AfterSchoolLibrary
                 {
                     //if creating a new form, copy from the default form
                     var defaultForm = account.GetDefaultForm(dc: dc);
-                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, msgs, dc: dc);
+                    newForm = defaultForm.Copy(loggedInUserId, account.ID.Value, null, msgs, dc: dc);
                     newForm.Name = (this.Name + " Form").MaxChars(100, "...");
                     msgs.AddRange(newForm.Save(dc: dc));
                 }

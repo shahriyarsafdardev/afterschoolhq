@@ -191,7 +191,18 @@ namespace AfterSchoolLibrary
                 msgs,
                 dc);
         }
-        
+
+        public static int GetExternalLeagueInviteCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountActivityGroup.GetCount(
+                new Hashtable() {
+                    { "AccountId", account.ID.Value },
+                    { "InviteStatusId", (int)InviteStatus.Invited }
+                },
+                msgs,
+                dc);
+        }
+
         public static List<ActivityGroup> GetSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.Session, msgs, dc);
@@ -279,14 +290,14 @@ namespace AfterSchoolLibrary
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Form CreateDefaultForm(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Form CreateDefaultForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var form = Form.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
 
-            msgs.AddRange(account.SetDefaultForm(form, loggedInUser, dc));
+            if (form.AccountId != formOwner.ID)
+                form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Standard Reg Form", msgs, dc);
 
-            if (form.AccountId != account.ID)
-                form = form.Copy(loggedInUser.ID.Value, account.ID.Value, msgs, dc);
+            msgs.AddRange(formOwner.SetDefaultForm(form, loggedInUser, dc));
 
             return form;
         }
@@ -483,6 +494,16 @@ namespace AfterSchoolLibrary
                 msgs.Add($"An invitation was not sent to ${email.Trim()}, a system error has occurred", MessageType.UserError);       
 
             return user;
+        }
+
+        public static SystemMessages SendLeagueInvite(int invitedAccountId, int activityGroupId, int sendingUserId, string customMessage = null)
+        {
+            var msgs = new SystemMessages();
+            var invitedAccount = Account.Load(invitedAccountId, msgs);
+            var activityGroup = ActivityGroup.Load(activityGroupId, msgs);
+            var sendingUser = WebUser.Load(sendingUserId, msgs);
+
+            return EmailHelper.SendLeagueAccountInvitedEmail(invitedAccount, activityGroup, sendingUser, customMessage);
         }
 
         public static string GenerateUniqueName(string name, int? accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -687,7 +708,7 @@ namespace AfterSchoolLibrary
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    msgs.Add($"{package.Name} Package has been activated", MessageType.Success);
+                    // msgs.Add($"{package.Name} Package has been activated", MessageType.Success);
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {
@@ -729,7 +750,7 @@ namespace AfterSchoolLibrary
         {
             var stripeAccount = Billing.StripeHelper.CreateCustomAccount(account.Name, account.Email, msgs);
 
-            if(account.IsNotEmpty())
+            if(stripeAccount.IsNotEmpty())
             {
                 account.StripePublishableKey = stripeAccount.CustomAccountKeys.Publishable;
                 account.StripeSecretKey = stripeAccount.CustomAccountKeys.Secret;
@@ -1876,7 +1897,31 @@ namespace AfterSchoolLibrary
         {
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
         }
+        
+        public static AccountActivityGroup InviteSchoolToLeague(this Account account, ActivityGroup activityGroup, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+           return AccountActivityGroupService.CreateNew(account, activityGroup, InviteStatus.Invited, user);
+        }
 
+        public static List<AccountActivityGroup> InviteSchoolsToLeague(List<Account> schools, ActivityGroup activityGroup, string customMessage, WebUser loggedInuser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountActivityGroups = new List<AccountActivityGroup>();
+
+            Database.ExecuteTransaction(
+                   action: (SystemMessages amsgs, DatabaseConnection adc) => {
+                       schools.ForEach(school => accountActivityGroups.Add(school.InviteSchoolToLeague(activityGroup, loggedInuser, amsgs, adc)));
+                   },
+                   onSuccess: (SystemMessages smsgs) => {
+                       msgs.AddRange(smsgs);
+                   },
+                   onFailure: (SystemMessages fmsgs) => {
+                       msgs.AddRange(fmsgs);
+                   }
+               );
+
+            return accountActivityGroups;
+        }
+        
         public static decimal GetTotalAmountPaid(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.GetTotalPaidByAccount(account.ID.Value, msgs, dc);

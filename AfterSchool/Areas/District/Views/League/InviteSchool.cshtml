@@ -1,0 +1,102 @@
+﻿@model ActivityGroup
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var inviteUrl = Url.Action("invite", "school");
+    var schoolsToInvite = (List<Account>)ViewBag.SchoolsToInvite;
+    var currentSchools = (List<Account>)ViewBag.CurrentSchools;
+    var schoolsPerColumn = (int)ViewBag.SchoolsPerColumn;
+    var registrationPeriod = (RegistrationPeriod)ViewBag.RegistrationWindow;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{Html.RenderPartial("_LeagueHeader", Model);}
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2><i class="s7-study"></i> Invite Schools to @Model.Name</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+
+            @if (!schoolsToInvite.Any())
+            {
+                <p> You have no more schools to invite to your league. <a href="@Url.Action("invite", "school")">Invite more schools to join your district</a>?</p>
+            }
+            else if (registrationPeriod.IsEmpty())
+            {
+                <p>
+                    You don't have any currently open or opening soon @UILabel.RegistrationPeriodLabel(true).ToLower(). Without a @UILabel.RegistrationPeriodLabel().ToLower() Schools will not be able to register their teams.
+                </p>
+                <p>
+                    <a href="@Url.Action("periods", "league", new { id = Model.Uid })" class="btn btn-primary btn-lg">
+                        Add a @UILabel.RegistrationPeriodLabel() &raquo;
+                    </a>
+                </p>
+            }
+            else
+            {
+                <form action="@Url.Action("inviteschool", "league",new { id = Model.Uid } )" method="post" id="invite-schools-forms" class="form-horizontal">
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Invite Message
+                        </label>
+                        <div class="col-sm-6">
+                            <textarea class="form-control" name="invitemessage" id="invitemessage">@Request["invitemessage"]</textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Select Schools<br />
+                            <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                        </label>
+                        <div class="col-sm-6">
+                            @for (int i = 0; i < 3; i++)
+                            {
+                                <div class="col-md-4">
+                                    @foreach (var school in schoolsToInvite.Skip((i * schoolsPerColumn)).ToList().Take(schoolsPerColumn))
+                                    {
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="school-@school.ID.Value" name="school-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
+                                            <label for="school-@school.ID">@school.Name.MaxChars(20, "...")</label>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                        </label>
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn btn-primary btn-lg">Invite Schools &raquo;</button>
+                        </div>
+                    </div>
+
+                </form>
+
+            }
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function selectAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', true);
+        });
+    }
+    function clearAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', false);
+        });
+    }
+</script>

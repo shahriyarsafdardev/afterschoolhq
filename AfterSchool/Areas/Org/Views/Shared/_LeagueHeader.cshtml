@@ -1,11 +1,16 @@
 ﻿@model ActivityGroup
 @{
+
+    var accountActivityGroup = Model.GetAccountActivityGroup(SessionVariables.CurrentAccount);
+    var ispublished = Model.IsPublished || (accountActivityGroup.IsNotEmpty() && accountActivityGroup.IsPublished);
+    var ispublishable = Model.IsPublishable || (accountActivityGroup.IsNotEmpty() && accountActivityGroup.IsPublishable);
+
     var publishClass = "btn-danger";
-    if (!Model.IsPublished)
+    if (!ispublished)
     {
         publishClass = "btn-alt7";
     }
-    else if (Model.IsPublishable)
+    else if (ispublishable)
     {
         publishClass = "btn-success";
     }
@@ -20,15 +25,19 @@
                 <i class="s7-graph2"></i> Summary
             </a>
            
+            <a href="@Url.Action("edit", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">
+                <i class="s7-edit"></i> Edit Setup
+            </a>
+           
             <a href="@Url.Action("periods", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
                 <i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)
             </a>
-            <a href="@Url.Action("leagueActivities", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
-                <i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)s
-            </a>
 
-            @if (Model.IsPublished || true)
+            @if (ispublished)
             {
+                <a href="@Url.Action("leagueActivities", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
+                    <i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
+                </a>
                 <a href="@Url.Action("registrations", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "registrations" ? "-active" : "")">
                     <i class="s7-user"></i> @UILabel.RegistrantLabel(true)
                 </a>

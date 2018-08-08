@@ -12,7 +12,7 @@ namespace AfterSchool.Models
         public static string ActivityLabel(ActivityGroupType activityGroupType, bool plural = false)
         {
             if (activityGroupType == ActivityGroupType.League)
-                return ActivityLabel(ActivityType.Team);
+                return ActivityLabel(ActivityType.Team, plural);
 
             return ActivityLabel(ActivityType.Activity);
         }

@@ -256,6 +256,7 @@
     <Compile Include="Areas\District\Controllers\LeagueController.cs" />
     <Compile Include="Areas\District\Controllers\MessageController.cs" />
     <Compile Include="Areas\District\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\District\Controllers\ProviderController.cs" />
     <Compile Include="Areas\District\Controllers\SchoolController.cs" />
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
@@ -829,6 +830,38 @@
     <Content Include="Public\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="Public\fonts\glyphicons-halflings-regular.woff" />
     <Content Include="Public\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="Areas\Org\Views\Account\PaymentsTOS.cshtml" />
+    <Content Include="Areas\District\Views\Provider\Index.cshtml" />
+    <Content Include="Areas\District\Views\Provider\Invite.cshtml" />
+    <Content Include="Areas\District\Views\Provider\InviteSent.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Add.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Attendance.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Edit.cshtml" />
+    <Content Include="Areas\District\Views\Activity\EditConfirmation.cshtml" />
+    <Content Include="Areas\District\Views\Activity\EditContact.cshtml" />
+    <Content Include="Areas\District\Views\Activity\EditCost.cshtml" />
+    <Content Include="Areas\District\Views\Activity\EditDetails.cshtml" />
+    <Content Include="Areas\District\Views\Activity\EditLocation.cshtml" />
+    <Content Include="Areas\District\Views\Activity\EditRestrictions.cshtml" />
+    <Content Include="Areas\District\Views\Activity\EditSchedule.cshtml" />
+    <Content Include="Areas\District\Views\Activity\EditSetup.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Form.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Index.cshtml" />
+    <Content Include="Areas\District\Views\Activity\MessageAdd.cshtml" />
+    <Content Include="Areas\District\Views\Activity\MessageDetail.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Messages.cshtml" />
+    <Content Include="Areas\District\Views\Activity\PublishDetail.cshtml" />
+    <Content Include="Areas\District\Views\Activity\RegistrantDetail.cshtml" />
+    <Content Include="Areas\District\Views\Activity\RegistrantImport.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Registrants.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Summary.cshtml" />
+    <Content Include="Areas\District\Views\Activity\Team.cshtml" />
+    <Content Include="Areas\District\Views\Activity\TrackAttendance.cshtml" />
+    <Content Include="Areas\District\Views\League\Schools.cshtml" />
+    <Content Include="Areas\District\Views\League\Teams.cshtml" />
+    <Content Include="Areas\District\Views\League\InviteSchool.cshtml" />
+    <Content Include="Areas\District\Views\League\Schedule.cshtml" />
+    <Content Include="Areas\District\Views\League\Periods.cshtml" />
     <Content Include="Areas\Org\Views\Services\MoveRegistrantAssignment.cshtml" />
     <Content Include="Areas\Org\Views\Services\SendPaymentReminder.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
@@ -1051,7 +1084,7 @@
     <Content Include="Areas\Org\Views\Group\Messages.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_ZendeskWidget.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_FormEditMenu.cshtml" />
-    <Content Include="Areas\Org\Views\Shared\_EditRegistrationPeriodModal.cshtml" />
+    <Content Include="Views\Shared\_EditRegistrationPeriodModal.cshtml" />
     <Content Include="Areas\Org\Views\Schedule\Edit.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_ActivityScheduleTitle.cshtml" />
     <Content Include="Areas\Org\Views\Activity\Index.cshtml" />
@@ -1259,6 +1292,7 @@
     <Content Include="Views\Shared\Login\_SignUpForm.cshtml" />
     <Content Include="Views\Login\Select.cshtml" />
     <Content Include="Views\SignUp\CreateAccount.cshtml" />
+    <Content Include="Views\Shared\_Teams.cshtml" />
     <Content Include="Views\Account\MakePayment.cshtml" />
   </ItemGroup>
   <ItemGroup>
