@@ -16,7 +16,7 @@ namespace AfterSchool.Controllers
 
         public ActionResult SearchLocations(string search)
         {
-            if (Request.UserHostAddress == "::1")
+            if (Request.UserHostAddress == "::1" || true)
             {
                 var msgs = new SystemMessages();
                 var locations = Location.Search(search.Trim(), 0, 10, msgs);
