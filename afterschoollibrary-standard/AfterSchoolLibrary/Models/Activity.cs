@@ -498,6 +498,15 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Activity> LoadList(List<int> ids, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], ids, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static List<Activity> LoadListWithLocations(List<int> ids, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -794,9 +803,14 @@ namespace AfterSchoolLibrary
             return RegistrantActivity.GetSeatCountByActivityId(this.ID.Value, msgs, dc);
         }
 
-        public int GetRegistrantCountByApplicationType(RegistrationAssignmentType rat, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, participationObjectId: this.ID, participationObjectType: ParticipationObjectType.Activity, msgs: msgs, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(
+                assignmentType: assignmentType, 
+                participationObjectId: this.ID, 
+                participationObjectType: ParticipationObjectType.Activity, 
+                msgs: msgs, 
+                dc: dc);
         }
 
         public bool IsFull(DatabaseConnection dc = null)
@@ -1412,12 +1426,12 @@ namespace AfterSchoolLibrary
             {
                 activity = Activity.Load(activityId.ToInteger(), msgs, dc);
                 if (seatsavailable.IsNumber() && 
-                    activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, msgs, dc) <= seatsavailable.ToString().ToInteger())
+                    activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc) <= seatsavailable.ToString().ToInteger())
                 {
                     activity.SeatsAvailable = seatsavailable.ToString().ToInteger();
                 }
                 if (waitinglistseats.IsNumber() && 
-                    activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, msgs, dc) <= waitinglistseats.ToString().ToInteger())
+                    activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc) <= waitinglistseats.ToString().ToInteger())
                 {
                     activity.WaitingListSeats = waitinglistseats.ToString().ToInteger();
                 }
@@ -2515,8 +2529,8 @@ namespace AfterSchoolLibrary
                 activity.GetAccount(msgs, dc).ID.Value, 
                 null,
                 null,
-                activity.ActivityGroupId.HasValue ? activity.ActivityGroupId.Value.AsList() : null, 
                 activityId.AsList(), 
+                ParticipationObjectType.Activity,
                 "registrations",
                 RegistrationReportType.SingleActivity,
                 RegistrationAssignmentType.NotSet,

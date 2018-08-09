@@ -233,9 +233,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 msgs.AddRange(selectedRegistration.WasUpdated());
 
-                UpdateSession(sat, SessionVariables.CurrentAccount.ID, registrantActivity.ActivityId, null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId);
+                UpdateSession(sat, SessionVariables.CurrentAccount.ID, registrantActivity.GetActivityId(), null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId, registrantActivity.GetActivityGroupId());
 
-                msgs.Add(string.Format("{0} has been moved to {1} for {2}", selectedRegistration.ToRegistrant().Name, ratTo.ToString().SplitByUpperCase(), registrantActivity.ActivityName), MessageType.Success);
+                msgs.Add(string.Format("{0} has been moved to {1} for {2}", selectedRegistration.ToRegistrant().Name, ratTo.ToString().SplitByUpperCase(), registrantActivity.GetParticipationObject(msgs).Name), MessageType.Success);
             }
 
             LoadRegistrationViewBag(registration, r);
@@ -251,7 +251,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var registration = Registration.LoadByUid(id.ToGuid());
             var selectedRegistration = Registration.LoadByUid(r.ToGuid());
 
-            msgs.AddRange(selectedRegistration.RemoveActivity(activity.ToInteger()));
+            msgs.AddRange(selectedRegistration.RemoveParticipation(activity.ToInteger(), ParticipationObjectType.Activity));
 
             if (msgs.HasNoErrors())
             {
@@ -315,7 +315,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrationPeriodId = regperiod.ID;
             }
 
-            registrant.AddOrUpdateActivity(selectedRegistration.ID.Value, activity.ToInteger(), seats, wlseats, aseats, iseats, dseats, assignmentType, choiceNumber, registrationPeriodId, act.ActivityGroupId, SessionVariables.LoggedInUser.ID.Value, msgs);
+            registrant.AddOrUpdateParticipationObject(
+                selectedRegistration.ID.Value, 
+                activity.ToInteger(), 
+                ParticipationObjectType.Activity, 
+                assignmentType, 
+                choiceNumber, 
+                registrationPeriodId, 
+                act.ActivityGroupId, 
+                SessionVariables.LoggedInUser.ID.Value, 
+                msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -352,9 +361,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var registration = Registration.LoadByUid(id.ToGuid());
             var selectedRegistration = Registration.LoadByUid(r.ToGuid());
 
-            BackgroundJob.Enqueue(() => Registration.SendConfirmation(selectedRegistration.ID.Value, true, null));
-            
-            msgs.Add(string.Format("{0} will be notified shortly", selectedRegistration.ToRegistrant().Name), MessageType.Success);
+            // TODO: Need to figure out
+            // BackgroundJob.Enqueue(() => Registration.SendConfirmation(selectedRegistration.ID.Value, true, null));
+
+            msgs.Add("Not Implemented", MessageType.UserError);
+            // msgs.Add(string.Format("{0} will be notified shortly", selectedRegistration.ToRegistrant().Name), MessageType.Success);
 
             LoadRegistrationViewBag(registration, r);
             ViewBag.Messages = msgs;
@@ -422,7 +433,10 @@ namespace AfterSchool.Areas.Org.Controllers
             else
                 activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.LoggedInUser, false, false, null, null);
 
-            ViewBag.Activities = activities.Where(x => !registrantActivities.Select(y => y.ActivityId.Value).Contains(x.ID.Value))
+            ViewBag.Activities = activities.Where(x =>
+                    x.ID.Value.NotIn(registrantActivities.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                    .Select(y => y.ParticipationObjectId.Value))
+                )
                 .OrderBy(x => x.Name)
                 .ToList();
 

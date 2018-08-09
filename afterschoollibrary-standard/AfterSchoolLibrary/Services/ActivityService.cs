@@ -44,19 +44,19 @@ namespace AfterSchoolLibrary
 
         public static int GetSeatsTaken(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, msgs, dc);
+            return activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc);
         }
 
         public static int GetWaitingListSeatsTaken(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, msgs, dc);
+            return activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc);
         }
 
         public static int GetSeatsRemaining(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var rtn = 0;
             if (activity.SeatsAvailable.HasValue)
-                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, msgs, dc);
+                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc);
 
             return Math.Max(0, rtn);
         }
@@ -65,7 +65,7 @@ namespace AfterSchoolLibrary
         {
             var rtn = 0;
             if (activity.WaitingListSeats.HasValue)
-                rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, msgs, dc);
+                rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc);
 
             return Math.Max(0, rtn);
         }
@@ -199,7 +199,7 @@ namespace AfterSchoolLibrary
             var activity = new Activity()
             {
                 Name = activityName,
-                AcceptCreditCard = acceptCreditCard,
+                // AcceptCreditCard = acceptCreditCard,
                 AllowToPayLater = allowToPayLater,
                 AccountId = accountId,
                 GenderRestriction = genderRestriction,
@@ -298,9 +298,10 @@ namespace AfterSchoolLibrary
             var accountRegistrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
 
             // add or update the registrant for the activity
-            ra = accountRegistrant.AddOrUpdateActivity(
+            ra = accountRegistrant.AddOrUpdateParticipationObject(
                 registrationId: checkoutObject.Registration.ID.Value,
-                activityId: checkoutObject.ParticipationObject.ObjectID.Value,
+                participationObjectId: checkoutObject.ParticipationObject.ObjectID.Value,
+                participationObjectType: checkoutObject.ParticipationObject.ObjectType,
                 assignmentType: assignmentType,
                 registrationPeriodId: period?.ID.IfEmpty(0),
                 activityGroupId: activity.ActivityGroupId,
@@ -310,7 +311,12 @@ namespace AfterSchoolLibrary
 
             // add registration activity
             // registration already created when the parent did the e-signature
-            checkoutObject.Registration.AddActivity(activity, loggedInUser.ID.Value, msgs, dc);
+            //checkoutObject.Registration.AddParticipationObject(
+            //    activity.ID.Value, 
+            //    ParticipationObjectType.Activity, 
+            //    loggedInUser.ID.Value, 
+            //    msgs, 
+            //    dc);
         }
         
         public static ActivityPayment AddPayment(this Activity activity, decimal amount, Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -402,7 +408,12 @@ namespace AfterSchoolLibrary
 
                 contacts.ForEach(contact => {
                     var finalInviteUrl = inviteUrl;
-                    var rag = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, contact.ID.Value, msgs, dc);
+                    var rag = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                        activity.ID.Value, 
+                        ParticipationObjectType.Activity, 
+                        contact.ID.Value, 
+                        msgs, 
+                        dc);
 
                     var salutation = "<p>Hello,</p>";
                     if (contact.FirstName.IsNotBlank())

@@ -1,7 +1,6 @@
 ﻿@model AfterSchoolLibrary.Activity
 
 @{
-    var paypal = Model.AccountPayPalEmailAddress;
     var stripe = Model.AccountStripePublishableKey;
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
     var paymentPlan = (SubscriptionPlan)ViewBag.PaymentPlan;
@@ -9,7 +8,6 @@
     if(!Model.ID.HasValue)
     {
         var a = Model.GetAccount();
-        paypal = a.PayPalEmailAddress;
         stripe = a.StripePublishableKey;
     }
     
@@ -57,6 +55,7 @@
         <div class="form-group hide">
             <label class="col-sm-3 control-label">Accept Credit Cards</label>
             <div class="col-sm-1">
+                @*
                 @{Html.RenderPartial
                     (
                         "~/Views/Shared/_SwitchButton.cshtml",
@@ -69,6 +68,7 @@
                         }
                     );
                 }
+                *@
             </div>
             <div class="col-sm-3">
                 @if (!accountPackage.HasFeature(FeatureType.AcceptPayments))

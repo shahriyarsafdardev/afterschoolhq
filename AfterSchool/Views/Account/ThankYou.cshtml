@@ -5,6 +5,9 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var account = (Account)ViewBag.Account;
     var registration = (Registration)ViewBag.Registration;
+    var registrant = registration.GetRegistrant();
+    var assignmentType = registration.GetRegistrantActivities().First().AssignmentTypeId;
+    var participationObject = registration.GetParticipationObject();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -23,7 +26,25 @@
                 <h1>Thank You</h1>
 
                 <div class="reg-ul">
-                    @Html.Raw(Registration.GetRegistrationConfirmationHtml(registration, account, null, null, null))
+                    <p>
+                        @registrant.Name has 
+                        @if(assignmentType == RegistrationAssignmentType.Applied)
+                        {
+                            <span>applied</span>
+                        }
+                        else if (assignmentType == RegistrationAssignmentType.WaitingList)
+                        {
+                            <span>been placed on the waiting list</span>
+                        }
+                        else
+                        {
+                            <span>been registered</span>
+                        }
+                        for @participationObject.Name
+                    </p>
+                    <p>
+                        <a href="@Url.Action("index", "home", new { area = "user" })" target="_blank">View your Family Account</a>
+                    </p>
                 </div>
 
                 <div>

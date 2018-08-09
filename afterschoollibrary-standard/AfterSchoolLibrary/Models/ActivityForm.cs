@@ -412,7 +412,7 @@ namespace AfterSchoolLibrary
 
         public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, participationObjectId: this.ActivityId, participationObjectType: ParticipationObjectType.Activity, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: rat, participationObjectId: this.ActivityId, participationObjectType: ParticipationObjectType.Activity, dc: dc);
         }
 
         public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)

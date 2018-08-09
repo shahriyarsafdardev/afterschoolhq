@@ -39,6 +39,7 @@ namespace AfterSchoolLibrary
 		public ActivityGroupType ActivityGroupActivityGroupTypeId { get { return (ActivityGroupType)MDV["ActivityGroupActivityGroupTypeId"].Value; } }
 		public string ActivityGroupUniqueName { get { return (string)MDV["ActivityGroupUniqueName"].Value; } }
 		public int? ActivityGroupAccountId { get { return (int?)MDV["ActivityGroupAccountId"].Value; } }
+		public bool ActivityGroupIsArchived { get { return (bool)MDV["ActivityGroupIsArchived"].Value; } }
 		
 
         public AccountActivityGroup()
@@ -73,6 +74,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityGroupActivityGroupTypeId", typeof(ActivityGroup).Name, "ActivityGroupTypeId", System.Data.SqlDbType.Int, "ActivityGroup");
 				_dp.Add(className, "ActivityGroupUniqueName", typeof(ActivityGroup).Name, "UniqueName", System.Data.SqlDbType.NVarChar, "ActivityGroup");
 				_dp.Add(className, "ActivityGroupAccountId", typeof(ActivityGroup).Name, "AccountId", System.Data.SqlDbType.Int, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Int, "ActivityGroup");
 				
                 return _dp;
             }
@@ -259,6 +261,14 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public static List<AccountActivityGroup> LoadList(List<int> ids, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public bool HasRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrationPeriod.GetCount(new System.Collections.Hashtable() { { "AccountActivityGroupid", this.ID.Value } }, msgs, dc) > 0;
@@ -292,9 +302,9 @@ namespace AfterSchoolLibrary
             return this.Save(dc);
         }
 
-        public ActivityGroup GetActivityGroup()
+        public ActivityGroup GetActivityGroup(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return ActivityGroup.Load(this.ActivityGroupId.Value);
+            return ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
         }
 
         public static bool IsExternalLeague(int accountId, int activityGroupId)

@@ -25,6 +25,10 @@ namespace AfterSchoolLibrary
 		/// <summary>
 		/// Required.
 		/// </summary>
+		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
 		public ParticipationObjectType ParticipationObjectTypeId { get { return (ParticipationObjectType)MDV["ParticipationObjectTypeId"].Value; } set { MDV["ParticipationObjectTypeId"].Value = value; } }
 		/// <summary>
 		/// Required.
@@ -83,6 +87,7 @@ namespace AfterSchoolLibrary
                 string className = typeof(RegistrantActivity).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
@@ -169,6 +174,8 @@ namespace AfterSchoolLibrary
 
 			if (this.RegistrantId.IsEmpty())
 				msgs.Add("RegistrantId is required on RegistrantActivity object", MessageType.Error);
+			if (this.ActivityId.IsEmpty())
+				msgs.Add("ActivityId is required on RegistrantActivity object", MessageType.Error);
 			if (this.ParticipationObjectTypeId.IsEmpty())
 				msgs.Add("ParticipationObjectTypeId is required on RegistrantActivity object", MessageType.Error);
 			if (this.ParticipationObjectId.IsEmpty())
@@ -197,6 +204,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RegistrantId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ActivityId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -483,12 +494,12 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountByActivityIdByAccountId(int ActivityId, int AccountId, DatabaseConnection dc = null)
+        public static int GetCountByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, int AccountId, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-            dq.Criterias.Add(ObjectMap["ActivityAccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
+            dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
             return dq.GetCount();
         }
 
@@ -534,7 +545,7 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, int? accountId = null, int? activityGroupId = null, int? participationObjectId = null, ParticipationObjectType? participationObjectType = null, int? registrationPeriodId = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetSeatCountByAssignmentType(RegistrationAssignmentType assignmentType, int? accountId = null, int? activityGroupId = null, int? participationObjectId = null, ParticipationObjectType? participationObjectType = null, int? registrationPeriodId = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -542,7 +553,7 @@ namespace AfterSchoolLibrary
             dq.SelectParameters.Clear();
             SelectParameter sp = null;
 
-            switch (rat)
+            switch (assignmentType)
             {
                 case RegistrationAssignmentType.Applied:
                     sp = new SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
@@ -797,7 +808,7 @@ namespace AfterSchoolLibrary
                 if (to == RegistrationAssignmentType.Reserved)
                 {
                     this.NumberOfSeats = this.NumberOfApplicationSeats;
-                    this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(rat: to, participationObjectId: this.ParticipationObjectId, participationObjectType: this.ParticipationObjectTypeId, msgs: msgs, dc: dc) + 1;
+                    this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: to, participationObjectId: this.ParticipationObjectId, participationObjectType: this.ParticipationObjectTypeId, msgs: msgs, dc: dc) + 1;
                     this.NumberOfApplicationSeats = 0;
                     this.ApplicationSeatIndex = null;
                     msgs.AddRange(this.Save(dc: dc));
@@ -806,7 +817,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfWaitingListSeats = this.NumberOfApplicationSeats;
                     this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to, 
+                        assignmentType: to, 
                         participationObjectId: this.ParticipationObjectId, 
                         participationObjectType: this.ParticipationObjectTypeId, 
                         msgs: msgs, 
@@ -836,7 +847,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfSeats = this.NumberOfWaitingListSeats;
                     this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId, 
                         msgs: msgs,
@@ -849,7 +860,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfApplicationSeats = this.NumberOfWaitingListSeats;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId, 
                         msgs: msgs,
@@ -879,7 +890,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfWaitingListSeats = this.NumberOfSeats;
                     this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId, 
                         msgs: msgs,
@@ -892,7 +903,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfApplicationSeats = this.NumberOfSeats;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId, 
                         msgs: msgs,
@@ -922,7 +933,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfSeats = this.NumberOfInvitationSeats;
                     this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId, 
                         msgs: msgs,
@@ -934,7 +945,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfWaitingListSeats = this.NumberOfInvitationSeats;
                     this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId, 
                         msgs: msgs,
@@ -946,7 +957,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfApplicationSeats = this.NumberOfInvitationSeats;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId, 
                         msgs: msgs,
@@ -967,7 +978,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfSeats = this.NumberOfSeatsDeclined;
                     this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId,
                         msgs: msgs,
@@ -979,7 +990,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfWaitingListSeats = this.NumberOfSeatsDeclined;
                     this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId,
                         msgs: msgs,
@@ -991,7 +1002,7 @@ namespace AfterSchoolLibrary
                 {
                     this.NumberOfApplicationSeats = this.NumberOfSeatsDeclined;
                     this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: to,
+                        assignmentType: to,
                         participationObjectId: this.ParticipationObjectId,
                         participationObjectType: this.ParticipationObjectTypeId,
                         msgs: msgs,
@@ -1129,7 +1140,15 @@ namespace AfterSchoolLibrary
             if (participationObject.ContactEmail.IsNotBlank() && account.Email.IsSameAs(participationObject.ContactEmail))
                 return msgs;
 
-            var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{participationObject.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{participationObject.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li><li><strong>{participationObject.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li><li><strong>{participationObject.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied, dc: dc)}</strong> applications</li></ul></p>";
+            var details = $"" +
+                $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{participationObject.Name}</strong> at <strong>{account.Name}</strong>.</p> " +
+                $"<p>You currently have a total of: " +
+                $"<ul>" +
+                $"<li><strong>{participationObject.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li>" +
+                $"<li><strong>{participationObject.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li>" +
+                $"<li><strong>{participationObject.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Applied, dc: dc)}</strong> applications</li>" +
+                $"</ul>" +
+                $"</p>";
 
             var message = $"<p>Hello {participationObject.ContactName},</p>{details}<p>{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
 
@@ -1158,6 +1177,128 @@ namespace AfterSchoolLibrary
         public SystemMessages SendPaymentReminder()
         {
             return EmailHelper.SendPaymentReminder(this);
+        }
+
+        public bool IsForActivity()
+        {
+            return this.ParticipationObjectTypeId == ParticipationObjectType.Activity;
+        }
+
+        public bool IsForActivityGroup()
+        {
+            return this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup;
+        }
+
+        public bool IsForAccountActivityGroup()
+        {
+            return this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup;
+        }
+
+        public int? GetActivityId()
+        {
+            if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                return this.ParticipationObjectId;
+
+            return null;
+        }
+
+        public int? GetActivityGroupId()
+        {
+            if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
+                return this.ParticipationObjectId;
+
+            return null;
+        }
+
+        public int? GetAccountActivityGroupId()
+        {
+            if (this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
+                return this.ParticipationObjectId;
+
+            return null;
+        }
+
+        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                return Activity.Load(this.ParticipationObjectId.Value, msgs, dc);
+
+            return null;
+        }
+
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
+                return ActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
+
+            return null;
+        }
+
+        public AccountActivityGroup GetAccountActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
+                return AccountActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
+
+            return null;
+        }
+
+        private List<ActivityInstance> GetScheduleInstances(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var instances = new List<ActivityInstance>();
+            switch (this.ParticipationObjectTypeId)
+            {
+                case ParticipationObjectType.Activity:
+                    instances.AddRange(this.GetActivity(msgs, dc).GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc));
+                    break;
+                case ParticipationObjectType.ActivityGroup:
+                    instances.AddRange(this.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc));
+                    break;
+                case ParticipationObjectType.AccountActivityGroup:
+                    var aag = this.GetAccountActivityGroup(msgs, dc);
+                    instances.AddRange(aag.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc));
+                    break;
+            }
+            return instances;
+        }
+
+        public bool IsInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var now = DateTime.UtcNow;
+            var instances = GetScheduleInstances(msgs, dc);
+            if (instances.Any())
+                return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+
+            return false;
+        }
+
+        public bool WasInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var now = DateTime.UtcNow;
+            var instances = GetScheduleInstances(msgs, dc);
+            if (instances.Any())
+                return instances.Last().EndDateTime < now;
+
+            return false;
+        }
+
+        public bool WillBeInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var now = DateTime.UtcNow;
+            var instances = GetScheduleInstances(msgs, dc);
+            if (instances.Any())
+                return now < instances.First().StartDateTime;
+
+            return false;
+        }
+
+        public bool IsOutOfSession(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var now = DateTime.UtcNow;
+            var instances = GetScheduleInstances(msgs, dc);
+            if (instances.Any())
+                return now > instances.Last().StartDateTime;
+
+            return true;
         }
 
         #endregion

@@ -291,65 +291,85 @@ namespace AfterSchoolLibrary
 
             msgs.Clear();
 
-            var dc = Database.StartTransaction();
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    amsgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, adc));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                }
+            );
 
-            try
-            {
-                msgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, dc));
-            }
-            catch (Exception ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError);
-            }
-            finally
-            {
-                Database.EndTransaction(dc, msgs);
-            }
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    amsgs.AddRange(AdditionalData(adc));
+                    amsgs.AddRange(UpdateActivityPayment(adc));
+                    amsgs.AddRange(UpdateInviteCodes(adc));
+                    amsgs.AddRange(UpdateTransactions(adc));
+                    amsgs.AddRange(UpdateRegistrantActivityParticipationObjects(adc));
+                    amsgs.AddRange(UpdateAssignmentType(adc));
+                    //msgs.AddRange(UpdateRegistrations2(dc));
+                    //msgs.AddRange(UpdateAccountFeatures(dc: dc));
+                    //msgs.AddRange(UpdateLocations(dc: dc));
+                    //msgs.AddRange(UpdateQuestionGroups(dc: dc));
+                    //msgs.AddRange(UpdateRegistrationModes(dc: dc));
+                    //msgs.AddRange(UpdateRegistrations(dc: dc));
+                    //msgs.AddRange(UpdateRegistrants(dc: dc));
+                    //msgs.AddRange(UpdateAccountProperties(dc: dc));
+                    //msgs.AddRange(UpdateAnswers(dc: dc));
+                    //msgs.AddRange(UpdateGradeLevels(dc: dc));
+                    //// msgs.AddRange(AddBellecChasseCustomQuestions(dc: dc));
+                    //// msgs.AddRange(UpdateApplicationSeatIndexesRunOnce(dc: dc));
+                    //msgs.AddRange(UpdateSessionActions(dc: dc));
+                    //// msgs.AddRange(UpdateActivityGroupsRunOnce(dc: dc));
+                    //// msgs.AddRange(UpdateActivities(dc: dc));
+                    //msgs.AddRange(UpdateAccountPackages(dc: dc));
+                    // msgs.AddRange(UpdateActivitySchedules(dc: dc));
+                    //msgs.AddRange(UpdateRegistrantActivities(dc: dc));
+                    //// msgs.AddRange(HandleDuplicateRegistrations(dc: dc));
+                    //msgs.AddRange(FixMissingMasterRecords(dc: dc));
+                    //// msgs.AddRange(FixMessedUpPreferences(dc: dc));
+                    // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc: dc));
+                    // msgs.AddRange(CreateMasterRecord(dc: dc));
+                    // msgs.AddRange(CreateSessionsLeagues(dc: dc));
+                    // msgs.AddRange(CreateActivitiesTeams(dc: dc));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                }
+            );            
 
-            msgs = new SystemMessages();
-            dc = Database.StartTransaction();
+            return msgs;
+        }
 
-            try
-            {
-                msgs.AddRange(AdditionalData(dc));
-                msgs.AddRange(UpdateActivityPayment(dc));
-                msgs.AddRange(UpdateInviteCodes(dc));
-                msgs.AddRange(UpdateTransactions(dc));
-                msgs.AddRange(UpdateAssignmentType(dc));
-                //msgs.AddRange(UpdateRegistrations2(dc));
-                //msgs.AddRange(UpdateAccountFeatures(dc: dc));
-                //msgs.AddRange(UpdateLocations(dc: dc));
-                //msgs.AddRange(UpdateQuestionGroups(dc: dc));
-                //msgs.AddRange(UpdateRegistrationModes(dc: dc));
-                //msgs.AddRange(UpdateRegistrations(dc: dc));
-                //msgs.AddRange(UpdateRegistrants(dc: dc));
-                //msgs.AddRange(UpdateAccountProperties(dc: dc));
-                //msgs.AddRange(UpdateAnswers(dc: dc));
-                //msgs.AddRange(UpdateGradeLevels(dc: dc));
-                //// msgs.AddRange(AddBellecChasseCustomQuestions(dc: dc));
-                //// msgs.AddRange(UpdateApplicationSeatIndexesRunOnce(dc: dc));
-                //msgs.AddRange(UpdateSessionActions(dc: dc));
-                //// msgs.AddRange(UpdateActivityGroupsRunOnce(dc: dc));
-                //// msgs.AddRange(UpdateActivities(dc: dc));
-                //msgs.AddRange(UpdateAccountPackages(dc: dc));
-                // msgs.AddRange(UpdateActivitySchedules(dc: dc));
-                //msgs.AddRange(UpdateRegistrantActivities(dc: dc));
-                //// msgs.AddRange(HandleDuplicateRegistrations(dc: dc));
-                //msgs.AddRange(FixMissingMasterRecords(dc: dc));
-                //// msgs.AddRange(FixMessedUpPreferences(dc: dc));
-                // msgs.AddRange(UpdateRegistrantEmailQuestionGroup(dc: dc));
-                // msgs.AddRange(CreateMasterRecord(dc: dc));
-                // msgs.AddRange(CreateSessionsLeagues(dc: dc));
-                // msgs.AddRange(CreateActivitiesTeams(dc: dc));
-            }
-            catch (Exception ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError);
-            }
-            finally
-            {
-                Database.EndTransaction(dc, msgs);
-            }
+        public static SystemMessages UpdateRegistrantActivityParticipationObjects(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var registrantActivities = RegistrantActivity.Load(
+                criterias: new Hashtable() { { "ParticipationObjectId", DBNull.Value } },
+                msgs: msgs,
+                dc: dc);
+
+            registrantActivities.ForEach(registrantActivity => {
+                registrantActivity.ParticipationObjectId = registrantActivity.ActivityId;
+                registrantActivity.ParticipationObjectTypeId = ParticipationObjectType.Activity;
+                msgs.AddRange(registrantActivity.Save(dc));
+            });
 
             return msgs;
         }
@@ -1229,175 +1249,175 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages HandleDuplicateRegistrations(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            // running for bellechasse
-            var msgs = new SystemMessages();
-            var registrations = Registration.LoadByActivityGroupId(175, dc: dc);
+        //public static SystemMessages HandleDuplicateRegistrations(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        //{
+        //    // running for bellechasse
+        //    var msgs = new SystemMessages();
+        //    var registrations = Registration.LoadByActivityGroupId(175, dc: dc);
 
-            while (registrations.Any())
-            {
-                var registration = registrations.First();
-                var related = registrations.Where(x =>
-                                    x.RegistrantFirstName.Trim().ToLower() == registration.RegistrantFirstName.Trim().ToLower() &&
-                                    x.RegistrantLastName.Trim().ToLower() == registration.RegistrantLastName.Trim().ToLower() &&
-                                    x.RegistrantEmail.Trim().ToLower() == registration.RegistrantEmail.Trim().ToLower() &&
-                                    x.ID != registration.ID
-                                ).ToList();
+        //    while (registrations.Any())
+        //    {
+        //        var registration = registrations.First();
+        //        var related = registrations.Where(x =>
+        //                            x.RegistrantFirstName.Trim().ToLower() == registration.RegistrantFirstName.Trim().ToLower() &&
+        //                            x.RegistrantLastName.Trim().ToLower() == registration.RegistrantLastName.Trim().ToLower() &&
+        //                            x.RegistrantEmail.Trim().ToLower() == registration.RegistrantEmail.Trim().ToLower() &&
+        //                            x.ID != registration.ID
+        //                        ).ToList();
 
-                var allRelated = new List<Registration>();
-                allRelated.Add(registration);
-                allRelated.AddRange(related);
+        //        var allRelated = new List<Registration>();
+        //        allRelated.Add(registration);
+        //        allRelated.AddRange(related);
 
-                if (allRelated.Count > 1)
-                {
-                    var lastRegistration = allRelated.OrderBy(x => x.CreateDate).Last();
-                    var lastRegistrant = lastRegistration.GetRegistrant(dc: dc);
+        //        if (allRelated.Count > 1)
+        //        {
+        //            var lastRegistration = allRelated.OrderBy(x => x.CreateDate).Last();
+        //            var lastRegistrant = lastRegistration.GetRegistrant(dc: dc);
 
-                    var regActivities = new List<RegistrantActivity>();
-                    var registrationActivities = new List<RegistrationActivity>();
-                    var distinctActivityIds = new List<int>();
-                    var finalActivityIds = new List<int>();
-                    var allRegistrants = allRelated.Select(x => x.GetRegistrant(dc: dc)).ToList();
-                    var studentGrades = allRegistrants.Select(x => x.GetAnswer(QuestionDataType.RegistrantGrade, dc: dc)).DistinctBy(x => x.Text).ToList();
+        //            var regActivities = new List<RegistrantActivity>();
+        //            var registrationActivities = new List<RegistrationActivity>();
+        //            var distinctActivityIds = new List<int>();
+        //            var finalActivityIds = new List<int>();
+        //            var allRegistrants = allRelated.Select(x => x.GetRegistrant(dc: dc)).ToList();
+        //            var studentGrades = allRegistrants.Select(x => x.GetAnswer(QuestionDataType.RegistrantGrade, dc: dc)).DistinctBy(x => x.Text).ToList();
 
-                    if (studentGrades.Count != 1)
-                    {
-                        // somebody said they were different grades on the same registration group / period
-                        // that ain't right
-                        msgs.Add(string.Format("Has different grades - {0}", registration.ID), MessageType.Notice);
-                    }
-                    else
-                    {
-                        foreach (var item in allRelated)
-                        {
-                            regActivities.AddRange(item.GetRegistrantActivities(dc: dc));
-                            registrationActivities.AddRange(item.GetRegistrationActivities(dc: dc));
-                        }
+        //            if (studentGrades.Count != 1)
+        //            {
+        //                // somebody said they were different grades on the same registration group / period
+        //                // that ain't right
+        //                msgs.Add(string.Format("Has different grades - {0}", registration.ID), MessageType.Notice);
+        //            }
+        //            else
+        //            {
+        //                foreach (var item in allRelated)
+        //                {
+        //                    regActivities.AddRange(item.GetRegistrantActivities(dc: dc));
+        //                    registrationActivities.AddRange(item.GetRegistrationActivities(dc: dc));
+        //                }
 
-                        distinctActivityIds = regActivities.Select(x => x.ActivityId.Value).Distinct().ToList();
+        //                distinctActivityIds = regActivities.Select(x => x.ActivityId.Value).Distinct().ToList();
 
-                        // check for activities where the grade level of the student is in the list of grades accepted by the activity
-                        // if doesn't contain grade level then it will need to be removed
-                        foreach (var activityId in distinctActivityIds)
-                        {
-                            var activity = Activity.Load(activityId, dc: dc);
-                            var activityGrades = activity.GetGradeLevels(dc: dc).Select(x => x.Name.Trim().ToLower()).ToList();
+        //                // check for activities where the grade level of the student is in the list of grades accepted by the activity
+        //                // if doesn't contain grade level then it will need to be removed
+        //                foreach (var activityId in distinctActivityIds)
+        //                {
+        //                    var activity = Activity.Load(activityId, dc: dc);
+        //                    var activityGrades = activity.GetGradeLevels(dc: dc).Select(x => x.Name.Trim().ToLower()).ToList();
 
-                            if (activityGrades.Contains(studentGrades.First().Text.Trim().ToLower()))
-                            {
-                                finalActivityIds.Add(activityId);
-                            }
-                        }
+        //                    if (activityGrades.Contains(studentGrades.First().Text.Trim().ToLower()))
+        //                    {
+        //                        finalActivityIds.Add(activityId);
+        //                    }
+        //                }
 
-                        // keep last registration
-                        foreach (var activityId in finalActivityIds)
-                        {
-                            var activity = Activity.Load(activityId, dc: dc);
-                            // get only reg activities for the last registrant
-                            var lastRegistrantActivities = regActivities.Where(x => x.RegistrantId == lastRegistrant.ID).ToList();
+        //                // keep last registration
+        //                foreach (var activityId in finalActivityIds)
+        //                {
+        //                    var activity = Activity.Load(activityId, dc: dc);
+        //                    // get only reg activities for the last registrant
+        //                    var lastRegistrantActivities = regActivities.Where(x => x.RegistrantId == lastRegistrant.ID).ToList();
 
-                            // if the activity is not in the list of activities for this particular last registrant
-                            // then we need to remove it from the old registrant and registration
-                            // then add it to the last registrant and last registration
-                            // will do this by simply changing the registration id and registrant id
-                            if (lastRegistrantActivities.Where(x => x.ActivityId == activityId).Count() == 0)
-                            {
-                                // should move the first reg activity added to any of the registrations, 
-                                // since that will have the highest seating index, etc.
-                                var regActivityToMove = regActivities.Where(x => x.ActivityId == activityId).OrderBy(x => x.CreateDate).FirstOrDefault();
-                                regActivityToMove.RegistrationId = lastRegistration.ID;
-                                regActivityToMove.RegistrantId = lastRegistrant.ID;
-                                msgs.AddRange(regActivityToMove.Save(dc: dc));
+        //                    // if the activity is not in the list of activities for this particular last registrant
+        //                    // then we need to remove it from the old registrant and registration
+        //                    // then add it to the last registrant and last registration
+        //                    // will do this by simply changing the registration id and registrant id
+        //                    if (lastRegistrantActivities.Where(x => x.ActivityId == activityId).Count() == 0)
+        //                    {
+        //                        // should move the first reg activity added to any of the registrations, 
+        //                        // since that will have the highest seating index, etc.
+        //                        var regActivityToMove = regActivities.Where(x => x.ActivityId == activityId).OrderBy(x => x.CreateDate).FirstOrDefault();
+        //                        regActivityToMove.RegistrationId = lastRegistration.ID;
+        //                        regActivityToMove.RegistrantId = lastRegistrant.ID;
+        //                        msgs.AddRange(regActivityToMove.Save(dc: dc));
 
-                                // move the matching registration
-                                // TODO: probably should cross reference the original registrationId of the regactivity to move with this one that is found
-                                var registrationActivityToMove = registrationActivities.Where(x => x.ActivityId == activityId).OrderBy(x => x.CreateDate).FirstOrDefault();
-                                registrationActivityToMove.RegistrationId = lastRegistration.ID;
-                                msgs.AddRange(registrationActivityToMove.Save(dc: dc));
-                            }
-                        }
+        //                        // move the matching registration
+        //                        // TODO: probably should cross reference the original registrationId of the regactivity to move with this one that is found
+        //                        var registrationActivityToMove = registrationActivities.Where(x => x.ActivityId == activityId).OrderBy(x => x.CreateDate).FirstOrDefault();
+        //                        registrationActivityToMove.RegistrationId = lastRegistration.ID;
+        //                        msgs.AddRange(registrationActivityToMove.Save(dc: dc));
+        //                    }
+        //                }
 
-                        // remove activities not in the grade level from the last registration and registrant
-                        var activityIdsToRemove = distinctActivityIds.Where(x => !finalActivityIds.Contains(x)).ToList();
-                        foreach (var activityId in activityIdsToRemove)
-                        {
-                            // removes it from the registrant as well
-                            msgs.AddRange(lastRegistration.RemoveActivity(activityId, dc: dc));
-                        }
+        //                // remove activities not in the grade level from the last registration and registrant
+        //                var activityIdsToRemove = distinctActivityIds.Where(x => !finalActivityIds.Contains(x)).ToList();
+        //                foreach (var activityId in activityIdsToRemove)
+        //                {
+        //                    // removes it from the registrant as well
+        //                    msgs.AddRange(lastRegistration.RemoveActivity(activityId, dc: dc));
+        //                }
 
-                        // Remove all activities from other registrations and registrants
-                        // except for the last one registrant and registration
-                        foreach (var item in allRelated.Where(x => x.ID != lastRegistration.ID))
-                        {
-                            foreach (var activityId in regActivities.Where(x => x.RegistrationId == item.ID).Select(x => x.ActivityId.Value))
-                            {
-                                // removes it from the registrant as well
-                                msgs.AddRange(item.RemoveActivity(activityId, dc: dc));
-                            }
-                        }
+        //                // Remove all activities from other registrations and registrants
+        //                // except for the last one registrant and registration
+        //                foreach (var item in allRelated.Where(x => x.ID != lastRegistration.ID))
+        //                {
+        //                    foreach (var activityId in regActivities.Where(x => x.RegistrationId == item.ID).Select(x => x.ActivityId.Value))
+        //                    {
+        //                        // removes it from the registrant as well
+        //                        msgs.AddRange(item.RemoveActivity(activityId, dc: dc));
+        //                    }
+        //                }
 
-                        // now delete the other registrants and registrations
-                        foreach (var item in allRelated.Where(x => x.ID != lastRegistration.ID))
-                        {
-                            var registrant = item.GetRegistrant(dc: dc);
-                            msgs.AddRange(registrant.Delete(dc: dc));
-                            msgs.AddRange(item.Delete(dc: dc));
+        //                // now delete the other registrants and registrations
+        //                foreach (var item in allRelated.Where(x => x.ID != lastRegistration.ID))
+        //                {
+        //                    var registrant = item.GetRegistrant(dc: dc);
+        //                    msgs.AddRange(registrant.Delete(dc: dc));
+        //                    msgs.AddRange(item.Delete(dc: dc));
 
-                            if (lastRegistration.FirstRegistrationId == item.ID)
-                            {
-                                lastRegistration.FirstRegistrationId = null;
-                                msgs.AddRange(lastRegistration.Save(dc: dc));
-                            }
-                            if (lastRegistrant.FirstRegistrantId == registrant.ID)
-                            {
-                                lastRegistrant.FirstRegistrantId = null;
-                                msgs.AddRange(lastRegistrant.Save(dc: dc));
-                            }
-                        }
+        //                    if (lastRegistration.FirstRegistrationId == item.ID)
+        //                    {
+        //                        lastRegistration.FirstRegistrationId = null;
+        //                        msgs.AddRange(lastRegistration.Save(dc: dc));
+        //                    }
+        //                    if (lastRegistrant.FirstRegistrantId == registrant.ID)
+        //                    {
+        //                        lastRegistrant.FirstRegistrantId = null;
+        //                        msgs.AddRange(lastRegistrant.Save(dc: dc));
+        //                    }
+        //                }
 
-                        var newRegistrantActivities = lastRegistration.GetRegistrantActivities(dc: dc).OrderBy(x => x.PreferenceNumber).ThenBy(x => x.CreateDate);
-                        // update preference order
-                        int i = 1;
-                        foreach(var ra in newRegistrantActivities)
-                        {
-                            ra.PreferenceNumber = i;
-                            msgs.AddRange(ra.Save(dc: dc));
-                            i++;
-                        }
+        //                var newRegistrantActivities = lastRegistration.GetRegistrantActivities(dc: dc).OrderBy(x => x.PreferenceNumber).ThenBy(x => x.CreateDate);
+        //                // update preference order
+        //                int i = 1;
+        //                foreach(var ra in newRegistrantActivities)
+        //                {
+        //                    ra.PreferenceNumber = i;
+        //                    msgs.AddRange(ra.Save(dc: dc));
+        //                    i++;
+        //                }
 
-                        // check registrations and activities
-                        var newRelatedRegs = lastRegistration.GetRelatedRegistrations(dc: dc).Where(x => x.ActivityGroupId == 175).ToList();
-                        var newRegistrationActivityIds = lastRegistration.GetRegistrationActivities(dc: dc).Select(x => x.ActivityId.Value).ToList();
-                        var newRegistrantActivityIds = newRegistrantActivities.Select(x => x.ActivityId.Value).ToList();
+        //                // check registrations and activities
+        //                var newRelatedRegs = lastRegistration.GetRelatedRegistrations(dc: dc).Where(x => x.ActivityGroupId == 175).ToList();
+        //                var newRegistrationActivityIds = lastRegistration.GetRegistrationActivities(dc: dc).Select(x => x.ActivityId.Value).ToList();
+        //                var newRegistrantActivityIds = newRegistrantActivities.Select(x => x.ActivityId.Value).ToList();
 
-                        if (newRelatedRegs.Count == 0 &&
-                            !newRegistrationActivityIds.Except(newRegistrantActivityIds).Any() &&
-                            !newRegistrationActivityIds.Except(finalActivityIds).Any())
-                        {
-                            msgs.Add("It worked", MessageType.Success);
-                        }
-                        else
-                        {
-                            msgs.Add(string.Format("It didn't work - {0}", registration.ID), MessageType.Error);
-                        }
-                    }
+        //                if (newRelatedRegs.Count == 0 &&
+        //                    !newRegistrationActivityIds.Except(newRegistrantActivityIds).Any() &&
+        //                    !newRegistrationActivityIds.Except(finalActivityIds).Any())
+        //                {
+        //                    msgs.Add("It worked", MessageType.Success);
+        //                }
+        //                else
+        //                {
+        //                    msgs.Add(string.Format("It didn't work - {0}", registration.ID), MessageType.Error);
+        //                }
+        //            }
 
-                    // remove all the records that were just processed from the list
-                    foreach (var item in related)
-                    {
-                        registrations.Remove(item);
-                    }
-                }
+        //            // remove all the records that were just processed from the list
+        //            foreach (var item in related)
+        //            {
+        //                registrations.Remove(item);
+        //            }
+        //        }
 
-                registrations.Remove(registration);
+        //        registrations.Remove(registration);
 
-            }
+        //    }
 
-            // msgs.Add("Rollback please", MessageType.Error);
+        //    // msgs.Add("Rollback please", MessageType.Error);
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
         public static SystemMessages CreateMasterRecord(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {

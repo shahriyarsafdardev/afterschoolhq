@@ -431,63 +431,65 @@ namespace AfterSchoolLibrary
             return Registration.GetCount(criterias: new Hashtable() { { "RegistrationPeriodId", this.ID.Value } }, dc: dc);
         }
 
-        public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, DatabaseConnection dc = null)
-        {
-            if (registrations.IsEmpty())
-                registrations = Registration.LoadByRegistrationPeriodId(this.ID.Value, dc: dc);
+        //public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, DatabaseConnection dc = null)
+        //{
+        //    if (registrations.IsEmpty())
+        //        registrations = Registration.LoadByRegistrationPeriodId(this.ID.Value, dc: dc);
 
-            if(registrations.Any())
-                return RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc: dc)
-                    .Where(x => !x.ActivityIsDeleted)
-                    .ToList();
-            else
-                return new List<RegistrantActivity>();
-        }
+        //    if (registrations.Any())
+        //    {
+        //        return RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc: dc)
+        //            .Where(x => !x.ActivityIsDeleted)
+        //            .ToList();
+        //    }
+
+        //    return new List<RegistrantActivity>();
+        //}
 
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, registrationPeriodId: this.ID.Value, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: rat, registrationPeriodId: this.ID.Value, dc: dc);
         }
 
-        public List<RegistrantAssignment> RandomizePlacementAttempt(Account account, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var rr = new RegistrationRandomization(this);
-            return rr.AttemptLottery(msgs, dc: dc);
-        }
+        //public List<RegistrantAssignment> RandomizePlacementAttempt(Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //    var rr = new RegistrationRandomization(this);
+        //    return rr.AttemptLottery(msgs, dc: dc);
+        //}
 
-        public SystemMessages RandomizePlacementApply(List<RegistrantAssignment> assignments, Account account, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var rr = new RegistrationRandomization(this);
-            msgs.AddRange(rr.ApplyLottery(assignments, dc: dc));
-            return msgs;
-        }
+        //public SystemMessages RandomizePlacementApply(List<RegistrantAssignment> assignments, Account account, DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var rr = new RegistrationRandomization(this);
+        //    msgs.AddRange(rr.ApplyLottery(assignments, dc: dc));
+        //    return msgs;
+        //}
 
-        public SystemMessages RandomizePlacementReset(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
+        //public SystemMessages RandomizePlacementReset(DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
 
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) => 
-                {
-                    this.GetRegistrantActivities(dc: adc)
-                        .ForEach(ra => 
-                            msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, adc))
-                        );
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                }
-            );
+        //    Database.ExecuteTransaction(
+        //        action: (SystemMessages amsgs, DatabaseConnection adc) => 
+        //        {
+        //            this.GetRegistrantActivities(dc: adc)
+        //                .ForEach(ra => 
+        //                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, adc))
+        //                );
+        //        },
+        //        onSuccess: (SystemMessages smsgs) =>
+        //        {
+        //            msgs.AddRange(smsgs);
+        //        },
+        //        onFailure: (SystemMessages fmsgs) =>
+        //        {
+        //            msgs.AddRange(fmsgs);
+        //        }
+        //    );
             
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
         private ActivityGroup _Group = null;
         public ActivityGroup GetGroup(SystemMessages msgs = null, DatabaseConnection dc = null)

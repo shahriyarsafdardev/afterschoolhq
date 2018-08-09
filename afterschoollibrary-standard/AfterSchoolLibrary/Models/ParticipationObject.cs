@@ -237,5 +237,15 @@ namespace AfterSchoolLibrary
                     return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
             }
         }
+
+        public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentType(
+                assignmentType: assignmentType,
+                participationObjectId: this.ObjectID,
+                participationObjectType: this.ObjectType,
+                msgs: msgs,
+                dc: dc);
+        }
     }
 }

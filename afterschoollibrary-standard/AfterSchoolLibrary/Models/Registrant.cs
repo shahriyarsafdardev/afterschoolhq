@@ -521,9 +521,13 @@ namespace AfterSchoolLibrary
         {
             return Registration.GetCount(new Hashtable() { { "RegistrantId", this.ID.Value } }, dc: dc);
         }
-        
+
 
         public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AddOrUpdateParticipationObject(registrationId, participationObjectId, participationObjectType, assignmentType, 1, registrationPeriodId, activityGroupId, loggedInUserId, msgs, dc);
+        }
+         public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int choiceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             int seats = 0, waitingListSeats = 0, applicationSeats = 0, invitationSeats = 0, declinedSeats = 0;
 
@@ -614,7 +618,7 @@ namespace AfterSchoolLibrary
 
                 if (seats > 0)
                     ra.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: RegistrationAssignmentType.Reserved, 
+                        assignmentType: RegistrationAssignmentType.Reserved, 
                         participationObjectId: participationObjectId, 
                         participationObjectType: participationObjectType,
                         msgs: msgs, 
@@ -622,7 +626,7 @@ namespace AfterSchoolLibrary
 
                 if (waitingListSeats > 0)
                     ra.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: RegistrationAssignmentType.WaitingList,
+                        assignmentType: RegistrationAssignmentType.WaitingList,
                         participationObjectId: participationObjectId,
                         participationObjectType: participationObjectType,
                         msgs: msgs, 
@@ -630,7 +634,7 @@ namespace AfterSchoolLibrary
 
                 if (applicationSeats > 0)
                     ra.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: RegistrationAssignmentType.Applied,
+                        assignmentType: RegistrationAssignmentType.Applied,
                         participationObjectId: participationObjectId,
                         participationObjectType: participationObjectType,
                         msgs: msgs, 

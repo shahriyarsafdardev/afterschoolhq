@@ -309,34 +309,34 @@ namespace AfterSchoolLibrary
             };
         }
 
-        public static List<FormQuestion> Load(List<int> ids, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<FormQuestion> Load(List<int> ids, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<FormQuestion> LoadByFormIdsByIsActive(List<int> FormIds, bool IsActive, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<FormQuestion> LoadByFormIdsByIsActive(List<int> FormIds, bool IsActive, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormId"], FormIds, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<FormQuestion> LoadList(List<int> ids, DatabaseConnection dc = null)
+        public static List<FormQuestion> LoadList(List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], ids, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public FormQuestionGroup GetFormQuestionGroup(DatabaseConnection dc = null)
+        public FormQuestionGroup GetFormQuestionGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionGroup.Load(this.FormQuestionGroupId.Value, dc: dc);
+            return FormQuestionGroup.Load(this.FormQuestionGroupId.Value, msgs, dc);
         }
 
         public FormQuestionAnswer GetAnswer(int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)

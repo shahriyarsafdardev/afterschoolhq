@@ -152,33 +152,29 @@
                 
                 </div>
             </div>
-
-            if(!Model.IsChildActivity)
-            {
-
-                if (accountPackage.HasFeature(FeatureType.ManageForms))
-                {
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">
-                            Registration Form <span class="text-danger">*</span>
-                        </label>
-                        <div class="col-md-6">
-                            <select name="form" id="form" class="form-control" required>
-                                <option value="">Select Form...</option>
-                                <option value="0"> + New Form</option>
-                                @foreach (var form in forms)
-                                {
-                                    <option value="@form.ID" @(activeForm?.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
-                                }
-                            </select>
-                        </div>                
-                        <div class="col-md-3">
-                            <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = activeForm?.ID })" id="editForm" target="_blank">Edit Form</a>
-                        </div>
-                    </div>
-                }
             
+            if (accountPackage.HasFeature(FeatureType.ManageForms))
+            {
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        Registration Form <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-md-6">
+                        <select name="form" id="form" class="form-control" required>
+                            <option value="">Select Form...</option>
+                            <option value="0"> + New Form</option>
+                            @foreach (var form in forms)
+                            {
+                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+                            }
+                        </select>
+                    </div>                
+                    <div class="col-md-3">
+                        <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = activeForm?.ID })" id="editForm" target="_blank">Edit Form</a>
+                    </div>
+                </div>
             }
+
             if (SessionVariables.AccountPackage.HasFeature(FeatureType.AllowApplications))
             {
                 <div class="form-group">

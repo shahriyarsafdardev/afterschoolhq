@@ -111,24 +111,24 @@ namespace AfterSchoolLibrary
             return ContactList.GetCount(criterias: new Hashtable() { { "AccountId", account.ID.Value } }, dc: dc);
         }
 
-        public static List<Registrant> GetRegistrantsByActivityId(this Account account, int activityId, int? start = null, int? length = null, DatabaseConnection dc = null)
-        {
-            return account.GetRegistrantActivitiesByActivityId(activityId, start, length, dc: dc)
-                .Select(x => x.ToRegistrant())
-                .ToList();
-        }
+        //public static List<Registrant> GetRegistrantsByActivityId(this Account account, int activityId, int? start = null, int? length = null, DatabaseConnection dc = null)
+        //{
+        //    return account.GetRegistrantActivitiesByActivityId(activityId, start, length, dc: dc)
+        //        .Select(x => x.ToRegistrant())
+        //        .ToList();
+        //}
 
-        public static List<RegistrantActivity> GetRegistrantActivitiesByActivityId(this Account account, int activityId, int? start = null, int? length = null, DatabaseConnection dc = null)
-        {
-            return RegistrantActivity.LoadByActivityId(activityId, start, length, dc: dc)
-                .Where(x => x.ActivityAccountId == account.ID)
-                .ToList();
-        }
+        //public static List<RegistrantActivity> GetRegistrantActivitiesByParticipationObject(this Account account, int participationObjectId, ParticipationObjectType participationObjectType, int? start = null, int? length = null, DatabaseConnection dc = null)
+        //{
+        //    return RegistrantActivity.LoadByParticipationObject(participationObjectId, participationObjectType, start, length, dc: dc)
+        //        .Where(x => x.ActivityAccountId == account.ID)
+        //        .ToList();
+        //}
 
-        public static int GetRegistrantActivityCountByActivityId(this Account account, int activityId, DatabaseConnection dc = null)
-        {
-            return RegistrantActivity.GetCountByActivityIdByAccountId(activityId, account.ID.Value, dc: dc);
-        }
+        //public static int GetRegistrantActivityCountByActivityId(this Account account, int activityId, DatabaseConnection dc = null)
+        //{
+        //    return RegistrantActivity.GetCountByActivityIdByAccountId(activityId, account.ID.Value, dc: dc);
+        //}
 
         public static List<Form> GetForms(this Account account, DatabaseConnection dc = null)
         {
@@ -1111,14 +1111,14 @@ namespace AfterSchoolLibrary
                 dc: dc);
         }
 
-        public static List<Registration> SearchRegistrations(this Account account, string searchText, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, int? start, int? length, DatabaseConnection dc = null)
+        public static List<Registration> SearchRegistrations(this Account account, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, RegistrationAssignmentType rat, int? start, int? length, DatabaseConnection dc = null)
         {
-            return Registration.Search(searchText, account.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, start, length, dc: dc);
+            return Registration.Search(searchText, account.ID.Value, questionId, participationObjectIds, participationObjectType, regStatus, rat, start, length, dc: dc);
         }
 
-        public static int SearchRegistrationCount(this Account account, string searchText, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, DatabaseConnection dc = null)
+        public static int SearchRegistrationCount(this Account account, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
-            return Registration.SearchCount(searchText, account.ID.Value, questionId, activityGroupIds, activityIds, regStatus, rat, dc: dc);
+            return Registration.SearchCount(searchText, account.ID.Value, questionId, participationObjectIds, participationObjectType, regStatus, rat, dc: dc);
         }
 
         public static Activity GetDefaultNewActivity(this Account account)
