@@ -495,8 +495,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var account = SessionVariables.CurrentAccount;
-               //haost account 
+                msgs.AddRange(SendSubmitOrWithdrawnEmail(activity, true));
+
             }
 
             var group = activity.GetActivityGroup();
@@ -505,7 +505,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RetractFromDistrict(string id, string pn, string rpp, string archive)
+        public ActionResult WithdrawFromDistrict(string id, string pn, string rpp, string archive)
         {
             var msgs = new SystemMessages();
 
@@ -516,9 +516,24 @@ namespace AfterSchool.Areas.Org.Controllers
             activity.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
             msgs.AddRange(activity.Save());
 
+            if (msgs.HasNoErrors())
+            {
+                msgs.AddRange(SendSubmitOrWithdrawnEmail(activity, false));
+
+            }
+
             var group = activity.GetActivityGroup();
             LoadLeagueActivityViewBag(group, id, pn, rpp, archive);
             return View("LeagueActivities", group);
+        }
+
+        private SystemMessages SendSubmitOrWithdrawnEmail(Activity activity, bool isSubmitting)
+        {
+
+            var account = SessionVariables.CurrentAccount;
+            var activityGroup = activity.GetActivityGroup();
+            var hostAccount = activityGroup.GetAccount();
+            return account.SendSubmitTeamtoDistrictEmail(hostAccount, activity, activityGroup, isSubmitting);
         }
 
         [HttpGet]

@@ -672,7 +672,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages SendTeamSubmmittedToDistrictNotifitication(Account visitorAccount, Account hostAccount, Activity activity, ActivityGroup activityGroup)
+        public static SystemMessages SendTeamSubmmittedToDistrictNotifitication(Account visitorAccount, Account hostAccount, Activity activity, ActivityGroup activityGroup, bool isSubmitting)
         {
             var msgs = new SystemMessages();
 
@@ -681,7 +681,9 @@ namespace AfterSchoolLibrary
                 { "OrgName", visitorAccount.Name},
                 { "ActivityName", activity.Name },
                 { "LeagueName", activityGroup.Name },
-             
+                {"Verb", isSubmitting ? "submitted" : "withdrawn" },
+                {"Preposistion", isSubmitting ? "to" : "from" },
+
             };
 
             var subject = $"{activity.Name} has been submitted for {activityGroup.Name}";

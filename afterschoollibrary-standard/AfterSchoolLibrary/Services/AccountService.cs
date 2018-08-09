@@ -482,9 +482,9 @@ namespace AfterSchoolLibrary
             return EmailHelper.SendAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
         }
 
-        public static SystemMessages SendSubmitTeamtoDistrictEmail(this Account vistorAccount, Account hostAccount, Activity activity, ActivityGroup activityGroup, DatabaseConnection dc = null)
+        public static SystemMessages SendSubmitTeamtoDistrictEmail(this Account vistorAccount, Account hostAccount, Activity activity, ActivityGroup activityGroup, bool isSubmitting, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendTeamSubmmittedToDistrictNotifitication(vistorAccount, hostAccount, activity, activityGroup);
+            return EmailHelper.SendTeamSubmmittedToDistrictNotifitication(vistorAccount, hostAccount, activity, activityGroup, isSubmitting);
         }
 
         public static WebUser InviteUser(this Account account, string firstName, string lastName, string email, string message, UserType ut, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
