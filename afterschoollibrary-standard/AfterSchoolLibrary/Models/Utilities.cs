@@ -583,25 +583,25 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages UpdateAnswers(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
+        //public static SystemMessages UpdateAnswers(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
 
-            var answers = FormQuestionAnswer.Load(criterias: new Hashtable() { { "RegistrationId", DBNull.Value } }, dc: dc);
-            answers = answers.Where(x => x.ActivityId.HasValue).ToList();
-            foreach (var answer in answers)
-            {
-                var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(answer.ActivityId.Value, answer.RegistrantId.Value, dc: dc);
-                if (ra.IsNotEmpty() && ra.RegistrationId.HasValue)
-                {
-                    answer.RegistrationId = ra.RegistrationId;
-                    answer.QuestionDataTypeId = answer.FormQuestionQuestionDataTypeId;
-                    msgs.AddRange(answer.Save(dc: dc));
-                }
-            }
+        //    var answers = FormQuestionAnswer.Load(criterias: new Hashtable() { { "RegistrationId", DBNull.Value } }, dc: dc);
+        //    answers = answers.Where(x => x.ActivityId.HasValue).ToList();
+        //    foreach (var answer in answers)
+        //    {
+        //        var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(answer.ActivityId.Value, answer.RegistrantId.Value, dc: dc);
+        //        if (ra.IsNotEmpty() && ra.RegistrationId.HasValue)
+        //        {
+        //            answer.RegistrationId = ra.RegistrationId;
+        //            answer.QuestionDataTypeId = answer.FormQuestionQuestionDataTypeId;
+        //            msgs.AddRange(answer.Save(dc: dc));
+        //        }
+        //    }
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
         public static SystemMessages UpdateRegistrations(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
@@ -987,51 +987,51 @@ namespace AfterSchoolLibrary
         //    return msgs;
         //}
 
-        public static SystemMessages UpdateApplicationSeatIndexesRunOnce(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var ras = RegistrantActivity.Load(dc: dc);
+        //public static SystemMessages UpdateApplicationSeatIndexesRunOnce(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var ras = RegistrantActivity.Load(dc: dc);
 
-            var activityIds = ras.Select(x => x.ActivityId.Value).ToList();
+        //    var activityIds = ras.Select(x => x.ActivityId.Value).ToList();
 
-            var accountId = 18;
-            if (Utilities.IsProduction || Utilities.IsStaging)
-            {
-                accountId = 6;
-            }
+        //    var accountId = 18;
+        //    if (Utilities.IsProduction || Utilities.IsStaging)
+        //    {
+        //        accountId = 6;
+        //    }
 
-            foreach (var id in activityIds)
-            {
-                var activity = Activity.Load(id, dc: dc);
-                var activityRas = new List<RegistrantActivity>();
-                if (activity.GetDays().Count == 0)
-                {
-                    var index = 0;
-                    activityRas = ras.Where(x => x.ActivityId.Value == id && x.NumberOfApplicationSeats.HasValue && x.ActivityAccountId == accountId).OrderBy(x => x.CreateDate.Value).ToList();
-                    foreach (var ra in activityRas)
-                    {
-                        index++;
-                        ra.ApplicationSeatIndex = index;
-                        msgs.AddRange(ra.Save(dc: dc));
-                    }
-                }
-                else
-                {
-                    foreach (var day in activity.GetDaysOfTheWeek())
-                    {
-                        var index = 0;
-                        activityRas = ras.Where(x => x.ActivityId.Value == id && x.NumberOfApplicationSeats.HasValue && x.ActivityAccountId == accountId && x.Day == day).OrderBy(x => x.CreateDate.Value).ToList();
-                        foreach (var ra in activityRas)
-                        {
-                            index++;
-                            ra.ApplicationSeatIndex = index;
-                            msgs.AddRange(ra.Save(dc: dc));
-                        }
-                    }
-                }
-            }
-            return msgs;
-        }
+        //    foreach (var id in activityIds)
+        //    {
+        //        var activity = Activity.Load(id, dc: dc);
+        //        var activityRas = new List<RegistrantActivity>();
+        //        if (activity.GetDays().Count == 0)
+        //        {
+        //            var index = 0;
+        //            activityRas = ras.Where(x => x.ActivityId.Value == id && x.NumberOfApplicationSeats.HasValue && x.ActivityAccountId == accountId).OrderBy(x => x.CreateDate.Value).ToList();
+        //            foreach (var ra in activityRas)
+        //            {
+        //                index++;
+        //                ra.ApplicationSeatIndex = index;
+        //                msgs.AddRange(ra.Save(dc: dc));
+        //            }
+        //        }
+        //        else
+        //        {
+        //            foreach (var day in activity.GetDaysOfTheWeek())
+        //            {
+        //                var index = 0;
+        //                activityRas = ras.Where(x => x.ActivityId.Value == id && x.NumberOfApplicationSeats.HasValue && x.ActivityAccountId == accountId && x.Day == day).OrderBy(x => x.CreateDate.Value).ToList();
+        //                foreach (var ra in activityRas)
+        //                {
+        //                    index++;
+        //                    ra.ApplicationSeatIndex = index;
+        //                    msgs.AddRange(ra.Save(dc: dc));
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return msgs;
+        //}
 
         public static SystemMessages UpdateSessionActions(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {

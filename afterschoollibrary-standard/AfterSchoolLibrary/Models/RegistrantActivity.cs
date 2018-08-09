@@ -1118,20 +1118,20 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public SystemMessages SendNewRegistrationNotice(Account account = null, Activity activity = null, DatabaseConnection dc = null)
+        public SystemMessages SendNewRegistrationNotice(ParticipationObject participationObject, DatabaseConnection dc = null)
         {
-            activity = activity ?? this.ToActivity(true, dc: dc);
-            account = account ?? activity.GetAccount(dc: dc);
+            var msgs = new SystemMessages();
+            var account = participationObject.OwnerAccount;
 
             if (account.Email.IsEmpty())
-                return new SystemMessages();
+                return msgs;
 
-            if (activity.ContactEmail.IsNotBlank() && account.Email.IsSameAs(activity.ContactEmail))
-                return new SystemMessages();
+            if (participationObject.ContactEmail.IsNotBlank() && account.Email.IsSameAs(participationObject.ContactEmail))
+                return msgs;
 
-            var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{activity.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li><li><strong>{activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied, dc: dc)}</strong> applications</li></ul></p>";
+            var details = $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{participationObject.Name}</strong> at <strong>{account.Name}</strong>.</p> <p>You currently have a total of: <ul><li><strong>{participationObject.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li><li><strong>{participationObject.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li><li><strong>{participationObject.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied, dc: dc)}</strong> applications</li></ul></p>";
 
-            var message = $"<p>Hello {activity.ContactName},</p>{details}<p>{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
+            var message = $"<p>Hello {participationObject.ContactName},</p>{details}<p>{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
 
             return SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
@@ -1139,7 +1139,7 @@ namespace AfterSchoolLibrary
                                     Utilities.AppName(account.IsAfterSchool)
                                ),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
-                    subject: $"You have a new registration for {activity.Name}",
+                    subject: $"You have a new registration for {participationObject.Name}",
                     body: message,
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
@@ -1148,8 +1148,8 @@ namespace AfterSchoolLibrary
         public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                this.ActivityId.Value,
-                ParticipationObjectType.Activity,
+                this.ParticipationObjectId.Value,
+                this.ParticipationObjectTypeId,
                 this.RegistrantId.Value,
                 msgs,
                 dc);

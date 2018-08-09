@@ -634,15 +634,19 @@ namespace AfterSchoolLibrary
                     .ToList();
         }
 
-        public SystemMessages RemoveActivity(int activityId, DatabaseConnection dc = null)
+        public SystemMessages RemoveParticipation(int participationObjectId, ParticipationObjectType participationObjectType, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
-            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.RegistrantId.Value, dc: dc);
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                participationObjectId, 
+                participationObjectType, 
+                this.RegistrantId.Value,
+                msgs,
+                dc);
+
             if (ra.IsNotEmpty())
-            {
                 msgs.AddRange(ra.CancelRegistration(dc: dc));
-            }
 
             return msgs;
         }
@@ -657,160 +661,160 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static string PrintRegisteredActivities(List<RegistrantActivity> registrantActivities, string text, DatabaseConnection dc = null)
-        {
-            var activities = "<p>" + text + ":<ul>";
-            foreach (var ra in registrantActivities)
-            {
-                var showChoice = registrantActivities.Where(x => x.PreferenceNumber != ra.PreferenceNumber).Any();
-                var activityname = "";
-                activityname = ra.ToActivity().GetDaysOfTheWeek(dc: dc).Select(x => x.ToString()).ToStringList(", ", " & ") + ": ";
-                activityname += ra.ActivityName;
-                if (showChoice) activityname += " (" + ra.PreferenceNumber.Value.ToOrdinal() + " Choice)";
-                activities += string.Format("<li>{0}</li>", activityname);
-            }
-            activities += "</ul></p>";
-            return activities;
-        }
+        //public static string PrintRegisteredActivities(List<RegistrantActivity> registrantActivities, string text, DatabaseConnection dc = null)
+        //{
+        //    var activities = "<p>" + text + ":<ul>";
+        //    foreach (var ra in registrantActivities)
+        //    {
+        //        var showChoice = registrantActivities.Where(x => x.PreferenceNumber != ra.PreferenceNumber).Any();
+        //        var activityname = "";
+        //        activityname = ra.ToActivity().GetDaysOfTheWeek(dc: dc).Select(x => x.ToString()).ToStringList(", ", " & ") + ": ";
+        //        activityname += ra.ActivityName;
+        //        if (showChoice) activityname += " (" + ra.PreferenceNumber.Value.ToOrdinal() + " Choice)";
+        //        activities += string.Format("<li>{0}</li>", activityname);
+        //    }
+        //    activities += "</ul></p>";
+        //    return activities;
+        //}
 
-        public static string GetRegistrationConfirmationHtml(Registration registration, Account account, Registrant registrant, List<RegistrantActivity> registrantActivities, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //public static string GetRegistrationConfirmationHtml(Registration registration, Account account, Registrant registrant, List<RegistrantActivity> registrantActivities, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var group = registration.GetActivityGroup(msgs, dc);
+        //    var group = registration.GetActivityGroup(msgs, dc);
 
-            if (registrant.IsEmpty())
-                registrant = registration.GetRegistrant(msgs, dc);
+        //    if (registrant.IsEmpty())
+        //        registrant = registration.GetRegistrant(msgs, dc);
 
-            if (registrantActivities.IsEmpty())
-                registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
-                    .OrderBy(x => x.PreferenceNumber)
-                    .ToList();
+        //    if (registrantActivities.IsEmpty())
+        //        registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
+        //            .OrderBy(x => x.PreferenceNumber)
+        //            .ToList();
 
-            AccountProperty thankyou = null;
+        //    AccountProperty thankyou = null;
 
-            var reservedRas = registrantActivities.Where(x => x.NumberOfSeats > 0)
-                .DistinctBy(x => x.ActivityId)
-                .ToList();
-            var waitingListRas = registrantActivities.Where(x => x.NumberOfWaitingListSeats > 0)
-                .DistinctBy(x => x.ActivityId)
-                .ToList();
-            var applicationRas = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0)
-                .DistinctBy(x => x.ActivityId)
-                .ToList();
-            var hasLotteryRan = group.IsNotEmpty() && group.HasLotteryRun;
+        //    var reservedRas = registrantActivities.Where(x => x.NumberOfSeats > 0)
+        //        .DistinctBy(x => x.ActivityId)
+        //        .ToList();
+        //    var waitingListRas = registrantActivities.Where(x => x.NumberOfWaitingListSeats > 0)
+        //        .DistinctBy(x => x.ActivityId)
+        //        .ToList();
+        //    var applicationRas = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0)
+        //        .DistinctBy(x => x.ActivityId)
+        //        .ToList();
+        //    var hasLotteryRan = group.IsNotEmpty() && group.HasLotteryRun;
 
-            string activities = "";
+        //    string activities = "";
 
-            // only has an application
-            if (applicationRas.Any() && !reservedRas.Any() && !waitingListRas.Any())
-            {
-                if (group.IsNotEmpty())
-                    thankyou = group.GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc: dc);
-                else
-                    thankyou = account.GetAccountProperty(AccountPropertyType.ApplicationThankYouEmail, dc: dc);
-            }
-            // has registered as normal
-            else
-            {
-                if (group.IsNotEmpty())
-                    thankyou = group.GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc: dc);
-                else
-                    thankyou = account.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail, dc: dc);
-            }
+        //    // only has an application
+        //    if (applicationRas.Any() && !reservedRas.Any() && !waitingListRas.Any())
+        //    {
+        //        if (group.IsNotEmpty())
+        //            thankyou = group.GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc: dc);
+        //        else
+        //            thankyou = account.GetAccountProperty(AccountPropertyType.ApplicationThankYouEmail, dc: dc);
+        //    }
+        //    // has registered as normal
+        //    else
+        //    {
+        //        if (group.IsNotEmpty())
+        //            thankyou = group.GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc: dc);
+        //        else
+        //            thankyou = account.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail, dc: dc);
+        //    }
 
-            // have any reserved activities
-            if (reservedRas.Any())
-                activities += PrintRegisteredActivities(
-                    reservedRas,
-                    hasLotteryRan ? "You have been selected for" : "You have registered for",
-                    dc);
+        //    // have any reserved activities
+        //    if (reservedRas.Any())
+        //        activities += PrintRegisteredActivities(
+        //            reservedRas,
+        //            hasLotteryRan ? "You have been selected for" : "You have registered for",
+        //            dc);
 
-            // if the lottery has been run and the registrant didn't make it in some of the desired activities
-            if (hasLotteryRan && (waitingListRas.Any() || applicationRas.Any()))
-                activities += "<p>Unfortunately, you have <u>not</u> been selected for the following</p>";
+        //    // if the lottery has been run and the registrant didn't make it in some of the desired activities
+        //    if (hasLotteryRan && (waitingListRas.Any() || applicationRas.Any()))
+        //        activities += "<p>Unfortunately, you have <u>not</u> been selected for the following</p>";
 
-            if (waitingListRas.Any())
-                activities += PrintRegisteredActivities(waitingListRas, "You have been placed on the waiting list for", dc: dc);
+        //    if (waitingListRas.Any())
+        //        activities += PrintRegisteredActivities(waitingListRas, "You have been placed on the waiting list for", dc: dc);
 
-            if (applicationRas.Any())
-                activities += PrintRegisteredActivities(
-                    applicationRas,
-                    hasLotteryRan ? "You were <u>not</u> placed on the waiting list for" : "You have applied for",
-                    dc);
+        //    if (applicationRas.Any())
+        //        activities += PrintRegisteredActivities(
+        //            applicationRas,
+        //            hasLotteryRan ? "You were <u>not</u> placed on the waiting list for" : "You have applied for",
+        //            dc);
 
-            var custommessage = "";
-            if (thankyou.IsNotEmpty())
-                custommessage = thankyou.Value;
+        //    var custommessage = "";
+        //    if (thankyou.IsNotEmpty())
+        //        custommessage = thankyou.Value;
 
-            var accountInformation = "";
-            var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
-            if (masterRegistrant.IsNotEmpty())
-            {
-                accountInformation = "<p>";
-                var masterRegistrantAccount = masterRegistrant.GetAccount(msgs, dc);
+        //    var accountInformation = "";
+        //    var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+        //    if (masterRegistrant.IsNotEmpty())
+        //    {
+        //        accountInformation = "<p>";
+        //        var masterRegistrantAccount = masterRegistrant.GetAccount(msgs, dc);
 
-                if (masterRegistrantAccount?.AccountTypeId == AccountType.Registrant)
-                    accountInformation += $"<a href=\"{Email.BaseUrl(masterRegistrantAccount.IsAfterSchool)}login\">Login to view your {Utilities.AppName(masterRegistrantAccount.IsAfterSchool)} account</a>";
+        //        if (masterRegistrantAccount?.AccountTypeId == AccountType.Registrant)
+        //            accountInformation += $"<a href=\"{Email.BaseUrl(masterRegistrantAccount.IsAfterSchool)}login\">Login to view your {Utilities.AppName(masterRegistrantAccount.IsAfterSchool)} account</a>";
 
-                accountInformation += "</p>";
-            }
+        //        accountInformation += "</p>";
+        //    }
 
             
 
-            return $"{custommessage}{activities}{accountInformation}";
-        }
+        //    return $"{custommessage}{activities}{accountInformation}";
+        //}
 
         public static SystemMessages SendConfirmation(CheckoutObject checkoutObject, bool sendBcc, DatabaseConnection dc = null)
         {
             return EmailHelper.SendRegistrationConfirmed(checkoutObject, sendBcc);
         }
 
-        [Obsolete]
-        public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var registration = Registration.Load(registrationId, dc: dc);
-            var registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
-                .OrderBy(x => x.PreferenceNumber)
-                .ToList();
-            var account = registration.GetAccount(dc: dc);
-            var registrant = registration.GetRegistrant(dc: dc);
+        //[Obsolete]
+        //public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var registration = Registration.Load(registrationId, dc: dc);
+        //    var registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
+        //        .OrderBy(x => x.PreferenceNumber)
+        //        .ToList();
+        //    var account = registration.GetAccount(dc: dc);
+        //    var registrant = registration.GetRegistrant(dc: dc);
 
-            var message = GetRegistrationConfirmationHtml(registration, account, registrant, registrantActivities, msgs, dc);
-            var fullmessage = $"<p>Hello {registrant.Name},</p>{message}<p>{account.Name}</p>";
+        //    var message = GetRegistrationConfirmationHtml(registration, account, registrant, registrantActivities, msgs, dc);
+        //    var fullmessage = $"<p>Hello {registrant.Name},</p>{message}<p>{account.Name}</p>";
 
-            // send message to registrant
-            SendGridHelper.SendMail(
-                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                Email.AppEmailAddress, 
-                                $"{account.Name} via {Email.AppEmailFromName(account.IsAfterSchool)}"
-                            ),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.Name),
-                subject: $"Your {account.Name} registration",
-                body: $"{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
-                replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-            );
+        //    // send message to registrant
+        //    SendGridHelper.SendMail(
+        //        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+        //                        Email.AppEmailAddress, 
+        //                        $"{account.Name} via {Email.AppEmailFromName(account.IsAfterSchool)}"
+        //                    ),
+        //        toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.Name),
+        //        subject: $"Your {account.Name} registration",
+        //        body: $"{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
+        //        replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
+        //        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+        //    );
 
-            if (sendBcc)
-            {
-                SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                    Email.AppEmailAddress, 
-                                    $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
-                               ),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
-                    subject: $"CC: Your {account.Name} registration",
-                    body: $"{"A CC of the email is below: <br />-------------------<br />"}{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                );
-            }
+        //    if (sendBcc)
+        //    {
+        //        SendGridHelper.SendMail(
+        //            fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+        //                            Email.AppEmailAddress, 
+        //                            $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
+        //                       ),
+        //            toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
+        //            subject: $"CC: Your {account.Name} registration",
+        //            body: $"{"A CC of the email is below: <br />-------------------<br />"}{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
+        //            emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+        //        );
+        //    }
 
-            registrantActivities.ForEach(ra => ra.SendNewRegistrationNotice(account, null, null));
+        //    registrantActivities.ForEach(ra => ra.SendNewRegistrationNotice(account, null, null));
 
-            return msgs;
-        }        
+        //    return msgs;
+        //}        
 
         private static DatabaseQuery GetSearchQuery(string searchText, int accountId, int? questionId, List<int> activityGroupIds, RegistrationStatus regStatus, List<int> activityIds = null, RegistrationAssignmentType rat = RegistrationAssignmentType.NotSet, DatabaseConnection dc = null)
         {
@@ -1272,26 +1276,9 @@ namespace AfterSchoolLibrary
 
                 var firstRegistrations = allRegistrations.Where(x => !x.FirstRegistrationId.HasValue).ToList();
                 var registrantIds = allRegistrations.Select(x => x.RegistrantId.Value).ToList();
-                registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, dc: dc);
-
-                switch (rat)
-                {
-                    case RegistrationAssignmentType.Applied:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0).ToList();
-                        break;
-                    case RegistrationAssignmentType.Declined:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfSeatsDeclined > 0).ToList();
-                        break;
-                    case RegistrationAssignmentType.Invited:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfInvitationSeats > 0).ToList();
-                        break;
-                    case RegistrationAssignmentType.Reserved:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfSeats > 0).ToList();
-                        break;
-                    case RegistrationAssignmentType.WaitingList:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfWaitingListSeats > 0).ToList();
-                        break;
-                }
+                registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, dc: dc)
+                    .Where(x=> x.AssignmentTypeId == rat)
+                    .ToList();                
 
                 days = Enum.GetValues(typeof(DayOfWeekASL))
                                 .Cast<DayOfWeekASL>()
@@ -1559,17 +1546,17 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public bool IsRegisteredFor(Activity activity, DayOfWeekASL day, DatabaseConnection dc = null)
+        public bool IsRegisteredFor(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetRegistrantActivities(dc: dc).Where(x => x.ActivityId.Value == activity.ID.Value && x.Day == day).Count() > 0;
+            return this.GetRegistrantActivities(msgs, dc)
+                .Where(x => 
+                    x.ParticipationObjectId.Value == participationObjectId && 
+                    x.ParticipationObjectTypeId == participationObjectType)
+                .Count() > 0;
         }
-        public bool IsRegisteredFor(Activity activity, DatabaseConnection dc = null)
+        public bool IsRegisteredFor(ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (activity.GetDays().Count == 1)
-            {
-                return this.GetRegistrantActivities(dc: dc).Where(x => x.ActivityId.Value == activity.ID.Value && activity.GetDaysOfTheWeek().First() == x.Day).Count() > 0;
-            }
-            return false;
+            return IsRegisteredFor(participationObject.ObjectID.Value, participationObject.ObjectType, msgs, dc);
         }
 
         public static int TotalCurrentRegistrationsCount(int accountId, DatabaseConnection dc = null)
@@ -1781,12 +1768,17 @@ namespace AfterSchoolLibrary
             var registrantActivities = this.GetRegistrantActivities(msgs, dc);
 
             if (registrantActivities.Any())
+            {
+                // this only works now because we're doing on registration at a time
+                var registrantActivity = registrantActivities.First();
+
                 return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                    registrantActivities.First().ActivityId.Value,
-                    ParticipationObjectType.Activity,
+                    registrantActivity.ParticipationObjectId.Value,
+                    registrantActivity.ParticipationObjectTypeId,
                     this.RegistrantId.Value,
                     msgs,
                     dc) > 0;
+            }
 
             msgs.Add("Incomplete registration", MessageType.UserError);
 
@@ -1797,7 +1789,22 @@ namespace AfterSchoolLibrary
         {
             var registrantActivities = this.GetRegistrantActivities(msgs, dc);
             if (registrantActivities.Any())
-                return registrantActivities.First().ToActivity(true, msgs, dc).ToParticipationObject(msgs, dc);
+            {
+                var registrantActivity = registrantActivities.First();
+
+                switch (registrantActivity.ParticipationObjectTypeId)
+                {
+                    case ParticipationObjectType.AccountActivityGroup:
+                        return AccountActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
+                            .ToParticipationObject(msgs, dc);
+                    case ParticipationObjectType.ActivityGroup:
+                        return ActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
+                            .ToParticipationObject(msgs, dc);
+                    case ParticipationObjectType.Activity:
+                        return Activity.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
+                            .ToParticipationObject(msgs, dc);
+                }
+            }
 
             return null;
         }
