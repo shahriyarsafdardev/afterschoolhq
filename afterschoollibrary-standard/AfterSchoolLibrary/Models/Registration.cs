@@ -35,6 +35,7 @@ namespace AfterSchoolLibrary
 		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
 		public DateTime? LastUpdated { get { return (DateTime?)MDV["LastUpdated"].Value; } set { MDV["LastUpdated"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
+		public int? AccountActivityGroupId { get { return (int?)MDV["AccountActivityGroupId"].Value; } set { MDV["AccountActivityGroupId"].Value = value; } }
 		public int? FirstRegistrationId { get { return (int?)MDV["FirstRegistrationId"].Value; } set { MDV["FirstRegistrationId"].Value = value; } }
 		public string ESignature { get { return (string)MDV["ESignature"].Value; } set { MDV["ESignature"].Value = value; } }
 		public RegistrationCompletionStatus CompletionStatusId { get { return (RegistrationCompletionStatus)MDV["CompletionStatusId"].Value; } set { MDV["CompletionStatusId"].Value = value; } }
@@ -75,6 +76,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LastUpdated", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FirstRegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
@@ -208,6 +210,10 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountActivityGroupId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FirstRegistrationId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -275,6 +281,14 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Registration> LoadByAccountActivityGroupId(int AccountActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -1096,7 +1110,7 @@ namespace AfterSchoolLibrary
         public static int SearchCount(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, RegistrationAssignmentType rat, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rat, msgs, dc);
-            return dq.GetCount();
+            return dq.GetCount(msgs);
         }
 
         public SystemMessages CancelAll(DatabaseConnection dc = null)
@@ -1104,7 +1118,7 @@ namespace AfterSchoolLibrary
             return this.DeleteWithRelatedRecords(dc: dc);
         }
 
-        public static List<Registration> LoadByRegistrationPeriodId(int RegistrationPeriodId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Registration> LoadByRegistrationPeriodId(int RegistrationPeriodId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1114,10 +1128,10 @@ namespace AfterSchoolLibrary
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Registration> LoadByActivityGroupId(int ActivityGroupId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Registration> LoadByActivityGroupId(int ActivityGroupId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1127,7 +1141,20 @@ namespace AfterSchoolLibrary
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registration> LoadByAccountActivityGroupId(int AccountActivityGroupId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
+            dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
+            dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -228,18 +228,30 @@ namespace AfterSchoolLibrary
         {
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
             {
-                if (ObjectType == ParticipationObjectType.Activity)
-                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
-                else
-                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                if (IsActivity())
+                    return this.GetActivity().GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                else if (IsActivityGroup())
+                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                else if (IsAccountActivityGroup())
+                {
+                    var aag = this.GetAccountActivityGroup();
+                    return aag.GetActivityGroup(msgs, dc).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                }
             }
             else
             {
                 if (ObjectType == ParticipationObjectType.Activity)
-                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
-                else
-                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                    return this.GetActivity().GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                else if (IsActivityGroup())
+                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                else if (IsAccountActivityGroup())
+                {
+                    var aag = this.GetAccountActivityGroup();
+                    return aag.GetActivityGroup(msgs, dc).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                }
             }
+
+            return "";
         }
 
         public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -308,6 +320,39 @@ namespace AfterSchoolLibrary
         public Activity GetActivity()
         {
             return (Activity)this.Object;
+        }
+
+        public int? GetActivityGroupId()
+        {
+            return IsActivityGroup() ? ObjectID : null;
+        }
+
+        public int? GetAccountActivityGroupId()
+        {
+            return IsAccountActivityGroup() ? ObjectID : null;
+        }
+
+        public int? GetActivityId()
+        {
+            return IsActivity() ? ObjectID : null;
+        }
+
+        public ActivityPayment AddPayment(decimal amount, Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var payment = new ActivityPayment()
+            {
+                ParticipationObjectId = this.ObjectID,
+                ParticipationObjectTypeId = this.ObjectType,
+                Amount = amount,
+                RegistrantId = registrant.ID,
+                AccountId = this.OwnerAccount.ID,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+            };
+            msgs.AddRange(payment.Save(dc));
+            return payment;
         }
     }
 }

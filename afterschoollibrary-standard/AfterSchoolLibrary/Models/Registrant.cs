@@ -487,7 +487,7 @@ namespace AfterSchoolLibrary
             return reg;
         }
 
-        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -496,6 +496,7 @@ namespace AfterSchoolLibrary
                 AccountId = ownerAccountId,
                 RegistrantId = this.ID,
                 ActivityGroupId = activityGroupId,
+                AccountActivityGroupId = accountActivityGroupId,
                 ESignature = esignature,
                 CompletionStatusId = completionStatus,
                 CreateDate = DateTime.UtcNow,

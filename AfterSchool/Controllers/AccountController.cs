@@ -1037,9 +1037,18 @@ namespace AfterSchool.Controllers
                             );
 
                         // create registration
+
+                        var activityGroupId = new int?();
+
+                        if (participationObject.IsAccountActivityGroup())
+                            activityGroupId = participationObject.GetAccountActivityGroup().ActivityGroupId;
+                        else if (participationObject.IsActivity())
+                            activityGroupId = participationObject.GetActivity().ActivityGroupId;
+
                         registration = accountRegistrantCopy.AddRegistrationWithESignature(
                             ownerAccountId: participationObject.OwnerAccount.ID.Value,
-                            activityGroupId: participationObject.ObjectType == ParticipationObjectType.Activity ? ((Activity)participationObject.Object).ActivityGroupId : null,
+                            activityGroupId: activityGroupId,
+                            accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
                             esignature: signature,
                             completionStatus: RegistrationCompletionStatus.Started,
                             loggedInUserId: SessionVariables.LoggedInUser.ID.Value,

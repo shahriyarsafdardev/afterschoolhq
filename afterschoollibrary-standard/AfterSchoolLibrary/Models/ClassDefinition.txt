@@ -909,6 +909,7 @@ property: AmountPaid, decimal?, Money
 property: PaymentTypeId, PaymentType, Int
 property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
+property: AccountActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
 property: ESignature, string, NVarChar "50"
 property: CompletionStatusId, RegistrationCompletionStatus, Int
@@ -918,6 +919,7 @@ loadmethod: AccountId, List<>
 loadmethod: RegistrationPeriodId, List<>
 loadmethod: AccountId|RegistrantId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: AccountActivityGroupId, List<>
 loadmethod: FirstRegistrationId, List<>
 join: Registrant.ID, RegistrantId, InnerJoin
 joinproperty: Registrant.Email, string, NVarChar

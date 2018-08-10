@@ -329,6 +329,21 @@ namespace AfterSchoolLibrary
             return new ParticipationObject(this, msgs, dc);
         }
 
+        public List<Registration> GetRegistrations(int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registration.LoadByAccountActivityGroupId(this.ID.Value, start, length, msgs, dc);
+        }
+
+        public int GetRegistrationCount(DatabaseConnection dc = null)
+        {
+            return Registration.GetCount(criterias: new Hashtable() { { "AccountActivityGroupId", this.ID.Value } }, dc: dc);
+        }
+
+        public int GetActivityCount(bool? isArchived = null, bool? isDeleted = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.GetCountByActivityGroupId(this.ID.Value, isArchived, isDeleted, msgs, dc);
+        }
+
         #endregion
     }
 }

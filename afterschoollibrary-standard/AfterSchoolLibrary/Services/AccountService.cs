@@ -1751,17 +1751,12 @@ namespace AfterSchoolLibrary
                 var transaction = fromAccount.AddTransaction(toAccount, purchase, checkoutObject, loggedInUser, msgs, dc);
 
                 // need to track a payment for each activity/activitygroup
-                if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
-                {
-                    // TODO: How much does a user pay for an activity if a coupon is used to purchase multiple activities at once?
-                    var activity = (Activity)checkoutObject.ParticipationObject.Object;
-                    var payment = activity.AddPayment(
-                        amount: activity.CostPerRegistrant.Value * checkoutObject.NumberOfSeats,
-                        registrant: checkoutObject.Registration.GetRegistrant(msgs, dc),
-                        loggedInUser: loggedInUser,
-                        msgs: msgs,
-                        dc: dc);
-                }
+                checkoutObject.ParticipationObject.AddPayment(
+                    amount: checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats,
+                    registrant: checkoutObject.Registration.GetRegistrant(msgs, dc),
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
             }
         }
 
