@@ -270,13 +270,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private void LoadRegistrationsViewBag(ActivityGroup group, List<Registration> registrations)
         {
+            var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
+
+            ViewBag.AccountActivityGroup = aag;
             ViewBag.Registrations = registrations;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Registrations = registrations;
             ViewBag.RegistrantActivities = group.GetRegistrantActivities(registrations);
-            ViewBag.ReservedSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
-            ViewBag.WaitingListSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
-            ViewBag.ApplicationSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
+            ViewBag.ReservedSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
+            ViewBag.WaitingListSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
+            ViewBag.ApplicationSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
             ViewBag.ReturnUrl = Url.Action("registrations", "league", new { id = group.Uid });
         }
 

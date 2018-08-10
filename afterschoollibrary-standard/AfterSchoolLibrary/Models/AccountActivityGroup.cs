@@ -344,6 +344,11 @@ namespace AfterSchoolLibrary
             return Activity.GetCountByActivityGroupId(this.ID.Value, isArchived, isDeleted, msgs, dc);
         }
 
+        public int GetSeatCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: assignmentType, participationObjectId: this.ID.Value, participationObjectType: ParticipationObjectType.AccountActivityGroup, msgs: msgs, dc: dc);
+        }
+
         #endregion
     }
 }
