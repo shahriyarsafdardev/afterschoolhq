@@ -2,7 +2,7 @@
   <p>Notification from AfterSchool HQ</p>
   
   <p>
-      @Model.OrgName has @Model.Verb their team, @Model.ActivityName, Model @Model.Preposition LeagueName.
+      @Model.OrgName has @Model.Verb their team, @Model.ActivityName, @Model.Preposition LeagueName.
   </p>
   
 </div>

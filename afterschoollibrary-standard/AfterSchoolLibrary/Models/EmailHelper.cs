@@ -727,7 +727,7 @@ namespace AfterSchoolLibrary
                 { "ActivityName", activity.Name },
                 { "LeagueName", activityGroup.Name },
                 {"Verb", verb },
-                {"Preposistion", preposition },
+                {"Preposition", preposition },
 
             };
 
