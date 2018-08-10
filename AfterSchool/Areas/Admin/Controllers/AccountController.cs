@@ -19,11 +19,9 @@ namespace AfterSchool.Areas.Admin.Controllers
 
         }
 
-        // GET: Account
-        [HttpGet]
-        public ActionResult Index(string pn, string rpp)
+        private List<Account> IndexViewBag(string pn, string rpp, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
             var pageNumber = 1;
             var recordsPerPage = 10;
 
@@ -55,9 +53,33 @@ namespace AfterSchool.Areas.Admin.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-            return View(accounts);
+
+            return accounts;
+        }
+
+        // GET: Account
+        [HttpGet]
+        public ActionResult Index(string pn, string rpp)
+        {
+            return View(IndexViewBag(pn, rpp));
         }
         
+        [HttpGet]
+        public ActionResult ResendInvite(string id, string pn, string rpp)
+        {
+            var msgs = new SystemMessages();
+            var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
+
+            if (account.IsNotEmpty())
+            {
+                var user = account.GetUsers(msgs: msgs).FirstOrDefault();
+                if (user.IsNotEmpty())
+                    msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.LoggedInUser));
+            }
+
+            return View("index", IndexViewBag(pn, rpp, msgs));
+        }
+
         [HttpGet]
         public ActionResult Invite(string id)
         {

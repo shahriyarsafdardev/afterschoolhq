@@ -38,7 +38,7 @@
                         {
                             <tr>
                                 <td>
-                                    @if (account.GetUserCount() > 0)
+                                    @if (account.GetActiveUserCount() > 0)
                                     {
                                         <a href="@Url.Action("impersonate", "user", new { id = account.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-id"></i> View</a>
                                     }
@@ -51,7 +51,15 @@
                                 <td>
                                     @if (account.GetUserCount() == 0)
                                     {
-                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-sm">Invite To Account</a>
+                                        <a href="@Url.Action("invite", "account", new { id = account.Uid })" class="btn btn-default btn-sm">
+                                            Invite To Account
+                                        </a>
+                                    }
+                                    else if (account.GetActiveUserCount() == 0)
+                                    {
+                                        <a href="@Url.Action("resendinvite", "account", new { id = account.Uid })" class="btn btn-default btn-sm">
+                                            Resend Invite
+                                        </a>
                                     }
                                 </td>
                             </tr>

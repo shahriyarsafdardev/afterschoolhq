@@ -1406,6 +1406,18 @@ namespace AfterSchoolLibrary
                 );
         }
 
+        public static int GetActiveUserCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountWebUser.GetCount(
+                new Hashtable() {
+                    { "AccountId", account.ID },
+                    { "IsActive", true }
+                },
+                msgs,
+                dc
+                );
+        }
+
         public static List<WebUser> GetUsers(this Account account, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountWebUser.Load(
