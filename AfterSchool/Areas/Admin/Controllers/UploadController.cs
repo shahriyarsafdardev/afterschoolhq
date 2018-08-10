@@ -293,7 +293,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
 
-                       
+
 
                        foreach (var row in rows)
                        {
@@ -336,7 +336,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     phone: schoolPhone,
                                     isActive: true,
                                     accountType: AccountType.School,
-                                    packageId: Package.Load(msgs:msgs).First().ID.Value,
+                                    packageId: Package.Load(msgs: msgs).First().ID.Value,
                                     packageBillingPeriod: BillingPeriodType.Month,
                                     isAfterSchool: SessionVariables.IsAfterSchool.Value,
                                     loggedInUser: SessionVariables.LoggedInUser,
@@ -345,16 +345,16 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 );
 
                                locationHostAccount = account;
-                                // Adding the school to the district account so district can see details
-                                msgs.AddRange(
-                                    SessionVariables.CurrentAccount.AddVisitorAccount(
-                                        account,
-                                        HostPermissionType.Edit,
-                                        ApprovalStatus.Approved,
-                                        SessionVariables.LoggedInUser,
-                                        adc
-                                    )
-                                );
+                               // Adding the school to the district account so district can see details
+                               msgs.AddRange(
+                                   SessionVariables.CurrentAccount.AddVisitorAccount(
+                                       account,
+                                       HostPermissionType.Edit,
+                                       ApprovalStatus.Approved,
+                                       SessionVariables.LoggedInUser,
+                                       adc
+                                   )
+                               );
 
                                users.Add(user);
                                accounts.Add(account);
@@ -366,48 +366,39 @@ namespace AfterSchool.Areas.Admin.Controllers
                            }
 
 
-                            // Add new Location
-                            LocationService.CreateNew(
-                                schoolName,
-                                address,
-                                address2,
-                                city,
-                                state,
-                                postalCode,
-                                country,
-                                locationType,
-                                locationHostAccount.ID.Value,
-                                SessionVariables.LoggedInUser,
-                                msgs);
-
-
+                           // Add new Location
+                           LocationService.CreateNew(
+                               schoolName,
+                               address,
+                               address2,
+                               city,
+                               state,
+                               postalCode,
+                               country,
+                               locationType,
+                               locationHostAccount.ID.Value,
+                               SessionVariables.LoggedInUser,
+                               msgs);
                        }
 
                    },
-               onSuccess: (SystemMessages smsgs) =>
-               {
-                   msgs.AddRange(smsgs);
-
-                  // var numbersAndWords = numbers.Zip(words, (n, w) => new { Number = n, Word = w });
-                   var usersAndAccounts = users.Zip(accounts, (u, a) => new { user = u, account = a });
-                   foreach (var userAndAccount in usersAndAccounts)
+                   onSuccess: (SystemMessages smsgs) =>
                    {
-                       // don't send invites just yet
-                       // msgs.AddRange(userAndAccount.account.SendInvitedEmail(userAndAccount.user, SessionVariables.LoggedInUser, inviteMessage));
+                       msgs.AddRange(smsgs);
+
+                       // var numbersAndWords = numbers.Zip(words, (n, w) => new { Number = n, Word = w });
+                       var usersAndAccounts = users.Zip(accounts, (u, a) => new { user = u, account = a });
+                       foreach (var userAndAccount in usersAndAccounts)
+                       {
+                           // msgs.AddRange(userAndAccount.account.SendInvitedEmail(userAndAccount.user, SessionVariables.LoggedInUser, inviteMessage));
+                       }
+                   },
+                   onFailure: (SystemMessages fmsgs) =>
+                   {
+                       msgs.AddRange(fmsgs);
                    }
-               },
-               onFailure: (SystemMessages fmsgs) =>
-               {
-                   msgs.AddRange(fmsgs);
-               }
-           );
+               );
             }
-
-
-            
-           
-
-           
 
             return msgs;
         }
