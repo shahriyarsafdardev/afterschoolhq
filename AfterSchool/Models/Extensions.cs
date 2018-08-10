@@ -11,15 +11,6 @@ namespace AfterSchool.Models
 {
     public static class Extensions
     {
-        public static string Link(this RegistrantActivity ra)
-        {
-            return string.Format("<a href=\"/org/activity/summary/{0}\">{1}</a>", ra.ActivityId, ra.ActivityName);
-        }
-        public static string Link(this Activity a)
-        {
-            return string.Format("<a href=\"/org/activity/summary/{0}\">{1}</a>", a.ID, a.Name);
-        }
-
         public static FormQuestionViewModel ToFormQuestionViewModel(this FormQuestion question, NameValueCollection values)
         {
             return new FormQuestionViewModel(question, values);

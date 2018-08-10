@@ -44,19 +44,19 @@ namespace AfterSchoolLibrary
 
         public static int GetSeatsTaken(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, msgs, dc);
+            return activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc);
         }
 
         public static int GetWaitingListSeatsTaken(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, msgs, dc);
+            return activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc);
         }
 
         public static int GetSeatsRemaining(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var rtn = 0;
             if (activity.SeatsAvailable.HasValue)
-                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved, msgs, dc);
+                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc);
 
             return Math.Max(0, rtn);
         }
@@ -65,7 +65,7 @@ namespace AfterSchoolLibrary
         {
             var rtn = 0;
             if (activity.WaitingListSeats.HasValue)
-                rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList, msgs, dc);
+                rtn = activity.WaitingListSeats.Value - activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc);
 
             return Math.Max(0, rtn);
         }
@@ -199,7 +199,7 @@ namespace AfterSchoolLibrary
             var activity = new Activity()
             {
                 Name = activityName,
-                AcceptCreditCard = acceptCreditCard,
+                // AcceptCreditCard = acceptCreditCard,
                 AllowToPayLater = allowToPayLater,
                 AccountId = accountId,
                 GenderRestriction = genderRestriction,
@@ -230,88 +230,7 @@ namespace AfterSchoolLibrary
             msgs.AddRange(activity.Save(dc));
 
             return activity;
-        }
-
-        //private static Tuple<int, int, int> ProcessRegistrationSeats(this Activity activity, CheckoutObject purchaseObject, SystemMessages msgs, DatabaseConnection dc = null)
-        //{
-        //    var seatsAvailable = activity.GetSeatsRemaining(msgs, dc);
-        //    var waitingListSeatsAvailable = activity.GetWaitingListSeatsRemaining(msgs, dc);
-
-        //    var reservedSeats = 0;
-        //    var waitingListSeats = 0;
-        //    var applicationSeats = 0;
-
-        //    if (activity.RegistrationModeId == RegistrationMode.Apply)
-        //        applicationSeats = purchaseObject.NumberOfSeats;
-        //    else if (seatsAvailable >= purchaseObject.NumberOfSeats)
-        //        reservedSeats = purchaseObject.NumberOfSeats;
-        //    else if (waitingListSeatsAvailable >= purchaseObject.NumberOfSeats)
-        //        waitingListSeats = purchaseObject.NumberOfSeats;
-
-        //    if (reservedSeats == 0 && waitingListSeats == 0 && applicationSeats == 0)
-        //    {
-        //        msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
-        //        return null;
-        //    }
-
-        //    return new Tuple<int, int, int>(reservedSeats, waitingListSeats, applicationSeats);
-        //}
-
-        private static RegistrationAssignmentType ProcessRegistrationSeats(this Activity activity, CheckoutObject checkoutObject, RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var seatsAvailable = activity.GetSeatsRemaining(msgs, dc);
-            var waitingListSeatsAvailable = activity.GetWaitingListSeatsRemaining(msgs, dc);
-            var isPendingOrReserved = ra.IsNotEmpty() && (ra.AssignmentTypeId == RegistrationAssignmentType.Reserved || ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment);
-
-            // if they're paying for a registration they already completed
-            if (isPendingOrReserved)
-            {
-                return RegistrationAssignmentType.Reserved;
-            }
-            else
-            {
-                if (activity.RegistrationModeId == RegistrationMode.Apply)
-                    return RegistrationAssignmentType.Applied;
-                else if (seatsAvailable >= checkoutObject.NumberOfSeats)
-                    return RegistrationAssignmentType.Reserved;
-                else if (waitingListSeatsAvailable >= checkoutObject.NumberOfSeats)
-                    return RegistrationAssignmentType.WaitingList;
-            }
-            
-            msgs.Add($"Sorry, there are no more reserved seats or waiting list seats available for {activity.Name}", MessageType.UserError);
-
-            return RegistrationAssignmentType.NotSet;
-        }
-
-        public static void ProcessRegistration(this Activity activity, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var ra = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
-            var assignmentType = activity.ProcessRegistrationSeats(checkoutObject, ra, msgs, dc);
-
-            if (msgs.HasErrors())
-                return;
-
-            // get the registration period to see what period the registrant registered
-            var period = activity.GetCurrentRegistrationPeriod(msgs, dc);
-
-            // get the registrant record that was created just for the account
-            var accountRegistrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
-
-            // add or update the registrant for the activity
-            ra = accountRegistrant.AddOrUpdateActivity(
-                registrationId: checkoutObject.Registration.ID.Value,
-                activityId: checkoutObject.ParticipationObject.ObjectID.Value,
-                assignmentType: assignmentType,
-                registrationPeriodId: period?.ID.IfEmpty(0),
-                activityGroupId: activity.ActivityGroupId,
-                loggedInUserId: loggedInUser.ID.Value,
-                msgs: msgs,
-                dc: dc);
-
-            // add registration activity
-            // registration already created when the parent did the e-signature
-            checkoutObject.Registration.AddActivity(activity, loggedInUser.ID.Value, msgs, dc);
-        }
+        }        
         
         public static ActivityPayment AddPayment(this Activity activity, decimal amount, Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -402,7 +321,12 @@ namespace AfterSchoolLibrary
 
                 contacts.ForEach(contact => {
                     var finalInviteUrl = inviteUrl;
-                    var rag = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, contact.ID.Value, msgs, dc);
+                    var rag = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                        activity.ID.Value, 
+                        ParticipationObjectType.Activity, 
+                        contact.ID.Value, 
+                        msgs, 
+                        dc);
 
                     var salutation = "<p>Hello,</p>";
                     if (contact.FirstName.IsNotBlank())

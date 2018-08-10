@@ -36,7 +36,6 @@ namespace AfterSchoolLibrary
 		public string StripeCustomerId { get { return (string)MDV["StripeCustomerId"].Value; } set { MDV["StripeCustomerId"].Value = value; } }
 		public string StripeDefaultCardId { get { return (string)MDV["StripeDefaultCardId"].Value; } set { MDV["StripeDefaultCardId"].Value = value; } }
 		public int? DefaultFormId { get { return (int?)MDV["DefaultFormId"].Value; } set { MDV["DefaultFormId"].Value = value; } }
-		public string PayPalEmailAddress { get { return (string)MDV["PayPalEmailAddress"].Value; } set { MDV["PayPalEmailAddress"].Value = value; } }
 		public string StripeRefreshToken { get { return (string)MDV["StripeRefreshToken"].Value; } set { MDV["StripeRefreshToken"].Value = value; } }
 		public string StripeUserId { get { return (string)MDV["StripeUserId"].Value; } set { MDV["StripeUserId"].Value = value; } }
 		public string TimeZone { get { return (string)MDV["TimeZone"].Value; } set { MDV["TimeZone"].Value = value; } }
@@ -81,7 +80,6 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "StripeCustomerId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "StripeDefaultCardId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "DefaultFormId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "PayPalEmailAddress", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "StripeRefreshToken", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "StripeUserId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "TimeZone", System.Data.SqlDbType.NVarChar , "30");
@@ -215,10 +213,6 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["DefaultFormId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PayPalEmailAddress"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

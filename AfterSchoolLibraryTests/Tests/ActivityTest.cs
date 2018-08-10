@@ -320,15 +320,15 @@ namespace AfterSchoolLibraryTests
         [Fact(Skip = "Need to fix")]
         public void GetRegistrantCountByApplicationTypeTest()
         {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+            //var user = Factories.WebUserFactory.Create(msgs, dc);
+            //var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+            //var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
+            //var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
+            //var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
 
-            var n = new RegistrantAssignment() { RegistrantId = registrant.ID.Value };
-            var debug = activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc);
-            Assert.Equal(1, activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc));
+            //var n = new RegistrantAssignment() { RegistrantId = registrant.ID.Value };
+            //var debug = activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc);
+            //Assert.Equal(1, activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Invited, dc: dc));
         }
 
         /// <summary>
@@ -1025,14 +1025,13 @@ namespace AfterSchoolLibraryTests
                 var registrant = Factories.RegistrantFactory.Create(msgs, dc);
                 var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
 
-                var ra = registrant.AddOrUpdateActivity(
+                var ra = registrant.AddOrUpdateParticipationObject(
                     registration.ID.Value,
                     activity.ID.Value,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
+                    ParticipationObjectType.Activity,
+                    RegistrationAssignmentType.Reserved,
+                    null,
+                    null,
                     loggedInUser.ID.Value,
                     msgs,
                     dc

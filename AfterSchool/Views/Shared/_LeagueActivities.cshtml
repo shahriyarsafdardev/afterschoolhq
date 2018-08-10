@@ -100,17 +100,11 @@ else
                 <tr>
                     <th></th>
                     <th>@UILabel.ActivityLabel(activityType)</th>
-                    <th class="text-center">Days </th>
-                    <th class="text-center">Grades</th>
-                    <!--<th class="text-center">Ages</th>-->
+                    <th class="text-center">Practice Days</th>
                     <th class="text-center">Reserved</th>
                     @if (account.HasFeature(FeatureType.WaitingList))
                     {
                         <th class="text-center">Waiting</th>
-                    }
-                    @if (account.HasFeature(FeatureType.AllowApplications))
-                    {
-                        <th class="text-center">Applied</th>
                     }
                     <th></th>
                 </tr>
@@ -142,49 +136,15 @@ else
                                     @:-
                                 }
                             </td>
-                            <td class="text-center">
-                                @if (activity.GetGradeLevels().Count > 0)
-                                {
-                                    @activity.GetGradeLevels().OrderBy(x => x.ID.Value).Select(x => x.Abbreviation).ToStringList(", ")
-                                }
-                                else
-                                {
-                                    @:-
-                                }
-
-                            </td>
-                            <!--
-                            <td class="text-center">
-                                @if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
-                                {
-                                    @: @activity.AgeStart.Value - @activity.AgeEnd.Value
-                                }
-                                else
-                                {
-                                    @:-
-                                }
-                            </td>
-                            -->
-                            <td class="text-center @reservedTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable</td>
+                            <td class="text-center @reservedTextClass">@activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable</td>
                             @if (account.HasFeature(FeatureType.WaitingList))
                             {
-                                <td class="text-center @waitingTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList) / @activity.WaitingListSeats</td>
-                            }
-                            @if (account.HasFeature(FeatureType.AllowApplications))
-                            {
-                                <td class="text-center">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied)</td>
+                                <td class="text-center @waitingTextClass">@activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList) / @activity.WaitingListSeats</td>
                             }
                             <td>
                                 <div class="btn-group pull-right">
 
-                                    @*@if (activity.ActivityScheduleId.HasValue)
-                                        {
-                                            <button class="md-trigger btn btn-default btn-sm" data-modal="modal-schedule" id="edit-schedule-@activity.ID"
-                                                    onclick="editSchedule('@activity.Name', @activity.ID, @activity.ActivityScheduleId)">
-                                                <i class="s7-edit"></i> Schedule
-                                            </button>
-                                        }*@
-
+                                    @*
                                     <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy"
                                             onclick="setCopyActivity('@activity.Name', '@Url.Action("copy", "leagueactivity", new { id = activity.Uid.ToString() })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
                                         <i class="s7-copy-file"></i> Copy
@@ -201,6 +161,7 @@ else
                                             <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@activity.Name', '@Url.Action("restore", "leagueactivity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
                                         }
                                     }
+                                    *@
 
                                     <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@activity.Name', '@Url.Action("delete", "leagueactivity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                 </div>

@@ -30,9 +30,8 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var registration = ra.GetRegistration();
-            var activity = ra.ToActivity(true);
 
-            msgs.AddRange(SendPaymentReminder(activity.ToParticipationObject(msgs), registration));
+            msgs.AddRange(SendPaymentReminder(ra.GetParticipationObject(msgs), registration));
 
             return msgs;
         }

@@ -284,20 +284,6 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public List<Activity> GetActivities(DatabaseConnection dc = null)
-        {
-            var ras = RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, dc: dc).Where(x => x.ActivityGroupId == this.ActivityGroupId).ToList();
-            if(ras.Count == 0)
-            {
-                return Activity.LoadByActivityGroupId(this.ActivityGroupId.Value, dc: dc);
-            }
-            else
-            {
-                var activityIds = ras.Select(x => x.ActivityId.Value).ToList();
-                return Activity.LoadList(activityIds, dc: dc);
-            }
-        }
-
         public SystemMessages DeclineInvite(Account account, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();

@@ -458,16 +458,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
             foreach (var registrant in registrantsOfSchool)
             {
-                var activities = registrant.GetActivities();
+                var participationObjects = registrant.GetParticipationObjects();
 
-                if (!activities.Any(a => otherActiviesInGroup.Any(oa => a.ID == oa.ID)))
+                if (!participationObjects.Any(po => otherActiviesInGroup.Any(oa => po.ObjectID == oa.ID && po.ObjectType == ParticipationObjectType.Activity)))
                 {
                     availableRegistrants.Add(registrant);
                 }
-
             }
-
-
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.AvailableRegistrants = availableRegistrants;
@@ -509,7 +506,15 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     Registrant registrant = Registrant.Load(addedRegistrant.ID.Value);
 
-                    var registrantActivity = registrant.AddOrUpdateActivity(addedRegistrant.ID.Value, activity.ID.Value, activity.SeatsAvailable.Value, activity.WaitingListSeats.Value, activity.SeatsAvailable.Value, 0, 0, SessionVariables.LoggedInUser.ID.Value, msgs);
+                    var registrantActivity = registrant.AddOrUpdateParticipationObject(
+                        addedRegistrant.ID.Value, 
+                        activity.ID.Value, 
+                        ParticipationObjectType.Activity,
+                        RegistrationAssignmentType.Reserved,
+                        null,
+                        null,
+                        SessionVariables.LoggedInUser.ID.Value, 
+                        msgs);
 
                     updatedRegistrants.Add(registrant);
                 }
@@ -1056,23 +1061,23 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("index", "activity");
         }
 
-        [HttpPost]
-        public ActionResult NewOffering(string id, string activitynameoffer)
-        {
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
-            var childActivity = activity.CreateChild(activitynameoffer, SessionVariables.LoggedInUser.ID.Value, msgs);
+        //[HttpPost]
+        //public ActionResult NewOffering(string id, string activitynameoffer)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var activity = Activity.LoadByUid(id.ToGuid());
+        //    var childActivity = activity.CreateChild(activitynameoffer, SessionVariables.LoggedInUser.ID.Value, msgs);
 
-            ViewBag.Messages = msgs;
-            if (msgs.HasNoErrors())
-            {
-                return RedirectToAction("editsetup", new { id = childActivity.ID });
-            }
-            else
-            {
-                return RedirectToAction("index", "activity");
-            }
-        }
+        //    ViewBag.Messages = msgs;
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        return RedirectToAction("editsetup", new { id = childActivity.ID });
+        //    }
+        //    else
+        //    {
+        //        return RedirectToAction("index", "activity");
+        //    }
+        //}
 
         [HttpGet]
         public ActionResult Attendance(string id)
@@ -1271,50 +1276,50 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        [HttpPost]
-        public ActionResult WaitingList(string id, string numbertomove, string movefromto)
-        {
-            var msgs = new SystemMessages();
-            Activity activity = null;
+        //[HttpPost]
+        //public ActionResult WaitingList(string id, string numbertomove, string movefromto)
+        //{
+        //    var msgs = new SystemMessages();
+        //    Activity activity = null;
 
-            if (numbertomove.IsNumber() && movefromto.IsNotEmpty())
-            {
-                var ra = RegistrantActivity.Load(id.ToInteger());
-                if (movefromto.ToLower() == "to")
-                {
-                    if (numbertomove.ToInteger() > ra.NumberOfSeats)
-                    {
-                        numbertomove = ra.NumberOfSeats.ToString();
-                    }
-                    ra.NumberOfWaitingListSeats += numbertomove.ToInteger();
-                    ra.NumberOfSeats -= numbertomove.ToInteger();
-                }
-                else
-                {
-                    if (numbertomove.ToInteger() > ra.NumberOfWaitingListSeats)
-                    {
-                        numbertomove = ra.NumberOfWaitingListSeats.ToString();
-                    }
-                    ra.NumberOfWaitingListSeats -= numbertomove.ToInteger();
-                    ra.NumberOfSeats += numbertomove.ToInteger();
-                }
+        //    if (numbertomove.IsNumber() && movefromto.IsNotEmpty())
+        //    {
+        //        var ra = RegistrantActivity.Load(id.ToInteger());
+        //        if (movefromto.ToLower() == "to")
+        //        {
+        //            if (numbertomove.ToInteger() > ra.NumberOfSeats)
+        //            {
+        //                numbertomove = ra.NumberOfSeats.ToString();
+        //            }
+        //            ra.NumberOfWaitingListSeats += numbertomove.ToInteger();
+        //            ra.NumberOfSeats -= numbertomove.ToInteger();
+        //        }
+        //        else
+        //        {
+        //            if (numbertomove.ToInteger() > ra.NumberOfWaitingListSeats)
+        //            {
+        //                numbertomove = ra.NumberOfWaitingListSeats.ToString();
+        //            }
+        //            ra.NumberOfWaitingListSeats -= numbertomove.ToInteger();
+        //            ra.NumberOfSeats += numbertomove.ToInteger();
+        //        }
 
-                msgs.AddRange(ra.Save());
+        //        msgs.AddRange(ra.Save());
 
-                if (msgs.HasNoErrors())
-                {
-                    msgs.Add("The waiting list has been updated for " + ra.RegistrantName, MessageType.Success);
-                }
+        //        if (msgs.HasNoErrors())
+        //        {
+        //            msgs.Add("The waiting list has been updated for " + ra.RegistrantName, MessageType.Success);
+        //        }
 
-                activity = Activity.Load(ra.ActivityId.Value);
-            }
+        //        activity = Activity.Load(ra.ActivityId.Value);
+        //    }
 
-            ViewBag.Messages = msgs;
-            ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.Registrants = activity.GetRegistrantActivities();
-            return View("Registrants", activity);
+        //    ViewBag.Messages = msgs;
+        //    ViewBag.IsActivityLeader = IsActivityLeader(activity);
+        //    ViewBag.Registrants = activity.GetRegistrantActivities();
+        //    return View("Registrants", activity);
 
-        }
+        //}
 
         [HttpGet]
         public ActionResult RegistrantSummary(string id)
@@ -1408,7 +1413,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult RegistrantDetail(string id)
         {
             var ra = RegistrantActivity.Load(id.ToInteger());
-            var activity = Activity.Load(ra.ActivityId.Value);
+            var activity = Activity.Load(ra.ParticipationObjectId.Value);
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -1421,7 +1426,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             var ra = RegistrantActivity.Load(id.ToInteger());
-            var activity = Activity.Load(ra.ActivityId.Value);
+            var activity = Activity.Load(ra.ParticipationObjectId.Value);
 
             if (!datepaid.IsDateTime())
             {
@@ -1712,7 +1717,16 @@ namespace AfterSchool.Areas.Org.Controllers
                                 amsgs, 
                                 adc);
 
-                            var ra = registrant.AddOrUpdateActivity(registration.ID.Value, af.ActivityId.Value, seatCount, waitingListSeatCount, applicationSeatCount, invitationSeatCount, declinedSeatCount, 0, amsgs, dc: adc);
+                            var ra = registrant.AddOrUpdateParticipationObject(
+                                registration.ID.Value, 
+                                af.ActivityId.Value, 
+                                ParticipationObjectType.Activity,
+                                RegistrationAssignmentType.Reserved,
+                                null,
+                                null,
+                                SessionVariables.LoggedInUser.ID.Value,
+                                amsgs, 
+                                dc: adc);
 
                             for (var i = 0; i < headers.Count; i++)
                             {
@@ -1826,19 +1840,19 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityForm = activity.GetActiveActivityForm();
 
             //create form(s) if there is no form
-            if (activityForm.IsEmpty() && !activity.IsChildActivity)
-            {               
-                activity.CopyDefaultForm(SessionVariables.LoggedInUser.ID.Value);
-                activityForm = activity.GetActiveActivityForm();
+            //if (activityForm.IsEmpty() && !activity.IsChildActivity)
+            //{               
+            //    activity.CopyDefaultForm(SessionVariables.LoggedInUser.ID.Value);
+            //    activityForm = activity.GetActiveActivityForm();
 
-                List<Activity> children = activity.GetChildActivities();
-                foreach(var child in children)
-                {
-                    var af = child.AddFormAndActivitate(activityForm.ToForm(true), SessionVariables.LoggedInUser.ID.Value);
-                    af.IsPublished = activityForm.IsPublished;
-                    af.Save();
-                }
-            }
+            //    List<Activity> children = activity.GetChildActivities();
+            //    foreach(var child in children)
+            //    {
+            //        var af = child.AddFormAndActivitate(activityForm.ToForm(true), SessionVariables.LoggedInUser.ID.Value);
+            //        af.IsPublished = activityForm.IsPublished;
+            //        af.Save();
+            //    }
+            //}
 
             var questionGroups = activityForm.GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
@@ -2133,14 +2147,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private bool IsActivityLeader(Activity activity)
         {
-            if (activity.IsChildActivity)
-            {
-                return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.LoggedInUser.IsActivityLeader(activity.GetParentActivity());
-            }
-            else
-            {
-                return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.LoggedInUser.IsActivityLeader(activity);
-            }
+            return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.LoggedInUser.IsActivityLeader(activity);            
         }
 
        

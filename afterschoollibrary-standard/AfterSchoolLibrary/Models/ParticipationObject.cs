@@ -38,6 +38,7 @@ namespace AfterSchoolLibrary
         public string ContactPhone { get; set; }
         public string ContactEmail { get; set; }
         public string CostDescription { get; set; }
+        public RegistrationMode RegistrationModeId { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }       
@@ -63,6 +64,7 @@ namespace AfterSchoolLibrary
             ContactEmail = activity.ContactEmail;
             ContactPhone = activity.ContactPhone;
             CostDescription = activity.CostDescription;
+            RegistrationModeId = activity.RegistrationModeId;
            
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -110,6 +112,7 @@ namespace AfterSchoolLibrary
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             // TODO: PayLater = activityGroup.AllowToPayLater;
+            RegistrationModeId = activityGroup.RegistrationModeId;
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -143,6 +146,7 @@ namespace AfterSchoolLibrary
             ContactPhone = aag.ContactPhone;
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
+            RegistrationModeId = RegistrationMode.Apply; // aag.RegistrationModeId;
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -224,18 +228,131 @@ namespace AfterSchoolLibrary
         {
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
             {
-                if (ObjectType == ParticipationObjectType.Activity)
-                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
-                else
-                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                if (IsActivity())
+                    return this.GetActivity().GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                else if (IsActivityGroup())
+                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                else if (IsAccountActivityGroup())
+                {
+                    var aag = this.GetAccountActivityGroup();
+                    return aag.GetActivityGroup(msgs, dc).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                }
             }
             else
             {
                 if (ObjectType == ParticipationObjectType.Activity)
-                    return ((Activity)Object).GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
-                else
-                    return ((ActivityGroup)Object).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                    return this.GetActivity().GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                else if (IsActivityGroup())
+                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                else if (IsAccountActivityGroup())
+                {
+                    var aag = this.GetAccountActivityGroup();
+                    return aag.GetActivityGroup(msgs, dc).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                }
             }
+
+            return "";
+        }
+
+        public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentType(
+                assignmentType: assignmentType,
+                participationObjectId: this.ObjectID,
+                participationObjectType: this.ObjectType,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public RegistrationPeriod GetCurrentRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+                return GetActivity().GetCurrentRegistrationPeriod(msgs, dc);
+
+            if (IsActivityGroup())
+                return GetActivityGroup().GetCurrentRegistrationPeriod(msgs, dc);
+
+            if (IsAccountActivityGroup())
+                return GetAccountActivityGroup().GetCurrentRegistrationPeriod(msgs, dc);
+
+            return null;
+        }
+
+        public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+                return GetActivity().GetCurrentOrNextRegistrationPeriod(msgs, dc);
+
+            if (IsActivityGroup())
+                return GetActivityGroup().GetCurrentOrNextRegistrationPeriod(msgs, dc);
+
+            if (IsAccountActivityGroup())
+                return GetAccountActivityGroup().GetCurrentOrNextRegistrationPeriod(msgs, dc);
+
+            return null;
+        }
+
+        public bool IsActivity()
+        {
+            return ObjectType == ParticipationObjectType.Activity;
+        }
+
+        public bool IsAccountActivityGroup()
+        {
+            return ObjectType == ParticipationObjectType.AccountActivityGroup;
+        }
+
+        public bool IsActivityGroup()
+        {
+            return ObjectType == ParticipationObjectType.ActivityGroup;
+        }
+
+        public ActivityGroup GetActivityGroup()
+        {
+            return (ActivityGroup)this.Object;
+        }
+
+        public AccountActivityGroup GetAccountActivityGroup()
+        {
+            return (AccountActivityGroup)this.Object;
+        }
+
+        public Activity GetActivity()
+        {
+            return (Activity)this.Object;
+        }
+
+        public int? GetActivityGroupId()
+        {
+            return IsActivityGroup() ? ObjectID : null;
+        }
+
+        public int? GetAccountActivityGroupId()
+        {
+            return IsAccountActivityGroup() ? ObjectID : null;
+        }
+
+        public int? GetActivityId()
+        {
+            return IsActivity() ? ObjectID : null;
+        }
+
+        public ActivityPayment AddPayment(decimal amount, Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var payment = new ActivityPayment()
+            {
+                ParticipationObjectId = this.ObjectID,
+                ParticipationObjectTypeId = this.ObjectType,
+                Amount = amount,
+                RegistrantId = registrant.ID,
+                AccountId = this.OwnerAccount.ID,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+            };
+            msgs.AddRange(payment.Save(dc));
+            return payment;
         }
     }
 }

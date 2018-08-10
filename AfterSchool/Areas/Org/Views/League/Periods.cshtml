@@ -60,7 +60,7 @@
                                     <td>@period.GetStatus()</td>
                                     <td class="text-center">@period.GetRegistrationCount()</td>
                                     <td>
-                                        <div class="btn-group">
+                                        <div class="btn-group hide">
                                             @if (period.EndDateTime.Value > account.NowInAccountTimeZone() && !Model.IsArchived)
                                             {
                                                 <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="modal-send" onclick="sendPeriod(@period.ID)">

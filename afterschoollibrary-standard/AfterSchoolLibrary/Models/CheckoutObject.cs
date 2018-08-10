@@ -56,7 +56,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return ParticipationObject.IsNotEmpty() ? ParticipationObject.Cost.Value * NumberOfSeats : 0;
+                return ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue ? ParticipationObject.Cost.Value * NumberOfSeats : 0;
             }
         }
 
