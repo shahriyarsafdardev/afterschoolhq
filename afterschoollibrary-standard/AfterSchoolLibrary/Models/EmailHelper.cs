@@ -94,6 +94,8 @@ namespace AfterSchoolLibrary
             var subscription = checkoutObject.SubscriptionPlan;
             var registrant = checkoutObject.Registrant;
             var parentOrGuardian = registrant.GetParentOrGuardian(msgs);
+            var stripeAccount = billingAccount.GetStripeAccount(msgs);
+            var canAccountAcceptPayments = stripeAccount.IsNotEmpty() && stripeAccount.IsVerified;
 
             var receiptRows = "";
             var regStatus = "";
@@ -123,6 +125,8 @@ namespace AfterSchoolLibrary
             // so we should treat them as registered
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
                 amountDueOrPaid = "Amount Due (If Confirmed)";
+            else if (!canAccountAcceptPayments)
+                amountDueOrPaid = "Amount Due";
             else
                 amountDueOrPaid = "Amount Paid";
 

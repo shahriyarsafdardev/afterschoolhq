@@ -1411,6 +1411,18 @@ namespace AfterSchoolLibrary
                 );
         }
 
+        public static int GetActiveUserCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountWebUser.GetCount(
+                new Hashtable() {
+                    { "AccountId", account.ID },
+                    { "IsActive", true }
+                },
+                msgs,
+                dc
+                );
+        }
+
         public static List<WebUser> GetUsers(this Account account, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountWebUser.Load(
@@ -1873,7 +1885,6 @@ namespace AfterSchoolLibrary
         public static StripeAccount GetOrCreateStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-
             var stripeAccount = account.GetStripeAccount(msgs, dc);
 
             if (stripeAccount.IsEmpty())

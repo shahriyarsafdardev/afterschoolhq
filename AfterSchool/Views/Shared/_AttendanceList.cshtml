@@ -56,7 +56,7 @@
                     var presentCount = attendance.GetPresentCount();
                     <tr>
                         <td><a href="@Url.Action("trackattendance", "activity", new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a></td>
-                        <td>@account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString()</td>
+                        <td>@account.ConvertToAccountTimeZone(attendance.GetActivityInstance().StartDateTime.Value).ToLongDateString()</td>
                         <td>@seatsPossible</td>
                         <td>@presentCount</td>
                         <td>@Math.Max(0, seatsPossible - presentCount)</td>
