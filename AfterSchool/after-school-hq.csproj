@@ -1294,6 +1294,7 @@
     <Content Include="Views\SignUp\CreateAccount.cshtml" />
     <Content Include="Views\Shared\_Teams.cshtml" />
     <Content Include="Views\Account\MakePayment.cshtml" />
+    <Content Include="Views\Shared\_DashboardNotfications.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

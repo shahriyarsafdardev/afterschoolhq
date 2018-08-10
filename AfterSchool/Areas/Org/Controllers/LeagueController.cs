@@ -544,6 +544,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, id.ToInteger(), msgs);
             msgs.AddRange(accountActivityGroup.UpdateInvitationStatus(inviteStatus, SessionVariables.CurrentAccount.ID.Value));
 
+            if (msgs.HasNoErrors())
+            {
+               msgs.AddRange(accountActivityGroup.SendInviteStatusUpdateEmail(inviteStatus, SessionVariables.CurrentAccount, SessionVariables.LoggedInUser,msgs));
+            }
+
             return RedirectToAction("IndexExternal", new { id });
         }
 

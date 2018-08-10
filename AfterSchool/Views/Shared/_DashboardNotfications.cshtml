@@ -1,0 +1,45 @@
+﻿@{ 
+    var notifications = (List<TempDataDictionary>)ViewData["Notifications"];
+}
+
+@if (notifications.IsEmpty())
+{
+    <div class="widget">
+        <div class="widget-head">
+            <h1>Notifications</h1>
+        </div>
+        <div class="widget-tile">
+            <p>
+                There are no notifications.
+            </p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Notifications</th>
+                    <th class="text-center"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var notification in notifications)
+                {
+
+                    <tr>
+                        <td>
+                            <p>@notification["subject"]</p>
+                        </td>
+                        <td>
+                            <p>@notification["message"]</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
