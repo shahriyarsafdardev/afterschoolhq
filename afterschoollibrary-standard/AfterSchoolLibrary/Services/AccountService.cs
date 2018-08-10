@@ -1033,10 +1033,10 @@ namespace AfterSchoolLibrary
             return RegistrantActivity.GetCount(new Hashtable() { { "ActivityAccountId", account.ID.Value } });
         }
 
-        public static int GetRegistrantCount(this Account account, DatabaseConnection dc = null)
-        {
-            return RegistrantActivity.GetSeatCountByAccountId(account.ID.Value, dc: dc);
-        }
+        //public static int GetRegistrantCount(this Account account, DatabaseConnection dc = null)
+        //{
+        //    return RegistrantActivity.GetSeatCountByAccountId(account.ID.Value, dc: dc);
+        //}
 
         public static List<Attendance> GetCompletedAttendance(this Account account, DatabaseConnection dc = null)
         {
@@ -1762,20 +1762,12 @@ namespace AfterSchoolLibrary
                     // mark as completed
                     amsgs.AddRange(checkoutObject.Registration.FinalizeRegistration(loggedInUser, adc));
 
-                    // TODO: Allow user to register for multiple activities in one session at once
-
-                    // add them to the activity
-                    if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
-                    {
-                        var activity = ((Activity)checkoutObject.ParticipationObject.Object);
-                        activity.ProcessRegistration(
-                            checkoutObject: checkoutObject,
-                            loggedInUser: loggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
-                    }
-
-                    // TODO: Add to an activity group if they are registering for a session
+                    // TODO: Allow user to register for multiple activities in one session at once MAYBE
+                    Registration.ProcessRegistration(
+                        checkoutObject: checkoutObject,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);                    
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

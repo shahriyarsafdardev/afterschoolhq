@@ -691,7 +691,7 @@ name: RegistrantActivity
 description: How a registrant is placed in an activity/team. 
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
-property: ActivityId, int?, Int, required
+property: ActivityId, int?, Int
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: RegistrationId, int?, Int

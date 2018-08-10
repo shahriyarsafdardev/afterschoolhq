@@ -407,7 +407,10 @@ namespace AfterSchoolLibrary
 
         public int GetRegistrantCount(DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByActivityId(this.ActivityId.Value, dc: dc);
+            return RegistrantActivity.GetSeatCountByParticipationObject(
+                this.ActivityId.Value, 
+                ParticipationObjectType.Activity, 
+                dc: dc);
         }
 
         public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)

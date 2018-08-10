@@ -22,9 +22,6 @@ namespace AfterSchoolLibrary
 		/// Required.
 		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
 		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		/// <summary>
 		/// Required.
@@ -174,8 +171,6 @@ namespace AfterSchoolLibrary
 
 			if (this.RegistrantId.IsEmpty())
 				msgs.Add("RegistrantId is required on RegistrantActivity object", MessageType.Error);
-			if (this.ActivityId.IsEmpty())
-				msgs.Add("ActivityId is required on RegistrantActivity object", MessageType.Error);
 			if (this.ParticipationObjectTypeId.IsEmpty())
 				msgs.Add("ParticipationObjectTypeId is required on RegistrantActivity object", MessageType.Error);
 			if (this.ParticipationObjectId.IsEmpty())
@@ -503,20 +498,22 @@ namespace AfterSchoolLibrary
             return dq.GetCount();
         }
 
-        public static bool ExistsByActivityIdByRegistrantId(int activityId, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool ExistsByParticipationObjectByRegistrant(int participationObjectId, ParticipationObjectType participationObjectType, int registrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ActivityId"], activityId);
+            dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
+            dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantId);
             return dq.GetCount(msgs) > 0;
         }
 
-        public static bool ExistsByActivityIdByRegistrantIds(int activityId, List<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool ExistsByParticipationObjectByRegistrants(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ActivityId"], activityId);
+            dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
+            dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
             return dq.GetCount(msgs) > 0;
         }
@@ -594,7 +591,7 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
-        public static int GetSeatCountByActivityId(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetSeatCountByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -613,7 +610,8 @@ namespace AfterSchoolLibrary
             sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
             dq.SelectParameters.Add(sp3);
 
-            dq.Criterias.Add(ObjectMap["activityId"], activityId);
+            dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
+            dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
 
             var results = dq.Select(msgs);
             if(results.Rows.Any())
@@ -622,33 +620,33 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
-        public static int GetSeatCountByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
-            dq.SelectParameters.Clear();
+        //public static int GetSeatCountByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+        //    dq.Connection = dc;
+        //    dq.UseParameterizedQuery = false;
+        //    dq.SelectParameters.Clear();
 
-            BasicLibrary.DataAccess.SelectParameter sp1 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfSeats"]);
-            sp1.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp1);
+        //    BasicLibrary.DataAccess.SelectParameter sp1 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfSeats"]);
+        //    sp1.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
+        //    dq.SelectParameters.Add(sp1);
 
-            BasicLibrary.DataAccess.SelectParameter sp2 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
-            sp2.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp2);
+        //    BasicLibrary.DataAccess.SelectParameter sp2 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
+        //    sp2.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
+        //    dq.SelectParameters.Add(sp2);
 
-            BasicLibrary.DataAccess.SelectParameter sp3 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
-            sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp3);
+        //    BasicLibrary.DataAccess.SelectParameter sp3 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
+        //    sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
+        //    dq.SelectParameters.Add(sp3);
 
-            dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId);
+        //    dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId);
 
-            var results = dq.Select(msgs);
-            if (results.Rows.Any())
-                return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
+        //    var results = dq.Select(msgs);
+        //    if (results.Rows.Any())
+        //        return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
 
-            return 0;
-        }
+        //    return 0;
+        //}
 
         public static int GetSeatCountByRegistrationPeriodId(int RegistrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -678,33 +676,33 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
-        public static int GetSeatCountByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
-            dq.SelectParameters.Clear();
+        //public static int GetSeatCountByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+        //    dq.Connection = dc;
+        //    dq.UseParameterizedQuery = false;
+        //    dq.SelectParameters.Clear();
 
-            BasicLibrary.DataAccess.SelectParameter sp1 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfSeats"]);
-            sp1.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp1);
+        //    BasicLibrary.DataAccess.SelectParameter sp1 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfSeats"]);
+        //    sp1.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
+        //    dq.SelectParameters.Add(sp1);
 
-            BasicLibrary.DataAccess.SelectParameter sp2 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
-            sp2.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp2);
+        //    BasicLibrary.DataAccess.SelectParameter sp2 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
+        //    sp2.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
+        //    dq.SelectParameters.Add(sp2);
 
-            BasicLibrary.DataAccess.SelectParameter sp3 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
-            sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp3);
+        //    BasicLibrary.DataAccess.SelectParameter sp3 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
+        //    sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
+        //    dq.SelectParameters.Add(sp3);
 
-            dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+        //    dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
 
-            var results = dq.Select(msgs);
-            if (results.Rows.Any())
-                return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
+        //    var results = dq.Select(msgs);
+        //    if (results.Rows.Any())
+        //        return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
 
-            return 0;
-        }
+        //    return 0;
+        //}
 
         public static List<RegistrantActivity> LoadByRegistrationIds(List<int> RegistrationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -722,20 +720,20 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<RegistrantActivity> GetByActivityIds(List<int> activityIds, List<int> registrantIds, DateTime startDate, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
+        //public static List<RegistrantActivity> GetByActivityIds(List<int> activityIds, List<int> registrantIds, DateTime startDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    var dq = DatabaseQuery;
+        //    dq.Connection = dc;
 
-            dq.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"]);
+        //    dq.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"]);
 
-            dq.Criterias.Add(Activity.ObjectMap["Id"], activityIds, DatabaseCriteriaOperatorEnum.In);
-            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
-            dq.Criterias.Add(ObjectMap["NumberOfSeats"], 1, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-            dq.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+        //    dq.Criterias.Add(Activity.ObjectMap["Id"], activityIds, DatabaseCriteriaOperatorEnum.In);
+        //    dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+        //    dq.Criterias.Add(ObjectMap["NumberOfSeats"], 1, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+        //    dq.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
+        //    return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        //}
 
         //public RegistrationActivity GetRegistrationActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
         //{

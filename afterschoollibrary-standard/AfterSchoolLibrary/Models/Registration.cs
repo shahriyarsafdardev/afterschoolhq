@@ -1979,6 +1979,63 @@ namespace AfterSchoolLibrary
             return null;
         }
 
+        private static RegistrationAssignmentType ProcessRegistrationSeats(CheckoutObject checkoutObject, RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var participationObject = checkoutObject.ParticipationObject;
+            var seatsAvailable = participationObject.SeatsRemaining;
+            var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
+            var isPendingOrReserved = ra.IsNotEmpty() && (ra.AssignmentTypeId == RegistrationAssignmentType.Reserved || ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment);
+
+            // if they're paying for a registration they already completed
+            if (isPendingOrReserved)
+                return RegistrationAssignmentType.Reserved;
+            
+            if (participationObject.RegistrationModeId == RegistrationMode.Apply)
+                return RegistrationAssignmentType.Applied;
+            else if (!seatsAvailable.HasValue || seatsAvailable >= checkoutObject.NumberOfSeats)
+                return RegistrationAssignmentType.Reserved;
+            else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= checkoutObject.NumberOfSeats)
+                return RegistrationAssignmentType.WaitingList;
+
+            msgs.Add(
+                $"Sorry, there are no more reserved seats or waiting list seats available for {participationObject.Name}",
+                MessageType.UserError);
+
+            return RegistrationAssignmentType.NotSet;
+        }
+
+        public static void ProcessRegistration(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var participationObject = checkoutObject.ParticipationObject;
+            var ra = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
+            var assignmentType = Registration.ProcessRegistrationSeats(checkoutObject, ra, msgs, dc);
+            var activityGroupId = new int?();
+
+            if (msgs.HasErrors())
+                return;
+
+            if (participationObject.IsActivity())
+                activityGroupId = participationObject.GetActivityGroup().ID;
+
+            // get the registration period to see what period the registrant registered
+            var period = participationObject.GetCurrentRegistrationPeriod(msgs, dc);
+
+            // get the registrant record that was created just for the account
+            var accountRegistrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
+
+            // add or update the registrant for the activity
+            ra = accountRegistrant.AddOrUpdateParticipationObject(
+                registrationId: checkoutObject.Registration.ID.Value,
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                assignmentType: assignmentType,
+                registrationPeriodId: period?.ID.IfEmpty(0),
+                activityGroupId: activityGroupId,
+                loggedInUserId: loggedInUser.ID.Value,
+                msgs: msgs,
+                dc: dc);
+        }
+
         #endregion
     }
 }

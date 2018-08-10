@@ -821,20 +821,14 @@ namespace AfterSchoolLibrary
 
         public bool IsRegisteredFor(ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (participationObject.ObjectType == ParticipationObjectType.Activity)
-            {
-                var childrenRegistrants = this.GetChildren(participationObject.OwnerAccount.ID.Value, msgs, dc);
+            var childrenRegistrants = this.GetChildren(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
-                return childrenRegistrants.Any() && RegistrantActivity.ExistsByActivityIdByRegistrantIds(
-                    activityId: participationObject.ObjectID.Value,
-                    registrantIds: childrenRegistrants.Select(registrant => registrant.ID.Value).ToList(),
-                    msgs: msgs,
-                    dc: dc);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            return childrenRegistrants.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                registrantIds: childrenRegistrants.Select(registrant => registrant.ID.Value).ToList(),
+                msgs: msgs,
+                dc: dc);
         }
 
         public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)

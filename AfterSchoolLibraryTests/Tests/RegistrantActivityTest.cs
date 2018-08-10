@@ -215,29 +215,29 @@ namespace AfterSchoolLibraryTests
         /// <summary>
         /// Test getting Registrant Activities (list) by ActivityIds (list) from RegistrantActivity Table
         /// </summary>
-        [Fact(Skip = "Need to fix")]
-        public void GetByActivityIdsTest()
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
-            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-            var instance = ActivityInstanceFactory.Create(activity, schedule, DateTime.UtcNow.AddWeeks(-1), DateTime.UtcNow.AddWeeks(1), msgs, dc);
+        //[Fact(Skip = "Need to fix")]
+        //public void GetByActivityIdsTest()
+        //{
+        //    var user = Factories.WebUserFactory.Create(msgs, dc);
+        //    var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+        //    var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+        //    var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc: dc);
+        //    var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
+        //    var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+        //    var instance = ActivityInstanceFactory.Create(activity, schedule, DateTime.UtcNow.AddWeeks(-1), DateTime.UtcNow.AddWeeks(1), msgs, dc);
 
-            var activityIds = new List<int>
-            {
-                activity.ID.Value
-            };
+        //    var activityIds = new List<int>
+        //    {
+        //        activity.ID.Value
+        //    };
 
-            var registrantIds = new List<int>
-            {
-                registrant.ID.Value
-            };
+        //    var registrantIds = new List<int>
+        //    {
+        //        registrant.ID.Value
+        //    };
 
-            Assert.Single(RegistrantActivity.GetByActivityIds(activityIds, registrantIds, DateTime.UtcNow, dc: dc));
-        }             
+        //    Assert.Single(RegistrantActivity.GetByActivityIds(activityIds, registrantIds, DateTime.UtcNow, dc: dc));
+        //}             
 
         [Fact]
         public void CancelRegistrationTest()

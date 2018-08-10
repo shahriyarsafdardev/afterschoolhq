@@ -800,7 +800,11 @@ namespace AfterSchoolLibrary
 
         public int GetRegistrantCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByActivityId(this.ID.Value, msgs, dc);
+            return RegistrantActivity.GetSeatCountByParticipationObject(
+                this.ID.Value,
+                ParticipationObjectType.Activity,
+                msgs, 
+                dc);
         }
 
         public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
