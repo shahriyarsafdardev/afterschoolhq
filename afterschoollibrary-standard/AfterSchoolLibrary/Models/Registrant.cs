@@ -642,17 +642,26 @@ namespace AfterSchoolLibrary
         {
             var parentAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
             var studentQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
-            return this.AddAnswer(parentAnswer.Text, studentQuestion, loggedInUser.ID.Value, msgs, dc);
+            if (studentQuestion.IsNotEmpty() && parentAnswer.IsNotEmpty())
+                return this.AddAnswer(parentAnswer.Text, studentQuestion, loggedInUser.ID.Value, msgs, dc);
+
+            return null;
         }
 
         public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddAnswer(answerText, question, null, loggedInUserId, msgs, dc);
+            if (question.IsNotEmpty())
+                return AddAnswer(answerText, question, null, loggedInUserId, msgs, dc);
+
+            return null;
         }
 
         public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUserId, msgs, dc);
+            if (question.IsNotEmpty())
+                return AddAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUserId, msgs, dc);
+
+            return null;
         }
 
         public FormQuestionAnswer AddAnswer(string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
