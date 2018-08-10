@@ -881,7 +881,7 @@ namespace AfterSchoolLibrary
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
             dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
-            dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+            // dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 
             // aggregate related registrations
             var regQuery = Registration.DatabaseQuery;
@@ -889,7 +889,7 @@ namespace AfterSchoolLibrary
             regQuery.Joins[0].Alias = "Registrant1";
             regQuery.SelectParameters.Clear();
             regQuery.SelectParameters.Add(
-                Registration.ObjectMap["FirstRegistrationId"], 
+                Registration.ObjectMap["Id"], 
                 "regid", 
                 string.Format("ISNULL({0}, {1})", DatabaseQuery.FunctionReplaceValue, ObjectMap["ID"].ParameterFullName)
                 );
@@ -911,7 +911,8 @@ namespace AfterSchoolLibrary
                     raQuery.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectTypeId"], (int)participationObjectType);
                 }
 
-                raQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                if (rat != RegistrationAssignmentType.NotSet)
+                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                 regQuery.Criterias.Add(ObjectMap["Id"], raQuery, DatabaseCriteriaOperatorEnum.In);
             }
@@ -932,7 +933,8 @@ namespace AfterSchoolLibrary
                     // has start dates that are less than or equal to now
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-                    aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.In);
 
@@ -948,7 +950,8 @@ namespace AfterSchoolLibrary
                     // has end dates that are greater than or equal to now
                     bQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
-                    bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], bQuery, DatabaseCriteriaOperatorEnum.In);
                 }
@@ -966,7 +969,8 @@ namespace AfterSchoolLibrary
                     aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-                    aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                     var parameter = Registrant.ObjectMap["id"];
                     parameter.TableAlias = "Registrant1";
@@ -984,7 +988,9 @@ namespace AfterSchoolLibrary
                     bQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
                     bQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
 
-                    bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+
                     bQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], bQuery, DatabaseCriteriaOperatorEnum.In);
@@ -1003,7 +1009,8 @@ namespace AfterSchoolLibrary
                     aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
-                    aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                     var parameter = Registrant.ObjectMap["id"];
                     parameter.TableAlias = "Registrant1";

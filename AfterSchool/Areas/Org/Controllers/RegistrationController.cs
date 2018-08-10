@@ -46,41 +46,57 @@ namespace AfterSchool.Areas.Org.Controllers
             var registrationStatus = RegistrationStatus.NotSet;
 
             if (activity.IsNotEmpty())
-            {
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
-            }
 
             if (group.IsNotEmpty())
             {
                 groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
+                var groupList = ActivityGroup.LoadList(groupIds, msgs);
+                groupList.ForEach(x => {
+                    activityIds.AddRange(x.GetActivities(false, false, null, null).Select(y => y.ID.Value));
+                });
             }
 
             if (at.IsNumber())
-            {
                 rat = (RegistrationAssignmentType)at.ToInteger();
-            }
 
             if (regstatus.IsNumber())
-            {
                 registrationStatus = (RegistrationStatus)regstatus.ToInteger();
-            }
 
             if (question.IsNumber())
-            {
                 questionId = question.ToInteger();
-            }
 
-            registrations = SessionVariables.CurrentAccount.SearchRegistrations(q, questionId, groupIds, activityIds, registrationStatus, rat, start, length);
-            totalCount = SessionVariables.CurrentAccount.SearchRegistrationCount(q, questionId, groupIds, activityIds, registrationStatus, rat);                 
+            registrations = SessionVariables.CurrentAccount.SearchRegistrations(
+                q, 
+                questionId, 
+                activityIds,
+                ParticipationObjectType.Activity,
+                registrationStatus, 
+                rat, 
+                start, 
+                length);
+
+            totalCount = SessionVariables.CurrentAccount.SearchRegistrationCount(
+                q, 
+                questionId,
+                activityIds,
+                ParticipationObjectType.Activity,
+                registrationStatus, 
+                rat);                 
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
-            activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.LoggedInUser, false, false).OrderBy(x => x.Name).ToList();
+            activities = SessionVariables.CurrentAccount.GetActivities(
+                UserType.Administrator, 
+                SessionVariables.LoggedInUser,
+                false, 
+                false)
+                .OrderBy(x => x.Name)
+                .ToList();
+
             groups = SessionVariables.CurrentAccount.GetSessions();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
-            {
                 msgs.Add("An email will be sent shortly", MessageType.Success);
-            }
 
             //get all questions
             var activityForms = SessionVariables.CurrentAccount.GetActivityForms().Where(x => x.IsActive).ToList();
@@ -126,7 +142,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
 
             if (group.IsNotEmpty())
+            {
                 groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
+                var groupList = ActivityGroup.LoadList(groupIds, msgs);
+                groupList.ForEach(x => {
+                    activityIds.AddRange(x.GetActivities(false, false, null, null).Select(y => y.ID.Value));
+                });
+            }
 
             if (at.IsNumber())
                 rat = (RegistrationAssignmentType)at.ToInteger();
@@ -144,8 +166,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     account.ID.Value,
                     q,
                     questionId,
-                    groupIds,
                     activityIds,
+                    ParticipationObjectType.Activity,
                     filename,
                     (RegistrationReportType)reporttype.ToInteger(),
                     RegistrationAssignmentType.Reserved,

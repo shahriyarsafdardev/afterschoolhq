@@ -1301,6 +1301,22 @@ namespace AfterSchoolLibrary
             return true;
         }
 
+        public ActivitySchedule GetSchedule(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            switch(this.ParticipationObjectTypeId)
+            {
+                case ParticipationObjectType.AccountActivityGroup:
+                    var aag = this.GetAccountActivityGroup(msgs, dc);
+                    return aag.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
+                case ParticipationObjectType.Activity:
+                    return this.GetActivity(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
+                case ParticipationObjectType.ActivityGroup:
+                    return this.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
+            }
+
+            return null;
+        }
+
         #endregion
     }
 }

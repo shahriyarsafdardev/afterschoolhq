@@ -378,9 +378,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var questionId = new int?();
             var account = SessionVariables.CurrentAccount;
             var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var participationObjectType = ParticipationObjectType.Activity;
 
             if (activity.IsNumber())
                 activityIds = activity.ToInteger().AsList();
+            else
+                activityIds = group.GetActivities(false, false, null, null).Select(x => x.ID.Value).ToList();
 
             if (question.IsNumber())
                 questionId = question.ToInteger();
@@ -390,8 +393,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     account.ID.Value, 
                     q, 
                     questionId,
-                    group.ID.Value.AsList(), 
-                    activityIds, 
+                    activityIds,
+                    participationObjectType,
                     filename, 
                     (RegistrationReportType)reporttype.ToInteger(),
                     RegistrationAssignmentType.Reserved,
@@ -446,24 +449,30 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(group);
         }
 
-        [HttpGet]
-        public ActionResult DownloadRegistrations(string id)
-        {
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var registrations = group.GetRegistrations();
-            string csv = Registration.ExportCSV(registrations, SessionVariables.CurrentAccount, RegistrationReportType.Detailed, RegistrationStatus.NotSet, RegistrationAssignmentType.NotSet, group.ID.Value.AsList());
+        //[HttpGet]
+        //public ActionResult DownloadRegistrations(string id)
+        //{
+        //    var group = ActivityGroup.LoadByUid(id.ToGuid());
+        //    var registrations = group.GetRegistrations();
+        //    string csv = Registration.ExportCSV(
+        //        registrations, 
+        //        SessionVariables.CurrentAccount, 
+        //        RegistrationReportType.Detailed, 
+        //        RegistrationStatus.NotSet, 
+        //        RegistrationAssignmentType.NotSet, 
+        //        group.ID.Value.AsList());
 
-            Response.Clear();
-            Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
-            Response.AddHeader("Content-Disposition", "attachment; filename=registrations.csv");
+        //    Response.Clear();
+        //    Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
+        //    Response.AddHeader("Content-Disposition", "attachment; filename=registrations.csv");
 
-            byte[] filebytes = System.Text.UTF8Encoding.UTF8.GetBytes(csv);
-            Response.AddHeader("Content-Length", filebytes.Length.ToString());
-            Response.BinaryWrite(filebytes);
-            Response.End();
+        //    byte[] filebytes = System.Text.UTF8Encoding.UTF8.GetBytes(csv);
+        //    Response.AddHeader("Content-Length", filebytes.Length.ToString());
+        //    Response.BinaryWrite(filebytes);
+        //    Response.End();
 
-            return RedirectToAction("registrations", new { id = id });
-        }
+        //    return RedirectToAction("registrations", new { id = id });
+        //}
 
         [HttpGet]
         public ActionResult Messages(string id)

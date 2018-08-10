@@ -6,6 +6,7 @@
     var backtolistAction = ViewData["BackToListAction"].ToString();
     var backtolistController = ViewData["BackToListController"].ToString();
     var showPaymentForm = (bool)ViewData["ShowPaymentForm"];
+    var activity = Model.GetActivity();
 
     if (showPaymentForm)
     {
@@ -16,7 +17,7 @@
     <div class="panel-heading">
         <div class="div-group pull-right">
             <a href="@Url.Action("edit", "registration", new { id = Model.GetRegistration().Uid.ToString() })" class="btn btn-primary">View Full Registration</a>
-            <a href="@Url.Action(backtolistAction, backtolistController, new { id = Model.ActivityUid })" class="btn btn-default">&laquo; Back to List</a>
+            <a href="@Url.Action(backtolistAction, backtolistController, new { id = activity.Uid })" class="btn btn-default">&laquo; Back to List</a>
         </div>
         @Model.RegistrantName
     </div>
@@ -72,7 +73,7 @@
             </div>
         </div>
 
-        @if (Model.ActivityCostPerRegistrant > 0 && false)
+        @if (activity.CostPerRegistrant > 0 && false)
         {
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -88,7 +89,7 @@
                                     </td>
                                     <td>
                                         <div class="col-md-6">
-                                            @((Model.ActivityCostPerRegistrant * Model.TotalSeats).ToCurrency()) (@Model.ActivityCostPerRegistrant.ToCurrency() x @Model.TotalSeats Seats)
+                                            @((activity.CostPerRegistrant * Model.TotalSeats).ToCurrency()) (@activity.CostPerRegistrant.ToCurrency() x @Model.TotalSeats Seats)
                                         </div>
                                     </td>
                                 </tr>
