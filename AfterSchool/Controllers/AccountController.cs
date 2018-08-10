@@ -740,7 +740,7 @@ namespace AfterSchool.Controllers
                                allquestions,
                                parentRegistrant,
                                key,
-                               parent1Map[key],
+                               parent1AddressMap[key],
                                SessionVariables.LoggedInUser,
                                amsgs,
                                adc);
