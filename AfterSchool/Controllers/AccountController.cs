@@ -725,6 +725,27 @@ namespace AfterSchool.Controllers
                                adc);
                         }
 
+                        var parent1AddressMap = new Dictionary<QuestionDataType, QuestionDataType>()
+                        {
+                            { QuestionDataType.RegistrantAddress1,  QuestionDataType.Parent1Address1 },
+                            { QuestionDataType.RegistrantAddress2,  QuestionDataType.Parent1Address2 },
+                            { QuestionDataType.RegistrantCity,  QuestionDataType.Parent1City },
+                            { QuestionDataType.RegistrantState,  QuestionDataType.Parent1State },
+                            { QuestionDataType.RegistrantPostalCode,  QuestionDataType.Parent1PostalCode },
+                        };
+
+                        foreach (var key in parent1AddressMap.Keys)
+                        {
+                            student.MapAndAddAnswer(
+                               allquestions,
+                               parentRegistrant,
+                               key,
+                               parent1AddressMap[key],
+                               SessionVariables.LoggedInUser,
+                               amsgs,
+                               adc);
+                        }
+
                         if (parentRegistrant2.IsNotEmpty())
                         {
                             // get parent 2 info
@@ -750,6 +771,8 @@ namespace AfterSchool.Controllers
                                    adc);
                             }
                         }
+
+                        // TODO: maybe should get sibling and copy health info
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
