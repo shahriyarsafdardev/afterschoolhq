@@ -77,18 +77,22 @@
                                             @participationObject.Cost.ToCurrency()
                                         </td>
                                     </tr>
-                                    @foreach (var plan in participationObject.PaymentPlans)
-                                    {
+                                    @if (participationObject.PaymentPlans.Any())
+                                    { 
+                                        foreach (var plan in participationObject.PaymentPlans)
+                                        {
                                         
-                                        <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
-                                            <td>Payment Plan</td>
-                                            <td>
-                                                @plan.CostPerPeriod.ToCurrency() /
-                                                @plan.BillingPeriodTypeId.ToString().ToLower() for
-                                                @plan.TotalPeriods @plan.BillingPeriodTypeId.ToString().ToLower()s
-                                            </td>
-                                        </tr>
+                                            <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
+                                                <td>Payment Plan</td>
+                                                <td>
+                                                    @plan.CostPerPeriod.ToCurrency() /
+                                                    @plan.BillingPeriodTypeId.ToString().ToLower() for
+                                                    @plan.TotalPeriods @plan.BillingPeriodTypeId.ToString().ToLower()s
+                                                </td>
+                                            </tr>
+                                        }
                                     }
+
                                     @if (participationObject.SubscriptionPlans.Any())
                                     {
                                         <tr>
@@ -99,6 +103,10 @@
                                                 @participationObject.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
                                             </td>
                                         </tr>
+                                    }
+                                    else
+                                    {
+                                        <span id="subscription-total-value" class="hide">0</span>
                                     }
                                 </tbody>
                                 <tfoot>
@@ -244,8 +252,8 @@
         }
     }
 
-    function updateTotals(regTotalToday) {
-        let total = regTotalToday + getSubscriptionTotalValue();
+    function updateTotals(regFee, regTotalToday) {
+        let total = regFee + regTotalToday + getSubscriptionTotalValue();
         $('#total-due-today').html(total.toFixed(2));
     }
 
@@ -258,16 +266,21 @@
 
     function updatePaymentOptionCost(paymentPlanId) {
         let regTotalToday = parseFloat($(`#payment-plan-cost-${paymentPlanId}`).html());
-        updateTotals(regTotalToday);
-
+        
         $('#registration-fee-row').addClass('hide');
         $('.paymentplan-fee-row').addClass('hide');
 
         if (paymentPlanId == 0) {
+            updateTotals(getRegFee(), 0);
             $('#registration-fee-row').removeClass('hide');
         } else {
+            updateTotals(0, regTotalToday);
             $(`#paymentplan-fee-row-${paymentPlanId}`).removeClass('hide');
         }
+    }
+
+    function getRegFee() {
+        return parseFloat($('#fee-total-value').html());
     }
 
     function sizePaymentBlock() {
@@ -299,7 +312,14 @@
             updatePaymentOptionCost(paymentPlanId);
         });
 
-        updatePaymentOptionCost(0);
+        @if (participationObject.PaymentPlans.Any())
+        { 
+            @: updatePaymentOptionCost(0);
+        }
+        else
+        {
+            @: updateTotals(getRegFee(), 0);
+        }
 
         $('#existing-payment-form').submit(function () {
             $('#btn-paywithexistingcard').html('Processing Payment...');
