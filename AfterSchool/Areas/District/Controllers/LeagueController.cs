@@ -271,7 +271,10 @@ namespace AfterSchool.Areas.District.Controllers
             var length = recordsPerPage;
 
             int userCount = SessionVariables.CurrentAccount.GetUserCount();
-            var teams = SessionVariables.CurrentAccount.GetActivities(UserType.ActivityLeader, WebUser.Load(SessionVariables.CurrentAccount.OwnerId.Value), null, null, null, null,null);
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            var teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
+           // var teams = activityGroup.GetActivities();
+          //  var teams = SessionVariables.CurrentAccount.GetActivities(UserType.ActivityLeader, WebUser.Load(SessionVariables.CurrentAccount.OwnerId.Value), null, null, null, null,null);
             var totalPages = Math.Ceiling(userCount.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = new SystemMessages();
@@ -282,7 +285,7 @@ namespace AfterSchool.Areas.District.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-
+            ViewBag.Teams = teams.Where(t => t.DateSubmittedToActivityGroup.IsNotEmpty()).ToList();
             ViewBag.Activities = group.GetActivities();
             return View(group);
         }                        

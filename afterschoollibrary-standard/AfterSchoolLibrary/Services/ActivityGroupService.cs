@@ -110,6 +110,37 @@ namespace AfterSchoolLibrary.Services
             return activityGroup.AccountId != currentAccount.ID ? AccountActivityGroup.LoadByAccountIdByActivityGroupId(currentAccount.ID.Value, activityGroup.ID.Value, msgs) : null;
         }
 
+        public static List<AccountActivityGroup> GetAccountActivityGroups(this ActivityGroup activityGroup, Account currentAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var vistorAccounts = currentAccount.GetVisitorAccounts(accountType);
+            List<AccountActivityGroup> accountActivityGroups = new List<AccountActivityGroup>();
+            
+            foreach(var visitorAccount in vistorAccounts)
+            {
+                accountActivityGroups.Add(AccountActivityGroup.LoadByAccountIdByActivityGroupId(visitorAccount.ID.Value, activityGroup.ID.Value));
+            }
+
+            return accountActivityGroups;
+        }
+
+        public static List<Activity> GetLeagueTeams(this ActivityGroup activityGroup, Account currentAccount, AccountType accountType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<Activity> teams = new List<Activity>();
+            var accountActivityGroups = activityGroup.GetAccountActivityGroups(currentAccount, accountType);
+
+            foreach(var accountActivityGroup in accountActivityGroups)
+            {
+                if (accountActivityGroup.IsNotEmpty())
+                {
+                    teams.AddRange(Activity.LoadByAccountActivityGroupId(accountActivityGroup.ID.Value));
+                }
+                
+            }
+
+            return teams;
+        }
+
         public static int GetLeagueInviteCount(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountActivityGroup.GetCount(

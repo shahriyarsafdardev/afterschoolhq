@@ -10,6 +10,16 @@ Imports System.Data
 Public Module Extensions
 
     <Extension>
+    Public Function [In](Of T)(ByVal aObject As T, ByVal list As IEnumerable(Of T)) As Boolean
+        Return list.Contains(aObject)
+    End Function
+
+    <Extension>
+    Public Function NotIn(Of T)(ByVal aObject As T, ByVal list As IEnumerable(Of T)) As Boolean
+        Return Not list.Contains(aObject)
+    End Function
+
+    <Extension>
     Public Function ParseEnum(Of T)(ByVal aString As String) As T
         Return System.Enum.Parse(GetType(T), aString, True)
     End Function

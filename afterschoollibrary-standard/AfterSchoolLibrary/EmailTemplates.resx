@@ -124,6 +124,9 @@
   <data name="Email_Verification" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\Email-Verification.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="LeagueInviteStatusUpdate_Notification" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\leagueinvitestatusupdate-notification.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="LeagueSchool_Invited" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\leagueschool-invited.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -147,6 +150,9 @@
   </data>
   <data name="SubscriptionPayment_Succeeded" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\SubscriptionPayment-Succeeded.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="TeamSubmittedToDistrict_Notification" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\teamsubmittedtodistrict-notification.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="VisitorAccount_Approved" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\visitoraccount-approved.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

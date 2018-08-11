@@ -1,6 +1,6 @@
 ﻿@model Activity
 @{ 
-    var isActive = Model.ID.HasValue && Model.ID.Value > 0 && !Model.IsChildActivity;
+    var isActive = Model.ID.HasValue && Model.ID.Value > 0;
     var isScheduleActive = Model.ID.HasValue && Model.ID.Value > 0;
     var activeMenu = ViewBag.ActiveMenu.ToString().ToLower();
 

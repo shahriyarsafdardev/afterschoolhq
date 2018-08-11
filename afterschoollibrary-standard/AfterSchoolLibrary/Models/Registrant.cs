@@ -329,14 +329,14 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public List<Activity> GetActivities(DatabaseConnection dc = null)
+        public List<ParticipationObject> GetParticipationObjects(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, dc: dc).Select(x => x.ToActivity()).ToList();
+            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, msgs, dc).Select(x => x.GetParticipationObject(msgs, dc)).ToList();
         }
 
-        public List<RegistrantActivity> GetRegistrantActivities(DatabaseConnection dc = null)
+        public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, dc: dc).ToList();
+            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, msgs, dc).ToList();
         }
 
         private static DatabaseQuery SearchRegistrantsQuery(string searchText, int? contactListId, int accountId, DatabaseConnection dc = null)
@@ -487,7 +487,7 @@ namespace AfterSchoolLibrary
             return reg;
         }
 
-        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -496,6 +496,7 @@ namespace AfterSchoolLibrary
                 AccountId = ownerAccountId,
                 RegistrantId = this.ID,
                 ActivityGroupId = activityGroupId,
+                AccountActivityGroupId = accountActivityGroupId,
                 ESignature = esignature,
                 CompletionStatusId = completionStatus,
                 CreateDate = DateTime.UtcNow,
@@ -521,9 +522,13 @@ namespace AfterSchoolLibrary
         {
             return Registration.GetCount(new Hashtable() { { "RegistrantId", this.ID.Value } }, dc: dc);
         }
-        
 
-        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+
+        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return AddOrUpdateParticipationObject(registrationId, participationObjectId, participationObjectType, assignmentType, 1, registrationPeriodId, activityGroupId, loggedInUserId, msgs, dc);
+        }
+         public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int choiceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             int seats = 0, waitingListSeats = 0, applicationSeats = 0, invitationSeats = 0, declinedSeats = 0;
 
@@ -546,11 +551,11 @@ namespace AfterSchoolLibrary
                     break;
             }
 
-            return AddOrUpdateActivity(registrationId, activityId, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, assignmentType, 1, registrationPeriodId, activityGroupId, loggedInUserId, msgs, dc);
+            return AddOrUpdateParticipationObject(registrationId, participationObjectId, participationObjectType, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, assignmentType, 1, registrationPeriodId, activityGroupId, loggedInUserId, msgs, dc);
         }
 
         [Obsolete]
-        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var assignmentType = RegistrationAssignmentType.NotSet;
 
@@ -565,22 +570,23 @@ namespace AfterSchoolLibrary
             else if (declinedSeats > 0)
                 assignmentType = RegistrationAssignmentType.Declined;
 
-            return AddOrUpdateActivity(registrationId, activityId, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, assignmentType, 1, null, null, loggedInUserId, msgs, dc);
+            return AddOrUpdateParticipationObject(registrationId, participationObjectId, participationObjectType, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, assignmentType, 1, null, null, loggedInUserId, msgs, dc);
         }
 
-        public RegistrantActivity AddOrUpdateActivity(int registrationId, int activityId, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var changingAssignment = false;
             // var changingDays = false;
 
-            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(participationObjectId, participationObjectType, this.ID.Value, msgs, dc);
 
             if (ra.IsEmpty())
             {
                 ra = new RegistrantActivity
                 {
-                    ActivityId = activityId,
+                    ParticipationObjectId = participationObjectId,
+                    ParticipationObjectTypeId = participationObjectType,
                     RegistrantId = this.ID,
                     RegistrationId = registrationId,
                     ActivityGroupId = activityGroupId,
@@ -613,22 +619,25 @@ namespace AfterSchoolLibrary
 
                 if (seats > 0)
                     ra.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: RegistrationAssignmentType.Reserved, 
-                        activityId: activityId, 
+                        assignmentType: RegistrationAssignmentType.Reserved, 
+                        participationObjectId: participationObjectId, 
+                        participationObjectType: participationObjectType,
                         msgs: msgs, 
                         dc: dc) + 1;
 
                 if (waitingListSeats > 0)
                     ra.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: RegistrationAssignmentType.WaitingList, 
-                        activityId: activityId, 
+                        assignmentType: RegistrationAssignmentType.WaitingList,
+                        participationObjectId: participationObjectId,
+                        participationObjectType: participationObjectType,
                         msgs: msgs, 
                         dc: dc) + 1;
 
                 if (applicationSeats > 0)
                     ra.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        rat: RegistrationAssignmentType.Applied, 
-                        activityId: activityId, 
+                        assignmentType: RegistrationAssignmentType.Applied,
+                        participationObjectId: participationObjectId,
+                        participationObjectType: participationObjectType,
                         msgs: msgs, 
                         dc: dc) + 1;
             }
@@ -708,15 +717,18 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activityId, ParticipationObjectType.Activity, this.ID.Value, msgs, dc);
             if (ra.IsEmpty())
             {
-                ra = new RegistrantActivity();
-                ra.ActivityId = activityId;
-                ra.RegistrantId = this.ID;
-                ra.CreateDate = DateTime.UtcNow;
-                ra.CreatedBy = loggedInUserId;
-                ra.ActivityGroupId = activityGroupId;
+                ra = new RegistrantActivity
+                {
+                    ParticipationObjectId = activityId,
+                    ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                    RegistrantId = this.ID,
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUserId,
+                    ActivityGroupId = activityGroupId
+                };
             }
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
@@ -819,20 +831,14 @@ namespace AfterSchoolLibrary
 
         public bool IsRegisteredFor(ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (participationObject.ObjectType == ParticipationObjectType.Activity)
-            {
-                var childrenRegistrants = this.GetChildren(participationObject.OwnerAccount.ID.Value, msgs, dc);
+            var childrenRegistrants = this.GetChildren(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
-                return childrenRegistrants.Any() && RegistrantActivity.ExistsByActivityIdByRegistrantIds(
-                    activityId: participationObject.ObjectID.Value,
-                    registrantIds: childrenRegistrants.Select(registrant => registrant.ID.Value).ToList(),
-                    msgs: msgs,
-                    dc: dc);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            return childrenRegistrants.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                registrantIds: childrenRegistrants.Select(registrant => registrant.ID.Value).ToList(),
+                msgs: msgs,
+                dc: dc);
         }
 
         public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1089,7 +1095,7 @@ namespace AfterSchoolLibrary
         public SystemMessages DeleteRegistrantActivity(int activityId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var registrantAcitivity = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.ID.Value, msgs, dc);
+            var registrantAcitivity = RegistrantActivity.LoadByParticipationObjectByRegistrant(activityId, ParticipationObjectType.Activity, this.ID.Value, msgs, dc);
 
             msgs.AddRange(registrantAcitivity.Delete(dc));
 

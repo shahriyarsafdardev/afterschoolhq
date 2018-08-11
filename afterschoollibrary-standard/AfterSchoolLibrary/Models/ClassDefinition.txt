@@ -76,11 +76,11 @@ property: ContactName, string, NVarChar "50"
 property: ContactPhone, string, NVarChar "50"
 property: ContactEmail, string, NVarChar "100"
 property: WaitingListSeats, int?, Int
-property: AcceptPayPal, bool, Bit
-property: AcceptCreditCard, bool, Bit
-property: ParentActivityId, int?, Int
+-property: AcceptPayPal, bool, Bit
+-property: AcceptCreditCard, bool, Bit
+-property: ParentActivityId, int?, Int
 property: AllowToPayLater, bool, Bit
-property: AllowOrganizationRegistration, bool, Bit
+-property: AllowOrganizationRegistration, bool, Bit
 property: GenderRestriction, GenderRestrictionType, Int
 property: RegistrationModeId, RegistrationMode, Int
 property: LocationId, int?, Int
@@ -89,9 +89,9 @@ property: IsPublished, bool, Bit
 property: IsArchived, bool, Bit
 property: ActivityGroupId, int?, Int
 property: ActivityScheduleId, int?, Int
-property: ScheduleRequiresAllDays, bool, Bit
+-property: ScheduleRequiresAllDays, bool, Bit
 property: UniqueName, string, NVarChar "100"
-property: IsTemplate, bool, Bit
+-property: IsTemplate, bool, Bit
 property: ActivitySectionId, int?, Int
 property: ActivityTypeId, ActivityType, Int, required
 property: DateSubmittedToActivityGroup, DateTime?, DateTime
@@ -99,7 +99,7 @@ property: AccountActivityGroupId, int?, Int
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
-joinproperty: Account.PayPalEmailAddress, string, NVarChar
+-joinproperty: Account.PayPalEmailAddress, string, NVarChar
 joinproperty: Account.StripePublishableKey, string, NVarChar
 joinproperty: Account.TimeZone, string, NVarChar
 joinproperty: ActivityGroup.IsArchived, bool?, Bit
@@ -108,7 +108,7 @@ loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
 loadmethod: Uid
-loadmethod: ParentActivityId, List<>
+-loadmethod: ParentActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
@@ -312,7 +312,7 @@ property: IsAfterSchool, bool, Bit
 property: StripeCustomerId, string, NVarChar "50"
 property: StripeDefaultCardId, string, NVarChar "50"
 property: DefaultFormId, int?, Int
-property: PayPalEmailAddress, string, NVarChar "100"
+-property: PayPalEmailAddress, string, NVarChar "100"
 property: StripeRefreshToken, string, NVarChar "100"
 property: StripeUserId, string, NVarChar "100"
 property: TimeZone, string, NVarChar "30"
@@ -579,6 +579,7 @@ joinproperty: ActivityGroup.Uid, string, NVarChar
 joinproperty: ActivityGroup.ActivityGroupTypeId, ActivityGroupType, Int
 joinproperty: ActivityGroup.UniqueName, string, NVarChar
 joinproperty: ActivityGroup.AccountId, int?, Int
+joinproperty: ActivityGroup.IsArchived, bool, Int
 [end]
 
 [begin]
@@ -690,7 +691,9 @@ name: RegistrantActivity
 description: How a registrant is placed in an activity/team. 
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
-property: ActivityId, int?, Int, required
+property: ActivityId, int?, Int
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 property: RegistrationId, int?, Int
 property: Uid, Guid, UniqueIdentifier
 property: OnWaitingList, bool, Bit
@@ -713,10 +716,10 @@ property: RegistrationPeriodId, int?, Int
 property: ActivityGroupId, int?, Int
 property: Rating, int?, Int
 property: AssignmentTypeId, RegistrationAssignmentType, Int
-join: Activity.ID, ActivityId, InnerJoin
+-join: Activity.ID, ActivityId, InnerJoin
 join: Registrant.ID, RegistrantId, InnerJoin
-join: Account.ID, Activity.AccountId, InnerJoin
-join: ActivityGroup.ID, Activity.ActivityGroupId, LeftOuterJoin
+-join: Account.ID, Activity.AccountId, InnerJoin
+-join: ActivityGroup.ID, Activity.ActivityGroupId, LeftOuterJoin
 joinproperty: Registrant.Email, string, NVarChar
 joinproperty: Registrant.FirstName, string, NVarChar
 joinproperty: Registrant.LastName, string, NVarChar
@@ -725,25 +728,27 @@ joinproperty: Registrant.Phone, string, NVarChar
 joinproperty: Registrant.Company, string, NVarChar
 joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
 joinproperty: Registrant.FirstRegistrantId, int?, Int
-joinproperty: Activity.Name, string, NVarChar
-joinproperty: Activity.Uid, Guid, UniqueIdentifier
-joinproperty: Activity.AccountId, int?, Int
-joinproperty: Activity.CostPerRegistrant, decimal?, Money
-joinproperty: Activity.IsDeleted, bool, Bit
-joinproperty: Activity.ScheduleRequiresAllDays, bool, Bit
-joinproperty: Account.Name, string, NVarChar
-joinproperty: Activity.IsArchived, bool, Bit
-joinproperty: Activity.ActivityGroupId, int?, Int
-joinproperty: Activity.ActivityScheduleId, int?, Int
-joinproperty: ActivityGroup.IsArchived, bool, Bit
-loadmethod: ActivityId, List<>
+-joinproperty: Activity.Name, string, NVarChar
+-joinproperty: Activity.Uid, Guid, UniqueIdentifier
+-joinproperty: Activity.AccountId, int?, Int
+-joinproperty: Activity.CostPerRegistrant, decimal?, Money
+-joinproperty: Activity.IsDeleted, bool, Bit
+-joinproperty: Activity.ScheduleRequiresAllDays, bool, Bit
+-joinproperty: Account.Name, string, NVarChar
+-joinproperty: Activity.IsArchived, bool, Bit
+-joinproperty: Activity.ActivityGroupId, int?, Int
+-joinproperty: Activity.ActivityScheduleId, int?, Int
+-joinproperty: ActivityGroup.IsArchived, bool, Bit
+-loadmethod: ActivityId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: RegistrationId, List<>
 loadmethod: Uid
-loadmethod: ActivityId|RegistrantId
-loadmethod: ActivityId|Day, List<>
-loadmethod: ActivityId|OnWaitingList, List<>
-loadmethod: ActivityGroupId, List<>
+-loadmethod: ActivityId|RegistrantId
+-loadmethod: ActivityId|Day, List<>
+-loadmethod: ActivityId|OnWaitingList, List<>
+-loadmethod: ActivityGroupId, List<>
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
+loadmethod: ParticipationObjectId|ParticipationObjectTypeId|RegistrantId, , LoadByParticipationObjectByRegistrant
 [end]
 
 [begin]
@@ -904,6 +909,7 @@ property: AmountPaid, decimal?, Money
 property: PaymentTypeId, PaymentType, Int
 property: LastUpdated, DateTime?, DateTime
 property: ActivityGroupId, int?, Int
+property: AccountActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
 property: ESignature, string, NVarChar "50"
 property: CompletionStatusId, RegistrationCompletionStatus, Int
@@ -913,6 +919,7 @@ loadmethod: AccountId, List<>
 loadmethod: RegistrationPeriodId, List<>
 loadmethod: AccountId|RegistrantId, List<>
 loadmethod: ActivityGroupId, List<>
+loadmethod: AccountActivityGroupId, List<>
 loadmethod: FirstRegistrationId, List<>
 join: Registrant.ID, RegistrantId, InnerJoin
 joinproperty: Registrant.Email, string, NVarChar
@@ -924,13 +931,15 @@ joinproperty: Registrant.Company, string, NVarChar
 joinproperty: Registrant.RegistrantTypeId, RegistrantType, Int
 [end]
 
-[begin]
+[/begin]
 type: Class
 name: RegistrationActivity
 description: Activities that were selected when a user Registered. Not sure if this class is necessary, but for right now it is used.
 inherits: BasicObject
 property: RegistrationId, int?, Int, required
 property: ActivityId, int?, Int, required
+property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
+property: ParticipationObjectId, int?, Int, required
 loadmethod: ActivityId|RegistrationId
 loadmethod: ActivityId, List<>
 loadmethod: RegistrationId, List<>
@@ -942,7 +951,7 @@ joinproperty: Activity.AccountId, int?, Int
 joinproperty: Activity.CostPerRegistrant, decimal?, Money
 joinproperty: Activity.IsArchived, bool, Bit
 joinproperty: ActivityGroup.IsArchived, bool, Bit
-[end]
+[/end]
 
 [begin]
 type: Class

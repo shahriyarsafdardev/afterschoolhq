@@ -13,7 +13,8 @@
 
     if (ViewData["ActivityGroupType"].IsNotEmpty())
     {
-        activityGroupType = (ActivityGroupType)ViewData["ActivityGroupType"].ToString().ToInteger();
+     //   activityGroupType = (ActivityGroupType)ViewData["ActivityGroupType"].ToString();
+        activityGroupType = (ActivityGroupType)Enum.Parse(typeof(ActivityGroupType), ViewData["ActivityGroupType"].ToString(), true);
 
         if (activityGroupType == ActivityGroupType.League)
         {

@@ -270,13 +270,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private void LoadRegistrationsViewBag(ActivityGroup group, List<Registration> registrations)
         {
+            var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
+
+            ViewBag.AccountActivityGroup = aag;
             ViewBag.Registrations = registrations;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Registrations = registrations;
             ViewBag.RegistrantActivities = group.GetRegistrantActivities(registrations);
-            ViewBag.ReservedSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
-            ViewBag.WaitingListSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
-            ViewBag.ApplicationSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
+            ViewBag.ReservedSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
+            ViewBag.WaitingListSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
+            ViewBag.ApplicationSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
             ViewBag.ReturnUrl = Url.Action("registrations", "league", new { id = group.Uid });
         }
 
@@ -309,6 +312,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 isArchived = archive.ToInteger().ToBoolean();
             }
 
+            var accountAcitivtyGroup = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
+
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
             var account = SessionVariables.CurrentAccount;
@@ -317,8 +322,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var finalActivities = activities.OrderBy(x => x.Name).ToList();
 
+
+           var reallyFinalActivities = Activity.LoadByAccountActivityGroupId(accountAcitivtyGroup.ID.Value);
+
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Activities = finalActivities;
+            ViewBag.Activities = reallyFinalActivities;
             ViewBag.NeedToUpgrade = finalActivities.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.Messages = new SystemMessages();
             ViewBag.HasArchivedActivities = group.GetActivityCount(true, false) > 0;
@@ -487,9 +495,48 @@ namespace AfterSchool.Areas.Org.Controllers
             activity.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
             msgs.AddRange(activity.Save());
 
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.AddRange(SendSubmitOrWithdrawnEmail(activity, true));
+
+            }
+
             var group = activity.GetActivityGroup();
             LoadLeagueActivityViewBag(group, id, pn, rpp, archive);
             return View("LeagueActivities", group);
+        }
+
+        [HttpGet]
+        public ActionResult WithdrawFromDistrict(string id, string pn, string rpp, string archive)
+        {
+            var msgs = new SystemMessages();
+
+            var activity = Activity.LoadByUid(id.ToGuid());
+
+            activity.DateSubmittedToActivityGroup = null;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            msgs.AddRange(activity.Save());
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.AddRange(SendSubmitOrWithdrawnEmail(activity, false));
+
+            }
+
+            var group = activity.GetActivityGroup();
+            LoadLeagueActivityViewBag(group, id, pn, rpp, archive);
+            return View("LeagueActivities", group);
+        }
+
+        private SystemMessages SendSubmitOrWithdrawnEmail(Activity activity, bool isSubmitting)
+        {
+
+            var account = SessionVariables.CurrentAccount;
+            var activityGroup = activity.GetActivityGroup();
+            var hostAccount = activityGroup.GetAccount();
+            return account.SendSubmitTeamtoDistrictEmail(hostAccount, activity, activityGroup, isSubmitting);
         }
 
         [HttpGet]
@@ -499,6 +546,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, id.ToInteger(), msgs);
             msgs.AddRange(accountActivityGroup.UpdateInvitationStatus(inviteStatus, SessionVariables.CurrentAccount.ID.Value));
+
+            if (msgs.HasNoErrors())
+            {
+               msgs.AddRange(accountActivityGroup.SendInviteStatusUpdateEmail(inviteStatus, SessionVariables.CurrentAccount, SessionVariables.LoggedInUser,msgs));
+            }
 
             return RedirectToAction("IndexExternal", new { id });
         }

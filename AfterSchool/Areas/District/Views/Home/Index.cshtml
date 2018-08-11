@@ -1,6 +1,7 @@
 ﻿@model AfterSchoolLibrary.Account
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var submittedActivites = (List<Activity>)ViewBag.SubmittedActivities;
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -12,7 +13,16 @@
             Welcome @SessionVariables.LoggedInUser.FirstName!
         </div>
         <div class="panel-body">
-            This is your district dashboard
+            This is your district dashboard 
+
+            @if (submittedActivites.Count > 0)
+            {
+                foreach(Activity activity in submittedActivites)
+                {
+                    <p>@activity.Name has been submitted to @activity.GetActivityGroup().Name</p>
+                }
+            }
+            @* loop through notifications *@
         </div>
     </div>
 </div>

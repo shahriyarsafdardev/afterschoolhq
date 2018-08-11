@@ -35,6 +35,7 @@ namespace AfterSchoolLibrary
 		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
 		public DateTime? LastUpdated { get { return (DateTime?)MDV["LastUpdated"].Value; } set { MDV["LastUpdated"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
+		public int? AccountActivityGroupId { get { return (int?)MDV["AccountActivityGroupId"].Value; } set { MDV["AccountActivityGroupId"].Value = value; } }
 		public int? FirstRegistrationId { get { return (int?)MDV["FirstRegistrationId"].Value; } set { MDV["FirstRegistrationId"].Value = value; } }
 		public string ESignature { get { return (string)MDV["ESignature"].Value; } set { MDV["ESignature"].Value = value; } }
 		public RegistrationCompletionStatus CompletionStatusId { get { return (RegistrationCompletionStatus)MDV["CompletionStatusId"].Value; } set { MDV["CompletionStatusId"].Value = value; } }
@@ -75,6 +76,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LastUpdated", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FirstRegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
@@ -208,6 +210,10 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AccountActivityGroupId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FirstRegistrationId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -275,6 +281,14 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Registration> LoadByAccountActivityGroupId(int AccountActivityGroupId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -557,7 +571,7 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             // delete previous relationships to old registration
-            msgs.AddRange(ra.DeleteRegistrationActivity(dc: dc));
+            //msgs.AddRange(ra.DeleteRegistrationActivity(dc: dc));
 
             // move to new registrant and registration
             ra.RegistrantId = this.RegistrantId;
@@ -568,35 +582,35 @@ namespace AfterSchoolLibrary
 
             // add to this registration record 
             // TODO: hopefully will remove this in the future, the whole registration activity object :(
-            this.AddActivity(ra.ActivityId.Value, loggedInUserId, msgs, dc);
+            //this.AddActivity(ra.ActivityId.Value, loggedInUserId, msgs, dc);
 
             return msgs;
         }
 
-        public RegistrationActivity AddActivity(int activityId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //public RegistrationActivity AddActivity(int activityId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var ra = RegistrationActivity.LoadByActivityIdByRegistrationId(activityId, this.ID.Value, dc: dc);
-            if (ra.IsEmpty())
-            {
-                ra = new RegistrationActivity
-                {
-                    ActivityId = activityId,
-                    RegistrationId = this.ID,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId
-                };
-                msgs.AddRange(ra.Save(dc));
-            }
+        //    var ra = RegistrationActivity.LoadByActivityIdByRegistrationId(activityId, this.ID.Value, dc: dc);
+        //    if (ra.IsEmpty())
+        //    {
+        //        ra = new RegistrationActivity
+        //        {
+        //            ActivityId = activityId,
+        //            RegistrationId = this.ID,
+        //            CreateDate = DateTime.UtcNow,
+        //            CreatedBy = loggedInUserId
+        //        };
+        //        msgs.AddRange(ra.Save(dc));
+        //    }
 
-            return ra;
-        }
+        //    return ra;
+        //}
 
-        public RegistrationActivity AddActivity(Activity activity, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AddActivity(activity.ID.Value, loggedInUserId, msgs, dc);
-        }
+        //public RegistrationActivity AddActivity(Activity activity, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    return AddActivity(activity.ID.Value, loggedInUserId, msgs, dc);
+        //}
 
         public Account GetAccount(DatabaseConnection dc = null)
         {
@@ -618,31 +632,93 @@ namespace AfterSchoolLibrary
             return Registrant.Load(this.RegistrantId.Value, msgs, dc);
         }
 
-        public List<RegistrationActivity> GetRegistrationActivities(DatabaseConnection dc = null)
-        {
-            return RegistrationActivity.LoadByRegistrationId(this.ID.Value, dc: dc);
-        }
+        //public List<RegistrationActivity> GetRegistrationActivities(DatabaseConnection dc = null)
+        //{
+        //    return RegistrationActivity.LoadByRegistrationId(this.ID.Value, dc: dc);
+        //}
 
         public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrationId(this.ID.Value, msgs, dc)
-                    .Where(x => 
-                        !x.ActivityIsDeleted && 
-                        !x.ActivityIsArchived && 
-                        (!x.ActivityActivityGroupId.HasValue || !x.ActivityGroupIsArchived)
-                    )
-                    .ToList();
+            var registrantActivities = RegistrantActivity.LoadByRegistrationId(this.ID.Value, msgs, dc);
+            var participationObjectTypes = registrantActivities.Select(registrantActivity => registrantActivity.ParticipationObjectTypeId)
+                .DistinctBy(registrantActivity => registrantActivity)
+                .ToList();
+            var rasToReturn = new List<RegistrantActivity>();
+
+            participationObjectTypes.ForEach(participationObjectType => {
+
+                switch (participationObjectType)
+                {
+                    case ParticipationObjectType.Activity:
+                        var activityIds = registrantActivities.Where(x => x.ParticipationObjectTypeId == participationObjectType)
+                            .Select(x => x.ParticipationObjectId.Value)
+                            .ToList();
+                        var activities = Activity.LoadList(activityIds, msgs, dc);
+                        var validActivityIds = activities.Where(x =>
+                            !x.IsDeleted &&
+                            !x.IsArchived &&
+                            (!x.ActivityGroupId.HasValue || !x.ActivityGroupIsArchived.Value))
+                            .Select(activity => activity.ID.Value);
+
+                        rasToReturn.AddRange(registrantActivities.Where(
+                            registrantActivity => 
+                                registrantActivity.ParticipationObjectTypeId == participationObjectType && 
+                                registrantActivity.ParticipationObjectId.Value.In(validActivityIds)
+                            ));
+
+                        break;
+
+                    case ParticipationObjectType.ActivityGroup:
+                        var activityGroupIds = registrantActivities.Where(x => x.ParticipationObjectTypeId == participationObjectType)
+                            .Select(x => x.ParticipationObjectId.Value)
+                            .ToList();
+                        var activityGroups = ActivityGroup.LoadList(activityGroupIds, msgs, dc);
+                        var validActivityGroupIds = activityGroups.Where(x => !x.IsArchived)
+                            .Select(activity => activity.ID.Value);
+
+                        rasToReturn.AddRange(registrantActivities.Where(
+                            registrantActivity => 
+                                registrantActivity.ParticipationObjectTypeId == participationObjectType && 
+                                registrantActivity.ParticipationObjectId.Value.In(validActivityGroupIds)
+                            ));
+
+                        break;
+
+                    case ParticipationObjectType.AccountActivityGroup:
+                        var accountActivityGroupIds = registrantActivities.Where(x => x.ParticipationObjectTypeId == participationObjectType)
+                            .Select(x => x.ParticipationObjectId.Value)
+                            .ToList();
+                        var accountActivityGroups = AccountActivityGroup.LoadList(accountActivityGroupIds, msgs, dc);
+                        var validAccountActivityGroupIds = accountActivityGroups.Where(x => !x.ActivityGroupIsArchived)
+                            .Select(activity => activity.ID.Value);
+
+                        rasToReturn.AddRange(registrantActivities.Where(
+                            registrantActivity => 
+                                registrantActivity.ParticipationObjectTypeId == participationObjectType && 
+                                registrantActivity.ParticipationObjectId.Value.In(validAccountActivityGroupIds)
+                            ));
+
+                        break;
+                }
+
+            });
+
+            return rasToReturn;
         }
 
-        public SystemMessages RemoveActivity(int activityId, DatabaseConnection dc = null)
+        public SystemMessages RemoveParticipation(int participationObjectId, ParticipationObjectType participationObjectType, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
-            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activityId, this.RegistrantId.Value, dc: dc);
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                participationObjectId, 
+                participationObjectType, 
+                this.RegistrantId.Value,
+                msgs,
+                dc);
+
             if (ra.IsNotEmpty())
-            {
                 msgs.AddRange(ra.CancelRegistration(dc: dc));
-            }
 
             return msgs;
         }
@@ -657,169 +733,169 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static string PrintRegisteredActivities(List<RegistrantActivity> registrantActivities, string text, DatabaseConnection dc = null)
-        {
-            var activities = "<p>" + text + ":<ul>";
-            foreach (var ra in registrantActivities)
-            {
-                var showChoice = registrantActivities.Where(x => x.PreferenceNumber != ra.PreferenceNumber).Any();
-                var activityname = "";
-                activityname = ra.ToActivity().GetDaysOfTheWeek(dc: dc).Select(x => x.ToString()).ToStringList(", ", " & ") + ": ";
-                activityname += ra.ActivityName;
-                if (showChoice) activityname += " (" + ra.PreferenceNumber.Value.ToOrdinal() + " Choice)";
-                activities += string.Format("<li>{0}</li>", activityname);
-            }
-            activities += "</ul></p>";
-            return activities;
-        }
+        //public static string PrintRegisteredActivities(List<RegistrantActivity> registrantActivities, string text, DatabaseConnection dc = null)
+        //{
+        //    var activities = "<p>" + text + ":<ul>";
+        //    foreach (var ra in registrantActivities)
+        //    {
+        //        var showChoice = registrantActivities.Where(x => x.PreferenceNumber != ra.PreferenceNumber).Any();
+        //        var activityname = "";
+        //        activityname = ra.ToActivity().GetDaysOfTheWeek(dc: dc).Select(x => x.ToString()).ToStringList(", ", " & ") + ": ";
+        //        activityname += ra.ActivityName;
+        //        if (showChoice) activityname += " (" + ra.PreferenceNumber.Value.ToOrdinal() + " Choice)";
+        //        activities += string.Format("<li>{0}</li>", activityname);
+        //    }
+        //    activities += "</ul></p>";
+        //    return activities;
+        //}
 
-        public static string GetRegistrationConfirmationHtml(Registration registration, Account account, Registrant registrant, List<RegistrantActivity> registrantActivities, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //public static string GetRegistrationConfirmationHtml(Registration registration, Account account, Registrant registrant, List<RegistrantActivity> registrantActivities, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var group = registration.GetActivityGroup(msgs, dc);
+        //    var group = registration.GetActivityGroup(msgs, dc);
 
-            if (registrant.IsEmpty())
-                registrant = registration.GetRegistrant(msgs, dc);
+        //    if (registrant.IsEmpty())
+        //        registrant = registration.GetRegistrant(msgs, dc);
 
-            if (registrantActivities.IsEmpty())
-                registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
-                    .OrderBy(x => x.PreferenceNumber)
-                    .ToList();
+        //    if (registrantActivities.IsEmpty())
+        //        registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
+        //            .OrderBy(x => x.PreferenceNumber)
+        //            .ToList();
 
-            AccountProperty thankyou = null;
+        //    AccountProperty thankyou = null;
 
-            var reservedRas = registrantActivities.Where(x => x.NumberOfSeats > 0)
-                .DistinctBy(x => x.ActivityId)
-                .ToList();
-            var waitingListRas = registrantActivities.Where(x => x.NumberOfWaitingListSeats > 0)
-                .DistinctBy(x => x.ActivityId)
-                .ToList();
-            var applicationRas = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0)
-                .DistinctBy(x => x.ActivityId)
-                .ToList();
-            var hasLotteryRan = group.IsNotEmpty() && group.HasLotteryRun;
+        //    var reservedRas = registrantActivities.Where(x => x.NumberOfSeats > 0)
+        //        .DistinctBy(x => x.ActivityId)
+        //        .ToList();
+        //    var waitingListRas = registrantActivities.Where(x => x.NumberOfWaitingListSeats > 0)
+        //        .DistinctBy(x => x.ActivityId)
+        //        .ToList();
+        //    var applicationRas = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0)
+        //        .DistinctBy(x => x.ActivityId)
+        //        .ToList();
+        //    var hasLotteryRan = group.IsNotEmpty() && group.HasLotteryRun;
 
-            string activities = "";
+        //    string activities = "";
 
-            // only has an application
-            if (applicationRas.Any() && !reservedRas.Any() && !waitingListRas.Any())
-            {
-                if (group.IsNotEmpty())
-                    thankyou = group.GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc: dc);
-                else
-                    thankyou = account.GetAccountProperty(AccountPropertyType.ApplicationThankYouEmail, dc: dc);
-            }
-            // has registered as normal
-            else
-            {
-                if (group.IsNotEmpty())
-                    thankyou = group.GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc: dc);
-                else
-                    thankyou = account.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail, dc: dc);
-            }
+        //    // only has an application
+        //    if (applicationRas.Any() && !reservedRas.Any() && !waitingListRas.Any())
+        //    {
+        //        if (group.IsNotEmpty())
+        //            thankyou = group.GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc: dc);
+        //        else
+        //            thankyou = account.GetAccountProperty(AccountPropertyType.ApplicationThankYouEmail, dc: dc);
+        //    }
+        //    // has registered as normal
+        //    else
+        //    {
+        //        if (group.IsNotEmpty())
+        //            thankyou = group.GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc: dc);
+        //        else
+        //            thankyou = account.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail, dc: dc);
+        //    }
 
-            // have any reserved activities
-            if (reservedRas.Any())
-                activities += PrintRegisteredActivities(
-                    reservedRas,
-                    hasLotteryRan ? "You have been selected for" : "You have registered for",
-                    dc);
+        //    // have any reserved activities
+        //    if (reservedRas.Any())
+        //        activities += PrintRegisteredActivities(
+        //            reservedRas,
+        //            hasLotteryRan ? "You have been selected for" : "You have registered for",
+        //            dc);
 
-            // if the lottery has been run and the registrant didn't make it in some of the desired activities
-            if (hasLotteryRan && (waitingListRas.Any() || applicationRas.Any()))
-                activities += "<p>Unfortunately, you have <u>not</u> been selected for the following</p>";
+        //    // if the lottery has been run and the registrant didn't make it in some of the desired activities
+        //    if (hasLotteryRan && (waitingListRas.Any() || applicationRas.Any()))
+        //        activities += "<p>Unfortunately, you have <u>not</u> been selected for the following</p>";
 
-            if (waitingListRas.Any())
-                activities += PrintRegisteredActivities(waitingListRas, "You have been placed on the waiting list for", dc: dc);
+        //    if (waitingListRas.Any())
+        //        activities += PrintRegisteredActivities(waitingListRas, "You have been placed on the waiting list for", dc: dc);
 
-            if (applicationRas.Any())
-                activities += PrintRegisteredActivities(
-                    applicationRas,
-                    hasLotteryRan ? "You were <u>not</u> placed on the waiting list for" : "You have applied for",
-                    dc);
+        //    if (applicationRas.Any())
+        //        activities += PrintRegisteredActivities(
+        //            applicationRas,
+        //            hasLotteryRan ? "You were <u>not</u> placed on the waiting list for" : "You have applied for",
+        //            dc);
 
-            var custommessage = "";
-            if (thankyou.IsNotEmpty())
-                custommessage = thankyou.Value;
+        //    var custommessage = "";
+        //    if (thankyou.IsNotEmpty())
+        //        custommessage = thankyou.Value;
 
-            var accountInformation = "";
-            var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
-            if (masterRegistrant.IsNotEmpty())
-            {
-                accountInformation = "<p>";
-                var masterRegistrantAccount = masterRegistrant.GetAccount(msgs, dc);
+        //    var accountInformation = "";
+        //    var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+        //    if (masterRegistrant.IsNotEmpty())
+        //    {
+        //        accountInformation = "<p>";
+        //        var masterRegistrantAccount = masterRegistrant.GetAccount(msgs, dc);
 
-                if (masterRegistrantAccount?.AccountTypeId == AccountType.Registrant)
-                    accountInformation += $"<a href=\"{Email.BaseUrl(masterRegistrantAccount.IsAfterSchool)}login\">Login to view your {Utilities.AppName(masterRegistrantAccount.IsAfterSchool)} account</a>";
+        //        if (masterRegistrantAccount?.AccountTypeId == AccountType.Registrant)
+        //            accountInformation += $"<a href=\"{Email.BaseUrl(masterRegistrantAccount.IsAfterSchool)}login\">Login to view your {Utilities.AppName(masterRegistrantAccount.IsAfterSchool)} account</a>";
 
-                accountInformation += "</p>";
-            }
+        //        accountInformation += "</p>";
+        //    }
 
             
 
-            return $"{custommessage}{activities}{accountInformation}";
-        }
+        //    return $"{custommessage}{activities}{accountInformation}";
+        //}
 
         public static SystemMessages SendConfirmation(CheckoutObject checkoutObject, bool sendBcc, DatabaseConnection dc = null)
         {
             return EmailHelper.SendRegistrationConfirmed(checkoutObject, sendBcc);
         }
 
-        [Obsolete]
-        public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var registration = Registration.Load(registrationId, dc: dc);
-            var registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
-                .OrderBy(x => x.PreferenceNumber)
-                .ToList();
-            var account = registration.GetAccount(dc: dc);
-            var registrant = registration.GetRegistrant(dc: dc);
+        //[Obsolete]
+        //public static SystemMessages SendConfirmation(int registrationId, bool sendBcc, DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var registration = Registration.Load(registrationId, dc: dc);
+        //    var registrantActivities = RegistrantActivity.LoadByRegistrationId(registration.ID.Value, msgs, dc)
+        //        .OrderBy(x => x.PreferenceNumber)
+        //        .ToList();
+        //    var account = registration.GetAccount(dc: dc);
+        //    var registrant = registration.GetRegistrant(dc: dc);
 
-            var message = GetRegistrationConfirmationHtml(registration, account, registrant, registrantActivities, msgs, dc);
-            var fullmessage = $"<p>Hello {registrant.Name},</p>{message}<p>{account.Name}</p>";
+        //    var message = GetRegistrationConfirmationHtml(registration, account, registrant, registrantActivities, msgs, dc);
+        //    var fullmessage = $"<p>Hello {registrant.Name},</p>{message}<p>{account.Name}</p>";
 
-            // send message to registrant
-            SendGridHelper.SendMail(
-                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                Email.AppEmailAddress, 
-                                $"{account.Name} via {Email.AppEmailFromName(account.IsAfterSchool)}"
-                            ),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.Name),
-                subject: $"Your {account.Name} registration",
-                body: $"{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
-                replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-            );
+        //    // send message to registrant
+        //    SendGridHelper.SendMail(
+        //        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+        //                        Email.AppEmailAddress, 
+        //                        $"{account.Name} via {Email.AppEmailFromName(account.IsAfterSchool)}"
+        //                    ),
+        //        toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.Name),
+        //        subject: $"Your {account.Name} registration",
+        //        body: $"{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
+        //        replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
+        //        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+        //    );
 
-            if (sendBcc)
-            {
-                SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                    Email.AppEmailAddress, 
-                                    $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
-                               ),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
-                    subject: $"CC: Your {account.Name} registration",
-                    body: $"{"A CC of the email is below: <br />-------------------<br />"}{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                );
-            }
+        //    if (sendBcc)
+        //    {
+        //        SendGridHelper.SendMail(
+        //            fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+        //                            Email.AppEmailAddress, 
+        //                            $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
+        //                       ),
+        //            toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
+        //            subject: $"CC: Your {account.Name} registration",
+        //            body: $"{"A CC of the email is below: <br />-------------------<br />"}{fullmessage}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_confirmation"))}",
+        //            emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+        //        );
+        //    }
 
-            registrantActivities.ForEach(ra => ra.SendNewRegistrationNotice(account, null, null));
+        //    registrantActivities.ForEach(ra => ra.SendNewRegistrationNotice(account, null, null));
 
-            return msgs;
-        }        
+        //    return msgs;
+        //}        
 
-        private static DatabaseQuery GetSearchQuery(string searchText, int accountId, int? questionId, List<int> activityGroupIds, RegistrationStatus regStatus, List<int> activityIds = null, RegistrationAssignmentType rat = RegistrationAssignmentType.NotSet, DatabaseConnection dc = null)
+        private static DatabaseQuery GetSearchQuery(string searchText, int accountId, int? questionId, RegistrationStatus regStatus, List<int> participationObjectIds = null, ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet, RegistrationAssignmentType rat = RegistrationAssignmentType.NotSet, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
             dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
-            dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+            // dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
 
             // aggregate related registrations
             var regQuery = Registration.DatabaseQuery;
@@ -827,7 +903,7 @@ namespace AfterSchoolLibrary
             regQuery.Joins[0].Alias = "Registrant1";
             regQuery.SelectParameters.Clear();
             regQuery.SelectParameters.Add(
-                Registration.ObjectMap["FirstRegistrationId"], 
+                Registration.ObjectMap["Id"], 
                 "regid", 
                 string.Format("ISNULL({0}, {1})", DatabaseQuery.FunctionReplaceValue, ObjectMap["ID"].ParameterFullName)
                 );
@@ -835,7 +911,7 @@ namespace AfterSchoolLibrary
             regQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
 
             // getting only registered seats
-            if (rat != RegistrationAssignmentType.NotSet || (activityIds.IsNotEmpty() && activityIds.Any()) || (activityGroupIds.IsNotEmpty() && activityGroupIds.Any()))
+            if (rat != RegistrationAssignmentType.NotSet || (participationObjectIds.IsNotEmpty() && participationObjectIds.Any()))
             {
                 var raQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
                 raQuery.UseParameterizedQuery = false;
@@ -843,27 +919,14 @@ namespace AfterSchoolLibrary
                 raQuery.SelectParameters.Add(RegistrantActivity.ObjectMap["RegistrationId"]);
                 raQuery.Joins.Add(ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
 
-                if (activityIds.IsNotEmpty() && activityIds.Any()) raQuery.Criterias.Add(RegistrantActivity.ObjectMap["ActivityId"], activityIds, DatabaseCriteriaOperatorEnum.In);
-                if (activityGroupIds.IsNotEmpty() && activityGroupIds.Any()) raQuery.Criterias.Add(RegistrantActivity.ObjectMap["ActivityGroupId"], activityGroupIds, DatabaseCriteriaOperatorEnum.In);
-
-                switch (rat)
+                if (participationObjectIds.IsNotEmpty() && participationObjectIds.Any())
                 {
-                    case RegistrationAssignmentType.Applied:
-                        raQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                        break;
-                    case RegistrationAssignmentType.Declined:
-                        raQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeatsDeclined"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                        break;
-                    case RegistrationAssignmentType.Invited:
-                        raQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfInvitationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                        break;
-                    case RegistrationAssignmentType.Reserved:
-                        raQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                        break;
-                    case RegistrationAssignmentType.WaitingList:
-                        raQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfWaitingListSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                        break;
+                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectId"], participationObjectIds, DatabaseCriteriaOperatorEnum.In);
+                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectTypeId"], (int)participationObjectType);
                 }
+
+                if (rat != RegistrationAssignmentType.NotSet)
+                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                 regQuery.Criterias.Add(ObjectMap["Id"], raQuery, DatabaseCriteriaOperatorEnum.In);
             }
@@ -884,24 +947,8 @@ namespace AfterSchoolLibrary
                     // has start dates that are less than or equal to now
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-                    switch (rat)
-                    {
-                        case RegistrationAssignmentType.Applied:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Declined:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeatsDeclined"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Invited:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfInvitationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Reserved:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.WaitingList:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfWaitingListSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                    }
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.In);
 
@@ -917,25 +964,8 @@ namespace AfterSchoolLibrary
                     // has end dates that are greater than or equal to now
                     bQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
-                    switch (rat)
-                    {
-                        case RegistrationAssignmentType.Applied:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Declined:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeatsDeclined"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Invited:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfInvitationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Reserved:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.WaitingList:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfWaitingListSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                    }
-
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], bQuery, DatabaseCriteriaOperatorEnum.In);
                 }
@@ -953,24 +983,8 @@ namespace AfterSchoolLibrary
                     aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-                    switch (rat)
-                    {
-                        case RegistrationAssignmentType.Applied:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Declined:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeatsDeclined"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Invited:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfInvitationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Reserved:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.WaitingList:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfWaitingListSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                    }
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                     var parameter = Registrant.ObjectMap["id"];
                     parameter.TableAlias = "Registrant1";
@@ -988,24 +1002,9 @@ namespace AfterSchoolLibrary
                     bQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
                     bQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
 
-                    switch (rat)
-                    {
-                        case RegistrationAssignmentType.Applied:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Declined:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeatsDeclined"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Invited:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfInvitationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Reserved:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.WaitingList:
-                            bQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfWaitingListSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                    }
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+
                     bQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], bQuery, DatabaseCriteriaOperatorEnum.In);
@@ -1024,48 +1023,15 @@ namespace AfterSchoolLibrary
                     aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
-                    switch (rat)
-                    {
-                        case RegistrationAssignmentType.Applied:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfApplicationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Declined:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeatsDeclined"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Invited:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfInvitationSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.Reserved:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                        case RegistrationAssignmentType.WaitingList:
-                            aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfWaitingListSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                            break;
-                    }
+                    if (rat != RegistrationAssignmentType.NotSet)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
 
                     var parameter = Registrant.ObjectMap["id"];
                     parameter.TableAlias = "Registrant1";
                     aQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.NotIn);
-
-                    /*
-                    // has some records in the activity instance table
-                    var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
-                    bQuery.UseParameterizedQuery = false;
-                    bQuery.SelectParameters.Clear();
-                    bQuery.SelectParameters.Add(RegistrantActivity.ObjectMap["RegistrationId"]);
-                    bQuery.Joins.Add(ObjectMap["ID"], RegistrantActivity.ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
-                    bQuery.Joins.Add(Activity.ObjectMap["ID"], RegistrantActivity.ObjectMap["ActivityId"], DatabaseJoinTypeEnum.InnerJoin);
-                    bQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
-
-                    bQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
-                    aQuery.Criterias.Add(RegistrantActivity.ObjectMap["NumberOfSeats"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-                    
-                    aQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
-
-                    regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.NotIn);
-                    */
+                   
                 }
             }
 
@@ -1131,20 +1097,20 @@ namespace AfterSchoolLibrary
             return dq;
         }
 
-        public static List<Registration> Search(string searchText, int accountId, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, int? start, int? length, DatabaseConnection dc = null)
+        public static List<Registration> Search(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, RegistrationAssignmentType rat, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = GetSearchQuery(searchText, accountId, questionId, activityGroupIds, regStatus, activityIds, rat, dc: dc);
+            var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rat, msgs, dc);
             dq.UseParameterizedQuery = false;
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
 
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int SearchCount(string searchText, int accountId, int? questionId, List<int> activityGroupIds, List<int> activityIds, RegistrationStatus regStatus, RegistrationAssignmentType rat, DatabaseConnection dc = null)
+        public static int SearchCount(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, RegistrationAssignmentType rat, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = GetSearchQuery(searchText, accountId, questionId, activityGroupIds, regStatus, activityIds, rat, dc: dc);
-            return dq.GetCount();
+            var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rat, msgs, dc);
+            return dq.GetCount(msgs);
         }
 
         public SystemMessages CancelAll(DatabaseConnection dc = null)
@@ -1152,7 +1118,7 @@ namespace AfterSchoolLibrary
             return this.DeleteWithRelatedRecords(dc: dc);
         }
 
-        public static List<Registration> LoadByRegistrationPeriodId(int RegistrationPeriodId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Registration> LoadByRegistrationPeriodId(int RegistrationPeriodId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1162,10 +1128,10 @@ namespace AfterSchoolLibrary
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Registration> LoadByActivityGroupId(int ActivityGroupId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Registration> LoadByActivityGroupId(int ActivityGroupId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -1175,37 +1141,66 @@ namespace AfterSchoolLibrary
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> groupIds, List<int> activityIds, string filename, RegistrationReportType reportType, RegistrationAssignmentType rat, string uiActivityLabel, string emails, string subject, string body)
+        public static List<Registration> LoadByAccountActivityGroupId(int AccountActivityGroupId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus, DatabaseCriteriaOperatorEnum.In);
+            dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
+            dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrantActivities = this.GetRegistrantActivities(msgs, dc);
+
+            if (registrantActivities.Any())
+                return registrantActivities.First().GetAmountPaid(msgs, dc);
+
+            return 0;
+        }
+
+        #region CSVReport
+
+        public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, RegistrationAssignmentType rat, string uiActivityLabel, string emails, string subject, string body)
         {
             var msgs = new SystemMessages();
             var account = Account.Load(accountId);
             var registrations = account.SearchRegistrations(
-                searchText, 
-                questionId, 
-                groupIds, 
-                activityIds, 
+                searchText,
+                questionId,
+                participationObjectIds,
+                participationObjectType,
                 RegistrationStatus.NotSet,
-                rat, 
-                null, 
+                rat,
+                null,
                 null);
 
             string csv = Registration.ExportCSV(
-                registrations, 
+                registrations,
                 account,
-                reportType, 
-                RegistrationStatus.NotSet, 
-                RegistrationAssignmentType.NotSet,
-                groupIds);
+                reportType,
+                RegistrationStatus.NotSet,
+                RegistrationAssignmentType.NotSet);
 
-            var ms = new System.IO.MemoryStream(System.Text.UTF8Encoding.UTF8.GetBytes(csv));
-            var ah = new AmazonHelper(Utilities.AmazonBucketName, Utilities.AmazonAccessKeyId, Utilities.AmazonSecretAccessKeyId, Utilities.AmazonRegionEndPoint);
+            var ms = new System.IO.MemoryStream(Encoding.UTF8.GetBytes(csv));
+            var ah = new AmazonHelper(
+                Utilities.AmazonBucketName, 
+                Utilities.AmazonAccessKeyId, 
+                Utilities.AmazonSecretAccessKeyId, 
+                Utilities.AmazonRegionEndPoint);
 
             if (filename.IsNotEmpty())
             {
-                filename = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.NoAlphaNumericCharactersRegEx).Replace(filename, "");
+                filename = new System.Text.RegularExpressions.Regex(BasicLibrary.Utilities.NoAlphaNumericCharactersRegEx)
+                    .Replace(filename, "");
 
                 if (!filename.Contains(".csv"))
                     filename += ".csv";
@@ -1238,12 +1233,12 @@ namespace AfterSchoolLibrary
                     emails.Split(',')
                     .Select(x => x.Trim())
                     .Where(email => email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx)));
-            
+
             // send to email list
             emailList.ForEach(email =>
                 msgs.AddRange(SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Email.AppEmailAddress, 
+                        Email.AppEmailAddress,
                         $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
                         ),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
@@ -1256,65 +1251,37 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus regStatus, RegistrationAssignmentType rat, List<int> groupIds, DatabaseConnection dc = null)
+        public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus registrationStatus, RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var allRegistrations = new List<Registration>();
-            var loopingRegistrations = registrations;
-            var days = new List<DayOfWeekASL>();
             var registrantActivities = new List<RegistrantActivity>();
-            var allDayActivities = new List<Activity>();
+            var registrantIds = registrations.Select(x => x.RegistrantId.Value).ToList();
 
-            allRegistrations.AddRange(registrations);
+            registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, msgs, dc);
 
-            if (reportType != RegistrationReportType.SingleActivity)
+            if (assignmentType != RegistrationAssignmentType.NotSet)
+                registrantActivities = registrantActivities.Where(x => x.AssignmentTypeId == assignmentType)
+                .ToList();
+
+            switch(registrationStatus)
             {
-                registrations.ForEach(registration => allRegistrations.AddRange(registration.GetRelatedRegistrations(dc: dc)));
-
-                var firstRegistrations = allRegistrations.Where(x => !x.FirstRegistrationId.HasValue).ToList();
-                var registrantIds = allRegistrations.Select(x => x.RegistrantId.Value).ToList();
-                registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, dc: dc);
-
-                switch (rat)
-                {
-                    case RegistrationAssignmentType.Applied:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfApplicationSeats > 0).ToList();
-                        break;
-                    case RegistrationAssignmentType.Declined:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfSeatsDeclined > 0).ToList();
-                        break;
-                    case RegistrationAssignmentType.Invited:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfInvitationSeats > 0).ToList();
-                        break;
-                    case RegistrationAssignmentType.Reserved:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfSeats > 0).ToList();
-                        break;
-                    case RegistrationAssignmentType.WaitingList:
-                        registrantActivities = registrantActivities.Where(x => x.NumberOfWaitingListSeats > 0).ToList();
-                        break;
-                }
-
-                days = Enum.GetValues(typeof(DayOfWeekASL))
-                                .Cast<DayOfWeekASL>()
-                                .Where(x => x != DayOfWeekASL.NotSet)
-                                .ToList();
-
-                var allActivityIds = registrantActivities.Select(x => x.ActivityId.Value).Distinct().ToList();
-                allDayActivities = Activity.GetByActivitiesByRegistrants(allActivityIds, registrantIds, DayOfWeekASL.NotSet, regStatus, groupIds, dc: dc);
-
-                // preload days for each activity (trying to find a faster way to do this)
-                allDayActivities.ForEach(x => x.GetDays(dc: dc));
-
-                loopingRegistrations = firstRegistrations;
+                case RegistrationStatus.Current:
+                    registrantActivities = registrantActivities.Where(x => x.IsInSession(msgs, dc)).ToList();
+                    break;
+                case RegistrationStatus.Past:
+                    registrantActivities = registrantActivities.Where(x => x.WasInSession(msgs, dc)).ToList();
+                    break;
+                case RegistrationStatus.Future:
+                    registrantActivities = registrantActivities.Where(x => x.WillBeInSession(msgs, dc)).ToList();
+                    break;
             }
 
-            // only load last registration answers
-            var answers = FormQuestionAnswer.LoadByRegistrationIds(allRegistrations.Select(x => x.ID.Value).ToList(), dc: dc)
-                .Where(x => x.Text.IsNotBlank())
-                .ToList();
+            var answers = FormQuestionAnswer.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), msgs, dc)
+               .Where(x => x.Text.IsNotBlank())
+               .ToList();
 
             var questionIds = answers.Select(x => x.FormQuestionId.Value).Distinct().ToList();
 
-            var questions = FormQuestion.LoadList(questionIds, dc: dc)
+            var questions = FormQuestion.LoadList(questionIds, msgs, dc)
                 .OrderBy(x => x.DisplayOrder)
                 .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                 .ToList();
@@ -1340,58 +1307,38 @@ namespace AfterSchoolLibrary
 
             table.Add(AddHeadersToCSVReport(
                 reportType,
-                days,
                 standardQuestions,
                 customQuestions
                 ));
 
             // print data for each registration
-            loopingRegistrations.ForEach(registration =>
+            registrations.ForEach(registration =>
                 table.Add(AddEachRegistrationToCSVReport(
                     registration,
-                    allRegistrations,
                     account,
                     reportType,
                     assignmentTypes,
-                    days,
                     registrantActivities,
-                    allDayActivities,
                     standardQuestions,
                     customQuestions,
                     answers,
+                    msgs,
                     dc))
             );
 
             return CsvFile.Create(table);
         }
 
-        private static List<string> AddHeadersToCSVReport(RegistrationReportType reportType, List<DayOfWeekASL> days, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions)
+        private static List<string> AddHeadersToCSVReport(RegistrationReportType reportType, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions)
         {
             var row = new List<string>();
 
-            row.Add(string.Format("Date {0}Registered", reportType == RegistrationReportType.SingleActivity ? "" : "First "));
-
-            if (reportType == RegistrationReportType.Detailed)
-                row.Add("Date Last Registered");
+            row.Add($"Date Registered");
 
             row.Add("First Name");
             row.Add("Last Name");
-            row.Add("Email");            
-
-            /*
-            if (reportType == RegistrationReportType.Basic && false)
-            {
-                assignmentTypes = new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved };
-
-                foreach (var type in assignmentTypes)
-                {
-                    row.Add(type.ToString().SplitByUpperCase());
-                }
-            }
-            */
-
-            if (reportType != RegistrationReportType.SingleActivity)
-                days.ForEach(day => row.Add(day.ToString()));
+            row.Add("Email");
+            row.Add("Activities");
 
             if (reportType != RegistrationReportType.Basic)
             {
@@ -1402,116 +1349,61 @@ namespace AfterSchoolLibrary
             return row;
         }
 
-        private static List<string> AddEachRegistrationToCSVReport(Registration registration, List<Registration> allRegistrations, Account account, RegistrationReportType reportType, List<RegistrationAssignmentType> assignmentTypes, List<DayOfWeekASL> days, List<RegistrantActivity> registrantActivities, List<Activity> allDayActivities, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, DatabaseConnection dc = null)
-        {
-            var relatedRegistrations = new List<Registration> { registration };
-            relatedRegistrations.AddRange(allRegistrations
-                .Where(x =>
-                    x.FirstRegistrationId.HasValue &&
-                    x.FirstRegistrationId.Value == registration.ID.Value)
-                .ToList()
-            );
-
-            var lastRegistration = relatedRegistrations.OrderBy(x => x.ID.Value).Last();
-
+        private static List<string> AddEachRegistrationToCSVReport(Registration registration, Account account, RegistrationReportType reportType, List<RegistrationAssignmentType> assignmentTypes, List<RegistrantActivity> registrantActivities, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, SystemMessages msgs, DatabaseConnection dc = null)
+        {            
             var row = new List<string>();
 
             row.Add(account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString());
-            if (reportType == RegistrationReportType.Detailed)
-                row.Add(account.ConvertToAccountTimeZone(lastRegistration.CreateDate.Value).ToShortDateTimeString());
 
             row.Add(registration.RegistrantFirstName);
             row.Add(registration.RegistrantLastName);
-            row.Add(registration.RegistrantEmail);            
+            row.Add(registration.RegistrantEmail);
 
-            /*
-            if (reportType == RegistrationReportType.Basic && false)
-            {
-                var reservedRas = RegistrantActivity.GetByActivityIds(activityIds, regIds, DateTime.UtcNow, dc: dc);
-                // var reservedRas = ras.Where(x => x.NumberOfSeats.Value > 0).ToList();
-                // var waitingListRas = ras.Where(x => x.NumberOfWaitingListSeats.Value > 0).ToList();
-                // var applicationRas = ras.Where(x => x.NumberOfApplicationSeats.Value > 0).ToList();
-
-                foreach (var type in assignmentTypes)
-                {
-                    switch (type)
-                    {
-                        case RegistrationAssignmentType.Application:
-                            // row.Add(applicationRas.OrderBy(x => x.PreferenceNumber.Value).Select(x => x.ActivityName).ToStringList(", "));
-                            break;
-                        case RegistrationAssignmentType.Reserved:
-                            row.Add(reservedRas.OrderBy(x => x.PreferenceNumber.Value).Select(x => x.ActivityName).ToStringList(", "));
-                            break;
-                        case RegistrationAssignmentType.WaitingList:
-                            // row.Add(waitingListRas.OrderBy(x => x.PreferenceNumber.Value).Select(x => x.ActivityName).ToStringList(", "));
-                            break;
-                    }
-                }
-            }
-            */
-
-            if (reportType != RegistrationReportType.SingleActivity)
-            {
-                AddDaysAndActivitiesToCSVReport(row, relatedRegistrations, days, registrantActivities, allDayActivities);
-            }
+            AddActivitiesToCSVReport(row, registration, registrantActivities);
 
             if (reportType != RegistrationReportType.Basic)
             {
-                AddTotalPaidToCSVReport(row, relatedRegistrations);
-                AddQuestionsToCSVReport(row, standardQuestions, customQuestions, answers, relatedRegistrations);
+                row.Add(registration.GetAmountPaid(msgs, dc).ToCurrency());
+                AddQuestionsToCSVReport(row, standardQuestions, customQuestions, answers, registration);
             }
 
             return row;
         }
 
-        private static void AddQuestionHeadersToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions)
+        private static void AddActivitiesToCSVReport(List<string> row, Registration registration, List<RegistrantActivity> registrantActivities, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            foreach (var question in standardQuestions)
-            {
-                switch (question.QuestionDataTypeId)
+            var regIds = registration.ID.Value.AsList();
+            var ras = registrantActivities.Where(registrantActivity => registrantActivity.RegistrationId.Value.In(regIds))
+                .ToList();
+            var participationObjects = ras.Select(registrantActivity =>
+                new
                 {
-                    case QuestionDataType.RegistrantFirstName:
-                    case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
+                    registrantActivity.ParticipationObjectId,
+                    registrantActivity.ParticipationObjectTypeId
+                })
+                .ToList();
+
+            var activitiesList = new List<string>();
+            participationObjects.ForEach(participationObject => {
+                switch(participationObject.ParticipationObjectTypeId)
+                {
+                    case ParticipationObjectType.AccountActivityGroup:
+                        var aag = AccountActivityGroup.Load(participationObject.ParticipationObjectId.Value, msgs, dc);
+                        activitiesList.Add(ActivityGroup.Load(aag.ActivityGroupId.Value, msgs, dc).Name);
                         break;
-                    default:
-                        row.Add(string.Format("{0} - {1}", question.FormQuestionGroupName, question.Text.ToString()));
+                    case ParticipationObjectType.Activity:
+                        activitiesList.Add(Activity.Load(participationObject.ParticipationObjectId.Value, msgs, dc).Name);
+                        break;
+                    case ParticipationObjectType.ActivityGroup:
+                        activitiesList.Add(ActivityGroup.Load(participationObject.ParticipationObjectId.Value, msgs, dc).Name);
                         break;
                 }
-            }
-            foreach (var question in customQuestions)
-            {
-                row.Add(question.Text.ToString());
-            }
-        }
-
-        private static void AddDaysAndActivitiesToCSVReport(List<string> row, List<Registration> registrations, List<DayOfWeekASL> days, List<RegistrantActivity> registrantActivities, List<Activity> allDayActivities, DatabaseConnection dc = null)
-        {
-            var regIds = registrations.Select(x => x.RegistrantId.Value).ToList();
-            var ras = registrantActivities.Where(x => regIds.Contains(x.RegistrantId.Value)).ToList();
-            var activityIds = ras.Select(x => x.ActivityId.Value).ToList();
-
-            days.ForEach(day =>
-            {
-                var dayActivities = allDayActivities.Where(x => activityIds.Contains(x.ID.Value) && x.GetDaysOfTheWeek(dc: dc).Contains(day));
-                if (dayActivities.Any())
-                    row.Add(dayActivities.Select(x => x.Name).ToStringList(", "));
-                else
-                    row.Add("");
             });
+
+            row.Add(activitiesList.ToStringList("; "));
         }
 
-        private static void AddTotalPaidToCSVReport(List<string> row, List<Registration> registrations)
-        {
-            var totalPaid = (decimal)0;
-
-            if (registrations.Where(x => x.DatePaid.HasValue).Any())
-                totalPaid = registrations.Where(x => x.DatePaid.HasValue).Sum(x => x.AmountPaid.Value);
-
-            row.Add(totalPaid.ToCurrency());
-        }
-
-        private static void AddQuestionsToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, List<Registration> registrations)
+        private static void AddQuestionsToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, Registration registration)
         {
             foreach (var question in standardQuestions)
             {
@@ -1524,10 +1416,7 @@ namespace AfterSchoolLibrary
                     default:
                         var answer = answers
                             .Where(item =>
-                                registrations
-                                    .Select(registration => registration.ID.Value)
-                                    .ToList()
-                                    .Contains(item.RegistrationId.Value) &&
+                                registration.ID == item.RegistrationId &&
                                 item.FormQuestionQuestionDataTypeId == question.QuestionDataTypeId)
                             .OrderBy(x => x.RegistrationId)
                             .LastOrDefault();
@@ -1544,10 +1433,7 @@ namespace AfterSchoolLibrary
             {
                 var answer = answers
                     .Where(item =>
-                        registrations
-                            .Select(registration => registration.ID.Value)
-                            .ToList()
-                            .Contains(item.RegistrationId.Value) &&
+                        registration.ID == item.RegistrationId &&
                         item.FormQuestionText == question.Text)
                     .OrderBy(x => x.RegistrationId)
                     .LastOrDefault();
@@ -1559,17 +1445,315 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public bool IsRegisteredFor(Activity activity, DayOfWeekASL day, DatabaseConnection dc = null)
+        private static void AddQuestionHeadersToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions)
         {
-            return this.GetRegistrantActivities(dc: dc).Where(x => x.ActivityId.Value == activity.ID.Value && x.Day == day).Count() > 0;
-        }
-        public bool IsRegisteredFor(Activity activity, DatabaseConnection dc = null)
-        {
-            if (activity.GetDays().Count == 1)
+            foreach (var question in standardQuestions)
             {
-                return this.GetRegistrantActivities(dc: dc).Where(x => x.ActivityId.Value == activity.ID.Value && activity.GetDaysOfTheWeek().First() == x.Day).Count() > 0;
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        break;
+                    default:
+                        row.Add($"{question.FormQuestionGroupName} - {question.Text.ToString()}");
+                        break;
+                }
             }
-            return false;
+            foreach (var question in customQuestions)
+            {
+                row.Add(question.Text.ToString());
+            }
+        }
+
+        //public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus regStatus, RegistrationAssignmentType rat, List<int> groupIds, DatabaseConnection dc = null)
+        //{
+        //    var allRegistrations = new List<Registration>();
+        //    var loopingRegistrations = registrations;
+        //    var days = new List<DayOfWeekASL>();
+        //    var registrantActivities = new List<RegistrantActivity>();
+        //    var allDayActivities = new List<Activity>();
+
+        //    allRegistrations.AddRange(registrations);
+
+        //    if (reportType != RegistrationReportType.SingleActivity)
+        //    {
+        //        registrations.ForEach(registration => allRegistrations.AddRange(registration.GetRelatedRegistrations(dc: dc)));
+
+        //        var firstRegistrations = allRegistrations.Where(x => !x.FirstRegistrationId.HasValue).ToList();
+        //        var registrantIds = allRegistrations.Select(x => x.RegistrantId.Value).ToList();
+        //        registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, dc: dc)
+        //            .Where(x => x.AssignmentTypeId == rat)
+        //            .ToList();
+
+        //        days = Enum.GetValues(typeof(DayOfWeekASL))
+        //                        .Cast<DayOfWeekASL>()
+        //                        .Where(x => x != DayOfWeekASL.NotSet)
+        //                        .ToList();
+
+        //        var allActivityIds = registrantActivities.Select(x => x.ActivityId.Value).Distinct().ToList();
+        //        allDayActivities = Activity.GetByActivitiesByRegistrants(allActivityIds, registrantIds, DayOfWeekASL.NotSet, regStatus, groupIds, dc: dc);
+
+        //        // preload days for each activity (trying to find a faster way to do this)
+        //        allDayActivities.ForEach(x => x.GetDays(dc: dc));
+
+        //        loopingRegistrations = firstRegistrations;
+        //    }
+
+        //    // only load last registration answers
+        //    var answers = FormQuestionAnswer.LoadByRegistrationIds(allRegistrations.Select(x => x.ID.Value).ToList(), dc: dc)
+        //        .Where(x => x.Text.IsNotBlank())
+        //        .ToList();
+
+        //    var questionIds = answers.Select(x => x.FormQuestionId.Value).Distinct().ToList();
+
+        //    var questions = FormQuestion.LoadList(questionIds, dc: dc)
+        //        .OrderBy(x => x.DisplayOrder)
+        //        .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+        //        .ToList();
+
+        //    var standardQuestions = questions
+        //        .Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet)
+        //        .DistinctBy(x => x.QuestionDataTypeId)
+        //        .ToList();
+        //    var customQuestions = questions
+        //        .Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet)
+        //        .DistinctBy(x => x.Text)
+        //        .ToList();
+
+        //    var assignmentTypes = Enum.GetValues(typeof(RegistrationAssignmentType))
+        //        .Cast<RegistrationAssignmentType>()
+        //        .Where(x => x != RegistrationAssignmentType.NotSet &&
+        //                    x != RegistrationAssignmentType.Declined &&
+        //                    x != RegistrationAssignmentType.Invited)
+        //        .OrderBy(x => x)
+        //        .ToList();
+
+        //    var table = new List<List<string>>();
+
+        //    table.Add(AddHeadersToCSVReport(
+        //        reportType,
+        //        days,
+        //        standardQuestions,
+        //        customQuestions
+        //        ));
+
+        //    // print data for each registration
+        //    loopingRegistrations.ForEach(registration =>
+        //        table.Add(AddEachRegistrationToCSVReport(
+        //            registration,
+        //            allRegistrations,
+        //            account,
+        //            reportType,
+        //            assignmentTypes,
+        //            days,
+        //            registrantActivities,
+        //            allDayActivities,
+        //            standardQuestions,
+        //            customQuestions,
+        //            answers,
+        //            dc))
+        //    );
+
+        //    return CsvFile.Create(table);
+        //}
+
+        //private static List<string> AddHeadersToCSVReport(RegistrationReportType reportType, List<DayOfWeekASL> days, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions)
+        //{
+        //    var row = new List<string>();
+
+        //    row.Add($"Date {(reportType == RegistrationReportType.SingleActivity ? "" : "First ")}Registered");
+
+        //    if (reportType == RegistrationReportType.Detailed)
+        //        row.Add("Date Last Registered");
+
+        //    row.Add("First Name");
+        //    row.Add("Last Name");
+        //    row.Add("Email");
+
+        //    /*
+        //    if (reportType == RegistrationReportType.Basic && false)
+        //    {
+        //        assignmentTypes = new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved };
+
+        //        foreach (var type in assignmentTypes)
+        //        {
+        //            row.Add(type.ToString().SplitByUpperCase());
+        //        }
+        //    }
+        //    */
+
+        //    if (reportType != RegistrationReportType.SingleActivity)
+        //        days.ForEach(day => row.Add(day.ToString()));
+
+        //    if (reportType != RegistrationReportType.Basic)
+        //    {
+        //        row.Add("Amount Paid");
+        //        AddQuestionHeadersToCSVReport(row, standardQuestions, customQuestions);
+        //    }
+
+        //    return row;
+        //}
+
+        //private static List<string> AddEachRegistrationToCSVReport(Registration registration, List<Registration> allRegistrations, Account account, RegistrationReportType reportType, List<RegistrationAssignmentType> assignmentTypes, List<DayOfWeekASL> days, List<RegistrantActivity> registrantActivities, List<Activity> allDayActivities, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, DatabaseConnection dc = null)
+        //{
+        //    var relatedRegistrations = new List<Registration> { registration };
+        //    relatedRegistrations.AddRange(allRegistrations
+        //        .Where(x =>
+        //            x.FirstRegistrationId.HasValue &&
+        //            x.FirstRegistrationId.Value == registration.ID.Value)
+        //        .ToList()
+        //    );
+
+        //    var lastRegistration = relatedRegistrations.OrderBy(x => x.ID.Value).Last();
+
+        //    var row = new List<string>();
+
+        //    row.Add(account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString());
+        //    if (reportType == RegistrationReportType.Detailed)
+        //        row.Add(account.ConvertToAccountTimeZone(lastRegistration.CreateDate.Value).ToShortDateTimeString());
+
+        //    row.Add(registration.RegistrantFirstName);
+        //    row.Add(registration.RegistrantLastName);
+        //    row.Add(registration.RegistrantEmail);
+
+        //    /*
+        //    if (reportType == RegistrationReportType.Basic && false)
+        //    {
+        //        var reservedRas = RegistrantActivity.GetByActivityIds(activityIds, regIds, DateTime.UtcNow, dc: dc);
+        //        // var reservedRas = ras.Where(x => x.NumberOfSeats.Value > 0).ToList();
+        //        // var waitingListRas = ras.Where(x => x.NumberOfWaitingListSeats.Value > 0).ToList();
+        //        // var applicationRas = ras.Where(x => x.NumberOfApplicationSeats.Value > 0).ToList();
+
+        //        foreach (var type in assignmentTypes)
+        //        {
+        //            switch (type)
+        //            {
+        //                case RegistrationAssignmentType.Application:
+        //                    // row.Add(applicationRas.OrderBy(x => x.PreferenceNumber.Value).Select(x => x.ActivityName).ToStringList(", "));
+        //                    break;
+        //                case RegistrationAssignmentType.Reserved:
+        //                    row.Add(reservedRas.OrderBy(x => x.PreferenceNumber.Value).Select(x => x.ActivityName).ToStringList(", "));
+        //                    break;
+        //                case RegistrationAssignmentType.WaitingList:
+        //                    // row.Add(waitingListRas.OrderBy(x => x.PreferenceNumber.Value).Select(x => x.ActivityName).ToStringList(", "));
+        //                    break;
+        //            }
+        //        }
+        //    }
+        //    */
+
+        //    if (reportType != RegistrationReportType.SingleActivity)
+        //    {
+        //        AddDaysAndActivitiesToCSVReport(row, relatedRegistrations, days, registrantActivities, allDayActivities);
+        //    }
+
+        //    if (reportType != RegistrationReportType.Basic)
+        //    {
+        //        AddTotalPaidToCSVReport(row, relatedRegistrations);
+        //        AddQuestionsToCSVReport(row, standardQuestions, customQuestions, answers, relatedRegistrations);
+        //    }
+
+        //    return row;
+        //}
+        //private static void AddDaysAndActivitiesToCSVReport(List<string> row, List<Registration> registrations, List<DayOfWeekASL> days, List<RegistrantActivity> registrantActivities, List<Activity> allDayActivities, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    var regIds = registrations.Select(registration => registration.RegistrantId.Value)
+        //        .ToList();
+        //    var ras = registrantActivities.Where(registrantActivity => regIds.Contains(registrantActivity.RegistrantId.Value))
+        //        .ToList();
+        //    var participationObjects = ras.Select(registrantActivity => 
+        //        new
+        //        {
+        //            registrantActivity.ParticipationObjectId,
+        //            registrantActivity.ParticipationObjectTypeId
+        //        })
+        //        .ToList();
+
+        //    days.ForEach(day =>
+        //    {
+        //        var dayActivities = allDayActivities.Where(x => 
+        //            participationObjects.Contains(x.ID.Value) && 
+        //            x.GetDaysOfTheWeek(msgs, dc).Contains(day)
+        //            );
+        //        if (dayActivities.Any())
+        //            row.Add(dayActivities.Select(x => x.Name).ToStringList(", "));
+        //        else
+        //            row.Add("");
+        //    });
+        //}
+
+        //private static void AddTotalPaidToCSVReport(List<string> row, List<Registration> registrations)
+        //{
+        //    var totalPaid = (decimal)0;
+
+        //    if (registrations.Where(x => x.DatePaid.HasValue).Any())
+        //        totalPaid = registrations.Where(x => x.DatePaid.HasValue).Sum(x => x.AmountPaid.Value);
+
+        //    row.Add(totalPaid.ToCurrency());
+        //}
+
+        //private static void AddQuestionsToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, List<Registration> registrations)
+        //{
+        //    foreach (var question in standardQuestions)
+        //    {
+        //        switch (question.QuestionDataTypeId)
+        //        {
+        //            case QuestionDataType.RegistrantFirstName:
+        //            case QuestionDataType.RegistrantLastName:
+        //            case QuestionDataType.RegistrantEmail:
+        //                break;
+        //            default:
+        //                var answer = answers
+        //                    .Where(item =>
+        //                        registrations
+        //                            .Select(registration => registration.ID.Value)
+        //                            .ToList()
+        //                            .Contains(item.RegistrationId.Value) &&
+        //                        item.FormQuestionQuestionDataTypeId == question.QuestionDataTypeId)
+        //                    .OrderBy(x => x.RegistrationId)
+        //                    .LastOrDefault();
+
+        //                if (answer.IsNotEmpty())
+        //                    row.Add(answer.Text);
+        //                else
+        //                    row.Add("");
+        //                break;
+        //        }
+        //    }
+
+        //    foreach (var question in customQuestions)
+        //    {
+        //        var answer = answers
+        //            .Where(item =>
+        //                registrations
+        //                    .Select(registration => registration.ID.Value)
+        //                    .ToList()
+        //                    .Contains(item.RegistrationId.Value) &&
+        //                item.FormQuestionText == question.Text)
+        //            .OrderBy(x => x.RegistrationId)
+        //            .LastOrDefault();
+
+        //        if (answer.IsNotEmpty())
+        //            row.Add(answer.Text);
+        //        else
+        //            row.Add("");
+        //    }
+        //}
+
+        #endregion
+
+        public bool IsRegisteredFor(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return this.GetRegistrantActivities(msgs, dc)
+                .Where(x => 
+                    x.ParticipationObjectId.Value == participationObjectId && 
+                    x.ParticipationObjectTypeId == participationObjectType)
+                .Count() > 0;
+        }
+        public bool IsRegisteredFor(ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return IsRegisteredFor(participationObject.ObjectID.Value, participationObject.ObjectType, msgs, dc);
         }
 
         public static int TotalCurrentRegistrationsCount(int accountId, DatabaseConnection dc = null)
@@ -1781,12 +1965,17 @@ namespace AfterSchoolLibrary
             var registrantActivities = this.GetRegistrantActivities(msgs, dc);
 
             if (registrantActivities.Any())
+            {
+                // this only works now because we're doing on registration at a time
+                var registrantActivity = registrantActivities.First();
+
                 return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                    registrantActivities.First().ActivityId.Value,
-                    ParticipationObjectType.Activity,
+                    registrantActivity.ParticipationObjectId.Value,
+                    registrantActivity.ParticipationObjectTypeId,
                     this.RegistrantId.Value,
                     msgs,
                     dc) > 0;
+            }
 
             msgs.Add("Incomplete registration", MessageType.UserError);
 
@@ -1797,9 +1986,81 @@ namespace AfterSchoolLibrary
         {
             var registrantActivities = this.GetRegistrantActivities(msgs, dc);
             if (registrantActivities.Any())
-                return registrantActivities.First().ToActivity(true, msgs, dc).ToParticipationObject(msgs, dc);
+            {
+                var registrantActivity = registrantActivities.First();
+
+                switch (registrantActivity.ParticipationObjectTypeId)
+                {
+                    case ParticipationObjectType.AccountActivityGroup:
+                        return AccountActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
+                            .ToParticipationObject(msgs, dc);
+                    case ParticipationObjectType.ActivityGroup:
+                        return ActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
+                            .ToParticipationObject(msgs, dc);
+                    case ParticipationObjectType.Activity:
+                        return Activity.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
+                            .ToParticipationObject(msgs, dc);
+                }
+            }
 
             return null;
+        }
+
+        private static RegistrationAssignmentType ProcessRegistrationSeats(CheckoutObject checkoutObject, RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var participationObject = checkoutObject.ParticipationObject;
+            var seatsAvailable = participationObject.SeatsRemaining;
+            var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
+            var isPendingOrReserved = ra.IsNotEmpty() && (ra.AssignmentTypeId == RegistrationAssignmentType.Reserved || ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment);
+
+            // if they're paying for a registration they already completed
+            if (isPendingOrReserved)
+                return RegistrationAssignmentType.Reserved;
+            
+            if (participationObject.RegistrationModeId == RegistrationMode.Apply)
+                return RegistrationAssignmentType.Applied;
+            else if (!seatsAvailable.HasValue || seatsAvailable >= checkoutObject.NumberOfSeats)
+                return RegistrationAssignmentType.Reserved;
+            else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= checkoutObject.NumberOfSeats)
+                return RegistrationAssignmentType.WaitingList;
+
+            msgs.Add(
+                $"Sorry, there are no more reserved seats or waiting list seats available for {participationObject.Name}",
+                MessageType.UserError);
+
+            return RegistrationAssignmentType.NotSet;
+        }
+
+        public static void ProcessRegistration(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var participationObject = checkoutObject.ParticipationObject;
+            var ra = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
+            var assignmentType = Registration.ProcessRegistrationSeats(checkoutObject, ra, msgs, dc);
+            var activityGroupId = new int?();
+
+            if (msgs.HasErrors())
+                return;
+
+            if (participationObject.IsActivity())
+                activityGroupId = participationObject.GetActivityGroup().ID;
+
+            // get the registration period to see what period the registrant registered
+            var period = participationObject.GetCurrentRegistrationPeriod(msgs, dc);
+
+            // get the registrant record that was created just for the account
+            var accountRegistrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
+
+            // add or update the registrant for the activity
+            ra = accountRegistrant.AddOrUpdateParticipationObject(
+                registrationId: checkoutObject.Registration.ID.Value,
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                assignmentType: assignmentType,
+                registrationPeriodId: period?.ID.IfEmpty(0),
+                activityGroupId: activityGroupId,
+                loggedInUserId: loggedInUser.ID.Value,
+                msgs: msgs,
+                dc: dc);
         }
 
         #endregion

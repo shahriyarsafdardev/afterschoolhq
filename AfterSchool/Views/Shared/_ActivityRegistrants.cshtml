@@ -53,7 +53,7 @@
                         <td class="text-center">@ra.AssignmentSeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         <td>
-                            @if (ra.ActivityCostPerRegistrant == 0)
+                            @if (activity.CostPerRegistrant == 0)
                             {
                                 @:FREE
                             }

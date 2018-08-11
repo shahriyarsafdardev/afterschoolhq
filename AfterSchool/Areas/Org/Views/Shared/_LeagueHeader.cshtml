@@ -44,10 +44,10 @@
                 @*<a href="@Url.Action("schedules", "league", new {id = Model.Uid})"  class="btn btn-alt6@(actionName == "schedules" ? "-active" : "")">
                   <i class="s7-date"></i>  Practice ?? Schedule
                 </a>*@
-                 <a href="@Url.Action("schedules", "league", new {id = Model.Uid})"  class="btn btn-alt6@(actionName == "schedules" ? "-active" : "")">
+                 <a href="@Url.Action("schedules", "league", new {id = Model.Uid})"  class="hide btn btn-alt6@(actionName == "schedules" ? "-active" : "")">
                   <i class="s7-date"></i>  Game Schedule
                 </a>
-                <div class="btn-group">
+                <div class="btn-group hide">
                     <button type="button" data-toggle="dropdown" class="btn btn-alt6 dropdown-toggle" aria-expanded="false">
                         More... <span class="caret"></span>
                     </button>
@@ -77,7 +77,9 @@
                     </ul>
                 </div>
             }
-            <a href="@Url.Action("publishdetail", "league", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish</a>
+            <a href="@Url.Action("publishdetail", "league", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> 
+                Publish@(ispublished ? "ed": "")
+            </a>
         </div>
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="location.href=this.value;">
@@ -90,12 +92,6 @@
                 @if (activityCount > 0 || Model.IsPublished)
                 {
                     <option value="@Url.Action("registrations", "league", new { id = Model.Uid })">@UILabel.RegistrantLabel(true)</option>
-                    <option value="@Url.Action("invited", "league", new { id = Model.Uid })">Invitations</option>
-                    <option value="@Url.Action("messages", "league", new { id = Model.Uid })">Messaging</option>
-                    if (Model.RegistrationModeId == RegistrationMode.Apply)
-                    {
-                        <option value="@Url.Action("placement", "league", new { id = Model.Uid })">Lottery</option>
-                    }
                 }
                 <option value="@Url.Action("publishdetail", "league", new { id = Model.Uid })">Publish</option>
             </select>

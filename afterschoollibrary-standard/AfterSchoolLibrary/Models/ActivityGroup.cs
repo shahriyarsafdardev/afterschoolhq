@@ -486,7 +486,7 @@ namespace AfterSchoolLibrary
         }
 
         public List<RegistrantActivity> _RegistrantActivities = null;
-        public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, DatabaseConnection dc = null)
+        public List<RegistrantActivity> GetRegistrantActivities(List<Registration> registrations = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (registrations.IsEmpty())
                 registrations = Registration.LoadByActivityGroupId(this.ID.Value, dc: dc);
@@ -494,9 +494,21 @@ namespace AfterSchoolLibrary
             if (_RegistrantActivities.IsEmpty())
             {
                 if (registrations.Any())
-                    _RegistrantActivities = RegistrantActivity.LoadByRegistrationIds(registrations.Select(x => x.ID.Value).ToList(), dc: dc)
-                        .Where(x => !x.ActivityIsDeleted)
+                {
+                    var registrationIds = registrations.Select(x => x.ID.Value).ToList();
+                    _RegistrantActivities = RegistrantActivity.LoadByRegistrationIds(registrationIds, msgs, dc);
+
+                    var activityIds = _RegistrantActivities.Where(x => x.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                        .Select(x => x.ParticipationObjectId.Value)
                         .ToList();
+
+                    var deletedActivityIds = Activity.LoadList(activityIds, true, msgs, dc).Select(activity => activity.ID.Value);
+                    _RegistrantActivities = _RegistrantActivities.Where(x =>
+                        x.ParticipationObjectTypeId == ParticipationObjectType.Activity && 
+                        x.ParticipationObjectId.Value.NotIn(deletedActivityIds)
+                        )
+                        .ToList();
+                }
                 else
                     _RegistrantActivities = new List<RegistrantActivity>();
             }
@@ -516,50 +528,50 @@ namespace AfterSchoolLibrary
 
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(rat: rat, activityGroupId: this.ID.Value, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: rat, activityGroupId: this.ID.Value, dc: dc);
         }
 
-        public List<RegistrantAssignment> RandomizePlacementAttempt(RegistrationPeriod period, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var rr = new RegistrationRandomization(this);
-            rr.RegistrationPeriod = period;
-            return rr.AttemptLottery(msgs, dc: dc);
-        }
+        //public List<RegistrantAssignment> RandomizePlacementAttempt(RegistrationPeriod period, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //    var rr = new RegistrationRandomization(this);
+        //    rr.RegistrationPeriod = period;
+        //    return rr.AttemptLottery(msgs, dc: dc);
+        //}
 
-        public SystemMessages RandomizePlacementApply(RegistrationPeriod period, List<RegistrantAssignment> assignments, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var rr = new RegistrationRandomization(this);
-            rr.RegistrationPeriod = period;
-            msgs.AddRange(rr.ApplyLottery(assignments, dc: dc));
-            return msgs;
-        }
+        //public SystemMessages RandomizePlacementApply(RegistrationPeriod period, List<RegistrantAssignment> assignments, DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var rr = new RegistrationRandomization(this);
+        //    rr.RegistrationPeriod = period;
+        //    msgs.AddRange(rr.ApplyLottery(assignments, dc: dc));
+        //    return msgs;
+        //}
 
-        public SystemMessages RandomizePlacementReset(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
+        //public SystemMessages RandomizePlacementReset(DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
 
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
-                {
-                    this.GetRegistrantActivities(dc: adc).ForEach(
-                        ra => amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, adc))
-                    );
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                dc: dc
-            );
+        //    Database.ExecuteTransaction(
+        //        action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
+        //        {
+        //            this.GetRegistrantActivities(dc: adc).ForEach(
+        //                ra => amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, adc))
+        //            );
+        //        },
+        //        onSuccess: (SystemMessages smsgs) =>
+        //        {
+        //            msgs.AddRange(smsgs);
+        //        },
+        //        onFailure: (SystemMessages fmsgs) =>
+        //        {
+        //            msgs.AddRange(fmsgs);
+        //        },
+        //        dc: dc
+        //    );
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
         public int GetActivityCount(bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1088,21 +1100,21 @@ namespace AfterSchoolLibrary
                 ); 
         }
 
-        public static SystemMessages SendRegistrationConfirmations(int id, List<Registration> registrations = null, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var group = ActivityGroup.Load(id, dc: dc);
+        //public static SystemMessages SendRegistrationConfirmations(int id, List<Registration> registrations = null, DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var group = ActivityGroup.Load(id, dc: dc);
 
-            if (registrations.IsEmpty())
-                registrations = group.GetRegistrations(dc: dc);
+        //    if (registrations.IsEmpty())
+        //        registrations = group.GetRegistrations(dc: dc);
 
-            var firstReg = registrations.First();
+        //    var firstReg = registrations.First();
 
-            // send one bcc for first reg
-            registrations.ForEach(reg => msgs.AddRange(Registration.SendConfirmation(reg.ID.Value, firstReg.ID == reg.ID, null)));
+        //    // send one bcc for first reg
+        //    registrations.ForEach(reg => msgs.AddRange(Registration.SendConfirmation(reg.ID.Value, firstReg.ID == reg.ID, null)));
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
         public ActivityGroup Copy(string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {

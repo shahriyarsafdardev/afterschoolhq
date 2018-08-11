@@ -29,7 +29,7 @@
             @if (isActivityLeader)
             {
                 <a href="@Url.Action("editsetup", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "editsetup" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
-                if (!Model.IsChildActivity && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
+                if (!SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                 {
                     <a href="@Url.Action("form", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
                 }
@@ -46,7 +46,7 @@
                     <a href="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"><i class="s7-mail"></i> Messaging</a>
                 }
             }
-            @if (isActivityLeader && !Model.IsChildActivity)
+            @if (isActivityLeader)
             {
                 if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
                 {
@@ -66,7 +66,7 @@
                 @if (isActivityLeader)
                 {
                     <option value="@Url.Action("editsetup", "leagueactivity", new { id = Model.Uid })">Setup</option>
-                    if (!Model.IsChildActivity && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
+                    if (!SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                     {
                         <option value="@Url.Action("form", "leagueactivity", new { id = Model.Uid })">Reg Form</option>
                     }
@@ -84,7 +84,7 @@
                         <option value="@Url.Action("messages", "leagueactivity", new { id = Model.Uid })">Messaging</option>
                     }
                 }
-                @if (isActivityLeader && !Model.IsChildActivity)
+                @if (isActivityLeader)
                 {
                     if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
                     {

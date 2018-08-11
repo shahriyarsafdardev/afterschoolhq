@@ -33,7 +33,7 @@ namespace AfterSchoolLibraryTests
         }
 
         [Fact]
-        public void ToActivitydbTest()
+        public void ToActivityNoDBTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
@@ -43,11 +43,11 @@ namespace AfterSchoolLibraryTests
 
             registrantActivity = registrantActivity.Reload(dc: dc);
 
-            Assert.NotNull(registrantActivity.ToActivity(false));
+            Assert.Equal(registrantActivity.ParticipationObjectId, registrantActivity.GetParticipationObject(msgs, dc).ObjectID);
         }
 
         [Fact]
-        public void ToActivityTest()
+        public void ToActivityDBTest()
         {
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
@@ -57,7 +57,7 @@ namespace AfterSchoolLibraryTests
 
             registrantActivity = registrantActivity.Reload(dc: dc);
 
-            Assert.NotNull(registrantActivity.ToActivity(true, dc: dc));
+            Assert.Equal(registrantActivity.ParticipationObjectId, registrantActivity.GetParticipationObject(msgs, dc).ObjectID);
         }
 
 
@@ -73,9 +73,11 @@ namespace AfterSchoolLibraryTests
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
 
-            registrantActivity = registrantActivity.Reload(dc: dc);
+            registrantActivity = registrantActivity.Reload(msgs, dc);
 
-            Assert.Equal(registrantActivity.ToString(), RegistrantActivity.LoadByActivityId(activity.ID.Value, dc: dc).ElementAt(0).ToString());
+            var list = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, dc: dc);
+
+            Assert.Single(list);
         }
 
         /// <summary>
@@ -213,62 +215,29 @@ namespace AfterSchoolLibraryTests
         /// <summary>
         /// Test getting Registrant Activities (list) by ActivityIds (list) from RegistrantActivity Table
         /// </summary>
-        [Fact(Skip = "Need to fix")]
-        public void GetByActivityIdsTest()
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
-            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
-            var instance = ActivityInstanceFactory.Create(activity, schedule, DateTime.UtcNow.AddWeeks(-1), DateTime.UtcNow.AddWeeks(1), msgs, dc);
+        //[Fact(Skip = "Need to fix")]
+        //public void GetByActivityIdsTest()
+        //{
+        //    var user = Factories.WebUserFactory.Create(msgs, dc);
+        //    var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
+        //    var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+        //    var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc: dc);
+        //    var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
+        //    var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
+        //    var instance = ActivityInstanceFactory.Create(activity, schedule, DateTime.UtcNow.AddWeeks(-1), DateTime.UtcNow.AddWeeks(1), msgs, dc);
 
-            var activityIds = new List<int>
-            {
-                activity.ID.Value
-            };
+        //    var activityIds = new List<int>
+        //    {
+        //        activity.ID.Value
+        //    };
 
-            var registrantIds = new List<int>
-            {
-                registrant.ID.Value
-            };
+        //    var registrantIds = new List<int>
+        //    {
+        //        registrant.ID.Value
+        //    };
 
-            Assert.Single(RegistrantActivity.GetByActivityIds(activityIds, registrantIds, DateTime.UtcNow, dc: dc));
-        }
-
-        /// <summary>
-        /// Test for retrieving registrantActivity from DB
-        /// Needs to be fixed
-        /// </summary>
-        [Fact(Skip = "Need to fix")]
-        public void GetRegistrationActivityTest()
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc: dc);
-
-            Assert.Equal(registrantActivity.ToString(), registrantActivity.GetRegistrationActivity(dc: dc).ToString());
-        }
-
-        [Fact]
-        public void DeleteRegistrationActivityTest()
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
-            var registration = RegistrationFactory.Create(account, registrant, msgs, dc);
-            var registrationActivity = RegistrationActivityFactory.Create(activity, registration, msgs, dc);
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registration, msgs, dc);
-
-            msgs.AddRange(registrantActivity.DeleteRegistrationActivity(dc));
-
-            Assert.True(RegistrationActivity.LoadByActivityIdByRegistrationId(activity.ID.Value, registration.ID.Value, msgs, dc).IsEmpty());
-        }
+        //    Assert.Single(RegistrantActivity.GetByActivityIds(activityIds, registrantIds, DateTime.UtcNow, dc: dc));
+        //}             
 
         [Fact]
         public void CancelRegistrationTest()
@@ -279,7 +248,6 @@ namespace AfterSchoolLibraryTests
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
-            var registrationActivity = Factories.RegistrationActivityFactory.Create(activity, registration, msgs, dc);
 
             Assert.True(registrantActivity.CancelRegistration(msgs, dc).HasNoErrors());
         }
@@ -295,9 +263,8 @@ namespace AfterSchoolLibraryTests
             var registrant = Factories.RegistrantFactory.Create(msgs, dc: dc);
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
             var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
-            var registrationActivity = Factories.RegistrationActivityFactory.Create(activity, registration, msgs, dc);
 
-            Assert.True(registrantActivity.SendNewRegistrationNotice(account, activity, dc: dc).HasNoErrors());
+            Assert.True(registrantActivity.SendNewRegistrationNotice(activity.ToParticipationObject(msgs, dc), dc).HasNoErrors());
         }
 
     }

@@ -160,14 +160,22 @@ else
                                 }
                                 
                             </td>
-                            <td class="text-center @reservedTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable</td>
+                            <td class="text-center @reservedTextClass">
+                                @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable
+                            </td>
+
                             @if (account.HasFeature(FeatureType.WaitingList))
                             {
-                                <td class="text-center @waitingTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList) / @activity.WaitingListSeats</td>
+                                <td class="text-center @waitingTextClass">
+                                    @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList) / @activity.WaitingListSeats
+                                </td>
                             }
+
                             @if (account.HasFeature(FeatureType.AllowApplications))
                             {
-                                <td class="text-center">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied)</td>
+                                <td class="text-center">
+                                    @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Applied)
+                                </td>
                             }
                             <td>
                                 <div class="btn-group pull-right">

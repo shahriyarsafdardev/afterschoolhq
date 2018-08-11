@@ -99,6 +99,9 @@ else
                     <th class="text-center">
                         @UILabel.ActivityLabel(activityGroupType, true)
                     </th>
+                    <th>
+                        Registrations
+                    </th>
                     <th></th>
                 </tr>
             </thead>
@@ -107,12 +110,20 @@ else
                 {
                     foreach (var group in Model)
                     {
+                        var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
+                        var regCount = aag.IsEmpty() ? group.GetRegistrationCount() : aag.GetRegistrationCount();
+                        var activityCount = aag.IsEmpty() ? group.GetActivityCount(isArchive, false) : aag.GetActivityCount(isArchive, false);
+
                         <tr>
                             <td>
                                 <a href="@Url.Action("summary", controller, new {id = group.Uid})" class="btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
                             </td>
                             <td><a href="@Url.Action("summary", controller, new {id = group.Uid})">@group.Name</a></td>
-                            <td class="text-center">@group.GetActivityCount(isArchive, false)</td>
+                            
+                            <td class="text-center">@activityCount</td>
+                            
+                            <td>@regCount</td>
+
                             @if (!isExternalGroupsView)
                             {
                                 <td>

@@ -82,5 +82,16 @@ namespace AfterSchoolLibrary.Services
             var externalAccount = Account.Load(aag.ActivityGroupAccountId.Value, msgs, dc);
             return $"{Utilities.BaseUrl(isAfterSchool)}/{aag.GetAccount(msgs, dc).UniqueName.ToLower()}/{aag.ActivityGroupActivityGroupTypeId.ToString().ToLower()}/{externalAccount.UniqueName}/{aag.ActivityGroupUniqueName.ToLower()}";
         }
+
+        public static SystemMessages SendInviteStatusUpdateEmail(this AccountActivityGroup accountActivityGroup, InviteStatus inviteStatus, Account account, WebUser currentUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var activityGroup = accountActivityGroup.GetActivityGroup();
+
+            EmailHelper.SendInviteStatusUpdatedEmail(account, activityGroup, currentUser, inviteStatus);
+
+            return msgs;
+        }
     }
 }

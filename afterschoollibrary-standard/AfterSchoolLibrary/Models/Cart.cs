@@ -173,7 +173,7 @@ namespace AfterSchoolLibrary
 
         public CartItem AddCartItem(RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddCartItem(ra.ActivityId.Value, ParticipationObjectType.Activity, ra.ID.Value, msgs, dc: dc);
+            return AddCartItem(ra.ParticipationObjectId.Value, ParticipationObjectType.Activity, ra.ID.Value, msgs, dc: dc);
         }
 
         public CartItem AddCartItem(Activity activity, SystemMessages msgs, DatabaseConnection dc = null)

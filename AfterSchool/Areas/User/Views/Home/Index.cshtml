@@ -65,7 +65,7 @@
                     {
                         Html.RenderPartial(
                              "_ScheduledActivities",
-                             ras.Where(x => x.ToActivity().IsInSession()).ToList(),
+                             ras.Where(x => x.IsInSession()).ToList(),
                              new ViewDataDictionary()
                              {
                                  { "registrant", registrant },
@@ -75,7 +75,7 @@
 
                         Html.RenderPartial(
                              "_ScheduledActivities",
-                             ras.Where(x => x.ToActivity().WillBeInSession()).ToList(),
+                             ras.Where(x => x.WillBeInSession()).ToList(),
                              new ViewDataDictionary()
                              {
                                  { "registrant", registrant },

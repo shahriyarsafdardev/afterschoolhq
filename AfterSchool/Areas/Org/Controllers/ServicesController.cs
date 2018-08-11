@@ -23,7 +23,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid(), msgs);
-            var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                activity.ID.Value, 
+                ParticipationObjectType.Activity, 
+                registrant.ToInteger(), msgs);
             var newAssignmentType = (RegistrationAssignmentType)assignmenttype.ToInteger();
 
             if (ra.IsNotEmpty())
@@ -33,9 +36,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {   
                         var reg = ra.ToRegistrant();
-                        reg.AddOrUpdateActivity(
+                        reg.AddOrUpdateParticipationObject(
                             ra.RegistrationId.Value,
                             activity.ID.Value,
+                            ParticipationObjectType.Activity,
                             newAssignmentType,
                             ra.RegistrationPeriodId,
                             ra.ActivityGroupId,
@@ -79,7 +83,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsGuid())
             {
                 var activity = Activity.LoadByUid(id.ToGuid(), msgs);
-                var ra = RegistrantActivity.LoadByActivityIdByRegistrantId(activity.ID.Value, registrant.ToInteger(), msgs);
+                var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                    activity.ID.Value, 
+                    ParticipationObjectType.Activity, 
+                    registrant.ToInteger(), msgs);
                 var assignmentType = ra.AssignmentTypeId;
 
                 if (ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
@@ -88,9 +95,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     assignmentType = RegistrationAssignmentType.ReservedPendingPayment;
 
-                    reg.AddOrUpdateActivity(
+                    reg.AddOrUpdateParticipationObject(
                         ra.RegistrationId.Value,
                         activity.ID.Value,
+                        ParticipationObjectType.Activity,
                         assignmentType,
                         ra.RegistrationPeriodId,
                         ra.ActivityGroupId,

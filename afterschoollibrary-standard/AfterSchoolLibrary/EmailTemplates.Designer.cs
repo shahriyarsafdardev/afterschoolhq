@@ -83,6 +83,16 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] LeagueInviteStatusUpdate_Notification {
+            get {
+                object obj = ResourceManager.GetObject("LeagueInviteStatusUpdate_Notification", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] LeagueSchool_Invited {
             get {
                 object obj = ResourceManager.GetObject("LeagueSchool_Invited", resourceCulture);
@@ -156,6 +166,16 @@ namespace AfterSchoolLibrary {
         internal static byte[] SubscriptionPayment_Succeeded {
             get {
                 object obj = ResourceManager.GetObject("SubscriptionPayment_Succeeded", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] TeamSubmittedToDistrict_Notification {
+            get {
+                object obj = ResourceManager.GetObject("TeamSubmittedToDistrict_Notification", resourceCulture);
                 return ((byte[])(obj));
             }
         }

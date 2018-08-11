@@ -15,8 +15,10 @@
             <div class="panel-body">
                 @foreach (var ra in Model.Where(x => x.NumberOfSeats > 0))
                 {
-                    <p class="text-medium">@ra.ActivityName</p>
-                    Html.RenderPartial("~/Views/Shared/_ActivityScheduleHtml.cshtml", ra.ToActivity().GetSchedule());
+                    var po = ra.GetParticipationObject();
+
+                    <p class="text-medium">@po.Name</p>
+                    Html.RenderPartial("~/Views/Shared/_ActivityScheduleHtml.cshtml", po.Schedule);
                     <hr />
                 }
             </div>
@@ -31,7 +33,12 @@
             <div class="panel-body">
                 @foreach (var ra in Model.Where(x => x.NumberOfWaitingListSeats > 0))
                 {
-                    @: @ra.ActivityName - @ra.ToActivity().GetSchedule().GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")<br />
+                    var po = ra.GetParticipationObject();
+
+                    <span>
+                        @po.Name - 
+                        @po.Schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")
+                    </span><br />
                 }
             </div>
         </div>
@@ -45,7 +52,12 @@
             <div class="panel-body">
                 @foreach (var ra in Model.Where(x => x.NumberOfApplicationSeats > 0))
                 {
-                    @: @ra.ActivityName - @ra.ToActivity().GetSchedule().GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")<br />
+                    var po = ra.GetParticipationObject();
+
+                    <span>
+                        @po.Name - 
+                        @po.Schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")
+                    </span><br />
                 }
             </div>
         </div>

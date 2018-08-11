@@ -30,9 +30,8 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var registration = ra.GetRegistration();
-            var activity = ra.ToActivity(true);
 
-            msgs.AddRange(SendPaymentReminder(activity.ToParticipationObject(msgs), registration));
+            msgs.AddRange(SendPaymentReminder(ra.GetParticipationObject(msgs), registration));
 
             return msgs;
         }
@@ -565,6 +564,45 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public static SystemMessages SendInviteStatusUpdatedEmail(Account invitedAccount, ActivityGroup activityGroup, WebUser sendingUser, InviteStatus inviteStatus)
+        {
+            var msgs = new SystemMessages();
+            var invitedUser = invitedAccount.GetAccountOwner(msgs); 
+            var sendingAccount = activityGroup.GetAccount(msgs);
+            var leagueOwner = WebUser.Load(sendingAccount.OwnerId.Value);
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", invitedUser.FirstName },
+                { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
+                { "SenderDisplayName", sendingUser.DisplayName },
+                { "RegistrationStartDate", activityGroup.GetCurrentOrNextRegistrationPeriod(msgs).StartDateTime.ToLongDateTimeString() },
+                { "RegistrationEndDate", activityGroup.GetCurrentOrNextRegistrationPeriod(msgs).EndDateTime.ToLongDateTimeString() },
+                { "LeagueAccountName", sendingAccount.Name },
+                { "LeagueName", activityGroup.Name },
+                { "InviteStatus", inviteStatus.ToString() }
+            };
+
+            var subject = $"{sendingUser.DisplayName} has {inviteStatus} your invitation to {activityGroup.Name} in {Utilities.AppName(invitedAccount.IsAfterSchool)}";
+            var body = ProcessTemplate(
+                EmailTemplates.LeagueInviteStatusUpdate_Notification,
+                model,
+                "leagueinvitestatusupdatenotification",
+                msgs
+                );
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(invitedAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(leagueOwner.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(invitedAccount.IsAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
         public static SystemMessages SendAccessRequestToHost(Account visitorAccount, Account hostAccount)
         {
             var msgs = new SystemMessages();
@@ -675,6 +713,51 @@ namespace AfterSchoolLibrary
             msgs.AddRange(mailMsgs);
             return msgs;
         }
+
+        public static SystemMessages SendTeamSubmmittedToDistrictNotifitication(Account visitorAccount, Account hostAccount, Activity activity, ActivityGroup activityGroup, bool isSubmitting)
+        {
+            var msgs = new SystemMessages();
+            var verb = isSubmitting ? "submitted" : "withdrawn";
+            var preposition = isSubmitting ? "to" : "from";
+
+            var model = new NameValueCollection()
+            {
+                { "OrgName", visitorAccount.Name},
+                { "ActivityName", activity.Name },
+                { "LeagueName", activityGroup.Name },
+                {"Verb", verb },
+                {"Preposition", preposition },
+
+            };
+
+            var subject = $"{activity.Name} has been {verb} {preposition} {activityGroup.Name}";
+            var body = ProcessTemplate(
+               EmailTemplates.TeamSubmittedToDistrict_Notification,
+               model,
+               "teamsubmittedtodistrict",
+               msgs
+               );
+
+            var mailMsgsHost = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(hostAccount.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                );
+            var mailMsgsVisitor = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgsHost);
+            msgs.AddRange(mailMsgsVisitor);
+            return msgs;
+        }
+
 
         private static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {

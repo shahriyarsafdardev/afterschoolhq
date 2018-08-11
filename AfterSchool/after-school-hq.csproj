@@ -269,8 +269,6 @@
     <Compile Include="Areas\Org\Controllers\GroupController.cs" />
     <Compile Include="Areas\Org\Controllers\HomeController.cs" />
     <Compile Include="Areas\Org\Controllers\LeagueController.cs" />
-    <Compile Include="Areas\Org\Controllers\PeriodController.cs" />
-    <Compile Include="Areas\Org\Controllers\RegistrantController.cs" />
     <Compile Include="Areas\Org\Controllers\RegistrationController.cs" />
     <Compile Include="Areas\Org\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
@@ -1298,6 +1296,7 @@
     <Content Include="Views\SignUp\CreateAccount.cshtml" />
     <Content Include="Views\Shared\_Teams.cshtml" />
     <Content Include="Views\Account\MakePayment.cshtml" />
+    <Content Include="Views\Shared\_DashboardNotfications.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

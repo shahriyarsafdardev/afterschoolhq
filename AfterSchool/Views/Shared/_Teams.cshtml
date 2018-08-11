@@ -1,4 +1,5 @@
-﻿@{
+﻿@model List<AfterSchoolLibrary.Activity>
+@{
     var account = (Account)ViewData["Account"];
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
     var showRegistrationPeriodFilter = (bool)ViewData["ShowRegistrationPeriodFilter"];
@@ -14,6 +15,8 @@
     var archivedListUrl = Url.Action("index", "activity", new { archive = 1 });
     var hasArchivedActivities = (bool)ViewData["HasArchivedActivities"];
     var activityType = ActivityType.Activity;
+
+    var disableViewTeams = (bool)ViewData["disableViewTeam"].IsNotEmpty();
 
     if (group.IsNotEmpty())
     {
@@ -118,14 +121,23 @@ else
 
 
                         <tr>
+                             @if (disableViewTeams)
+                             {
+                                 <td></td>  
+                                 <td> @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")</td>
+                             }
+                             else {
                             <td>
-                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-default btn-sm">View</a>
+                               
+                                    <a href="@Url.Action("summary", "activity", new { id = @activity.Uid })" class="btn btn-default btn-sm">View</a>
+                                
                             </td>
                             <td>
-                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})">
+                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid })">
                                     @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
                                 </a>
                             </td>
+                             }
                             <td class="text-center">
                                 @if (activity.GetDaysOfTheWeek().Any())
                                 {
@@ -168,7 +180,10 @@ else
                             {
                                 <td class="text-center">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied)</td>
                             }
-                            <td>
+
+                            @if (!disableViewTeams)
+                            {
+                                <td>
                                 <div class="btn-group pull-right">
 
                                     @if (activity.ActivityScheduleId.HasValue && false)
@@ -199,6 +214,8 @@ else
                                     <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@activity.Name', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                 </div>
                             </td>
+                            }
+                            
                         </tr>
                     }
                 }
@@ -385,7 +402,7 @@ else
     }
     function editSchedule(name, activity, schedule) {
         //console.log("editscheudle");
-       // console.log(name, activity, schedule);
+        // console.log(name, activity, schedule);
         $('#schedule-activity-name').html(name);
         $('#schedule').val(schedule);
         $('#schedule-activity').val(activity);

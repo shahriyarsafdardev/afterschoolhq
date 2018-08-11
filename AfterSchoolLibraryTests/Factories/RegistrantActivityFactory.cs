@@ -13,7 +13,12 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static RegistrantActivity Create(Activity activity, Registrant registrant, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new RegistrantActivity() { ActivityId = activity.ID, RegistrantId = registrant.ID };
+            var obj = new RegistrantActivity()
+            {
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                RegistrantId = registrant.ID
+            };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
@@ -22,7 +27,8 @@ namespace AfterSchoolLibraryTests.Factories
         {
             var obj = new RegistrantActivity()
             {
-                ActivityId = activity.ID,
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 RegistrantId = registrant.ID,
                 RegistrationId = registration.ID,
             };
@@ -34,7 +40,8 @@ namespace AfterSchoolLibraryTests.Factories
         {
             var obj = new RegistrantActivity()
             {
-                ActivityId = activity.ID,
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 RegistrantId = registrant.ID,
                 RegistrationPeriodId = registrationPeriodID,
                 NumberOfSeats = numberOfSeats,
@@ -49,7 +56,8 @@ namespace AfterSchoolLibraryTests.Factories
         {
             var obj = new RegistrantActivity()
             {
-                ActivityId = activity.ID,
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 RegistrantId = registrant.ID,
                 NumberOfSeats = numberOfSeats,
                 NumberOfWaitingListSeats = numberOfWaitingListSeats,

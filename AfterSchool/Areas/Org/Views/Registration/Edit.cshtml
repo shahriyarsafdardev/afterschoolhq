@@ -109,21 +109,24 @@
 
                         @foreach (var ra in registrantActivities.OrderBy(x => x.Day))
                         {
-                            var activity = ra.ToActivity(true);
-                            var dayText = ra.Day.ToString();
+                            var participationObject = ra.GetParticipationObject();
+                            var dayText = "";
+                            var schedule = ra.GetSchedule();
                             
-                            if (ra.ActivityScheduleRequiresAllDays)
+                            if (schedule.IsNotEmpty())
                             {
-                                dayText = activity.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ", " and ");
+                                dayText = schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ", " and ");
                             }
                             
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <div class="btn-group pull-right">
                                         <button class="btn btn-default md-trigger" data-modal="modal-move-seat" onclick="moveSeat(@ra.ID, @((int)ra.RegistrationAssignmentTypeId))"><i class="s7-gleam"></i> <span>Move Seat</span></button>
-                                        <button class="btn btn-default md-trigger" data-modal="modal-confirmation-activity" onclick="deleteActivity(@ra.ActivityId, '@UI.JavascriptSafeString(ra.ActivityName)')"><i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span></button>
+                                        <button class="btn btn-default md-trigger" data-modal="modal-confirmation-activity" onclick="deleteActivity(@ra.ActivityId, '@UI.JavascriptSafeString(participationObject.Name)')"><i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span></button>
                                     </div>
-                                    <a href="@Url.Action("summary", "activity", new { id = activity.Uid })">@activity.ToFullDescription()</a>                                    
+                                    <a href="@Url.Action("summary", "activity", new { id = participationObject.Uid })">
+                                        @participationObject.Name
+                                    </a>                                    
                                 </div>
                                 <div class="panel-body">
                                     <div class="table-responsive">

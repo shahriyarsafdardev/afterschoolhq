@@ -1060,9 +1060,18 @@ namespace AfterSchool.Controllers
                             );
 
                         // create registration
+
+                        var activityGroupId = new int?();
+
+                        if (participationObject.IsAccountActivityGroup())
+                            activityGroupId = participationObject.GetAccountActivityGroup().ActivityGroupId;
+                        else if (participationObject.IsActivity())
+                            activityGroupId = participationObject.GetActivity().ActivityGroupId;
+
                         registration = accountRegistrantCopy.AddRegistrationWithESignature(
                             ownerAccountId: participationObject.OwnerAccount.ID.Value,
-                            activityGroupId: participationObject.ObjectType == ParticipationObjectType.Activity ? ((Activity)participationObject.Object).ActivityGroupId : null,
+                            activityGroupId: activityGroupId,
+                            accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
                             esignature: signature,
                             completionStatus: RegistrationCompletionStatus.Started,
                             loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
@@ -1318,10 +1327,6 @@ namespace AfterSchool.Controllers
         private Registration ThankYouViewBag(string registrationUid, SystemMessages msgs)
         {
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
-
-            // this should be moved into the library
-            //if (SessionVariables.Cart.IsNotEmpty())
-            //    BackgroundJob.Enqueue(() => Registration.SendConfirmation(registration.ID.Value, true, null));
 
             // clear out session stuff after it sends confirmation, don't want to send on refresh
             ResetRegistrationSession();
