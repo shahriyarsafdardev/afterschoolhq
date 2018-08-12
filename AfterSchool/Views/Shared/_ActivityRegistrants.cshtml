@@ -83,7 +83,7 @@
                             </select>
                         </td>
                         <td>
-                            @if (ra.GetAmountPaid() == 0)
+                            @if (ra.GetAmountPaid() == 0 && ra.ToRegistrant().ParentRegistrantId.HasValue)
                             {
                                 <button class="btn btn-default btn-sm" 
                                         data-modal="modal-waitinglist" 

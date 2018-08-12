@@ -434,6 +434,11 @@ namespace AfterSchoolLibrary
             };
         }
 
+        public Registrant GetRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.Load(this.RegistrantId.Value, msgs, dc);
+        }
+
         //public Activity ToActivity(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         //{
         //    if (loadFromDb)
