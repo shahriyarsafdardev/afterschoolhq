@@ -9,61 +9,96 @@ namespace AfterSchool.Models
 {
     public class SessionVariables
     {
+        private static Registrant _CurrentRegistrant;
         public static Registrant CurrentRegistrant
         {
             get
             {
-                return (Registrant)HttpContext.Current.Session["CurrentRegistrant"];
+                if (_CurrentRegistrant.IsEmpty())
+                    _CurrentRegistrant = SessionHelper.GetCurrentRegistrant();
+
+                return _CurrentRegistrant;
             }
             set
             {
-                HttpContext.Current.Session["CurrentRegistrant"] = value;
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("CurrentRegistrant", value.ID.Value.ToString());
+                _CurrentRegistrant = value;
             }
         }
+
+        private static WebUser _LoggedInUser;
         public static WebUser LoggedInUser
         {
             get
             {
-                return (WebUser)HttpContext.Current.Session["LoggedInUser"];
+                if (_LoggedInUser.IsEmpty())
+                    _LoggedInUser = SessionHelper.GetLoggedInUser();
+
+                return _LoggedInUser;
             }
             set
             {
-                HttpContext.Current.Session["LoggedInUser"] = value;
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("LoggedInUser", value.ID.Value.ToString());
+                _LoggedInUser = value;
             }
         }
+
+        private static WebUser _OriginalLoggedInUser;
         public static WebUser OriginalLoggedInUser
         {
             get
             {
-                return (WebUser)HttpContext.Current.Session["OriginalLoggedInUser"];
+                if (_OriginalLoggedInUser.IsEmpty())
+                    _OriginalLoggedInUser = SessionHelper.GetOriginalLoggedInUser();
+
+                return _OriginalLoggedInUser;
             }
             set
             {
-                HttpContext.Current.Session["OriginalLoggedInUser"] = value;
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("OriginalLoggedInUser", value.ID.Value.ToString());
+                _OriginalLoggedInUser = value;
             }
         }
+
+        private static Account _CurrentAccount;
         public static Account CurrentAccount
         {
             get
             {
-                return (Account)HttpContext.Current.Session["CurrentAccount"];
+                if (_CurrentAccount.IsEmpty())
+                    _CurrentAccount = SessionHelper.GetAccount();
+
+                return _CurrentAccount;
             }
             set
             {
-                HttpContext.Current.Session["CurrentAccount"] = value;
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("CurrentAccount", value.ID.Value.ToString());
+                _CurrentAccount = value;
             }
         }
+
+        private static Account _RegistrationStartPageAccount;
         public static Account RegistrationStartPageAccount
         {
             get
             {
-                return (Account)HttpContext.Current.Session["RegistrationStartPageAccount"];
+                if (_RegistrationStartPageAccount.IsEmpty())
+                    _RegistrationStartPageAccount = SessionHelper.GetRegistrationStartPageAccount();
+
+                return _RegistrationStartPageAccount;
             }
             set
             {
-                HttpContext.Current.Session["RegistrationStartPageAccount"] = value;
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("RegistrationStartPageAccount", value.ID.Value.ToString());
+                _RegistrationStartPageAccount = value;
             }
         }
+
         public static UserType AccountUserType
         {
             get
@@ -75,38 +110,58 @@ namespace AfterSchool.Models
                 HttpContext.Current.Session["AccountUserType"] = value;
             }
         }
+
+        private static AccountPackage _AccountPackage;
         public static AccountPackage AccountPackage
         {
             get
             {
-                return (AccountPackage)HttpContext.Current.Session["AccountPackage"];
+                if (_AccountPackage.IsEmpty())
+                    _AccountPackage = SessionHelper.GetAccountPackage();
+
+                return _AccountPackage;
             }
             set
             {
-                HttpContext.Current.Session["AccountPackage"] = value;
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("AccountPackage", value.ID.Value.ToString());
+                _AccountPackage = value;
             }
         }
+
+        private static Session _VisitorSession;
         public static Session VisitorSession
         {
             get
             {
-                return (Session)HttpContext.Current.Session["VisitorSession"];
+                if (_VisitorSession.IsEmpty())
+                    _VisitorSession = SessionHelper.GetVisitorSession();
+
+                return _VisitorSession;
             }
             set
             {
-                HttpContext.Current.Session["VisitorSession"] = value;
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("VisitorSession", value.ID.Value.ToString());
+                _VisitorSession = value;
             }
         }
 
+        private static Cart _Cart;
         public static Cart Cart
         {
             get
             {
-                return (Cart)HttpContext.Current.Session["Cart"];
+                if (_Cart.IsEmpty())
+                    _Cart = SessionHelper.GetCart();
+
+                return _Cart;
             }
             set
             {
-                HttpContext.Current.Session["Cart"] = value;
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("Cart", value.ID.Value.ToString());
+                _Cart = value;
             }
         }
 

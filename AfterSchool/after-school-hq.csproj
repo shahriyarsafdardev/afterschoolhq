@@ -335,6 +335,7 @@
     <Compile Include="Models\RebornImage.cs" />
     <Compile Include="Models\RegistrantImportField.cs" />
     <Compile Include="Models\RollbarExceptionFilter.cs" />
+    <Compile Include="Models\SessionHelper.cs" />
     <Compile Include="Models\SessionVariables.cs" />
     <Compile Include="Models\UI.cs" />
     <Compile Include="Models\UILabel.cs" />
