@@ -854,9 +854,9 @@ namespace AfterSchoolLibrary
             return ActivityForm.LoadByActivityId(this.ID.Value, dc: dc).Select(x => x.ToForm()).ToList();
         }
 
-        public Form GetActiveForm(DatabaseConnection dc = null)
+        public Form GetActiveForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var af = GetActiveActivityForm(dc: dc);
+            var af = GetActiveActivityForm(msgs, dc);
             if (af.IsEmpty())
                 return null;
 
@@ -1072,7 +1072,7 @@ namespace AfterSchoolLibrary
                     if (account.HasFeature(FeatureType.ManageForms, amsgs, adc))
                     {
                         //get form and use the same form
-                        var formToUse = this.GetActiveForm(adc);
+                        var formToUse = this.GetActiveForm(amsgs, adc);
                         if (formToUse.IsEmpty())
                             formToUse = account.GetDefaultForm(msgs, adc);
 
@@ -1083,7 +1083,7 @@ namespace AfterSchoolLibrary
                     {
                         Form formToCopy = null;
                         if (useSameForm)
-                            formToCopy = this.GetActiveForm(adc);
+                            formToCopy = this.GetActiveForm(amsgs, adc);
                         else
                             formToCopy = account.GetDefaultForm(amsgs, adc);
 

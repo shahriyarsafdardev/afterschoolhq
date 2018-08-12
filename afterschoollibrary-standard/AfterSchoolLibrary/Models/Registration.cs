@@ -2006,9 +2006,8 @@ namespace AfterSchoolLibrary
             return null;
         }
 
-        private static RegistrationAssignmentType ProcessRegistrationSeats(CheckoutObject checkoutObject, RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
+        private static RegistrationAssignmentType ProcessRegistrationSeats(ParticipationObject participationObject, int numberOfSeatsRequested, RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var participationObject = checkoutObject.ParticipationObject;
             var seatsAvailable = participationObject.SeatsRemaining;
             var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
             var isPendingOrReserved = ra.IsNotEmpty() && (ra.AssignmentTypeId == RegistrationAssignmentType.Reserved || ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment);
@@ -2017,11 +2016,11 @@ namespace AfterSchoolLibrary
             if (isPendingOrReserved)
                 return RegistrationAssignmentType.Reserved;
             
-            if (participationObject.RegistrationModeId == RegistrationMode.Apply)
+            if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
-            else if (!seatsAvailable.HasValue || seatsAvailable >= checkoutObject.NumberOfSeats)
+            else if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
                 return RegistrationAssignmentType.Reserved;
-            else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= checkoutObject.NumberOfSeats)
+            else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
                 return RegistrationAssignmentType.WaitingList;
 
             msgs.Add(
@@ -2033,30 +2032,34 @@ namespace AfterSchoolLibrary
 
         public static void ProcessRegistration(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var participationObject = checkoutObject.ParticipationObject;
-            var ra = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
-            var assignmentType = Registration.ProcessRegistrationSeats(checkoutObject, ra, msgs, dc);
-            var activityGroupId = new int?();
+            ProcessRegistration(
+                checkoutObject.Registration,
+                checkoutObject.ParticipationObject,
+                checkoutObject.Registration.GetRegistrant(msgs, dc),
+                checkoutObject.NumberOfSeats,
+                checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetActivityGroupId() : new int?(),
+                checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(msgs, dc)?.ID,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static void ProcessRegistration(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            //var participationObject = checkoutObject.ParticipationObject;
+            var ra = registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
+            var assignmentType = Registration.ProcessRegistrationSeats(participationObject, seatsRequested, ra, msgs, dc);
 
             if (msgs.HasErrors())
                 return;
 
-            if (participationObject.IsActivity())
-                activityGroupId = participationObject.GetActivityGroup().ID;
-
-            // get the registration period to see what period the registrant registered
-            var period = participationObject.GetCurrentRegistrationPeriod(msgs, dc);
-
-            // get the registrant record that was created just for the account
-            var accountRegistrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
-
             // add or update the registrant for the activity
-            ra = accountRegistrant.AddOrUpdateParticipationObject(
-                registrationId: checkoutObject.Registration.ID.Value,
+            ra = registrant.AddOrUpdateParticipationObject(
+                registrationId: registration.ID.Value,
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 assignmentType: assignmentType,
-                registrationPeriodId: period?.ID.IfEmpty(0),
+                registrationPeriodId: periodId,
                 activityGroupId: activityGroupId,
                 loggedInUserId: loggedInUser.ID.Value,
                 msgs: msgs,
