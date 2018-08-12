@@ -2018,9 +2018,9 @@ namespace AfterSchoolLibrary
             
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
-            else if (seatsAvailable >= numberOfSeatsRequested)
+            else if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
                 return RegistrationAssignmentType.Reserved;
-            else if (waitingListSeatsAvailable >= numberOfSeatsRequested)
+            else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
                 return RegistrationAssignmentType.WaitingList;
 
             msgs.Add(
