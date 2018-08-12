@@ -295,7 +295,11 @@ namespace AfterSchoolLibrary
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    amsgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, adc));
+                    if(WebUser.GetCount() == 0)
+                    {
+                        amsgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, adc));
+                    }
+                   
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

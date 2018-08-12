@@ -7,10 +7,10 @@
     var mainColWidth = 10;
     var saveBtnWidth = 7;
     var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId));
-    var availableRegistrants = (List<Registrant>)ViewBag.AvailableRegistrants;
-    var currentRegistrants = (List<Registrant>)ViewBag.CurrentRegistrants;
+    var availableRegistrations = (List<Registration>)ViewBag.AvailableRegistrants;
+    var currentRegistrants = (List<Registration>)ViewBag.CurrentRegistrants;
     var registrantsPerColumn = 2;
-    var count = availableRegistrants.Count;
+    var count = availableRegistrations.Count;
     if (group.IsNotEmpty())
     {
         title = group.Name + " - " + title;
@@ -36,7 +36,7 @@
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid, selectedStudents = currentRegistrants })" class="form-horizontal">
 
-                    @if (availableRegistrants.Count == 0 || true)
+                    @if (availableRegistrations.Count == 0)
                     {
                         <p> No one has registered for this team yet. </p>
                     } else
@@ -50,11 +50,11 @@
                                 @for (int i = 0; i < 3; i++)
                                 {
                                     <div class="col-md-4">
-                                        @foreach (var registrant in availableRegistrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                                        @foreach (var registration in availableRegistrations.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                         {
                                             <div class="am-checkbox">
-                                                <input type="checkbox" onclick="toggleCheck(@registrant)" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" @(currentRegistrants.Contains(registrant) ? " checked=\"checked\" " : "") />
-                                                <label for="registrant-@registrant.ID">@registrant.DisplayName.MaxChars(20, "...")</label>
+                                                <input type="checkbox" onclick="toggleCheck(@registration)" id="registrant-@registration.ID" name="registrant-@registration.ID" value="1" @(currentRegistrants.Contains(registration) ? " checked=\"checked\" " : "") />
+                                                <label for="registrant-@registration.ID">@registration.RegistrantFirstName @registration.RegistrantLastName</label>
                                             </div>
                                         }
                                     </div>

@@ -447,6 +447,14 @@ namespace AfterSchool.Areas.Org.Controllers
         private void LoadEditStudentsViewBag(Activity activity)
         {
             var activityGroup = activity.GetActivityGroup();
+            var registrantActivities = activity.GetRegistrantActivities();
+            var registrants = activityGroup.GetRegistrants();
+            var registrations = activityGroup.GetRegistrations();
+            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
+          //  accountActivityGroup.Registrants
+           // var registrants = Regi
+            //var registrants = Sess
+
             var otherActiviesInGroup = activityGroup.GetActivities();
             otherActiviesInGroup.Remove(activity);
             var fullListOfRegistrants = activityGroup.GetRegistrants();
@@ -467,8 +475,8 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = new SystemMessages();
-            ViewBag.AvailableRegistrants = availableRegistrants;
-            ViewBag.CurrentRegistrants = currentRegistrants;
+            ViewBag.AvailableRegistrants = registrations;
+            ViewBag.CurrentRegistrants = registrations;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Group = activity.GetActivityGroup();
             ViewBag.ActiveMenu = "EditStudents";
@@ -492,6 +500,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
             var updatedRegistrants = new List<Registrant>();
+            var activityGroup = activity.GetActivityGroup();
+            var registrations = activityGroup.GetRegistrations();
+            List<Registration> addedRegistrations = new List<Registration>();
+
+            registrations.ForEach(registration => {
+                if (Request[String.Format("registration-{0}", registration.ID)].IsBoolean())
+                {
+                    //registration
+                }
+                    addedRegistrations.Add(registration);
+            });
 
             var currentRegistrants = activity.GetRegistrants();
             //var updatedRegistrantIds = currentRegistrants.Select(cr => cr.ID.Value).ToList();

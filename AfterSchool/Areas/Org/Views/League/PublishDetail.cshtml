@@ -13,10 +13,10 @@
 
     if (accountActivityGroup.IsNotEmpty())
     {
-        publishMsgs = accountActivityGroup.GetItemsRequiredToPublish();
+       // publishMsgs = accountActivityGroup.GetItemsRequiredToPublish();
         if (accountActivityGroup.IsPublishable)
         {
-            publishUrl = Url.Action("publish", "league", new { id = Model.Uid });
+            publishUrl = Url.Action("publish", "league", new { id = Model.Uid.ToString() });
             btnDisabled = "";
         }
     }
@@ -25,7 +25,7 @@
         publishMsgs = Model.GetItemsRequiredToPublish();
         if (Model.IsPublishable)
         {
-            publishUrl = Url.Action("publish", "league", new { id = Model.Uid });
+            publishUrl = Url.Action("publish", "league", new { id = Model.Uid.ToString() });
             btnDisabled = "";
         }
     }
