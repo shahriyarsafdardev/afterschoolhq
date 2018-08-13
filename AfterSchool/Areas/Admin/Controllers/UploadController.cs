@@ -79,6 +79,8 @@ namespace AfterSchool.Areas.Admin.Controllers
         private string[] firstNameHeaders { get { return new string[] { "firstname", "fname", "first" }; } }
         private string[] lastNameHeaders { get { return new string[] { "lastname", "lname", "last" }; } }
         private string[] emailHeaders { get { return new string[] { "email", "emailaddress" }; } }
+        private string[] minGrade { get { return new string[] { "mingrade", "lowestgrade" }; } }
+        private string[] maxGrade { get { return new string[] { "maxgrade", "highestgrade" }; } }
 
 
         private void AddHeaders(List<string[]> list)
@@ -95,6 +97,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             list.Add(firstNameHeaders);
             list.Add(lastNameHeaders);
             list.Add(emailHeaders);
+            list.Add(minGrade);
+            list.Add(maxGrade);
         }
 
         private string ProcessImport(HttpPostedFileBase importfile, SystemMessages msgs)
@@ -191,7 +195,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                         if (phoneHeaders.Contains(headerName))
                         {
-                            if (field.IsBlank() || !field.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            if (field != "" && !field.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
                             {
                                 hasErrors = true;
                                 msgs.Add(String.Format("In csv, line: {1} \n {0} is not a valid phone number", field, rows.IndexOf(row)), MessageType.UserError);
@@ -346,7 +350,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                                locationHostAccount = account;
                                // Adding the school to the district account so district can see details
-                               msgs.AddRange(
+                               amsgs.AddRange(
                                    SessionVariables.CurrentAccount.AddVisitorAccount(
                                        account,
                                        HostPermissionType.Edit,
@@ -365,9 +369,9 @@ namespace AfterSchool.Areas.Admin.Controllers
                                locationHostAccount = SessionVariables.CurrentAccount;
                            }
 
-
-                           // Add new Location
-                           LocationService.CreateNew(
+                           if(address != "")
+                           {
+                               LocationService.CreateNew(
                                schoolName,
                                address,
                                address2,
@@ -378,7 +382,9 @@ namespace AfterSchool.Areas.Admin.Controllers
                                locationType,
                                locationHostAccount.ID.Value,
                                SessionVariables.LoggedInUser,
-                               msgs);
+                               amsgs,
+                               adc);
+                           }
                        }
 
                    },
