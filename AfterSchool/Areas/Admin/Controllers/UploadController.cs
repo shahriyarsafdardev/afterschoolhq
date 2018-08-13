@@ -366,7 +366,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                         phone: schoolPhone,
                                         isActive: true,
                                         accountType: AccountType.School,
-                                        packageId: Package.Load(msgs: msgs, dc: adc).First().ID.Value,
+                                        packageId: Package.Load(msgs: amsgs, dc: adc).First().ID.Value,
                                         packageBillingPeriod: BillingPeriodType.Month,
                                         isAfterSchool: SessionVariables.IsAfterSchool.Value,
                                         loggedInUser: SessionVariables.LoggedInUser,
