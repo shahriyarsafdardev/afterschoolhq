@@ -18,7 +18,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h2><i class="s7-study"></i> Invite Schools to @Model.Name</h2>
+            <h2><i class="s7-study"></i> Add Schools to @Model.Name</h2>
             <div class="clearfix"></div>
         </div>
         <div class="panel-body">
@@ -43,6 +43,17 @@
                 <form action="@Url.Action("inviteschool", "league",new { id = Model.Uid } )" method="post" id="invite-schools-forms" class="form-horizontal">
 
                     <div class="form-group">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-6">
+                            <div class="am-checkbox">
+                                <input type="checkbox" class="form-control" name="sendinvite" id="sendinvite" value="1" />
+                                <label for="sendinvite">Send Invite Email to School(s)</label>
+                            </div>
+                            <p class="text-muted"><em>If you check this box we will send an invite message to the school. If not, we will simply add this school to your league, and you can notify them and/or each school will see their league invites when they login.</em></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group hide" id="invitemessage-div">
                         <label class="col-sm-3 control-label">
                             Invite Message
                         </label>
@@ -89,6 +100,17 @@
 
 
 <script>
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#sendinvite').click(function () {
+            if ($(this).is(':checked')) {
+                $('#invitemessage-div').removeClass('hide');
+            } else {
+                $('#invitemessage-div').addClass('hide');
+            }
+        });
+    });
+
     function selectAll() {
         $('input[type="checkbox"]').each(function () {
             $(this).prop('checked', true);
