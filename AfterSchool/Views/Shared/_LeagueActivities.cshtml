@@ -120,12 +120,13 @@ else
 
                         <tr>
                             <td>
-                                <a href="@Url.Action("summary", "leagueactivity", new { id = @activity.Uid})" class="btn btn-default btn-sm">View</a>
+                                <a href="@Url.Action("summary", "leagueactivity", new { id = @activity.Uid})" class="btn btn-default btn-sm hidden">View</a>
                             </td>
                             <td>
-                                <a href="@Url.Action("summary", "leagueactivity", new { id = @activity.Uid})">
+                                @*<a href="@Url.Action("summary", "leagueactivity", new { id = @activity.Uid})">*@
+                                 <span>
                                     @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
-                                </a>
+                                </span>
                             </td>
                             <td class="text-center">
                                 @if (activity.GetDaysOfTheWeek().Any())
