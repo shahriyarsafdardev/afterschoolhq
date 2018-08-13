@@ -81,7 +81,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         private string[] emailHeaders { get { return new string[] { "email", "emailaddress" }; } }
         private string[] minGrade { get { return new string[] { "mingrade", "lowestgrade" }; } }
         private string[] maxGrade { get { return new string[] { "maxgrade", "highestgrade" }; } }
-        private string[] accountIdHeaders { get { return new string[] { "accountId" }; } }
+        private string[] accountIdHeaders { get { return new string[] { "accountid" }; } }
 
 
         private void AddHeaders(List<string[]> list)
@@ -295,6 +295,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                 districtAccount = Account.Load(84);
             else if (AfterSchoolLibrary.Utilities.IsQA)
                 districtAccount = Account.Load(193);
+           // else
+           //     districtAccount = Account.Load(80);
 
             var users = new List<WebUser>();
             var accounts = new List<Account>();
@@ -311,7 +313,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                            Account account = null;
                            Account locationHostAccount = null;
 
-                           var accountIdFromCSV = row.ElementAt(schoolIndex).Value;
+                           var accountIdFromCSV = row.ElementAt(accountIdIndex).Value;
                            var schoolName = row.ElementAt(schoolIndex).Value;
                            var schoolPhone = row.ElementAt(phoneIndex).Value;
                            var address = row.ElementAt(addressIndex).Value;
