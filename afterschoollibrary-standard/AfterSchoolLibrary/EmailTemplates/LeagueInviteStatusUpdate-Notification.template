@@ -1,7 +1,6 @@
 ﻿<div>
   <p>Hello @Model.FirstName,</p>
   
-
   <p>
       @Model.SenderDisplayName at @Model.OrgAccountName has @inviteStatus your invitation to @Model.LeagueName
   </p>

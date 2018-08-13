@@ -89,7 +89,7 @@ namespace AfterSchoolLibrary.Services
 
             var activityGroup = accountActivityGroup.GetActivityGroup();
 
-            EmailHelper.SendInviteStatusUpdatedEmail(account, activityGroup, currentUser, inviteStatus);
+            // EmailHelper.SendInviteStatusUpdatedEmail(account, activityGroup, currentUser, inviteStatus);
 
             return msgs;
         }
