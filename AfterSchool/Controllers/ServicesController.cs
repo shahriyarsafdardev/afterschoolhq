@@ -49,7 +49,7 @@ namespace AfterSchool.Controllers
                 Response.End();
             }
             return View();
-        }        
+        }
 
         public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)
         {
@@ -89,7 +89,7 @@ namespace AfterSchool.Controllers
 
                     AfterSchoolLibrary.SendGridHelper.SendMail(
                         fromEmail: AfterSchoolLibrary.Email.AppEmailAddress,
-                        toEmail: AfterSchoolLibrary.Email.AppAdminEmailAddress,
+                        toEmail: "sales@afterschoolhq.com",
                         subject: string.Format("WEBSITE FORM: {0}", subject),
                         body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message)
                     );
