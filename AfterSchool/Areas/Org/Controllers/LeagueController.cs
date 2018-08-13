@@ -653,5 +653,127 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View("publishdetail", activityGroup);
         }
+
+        [HttpGet]
+        public ActionResult AddRegistration(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var form = aag.IsEmpty() ? league.GetForm(msgs) : aag.GetForm(msgs);
+            var questions = form.GetActiveQuestions(msgs);
+
+            ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
+            ViewBag.Messages = msgs;
+            ViewBag.AccountActivityGroup = aag;
+
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult AddRegistration(string id, string parentsig)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var form = aag.IsEmpty() ? league.GetForm(msgs) : aag.GetForm(msgs);
+            var questions = form.GetActiveQuestions(msgs);            
+
+            questions.ForEach(question => {
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
+            });
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+            {
+                Registrant student = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        var location = SessionVariables.CurrentAccount.GetDefaultLocation(amsgs, adc);
+
+                        // create student registrant record associated to this account
+                        student = SessionVariables.CurrentAccount.CreateRegistrant(
+                            associatedUser: null,
+                            registrantType: RegistrantType.Individual,
+                            isMaster: false,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: location?.ID,
+                            loggedInUser: SessionVariables.LoggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        // create a registration
+                        var registration = student.AddRegistration(
+                            ownerAccountId: SessionVariables.CurrentAccount.ID.Value,
+                            activityGroupId: league.ID,
+                            completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                            loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        // add answers
+                        qvms.ForEach(qvm =>
+                        {
+                            student.AddAnswer(
+                                answerText: qvm.Value.IfEmpty("").Trim(),
+                                question: qvm.Question,
+                                registrationId: registration.ID,
+                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+
+                        // manages seats and create registrantactivity record
+                        Registration.ProcessRegistration(
+                            registration: registration,
+                            participationObject: aag.ToParticipationObject(amsgs, adc),
+                            registrant: student,
+                            seatsRequested: 1,
+                            activityGroupId: league.ID,
+                            periodId: aag.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
+                            loggedInUser: SessionVariables.LoggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        msgs.Add("Your new registration has been added", MessageType.Success);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("registrations", new { id = league.Uid });
+
+            ViewBag.Messages = msgs;
+            ViewBag.QuestionViewModels = qvms;
+
+            return View(league);
+        }
     }
 }

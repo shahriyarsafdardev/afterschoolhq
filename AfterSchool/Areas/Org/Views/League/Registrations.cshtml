@@ -79,7 +79,15 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="btn-group pull-right">
+
+                <a href="@Url.Action("addregistration", "league" , new { id = Model.Uid })" class="btn btn-primary btn-space">
+                    Add Student
+                </a>
+
+            </div>
+
+            <div class="row hide">
                 <div class="col-md-12">
                     <button class="btn btn-primary md-trigger btn-lg btn-space" data-modal="modal-emails">Email Report</button>
                     <button type="button" onclick="notifyAll()" class="btn btn-default btn-lg btn-space md-trigger" data-modal="modal-confirmation" @btnNotifyDisabled>
@@ -97,15 +105,15 @@
             </div>
 
             @{ Html.RenderPartial("_Registrations", registrations, new ViewDataDictionary() {
-                   { "NavAction", "registrations" },
-                   { "NavController", "league" },
-                   { "NavId", Model.Uid },
-                   { "EditAction", "edit" },
-                   { "EditController", "registration" },
-                   { "Account", account },
-                   { "Paging", paging },
-                   { "ReturnUrl", returnUrl }
-                });}
+               { "NavAction", "registrations" },
+               { "NavController", "league" },
+               { "NavId", Model.Uid },
+               { "EditAction", "edit" },
+               { "EditController", "registration" },
+               { "Account", account },
+               { "Paging", paging },
+               { "ReturnUrl", returnUrl }
+            });}
 
         </div>
     </div>
