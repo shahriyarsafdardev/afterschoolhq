@@ -27,19 +27,24 @@ namespace AfterSchoolLibrary.Services
 
         public static AccountRelationship CreateNew(Account hostAccount, Account visitorAccount, ApprovalStatus approvalStatus, HostPermissionType hostPermissionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var accountRelationship = new AccountRelationship
-            {
-                VisitorAccountId = visitorAccount.ID,
-                HostAccountId = hostAccount.ID,
-                ApprovalStatusId = approvalStatus,
-                HostPermissionTypeId = hostPermissionType,
-                CreatedBy = loggedInUser.ID,
-                CreateDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser.ID,
-                LastModifiedDate = DateTime.UtcNow
-            };
+            var accountRelationship = AccountRelationship.LoadByHostAccountIdByVisitorAccountId(hostAccount.ID.Value, visitorAccount.ID.Value, msgs, dc);
 
-            msgs.AddRange(accountRelationship.Save(dc: dc));
+            if (accountRelationship.IsEmpty())
+            {
+                accountRelationship = new AccountRelationship
+                {
+                    VisitorAccountId = visitorAccount.ID,
+                    HostAccountId = hostAccount.ID,
+                    ApprovalStatusId = approvalStatus,
+                    HostPermissionTypeId = hostPermissionType,
+                    CreatedBy = loggedInUser.ID,
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedBy = loggedInUser.ID,
+                    LastModifiedDate = DateTime.UtcNow
+                };
+
+                msgs.AddRange(accountRelationship.Save(dc: dc));
+            }
 
             return accountRelationship;
         }
