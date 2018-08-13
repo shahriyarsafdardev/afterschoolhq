@@ -23,6 +23,8 @@ namespace AfterSchool.Models
             {
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("CurrentRegistrant", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("CurrentRegistrant");
                 _CurrentRegistrant = value;
             }
         }
@@ -41,6 +43,8 @@ namespace AfterSchool.Models
             {
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("LoggedInUser", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("LoggedInUser");
                 _LoggedInUser = value;
             }
         }
@@ -59,6 +63,8 @@ namespace AfterSchool.Models
             {
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("OriginalLoggedInUser", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("OriginalLoggedInUser");
                 _OriginalLoggedInUser = value;
             }
         }
@@ -77,6 +83,8 @@ namespace AfterSchool.Models
             {
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("CurrentAccount", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("CurrentAccount");
                 _CurrentAccount = value;
             }
         }
@@ -95,6 +103,8 @@ namespace AfterSchool.Models
             {
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("RegistrationStartPageAccount", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("RegistrationStartPageAccount");
                 _RegistrationStartPageAccount = value;
             }
         }
@@ -125,6 +135,8 @@ namespace AfterSchool.Models
             {
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("AccountPackage", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("AccountPackage");
                 _AccountPackage = value;
             }
         }
@@ -143,6 +155,8 @@ namespace AfterSchool.Models
             {
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("VisitorSession", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("VisitorSession");
                 _VisitorSession = value;
             }
         }
@@ -161,6 +175,8 @@ namespace AfterSchool.Models
             {
                 if (value.IsNotEmpty())
                     SessionHelper.AddToSession("Cart", value.ID.Value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("Cart");
                 _Cart = value;
             }
         }

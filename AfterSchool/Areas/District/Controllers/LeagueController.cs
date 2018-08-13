@@ -370,11 +370,6 @@ namespace AfterSchool.Areas.District.Controllers
                 { "maxgrade", maxgrade }
             };
 
-            if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
-            {
-                values.Add("schedule", schedule);
-            }
-
             var filteredParams = Request.Params.Filter("schedulerepeat-");
             var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
             inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
@@ -443,7 +438,7 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpPost]
-        public ActionResult InviteSchool(string id, string invitemessage)
+        public ActionResult InviteSchool(string id, string invitemessage, string sendinvite)
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
@@ -457,7 +452,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             AccountService.InviteSchoolsToLeague(invitedSchools, activityGroup, invitemessage, SessionVariables.LoggedInUser, msgs);            
 
-            if (msgs.HasNoErrors())
+            if (msgs.HasNoErrors() && sendinvite.IsBoolean())
             {
                 var activityGroupId = activityGroup.ID.Value;
                 var senderUserId = SessionVariables.LoggedInUser.ID.Value;
