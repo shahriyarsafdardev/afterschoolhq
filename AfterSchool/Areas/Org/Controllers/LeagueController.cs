@@ -99,8 +99,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Summary(string id)
         {
             var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(group.AccountId.Value, group.ID.Value);
-            var registrations = group.GetRegistrations();
+            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, group.ID.Value);
+            // var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(group.AccountId.Value, group.ID.Value);
+            //var registrations = group.GetRegistrations()
+            var registrations = accountActivityGroup.GetRegistrations();
             var actions = SessionAction.LoadByActivityGroupId(
                 group.ID.Value,
                 new List<SessionActionType>() {

@@ -7,8 +7,8 @@
     var mainColWidth = 10;
     var saveBtnWidth = 7;
     var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId));
-    var availableRegistrations = (List<Registration>)ViewBag.AvailableRegistrants;
-    var currentRegistrants = (List<Registration>)ViewBag.CurrentRegistrants;
+    var availableRegistrations = (List<Registration>)ViewBag.AvailableRegistrations;
+    var currentRegistrants = (List<Registration>)ViewBag.CurrentRegistrations;
     var registrantsPerColumn = 2;
     var count = availableRegistrations.Count;
     if (group.IsNotEmpty())
@@ -34,7 +34,7 @@
         <div class="panel-body">
 
             <div class="col-md-8 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid, selectedStudents = currentRegistrants })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid })" class="form-horizontal">
 
                     @if (availableRegistrations.Count == 0)
                     {
@@ -43,7 +43,7 @@
                     {
                         <div class="form-group">
                             <label class="col-sm-3 control-label">
-                                Select @UILabel.RegistrantLabel(true)<br/>
+                                Select Students<br />
                                 <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                             </label>
                             <div class="col-sm-6">
@@ -52,10 +52,11 @@
                                     <div class="col-md-4">
                                         @foreach (var registration in availableRegistrations.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                         {
-                                            <div class="am-checkbox">
-                                                <input type="checkbox" onclick="toggleCheck(@registration)" id="registrant-@registration.ID" name="registrant-@registration.ID" value="1" @(currentRegistrants.Contains(registration) ? " checked=\"checked\" " : "") />
-                                                <label for="registrant-@registration.ID">@registration.RegistrantFirstName @registration.RegistrantLastName</label>
+                                            <div class="am-checkbox"  >
+                                                <input type="checkbox" id="registration-@registration.ID" name="registration-@registration.ID" value="1" @(currentRegistrants.Contains(registration) ? " checked=\"checked\" " : "") />
+                                                <label for="registration-@registration.ID">@registration.RegistrantFirstName @registration.RegistrantLastName</label>
                                             </div>
+                                         
                                         }
                                     </div>
                                 }
@@ -64,7 +65,6 @@
                     }
                     
 
-                    
 
                     <div class="form-group">
 
@@ -73,7 +73,7 @@
                         </div>
 
                         <div class="col-sm-@saveBtnWidth col-sm-offset-3">
-                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick=onclick="navigateActivity('@Url.Action("editcontact", "leagueactivity")')"><i class="s7-diskette"></i>Save</button>
+                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid })')"><i class="s7-diskette"></i>Save</button>
                         </div>
 
                         
@@ -98,16 +98,16 @@
         $('#form1').attr('action', url);
     }
 
-    function toggleCheck(registrant) {
-        var cr = @currentRegistrants;
-        if (cr.Contains(r)) {
-            cr.Remove(r);
-        } else {
-            cr.Add(r);
-        }
-        @currentRegistrants = cr;
+    function selectAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', true);
+        });
     }
-
+    function clearAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', false);
+        });
+    }
     
 
 </script>

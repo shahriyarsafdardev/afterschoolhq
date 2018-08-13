@@ -9,7 +9,7 @@
     var activeForm = (ActivityForm)ViewBag.ActiveForm;
     var isActivityLeader = (bool)ViewBag.IsActivityLeader;
     var activityGroupType = group.ActivityGroupTypeId;
-    var isExternalLeague = ViewBag.isExternalLeague;
+    var isExternalLeague = ViewBag.isExternalLeague ?? false;
 
     var waitinglistdisabled = "";
     if (!accountPackage.HasFeature(FeatureType.WaitingList))

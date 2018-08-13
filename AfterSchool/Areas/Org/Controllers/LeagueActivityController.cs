@@ -447,36 +447,15 @@ namespace AfterSchool.Areas.Org.Controllers
         private void LoadEditStudentsViewBag(Activity activity)
         {
             var activityGroup = activity.GetActivityGroup();
-            var registrantActivities = activity.GetRegistrantActivities();
-            var registrants = activityGroup.GetRegistrants();
-            var registrations = activityGroup.GetRegistrations();
             var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
-          //  accountActivityGroup.Registrants
-           // var registrants = Regi
-            //var registrants = Sess
+            var registrants = activityGroup.GetRegistrants();
 
-            var otherActiviesInGroup = activityGroup.GetActivities();
-            otherActiviesInGroup.Remove(activity);
-            var fullListOfRegistrants = activityGroup.GetRegistrants();
-            var registrantsOfSchool = fullListOfRegistrants.Where(r => r.AccountId == activity.AccountId);
-            var availableRegistrants = new List<Registrant>();
-            var currentRegistrants = activity.GetRegistrants();
-
-            availableRegistrants.AddRange(currentRegistrants);
-
-            foreach (var registrant in registrantsOfSchool)
-            {
-                var participationObjects = registrant.GetParticipationObjects();
-
-                if (!participationObjects.Any(po => otherActiviesInGroup.Any(oa => po.ObjectID == oa.ID && po.ObjectType == ParticipationObjectType.Activity)))
-                {
-                    availableRegistrants.Add(registrant);
-                }
-            }
+            var registrations = accountActivityGroup.GetRegistrations();
+            var currentregistrations = registrations.Where(r => r.IsRegisteredFor(activity.ToParticipationObject())).ToList();
 
             ViewBag.Messages = new SystemMessages();
-            ViewBag.AvailableRegistrants = registrations;
-            ViewBag.CurrentRegistrants = registrations;
+            ViewBag.AvailableRegistrations = registrations;
+            ViewBag.CurrentRegistrations = currentregistrations;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Group = activity.GetActivityGroup();
             ViewBag.ActiveMenu = "EditStudents";
@@ -495,58 +474,58 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditStudents(string id, List<Registrant> selectedRegistrants, string cmd)
+        public ActionResult EditStudents(string id, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
+            var participationObject = activity.ToParticipationObject();
             var updatedRegistrants = new List<Registrant>();
             var activityGroup = activity.GetActivityGroup();
             var registrations = activityGroup.GetRegistrations();
             List<Registration> addedRegistrations = new List<Registration>();
 
-            registrations.ForEach(registration => {
-                if (Request[String.Format("registration-{0}", registration.ID)].IsBoolean())
-                {
-                    //registration
-                }
-                    addedRegistrations.Add(registration);
-            });
-
-            var currentRegistrants = activity.GetRegistrants();
-            //var updatedRegistrantIds = currentRegistrants.Select(cr => cr.ID.Value).ToList();
-            //var currentRegistrantsIds = currentRegistrants.Select(c => c.ID).ToList();
-            var removedRegistrants = currentRegistrants.Where(i => !selectedRegistrants.Contains(i));
-            var addedRegistrants = selectedRegistrants.Where(i => !currentRegistrants.Contains(i));
+ 
             
 
-            if (id.IsGuid())
-            {     
-                foreach (var addedRegistrant in addedRegistrants)
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    Registrant registrant = Registrant.Load(addedRegistrant.ID.Value);
 
-                    var registrantActivity = registrant.AddOrUpdateParticipationObject(
-                        addedRegistrant.ID.Value, 
-                        activity.ID.Value, 
-                        ParticipationObjectType.Activity,
-                        RegistrationAssignmentType.Reserved,
-                        null,
-                        null,
-                        SessionVariables.LoggedInUser.ID.Value, 
-                        msgs);
+                    registrations.ForEach(registration =>
+                    {
+                        if (Request[String.Format("registration-{0}", registration.ID)].IsBoolean())
+                        {
+                            var registrant = registration.GetRegistrant();
+                            //check if the student is already registered for this team
+                            if (RegistrantActivity.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value, participationObject.ObjectType, registrant.ID.Value).IsEmpty())
+                            {
+                                // manages seats and create registrantactivity record
+                                Registration.ProcessRegistration(
+                                    registration: registration,
+                                    participationObject: activity.ToParticipationObject(amsgs, adc),
+                                    registrant: registrant,
+                                    seatsRequested: 1,
+                                    activityGroupId: activity.ActivityGroupId,
+                                    periodId: activity.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
+                                    loggedInUser: SessionVariables.LoggedInUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            }
+                        }
+                    });
 
-                    updatedRegistrants.Add(registrant);
-                }
-
-                foreach( var registrant in removedRegistrants)
+                },
+                onSuccess: (SystemMessages smsgs) =>
                 {
-                    msgs.AddRange(registrant.DeleteRegistrantActivity(activity.ID.Value));
-                    updatedRegistrants.Remove(registrant);
+                    msgs.AddRange(smsgs);
+                    msgs.Add("Your new registration has been added", MessageType.Success);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
                 }
-            }
-
-            
-           
+            );
             
             if (msgs.HasNoErrors())
             {
