@@ -316,27 +316,27 @@ namespace AfterSchool.Areas.Admin.Controllers
                            Account account = null;
                            Account locationHostAccount = null;
 
-                           var accountIdFromCSV = row.ElementAt(accountIdIndex).Value;
-                           var schoolName = row.ElementAt(schoolIndex).Value;
-                           var schoolPhone = row.ElementAt(phoneIndex).Value;
-                           var address = row.ElementAt(addressIndex).Value;
+                           var accountIdFromCSV = row.ElementAt(accountIdIndex).Value.IfEmpty("").Trim();
+                           var schoolName = row.ElementAt(schoolIndex).Value.IfEmpty("").Trim();
+                           var schoolPhone = row.ElementAt(phoneIndex).Value.IfEmpty("").Trim();
+                           var address = row.ElementAt(addressIndex).Value.IfEmpty("").Trim();
                            var address2 = "";
                            if (address2Index > -1)
                            {
-                               address2 = row.ElementAt(address2Index).Value;
+                               address2 = row.ElementAt(address2Index).Value.IfEmpty("").Trim();
                            }
-                           var city = row.ElementAt(cityIndex).Value;
-                           var state = row.ElementAt(stateIndex).Value;
-                           var postalCode = row.ElementAt(postalCodeIndex).Value;
+                           var city = row.ElementAt(cityIndex).Value.IfEmpty("").Trim();
+                           var state = row.ElementAt(stateIndex).Value.IfEmpty("").Trim();
+                           var postalCode = row.ElementAt(postalCodeIndex).Value.IfEmpty("").Trim();
                            var country = "US";
                            var locationType = LocationType.School;
-                           var firstname = row.ElementAt(firstNameIndex).Value;
-                           var lastname = row.ElementAt(lastNameIndex).Value;
-                           var email = row.ElementAt(emailIndex).Value;
-                           var minGrade = row.ElementAt(minGradeIndex).Value;
-                           var maxGrade = row.ElementAt(maxGradeIndex).Value;
+                           var firstname = row.ElementAt(firstNameIndex).Value.IfEmpty("").Trim();
+                           var lastname = row.ElementAt(lastNameIndex).Value.IfEmpty("").Trim();
+                           var email = row.ElementAt(emailIndex).Value.IfEmpty("").Trim();
+                           var minGrade = row.ElementAt(minGradeIndex).Value.IfEmpty("").Trim();
+                           var maxGrade = row.ElementAt(maxGradeIndex).Value.IfEmpty("").Trim();
 
-                           if (accountIdFromCSV.Length > 0)
+                           if (accountIdFromCSV.IfEmpty("").Trim().Length > 0)
                            {
                                account = Account.Load(accountIdFromCSV.ToInteger(), amsgs, adc);
                            }
