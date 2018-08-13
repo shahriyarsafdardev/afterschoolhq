@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-           AddContacts("1", null, null, null, null, null, null);
+            AddContacts("1", null, null, null, null, null, null);
             ViewBag.Step = 1;
             ViewBag.ShowSubmit = false;
             return View();
@@ -31,7 +31,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         [HttpPost]
         public ActionResult Index(string step, string importtype, string emaillist, string createlist, string listname, string importtext, string listId)
         {
-            AddContacts(step, importtype, emaillist, createlist, listname,importtext, listId);
+            AddContacts(step, importtype, emaillist, createlist, listname, importtext, listId);
             ViewBag.Step = step.ToInteger();
             ViewBag.ShowSubmit = ViewBag.Messages.HasNoErrors();
             ViewBag.ImportFile = Request.Files[0];
@@ -43,7 +43,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         {
             var msgs = new SystemMessages();
             var csvMsgs = new SystemMessages();
-            
+
             ViewBag.ContactLists = SessionVariables.CurrentAccount.GetContactLists();
 
             if (step == "1")
@@ -52,26 +52,26 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
             else if ((Request.Files.Count == 0 || Request.Files[0].ContentLength == 0 || !Request.Files[0].FileName.Contains(".csv")))
             {
-                 msgs.Add("Please upload a valid CSV file", MessageType.UserError);
+                msgs.Add("Please upload a valid CSV file", MessageType.UserError);
             }
             else
             {
                 var inviteMessage = Request["invite-message"];
                 ViewBag.ImportText = ProcessImport(Request.Files[0], msgs);
-                if(msgs.HasNoErrors())
+                if (msgs.HasNoErrors())
                 {
                     msgs.AddRange(AddLocations(ViewBag.Rows, ViewBag.Headers, inviteMessage, msgs));
                 }
-            }                    
-           
+            }
+
             ViewBag.Messages = msgs;
         }
 
         private string[] schoolHeaders { get { return new string[] { "school", "schoolname", "name" }; } }
         private string[] gradeHeaders { get { return new string[] { "grades", "gradelevels" }; } }
-        private string[] phoneHeaders { get { return new string[] { "phone", "phonenumber", "phoneno", "telephone"  }; } }
+        private string[] phoneHeaders { get { return new string[] { "phone", "phonenumber", "phoneno", "telephone" }; } }
         private string[] addressHeaders { get { return new string[] { "address", "addr", "streetaddress", "address1" }; } }
-        private string[] aptSuiteHeaders { get { return new string[] { "address2","apartmentno", "suite", "apt/suite" }; } }
+        private string[] aptSuiteHeaders { get { return new string[] { "address2", "apartmentno", "suite", "apt/suite" }; } }
         private string[] cityHeaders { get { return new string[] { "city", "town", "cityname" }; } }
         private string[] stateHeaders { get { return new string[] { "state", "statename" }; } }
         private string[] zipHeaders { get { return new string[] { "zip", "zipcode" }; } }
@@ -79,8 +79,8 @@ namespace AfterSchool.Areas.Admin.Controllers
         private string[] firstNameHeaders { get { return new string[] { "firstname", "fname", "first" }; } }
         private string[] lastNameHeaders { get { return new string[] { "lastname", "lname", "last" }; } }
         private string[] emailHeaders { get { return new string[] { "email", "emailaddress" }; } }
-        private string[] minGrade { get { return new string[] { "mingrade", "lowestgrade" }; } }
-        private string[] maxGrade { get { return new string[] { "maxgrade", "highestgrade" }; } }
+        private string[] minGradeHeaders { get { return new string[] { "mingrade", "lowestgrade" }; } }
+        private string[] maxGradeHeaders { get { return new string[] { "maxgrade", "highestgrade" }; } }
         private string[] accountIdHeaders { get { return new string[] { "accountid" }; } }
 
 
@@ -98,8 +98,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             list.Add(firstNameHeaders);
             list.Add(lastNameHeaders);
             list.Add(emailHeaders);
-            list.Add(minGrade);
-            list.Add(maxGrade);
+            list.Add(minGradeHeaders);
+            list.Add(maxGradeHeaders);
             list.Add(accountIdHeaders);
         }
 
@@ -140,7 +140,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                         foreach (var headerName in headerList)
                         {
-                            if(headerName.Contains(headerNoSpacesEtc))
+                            if (headerName.Contains(headerNoSpacesEtc))
                             {
                                 row.Add(field);
                                 if (!headersWithData.Contains(headerNoSpacesEtc))
@@ -165,9 +165,9 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add("Please add an school name to each record", MessageType.UserError);
             }
 
-            foreach(var headerName in headerList)
+            foreach (var headerName in headerList)
             {
-                if(headersWithData.Where(x => schoolHeaders.Contains(x)).Count() == 0)
+                if (headersWithData.Where(x => schoolHeaders.Contains(x)).Count() == 0)
                 {
                     msgs.Add(String.Format("Please add {0} value to each record", headerName[0]), MessageType.UserError);
                 }
@@ -205,13 +205,13 @@ namespace AfterSchool.Areas.Admin.Controllers
                         }
                         if (emailHeaders.Contains(headerName))
                         {
-                            if(!field.IsBlank() && !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                            if (!field.IsBlank() && !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                             {
                                 hasErrors = true;
                                 msgs.Add(String.Format("In csv, line: {1} \n {0} is not a valid email", field, rows.IndexOf(row)), MessageType.UserError);
                             }
                         }
-                      
+
                         validatedRow.Add(validatedField);
                     }
                     validatedRows.Add(validatedRow);
@@ -255,14 +255,14 @@ namespace AfterSchool.Areas.Admin.Controllers
             var msgs = new SystemMessages();
             var inviteMessage = Request["invite-message"];
             ProcessImport(Request.Files[0], msgs);
-            msgs.AddRange(AddLocations(ViewBag.Rows,ViewBag.headers,inviteMessage, msgs));
+            msgs.AddRange(AddLocations(ViewBag.Rows, ViewBag.headers, inviteMessage, msgs));
             ViewBag.Messages = msgs;
             return View("LocationsSubmitted");
         }
 
-        private int GetHeaderPostion(List<string> headersWithData, string[] headerToCheckFor )
+        private int GetHeaderPostion(List<string> headersWithData, string[] headerToCheckFor)
         {
-            for(int i = 0; i < headersWithData.Count; i++)
+            for (int i = 0; i < headersWithData.Count; i++)
             {
                 if (headerToCheckFor.Contains(headersWithData[i]))
                 {
@@ -289,14 +289,17 @@ namespace AfterSchool.Areas.Admin.Controllers
             var lastNameIndex = GetHeaderPostion(headersWithData, lastNameHeaders);
             var emailIndex = GetHeaderPostion(headersWithData, emailHeaders);
             var accountIdIndex = GetHeaderPostion(headersWithData, accountIdHeaders);
+            var minGradeIndex = GetHeaderPostion(headersWithData, minGradeHeaders);
+            var maxGradeIndex = GetHeaderPostion(headersWithData, maxGradeHeaders);
             Account districtAccount = null;
+            var allGradeLevels = GradeLevel.Load();
 
             if (AfterSchoolLibrary.Utilities.IsProduction)
                 districtAccount = Account.Load(84);
             else if (AfterSchoolLibrary.Utilities.IsQA)
                 districtAccount = Account.Load(193);
-           // else
-           //     districtAccount = Account.Load(80);
+            // else
+            //     districtAccount = Account.Load(80);
 
             var users = new List<WebUser>();
             var accounts = new List<Account>();
@@ -330,6 +333,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                            var firstname = row.ElementAt(firstNameIndex).Value;
                            var lastname = row.ElementAt(lastNameIndex).Value;
                            var email = row.ElementAt(emailIndex).Value;
+                           var minGrade = row.ElementAt(minGradeIndex).Value;
+                           var maxGrade = row.ElementAt(maxGradeIndex).Value;
 
                            if (accountIdFromCSV.Length > 0)
                            {
@@ -338,6 +343,19 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                            if (firstname.Length > 0)
                            {
+                               if (account.IsEmpty())
+                               {
+                                   account = Account.Load(
+                                       criterias: new System.Collections.Hashtable
+                                       {
+                                           { "Name", schoolName },
+                                           { "Phone", schoolPhone }
+                                       },
+                                       msgs: amsgs,
+                                       dc: adc
+                                       ).FirstOrDefault();
+                               }
+
                                if (account.IsNotEmpty())
                                {
                                    user = WebUserService.InviteNew(
@@ -375,8 +393,31 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     );
                                }
 
+
+                               // load grade levels
+                               var minGradeLevel = allGradeLevels.Where(grade =>
+                                    (minGrade.Length == 1 &&
+                                    grade.Name.ToLower().First() == minGrade.ToLower().First()) ||
+                                    (minGrade.Length == 2 &&
+                                    grade.Name.ToLower().MaxChars(2) == minGrade.ToLower().MaxChars(2))
+                                ).FirstOrDefault();
+
+                               var maxGradeLevel = allGradeLevels.Where(grade =>
+                                    (maxGrade.Length == 1 &&
+                                    grade.Name.ToLower().First() == maxGrade.ToLower().First()) ||
+                                    (maxGrade.Length == 2 &&
+                                    grade.Name.ToLower().MaxChars(2) == maxGrade.ToLower().MaxChars(2))
+                                ).FirstOrDefault();
+
+                               if (minGradeLevel.IsNotEmpty())
+                                   account.MinGradeLevelOffered = minGradeLevel.ID;
+                               if (maxGradeLevel.IsNotEmpty())
+                                   account.MaxGradeLevelOffered = maxGradeLevel.ID;
+
+                               amsgs.AddRange(account.Save(adc));
+
                                locationHostAccount = account;
-                               
+
                                // Adding the school to the district account so district can see details
                                amsgs.AddRange(
                                    districtAccount.AddVisitorAccount(
@@ -397,7 +438,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                locationHostAccount = null;
                            }
 
-                           if(address != "" && accountIdFromCSV.Length == 0)
+                           if (address != "" && accountIdFromCSV.Length == 0)
                            {
                                LocationService.CreateNew(
                                schoolName,
@@ -445,5 +486,5 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
     }
 
-    
+
 }
