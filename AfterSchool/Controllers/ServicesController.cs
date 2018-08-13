@@ -49,11 +49,11 @@ namespace AfterSchool.Controllers
                 Response.End();
             }
             return View();
-        }        
+        }
 
         public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)
         {
-            if (Request.UserHostAddress == "::1")
+            if (Request.UserHostAddress == "::1" || true)
             {
                 var msgs = new SystemMessages();
 
@@ -87,12 +87,12 @@ namespace AfterSchool.Controllers
                     AfterSchoolLibrary.Email.SendMail(msg);
                     */
 
-                    AfterSchoolLibrary.SendGridHelper.SendMail(
-                        fromEmail: AfterSchoolLibrary.Email.AppEmailAddress,
-                        toEmail: AfterSchoolLibrary.Email.AppAdminEmailAddress,
+                    EmailHelper.SendEmail(
+                        toEmail: "sales@afterschoolhq.com",
                         subject: string.Format("WEBSITE FORM: {0}", subject),
-                        body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message)
-                    );
+                        body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message),
+                        isAfterSchool: true
+                        );
 
                     status = "ok";
                 }
