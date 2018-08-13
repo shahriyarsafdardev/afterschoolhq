@@ -87,21 +87,17 @@ namespace AfterSchool.Controllers
                     AfterSchoolLibrary.Email.SendMail(msg);
                     */
 
-                    EmailHelper.SendEmail(
+                    msgs.AddRange(EmailHelper.SendEmail(
                         toEmail: "sales@afterschoolhq.com",
                         subject: string.Format("WEBSITE FORM: {0}", subject),
                         body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message),
                         isAfterSchool: true
-                        );
-
-                    status = "ok";
-                }
-                else
-                {
-                    status = "error";
+                        ));                    
                 }
 
-                return new JsonResult { Data = new { status = status, messages = msgs } };
+                status = msgs.HasNoErrors() ? "ok" : "error";
+
+                return new JsonResult { Data = new { status, messages = msgs } };
             }
             else
             {
