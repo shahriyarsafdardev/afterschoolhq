@@ -356,28 +356,39 @@ namespace AfterSchool.Areas.Admin.Controllers
                                        ).FirstOrDefault();
                                }
 
+                               if (user.IsEmpty())
+                               {
+                                   user = WebUser.LoadByEmail(email, amsgs, adc);
+                               }
+
                                if (account.IsNotEmpty())
                                {
-                                   user = WebUserService.InviteNew(
-                                       firstname,
-                                       lastname,
-                                       email,
-                                       new WebUser { ID = 0 },
-                                       amsgs,
-                                       adc);
+                                   if (user.IsEmpty())
+                                   {
+                                       user = WebUserService.InviteNew(
+                                           firstname,
+                                           lastname,
+                                           email,
+                                           new WebUser { ID = 0 },
+                                           amsgs,
+                                           adc);
 
-                                   amsgs.AddRange(account.AddUser(user, UserType.Owner, 0, adc));
+                                       amsgs.AddRange(account.AddUser(user, UserType.Owner, 0, adc));
+                                   }
                                }
                                else
                                {
-                                   user = WebUserService.InviteNew(
-                                        firstName: firstname,
-                                        lastName: lastname,
-                                        email: email,
-                                        loggedInUser: SessionVariables.LoggedInUser,
-                                        msgs: amsgs,
-                                        dc: adc
-                                    );
+                                   if (user.IsEmpty())
+                                   {
+                                       user = WebUserService.InviteNew(
+                                            firstName: firstname,
+                                            lastName: lastname,
+                                            email: email,
+                                            loggedInUser: SessionVariables.LoggedInUser,
+                                            msgs: amsgs,
+                                            dc: adc
+                                        );
+                                   }
 
                                    account = user.AddNewAccount(
                                         orgName: schoolName,
