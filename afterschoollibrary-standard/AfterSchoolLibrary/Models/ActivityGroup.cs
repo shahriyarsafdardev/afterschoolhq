@@ -471,7 +471,7 @@ namespace AfterSchoolLibrary
         public List<Activity> GetActivities(bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, DatabaseConnection dc = null)
         {
             if (_Activities.IsEmpty() || forceReload)
-                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, IsArchived, isDeleted, start, length, dc: dc);
+                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, IsArchived, isDeleted, start, length, dc: dc);
 
             return _Activities;
         }

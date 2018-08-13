@@ -59,11 +59,11 @@ namespace AfterSchoolLibrary
         {
             if (user.IsEmpty() || new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }.Contains(userType))
             {
-                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, msgs, dc).ToList();
+                return Activity.LoadByAccountId(account.ID.Value, null, null, isArchived, isDeleted, start, length, msgs, dc).ToList();
             }
             else
             {
-                return Activity.LoadByAccountId(account.ID.Value, null, isArchived, isDeleted, start, length, msgs, dc)
+                return Activity.LoadByAccountId(account.ID.Value, null, null, isArchived, isDeleted, start, length, msgs, dc)
                     .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
                     .ToList();
             }

@@ -516,7 +516,7 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private static DatabaseQuery LoadByAccountIdQuery(int? accountId, int? activityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        private static DatabaseQuery LoadByAccountIdQuery(int? accountId, int? activityGroupId, int? accountActivityGroupId, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.UseParameterizedQuery = false;
@@ -529,6 +529,10 @@ namespace AfterSchoolLibrary
             if (activityGroupId.HasValue)
             {
                 dq.Criterias.Add(ObjectMap["activityGroupId"], activityGroupId.Value);
+            }
+            if (accountActivityGroupId.HasValue)
+            {
+                dq.Criterias.Add(ObjectMap["accountActivityGroupId"], accountActivityGroupId.Value);
             }
             if (isArchived.HasValue)
             {
@@ -568,19 +572,25 @@ namespace AfterSchoolLibrary
 
         public static int GetCountByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc);
+            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, null, isArchived, isDeleted, dc);
             return dq.GetCount(msgs);
         }
 
         public static int GetCountByActivityGroupId(int? activityGroupId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = LoadByAccountIdQuery(null, activityGroupId, isArchived, isDeleted, dc);
+            var dq = LoadByAccountIdQuery(null, activityGroupId, null, isArchived, isDeleted, dc);
             return dq.GetCount(msgs);
         }
 
-        public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, bool? isArchived, bool? isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountByAccountActivityGroupId(int? accountActivityGroupId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, isArchived, isDeleted, dc: dc);
+            var dq = LoadByAccountIdQuery(null, null, accountActivityGroupId, isArchived, isDeleted, dc);
+            return dq.GetCount(msgs);
+        }
+
+        public static List<Activity> LoadByAccountId(int AccountId, int? activityGroupId, int? accountActivityGroupId, bool? isArchived, bool? isDeleted, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = LoadByAccountIdQuery(AccountId, activityGroupId, accountActivityGroupId, isArchived, isDeleted, dc: dc);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             dq.OrderBys.Add("Name", OrderByDirectionEnum.Ascending);
@@ -2101,7 +2111,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        private SystemMessages SetupTeam(Account account, int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages SetupTeam(Account account, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             //validate the user is part of this account (not a global admin)
