@@ -339,6 +339,11 @@ namespace AfterSchoolLibrary
             return Registration.GetCount(criterias: new Hashtable() { { "AccountActivityGroupId", this.ID.Value } }, dc: dc);
         }
 
+        public List<Activity> GetActivities(bool? isArchived = null, bool? isDeleted = null, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.LoadByAccountId(this.AccountId.Value, null, this.ID, isArchived, isDeleted, start, length, msgs, dc);
+        }
+
         public int GetActivityCount(bool? isArchived = null, bool? isDeleted = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.GetCountByActivityGroupId(this.ID.Value, isArchived, isDeleted, msgs, dc);
@@ -347,6 +352,21 @@ namespace AfterSchoolLibrary
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: assignmentType, participationObjectId: this.ID.Value, participationObjectType: ParticipationObjectType.AccountActivityGroup, msgs: msgs, dc: dc);
+        }
+
+        public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Form.Load(this.FormId.Value, msgs, dc);
+        }
+
+        public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByParticipationObject(this.ID.Value, ParticipationObjectType.AccountActivityGroup, msgs, dc);
+        }
+
+        public List<Registrant> GetRegistrants(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetRegistrantActivities(msgs, dc).Select(registrantActivity => registrantActivity.ToRegistrant()).ToList();
         }
 
         #endregion

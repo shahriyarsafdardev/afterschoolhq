@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
@@ -16,6 +16,7 @@
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet">
 		<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
 		<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 	</head>
 	<body>
 		<div class="container-fluid">
@@ -75,71 +76,74 @@
 					</div>
 					<div class="col-md-5 col-sm-6 right-form">
 
-						<div class="form-section">
+                        <div class="form-section">
 
-							<form method="post" action="assets/contact.php">
-									<div class="form-dv">
-										<input type="text" name="email" placeholder="Email" id="email" class="form-control contact-email form-input" required>
-									</div>
-									<div class="form-dv">
-										<input type="text" name="subject" placeholder="Subject" id="subject" class="form-control contact-subject form-input" required>
-								  </div>
-									<div class="form-dv">
-										<textarea name="message" class="form-control form-textarea" id="message" rows="5" placeholder="Message" required></textarea>
-									</div>
-									<div class="margin-b-10">
-											<div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO"></div>
-									</div>
-									<button type="button" id="btn-submit-contact-form" class="btn btn-contact btn-send" onclick="submitContactForm()">Submit</button>
-							</form>
-							<script>
-									function submitContactForm() {
+                            <div class="hide submit-contact-success">Your message has been sent</div>
+                            <div class="hide submit-contact-error">Error sending message</div>
 
-											var params = 'email=' + $('#email').val() +
-													'&subject=' + $('#subject').val() +
-													'&message=' + $('#message').val() +
-													'&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+                            <form method="post" action="assets/contact.php">
+                                <div class="form-dv">
+                                    <input type="text" name="email" placeholder="Email" id="email" class="form-control contact-email form-input" required>
+                                </div>
+                                <div class="form-dv">
+                                    <input type="text" name="subject" placeholder="Subject" id="subject" class="form-control contact-subject form-input" required>
+                                </div>
+                                <div class="form-dv">
+                                    <textarea name="message" class="form-control form-textarea" id="message" rows="5" placeholder="Message" required></textarea>
+                                </div>
+                                <div class="margin-b-10">
+                                    <div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO"></div>
+                                </div>
+                                <button type="button" id="btn-submit-contact-form" class="btn btn-contact btn-send" onclick="submitContactForm()">Submit</button>
+                            </form>
+                            <script>
+                                function submitContactForm() {
 
-											$('#btn-submit-contact-form').html('Submitting...');
-											$('#btn-submit-contact-form').prop('disabled', true);
+                                    var params = 'email=' + $('#email').val() +
+                                        '&subject=' + $('#subject').val() +
+                                        '&message=' + $('#message').val() +
+                                        '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
 
-											$.post(
-													'/services/submitcontactform',
-													params,
-													function (data) {
+                                    $('#btn-submit-contact-form').html('Submitting...');
+                                    $('#btn-submit-contact-form').prop('disabled', true);
 
-															$('#btn-submit-contact-form').html('Submit');
-															$('#btn-submit-contact-form').prop('disabled', false);
-															grecaptcha.reset();
+                                    $.post(
+                                        '/services/submitcontactform',
+                                        params,
+                                        function (data) {
 
-															if (data && data.status == 'ok') {
+                                            $('#btn-submit-contact-form').html('Submit');
+                                            $('#btn-submit-contact-form').prop('disabled', false);
+                                            grecaptcha.reset();
 
-																	$('#email').val('');
-																	$('#subject').val('');
-																	$('#message').val('');
+                                            if (data && data.status == 'ok') {
 
-																	$('.submit-contact-error').addClass('hide');
-																	$('.submit-contact-success').removeClass('hide');
+                                                $('#email').val('');
+                                                $('#subject').val('');
+                                                $('#message').val('');
 
-															} else {
+                                                $('.submit-contact-error').addClass('hide');
+                                                $('.submit-contact-success').removeClass('hide');
 
-																	$('.submit-contact-success').addClass('hide');
-																	$('.submit-contact-error').removeClass('hide');
-																	$('.submit-contact-error').html('');
+                                            } else {
 
-																	for (var message of data.messages) {
-																			$('.submit-contact-error').append('<p>');
-																			$('.submit-contact-error').append(message.Text);
-																			$('.submit-contact-error').append('</p>');
-																	}
+                                                $('.submit-contact-success').addClass('hide');
+                                                $('.submit-contact-error').removeClass('hide');
+                                                $('.submit-contact-error').html('');
 
-															}
-													}
-											);
-									}
-							</script>
+                                                for (var message of data.messages) {
+                                                    $('.submit-contact-error').append('<p>');
+                                                    $('.submit-contact-error').append(message.Text);
+                                                    $('.submit-contact-error').append('</p>');
+                                                }
 
-						</div>
+                                            }
+                                        }
+                                    );
+                                }
+                            </script>
+
+                        </div>
 					</div>
 				</div>
 			</div>

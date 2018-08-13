@@ -87,5 +87,10 @@ namespace AfterSchool.Models
         {
             HttpContext.Current.Session[key] = value;
         }
+
+        public static void RemoveFromSession(string key)
+        {
+            HttpContext.Current.Session[key] = null;
+        }
     }
 }

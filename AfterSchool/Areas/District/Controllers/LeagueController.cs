@@ -370,11 +370,6 @@ namespace AfterSchool.Areas.District.Controllers
                 { "maxgrade", maxgrade }
             };
 
-            if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
-            {
-                values.Add("schedule", schedule);
-            }
-
             var filteredParams = Request.Params.Filter("schedulerepeat-");
             var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
             inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));

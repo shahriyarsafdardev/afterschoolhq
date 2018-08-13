@@ -24,6 +24,7 @@
         id = group.Uid.ToString();
         currentListUrl = Url.Action("activities", "group", new { archive = 0 });
         archivedListUrl = Url.Action("activities", "group", new { archive = 1 });
+        activityType = group.ActivityGroupTypeId == ActivityGroupType.League ? ActivityType.Team : ActivityType.Activity;
     }
 
     var currentClass = "";
@@ -194,7 +195,7 @@ else
                 else
                 {
                     <tr>
-                        <td colspan="8">There are no @UILabel.ActivityLabel(activityType, true).ToLower(). Please <a href="@addUrl">add new @UILabel.ActivityLabel(activityType).ToLower()</a></td>
+                        <td colspan="8">There are no @UILabel.ActivityLabel(activityType, true).ToLower().</td>
                     </tr>
                 }
             </tbody>
