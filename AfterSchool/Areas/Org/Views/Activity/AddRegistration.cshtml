@@ -15,7 +15,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", $"{Model.Name} - Add {UILabel.RegistrantLabel()}"); }
+            @{Html.RenderPartial("_ActivityGroupTitle", Model.Name); }
         </div>
         <div class="panel-body">
 
@@ -28,12 +28,12 @@
                             @group.Name
                         </div>
                         <div class="panel-body">
-                            @foreach(var qvm in qvms.Where(qvm => qvm.Question.GetFormQuestionGroup().ID == group.ID))
+                            @foreach (var qvm in qvms.Where(qvm => qvm.Question.GetFormQuestionGroup().ID == group.ID))
                             {
                                 Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
-                            }  
+                            }
                         </div>
-                    </div>                              
+                    </div>
                 }
 
                 <div class="row">
