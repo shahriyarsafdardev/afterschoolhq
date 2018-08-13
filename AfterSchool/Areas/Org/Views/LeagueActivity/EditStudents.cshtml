@@ -1,16 +1,15 @@
 ﻿@model AfterSchoolLibrary.Activity
 @{
     ViewBag.Title = ((Account)ViewBag.Account).Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
 
     var group = (ActivityGroup)ViewBag.Group;
     var mainColWidth = 10;
     var saveBtnWidth = 7;
     var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId));
-    var availableRegistrants = (List<Registrant>)ViewBag.AvailableRegistrants;
-    var currentRegistrants = (List<Registrant>)ViewBag.CurrentRegistrants;
+    var registrants = (List<Registrant>)ViewBag.Registrants;
     var registrantsPerColumn = 2;
-    var count = availableRegistrants.Count;
+    var count = registrants.Count;
     if (group.IsNotEmpty())
     {
         title = group.Name + " - " + title;
@@ -34,27 +33,28 @@
         <div class="panel-body">
 
             <div class="col-md-8 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid, selectedStudents = currentRegistrants })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid })" class="form-horizontal">
 
-                    @if (availableRegistrants.Count == 0 || true)
+                    @if (registrants.Count == 0)
                     {
                         <p> No one has registered for this team yet. </p>
-                    } else
+                    }
+                    else
                     {
                         <div class="form-group">
                             <label class="col-sm-3 control-label">
-                                Select @UILabel.RegistrantLabel(true)<br/>
+                                Select Students<br />
                                 <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                             </label>
                             <div class="col-sm-6">
                                 @for (int i = 0; i < 3; i++)
                                 {
                                     <div class="col-md-4">
-                                        @foreach (var registrant in availableRegistrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                                        @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                         {
-                                            <div class="am-checkbox">
-                                                <input type="checkbox" onclick="toggleCheck(@registrant)" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" @(currentRegistrants.Contains(registrant) ? " checked=\"checked\" " : "") />
-                                                <label for="registrant-@registrant.ID">@registrant.DisplayName.MaxChars(20, "...")</label>
+                                            <div class="am-checkbox"  >
+                                                <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" />
+                                                <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
                                             </div>
                                         }
                                     </div>
@@ -62,9 +62,6 @@
                             </div>
                         </div>
                     }
-                    
-
-                    
 
                     <div class="form-group">
 
@@ -73,7 +70,7 @@
                         </div>
 
                         <div class="col-sm-@saveBtnWidth col-sm-offset-3">
-                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick=onclick="navigateActivity('@Url.Action("editcontact", "leagueactivity")')"><i class="s7-diskette"></i>Save</button>
+                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid })')"><i class="s7-diskette"></i>Save</button>
                         </div>
 
                         
@@ -98,16 +95,16 @@
         $('#form1').attr('action', url);
     }
 
-    function toggleCheck(registrant) {
-        var cr = @currentRegistrants;
-        if (cr.Contains(r)) {
-            cr.Remove(r);
-        } else {
-            cr.Add(r);
-        }
-        @currentRegistrants = cr;
+    function selectAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', true);
+        });
     }
-
+    function clearAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', false);
+        });
+    }
     
 
 </script>

@@ -99,8 +99,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Summary(string id)
         {
             var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(group.AccountId.Value, group.ID.Value);
-            var registrations = group.GetRegistrations();
+            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, group.ID.Value);
+            // var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(group.AccountId.Value, group.ID.Value);
+            //var registrations = group.GetRegistrations()
+            var registrations = accountActivityGroup.GetRegistrations();
             var actions = SessionAction.LoadByActivityGroupId(
                 group.ID.Value,
                 new List<SessionActionType>() {
@@ -212,6 +214,32 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("periods", group);
         }
 
+        [HttpPost]
+        public ActionResult TeamQuickAdd(string id, string teamname, string seatsavailable)
+        {
+            var msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);            
+
+            var activity = new Activity()
+            {
+                Name = teamname.MaxChars(50),
+                SeatsAvailable = seatsavailable.ToInteger(),
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = SessionVariables.LoggedInUser.ID,
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                AccountActivityGroupId = accountActivityGroup?.ID,
+                ActivityGroupId = activityGroup.ID,
+                AccountId = SessionVariables.CurrentAccount.ID,                
+            };
+            msgs.AddRange(activity.Save());
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(activity.SetupTeam(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser.ID.Value));
+
+            return RedirectToAction("LeagueActivities", new { id });
+        }
 
         /// <summary>
         ///  Controller for the "Students" registrations tab 
@@ -312,24 +340,21 @@ namespace AfterSchool.Areas.Org.Controllers
                 isArchived = archive.ToInteger().ToBoolean();
             }
 
-            var accountAcitivtyGroup = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
+            var accountActivityGroup = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
             var account = SessionVariables.CurrentAccount;
-            var activities = group.GetActivities(isArchived, false, start, length);
-            var totalCount = group.GetActivityCount(isArchived, false);
+            var activities = accountActivityGroup.IsEmpty() ? group.GetActivities(isArchived, false, start, length) : accountActivityGroup.GetActivities(isArchived, false, start, length);
+            var totalCount = accountActivityGroup.IsEmpty() ? group.GetActivityCount(isArchived, false) : accountActivityGroup.GetActivityCount(isArchived, false);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var finalActivities = activities.OrderBy(x => x.Name).ToList();
 
-
-           var reallyFinalActivities = Activity.LoadByAccountActivityGroupId(accountAcitivtyGroup.ID.Value);
-
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Activities = reallyFinalActivities;
+            ViewBag.Activities = finalActivities;
             ViewBag.NeedToUpgrade = finalActivities.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.Messages = new SystemMessages();
-            ViewBag.HasArchivedActivities = group.GetActivityCount(true, false) > 0;
+            ViewBag.HasArchivedActivities = accountActivityGroup.IsEmpty() ? group.GetActivityCount(true, false) > 0 : accountActivityGroup.GetActivityCount(true, false) > 0;
 
             ViewBag.PagingModel = new PagingModel()
             {

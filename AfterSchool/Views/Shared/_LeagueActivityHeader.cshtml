@@ -19,6 +19,7 @@
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
     var registrantCount = Model.GetRegistrantCount();
     var group = Model.GetActivityGroup();
+    var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
 }
 
 @if (Model?.ID.GetValueOrDefault(0) > 0)
@@ -52,7 +53,10 @@
                 {
                     <a href="@Url.Action("team", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")"><i class="s7-users"></i> Staff</a>
                 }
-                <a href="@Url.Action("publishdetail", "leagueactivity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
+                if (aag.IsEmpty())
+                { 
+                    <a href="@Url.Action("publishdetail", "leagueactivity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
+                }
             }
             @if (Model.ActivityGroupId.HasValue)
             {
