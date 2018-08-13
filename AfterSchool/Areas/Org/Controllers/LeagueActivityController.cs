@@ -444,29 +444,26 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
 
-        private void LoadEditStudentsViewBag(Activity activity)
+        private List<Registrant> LoadEditStudentsViewBag(Activity activity)
         {
             var activityGroup = activity.GetActivityGroup();
             var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
-            var registrants = activityGroup.GetRegistrants();
-
-            var registrations = accountActivityGroup.GetRegistrations();
-            var currentregistrations = registrations.Where(r => r.IsRegisteredFor(activity.ToParticipationObject())).ToList();
+            var registrants = accountActivityGroup.IsEmpty() ? activityGroup.GetRegistrants() : accountActivityGroup.GetRegistrants();
 
             ViewBag.Messages = new SystemMessages();
-            ViewBag.AvailableRegistrations = registrations;
-            ViewBag.CurrentRegistrations = currentregistrations;
+            ViewBag.Registrants = registrants;
             ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.Group = activity.GetActivityGroup();
+            ViewBag.Group = activityGroup;
             ViewBag.ActiveMenu = "EditStudents";
             ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
+
+            return registrants;
         }
 
         [HttpGet]
         public ActionResult EditStudents(string id)
         {
             var activity = Activity.LoadByUid(id.ToGuid());
-
 
             LoadEditStudentsViewBag(activity);
             
@@ -477,29 +474,34 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditStudents(string id, string cmd)
         {
             var msgs = new SystemMessages();
-            Activity activity = Activity.LoadByUid(id.ToGuid());
-            var participationObject = activity.ToParticipationObject();
+            var activity = Activity.LoadByUid(id.ToGuid());
             var updatedRegistrants = new List<Registrant>();
             var activityGroup = activity.GetActivityGroup();
-            var registrations = activityGroup.GetRegistrations();
-            List<Registration> addedRegistrations = new List<Registration>();
+            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
 
- 
-            
+            var registrants = LoadEditStudentsViewBag(activity);
 
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-
-                    registrations.ForEach(registration =>
+                    registrants.ForEach(registrant =>
                     {
-                        if (Request[String.Format("registration-{0}", registration.ID)].IsBoolean())
-                        {
-                            var registrant = registration.GetRegistrant();
+                        var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value);
+
+                        if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
+                        {                            
                             //check if the student is already registered for this team
-                            if (RegistrantActivity.LoadByParticipationObjectByRegistrant(participationObject.ObjectID.Value, participationObject.ObjectType, registrant.ID.Value).IsEmpty())
+                            if (RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value).IsEmpty())
                             {
+                                var registration = registrant.AddRegistration(
+                                    SessionVariables.CurrentAccount.ID.Value,
+                                    activity.ActivityGroupId,
+                                    RegistrationCompletionStatus.Completed,
+                                    SessionVariables.LoggedInUser.ID.Value,
+                                    amsgs,
+                                    adc);
+
                                 // manages seats and create registrantactivity record
                                 Registration.ProcessRegistration(
                                     registration: registration,
@@ -513,13 +515,18 @@ namespace AfterSchool.Areas.Org.Controllers
                                     dc: adc);
                             }
                         }
+                        else if (!Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsNotEmpty())
+                        {
+                            var registration = ra.GetRegistration(adc);
+                            amsgs.AddRange(registration.RemoveParticipation(activity.ID.Value, ParticipationObjectType.Activity, adc));
+                        }
                     });
 
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    msgs.Add("Your new registration has been added", MessageType.Success);
+                    msgs.Add("Your new team registrations have been added", MessageType.Success);
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {

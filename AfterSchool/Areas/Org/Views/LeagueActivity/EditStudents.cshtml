@@ -1,16 +1,15 @@
 ﻿@model AfterSchoolLibrary.Activity
 @{
     ViewBag.Title = ((Account)ViewBag.Account).Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
 
     var group = (ActivityGroup)ViewBag.Group;
     var mainColWidth = 10;
     var saveBtnWidth = 7;
     var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId));
-    var availableRegistrations = (List<Registration>)ViewBag.AvailableRegistrations;
-    var currentRegistrants = (List<Registration>)ViewBag.CurrentRegistrations;
+    var registrants = (List<Registrant>)ViewBag.Registrants;
     var registrantsPerColumn = 2;
-    var count = availableRegistrations.Count;
+    var count = registrants.Count;
     if (group.IsNotEmpty())
     {
         title = group.Name + " - " + title;
@@ -36,10 +35,11 @@
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid })" class="form-horizontal">
 
-                    @if (availableRegistrations.Count == 0)
+                    @if (registrants.Count == 0)
                     {
                         <p> No one has registered for this team yet. </p>
-                    } else
+                    }
+                    else
                     {
                         <div class="form-group">
                             <label class="col-sm-3 control-label">
@@ -50,21 +50,18 @@
                                 @for (int i = 0; i < 3; i++)
                                 {
                                     <div class="col-md-4">
-                                        @foreach (var registration in availableRegistrations.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                                        @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                         {
                                             <div class="am-checkbox"  >
-                                                <input type="checkbox" id="registration-@registration.ID" name="registration-@registration.ID" value="1" @(currentRegistrants.Contains(registration) ? " checked=\"checked\" " : "") />
-                                                <label for="registration-@registration.ID">@registration.RegistrantFirstName @registration.RegistrantLastName</label>
+                                                <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" />
+                                                <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
                                             </div>
-                                         
                                         }
                                     </div>
                                 }
                             </div>
                         </div>
                     }
-                    
-
 
                     <div class="form-group">
 

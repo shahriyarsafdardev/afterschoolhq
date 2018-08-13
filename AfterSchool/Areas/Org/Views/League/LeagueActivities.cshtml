@@ -3,7 +3,6 @@
     ViewBag.Title = "Teams";
     var msgs = (SystemMessages)ViewBag.Messages;
     var activities = (List<Activity>)ViewBag.Activities;
-    var needToUpgrade = (bool)ViewBag.NeedToUpgrade;
     var hasArchivedActivities = (bool)ViewBag.HasArchivedActivities;
 }
 
@@ -18,37 +17,40 @@
         <div class="panel-heading">
             <div class="pull-right">
 
-                @if (!needToUpgrade)
-                {
-                    <a href="@Url.Action("editsetup", "leagueactivity", new { group = Model.Uid })" class="btn btn-primary btn-space margin-r-10">
-                        <i class="icon icon-left s7-plus"></i>
-                        Add @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
-                    </a>
-                }
-                else
-                {
-                    <button class="btn btn-primary md-trigger" data-modal="modal-offering">
-                        <i class="icon icon-left s7-plus"></i>
-                        Add @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
-                    </button>
-                    <div id="modal-offering" class="md-modal colored-header custom-width md-effect-9">
-                        <form id="form-upgrade" action="" method="post">
-                            <div class="md-content">
-                                <div class="modal-header">
-                                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                                    <h3 class="modal-title">Upgrade Your Account</h3>
+                <button class="btn btn-primary btn-space md-trigger" data-modal="modal-quick-add">
+                    Team Quick Add
+                </button>
+
+                <a href="@Url.Action("editsetup", "leagueactivity", new { group = Model.Uid })" class="btn btn-default btn-space margin-r-10">
+                    <i class="icon icon-left s7-plus"></i>
+                    Add @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
+                </a>
+
+                <div id="modal-quick-add" class="md-modal colored-header custom-width md-effect-9">
+                    <form id="form-upgrade" action="@Url.Action("teamquickadd", "league", new { id = Model.Uid })" method="post">
+                        <div class="md-content">
+
+                            <div class="modal-header">
+                                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                                <h3 class="modal-title">Create a Team</h3>
+                            </div>
+                            <div class="modal-body form">
+                                <div class="form-group">
+                                    <label class="control-label">Enter your team name</label>
+                                    <input type="text" id="teamname" name="teamname" class="form-control" placeholder="ex: Tigers" />
                                 </div>
-                                <div class="modal-body form">
-                                    <p>You have reached your limit of @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true). Time to upgrade :).</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                                    <a href="@Url.Action("packages", "account")" class="btn btn-primary">Upgrade &raquo;</a>
+                                <div class="form-group">
+                                    <label class="control-label">Enter the maximum number of players</label>
+                                    <input type="number" id="seatsavailable" name="seatsavailable" step="1" min="0" max="100" class="form-control" placeholder="ex: 15" />
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                }
+                            <div class="modal-footer">
+                                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Create Team &raquo;</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
 
             </div>
 
@@ -66,10 +68,12 @@
                                 { "PagingModel", ViewBag.PagingModel },
                                 { "ShowRegistrationPeriodFilter", false },
                                 { "Group", Model },
-                                { "NeedToUpgrade", needToUpgrade },
+                                { "NeedToUpgrade", false },
                                 { "HasArchivedActivities", hasArchivedActivities }
                             }
                         ); }
         </div>
     </div>
 </div>
+
+
