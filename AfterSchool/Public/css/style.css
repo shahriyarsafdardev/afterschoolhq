@@ -1249,6 +1249,9 @@ ul li.phone-li:after {
     margin-top: 15px;
     letter-spacing: 2px;
 }
+.btn-send:hover {
+  color: #00b48c;
+}
 .form-textarea {
     display: block;
     width: 100%;
