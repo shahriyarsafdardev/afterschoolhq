@@ -202,7 +202,7 @@ namespace AfterSchoolLibraryTests
             var user = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, msgs, dc: dc);
-            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, false, false, 0, 100, msgs, dc));
+            Assert.Single(Activity.LoadByAccountId(account.ID.Value, null, null, false, false, 0, 100, msgs, dc));
         }
 
         [Fact]

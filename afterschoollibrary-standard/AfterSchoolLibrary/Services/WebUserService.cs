@@ -245,7 +245,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Email must valid", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email))
+            else if (WebUser.ExistsByEmail(email, msgs, dc))
                 msgs.Add("Email is already in use by another user", MessageType.UserError);
 
             if (msgs.HasNoErrors())
@@ -259,7 +259,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = WebUserService.GenerateUsername(firstName, lastName)
+                    Username = WebUserService.GenerateUsername(firstName, lastName,msgs,dc)
                 };                
 
                 msgs.AddRange(user.Save(dc));

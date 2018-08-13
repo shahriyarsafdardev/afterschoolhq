@@ -12,6 +12,9 @@ body {
     background-color: rgba(47, 60, 64, 0.90);
     padding: 10px 0px;
 }
+.legal-body {
+  margin: 100px;
+}
 .top-right {
     padding-top: 23px;
 }
@@ -1507,6 +1510,10 @@ ul li.phone-li:after {
     height: 40px;
     margin-right: 0px;
 }
+.btn-newsletter:hover {
+  color: #00b48c;
+}
+
 .btn-newsletter img {
     width: 24px;
 }
