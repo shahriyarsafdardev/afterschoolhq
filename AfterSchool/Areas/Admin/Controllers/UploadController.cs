@@ -372,9 +372,9 @@ namespace AfterSchool.Areas.Admin.Controllers
                                            new WebUser { ID = 0 },
                                            amsgs,
                                            adc);
-
-                                       amsgs.AddRange(account.AddUser(user, UserType.Owner, 0, adc));
                                    }
+
+                                   amsgs.AddRange(account.AddUser(user, UserType.Owner, 0, adc));
                                }
                                else
                                {
