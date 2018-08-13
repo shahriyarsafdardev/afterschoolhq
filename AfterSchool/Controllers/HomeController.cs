@@ -16,7 +16,7 @@ namespace AfterSchool.Controllers
         {
             if (AfterSchool.Models.Utilities.IsAfterSchool())
             {
-                return RedirectToAction("ASHQ");
+                return Redirect("/public/");
             }
             else
             {
