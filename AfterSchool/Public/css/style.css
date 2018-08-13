@@ -1507,6 +1507,10 @@ ul li.phone-li:after {
     height: 40px;
     margin-right: 0px;
 }
+.btn-newsletter:hover {
+  color: #00b48c;
+}
+
 .btn-newsletter img {
     width: 24px;
 }
