@@ -139,7 +139,7 @@ namespace AfterSchoolLibrary
             RegistrationPeriod = aag.GetCurrentOrNextRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;
             RegistrationMode = activityGroup.RegistrationModeId;
-            Form = activityGroup.GetForm(msgs, dc);
+            Form = aag.GetForm(msgs, dc);
             OwnerAccount = aag.GetAccount(msgs, dc);
             ContactName = aag.ContactName;
             ContactEmail = aag.ContactEmail;
