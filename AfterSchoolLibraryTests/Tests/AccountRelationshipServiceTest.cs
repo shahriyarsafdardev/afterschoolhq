@@ -1,0 +1,49 @@
+﻿using System;
+using Xunit;
+using Xunit.Abstractions;
+using AfterSchoolLibrary;
+using AfterSchoolLibraryTests.Factories;
+using AfterSchoolLibrary.Services;
+
+namespace AfterSchoolLibraryTests.Tests
+{
+    public class AccountRelationshipServiceTest : BaseTest
+    {
+        private WebUser AccountOwner { get; set; }
+        private WebUser LoggedInUser { get; set; }
+
+        public AccountRelationshipServiceTest(ITestOutputHelper output) : base(output)
+        {
+            AccountOwner = WebUserFactory.Create(msgs, dc);
+            LoggedInUser = WebUserFactory.Create(msgs, dc);
+        }
+
+        [Fact]
+        public void CreateNewTest()
+        {
+            var visitorOwner = WebUserFactory.Create(msgs, dc);
+            var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+            var hostOwner = WebUserFactory.Create(msgs, dc);
+            var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+
+            var accountRelationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, LoggedInUser, msgs, dc);
+
+            Assert.True(accountRelationship.ID.HasValue);
+        }
+
+        [Fact]
+        public void CreateNewNoDuplicateTest()
+        {
+            var visitorOwner = WebUserFactory.Create(msgs, dc);
+            var visitorAccount = AccountFactory.Create(visitorOwner, msgs, dc);
+            var hostOwner = WebUserFactory.Create(msgs, dc);
+            var hostAccount = AccountFactory.Create(hostOwner, msgs, dc);
+
+            var accountRelationship1 = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, LoggedInUser, msgs, dc);
+            var accountRelationship2 = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, HostPermissionType.Edit, LoggedInUser, msgs, dc);
+
+            Assert.Equal(1, AccountRelationship.GetCount(msgs: msgs, dc: dc));
+        }
+
+    }
+}
