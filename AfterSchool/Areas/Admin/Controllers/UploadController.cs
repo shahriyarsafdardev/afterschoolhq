@@ -81,6 +81,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         private string[] emailHeaders { get { return new string[] { "email", "emailaddress" }; } }
         private string[] minGrade { get { return new string[] { "mingrade", "lowestgrade" }; } }
         private string[] maxGrade { get { return new string[] { "maxgrade", "highestgrade" }; } }
+        private string[] accountIdHeaders { get { return new string[] { "accountid" }; } }
 
 
         private void AddHeaders(List<string[]> list)
@@ -99,6 +100,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             list.Add(emailHeaders);
             list.Add(minGrade);
             list.Add(maxGrade);
+            list.Add(accountIdHeaders);
         }
 
         private string ProcessImport(HttpPostedFileBase importfile, SystemMessages msgs)
@@ -183,7 +185,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         var validatedField = new ImportField();
                         validatedField.Value = row[i];
 
-                        var field = row[i].ToLower();
+                        var field = row[i];
                         var headerName = headersWithData[i];
 
                         validatedField.Value = field;
@@ -286,9 +288,18 @@ namespace AfterSchool.Areas.Admin.Controllers
             var firstNameIndex = GetHeaderPostion(headersWithData, firstNameHeaders);
             var lastNameIndex = GetHeaderPostion(headersWithData, lastNameHeaders);
             var emailIndex = GetHeaderPostion(headersWithData, emailHeaders);
+            var accountIdIndex = GetHeaderPostion(headersWithData, accountIdHeaders);
+            Account districtAccount = null;
 
-            List<WebUser> users = new List<WebUser>();
-            List<Account> accounts = new List<Account>();
+            if (AfterSchoolLibrary.Utilities.IsProduction)
+                districtAccount = Account.Load(84);
+            else if (AfterSchoolLibrary.Utilities.IsQA)
+                districtAccount = Account.Load(193);
+           // else
+           //     districtAccount = Account.Load(80);
+
+            var users = new List<WebUser>();
+            var accounts = new List<Account>();
 
             if (msgs.HasNoErrors())
             {
@@ -296,15 +307,13 @@ namespace AfterSchool.Areas.Admin.Controllers
                (
                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
                    {
-
-
-
                        foreach (var row in rows)
                        {
                            WebUser user = null;
                            Account account = null;
                            Account locationHostAccount = null;
 
+                           var accountIdFromCSV = row.ElementAt(accountIdIndex).Value;
                            var schoolName = row.ElementAt(schoolIndex).Value;
                            var schoolPhone = row.ElementAt(phoneIndex).Value;
                            var address = row.ElementAt(addressIndex).Value;
@@ -322,36 +331,55 @@ namespace AfterSchool.Areas.Admin.Controllers
                            var lastname = row.ElementAt(lastNameIndex).Value;
                            var email = row.ElementAt(emailIndex).Value;
 
+                           if (accountIdFromCSV.Length > 0)
+                           {
+                               account = Account.Load(accountIdFromCSV.ToInteger(), amsgs, adc);
+                           }
+
                            if (firstname.Length > 0)
                            {
+                               if (account.IsNotEmpty())
+                               {
+                                   user = WebUserService.InviteNew(
+                                       firstname,
+                                       lastname,
+                                       email,
+                                       new WebUser { ID = 0 },
+                                       amsgs,
+                                       adc);
 
-                               user = WebUserService.InviteNew(
-                                    firstName: firstname,
-                                    lastName: lastname,
-                                    email: email,
-                                    loggedInUser: SessionVariables.LoggedInUser,
-                                    msgs: amsgs,
-                                    dc: adc
-                                );
+                                   amsgs.AddRange(account.AddUser(user, UserType.Owner, 0, adc));
+                               }
+                               else
+                               {
+                                   user = WebUserService.InviteNew(
+                                        firstName: firstname,
+                                        lastName: lastname,
+                                        email: email,
+                                        loggedInUser: SessionVariables.LoggedInUser,
+                                        msgs: amsgs,
+                                        dc: adc
+                                    );
 
-
-                               account = user.AddNewAccount(
-                                    orgName: schoolName,
-                                    phone: schoolPhone,
-                                    isActive: true,
-                                    accountType: AccountType.School,
-                                    packageId: Package.Load(msgs: msgs).First().ID.Value,
-                                    packageBillingPeriod: BillingPeriodType.Month,
-                                    isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                                    loggedInUser: SessionVariables.LoggedInUser,
-                                    msgs: amsgs,
-                                    dc: adc
-                                );
+                                   account = user.AddNewAccount(
+                                        orgName: schoolName,
+                                        phone: schoolPhone,
+                                        isActive: true,
+                                        accountType: AccountType.School,
+                                        packageId: Package.Load(msgs: amsgs, dc: adc).First().ID.Value,
+                                        packageBillingPeriod: BillingPeriodType.Month,
+                                        isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                                        loggedInUser: SessionVariables.LoggedInUser,
+                                        msgs: amsgs,
+                                        dc: adc
+                                    );
+                               }
 
                                locationHostAccount = account;
+                               
                                // Adding the school to the district account so district can see details
                                amsgs.AddRange(
-                                   SessionVariables.CurrentAccount.AddVisitorAccount(
+                                   districtAccount.AddVisitorAccount(
                                        account,
                                        HostPermissionType.Edit,
                                        ApprovalStatus.Approved,
@@ -366,10 +394,10 @@ namespace AfterSchool.Areas.Admin.Controllers
                            }
                            else
                            {
-                               locationHostAccount = SessionVariables.CurrentAccount;
+                               locationHostAccount = null;
                            }
 
-                           if(address != "")
+                           if(address != "" && accountIdFromCSV.Length == 0)
                            {
                                LocationService.CreateNew(
                                schoolName,
@@ -380,7 +408,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                postalCode,
                                country,
                                locationType,
-                               locationHostAccount.ID.Value,
+                               locationHostAccount?.ID,
                                SessionVariables.LoggedInUser,
                                amsgs,
                                adc);
