@@ -150,6 +150,14 @@ namespace AfterSchoolLibrary
             IsFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
+        public bool IsNotFreeAndCanAcceptPayments
+        {
+            get
+            {
+                return !IsFree && OwnerAccount.CanProcessPayments();
+            } 
+        }
+
         public string GetHomePageUrl(bool isAfterSchool = true)
         {
             switch (this.ObjectType)

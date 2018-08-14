@@ -1907,6 +1907,18 @@ namespace AfterSchoolLibrary
         {
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
         }
+
+        public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return StripeAccount.GetCount(criterias: 
+                new Hashtable()
+                {
+                    { "IsVerified", true },
+                    { "AccountId", account.ID.Value }
+                }, 
+                msgs: msgs, 
+                dc: dc) > 0;
+        }
         
         public static AccountActivityGroup InviteSchoolToLeague(this Account account, ActivityGroup activityGroup, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
