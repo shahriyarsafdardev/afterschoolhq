@@ -2066,6 +2066,14 @@ namespace AfterSchoolLibrary
                 dc: dc);
         }
 
+        public string GetPaymentUrl
+        {
+            get
+            {
+                return $"{Utilities.BaseUrl(true)}/account/makepayment/{this.Uid}";
+            }
+        }
+
         #endregion
     }
 }

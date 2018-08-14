@@ -2,6 +2,7 @@
 @{ 
     var account = (Account)ViewData["Account"];
     var activity = (Activity)ViewData["Activity"];
+    var participationObject = activity.ToParticipationObject();
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
     var assignmentType = (RegistrationAssignmentType)ViewData["assignmentType"];
@@ -53,7 +54,7 @@
                         <td class="text-center">@ra.AssignmentSeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         <td>
-                            @if (activity.CostPerRegistrant == 0)
+                            @if (participationObject.IsFree)
                             {
                                 @:FREE
                             }
@@ -83,7 +84,7 @@
                             </select>
                         </td>
                         <td>
-                            @if (ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                            @if (!participationObject.IsFree && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
                             {
                                 <button class="btn btn-default btn-sm" 
                                         data-modal="modal-waitinglist" 

@@ -53,7 +53,7 @@ namespace AfterSchoolLibrary
                 { "FirstName", parentOrGuardian.FirstName },
                 { "Registering", registering },
                 { "ActivityName",  participationObject.Name },
-                { "PaymentLink", $"{Utilities.BaseUrl(isAfterSchool)}/account/makepayment/{registration.Uid}" },
+                { "PaymentLink", registration.GetPaymentUrl },
                 { "BillerAccountName", participationObject.OwnerAccount.Name },
                 { "ActivityContactName", participationObject.ContactName },
                 { "ActivityContactEmail", participationObject.ContactEmail },

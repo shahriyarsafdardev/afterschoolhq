@@ -38,7 +38,6 @@ namespace AfterSchoolLibrary
         public string ContactPhone { get; set; }
         public string ContactEmail { get; set; }
         public string CostDescription { get; set; }
-        public RegistrationMode RegistrationModeId { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }       
@@ -64,7 +63,6 @@ namespace AfterSchoolLibrary
             ContactEmail = activity.ContactEmail;
             ContactPhone = activity.ContactPhone;
             CostDescription = activity.CostDescription;
-            RegistrationModeId = activity.RegistrationModeId;
            
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -112,7 +110,6 @@ namespace AfterSchoolLibrary
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             // TODO: PayLater = activityGroup.AllowToPayLater;
-            RegistrationModeId = activityGroup.RegistrationModeId;
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -138,7 +135,6 @@ namespace AfterSchoolLibrary
             ActivityGroupType = activityGroup.ActivityGroupTypeId;
             RegistrationPeriod = aag.GetCurrentOrNextRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;
-            RegistrationMode = activityGroup.RegistrationModeId;
             Form = aag.GetForm(msgs, dc);
             OwnerAccount = aag.GetAccount(msgs, dc);
             ContactName = aag.ContactName;
@@ -146,7 +142,7 @@ namespace AfterSchoolLibrary
             ContactPhone = aag.ContactPhone;
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
-            RegistrationModeId = RegistrationMode.Apply; // aag.RegistrationModeId;
+            RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
