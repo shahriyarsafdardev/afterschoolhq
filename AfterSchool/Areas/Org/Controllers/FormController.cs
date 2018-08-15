@@ -117,6 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (qg.IsNumber())
                         {
+                            // create or update question groups
                             if (qg.ToInteger() == 0)
                             {
                                 questionGroup = new FormQuestionGroup()
