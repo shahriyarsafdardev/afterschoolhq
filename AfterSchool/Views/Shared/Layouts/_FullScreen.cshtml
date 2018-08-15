@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="/assets/img/favicon.png">
+    <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
+    <title>@UILabel.ProductName()</title>
+
+    @{Html.RenderPartial("~/Views/Shared/_HeadIncludes.cshtml");}
+    @{Html.RenderPartial("~/Views/Shared/_ZendeskWidget.cshtml");}
+    @{Html.RenderPartial("~/Views/Shared/_MediumEditorScripts.cshtml");}
+
+</head>
+<body>
+    <div class="am-wrapper notopmenu">
+        <!-- Main section-->
+        <div class="am-content-full">
+            @RenderBody()
+        </div>
+    </div>
+
+    @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}
+
+    @RenderSection("scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+
+            $('.am-content-full').css({
+                'min-height': $(window).height(),
+                'background-color': '#fff',
+                'padding': '40px'
+            });
+
+            $('form').submit(function () {
+                $(this).find('button[type="submit"]').prop('disabled', true);
+                $(this).find('button[type="submit"]').html('...');
+                $("#modal-saving").addClass("md-show");
+                $('#saving-text').html('Saving...');
+            });
+
+            $('a').click(function () {
+                if ($(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
+                    $("#modal-saving").addClass("md-show");
+                    $('#saving-text').html('Loading...');
+                }
+            });
+
+        });
+    </script>
+
+    <div id="modal-saving" class="md-modal modal-container modal-full-color modal-full-color-success modal-effect-8" style="perspective: 1300px;">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div style="background-image: url(/assets/img/spinner.gif); background-position: center; width: 600px; height: 300px;">
+                </div>
+                <div class="text-center hide">
+                    <h3 id="saving-text">Saving...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

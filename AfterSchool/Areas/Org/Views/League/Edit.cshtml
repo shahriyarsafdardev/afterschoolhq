@@ -3,6 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var forms = (List<Form>)ViewBag.Forms;
+    var aag = (AccountActivityGroup)ViewBag.AccountActivityGroup;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -21,6 +22,20 @@
 
             <div class="col-md-12 col-lg-12">
 
+                @if (aag.IsNotEmpty() && aag.ContactName.IsNotEmpty() && aag.GetCurrentOrNextRegistrationPeriod().IsEmpty())
+                {
+                    <div role="alert" class="alert alert-success alert-icon">
+                        <div class="icon">
+                            <span class="s7-check-circle"></span>
+                        </div>
+                        <div class="message text-medium-small">
+                            <p class="text-center">
+                                Now that you've saved the @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId).ToLower() details. Please <a href="@Url.Action("periods", "league", new { id = Model.Uid })">add registration windows &raquo;</a>
+                            </p>
+                        </div>
+                    </div>
+                }
+
                 <form id="form1" method="post" action="@Url.Action("edit", "league", new { id = Model.Uid })" class="form-horizontal">
 
                     @{ Html.RenderPartial("~/Views/Shared/_ActivityGroupEdit.cshtml", Model); }
@@ -29,10 +44,10 @@
                         <label class="col-sm-3 control-label"></label>
                         <div class="col-sm-6">
                             <div class="btn-group pull-left">
-                                <button type="reset" class="btn btn-default">Discard Changes</button>
+                                <a href="@Url.Action("edit", "league", new { id = Model.Uid })" class="text-muted">Cancel Changes</a>
                             </div>
                             <div class="btn-group pull-right">
-                                <button type="submit" class="btn btn-primary">Save &raquo;</button>
+                                <button type="submit" class="btn btn-primary btn-lg">Save @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) Details &raquo;</button>
                             </div>
                         </div>
                     </div>

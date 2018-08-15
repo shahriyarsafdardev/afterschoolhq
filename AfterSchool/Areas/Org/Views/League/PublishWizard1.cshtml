@@ -1,0 +1,72 @@
+﻿@model AfterSchoolLibrary.ActivityGroup
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var aag = (AccountActivityGroup)ViewBag.AccountActivityGroup;
+}
+
+<div>
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", $"Publish {Model.Name} - Step 1 of 2 - Contact Person"); }
+        </div>
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-7">
+                    <div role="alert" class="alert alert-success alert-icon">
+                        <div class="icon">
+                            <span class="s7-check-circle"></span>
+                        </div>
+                        <div class="message text-medium-small">
+                            <p class="text-center">
+                                Please enter the contact person who parents should contact regarding this league
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form id="form1" method="post" action="@Url.Action("publishwizard1", "league", new { id = Model.Uid })" class="form-horizontal">
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Contact Name<span class="text-danger">*</span></label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="contactname" name="contactname" value="@aag.ContactName" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Contact Phone<span class="text-danger">*</span></label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="contactphone" name="contactphone" value="@aag.ContactPhone" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Contact Email<span class="text-danger">*</span></label>
+                    <div class="col-sm-6">
+                        <input type="email" class="form-control" id="contactemail" name="contactemail" value="@aag.ContactEmail" onfocus="this.select()" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <div class="btn-group pull-left">
+                            <a href="@Url.Action("indexexternal", "league")" class="text-muted">&laquo; Cancel</a>
+                        </div>
+                        <div class="btn-group pull-right">
+                            <button type="submit" class="btn btn-primary btn-lg">Save &amp; Continue &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>

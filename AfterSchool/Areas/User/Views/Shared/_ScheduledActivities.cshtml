@@ -34,7 +34,7 @@
 
                     Html.RenderPartial("~/Views/Shared/_ActivityScheduleHtml.cshtml", po.Schedule);
 
-                    if (!po.IsFree && ra.GetAmountPaid() == 0)
+                    if (po.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0)
                     {
                         <div class="col-md-12 padding-v-20">
                             <div class="row">

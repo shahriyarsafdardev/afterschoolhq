@@ -3,6 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var actions = (List<SessionAction>)ViewBag.Actions;
     var registrations = (List<Registration>)ViewBag.Registrations;
+    var aag = (AccountActivityGroup)ViewBag.AccountActivityGroup;
 
     decimal totalPaid = 0;
     int registrationCount = registrations.Count();
@@ -32,14 +33,10 @@
         </div>
         <div class="panel-body">
 
-          @if (registrationCount == 0) 
+          @if (registrationCount == 0 && !aag.IsPublished)
             {
                 <div class="widget">
-                    <div class="widget-head">
-                        <h1>@Model.Name</h1>
-                    </div>
-                    <div class="widget-tile">
-                        <hr />
+                    <div class="widget-tile text-medium-small">
                         <p>Welcome @SessionVariables.LoggedInUser.FirstName!</p>
                         <p>                            
                             <ol>
@@ -63,7 +60,7 @@
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
                                     <div data-toggle="counter" data-end="@registrationCount" data-decimals="0" data-suffix="" class="value">@registrationCount</div>
-                                    <div class="desc">Total @UILabel.RegistrantLabel(true)</div>
+                                    <div class="desc">@UILabel.RegistrantLabel(true) Registered</div>
                                 </div>
                                 <div class="icon"><span class="s7-users"></span></div>
                             </div>

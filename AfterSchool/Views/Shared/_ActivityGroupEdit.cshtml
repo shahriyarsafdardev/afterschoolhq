@@ -56,8 +56,13 @@
                     <option value="@form.ID" @(formId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
                 }
             </select>
+            <p class="text-muted">
+                <em>
+                    You can select "Standard Reg Form". This is the registration form your parents will use to register for your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId).ToLower(). 
+                </em>
+            </p>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 hide">
             <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = formId })" id="editForm" target="_blank">Edit Form</a>
         </div>
     </div>
