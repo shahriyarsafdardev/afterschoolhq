@@ -18,7 +18,7 @@
                 }
                 @if (SessionVariables.LoggedInUser.IsNotEmpty())
                 {
-                    <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View Family Account</a>
+                    <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View Account</a>
                     <a href="@Url.Action("index", "logout", new { returnurl = Request.Url.AbsolutePath })" class="btn btn-link">Logout</a>
                 }
                 else
