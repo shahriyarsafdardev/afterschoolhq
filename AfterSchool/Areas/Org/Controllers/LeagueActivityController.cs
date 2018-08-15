@@ -671,43 +671,37 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         [ValidateInput(false)]
-        public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime)
+        public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
         {
             var msgs = new SystemMessages();
-            Activity activity = Activity.LoadByUid(id.ToGuid());
-            var scheduleDates = new List<DateRange>();
+            Activity activity = null;
+            var inSessionDates = new List<DateRange>();
+            var outOfSessionDates = new List<DateTime>();
 
+            activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
                 var values = new Dictionary<string, object>();
 
-                if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
-                {
-                    values = new Dictionary<string, object>()
-                    {
-                        { "schedule", schedule }
-                    };
-                }
-                else
-                {
-                    var filteredParams = Request.Params.Filter("schedulerepeat-");
-                    var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-                    scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
+                var filteredParams = Request.Params.Filter("schedulerepeat-");
+                var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+                inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                    values = new Dictionary<string, object>()
-                    {
-                        { "scheduledetails", scheduledetails},
-                        { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
-                        { "repeatsweekly", repeatsweekly.IfBlank("0") },
-                        { "startdate", startdate },
-                        { "enddate", enddate },
-                        { "dailystarttime", dailystarttime },
-                        { "dailyendtime", dailyendtime },
-                        { "scheduledates", scheduleDates },
-                        { "schedule", schedule }
-                    };
-                    
-                }
+                values = new Dictionary<string, object>()
+                {
+                    { "scheduledetails", scheduledetails},
+                    { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
+                    { "repeatsweekly", repeatsweekly.IfBlank("0") },
+                    { "startdate", startdate },
+                    { "enddate", enddate },
+                    { "dailystarttime", dailystarttime },
+                    { "dailyendtime", dailyendtime },
+                    { "scheduledates", inSessionDates },
+                    { "scheduledatesclosed", outOfSessionDates },
+                    { "schedule", schedule },
+                    { "isongoing", isongoing }
+                };
 
                 activity = Activity.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
@@ -727,11 +721,11 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivitySchedule sched = null;
             if (msgs.HasNoErrors())
             {
-                sched = activity.GetSchedule(); 
+                sched = activity.GetSchedule();
             }
             else
             {
-                sched = ActivitySchedule.GetNewDefaultSchedule(scheduleDates);
+                sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
             }
 
             ViewBag.Messages = msgs;
@@ -746,18 +740,113 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "prev":
-                        ViewBag.ActiveMenu = "EditSetup";
-                        LoadEditSetupViewBag(id,activity.GetActivityGroup().ID.ToString());
-                        return View("EditSetup", activity);
+                        ViewBag.ActiveMenu = "EditRestrictions";
+                        return View("EditRestrictions", activity);
                     case "next":
-                        ViewBag.ActiveMenu = "EditContact";
-                        return View("EditContact", activity);
+                        ViewBag.ActiveMenu = "EditDetails";
+                        return View("EditDetails", activity);
                 }
             }
 
             ViewBag.ActiveMenu = "EditSchedule";
             return View(activity);
         }
+
+        //[HttpPost]
+        //[ValidateInput(false)]
+        //public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime)
+        //{
+        //    var msgs = new SystemMessages();
+        //    Activity activity = Activity.LoadByUid(id.ToGuid());
+        //    var scheduleDates = new List<DateRange>();
+        //    var inSessionDates = new List<DateRange>();
+        //    var outOfSessionDates = new List<DateTime>();
+
+        //    if (activity.IsNotEmpty())
+        //    {
+        //        var values = new Dictionary<string, object>();
+
+        //        //if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
+        //        //{
+        //        //    values = new Dictionary<string, object>()
+        //        //    {
+        //        //        { "schedule", schedule }
+        //        //    };
+        //        //}
+        //        //else
+        //        //{
+        //            var filteredParams = Request.Params.Filter("schedulerepeat-");
+        //            var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+        //            scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
+        //            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+        //            outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
+
+        //            values = new Dictionary<string, object>()
+        //            {
+        //                { "scheduledetails", scheduledetails},
+        //                { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
+        //                { "repeatsweekly", repeatsweekly.IfBlank("0") },
+        //                { "startdate", startdate },
+        //                { "enddate", enddate },
+        //                { "dailystarttime", dailystarttime },
+        //                { "dailyendtime", dailyendtime },
+        //                { "scheduledates", inSessionDates },
+        //                { "scheduledatesclosed", outOfSessionDates },
+        //                //{ "scheduledates", scheduleDates },
+        //                { "schedule", schedule }
+        //            };
+                    
+        //        //}
+
+        //        activity = Activity.EditExisting(
+        //            loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+        //            account: SessionVariables.CurrentAccount,
+        //            activityId: activity.ID.Value.ToString(),
+        //            values: values,
+        //            msgs: msgs
+        //        );
+        //    }
+
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
+        //    }
+
+        //    var instances = new List<ActivityInstance>();
+        //    ActivitySchedule sched = null;
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        sched = activity.GetSchedule(); 
+        //    }
+        //    else
+        //    {
+        //        sched = ActivitySchedule.GetNewDefaultSchedule(scheduleDates);
+        //    }
+
+        //    ViewBag.Messages = msgs;
+        //    ViewBag.Account = SessionVariables.CurrentAccount;
+        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
+        //    ViewBag.Schedule = sched;
+        //    ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
+        //    ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        switch (cmd)
+        //        {
+        //            case "prev":
+        //                ViewBag.ActiveMenu = "EditSetup";
+        //                LoadEditSetupViewBag(id,activity.GetActivityGroup().ID.ToString());
+        //                return View("EditSetup", activity);
+        //            case "next":
+        //                ViewBag.ActiveMenu = "EditContact";
+        //                return View("EditContact", activity);
+        //        }
+        //    }
+
+        //    ViewBag.ActiveMenu = "EditSchedule";
+        //    return View(activity);
+        //}
         
         [HttpGet]
         public ActionResult EditLocation(string id)
@@ -1280,51 +1369,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AssignmentType = rat;
             return View(activity);
         }
-
-        //[HttpPost]
-        //public ActionResult WaitingList(string id, string numbertomove, string movefromto)
-        //{
-        //    var msgs = new SystemMessages();
-        //    Activity activity = null;
-
-        //    if (numbertomove.IsNumber() && movefromto.IsNotEmpty())
-        //    {
-        //        var ra = RegistrantActivity.Load(id.ToInteger());
-        //        if (movefromto.ToLower() == "to")
-        //        {
-        //            if (numbertomove.ToInteger() > ra.NumberOfSeats)
-        //            {
-        //                numbertomove = ra.NumberOfSeats.ToString();
-        //            }
-        //            ra.NumberOfWaitingListSeats += numbertomove.ToInteger();
-        //            ra.NumberOfSeats -= numbertomove.ToInteger();
-        //        }
-        //        else
-        //        {
-        //            if (numbertomove.ToInteger() > ra.NumberOfWaitingListSeats)
-        //            {
-        //                numbertomove = ra.NumberOfWaitingListSeats.ToString();
-        //            }
-        //            ra.NumberOfWaitingListSeats -= numbertomove.ToInteger();
-        //            ra.NumberOfSeats += numbertomove.ToInteger();
-        //        }
-
-        //        msgs.AddRange(ra.Save());
-
-        //        if (msgs.HasNoErrors())
-        //        {
-        //            msgs.Add("The waiting list has been updated for " + ra.RegistrantName, MessageType.Success);
-        //        }
-
-        //        activity = Activity.Load(ra.ActivityId.Value);
-        //    }
-
-        //    ViewBag.Messages = msgs;
-        //    ViewBag.IsActivityLeader = IsActivityLeader(activity);
-        //    ViewBag.Registrants = activity.GetRegistrantActivities();
-        //    return View("Registrants", activity);
-
-        //}
 
         [HttpGet]
         public ActionResult RegistrantSummary(string id)

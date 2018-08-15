@@ -52,7 +52,7 @@
                                     <div class="col-md-4">
                                         @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                         {
-                                            <div class="am-checkbox"  >
+                                            <div class="am-checkbox">
                                                 <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" />
                                                 <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
                                             </div>
@@ -65,15 +65,15 @@
 
                     <div class="form-group">
 
-                         <div class="col-sm-2">
-                             <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editcontact", "leagueactivity", new { id = Model.Uid, cmd = "prev" })')">&laquo; Previous</button>
+                        <div class="col-sm-2">
+                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editcontact", "leagueactivity", new { id = Model.Uid, cmd = "prev" })')">&laquo; Previous</button>
                         </div>
 
                         <div class="col-sm-@saveBtnWidth col-sm-offset-3">
                             <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid })')"><i class="s7-diskette"></i>Save</button>
                         </div>
 
-                        
+
 
                     </div>
 
