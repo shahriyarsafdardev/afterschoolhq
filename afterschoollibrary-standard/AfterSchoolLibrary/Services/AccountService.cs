@@ -1913,7 +1913,7 @@ namespace AfterSchoolLibrary
             return StripeAccount.GetCount(criterias: 
                 new Hashtable()
                 {
-                    { "IsVerified", true },
+                    { "VerificationStatusId", (int)StripeVerificationStatus.Verified },
                     { "AccountId", account.ID.Value }
                 }, 
                 msgs: msgs, 
