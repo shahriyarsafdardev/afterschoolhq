@@ -98,13 +98,15 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Summary(string id)
         {
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, group.ID.Value);
-            // var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(group.AccountId.Value, group.ID.Value);
-            //var registrations = group.GetRegistrations()
-            var registrations = accountActivityGroup.GetRegistrations();
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            var aag = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, league.ID.Value);
+
+            if (!aag.IsPublished)
+                return RedirectToAction("publishwizard1", new { id = league.Uid });
+
+            var registrations = aag.GetRegistrations();
             var actions = SessionAction.LoadByActivityGroupId(
-                group.ID.Value,
+                league.ID.Value,
                 new List<SessionActionType>() {
                     SessionActionType.ActivityGroupCreate,
                     SessionActionType.ActivityGroupPublish,
@@ -115,7 +117,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.Actions = actions;
             ViewBag.Registrations = registrations;
-            return View(group);
+            ViewBag.AccountActivityGroup = aag;
+            return View(league);
         }
 
         public void PeriodViewBag(ActivityGroup group, SystemMessages msgs)
@@ -178,8 +181,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 regperiod.AccountId = SessionVariables.CurrentAccount.ID;
             }
 
-            regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
-            regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
+            regperiod.StartDateTime = $"{opendate} {opentime}".ToDateTime();
+            regperiod.EndDateTime = $"{closedate} {closetime}".ToDateTime();
             regperiod.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
             regperiod.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(regperiod.Save());
@@ -568,13 +571,16 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult UpdateInvitation(string id, InviteStatus inviteStatus)
         {
             var msgs = new SystemMessages();
-
-            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, id.ToInteger(), msgs);
-            msgs.AddRange(accountActivityGroup.UpdateInvitationStatus(inviteStatus, SessionVariables.CurrentAccount.ID.Value));
+            var aag = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, id.ToInteger(), msgs);
+            var league = aag.GetActivityGroup(msgs);
+            msgs.AddRange(aag.UpdateInvitationStatus(inviteStatus, SessionVariables.CurrentAccount.ID.Value));
 
             if (msgs.HasNoErrors())
             {
-               msgs.AddRange(accountActivityGroup.SendInviteStatusUpdateEmail(inviteStatus, SessionVariables.CurrentAccount, SessionVariables.LoggedInUser,msgs));
+                msgs.AddRange(aag.SendInviteStatusUpdateEmail(inviteStatus, SessionVariables.CurrentAccount, SessionVariables.LoggedInUser, msgs));
+
+                if (inviteStatus == InviteStatus.Accepted)
+                    return RedirectToAction("publishwizard1", new { id = league.Uid });
             }
 
             return RedirectToAction("IndexExternal", new { id });
@@ -774,6 +780,165 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.QuestionViewModels = qvms;
 
             return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult PublishWizard1(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            if (aag.FormId.IsEmpty())
+                aag.FormId = SessionVariables.CurrentAccount.GetForms().FirstOrDefault()?.ID;
+            if (aag.ContactName.IsEmpty())
+                aag.ContactName = SessionVariables.LoggedInUser.DisplayName;
+            if (aag.ContactPhone.IsEmpty())
+                aag.ContactPhone = SessionVariables.LoggedInUser.Phone;
+            if (aag.ContactEmail.IsEmpty())
+                aag.ContactEmail = SessionVariables.LoggedInUser.Email;
+
+            msgs.AddRange(aag.Save());
+            
+            ViewBag.AccountActivityGroup = aag;
+            ViewBag.Messages = msgs;
+
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult PublishWizard1(string id, string contactname, string contactphone, string contactemail)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            if (contactname.IsEmpty())
+                msgs.Add("Contact name is required", MessageType.UserError);
+
+            if (contactphone.IsEmpty())
+                msgs.Add("Contact phone is required", MessageType.UserError);
+            else if (!contactphone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                msgs.Add("Please enter a valid phone number", MessageType.UserError);
+
+            if (contactemail.IsEmpty())
+                msgs.Add("Contact email is required", MessageType.UserError);
+            else if (!contactemail.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Please enter a valid email", MessageType.UserError);
+
+            aag.ContactEmail = contactemail;
+            aag.ContactPhone = contactphone;
+            aag.ContactName = contactname;
+            msgs.AddRange(aag.Save());
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("publishwizard2", new { id = league.Uid });
+
+            ViewBag.Messages = msgs;
+            ViewBag.AccountActivityGroup = aag;
+
+            return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult PublishWizard2(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var period = new RegistrationPeriod()
+            {
+                StartDateTime = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow.Date),
+                EndDateTime = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow.Date).AddWeeks(1)
+            };
+
+            ViewBag.Messages = msgs;
+            ViewBag.Period = period;
+            ViewBag.AccountActivityGroup = aag;
+
+            return View(league);
+        }
+
+        [HttpPost]
+        public ActionResult PublishWizard2(string id, string opendate, string opentime, string closedate, string closetime)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var period = aag.GetCurrentOrNextRegistrationPeriod() ?? new RegistrationPeriod()
+            {
+                StartDateTime = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow.Date),
+                EndDateTime = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow.Date).AddWeeks(1)
+            };
+
+            if (opendate.IsEmpty())
+                msgs.Add("Registration Open Date is required", MessageType.UserError);
+            if (opentime.IsEmpty())
+                msgs.Add("Registration Open Time is required", MessageType.UserError);
+            if (closedate.IsEmpty())
+                msgs.Add("Registration Close Date is required", MessageType.UserError);
+            if (closetime.IsEmpty())
+                msgs.Add("Registration Close Time is required", MessageType.UserError);
+
+            if (!$"{opendate} {opentime}".IsDateTime())
+                msgs.Add("Registration Open Date and Time must be a valid date & time", MessageType.UserError);
+            if (!$"{closedate} {closetime}".IsDateTime())
+                msgs.Add("Registration Close Date and Time must be a valid date & time", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        period = new RegistrationPeriod()
+                        {
+                            StartDateTime = $"{opendate} {opentime}".ToDateTime(),
+                            EndDateTime = $"{closedate} {closetime}".ToDateTime(),
+                            LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                            LastModifiedDate = DateTime.UtcNow,
+                            CreateDate = DateTime.UtcNow,
+                            CreatedBy = SessionVariables.LoggedInUser.ID,
+                            AccountActivityGroupId = aag.ID,
+                            AccountId = SessionVariables.CurrentAccount.ID
+                        };
+                        amsgs.AddRange(period.Save(adc));
+
+                        amsgs.AddRange(aag.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value, adc));
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    }
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("publishwizard3", new { id = league.Uid });
+
+            ViewBag.Messages = msgs;
+            ViewBag.Period = period;
+            ViewBag.AccountActivityGroup = aag;
+
+            return View(league);
+        }
+
+        [HttpGet]
+        public ActionResult PublishWizard3(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.AccountActivityGroup = aag;
+
+            return View(league);
+
         }
     }
 }

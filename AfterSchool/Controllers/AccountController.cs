@@ -1038,6 +1038,8 @@ namespace AfterSchool.Controllers
                     {
                         // add standardized questions that the student just now answered back to the main profile
                         // that means no registration id
+                        msgs.Add($"Current Registrant IsEmpty: {SessionVariables.CurrentRegistrant.IsEmpty()}", MessageType.Notice);
+
                         qvms.Where(qvm => qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
                         .ToList()
                         .ForEach(qvm =>
@@ -1049,6 +1051,11 @@ namespace AfterSchool.Controllers
                                 msgs: amsgs,
                                 dc: adc);
                         });
+
+                        msgs.Add($"Current Registrant IsEmpty: {SessionVariables.CurrentRegistrant.IsEmpty()}", MessageType.Notice);
+                        msgs.Add($"participationObject IsEmpty: {participationObject.IsEmpty()}", MessageType.Notice);
+                        msgs.Add($"participationObject.OwnerAccount IsEmpty: {participationObject.OwnerAccount.IsEmpty()}", MessageType.Notice);
+                        msgs.Add($"SessionVariables.LoggedInUser IsEmpty: {SessionVariables.LoggedInUser.IsEmpty()}", MessageType.Notice);
 
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.

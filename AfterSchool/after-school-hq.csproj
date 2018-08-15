@@ -880,6 +880,9 @@
     <Content Include="aws-sessionprovider-sample.config" />
     <Content Include="Areas\Org\Views\Activity\AddRegistration.cshtml" />
     <Content Include="Areas\Org\Views\League\AddRegistration.cshtml" />
+    <Content Include="Areas\Org\Views\League\PublishWizard1.cshtml" />
+    <Content Include="Areas\Org\Views\League\PublishWizard2.cshtml" />
+    <Content Include="Areas\Org\Views\League\PublishWizard3.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1311,6 +1314,7 @@
     <Content Include="Views\Shared\_Teams.cshtml" />
     <Content Include="Views\Account\MakePayment.cshtml" />
     <Content Include="Views\Shared\_DashboardNotfications.cshtml" />
+    <Content Include="Views\Shared\Layouts\_FullScreen.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

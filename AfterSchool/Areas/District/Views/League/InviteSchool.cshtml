@@ -74,7 +74,7 @@
                                     @foreach (var school in schoolsToInvite.Skip((i * schoolsPerColumn)).ToList().Take(schoolsPerColumn))
                                     {
                                         <div class="am-checkbox">
-                                            <input type="checkbox" id="school-@school.ID.Value" name="school-@school.ID" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
+                                            <input type="checkbox" id="school-@school.ID.Value" name="school-@school.ID" class="school-checkbox" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
                                             <label for="school-@school.ID">@school.Name.MaxChars(20, "...")</label>
                                         </div>
                                     }
@@ -112,12 +112,12 @@
     });
 
     function selectAll() {
-        $('input[type="checkbox"]').each(function () {
+        $('.school-checkbox').each(function () {
             $(this).prop('checked', true);
         });
     }
     function clearAll() {
-        $('input[type="checkbox"]').each(function () {
+        $('.school-checkbox').each(function () {
             $(this).prop('checked', false);
         });
     }

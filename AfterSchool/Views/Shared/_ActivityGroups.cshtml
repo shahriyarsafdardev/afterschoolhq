@@ -102,7 +102,12 @@ else
                     <th>
                         Registrations
                     </th>
-                    <th></th>
+                    <th>
+                        @if (isExternalGroupsView)
+                        {
+                            <span>Team Registration Deadline</span>
+                        }
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -113,12 +118,15 @@ else
                         var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
                         var regCount = aag.IsEmpty() ? group.GetRegistrationCount() : aag.GetRegistrationCount();
                         var activityCount = aag.IsEmpty() ? group.GetActivityCount(isArchive, false) : aag.GetActivityCount(isArchive, false);
+                        var period = group.GetCurrentOrNextRegistrationPeriod();
 
                         <tr>
                             <td>
                                 <a href="@Url.Action("summary", controller, new {id = group.Uid})" class="btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>
                             </td>
-                            <td><a href="@Url.Action("summary", controller, new {id = group.Uid})">@group.Name</a></td>
+                            <td>
+                                <a href="@Url.Action("summary", controller, new {id = group.Uid})">@group.Name</a>
+                            </td>
                             
                             <td class="text-center">@activityCount</td>
                             
@@ -152,6 +160,26 @@ else
                                             </button>
                                         }
                                     </div>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    @if (period.IsNotEmpty())
+                                    {
+                                        if (period.IsOpen())
+                                        {
+                                            <span>Teams must be submitted by @period.EndDateTime.ToLongDateTimeString()</span>
+                                        }
+                                        else if (period.WillOpen())
+                                        {
+                                            <span>Team registration will open @period.EndDateTime.ToLongDateTimeString()</span>
+                                        }
+                                        else if (period.IsClosed())
+                                        {
+                                            <span>Team registration closed @period.EndDateTime.ToLongDateTimeString()</span>
+                                        }
+                                    }
                                 </td>
                             }
 

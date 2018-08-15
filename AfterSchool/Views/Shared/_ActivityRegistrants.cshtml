@@ -84,7 +84,7 @@
                             </select>
                         </td>
                         <td>
-                            @if (!participationObject.IsFree && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                            @if (participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
                             {
                                 <button class="btn btn-default btn-sm" 
                                         data-modal="modal-waitinglist" 
