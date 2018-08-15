@@ -1,3 +1,37 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+
+    string homeactive = "", leaguesactive = "", schoolsactive = "", providersactive = "", formactive = "", messagesactive = "", teamactive = "", profileactive = "";
+
+    switch (controller)
+    {
+        case "home":
+            homeactive = "active";
+            break;
+        case "school":
+            schoolsactive = "active";
+            break;
+        case "league":
+            leaguesactive = "active";
+            break;
+        case "provider":
+            providersactive = "active";
+            break;
+        case "form":
+            formactive = "active";
+            break;
+        case "message":
+            messagesactive = "active";
+            break;
+        case "user":
+            teamactive = "active";
+            break;
+        case "profileactive":
+            profileactive = "active";
+            break;
+    }
+}
+
 <div class="am-left-sidebar">
     <div class="content">
         <div class="am-logo hide"></div>
@@ -5,29 +39,29 @@
             <li>
                 <img src="/public/images/footer-icon.png" class="side-menu-logo" />
             </li>
-            <li>
+            <li class="@homeactive">
                 <a href="@Url.Action("index", "home")"><i class="icon s7-graph"></i><span>Dashboard</span></a>
             </li>
-            <li>
+            <li class="@leaguesactive">
                 <a href="@Url.Action("index", "league")"><i class="icon s7-ball"></i><span>Leagues</span></a>
             </li>
-            <li>
+            <li class="@schoolsactive">
                 <a href="@Url.Action("index", "school")"><i class="icon s7-study"></i><span>Schools</span></a>
             </li>
-            <li class="hide">
+            <li class="hide @providersactive">
                 <a href="@Url.Action("index", "provider")"><i class="icon s7-rocket"></i><span>Providers</span></a>
             </li>
-            <li class="hide">
+            <li class="hide @messagesactive">
                 <a href="@Url.Action("index", "message" )"><i class="icon s7-paper-plane"></i><span>Messages</span></a>
             </li>
-            <li class="hide">
+            <li class="hide @formactive">
                 <a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i><span>Forms</span></a>
             </li>
-            <li>
+            <li class="hide @teamactive">
                 <a href="@Url.Action("index", "user" )"><i class="icon s7-users"></i><span>Team</span></a>
             </li>
-            <li>
-            <li><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i><span>Profile</span></a></li>
+            <li class="@profileactive">
+                <a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i><span>Profile</span></a>
             </li>
             <li>
                 <a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i><span>Logout</span></a>

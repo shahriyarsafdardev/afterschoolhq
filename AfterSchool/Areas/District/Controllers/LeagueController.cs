@@ -192,8 +192,8 @@ namespace AfterSchool.Areas.District.Controllers
                 {
                     { "activitygroupid", group.ID.Value}
                 },
-                start,
-                length,
+                null,
+                null,
                 msgs);
 
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
