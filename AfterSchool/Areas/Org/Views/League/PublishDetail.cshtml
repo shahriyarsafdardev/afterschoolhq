@@ -100,7 +100,7 @@
                                 {
                                     <p class="text-warning text-medium">
                                         <i class="s7-next-2"></i>
-                                        Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) is ready to publish
+                                        Your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) is ready to publish. Click the button to the right to publish.
                                     </p>
                                 }
                             }
@@ -150,19 +150,20 @@
                             else
                             {
                                 <table class="table table-striped">
-                                    <tr>
-                                        <td>Organization Home Page</td>
-                                        <td>
-                                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">@SessionVariables.CurrentAccount.HomePageUrl</a>
-                                            <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
-                                        </td>
-                                    </tr>
+                                    
                                     @if (Model.IsPublished || (accountActivityGroup.IsNotEmpty() && accountActivityGroup.IsPublished))
                                     {
+                                        <tr>
+                                            <td>@SessionVariables.CurrentAccount.Name's Activity Home Page</td>
+                                            <td>
+                                                <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank">@SessionVariables.CurrentAccount.HomePageUrl</a>
+                                                <a href="@SessionVariables.CurrentAccount.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
+                                            </td>
+                                        </tr>
                                         if (accountActivityGroup.IsNotEmpty())
                                         {
                                             <tr>
-                                                <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) URL</td>
+                                                <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) Registration URL</td>
                                                 <td>
                                                     <a href="@aagRegistrationURL" target="_blank">@aagRegistrationURL</a>
                                                     <a href="@aagRegistrationURL" target="_blank"><i class="s7-link"></i></a>
@@ -172,7 +173,7 @@
                                         else if (Model.ID.HasValue)
                                         {
                                             <tr>
-                                                <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) URL</td>
+                                                <td>@UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) Registration URL</td>
                                                 <td>
                                                     <a href="@group.HomePageUrl" target="_blank">@group.HomePageUrl</a>
                                                     <a href="@group.HomePageUrl" target="_blank"><i class="s7-link"></i></a>
