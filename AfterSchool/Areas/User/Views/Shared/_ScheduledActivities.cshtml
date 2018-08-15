@@ -4,88 +4,86 @@
     var title = ViewData["title"];
 }
 
-@if (Model.Any())
+
+@if (Model.Any(x => x.AssignmentTypeId.In(new RegistrationAssignmentType[] { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment })))
 {
-    if (Model.Where(x => x.NumberOfSeats > 0).Any())
-    {
-        <div class="panel panel-alt4">
-            <div class="panel-heading">
-                @title 
-            </div>
-            <div class="panel-body">
-                @foreach (var ra in Model.Where(x => x.NumberOfSeats > 0))
-                {
-                    var po = ra.GetParticipationObject();
-                    var registration = ra.GetRegistration();
+    <div class="panel panel-alt4">
+        <div class="panel-heading">
+            @title 
+        </div>
+        <div class="panel-body">
+            @foreach (var ra in Model.Where(x => x.NumberOfSeats > 0))
+            {
+                var po = ra.GetParticipationObject();
+                var registration = ra.GetRegistration();
 
-                    <div class="col-md-12">
-                        <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
                         
-                            @if (po.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0)
-                            {
-                                <p class="text-medium-small pull-right">
-                                    <a href="@registration.GetPaymentUrl">Pay Now &raquo;</a>
-                                </p>
-                            }
+                        @if (po.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0)
+                        {
+                            <p class="text-medium-small pull-right">
+                                <a href="@registration.GetPaymentUrl">Pay Now &raquo;</a>
+                            </p>
+                        }
 
-                            <p class="text-medium">@po.Name</p>
+                        <p class="text-medium">@po.Name</p>
+                    </div>
+                </div>
+
+                Html.RenderPartial("~/Views/Shared/_ActivityScheduleHtml.cshtml", po.Schedule);
+
+                if (po.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0)
+                {
+                    <div class="col-md-12 padding-v-20">
+                        <div class="row">
+                            <a href="@registration.GetPaymentUrl" class="btn btn-primary center-block btn-lg">
+                                Pay Balance Online &raquo;
+                            </a>
                         </div>
                     </div>
-
-                    Html.RenderPartial("~/Views/Shared/_ActivityScheduleHtml.cshtml", po.Schedule);
-
-                    if (po.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0)
-                    {
-                        <div class="col-md-12 padding-v-20">
-                            <div class="row">
-                                <a href="@registration.GetPaymentUrl" class="btn btn-primary center-block btn-lg">
-                                    Pay Balance Online &raquo;
-                                </a>
-                            </div>
-                        </div>
-                    }
-
-                    <hr />
                 }
-            </div>
-        </div>
-    }
-    if (Model.Where(x => x.NumberOfWaitingListSeats > 0).Any())
-    {
-        <div class="panel panel-alt4">
-            <div class="panel-heading">
-                @registrant.FirstName.ToProperCase() is on the waiting list for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
-            </div>
-            <div class="panel-body">
-                @foreach (var ra in Model.Where(x => x.NumberOfWaitingListSeats > 0))
-                {
-                    var po = ra.GetParticipationObject();
 
-                    <span>
-                        @po.Name - 
-                        @po.Schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")
-                    </span><br />
-                }
-            </div>
+                <hr />
+            }
         </div>
-    }
-    if (Model.Where(x => x.NumberOfApplicationSeats > 0).Any())
-    {
-        <div class="panel panel-alt4">
-            <div class="panel-heading">
-                @registrant.FirstName.ToProperCase() applied for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
-            </div>
-            <div class="panel-body">
-                @foreach (var ra in Model.Where(x => x.NumberOfApplicationSeats > 0))
-                {
-                    var po = ra.GetParticipationObject();
+    </div>
+}
+@if (Model.Any(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList))
+{
+    <div class="panel panel-alt4">
+        <div class="panel-heading">
+            @registrant.FirstName.ToProperCase() is on the waiting list for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
+        </div>
+        <div class="panel-body">
+            @foreach (var ra in Model.Where(x => x.NumberOfWaitingListSeats > 0))
+            {
+                var po = ra.GetParticipationObject();
 
-                    <span>
-                        @po.Name - 
-                        @po.Schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")
-                    </span><br />
-                }
-            </div>
+                <span>
+                    @po.Name - 
+                    @po.Schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")
+                </span><br />
+            }
         </div>
-    }
+    </div>
+}
+@if (Model.Any(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied))
+{
+    <div class="panel panel-alt4">
+        <div class="panel-heading">
+            @registrant.FirstName.ToProperCase() applied for the following @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
+        </div>
+        <div class="panel-body">
+            @foreach (var ra in Model.Where(x => x.NumberOfApplicationSeats > 0))
+            {
+                var po = ra.GetParticipationObject();
+
+                <span>
+                    @po.Name - 
+                    @po.Schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ")
+                </span><br />
+            }
+        </div>
+    </div>
 }
