@@ -134,6 +134,7 @@ namespace AfterSchool.Models
                 return RedirectToAction("createaccount", "signup");
             }
             else if (SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
+            {
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
@@ -159,6 +160,7 @@ namespace AfterSchool.Models
 
                         return RedirectToAction("index", "home", new { area = "org" });
                 }
+            }
 
             return RedirectToAction("index", "login", new { area = "" });
         }
