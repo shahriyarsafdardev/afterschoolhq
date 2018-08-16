@@ -410,8 +410,8 @@ namespace AfterSchool.Areas.District.Controllers
             var schools = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School, msgs);
             var accountActivityGroups = AccountActivityGroup.LoadByActivityGroupId(activityGroup.ID.Value, msgs);
             var accountIds = accountActivityGroups.Select(a => a.AccountId.Value);
-
-            List<Account> notInivitedSchools = schools.Where(s => !accountIds.Contains(s.ID.Value)).ToList();
+            
+            var notInivitedSchools = schools.Where(s => s.ID.Value.NotIn(accountIds)).ToList();
 
             var invitedSchools = new List<Account>();
 

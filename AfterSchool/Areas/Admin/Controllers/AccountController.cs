@@ -19,7 +19,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
         }
 
-        private List<Account> IndexViewBag(string pn, string rpp, SystemMessages msgs = null)
+        private List<Account> IndexViewBag(string pn, string rpp, string search, AccountType type, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var pageNumber = 1;
@@ -41,8 +41,11 @@ namespace AfterSchool.Areas.Admin.Controllers
                 AccountType.SchoolDistrict
             };
 
-            var count = Account.GetCount(accountTypes, msgs);
-            var accounts = Account.LoadByAccountTypeIds(accountTypes, start, length, msgs);
+            if (type != AccountType.NotSet)
+                accountTypes = type.AsList();
+
+            var count = Account.GetSearchCount(search, accountTypes, msgs);
+            var accounts = Account.Search(search, accountTypes, start, length, msgs);
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = msgs;
@@ -59,13 +62,13 @@ namespace AfterSchool.Areas.Admin.Controllers
 
         // GET: Account
         [HttpGet]
-        public ActionResult Index(string pn, string rpp)
+        public ActionResult Index(string pn, string rpp, string search, AccountType type = AccountType.NotSet)
         {
-            return View(IndexViewBag(pn, rpp));
+            return View(IndexViewBag(pn, rpp, search, type));
         }
         
         [HttpGet]
-        public ActionResult ResendInvite(string id, string pn, string rpp)
+        public ActionResult ResendInvite(string id, string pn, string rpp, string search, AccountType type = AccountType.NotSet)
         {
             var msgs = new SystemMessages();
             var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
@@ -77,7 +80,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                     msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.LoggedInUser));
             }
 
-            return View("index", IndexViewBag(pn, rpp, msgs));
+            return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
         [HttpGet]

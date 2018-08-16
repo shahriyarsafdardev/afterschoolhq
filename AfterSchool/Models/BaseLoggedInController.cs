@@ -74,7 +74,7 @@ namespace AfterSchool.Models
 
             if (AllowedAccountTypes.IsNotEmpty() &&
                     AllowedAccountTypes.Any() &&
-                    !AllowedAccountTypes.Contains(SessionVariables.CurrentAccount.AccountTypeId))
+                    SessionVariables.CurrentAccount.AccountTypeId.NotIn(AllowedAccountTypes))
                 return false;
 
             return true;
