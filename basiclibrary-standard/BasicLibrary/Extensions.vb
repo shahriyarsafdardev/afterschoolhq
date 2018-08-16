@@ -65,9 +65,9 @@ Public Module Extensions
     End Function
 
     <Extension>
-    Public Function AsList(ByVal aInt As Integer) As List(Of Integer)
-        Dim x As New List(Of Integer)
-        x.Add(aInt)
+    Public Function AsList(Of T)(ByVal aObj As T) As List(Of T)
+        Dim x As New List(Of T)
+        x.Add(aObj)
         Return x
     End Function
 

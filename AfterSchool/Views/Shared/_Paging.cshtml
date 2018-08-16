@@ -7,18 +7,18 @@
     var controller = (string)ViewData["controller"];
     var queryString = ViewData["querystring"];
 
-    var pageUrl = Url.Action(action, controller, new { id = id, rpp = Request["rpp"] });
+    var pageUrl = $"{Url.Action(action, controller, new { id = id, rpp = Request["rpp"] })}?{queryString}";
 
     var previousLink = "#";
     var nextLink = "#";
 
     if (Model.PageNumber > 1)
     {
-        previousLink = Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber - 1 });
+        previousLink = $"{Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber - 1 })}&{queryString}";
     }
     if (Model.PageNumber < Model.TotalPages)
     {
-        nextLink = Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber + 1 });
+        nextLink = $"{Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber + 1 })}&{queryString}";
     }
 
     var iStart = 2;
@@ -68,7 +68,7 @@
                     <div class="btn-group pull-right">
                         <a class="btn btn-default" href="@previousLink">Previous</a>
                     
-                        <a class="btn @("1" == Request["pn"] ? "btn-primary" : "btn-default")" href="@string.Format(fullUrl, 1)">1</a>  
+                        <a class="btn @("1" == Request["pn"] || Request["pn"].IsBlank() ? "btn-primary" : "btn-default")" href="@string.Format(fullUrl, 1)">1</a>  
                                   
                         @if (Model.TotalPages > 2)
                         {
