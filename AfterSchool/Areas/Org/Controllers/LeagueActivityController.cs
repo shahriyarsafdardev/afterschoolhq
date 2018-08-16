@@ -634,6 +634,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditSchedule";
             ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
+            ViewBag.ActivityType = (int)activity.ActivityTypeId;
 
             ActivitySchedule schedule = null;
 
