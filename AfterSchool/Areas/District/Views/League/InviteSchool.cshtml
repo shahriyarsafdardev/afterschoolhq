@@ -74,7 +74,12 @@
                                     @foreach (var school in schoolsToInvite.Skip((i * schoolsPerColumn)).ToList().Take(schoolsPerColumn))
                                     {
                                         <div class="am-checkbox">
-                                            <input type="checkbox" id="school-@school.ID.Value" name="school-@school.ID" class="school-checkbox" value="1" @(currentSchools.Contains(school) ? " checked=\"checked\" " : "") />
+                                            <input type="checkbox" 
+                                                   id="school-@school.ID.Value" 
+                                                   name="school-@school.ID" 
+                                                   class="school-checkbox" 
+                                                   value="1" 
+                                                   @(school.In(currentSchools) ? " checked=\"checked\" " : "") />
                                             <label for="school-@school.ID">@school.Name.MaxChars(20, "...")</label>
                                         </div>
                                     }

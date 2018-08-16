@@ -21,6 +21,26 @@
 
         <div class="panel-body">
 
+            <div class="row padding-v-10">
+                <div class="col-md-4">
+                    <input type="text" id="search" name="search" value="@Request["search"]" class="form-control" placeholder="Enter Search Term..." />
+                </div>
+                <div class="col-md-4">
+                    <select name="type" id="type" class="form-control">
+                        <option value="">All Account Types</option>
+                        @foreach(var item in Enum.GetValues(typeof(AccountType)).Cast<AccountType>().Where(accountType => accountType.NotIn(new AccountType[] { AccountType.AfterSchool, AccountType.NotSet })))
+                        {
+                            <option value="@((int)item)" @(Request["type"] == ((int)item).ToString() ? "selected=\"selected\"" : "")>
+                                @item.ToString().SplitByUpperCase()
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table class="table table-striped">
                     <tr>
@@ -45,7 +65,7 @@
                                 </td>
                                 <td>@account.Name</td>
                                 <td>@account.AccountNumber</td>
-                                <td>@account.AccountTypeId.ToString()</td>
+                                <td>@account.AccountTypeId.ToString().SplitByUpperCase()</td>
                                 <td>@account.IsActive.ToYesNo()</td>
                                 <td>@account.CreateDate.Value.ToLongDateString()</td>
                                 <td>
@@ -74,7 +94,6 @@
                 </table>
             </div>
 
-
             @{Html.RenderPartial(
                       "~/Views/Shared/_Paging.cshtml",
                       paging,
@@ -82,7 +101,8 @@
                       {
                         { "id", "" },
                         { "action", "index" },
-                        { "controller", "account" }
+                        { "controller", "account" },
+                        { "querystring", $"search={Request["search"]}&type={Request["type"]}" }
                       }
                   );
             }
@@ -90,4 +110,20 @@
     </div>
 </div>
 
+<script>
+    function doSearch() {
+        location.href = `@Url.Action("index", "account")?search=${$('#search').val()}&type=${$('#type').val()}`;
+    }
 
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#type').change(function () {
+            doSearch();
+        });
+
+        $('#search').keypress(function (e) {
+            if (e.keyCode == 13 || e.keyCode == 10) {
+                doSearch();
+            }
+        });
+    });
+</script>

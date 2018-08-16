@@ -1351,7 +1351,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     msgs.Add("Please upload a file", MessageType.UserError);
                 }
-                else if (!new string[] { ".xls", ".csv", ".xlsx" }.Contains(Path.GetExtension(importfile.FileName)))
+                else if (Path.GetExtension(importfile.FileName).NotIn(new string[] { ".xls", ".csv", ".xlsx" }))
                 {
                     msgs.Add("Please upload a valid file", MessageType.UserError);
                 }
@@ -1392,7 +1392,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 var header = headers[i];
                                 var field = reader.GetField<string>(i);
-                                if (questions.Select(x => x.QuestionDataTypeId.ToString().ToLower()).Contains(header.ToLower()) && field.IsNotBlank())
+                                if (header.ToLower().In(questions.Select(x => x.QuestionDataTypeId.ToString().ToLower())) && field.IsNotBlank())
                                 {
                                     row.Add(field);
                                     if (!headersWithData.Contains(header))
@@ -1465,8 +1465,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     if (field.IsNotBlank())
                                     {
                                         var options = question.Options.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
-
-                                        if (!options.Contains(field))
+                                        
+                                        if (field.NotIn(options))
                                         {
                                             validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
                                         }
@@ -1483,7 +1483,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                         foreach (var fieldvalue in fieldvalues)
                                         {
-                                            if (!options.Contains(fieldvalue))
+                                            if (fieldvalue.NotIn(options))
                                             {
                                                 validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
                                             }
