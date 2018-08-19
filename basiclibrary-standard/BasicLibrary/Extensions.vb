@@ -46,7 +46,7 @@ Public Module Extensions
 
     <Extension>
     Public Function IsSameAs(ByVal aString As String, ByVal bString As String) As Boolean
-        If aString.ToLower.Trim = bString.ToLower.Trim Then
+        If (aString.IsEmpty() And bString.IsEmpty()) OrElse (aString.ToLower.Trim = bString.ToLower.Trim) Then
             Return True
         End If
         Return False

@@ -451,7 +451,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                            if (address != "" && accountIdFromCSV.Length == 0)
                            {
-                               LocationService.CreateNew(
+                               LocationService.CreateNewWithValidation(
                                schoolName,
                                address,
                                address2,
@@ -461,6 +461,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                country,
                                locationType,
                                locationHostAccount?.ID,
+                               null,
                                SessionVariables.LoggedInUser,
                                amsgs,
                                adc);

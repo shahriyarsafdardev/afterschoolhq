@@ -4,6 +4,8 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
 using System.Linq;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -41,24 +43,163 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(location.ID);
         }
 
-        [Fact]
-        public void DoesLocationAlreadyExistTest()
+        [Theory]
+        [InlineData("School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US")]
+        public void CleanUpDuplicateLocationsTest(string name, string address1, string address2, string city, string state, string postalCode, string country)
         {
-            var locationName = "School 70";
-            var address1 = "1234 N Whatever Street";
-            var address2 = "Suite 1900";
-            var city = "Indianapolis";
-            var state = "IN";
-            var postalCode = "12345";
+            for (var i = 0; i < 4; i++)
+            {
+                var location = LocationService.CreateNew(
+                  locationName: name,
+                  address1: address1,
+                  address2: address2,
+                  city: city,
+                  state: state,
+                  postalCode: postalCode,
+                  country: country,
+                  locationType: LocationType.NotSet,
+                  hostAccountId: LocationOwnerAccount.ID.Value,
+                  loggedInUser: LoggedInUser,
+                  msgs: msgs,
+                  dc: dc);
+            }
 
+            LocationService.CleanUpDuplicateLocations(msgs, dc);
+
+            Assert.Single(Location.Load(msgs: msgs, dc: dc));
+        }
+
+        [Theory]
+        [InlineData("School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US")]
+        public void CleanUpDuplicateLocationsRegistrantTest(string name, string address1, string address2, string city, string state, string postalCode, string country)
+        {
+            var locations = new List<Location>();
+
+            for (var i = 0; i < 4; i++)
+            {
+                var location = LocationService.CreateNew(
+                  locationName: name,
+                  address1: address1,
+                  address2: address2,
+                  city: city,
+                  state: state,
+                  postalCode: postalCode,
+                  country: country,
+                  locationType: LocationType.NotSet,
+                  hostAccountId: LocationOwnerAccount.ID.Value,
+                  loggedInUser: LoggedInUser,
+                  msgs: msgs,
+                  dc: dc);
+
+                var registrant = RegistrantFactory.Create(msgs, dc);
+                registrant.SchoolLocationId = location.ID.Value;
+                msgs.AddRange(registrant.Save(dc));
+
+                locations.Add(location);
+            }
+
+            LocationService.CleanUpDuplicateLocations(msgs, dc);
+
+            var registrantsAfterCleanUp = Registrant.Load(criterias: new Hashtable() { { "SchoolLocationId", locations.First().ID.Value } }, msgs: msgs, dc: dc);
+
+            Assert.Equal(4, registrantsAfterCleanUp.Count);
+        }
+
+        [Theory]
+        [InlineData("School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US")]
+        public void CleanUpDuplicateLocationsAccountTest(string name, string address1, string address2, string city, string state, string postalCode, string country)
+        {
+            var locations = new List<Location>();
+
+            for (var i = 0; i < 4; i++)
+            {
+                var newUser = WebUserFactory.Create(msgs, dc);
+                var newAccount = AccountFactory.Create(newUser, msgs, dc);
+
+                var location = LocationService.CreateNew(
+                  locationName: name,
+                  address1: address1,
+                  address2: address2,
+                  city: city,
+                  state: state,
+                  postalCode: postalCode,
+                  country: country,
+                  locationType: LocationType.NotSet,
+                  hostAccountId: LocationOwnerAccount.ID.Value,
+                  loggedInUser: LoggedInUser,
+                  msgs: msgs,
+                  dc: dc);
+                
+                msgs.AddRange(newAccount.SetDefaultLocation(location.ID.Value, LoggedInUser.ID.Value, dc));
+
+                locations.Add(location);
+            }
+
+            LocationService.CleanUpDuplicateLocations(msgs, dc);
+
+            var accountsAfterCleanUp = Account.Load(criterias: new Hashtable() { { "DefaultLocationId", locations.First().ID.Value } }, msgs: msgs, dc: dc);
+
+            Assert.Equal(4, accountsAfterCleanUp.Count);
+        }
+
+        [Theory]
+        [InlineData("School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US")]
+        public void CleanUpDuplicateLocationsActivityTest(string name, string address1, string address2, string city, string state, string postalCode, string country)
+        {
+            var locations = new List<Location>();
+
+            for (var i = 0; i < 4; i++)
+            {
+                var newUser = WebUserFactory.Create(msgs, dc);
+                var newOwnerAccount = AccountFactory.Create(newUser, msgs, dc);
+
+                newOwnerAccount.Name = name;
+                msgs.AddRange(newOwnerAccount.Save(dc));
+
+                var location = LocationService.CreateNew(
+                  locationName: name,
+                  address1: address1,
+                  address2: address2,
+                  city: city,
+                  state: state,
+                  postalCode: postalCode,
+                  country: country,
+                  locationType: LocationType.NotSet,
+                  hostAccountId: LocationOwnerAccount.ID.Value,
+                  loggedInUser: LoggedInUser,
+                  msgs: msgs,
+                  dc: dc);
+
+                var activity = ActivityFactory.Create(newOwnerAccount, msgs, dc);
+                activity.LocationId = location.ID;
+                msgs.AddRange(activity.Save(dc));
+
+                locations.Add(location);
+            }
+
+            LocationService.CleanUpDuplicateLocations(msgs, dc);
+
+            var activitiesAfterCleanUp = Activity.Load(criterias: new Hashtable() { { "LocationId", locations.First().ID.Value } }, msgs: msgs, dc: dc);
+
+            Assert.Equal(4, activitiesAfterCleanUp.Count);
+        }
+
+        [Theory]
+        [InlineData("School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US", "School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US", true)]
+        [InlineData("School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US", "School 70", "1234 N Whatever Street", " Suite 1900 ", "Indianapolis", "IN", "12345", "US", true)]
+        [InlineData("School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US", "School 70", "1234 N Whatever Street", " Suite 1900 ", "Indianapolis", "IN", "12345", "USA", false)]
+        [InlineData("School 70", "1234 N Whatever Street", null, "Indianapolis", "IN", "12345", "US", "School 70", "1234 N Whatever Street", "", "Indianapolis", "IN", "12345", "USA", false)]
+        [InlineData("School 70", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US", "School 700", "1234 N Whatever Street", "Suite 1900", "Indianapolis", "IN", "12345", "US", false)]
+        public void DoesLocationAlreadyExistTest(string name, string address1, string address2, string city, string state, string postalCode, string country, string otherName, string otherAddress1, string otherAddress2, string otherCity, string otherState, string otherPostalCode, string otherCountry, bool expectedResult)
+        {
             var location = LocationService.CreateNew(
-                locationName: locationName,
+                locationName: name,
                 address1: address1,
                 address2: address2,
                 city: city,
                 state: state,
                 postalCode: postalCode,
-                country: "US",
+                country: country,
                 locationType: LocationType.NotSet,
                 hostAccountId: LocationOwnerAccount.ID.Value,
                 loggedInUser: LoggedInUser,
@@ -67,18 +208,18 @@ namespace AfterSchoolLibraryTests.Tests
                 );
 
             var doesAlreadyExist = LocationService.DoesLocationAlreadyExist(
-                locationName: locationName,
-                address1: address1,
-                address2: address2,
-                city: city,
-                state: state,
-                postalCode: postalCode,
-                country: "US",
+                locationName: otherName,
+                address1: otherAddress1,
+                address2: otherAddress2,
+                city: otherCity,
+                state: otherState,
+                postalCode: otherPostalCode,
+                country: otherCountry,
                 msgs: msgs,
                 dc: dc
                 );
 
-            Assert.True(doesAlreadyExist);
+            Assert.Equal(expectedResult, doesAlreadyExist);
         }
 
         [Fact]
