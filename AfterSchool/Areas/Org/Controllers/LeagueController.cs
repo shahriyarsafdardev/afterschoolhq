@@ -234,7 +234,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 LastModifiedBy = SessionVariables.LoggedInUser.ID,
                 AccountActivityGroupId = accountActivityGroup?.ID,
                 ActivityGroupId = activityGroup.ID,
-                AccountId = SessionVariables.CurrentAccount.ID,                
+                AccountId = SessionVariables.CurrentAccount.ID,   
+                ActivityTypeId = ActivityType.Team,
             };
             msgs.AddRange(activity.Save());
 
