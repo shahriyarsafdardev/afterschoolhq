@@ -639,7 +639,7 @@ joinproperty: Registrant.Uid, Guid, UniqueIdentifier
 [begin]
 type: Class
 name: ActivityPayment
-description: keeps track of payments for an activity from a registrant/student
+description: keeps track of payments for an activity from a registrant/student - can have negative numbers for refunds
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
 property: ActivityId, int?, Int
@@ -648,12 +648,14 @@ property: Uid, Guid, UniqueIdentifier, required
 property: Amount, decimal?, Money
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
+property: TransactionId, int?, Int
 loadmethod: ActivityId, List<>
 loadmethod: AccountId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: Uid
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|RegistrantId, List<>, LoadByParticipationObjectByRegistrant
+loadmethod: TransactionId, List<>
 [end]
 
 [begin]
@@ -1323,9 +1325,14 @@ property: Uid, Guid, UniqueIdentifier
 property: PurchaseId, int?, Int
 property: PlatformPercentFee, decimal?, Decimal "10,2"
 property: PlatformFlatFee, decimal?, Decimal "10,2"
+property: TransactionTypeId, TransactionType, Int, required
+property: StripeChargeOrRefundId, string, NVarChar "50"
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid
+loadmethod: BillerAccountId|TransactionTypeId, List<>
+loadmethod: PayerAccountId|TransactionTypeId, List<>
+loadmethod: StripeChargeOrRefundId
 [end]
 
 [begin]
@@ -1581,7 +1588,7 @@ values: NotSet, Activity, Team
 [begin]
 type: Enum
 name: TransactionType
-values: NotSet, Credit, Debit
+values: NotSet, Charge, Refund
 [end]
 
 [begin]

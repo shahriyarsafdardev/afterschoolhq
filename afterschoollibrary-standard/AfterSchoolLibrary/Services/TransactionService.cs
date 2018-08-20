@@ -11,7 +11,7 @@ namespace AfterSchoolLibrary.Services
 {
     public class TransactionService
     {
-        public static Transaction CreateNew(Account fromAccount, Account toAccount, CheckoutObject checkoutObject, int? purchaseId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account fromAccount, Account toAccount, CheckoutObject checkoutObject, int? purchaseId, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -28,7 +28,9 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 PlatformFlatFee = toAccount.GetPlatformFlatFee(msgs, dc),
-                PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc)
+                PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc),
+                StripeChargeOrRefundId = stripeChargeOrRefundId,
+                TransactionTypeId = transactionType
             };
             msgs.AddRange(transaction.Save(dc));
 
