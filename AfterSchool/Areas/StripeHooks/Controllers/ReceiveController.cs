@@ -172,7 +172,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                             var payment = registrantSubscription.AddPayment(transaction, totalAmount, null, amsgs, adc);
 
                             // cancel stripe subscription at end of term
-                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && registrantSubscription.GetPaymentCount(amsgs, adc) == plan.TotalPeriods.Value)
+                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && registrantSubscription.GetPaymentCount(amsgs, adc) >= plan.TotalPeriods.Value)
                                 amsgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, planOwnerAccount.StripeUserId));
                         },
                         onSuccess: (SystemMessages smsgs) =>

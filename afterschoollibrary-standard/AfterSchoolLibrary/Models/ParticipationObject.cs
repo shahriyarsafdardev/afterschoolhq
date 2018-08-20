@@ -100,8 +100,8 @@ namespace AfterSchoolLibrary
             Form = activity.GetActiveActivityForm(msgs, dc)?.ToForm();
             OwnerAccount = activity.GetAccount(msgs, dc);
 
-            PaymentPlans = activity.GetPaymentPlans(msgs, dc);
-            SubscriptionPlans = activity.GetSubscriptionPlans(msgs, dc);
+            PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
+            SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
             IsFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 

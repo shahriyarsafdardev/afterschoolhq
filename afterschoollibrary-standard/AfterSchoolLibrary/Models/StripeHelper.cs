@@ -852,7 +852,7 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                GetSubscriptionService().Update(subscriptionId, options, requestOptions);
+                var subscription = GetSubscriptionService().Update(subscriptionId, options, requestOptions);
             }
             catch (StripeException ex)
             {

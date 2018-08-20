@@ -65,6 +65,7 @@ namespace AfterSchoolLibrary.Services
                 Amount = amount,
                 RegistrantId = registrantSubscriptionPlan.RegistrantId,
                 AccountId = plan.PlanOwnerAccountId,
+                TransactionId = transaction.ID,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
