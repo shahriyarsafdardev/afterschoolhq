@@ -19,13 +19,22 @@
 
                         @Html.Raw(UI.RenderMessagesToHtml(msgs))
 
-                        <form action="@Url.Action("new", "signup", new { id = ViewBag.Uid, a = ViewBag.AccountUid })" parsley-validate="" novalidate="" method="post" class="form-horizontal">
+                        <form action="@Url.Action("new", "signup", new { id = ViewBag.Uid, a = ViewBag.AccountUid })" parsley-validate="" novalidate="" method="post" class="form-horizontal" id="sign-up-form">
                             @{ Html.RenderPartial("~/Views/Shared/Login/_SignUpForm.cshtml", Model); }
                         </form>
                     </div>
                 </div>
-                <div class="text-center out-links"><a href="#">© @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+                <div class="text-center out-links"><a href="/">© @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#sign-up-form').submit(function () {
+            $('button[type="submit"]').html('Creating Account...');
+            $('button[type="submit"]').prop('disabled', true);
+        });
+    });
+</script>
