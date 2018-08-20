@@ -43,14 +43,20 @@
                                 <label for="paymentoption-0">Pay @participationObject.Cost.ToCurrency() Today</label>                                
                             </div>
 
-                            @foreach (var plan in participationObject.PaymentPlans.Where(plan => plan.IsActive))
+                            @foreach (var plan in participationObject.PaymentPlans)
                             {
                                 <div class="am-radio">
                                     <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
                                     <label for="paymentoption-@plan.ID">
-                                        Pay @plan.CostPerPeriod.ToCurrency() Today and
-                                        @(plan.TotalPeriods - 1) more payments of @plan.CostPerPeriod.ToCurrency()
-                                        each @plan.BillingPeriodTypeId.ToString().ToLower()
+                                        Pay @plan.CostPerPeriod.ToCurrency() Today
+                                        @if (plan.TotalPeriods > 1)
+                                        {
+                                            <span>
+                                                and
+                                                @(plan.TotalPeriods - 1) more payments of @plan.CostPerPeriod.ToCurrency()
+                                                each @plan.BillingPeriodTypeId.ToString().ToLower()
+                                            </span>
+                                        }
                                     </label>
                                     <span id="payment-plan-cost-@plan.ID" class="hide">@plan.CostPerPeriod</span>
                                 </div>
@@ -265,7 +271,7 @@
     }
 
     function updatePaymentOptionCost(paymentPlanId) {
-        let regTotalToday = parseFloat($('#payment-plan-cost' + paymentPlanId).html());
+        let regTotalToday = parseFloat($('#payment-plan-cost-' + paymentPlanId).html());
         
         $('#registration-fee-row').addClass('hide');
         $('.paymentplan-fee-row').addClass('hide');

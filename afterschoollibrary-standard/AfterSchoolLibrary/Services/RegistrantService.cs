@@ -145,6 +145,8 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
+            Stripe.StripeCharge stripeCharge = null;
+
             // process registration fee if one exists and it has a subscription
             if (!checkoutObject.ParticipationObject.IsFree)
             {
@@ -152,9 +154,9 @@ namespace AfterSchoolLibrary.Services
                 if (checkoutObject.StripeToken.IsNotBlank())
                     checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
 
-                // create chard for card
+                // create charge for card
                 if (msgs.HasNoErrors())
-                    fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
+                    stripeCharge = fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
             }
 
             if (msgs.HasErrors())
@@ -167,7 +169,7 @@ namespace AfterSchoolLibrary.Services
             // need to create an activity payment if there's a registration fee
             if (!checkoutObject.ParticipationObject.IsFree)
             {
-                fromAccount.AddTransaction(toAccount, purchase, checkoutObject, loggedInUser, msgs, dc);
+                fromAccount.AddTransaction(toAccount, purchase, checkoutObject, TransactionType.Charge, stripeCharge?.Id, loggedInUser, msgs, dc);
 
                 if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
                 {

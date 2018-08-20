@@ -39,10 +39,13 @@
             <div class="panel">
                 <div class="heading panel-h3 text-center">
                     <div class="padding-30">
-                        @registrant.DisplayName - @registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
+                        @registrant.DisplayName
+                        <p class="text-center text-small padding-v-10 text-muted">
+                            @registrant.GetAnswer(QuestionDataType.RegistrantGrade).Text Grade
+                        </p>
                     </div>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body">                    
                     <p>
                         <a href="@Url.Action("setstudent", "account", new { id = registrant.Uid })"
                            class="btn btn-register btn-lg"
@@ -58,7 +61,12 @@
     <div class="col-sm-12 col-md-6 col-lg-4">
         <div class="panel panel-full-dark">
             <div class="heading panel-h3 text-center">
-                <div class="padding-30">New Child</div>
+                <div class="padding-30">
+                    New Child
+                    <p class="text-center text-small padding-v-10 text-muted">
+                        &nbsp;
+                    </p>
+                </div>
             </div>
             <div class="panel-body">
                 <p><a href="@Url.Action("addstudent", "account")" class="btn btn-register btn-lg">Add Child</a></p>

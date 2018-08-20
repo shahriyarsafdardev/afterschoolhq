@@ -425,7 +425,7 @@ namespace AfterSchoolLibrary
         public SubscriptionPlan GetSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc)
-                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.Subscription && plan.IsActive)
                 .FirstOrDefault();
         }
 
@@ -435,7 +435,8 @@ namespace AfterSchoolLibrary
                 new Hashtable() {
                     { "ParticipationObjectId", this.ID.Value },
                     { "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity },
-                    { "PlanTypeId", (int)SubscriptionPlanType.Subscription }
+                    { "PlanTypeId", (int)SubscriptionPlanType.Subscription },
+                    { "IsActive", true }
                 }, 
                 msgs, 
                 dc) > 0;
@@ -443,9 +444,8 @@ namespace AfterSchoolLibrary
 
         public SubscriptionPlan GetPaymentPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // fdasfsd
             return SubscriptionPlan.LoadActiveByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc)
-                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.IsActive)
                 .FirstOrDefault();
         }
 
@@ -455,7 +455,8 @@ namespace AfterSchoolLibrary
                new Hashtable() {
                     { "ParticipationObjectId", this.ID.Value },
                     { "ParticipationObjectTypeId", (int)ParticipationObjectType.Activity },
-                    { "PlanTypeId", (int)SubscriptionPlanType.PaymentPlan }
+                    { "PlanTypeId", (int)SubscriptionPlanType.PaymentPlan },
+                    { "IsActive", true }
                },
                msgs,
                dc) > 0;
