@@ -480,6 +480,27 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
+        public ActionResult ManageStudents(string id)
+        {
+            var activity = Activity.LoadByUid(id.ToGuid());
+            LoadEditStudentsViewBag(activity);
+
+            return View(activity);
+        }
+
+        [HttpPost]
+        public ActionResult ManageStudents(string id, string cmd)
+        {
+            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = ManageStudentsHelper(activity);
+
+            LoadEditStudentsViewBag(activity);
+            ViewBag.Messages = msgs;
+
+            return View(activity);
+        }
+
+        [HttpGet]
         public ActionResult EditStudents(string id)
         {
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -523,8 +544,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var updatedRegistrants = new List<Registrant>();
             var activityGroup = activity.GetActivityGroup();
             var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
-            var activities = activityGroup.GetActivities();
-            activities.Remove(activity);
+           // var activities = activityGroup.GetActivities();
+            var activities = accountActivityGroup.IsEmpty() ? activityGroup.GetActivities() : accountActivityGroup.GetActivities();
+            activities = activities.Where(a => a.ID.Value != activity.ID.Value).ToList();
             var registrants = LoadEditStudentsViewBag(activity);
 
 
@@ -536,12 +558,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
 
-                        if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
+                        if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsNotEmpty())
                         {
                             //check if students is registered for another team on the league
                             foreach (var otherTeam in activities)
                             {
-                                if (registrant.IsRegisteredFor(otherTeam.ToParticipationObject(), amsgs, adc))
+                                if (RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsNotEmpty())
                                 {
                                     var otherRegAct = RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
                                     var otherRegistration = otherRegAct.GetRegistration(adc);
@@ -549,6 +571,10 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
 
                             }
+                        }
+
+                        if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
+                        {
 
                             //check if the student is already registered for this team
                             if (RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsEmpty())

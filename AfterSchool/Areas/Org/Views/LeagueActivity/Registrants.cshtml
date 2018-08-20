@@ -117,8 +117,12 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <a href="@Url.Action("registrantsummary", "activity", new { id = Model.Uid })" class="btn btn-default pull-right">
+                    <a href="@Url.Action("registrantsummary", "leagueactivity", new { id = Model.Uid })" class="btn btn-default pull-right">
                         <i class="icon icon-left s7-paper-plane"></i> Send Registration Report
+                    </a>
+
+                    <a href="@Url.Action("managestudents", "leagueactivity", new { id = Model.Uid })" class="btn btn-default pull-right btn-success">
+                        <i class="icon icon-left s7-plus"></i> Manage Students
                     </a>
 
                     <a href="@Url.Action("registrantdownload", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
