@@ -8,6 +8,7 @@
     var saveBtnWidth = 7;
     var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(Model.ActivityTypeId));
     var registrants = (List<Registrant>)ViewBag.Registrants;
+    var addedRegistrants = (List<Registrant>)ViewBag.AddedRegistrants;
     var registrantsPerColumn = 2;
     var count = registrants.Count;
     if (group.IsNotEmpty())
@@ -35,32 +36,19 @@
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editstudents", "leagueactivity", new { id = Model.Uid })" class="form-horizontal">
 
-                    @if (registrants.Count == 0)
+                    @if (registrants.Count == 0 && addedRegistrants.Count == 0)
                     {
-                        <p> No one has registered for this team yet. </p>
+                        <p> There are no available registrants to add to this team. </p>
                     }
                     else
                     {
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">
-                                Select Students<br />
-                                <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
-                            </label>
-                            <div class="col-sm-6">
-                                @for (int i = 0; i < 3; i++)
-                                {
-                                    <div class="col-md-4">
-                                        @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
-                                        {
-                                            <div class="am-checkbox">
-                                                <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" />
-                                                <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
+                        Html.RenderPartial("_ManageStudents", Model,
+                            new ViewDataDictionary() {
+                                { "Registrants", registrants },
+                                { "AddedRegistrants", addedRegistrants },
+                                { "Group", group }
+                            }
+                            );
                     }
 
                     <div class="form-group">

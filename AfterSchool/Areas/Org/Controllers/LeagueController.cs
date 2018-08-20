@@ -277,6 +277,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalCount = 0;
 
             registrations = group.GetRegistrations(start, length);
+            //probably a cleaner way to do this
+            var regsNoDupes = registrations.DistinctBy(r => r.Name).ToList();
             totalCount = group.GetRegistrationCount();
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
@@ -287,7 +289,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            LoadRegistrationsViewBag(group, registrations);
+            LoadRegistrationsViewBag(group, regsNoDupes);
 
             ViewBag.PagingModel = new PagingModel()
             {
