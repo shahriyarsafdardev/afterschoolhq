@@ -316,6 +316,8 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
+                    amsgs.AddRange(DefaultTransactionTypes(adc));
+
                     //amsgs.AddRange(UpdateActivityPayment(adc));
                     //amsgs.AddRange(UpdateInviteCodes(adc));
                     //amsgs.AddRange(UpdateTransactions(adc));
@@ -363,6 +365,15 @@ namespace AfterSchoolLibrary
             );            
 
             return msgs;
+        }
+
+        public static SystemMessages DefaultTransactionTypes(DatabaseConnection dc = null)
+        {
+            return Transaction.Update(
+                updateValues: new Hashtable() { { "TransactionTypeId", (int)TransactionType.Charge } },
+                criterias: new Hashtable() { { "TransactionTypeId", DBNull.Value } },
+                ObjectMap: Transaction.ObjectMap,
+                dc: dc);
         }
 
         public static SystemMessages SetDefaultLocations(DatabaseConnection dc = null)
