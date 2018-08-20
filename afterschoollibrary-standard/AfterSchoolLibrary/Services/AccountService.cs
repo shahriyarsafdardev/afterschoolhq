@@ -452,7 +452,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);            
-            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(account, accountOwner, plan, account.IsAfterSchool));
+            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, plan));
             return msgs;
         }
 

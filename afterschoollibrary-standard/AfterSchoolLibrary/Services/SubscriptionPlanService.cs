@@ -9,7 +9,7 @@ using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary.Services
 {
-    public class SubscriptionPlanService
+    public static class SubscriptionPlanService
     {
         public static SubscriptionPlan CreateNewSubscription(Account planOwner, Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -79,6 +79,11 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(plan.SaveWithStripe(dc));
 
             return plan;
+        }
+
+        public static ParticipationObject GetParticipationObject(this SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ParticipationObject(plan.ParticipationObjectId.Value, plan.ParticipationObjectTypeId, msgs, dc);
         }
     }
 }

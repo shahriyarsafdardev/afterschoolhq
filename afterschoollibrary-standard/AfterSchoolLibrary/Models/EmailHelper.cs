@@ -328,42 +328,36 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages SendSubscriptionPaymentSucceeded(Account account, WebUser user, SubscriptionPlan plan, bool isAfterSchool)
+        public static SystemMessages SendSubscriptionPaymentSucceeded(WebUser payingAccountUser, SubscriptionPlan plan)
         {
             var msgs = new SystemMessages();
-
-            var activityName = "";
-
-            if (plan.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                activityName = plan.GetActivity().Name;
-            else
-                activityName = plan.GetActivityGroup().Name;
+            var participationObject = plan.GetParticipationObject(msgs);
 
             var model = new NameValueCollection()
             {
-                { "FirstName", user.FirstName },
-                { "AccountName", account.Name },
+                { "FirstName", payingAccountUser.FirstName },
+                { "AccountName", participationObject.OwnerAccount.Name },
                 { "Period", $"{plan.BillingPeriodTypeId.ToString().ToLower()}ly" },
                 { "PaymentAmount", plan.CostPerPeriod.ToCurrency() },
-                { "ActivityName", activityName },
-                { "LoginLink", $"{Email.BaseUrl(isAfterSchool)}login" }
+                { "ActivityName", participationObject.Name },
+                { "LoginLink", Utilities.LoginUrl(true) }
             };
+
+            var subject = $"Your payment succeeded for {participationObject.Name}";
 
             var body = ProcessTemplate(
                 EmailTemplates.SubscriptionPayment_Succeeded,
                 model,
-                "subscriptionpaymentsucceeded-1.0.0",
+                "subscriptionpaymentsucceeded-1.0.1",
                 msgs
                 );
 
-            var subject = $"Your payment succeeded for ${activityName}";
-
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
+                fromEmail: Email.SendGridAppEmailAddress(true),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(payingAccountUser.Email),
                 subject: subject,
                 body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(true)
                 );
 
             msgs.AddRange(mailMsgs);

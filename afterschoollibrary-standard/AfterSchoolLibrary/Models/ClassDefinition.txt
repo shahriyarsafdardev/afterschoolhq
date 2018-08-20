@@ -1303,6 +1303,7 @@ property: SubscriptionPlanId, int?, Int, required
 property: RegistrantId, int?, Int, required
 property: StartDate, DateTime?, DateTime, required
 property: StripeSubscriptionId, string, NVarChar "50"
+property: StripeCustomerId, string, NVarChar "50"
 loadmethod: PurchaseId, List<>
 loadmethod: RegistrantId, List<>
 loadmethod: SubscriptionPlanId, List<>

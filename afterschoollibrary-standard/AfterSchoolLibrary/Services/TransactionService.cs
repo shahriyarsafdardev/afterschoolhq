@@ -13,13 +13,18 @@ namespace AfterSchoolLibrary.Services
     {
         public static Transaction CreateNew(Account fromAccount, Account toAccount, CheckoutObject checkoutObject, int? purchaseId, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            return CreateNew(fromAccount, toAccount, checkoutObject.RegistrationFee, checkoutObject.ParticipationObject.Name, purchaseId, transactionType, stripeChargeOrRefundId, loggedInUser, msgs, dc);
+        }
+
+        public static Transaction CreateNew(Account fromAccount, Account toAccount, decimal? amount, string activityName, int? purchaseId, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var transaction = new Transaction()
             {
-                Amount = checkoutObject.RegistrationFee,
+                Amount = amount,
                 BillerAccountId = toAccount.ID.Value,
-                Description = $"{checkoutObject.ParticipationObject.Name} registration",
+                Description = $"{activityName} registration",
                 PayerAccountId = fromAccount.ID,
                 PaymentTypeId = PaymentType.CreditCard,
                 PurchaseId = purchaseId,

@@ -1,6 +1,7 @@
 ﻿using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
 using Hangfire;
 using Newtonsoft.Json;
 using Stripe;
@@ -49,7 +50,6 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         msgs.Add("Getting AccountUpdated", MessageType.Notice);
                         return AccountUpdated(stripeEvent, msgs);
                     case "invoice.payment_succeeded":
-                        return ReturnOK(msgs);
                         msgs.Add("Getting payment_succeeded", MessageType.Notice);
                         return InvoicePaymentSucceeded(stripeEvent, msgs);
                     default:
@@ -74,7 +74,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
         {
-            SendLogEmail(msgs);
+            // SendLogEmail(msgs);
             return Ok(msgs.ToJSON());
         }
 
@@ -127,29 +127,70 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private IHttpActionResult InvoicePaymentSucceeded(StripeEvent stripeEvent, SystemMessages msgs)
         {
             var customerId = (string)stripeEvent.Data.Object.customer;
-            var payingAccount = Account.LoadByStripeCustomerId(customerId, msgs);
             var subscriptionId = (string)stripeEvent.Data.Object.subscription;
-            var totalAmount = ((string)stripeEvent.Data.Object.total).ToDecimal();
+            var chargeId = (string)stripeEvent.Data.Object.charge;
+            var totalAmountInCents = ((string)stripeEvent.Data.Object.total).ToDecimal();
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
+            var registrant = registrantSubscription.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+            var payingAccount = registrant.GetAccount(msgs);
             var planOwnerAccount = plan.GetAccount(msgs);
-
-            if (msgs.HasErrors())
-                BackgroundJob.Enqueue(() => payingAccount.SendSubscriptionPaymentSucceeded(plan, null));
-
-            if (msgs.HasErrors())
+            var participationObject = plan.GetParticipationObject(msgs);
+            
+            if (msgs.HasNoErrors())
             {
-                var payment = registrantSubscription.AddPayment(totalAmount, null, msgs);
 
-                // cancel stripe subscription at end of term
-                if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && registrantSubscription.GetPaymentCount(msgs) == plan.TotalPeriods.Value)
-                    msgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, planOwnerAccount.StripeUserId));
+                // check if this same charge has been posted already and tracked.
+                var transaction = Transaction.LoadByStripeChargeOrRefundId(chargeId, msgs);
+
+                if (transaction.IsEmpty())
+                {
+                    // send payment succeeded email;
+                    payingAccount.SendSubscriptionPaymentSucceeded(plan, null);
+
+                    // save transaction info and track payment to the activity as well.
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            var totalAmount = totalAmountInCents / 100;
+
+                            // must create a transaction first
+                            transaction = TransactionService.CreateNew(
+                                payingAccount,
+                                planOwnerAccount,
+                                totalAmount,
+                                participationObject.Name,
+                                registrantSubscription.PurchaseId,
+                                TransactionType.Charge,
+                                chargeId,
+                                null,
+                                amsgs,
+                                adc);
+
+                            // then track a payment
+                            var payment = registrantSubscription.AddPayment(transaction, totalAmount, null, amsgs, adc);
+
+                            // cancel stripe subscription at end of term
+                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && registrantSubscription.GetPaymentCount(amsgs, adc) == plan.TotalPeriods.Value)
+                                amsgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, planOwnerAccount.StripeUserId));
+                        },
+                        onSuccess: (SystemMessages smsgs) =>
+                        {
+                            msgs.AddRange(smsgs);
+                        },
+                        onFailure: (SystemMessages fmsgs) =>
+                        {
+                            msgs.AddRange(fmsgs);
+                        }
+                    );
+                }
             }
 
             if (msgs.HasErrors())
-                return InternalServerError();
+                return Return500(msgs);
 
-            return Ok();
+            return ReturnOK(msgs);
         }
 
         private IHttpActionResult InvoicePaymentFailed(StripeEvent stripeEvent, SystemMessages msgs)
@@ -160,13 +201,13 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
 
-            if (msgs.HasErrors())
-                BackgroundJob.Enqueue(() => account.SendSubscriptionPaymentFailed(plan, null));
+            if (msgs.HasNoErrors())
+               account.SendSubscriptionPaymentFailed(plan, null);
 
             if (msgs.HasErrors())
-                return InternalServerError();
+                return Return500(msgs);
 
-            return Ok();
+            return ReturnOK(msgs);
         }
     }
 }
