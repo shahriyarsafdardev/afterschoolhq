@@ -1542,7 +1542,7 @@ namespace AfterSchoolLibrary
                 country: "US",
                 locationType: LocationType.School,
                 hostAccountId: account.ID,
-                loggedInAccount: account,
+                visitorAccount: account,
                 loggedInUser: null,
                 msgs: msgs,
                 dc: dc);

@@ -295,11 +295,11 @@ namespace AfterSchoolLibrary
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    if(WebUser.GetCount() == 0)
+                    if (WebUser.GetCount() == 0)
                     {
                         amsgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, adc));
                     }
-                   
+
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -316,11 +316,16 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(UpdateActivityPayment(adc));
-                    amsgs.AddRange(UpdateInviteCodes(adc));
-                    amsgs.AddRange(UpdateTransactions(adc));
-                    amsgs.AddRange(UpdateRegistrantActivityParticipationObjects(adc));
-                    amsgs.AddRange(UpdateAssignmentType(adc));
+                    //amsgs.AddRange(UpdateActivityPayment(adc));
+                    //amsgs.AddRange(UpdateInviteCodes(adc));
+                    //amsgs.AddRange(UpdateTransactions(adc));
+                    //amsgs.AddRange(UpdateRegistrantActivityParticipationObjects(adc));
+                    //amsgs.AddRange(UpdateAssignmentType(adc));
+
+                    // amsgs.AddRange(SetDefaultLocations(adc));
+
+                    // LocationService.CleanUpDuplicateLocations(amsgs, adc);
+
                     //msgs.AddRange(UpdateRegistrations2(dc));
                     //msgs.AddRange(UpdateAccountFeatures(dc: dc));
                     //msgs.AddRange(UpdateLocations(dc: dc));
@@ -356,6 +361,25 @@ namespace AfterSchoolLibrary
                     msgs.AddRange(fmsgs);
                 }
             );            
+
+            return msgs;
+        }
+
+        public static SystemMessages SetDefaultLocations(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var accounts = Account.Load(new Hashtable() { { "DefaultLocationId", DBNull.Value } }, msgs: msgs, dc: dc);
+
+            accounts.ForEach(account => {
+                var locations = Location.Load(new Hashtable() { { "Name", account.Name } }, msgs: msgs, dc: dc);
+
+                if (locations.Any())
+                {
+                    account.DefaultLocationId = locations.First().ID;
+                    msgs.AddRange(account.Save(dc));
+                }
+            });
 
             return msgs;
         }

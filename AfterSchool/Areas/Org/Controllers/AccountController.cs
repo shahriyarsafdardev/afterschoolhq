@@ -98,7 +98,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var currentLocation = AfterSchoolLibrary.Location.Load(location.ToInteger(), msgs);
 
-                if (currentLocation.IsOwnedByOrIsNotOwned(SessionVariables.CurrentAccount))
+                if (currentLocation.IsOwnedByOrIsNotOwnedAtAll(SessionVariables.CurrentAccount))
                 {
                     currentLocation.LocationTypeId = locationType;
                     currentLocation.HostAccountId = hostAccountId;
@@ -121,7 +121,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     country: "US",
                     locationType: locationType,
                     hostAccountId: hostAccountId,
-                    loggedInAccount: SessionVariables.CurrentAccount,
+                    visitorAccount: SessionVariables.CurrentAccount,
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs
                     );
