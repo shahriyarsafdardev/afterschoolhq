@@ -448,16 +448,56 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var activityGroup = activity.GetActivityGroup();
             var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
+            // all students that have registered for the league
             var registrants = accountActivityGroup.IsEmpty() ? activityGroup.GetRegistrants() : accountActivityGroup.GetRegistrants();
+            // registrants already added to the team have a RegistrantActivity record
+            var registrantActivities = activity.GetRegistrantActivities();
+            var registrantActivitiesRegIds = registrantActivities.Select(ra => ra.RegistrantId).ToList();
+            //students not added to a team, we will re
+            var availableRegistrants = new List<Registrant>();
+            availableRegistrants.AddRange(registrants);
+            //students already added to a team
+            var addedRegistrants = new List<Registrant>();
+
+            foreach (var registrant in registrants)
+            {
+                if (registrantActivitiesRegIds.Contains(registrant.ID))
+                {
+                    availableRegistrants.Remove(registrant); // remove students that are already added
+                    addedRegistrants.Add(registrant);  // add students that have already been added
+                }
+            }
 
             ViewBag.Messages = new SystemMessages();
-            ViewBag.Registrants = registrants;
+            ViewBag.Registrants = availableRegistrants;
+            ViewBag.AddedRegistrants = addedRegistrants;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Group = activityGroup;
             ViewBag.ActiveMenu = "EditStudents";
             ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
 
             return registrants;
+        }
+
+        [HttpGet]
+        public ActionResult ManageStudents(string id)
+        {
+            var activity = Activity.LoadByUid(id.ToGuid());
+            LoadEditStudentsViewBag(activity);
+
+            return View(activity);
+        }
+
+        [HttpPost]
+        public ActionResult ManageStudents(string id, string cmd)
+        {
+            var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = ManageStudentsHelper(activity);
+
+            LoadEditStudentsViewBag(activity);
+            ViewBag.Messages = msgs;
+
+            return View(activity);
         }
 
         [HttpGet]
@@ -473,13 +513,42 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult EditStudents(string id, string cmd)
         {
-            var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var msgs = ManageStudentsHelper(activity);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            LoadEditStudentsViewBag(activity);
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    case "prev":
+                        ViewBag.ActiveMenu = "EditContact";
+                        return View("EditContact", activity);
+                    case "next":
+                        ViewBag.ActiveMenu = "EditStudents";
+                        return View("EditStudents", activity);
+                }
+            }
+
+            ViewBag.ActiveMenu = "EditStudents";
+            return View(activity);
+        }
+
+        private SystemMessages ManageStudentsHelper(Activity activity)
+        {
+            var msgs = new SystemMessages();
             var updatedRegistrants = new List<Registrant>();
             var activityGroup = activity.GetActivityGroup();
             var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
-
+           // var activities = activityGroup.GetActivities();
+            var activities = accountActivityGroup.IsEmpty() ? activityGroup.GetActivities() : accountActivityGroup.GetActivities();
+            activities = activities.Where(a => a.ID.Value != activity.ID.Value).ToList();
             var registrants = LoadEditStudentsViewBag(activity);
+
 
             Database.ExecuteTransaction
             (
@@ -487,12 +556,25 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     registrants.ForEach(registrant =>
                     {
-                        var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value);
+                        var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
 
                         if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
-                        {                            
+                        {
+
+                            //check if students is registered for another team on the league
+                            foreach (var otherTeam in activities)
+                            {
+                                if (RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsNotEmpty())
+                                {
+                                    var otherRegAct = RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
+                                    var otherRegistration = otherRegAct.GetRegistration(adc);
+                                    amsgs.AddRange(otherRegistration.RemoveParticipation(otherTeam.ID.Value, ParticipationObjectType.Activity, adc));
+                                }
+
+                            }
+
                             //check if the student is already registered for this team
-                            if (RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value).IsEmpty())
+                            if (RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsEmpty())
                             {
                                 var registration = registrant.AddRegistration(
                                     SessionVariables.CurrentAccount.ID.Value,
@@ -514,6 +596,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     msgs: amsgs,
                                     dc: adc);
                             }
+
+
                         }
                         else if (!Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsNotEmpty())
                         {
@@ -533,34 +617,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.AddRange(fmsgs);
                 }
             );
-            
+
             if (msgs.HasNoErrors())
             {
                 msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
             }
 
-            ViewBag.Messages = msgs;
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.SelectedRegistrants = updatedRegistrants;
-            LoadEditStudentsViewBag(activity);
-
-            if (msgs.HasNoErrors())
-            {
-                switch (cmd)
-                {
-                    case "prev":
-                        ViewBag.ActiveMenu = "EditSchedule";
-                        LoadEditScheduleViewBag(activity, null);
-                        return View("EditSchedule", activity);
-                    case "next":
-                        ViewBag.ActiveMenu = "EditStudents";
-                        return View("EditStudents", activity);
-                }
-            }
-
-            ViewBag.ActiveMenu = "EditStudents";
-            return View(activity);
+            return msgs;
         }
 
         [HttpGet]
@@ -741,113 +804,22 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "prev":
-                        ViewBag.ActiveMenu = "EditRestrictions";
-                        return View("EditRestrictions", activity);
+                        ViewBag.ActiveMenu = "EditSetup";
+                        ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
+                        ViewBag.IsActivityLeader = IsActivityLeader(activity);
+                        ViewBag.ActiveForm = activity.GetActiveActivityForm();
+                        return View("EditSetup", activity);
                     case "next":
-                        ViewBag.ActiveMenu = "EditDetails";
-                        return View("EditDetails", activity);
+                        //ViewBag.ActiveMenu = "EditDetails";
+                        //return View("EditDetails", activity);
+                        ViewBag.ActiveMenu = "EditContact";
+                        return View("EditContact", activity);
                 }
             }
 
             ViewBag.ActiveMenu = "EditSchedule";
             return View(activity);
         }
-
-        //[HttpPost]
-        //[ValidateInput(false)]
-        //public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime)
-        //{
-        //    var msgs = new SystemMessages();
-        //    Activity activity = Activity.LoadByUid(id.ToGuid());
-        //    var scheduleDates = new List<DateRange>();
-        //    var inSessionDates = new List<DateRange>();
-        //    var outOfSessionDates = new List<DateTime>();
-
-        //    if (activity.IsNotEmpty())
-        //    {
-        //        var values = new Dictionary<string, object>();
-
-        //        //if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageActivityGroups) && schedule.IsNumber() && schedule.ToInteger() > 0)
-        //        //{
-        //        //    values = new Dictionary<string, object>()
-        //        //    {
-        //        //        { "schedule", schedule }
-        //        //    };
-        //        //}
-        //        //else
-        //        //{
-        //            var filteredParams = Request.Params.Filter("schedulerepeat-");
-        //            var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-        //            scheduleDates = Models.ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-"));
-        //            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-        //            outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
-
-        //            values = new Dictionary<string, object>()
-        //            {
-        //                { "scheduledetails", scheduledetails},
-        //                { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
-        //                { "repeatsweekly", repeatsweekly.IfBlank("0") },
-        //                { "startdate", startdate },
-        //                { "enddate", enddate },
-        //                { "dailystarttime", dailystarttime },
-        //                { "dailyendtime", dailyendtime },
-        //                { "scheduledates", inSessionDates },
-        //                { "scheduledatesclosed", outOfSessionDates },
-        //                //{ "scheduledates", scheduleDates },
-        //                { "schedule", schedule }
-        //            };
-                    
-        //        //}
-
-        //        activity = Activity.EditExisting(
-        //            loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-        //            account: SessionVariables.CurrentAccount,
-        //            activityId: activity.ID.Value.ToString(),
-        //            values: values,
-        //            msgs: msgs
-        //        );
-        //    }
-
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-        //    }
-
-        //    var instances = new List<ActivityInstance>();
-        //    ActivitySchedule sched = null;
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        sched = activity.GetSchedule(); 
-        //    }
-        //    else
-        //    {
-        //        sched = ActivitySchedule.GetNewDefaultSchedule(scheduleDates);
-        //    }
-
-        //    ViewBag.Messages = msgs;
-        //    ViewBag.Account = SessionVariables.CurrentAccount;
-        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
-        //    ViewBag.Schedule = sched;
-        //    ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
-        //    ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
-
-        //    if (msgs.HasNoErrors())
-        //    {
-        //        switch (cmd)
-        //        {
-        //            case "prev":
-        //                ViewBag.ActiveMenu = "EditSetup";
-        //                LoadEditSetupViewBag(id,activity.GetActivityGroup().ID.ToString());
-        //                return View("EditSetup", activity);
-        //            case "next":
-        //                ViewBag.ActiveMenu = "EditContact";
-        //                return View("EditContact", activity);
-        //        }
-        //    }
-
-        //    ViewBag.ActiveMenu = "EditSchedule";
-        //    return View(activity);
-        //}
         
         [HttpGet]
         public ActionResult EditLocation(string id)

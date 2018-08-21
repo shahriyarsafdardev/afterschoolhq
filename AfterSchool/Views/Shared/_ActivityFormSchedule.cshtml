@@ -13,8 +13,7 @@
 
     if (ViewData["ActivityGroupType"].IsNotEmpty())
     {
-     //   activityGroupType = (ActivityGroupType)ViewData["ActivityGroupType"].ToString();
-        activityGroupType = (ActivityGroupType)Enum.Parse(typeof(ActivityGroupType), ViewData["ActivityGroupType"].ToString(), true);
+        activityGroupType = (ActivityGroupType)ViewData["ActivityGroupType"].ToString().ToInteger();
 
         if (activityGroupType == ActivityGroupType.League)
         {
@@ -36,7 +35,7 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        Schedule Information
+        @activityMeetingLabel Schedule Information
     </div>
     <div class="panel-body">
         <div>
@@ -137,7 +136,7 @@
                 </div>
 
 
-                @if (!activityGroupType.HasValue)
+                @if (!activityGroupType.HasValue && activityType != ActivityType.Team)
                 {
                     <div class="form-group" id="ongoing-div">
                         <label class="col-md-3 control-label">

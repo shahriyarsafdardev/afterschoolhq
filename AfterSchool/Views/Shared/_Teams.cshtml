@@ -104,9 +104,8 @@ else
             <thead>
                 <tr>
                     <th></th>
-                    <th>Teams</th>
-                    <th class="text-center">Grades</th>
-                    <!--<th class="text-center">Ages</th>-->
+                    <th>Team</th>
+                    <th class="text-center">Practice Schedule</th>
                     <th class="text-center">Players</th>
                     <th></th>
                 </tr>
@@ -119,24 +118,22 @@ else
                         var reservedTextClass = activity.IsFull() ? "text-danger text-bold" : "";
                         var waitingTextClass = activity.IsWaitingListFull() ? "text-danger text-bold" : "";
 
-
                         <tr>
                              @if (disableViewTeams)
                              {
-                                 <td></td>  
+                                 <td></td>
                                  <td> @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")</td>
                              }
-                             else {
-                            <td>
-                               
+                             else
+                             {
+                                <td>
                                     <a href="@Url.Action("summary", "activity", new { id = @activity.Uid })" class="btn btn-default btn-sm">View</a>
-                                
-                            </td>
-                            <td>
-                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid })">
-                                    @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
-                                </a>
-                            </td>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("summary", "activity", new { id = @activity.Uid })">
+                                        @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")
+                                    </a>
+                                </td>
                              }
                             <td class="text-center">
                                 @if (activity.GetDaysOfTheWeek().Any())
@@ -148,38 +145,10 @@ else
                                     @:-
                                 }
                             </td>
-                            <td class="text-center">
-                                @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
-                                {
-                                    <span>@activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name</span>
-                                }
-                                else
-                                {
-                                    @:-
-                                }
-
+                            
+                            <td class="text-center @reservedTextClass">
+                                @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable
                             </td>
-                            <!--
-                            <td class="text-center">
-                                @if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
-                                {
-                                    @: @activity.AgeStart.Value - @activity.AgeEnd.Value
-                                }
-                                else
-                                {
-                                    @:-
-                                }
-                            </td>
-                            -->
-                            <td class="text-center @reservedTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable</td>
-                            @if (account.HasFeature(FeatureType.WaitingList))
-                            {
-                                <td class="text-center @waitingTextClass">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.WaitingList) / @activity.WaitingListSeats</td>
-                            }
-                            @if (account.HasFeature(FeatureType.AllowApplications))
-                            {
-                                <td class="text-center">@activity.GetRegistrantCountByApplicationType(RegistrationAssignmentType.Applied)</td>
-                            }
 
                             @if (!disableViewTeams)
                             {

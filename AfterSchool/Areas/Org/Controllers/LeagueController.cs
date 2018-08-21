@@ -222,7 +222,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
-            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);            
+            var aag = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);            
 
             var activity = new Activity()
             {
@@ -232,10 +232,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 CreatedBy = SessionVariables.LoggedInUser.ID,
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = SessionVariables.LoggedInUser.ID,
-                AccountActivityGroupId = accountActivityGroup?.ID,
+                AccountActivityGroupId = aag?.ID,
                 ActivityGroupId = activityGroup.ID,
                 AccountId = SessionVariables.CurrentAccount.ID,   
                 ActivityTypeId = ActivityType.Team,
+                ContactEmail = aag.ContactEmail,
+                ContactName = aag.ContactName,
+                ContactPhone = aag.ContactPhone
             };
             msgs.AddRange(activity.Save());
 
@@ -277,6 +280,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalCount = 0;
 
             registrations = group.GetRegistrations(start, length);
+            //probably a cleaner way to do this
+            var regsNoDupes = registrations.DistinctBy(r => r.Name).ToList();
             totalCount = group.GetRegistrationCount();
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
@@ -287,7 +292,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            LoadRegistrationsViewBag(group, registrations);
+            LoadRegistrationsViewBag(group, regsNoDupes);
 
             ViewBag.PagingModel = new PagingModel()
             {

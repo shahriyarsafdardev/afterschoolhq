@@ -35,9 +35,13 @@
                     <a href="@Url.Action("form", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "form" ? "-active" : "")"><i class="s7-note2"></i> Reg Form</a>
                 }
             }
+            
+            <a href="@Url.Action("registrants", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")">
+                <i class="s7-user"></i> @UILabel.RegistrantLabel(true)
+            </a>
+
             @if(Model.IsPublished || registrantCount > 0)
-            {
-                <a href="@Url.Action("registrants", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")"><i class="s7-user"></i> @UILabel.RegistrantLabel(true)</a>
+            {   
                 if (SessionVariables.AccountPackage.HasFeature(FeatureType.Attendance))
                 {
                     <a href="@Url.Action("attendance", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
