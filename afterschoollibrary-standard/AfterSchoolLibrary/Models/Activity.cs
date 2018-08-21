@@ -2281,11 +2281,11 @@ namespace AfterSchoolLibrary
 
         [NonSerialized()]
         private ActivityGroup _ActivityGroup = null;
-        public ActivityGroup GetActivityGroup(DatabaseConnection dc = null)
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_ActivityGroup.IsEmpty() && this.ActivityGroupId.HasValue)
             {
-                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
+                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc: dc);
             }
             return _ActivityGroup;
         }

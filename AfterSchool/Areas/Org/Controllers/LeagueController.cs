@@ -946,5 +946,59 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(league);
 
         }
+
+        private void LoadTeamStudentsViewBag(StudentsViewBagObject studentsViewBagObject)
+        {
+            // registrants already added to the team have a RegistrantActivity record
+            var registrantActivities = studentsViewBagObject.Activity.GetRegistrantActivities();
+            var registrantActivitiesRegIds = registrantActivities.Select(ra => ra.RegistrantId).ToList();
+            //students not added to a team, we will re
+            var availableRegistrants = new List<Registrant>();
+            availableRegistrants.AddRange(studentsViewBagObject.Registrants);
+            //students already added to a team
+            var addedRegistrants = new List<Registrant>();
+
+            foreach (var registrant in studentsViewBagObject.Registrants)
+            {
+                if (registrantActivitiesRegIds.Contains(registrant.ID))
+                {
+                    availableRegistrants.Remove(registrant); // remove students that are already added
+                    addedRegistrants.Add(registrant);  // add students that have already been added
+                }
+            }
+
+            ViewBag.Messages = studentsViewBagObject.Messages;
+            ViewBag.Registrants = availableRegistrants;
+            ViewBag.AddedRegistrants = addedRegistrants;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.AccountActivityGroup = studentsViewBagObject.AccountActivityGroup;
+            ViewBag.Activity = studentsViewBagObject.Activity;
+            ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, studentsViewBagObject.ActivityGroup.ID.Value);
+
+        }
+
+        [HttpGet]
+        public ActionResult TeamStudents(string id, string team)
+        {
+            var studentViewBagObject = new StudentsViewBagObject(id, team);
+            LoadTeamStudentsViewBag(studentViewBagObject);
+
+            return View(studentViewBagObject.ActivityGroup);
+        }
+
+        [HttpPost]
+        public ActionResult TeamStudents(string id, string team, string cmd)
+        {
+            var studentViewBagObject = new StudentsViewBagObject(id, team);
+
+            studentViewBagObject.Messages.AddRange(LeagueHelper.UpdateStudentsInTeam(
+                studentViewBagObject.Activity, 
+                studentViewBagObject.Registrants, 
+                Request.Params.Filter("registrant-")));
+
+            LoadTeamStudentsViewBag(studentViewBagObject);
+
+            return View(studentViewBagObject.ActivityGroup);
+        }
     }
 }

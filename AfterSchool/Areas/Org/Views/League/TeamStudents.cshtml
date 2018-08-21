@@ -1,0 +1,88 @@
+﻿@model AfterSchoolLibrary.ActivityGroup
+@{
+    ViewBag.Title = ((Account)ViewBag.Account).Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+
+    var activity = (Activity)ViewBag.Activity;
+    var aag = (AccountActivityGroup)ViewBag.AccountActivityGroup;
+    var title = Model.Name.IfBlank("New " + UILabel.ActivityLabel(activity.ActivityTypeId));
+    var registrants = (List<Registrant>)ViewBag.Registrants;
+    var addedRegistrants = (List<Registrant>)ViewBag.AddedRegistrants;
+    var count = registrants.Count;
+
+    title = activity.Name + " - " + title;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{ Html.RenderPartial("_LeagueHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", title); }
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-12">
+                <form id="form1" method="post" action="@Url.Action("teamstudents", "league", new { id = Model.Uid, team = activity.Uid })" class="form-horizontal">
+
+                    @if (registrants.Count == 0 && addedRegistrants.Count == 0)
+                    {
+                        <p> There are no available registrants to add to this team. </p>
+                    }
+                    else
+                    {
+                        Html.RenderPartial("_ManageStudents", activity,
+                            new ViewDataDictionary() {
+                            { "Registrants", registrants },
+                            { "AddedRegistrants", addedRegistrants },
+                            { "Group", Model }
+                            }
+                            );
+                    }
+
+                    <div class="form-group">
+                        <div class="col-sm-3">
+                            <div class="pull-right">
+                                <a href="@Url.Action("leagueactivities", "league", new { id = Model.Uid })" class="text-muted">
+                                    &laquo; Back to Teams
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn btn-primary btn-space btn-lg btn-block">
+                                <i class="s7-diskette"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+    function navigateActivity(url) {
+        $('#form1').attr('action', url);
+    }
+
+    function selectAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', true);
+        });
+    }
+    function clearAll() {
+        $('input[type="checkbox"]').each(function () {
+            $(this).prop('checked', false);
+        });
+    }
+
+
+</script>
+

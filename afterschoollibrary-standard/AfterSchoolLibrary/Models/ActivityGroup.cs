@@ -516,9 +516,9 @@ namespace AfterSchoolLibrary
             return _RegistrantActivities;
         }
 
-        public List<Registrant> GetRegistrants(List<Registration> registrations = null, DatabaseConnection dc = null)
+        public List<Registrant> GetRegistrants(List<Registration> registrations = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetRegistrantActivities(registrations, dc: dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
+            return GetRegistrantActivities(registrations, msgs, dc: dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
         }
 
         public int GetTotalSeatsLeft(DatabaseConnection dc = null)
