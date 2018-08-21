@@ -286,7 +286,7 @@ namespace AfterSchoolLibraryTests
             int numberOfApplicationSeats = 1;
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
 
-            Assert.Single(activity.GetRegistrants(dc: dc));
+            Assert.Single(activity.GetRegistrants(msgs, dc));
         }
         
         [Fact]
@@ -914,7 +914,7 @@ namespace AfterSchoolLibraryTests
             var activityGroup = Factories.ActivityGroupFactory.Create(account, ActivityGroupType.Session, msgs, dc);
             var activity = Factories.ActivityFactory.Create(account, activityGroup, msgs, dc);
 
-            Assert.NotNull(activity.GetActivityGroup(dc));
+            Assert.NotNull(activity.GetActivityGroup(msgs, dc));
         }
 
 

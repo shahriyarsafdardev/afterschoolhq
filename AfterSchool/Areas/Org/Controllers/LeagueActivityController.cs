@@ -40,8 +40,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     SessionActionType.ActivityMoveToApplication,
                     SessionActionType.ActivityMoveToReserved,
                     SessionActionType.ActivityMoveToWaitingList
-                }, 
-                0, 
+                },
+                0,
                 15,
                 msgs);
             ViewBag.Messages = msgs;
@@ -160,7 +160,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var isLeader = true;
             var activePeriod = new RegistrationPeriod();
             ActivityGroup activityGroup = null;
-         
+
 
             if (id.IsGuid())
             {
@@ -233,7 +233,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "description", description }
             };
 
-            if(id != "0") activity = Activity.LoadByUid(id.ToGuid());
+            if (id != "0") activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
                 activity = Activity.EditExisting(
@@ -264,12 +264,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
 
                 if (msgs.HasNoErrors())
-                {                    
+                {
                     UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
                 }
             }
 
-           
+
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -341,13 +341,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
                 };
 
-            activity = Activity.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
-                    activityId: activity.ID.Value.ToString(),
-                    values: values,
-                    msgs: msgs
-                );
+                activity = Activity.EditExisting(
+                        loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                        account: SessionVariables.CurrentAccount,
+                        activityId: activity.ID.Value.ToString(),
+                        values: values,
+                        msgs: msgs
+                    );
             }
 
             if (msgs.HasNoErrors())
@@ -433,8 +433,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.ActiveMenu = "EditSchedule";
                         LoadEditScheduleViewBag(activity, null);
                         return View("EditSchedule", activity);
-                    case "next":
-                        LoadEditStudentsViewBag(activity);
+                    case "next":                       
+                        LoadEditStudentsViewBag(new StudentsViewBagObject(activity));
                         return View("EditStudents", activity);
                 }
             }
@@ -443,23 +443,18 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-
-        private List<Registrant> LoadEditStudentsViewBag(Activity activity)
+        private void LoadEditStudentsViewBag(StudentsViewBagObject studentsViewBagObject)
         {
-            var activityGroup = activity.GetActivityGroup();
-            var accountActivityGroup = AccountActivityGroup.LoadByAccountIdByActivityGroupId(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
-            // all students that have registered for the league
-            var registrants = accountActivityGroup.IsEmpty() ? activityGroup.GetRegistrants() : accountActivityGroup.GetRegistrants();
             // registrants already added to the team have a RegistrantActivity record
-            var registrantActivities = activity.GetRegistrantActivities();
+            var registrantActivities = studentsViewBagObject.Activity.GetRegistrantActivities();
             var registrantActivitiesRegIds = registrantActivities.Select(ra => ra.RegistrantId).ToList();
             //students not added to a team, we will re
             var availableRegistrants = new List<Registrant>();
-            availableRegistrants.AddRange(registrants);
+            availableRegistrants.AddRange(studentsViewBagObject.Registrants);
             //students already added to a team
             var addedRegistrants = new List<Registrant>();
 
-            foreach (var registrant in registrants)
+            foreach (var registrant in studentsViewBagObject.Registrants)
             {
                 if (registrantActivitiesRegIds.Contains(registrant.ID))
                 {
@@ -468,162 +463,75 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = studentsViewBagObject.Messages;
             ViewBag.Registrants = availableRegistrants;
             ViewBag.AddedRegistrants = addedRegistrants;
             ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.Group = activityGroup;
+            ViewBag.Group = studentsViewBagObject.ActivityGroup;
             ViewBag.ActiveMenu = "EditStudents";
-            ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
-
-            return registrants;
+            ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, studentsViewBagObject.ActivityGroup.ID.Value);            
         }
 
         [HttpGet]
         public ActionResult ManageStudents(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            LoadEditStudentsViewBag(activity);
+            var studentViewBagObject = new StudentsViewBagObject(id);
+            LoadEditStudentsViewBag(studentViewBagObject);
 
-            return View(activity);
+            return View(studentViewBagObject.Activity);
         }
 
         [HttpPost]
         public ActionResult ManageStudents(string id, string cmd)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            var msgs = ManageStudentsHelper(activity);
+            var studentViewBagObject = new StudentsViewBagObject(id);
 
-            LoadEditStudentsViewBag(activity);
-            ViewBag.Messages = msgs;
+            studentViewBagObject.Messages.AddRange(LeagueHelper.UpdateStudentsInTeam(studentViewBagObject.Activity, studentViewBagObject.Registrants, Request.Params.Filter("registrant-")));
 
-            return View(activity);
+            LoadEditStudentsViewBag(studentViewBagObject);
+
+            return View(studentViewBagObject.Activity);
         }
 
         [HttpGet]
         public ActionResult EditStudents(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var studentViewBagObject = new StudentsViewBagObject(id);
 
-            LoadEditStudentsViewBag(activity);
+            LoadEditStudentsViewBag(studentViewBagObject);
             
-            return View(activity);
+            return View(studentViewBagObject.Activity);
         }
 
         [HttpPost]
         public ActionResult EditStudents(string id, string cmd)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            var msgs = ManageStudentsHelper(activity);
+            var studentViewBagObject = new StudentsViewBagObject(id);
+            studentViewBagObject.Messages.AddRange(LeagueHelper.UpdateStudentsInTeam(
+                studentViewBagObject.Activity, 
+                studentViewBagObject.Registrants, 
+                Request.Params.Filter("registrant-")));
 
-            ViewBag.Messages = msgs;
+            LoadEditStudentsViewBag(studentViewBagObject);
+            
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            LoadEditStudentsViewBag(activity);
 
-            if (msgs.HasNoErrors())
+            if (studentViewBagObject.Messages.HasNoErrors())
             {
                 switch (cmd)
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditContact";
-                        return View("EditContact", activity);
+                        return View("EditContact", studentViewBagObject.Activity);
                     case "next":
                         ViewBag.ActiveMenu = "EditStudents";
-                        return View("EditStudents", activity);
+                        return View("EditStudents", studentViewBagObject.Activity);
                 }
             }
 
             ViewBag.ActiveMenu = "EditStudents";
-            return View(activity);
-        }
-
-        private SystemMessages ManageStudentsHelper(Activity activity)
-        {
-            var msgs = new SystemMessages();
-            var updatedRegistrants = new List<Registrant>();
-            var activityGroup = activity.GetActivityGroup();
-            var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
-           // var activities = activityGroup.GetActivities();
-            var activities = accountActivityGroup.IsEmpty() ? activityGroup.GetActivities() : accountActivityGroup.GetActivities();
-            activities = activities.Where(a => a.ID.Value != activity.ID.Value).ToList();
-            var registrants = LoadEditStudentsViewBag(activity);
-
-
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    registrants.ForEach(registrant =>
-                    {
-                        var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
-
-                        if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
-                        {
-
-                            //check if students is registered for another team on the league
-                            foreach (var otherTeam in activities)
-                            {
-                                if (RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsNotEmpty())
-                                {
-                                    var otherRegAct = RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
-                                    var otherRegistration = otherRegAct.GetRegistration(adc);
-                                    amsgs.AddRange(otherRegistration.RemoveParticipation(otherTeam.ID.Value, ParticipationObjectType.Activity, adc));
-                                }
-
-                            }
-
-                            //check if the student is already registered for this team
-                            if (RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsEmpty())
-                            {
-                                var registration = registrant.AddRegistration(
-                                    SessionVariables.CurrentAccount.ID.Value,
-                                    activity.ActivityGroupId,
-                                    RegistrationCompletionStatus.Completed,
-                                    SessionVariables.LoggedInUser.ID.Value,
-                                    amsgs,
-                                    adc);
-
-                                // manages seats and create registrantactivity record
-                                Registration.ProcessRegistration(
-                                    registration: registration,
-                                    participationObject: activity.ToParticipationObject(amsgs, adc),
-                                    registrant: registrant,
-                                    seatsRequested: 1,
-                                    activityGroupId: activity.ActivityGroupId,
-                                    periodId: activity.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
-                                    loggedInUser: SessionVariables.LoggedInUser,
-                                    msgs: amsgs,
-                                    dc: adc);
-                            }
-
-
-                        }
-                        else if (!Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsNotEmpty())
-                        {
-                            var registration = ra.GetRegistration(adc);
-                            amsgs.AddRange(registration.RemoveParticipation(activity.ID.Value, ParticipationObjectType.Activity, adc));
-                        }
-                    });
-
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                    msgs.Add("Your new team registrations have been added", MessageType.Success);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                }
-            );
-
-            if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
-
-            return msgs;
+            return View(studentViewBagObject.Activity);
         }
 
         [HttpGet]

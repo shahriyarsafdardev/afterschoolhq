@@ -85,11 +85,10 @@
             <select class="form-control" onchange="location.href=this.value;">
                 <option value="">Navigation</option>
                 <option value="@Url.Action("summary", "league", new { id = Model.Uid })">Summary</option>
-                <option value="@Url.Action("edit", "league", new {id = Model.Uid})">Setup</option>
-                <option value="@Url.Action("emailcontent", "league", new {id = Model.Uid})">Content</option>
+                <option value="@Url.Action("edit", "league", new {id = Model.Uid})">Edit Setup</option>
                 <option value="@Url.Action("periods", "league", new {id = Model.Uid})">@UILabel.RegistrationPeriodLabel(true)</option>
                 <option value="@Url.Action("activities", "league", new { id = Model.Uid })">@UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)</option>
-                @if (activityCount > 0 || Model.IsPublished)
+                @if (ispublished)
                 {
                     <option value="@Url.Action("registrations", "league", new { id = Model.Uid })">@UILabel.RegistrantLabel(true)</option>
                 }

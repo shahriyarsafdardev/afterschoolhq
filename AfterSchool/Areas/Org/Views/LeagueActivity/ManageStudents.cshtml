@@ -60,7 +60,7 @@
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <button type="submit" class="btn btn-primary btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("managestudents", "leagueactivity", new { id = Model.Uid })')">
+                            <button type="submit" class="btn btn-primary btn-space btn-lg btn-block">
                                 <i class="s7-diskette"></i> Save
                             </button>
                         </div>
@@ -72,11 +72,6 @@
 </div>
 
 <script>
-
-    
-    function navigateActivity(url) {
-        $('#form1').attr('action', url);
-    }
 
     function selectAll() {
         $('input[type="checkbox"]').each(function () {
