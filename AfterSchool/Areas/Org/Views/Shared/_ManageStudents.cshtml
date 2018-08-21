@@ -9,8 +9,19 @@
     var addedRegistrants = (List<Registrant>)ViewData["AddedRegistrants"];
 }
 
-<div class="main-content">                 
-    <p><i class="s7-info"></i> If a student is already on another team in @group.Name, they will automatically be removed from the other team when you add them to this team. </p>
+<div class="main-content">      
+    
+     <div role="alert" class="alert alert-info alert-icon">
+        <div class="icon">
+            <span class="s7-check-circle"></span>
+        </div>
+        <div class="message">
+            <p class="text-center">
+                If a student is already on another team in @group.Name, they will automatically be removed from the other team when you add them to this team.
+            </p>
+        </div>
+    </div>
+
     <div class="form-group">
         <label class="col-sm-3 control-label">
             Select Students<br />
@@ -18,34 +29,48 @@
         </label>
                             
         <div class="col-sm-7" id="available-registrants">
-            <p>Students registered for @group.Name but not on @Model.Name:</p>
-            @for (int i = 0; i < 3; i++)
+            <p class="text-medium-small">Students registered for @group.Name but not on @Model.Name:</p>
+            @if (registrants.Any())
             {
-                <div class="col-md-4">
-                    @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
-                    {
-                        <div class="am-checkbox">
-                            <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" />
-                            <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
-                        </div>
-                    }
-                </div>
+                for (int i = 0; i < 3; i++)
+                {
+                    <div class="col-md-4">
+                        @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                        {
+                            <div class="am-checkbox">
+                                <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" />
+                                <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p>None</p>
             }
         </div>
         <div class="col-sm-3"></div>
         <div class="col-sm-7" id="added-registrants">
-            <p>Students on @Model.Name:</p>
-            @for (int i = 0; i < 3; i++)
+            <p class="text-medium-small">Students on @Model.Name:</p>
+            @if (addedRegistrants.Any())
             {
-                <div class="col-md-4">
-                    @foreach (var registrant in addedRegistrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
-                    {
-                        <div class="am-checkbox">
-                            <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" checked />
-                            <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
-                        </div>
-                    }
-                </div>
+                for (int i = 0; i < 3; i++)
+                {
+                    <div class="col-md-4">
+                        @foreach (var registrant in addedRegistrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                        {
+                            <div class="am-checkbox">
+                                <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" checked />
+                                <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p>None</p>
             }
         </div>
     </div>                 
