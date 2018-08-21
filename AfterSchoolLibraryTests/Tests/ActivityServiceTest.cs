@@ -66,7 +66,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
             var plan = SubscriptionPlanFactory.Create(ActivityOwnerAccount, activity, SubscriptionPlanType.PaymentPlan, msgs, dc);
 
-            Assert.Single(activity.GetPaymentPlans(msgs, dc));
+            Assert.Single(activity.GetActivePaymentPlans(msgs, dc));
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
             var plan = SubscriptionPlanFactory.Create(ActivityOwnerAccount, activity, SubscriptionPlanType.Subscription, msgs, dc);
 
-            Assert.Single(activity.GetSubscriptionPlans(msgs, dc));
+            Assert.Single(activity.GetActiveSubscriptionPlans(msgs, dc));
         }
 
         [Fact]

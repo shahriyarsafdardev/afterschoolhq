@@ -40,9 +40,27 @@ namespace AfterSchoolLibrary
         public string CostDescription { get; set; }
 
         private ActivityType? ActivityType { get; set; }
-        private ActivityGroupType? ActivityGroupType { get; set; }       
+        private ActivityGroupType? ActivityGroupType { get; set; }
 
-        public ParticipationObject(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            switch(participationObjectType)
+            {
+                case ParticipationObjectType.AccountActivityGroup:
+                    InitAccountActivityGroup(AccountActivityGroup.Load(participationObjectId, msgs, dc), msgs, dc);
+                    break;
+                case ParticipationObjectType.Activity:
+                    InitActivity(Activity.Load(participationObjectId, msgs, dc), msgs, dc);
+                    break;
+                case ParticipationObjectType.ActivityGroup:
+                    InitActivityGroup(ActivityGroup.Load(participationObjectId, msgs, dc), msgs, dc);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private void InitActivity(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Object = activity;
             ObjectID = activity.ID;
@@ -63,7 +81,7 @@ namespace AfterSchoolLibrary
             ContactEmail = activity.ContactEmail;
             ContactPhone = activity.ContactPhone;
             CostDescription = activity.CostDescription;
-           
+
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
                 MinGradeId = activity.GradeLevelStart;
@@ -82,12 +100,12 @@ namespace AfterSchoolLibrary
             Form = activity.GetActiveActivityForm(msgs, dc)?.ToForm();
             OwnerAccount = activity.GetAccount(msgs, dc);
 
-            PaymentPlans = activity.GetPaymentPlans(msgs, dc);
-            SubscriptionPlans = activity.GetSubscriptionPlans(msgs, dc);
+            PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
+            SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
             IsFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
-        public ParticipationObject(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private void InitActivityGroup(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Object = activityGroup;
             ObjectID = activityGroup.ID;
@@ -116,7 +134,7 @@ namespace AfterSchoolLibrary
             IsFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
-        public ParticipationObject(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private void InitAccountActivityGroup(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Object = aag;
             var activityGroup = aag.GetActivityGroup(msgs, dc);
@@ -148,6 +166,21 @@ namespace AfterSchoolLibrary
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
 
             IsFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+        }
+
+        public ParticipationObject(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            InitActivity(activity, msgs, dc);
+        }
+
+        public ParticipationObject(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            InitActivityGroup(activityGroup, msgs, dc);
+        }
+
+        public ParticipationObject(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            InitAccountActivityGroup(aag, msgs, dc);
         }
 
         public bool IsNotFreeAndCanAcceptPayments
@@ -341,7 +374,7 @@ namespace AfterSchoolLibrary
             return IsActivity() ? ObjectID : null;
         }
 
-        public ActivityPayment AddPayment(decimal amount, Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var payment = new ActivityPayment()
             {
@@ -350,6 +383,7 @@ namespace AfterSchoolLibrary
                 Amount = amount,
                 RegistrantId = registrant.ID,
                 AccountId = this.OwnerAccount.ID,
+                TransactionId = transaction.ID,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,

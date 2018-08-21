@@ -1,6 +1,6 @@
 ﻿@model WebUser
 
-@{ 
+@{
     var showPhone = false;
 
     if (ViewData["showphone"].IsNotEmpty() && ViewData["showphone"].ToString().IsBoolean())
@@ -28,7 +28,7 @@
             <input type="email" name="email" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#email-handler" required="required" placeholder="E-mail" autocomplete="off" class="form-control" data-parsley-id="6" value="@Model.Email" />
         </div>
     </div>
-    
+
     @if (showPhone)
     {
         <div class="form-group">
@@ -55,5 +55,4 @@
     </div>
 </div>
 <p class="conditions">By creating an account, you agree with the <a href="@Url.Action("tos", "legal")" target="_blank">Terms and Conditions</a>.</p>
-<button type="submit" class="btn btn-block btn-primary btn-lg" id="btn-submit-sign-up">Sign Up &raquo;</button>
-
+<button type="submit" class="btn btn-block btn-primary btn-lg">Sign Up &raquo;</button>

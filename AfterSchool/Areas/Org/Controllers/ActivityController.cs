@@ -67,7 +67,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 recordsPerPage = rpp.ToInteger();
 
             if (archive.IsBoolean())
-                isArchived = archive.ToInteger().ToBoolean();
+                isArchived = archive.ToBoolean();
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;

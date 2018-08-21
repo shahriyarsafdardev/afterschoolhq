@@ -11,7 +11,7 @@ using System.Collections;
 namespace AfterSchoolLibrary
 {
 	/// <summary>
-    /// keeps track of payments for an activity from a registrant/student
+    /// keeps track of payments for an activity from a registrant/student - can have negative numbers for refunds
     /// </summary>
 	
     public class ActivityPayment : BasicObjectWithModified
@@ -37,6 +37,7 @@ namespace AfterSchoolLibrary
 		/// Required.
 		/// </summary>
 		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
+		public int? TransactionId { get { return (int?)MDV["TransactionId"].Value; } set { MDV["TransactionId"].Value = value; } }
 		
 
         public ActivityPayment()
@@ -62,6 +63,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
 				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "TransactionId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -171,6 +173,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["ParticipationObjectId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["TransactionId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -229,6 +235,14 @@ namespace AfterSchoolLibrary
 			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
 			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<ActivityPayment> LoadByTransactionId(int TransactionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["TransactionId"], TransactionId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 

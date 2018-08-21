@@ -42,6 +42,11 @@ namespace AfterSchoolLibrary
 		public int? PurchaseId { get { return (int?)MDV["PurchaseId"].Value; } set { MDV["PurchaseId"].Value = value; } }
 		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
 		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// </summary>
+		public TransactionType TransactionTypeId { get { return (TransactionType)MDV["TransactionTypeId"].Value; } set { MDV["TransactionTypeId"].Value = value; } }
+		public string StripeChargeOrRefundId { get { return (string)MDV["StripeChargeOrRefundId"].Value; } set { MDV["StripeChargeOrRefundId"].Value = value; } }
 		
 
         public Transaction()
@@ -50,6 +55,7 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.PaymentTypeId = PaymentType.NotSet;
 			this.Uid = Guid.NewGuid();
+			this.TransactionTypeId = TransactionType.NotSet;
 			
         }
 
@@ -69,6 +75,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "PurchaseId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
 				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "StripeChargeOrRefundId", System.Data.SqlDbType.NVarChar , "50");
 				
                 return _dp;
             }
@@ -130,6 +138,8 @@ namespace AfterSchoolLibrary
 				msgs.Add("PaymentTypeId is required on Transaction object", MessageType.Error);
 			if (this.Description.IsEmpty())
 				msgs.Add("Description is required on Transaction object", MessageType.Error);
+			if (this.TransactionTypeId.IsEmpty())
+				msgs.Add("TransactionTypeId is required on Transaction object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Transaction).Name));
@@ -188,6 +198,14 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["PlatformFlatFee"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["TransactionTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeChargeOrRefundId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -219,6 +237,32 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static List<Transaction> LoadByBillerAccountIdByTransactionTypeId(int BillerAccountId, TransactionType TransactionTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+			dq.Criterias.Add(ObjectMap["TransactionTypeId"], TransactionTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Transaction> LoadByPayerAccountIdByTransactionTypeId(int PayerAccountId, TransactionType TransactionTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+			dq.Criterias.Add(ObjectMap["TransactionTypeId"], TransactionTypeId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static Transaction LoadByStripeChargeOrRefundId(string StripeChargeOrRefundId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["StripeChargeOrRefundId"], StripeChargeOrRefundId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 

@@ -452,7 +452,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);            
-            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(account, accountOwner, plan, account.IsAfterSchool));
+            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, plan));
             return msgs;
         }
 
@@ -1687,13 +1687,15 @@ namespace AfterSchoolLibrary
                     dc: dc);
         }
 
-        internal static Transaction AddTransaction(this Account fromAccount, Account toAccount, Purchase purchase, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        internal static Transaction AddTransaction(this Account fromAccount, Account toAccount, Purchase purchase, CheckoutObject checkoutObject, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return TransactionService.CreateNew(
                     fromAccount,
                     toAccount,
                     checkoutObject,
                     purchase.ID,
+                    transactionType,
+                    stripeChargeOrRefundId,
                     loggedInUser,
                     msgs,
                     dc);
@@ -1743,8 +1745,9 @@ namespace AfterSchoolLibrary
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
             // don't process charge if the user is using a payment plan
+            Stripe.StripeCharge stripeCharge = null;
             if (msgs.HasNoErrors())
-                fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
+                stripeCharge = fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
@@ -1754,12 +1757,13 @@ namespace AfterSchoolLibrary
                 var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
 
                 // charge successful so I need to create a transaction
-                var transaction = fromAccount.AddTransaction(toAccount, purchase, checkoutObject, loggedInUser, msgs, dc);
+                var transaction = fromAccount.AddTransaction(toAccount, purchase, checkoutObject, TransactionType.Charge, stripeCharge?.Id, loggedInUser, msgs, dc);
 
                 // need to track a payment for each activity/activitygroup
                 checkoutObject.ParticipationObject.AddPayment(
                     amount: checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats,
                     registrant: checkoutObject.Registration.GetRegistrant(msgs, dc),
+                    transaction: transaction,
                     loggedInUser: loggedInUser,
                     msgs: msgs,
                     dc: dc);

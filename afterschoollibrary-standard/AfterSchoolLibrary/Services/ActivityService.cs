@@ -96,14 +96,18 @@ namespace AfterSchoolLibrary
                 dc);
         }
 
-        public static List<SubscriptionPlan> GetPaymentPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<SubscriptionPlan> GetActivePaymentPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PaymentPlan, msgs, dc);
+            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.PaymentPlan, msgs, dc)
+                .Where(plan => plan.IsActive)
+                .ToList();
         }
 
-        public static List<SubscriptionPlan> GetSubscriptionPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<SubscriptionPlan> GetActiveSubscriptionPlans(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.Subscription, msgs, dc);
+            return SubscriptionPlan.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, SubscriptionPlanType.Subscription, msgs, dc)
+                .Where(plan => plan.IsActive)
+                .ToList();
         }
 
         public static void CreateSampleActivity(Account account, SystemMessages msgs, DatabaseConnection dc = null)

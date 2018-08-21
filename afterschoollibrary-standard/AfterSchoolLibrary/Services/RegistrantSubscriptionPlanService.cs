@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -44,18 +45,16 @@ namespace AfterSchoolLibrary.Services
         public static int GetPaymentCount(this RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc);
-            return ActivityPayment.GetCount(
-                criterias: new System.Collections.Hashtable()
-                {
-                    { "ParticipationObjectId", plan.ParticipationObjectId.Value },
-                    { "ParticipationObjectTypeId", (int)plan.ParticipationObjectTypeId },
-                    { "RegistrantId", registrantSubscriptionPlan.RegistrantId.Value },
-                },
-                msgs: msgs,
-                dc: dc);
+            return ActivityPayment.LoadByParticipationObjectByRegistrant(
+                plan.ParticipationObjectId.Value,
+                plan.ParticipationObjectTypeId,
+                registrantSubscriptionPlan.RegistrantId.Value,
+                msgs,
+                dc)
+                .Count(payment => payment.Amount.Value > 0);
         }
 
-        public static ActivityPayment AddPayment(this RegistrantSubscriptionPlan registrantSubscriptionPlan, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static ActivityPayment AddPayment(this RegistrantSubscriptionPlan registrantSubscriptionPlan, Transaction transaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs, dc);
 
@@ -66,6 +65,7 @@ namespace AfterSchoolLibrary.Services
                 Amount = amount,
                 RegistrantId = registrantSubscriptionPlan.RegistrantId,
                 AccountId = plan.PlanOwnerAccountId,
+                TransactionId = transaction.ID,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
