@@ -558,8 +558,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
 
-                        if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsNotEmpty())
+                        if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
                         {
+
                             //check if students is registered for another team on the league
                             foreach (var otherTeam in activities)
                             {
@@ -571,10 +572,6 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
 
                             }
-                        }
-
-                        if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
-                        {
 
                             //check if the student is already registered for this team
                             if (RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsEmpty())
