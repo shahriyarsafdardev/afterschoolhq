@@ -316,7 +316,10 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(DefaultTransactionTypes(adc));
+
+                    amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
+
+                    // amsgs.AddRange(DefaultTransactionTypes(adc));
 
                     //amsgs.AddRange(UpdateActivityPayment(adc));
                     //amsgs.AddRange(UpdateInviteCodes(adc));
@@ -363,6 +366,37 @@ namespace AfterSchoolLibrary
                     msgs.AddRange(fmsgs);
                 }
             );            
+
+            return msgs;
+        }
+
+        public static SystemMessages FixRegistrationAccountActivityGroup(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var registrations = Registration.Load(
+                criterias: new Hashtable() { { "AccountActivityGroupId", DBNull.Value } },
+                msgs: msgs,
+                dc: dc
+            );
+
+            registrations.Where(registration => registration.ActivityGroupId.HasValue)
+                .ToList()
+                .ForEach(registration =>
+                {
+                    var activityGroup = registration.GetActivityGroup(msgs, dc);
+
+                    if (activityGroup.AccountId != registration.AccountId)
+                    {
+                        var account = registration.GetAccount(dc);
+                        var aag = activityGroup.GetAccountActivityGroup(account, msgs, dc);
+
+                        if (aag.IsNotEmpty())
+                        {
+                            registration.AccountActivityGroupId = aag.ID;
+                            msgs.AddRange(registration.Save(dc));
+                        }
+                    }
+                });            
 
             return msgs;
         }

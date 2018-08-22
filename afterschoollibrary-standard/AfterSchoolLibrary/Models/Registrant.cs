@@ -463,7 +463,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
         
-        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -472,6 +472,7 @@ namespace AfterSchoolLibrary
                 AccountId = ownerAccountId,
                 RegistrantId = this.ID,
                 ActivityGroupId = activityGroupId,
+                AccountActivityGroupId = accountActivityGroupId,
                 RegistrationPeriodId = periodId,
                 CompletionStatusId = completionStatus,
                 CreateDate = DateTime.UtcNow,

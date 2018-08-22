@@ -1205,6 +1205,7 @@ namespace AfterSchoolLibrary
                             var newRegistration = registrant.AddRegistration(
                                 account.ID.Value, 
                                 copy.ActivityGroupId, 
+                                copy.AccountActivityGroupId,
                                 null,
                                 RegistrationCompletionStatus.RequiresParentSignature, 
                                 loggedInUserId,
