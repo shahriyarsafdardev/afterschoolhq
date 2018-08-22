@@ -346,7 +346,7 @@ namespace AfterSchoolLibrary
 
         public int GetActivityCount(ActivityType? activityType = null, bool? isArchived = null, bool? isDeleted = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.GetCountByActivityGroupId(this.ID.Value, activityType, isArchived, isDeleted, msgs, dc);
+            return Activity.GetCountByAccountActivityGroupId(this.ID.Value, activityType, isArchived, isDeleted, msgs, dc);
         }
 
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
