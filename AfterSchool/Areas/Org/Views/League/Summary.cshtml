@@ -7,7 +7,7 @@
 
     decimal totalPaid = 0;
     int registrationCount = registrations.Count();
-    var activityCount = Model.GetActivityCount(Model.IsArchived, false);
+    var activityCount = Model.GetActivityCount(null, Model.IsArchived, false);
 
     if (registrations.Where(x => x.DatePaid.HasValue).Any())
     {

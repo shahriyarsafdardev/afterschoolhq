@@ -55,30 +55,22 @@ namespace AfterSchoolLibrary
             return ActivityForm.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, bool? isArchived, bool? isDeleted, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (user.IsEmpty() || new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }.Contains(userType))
-            {
-                return Activity.LoadByAccountId(account.ID.Value, null, null, isArchived, isDeleted, start, length, msgs, dc).ToList();
-            }
-            else
-            {
-                return Activity.LoadByAccountId(account.ID.Value, null, null, isArchived, isDeleted, start, length, msgs, dc)
+            if (user.IsEmpty() || userType.In(new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }))
+                return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, start, length, msgs, dc).ToList();
+
+            return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, start, length, msgs, dc)
                     .Where(activity => user.HasAccessToActivity(activity, msgs, dc))
                     .ToList();
-            }
         }
 
-        public static int GetActivityCount(this Account account, UserType userType, WebUser user, bool? isArchived, bool? isDeleted, DatabaseConnection dc = null)
+        public static int GetActivityCount(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (user.IsEmpty() || new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }.Contains(userType))
-            {
-                return Activity.GetCountByAccountId(account.ID.Value, null, isArchived, isDeleted, dc: dc);
-            }
-            else
-            {
-                return account.GetActivities(userType, user, isArchived, isDeleted, dc: dc).Count();
-            }
+            if (user.IsEmpty() || userType.In(new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }))
+                return Activity.GetCountByAccountId(account.ID.Value, null, activityType, isArchived, isDeleted, msgs, dc);
+
+            return account.GetActivityCount(userType, user, activityType, isArchived, isDeleted, msgs, dc);
         }
 
         public static int SearchContactCount(this Account account, string searchtext, int? contactListId, DatabaseConnection dc = null)

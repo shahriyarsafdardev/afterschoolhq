@@ -464,14 +464,14 @@ namespace AfterSchoolLibrary
         }
 
         private List<Activity> _Activities = null;
-        public List<Activity> GetActivities(DatabaseConnection dc = null)
+        public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetActivities(false, false, null, null, false, dc: dc);
+            return GetActivities(null, false, false, null, null, false, msgs, dc);
         }
-        public List<Activity> GetActivities(bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, DatabaseConnection dc = null)
+        public List<Activity> GetActivities(ActivityType? activityType, bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Activities.IsEmpty() || forceReload)
-                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, IsArchived, isDeleted, start, length, dc: dc);
+                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, activityType, IsArchived, isDeleted, start, length, msgs, dc);
 
             return _Activities;
         }
@@ -523,7 +523,7 @@ namespace AfterSchoolLibrary
 
         public int GetTotalSeatsLeft(DatabaseConnection dc = null)
         {
-            return this.GetActivities(false, false, null, null, false, dc: dc).Sum(x => x.SeatsAvailable.Value) - this.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved, dc: dc);
+            return this.GetActivities(null, false, false, null, null, false, dc: dc).Sum(x => x.SeatsAvailable.Value) - this.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved, dc: dc);
         }
 
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
@@ -573,18 +573,18 @@ namespace AfterSchoolLibrary
         //    return msgs;
         //}
 
-        public int GetActivityCount(bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public int GetActivityCount(ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return Activity.GetCountByActivityGroupId(this.ID.Value, isArchived, isDeleted, msgs, dc);
+                return Activity.GetCountByActivityGroupId(this.ID.Value, activityType, isArchived, isDeleted, msgs, dc);
 
             return 0;
         }
 
-        public int GetActivityCountByAccountId(int accountId, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public int GetActivityCountByAccountId(int accountId, ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return Activity.GetCountByAccountId(accountId, this.ID, isArchived, isDeleted, msgs, dc);
+                return Activity.GetCountByAccountId(accountId, this.ID, activityType, isArchived, isDeleted, msgs, dc);
 
             return 0;
         }
@@ -598,11 +598,20 @@ namespace AfterSchoolLibrary
             return _Account;
         }
 
+        public RegistrationPeriod GetLatestRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var period = this.GetCurrentOrNextRegistrationPeriod(msgs, dc: dc);
+            if (period.IsEmpty())
+                period = GetRegistrationPeriods(msgs, dc: dc).OrderByDescending(p => p.EndDateTime).FirstOrDefault();
+
+            return period;
+        }
+
         public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var period = this.GetCurrentRegistrationPeriod(msgs, dc: dc);
             if (period.IsEmpty())
-                return GetNextRegistrationPeriod(msgs, dc: dc);
+                period = GetNextRegistrationPeriod(msgs, dc: dc);
 
             return period;
         }
@@ -802,7 +811,7 @@ namespace AfterSchoolLibrary
                         group.LastModifiedBy = loggedInUser.ID;
                         amsgs.AddRange(group.Save(adc));
                         
-                        group.GetActivities(false, false, null, null, false, adc)
+                        group.GetActivities(null, false, false, null, null, false, amsgs, adc)
                         .ForEach(activity => {
                             activity.RegistrationModeId = group.RegistrationModeId;
                             activity.GenderRestriction = group.GenderRestriction;
@@ -1160,7 +1169,7 @@ namespace AfterSchoolLibrary
                     });
 
                     // activities
-                    this.GetActivities(adc).ForEach(activity => {
+                    this.GetActivities(amsgs, adc).ForEach(activity => {
                         var newact = activity.Copy(activity.Name, true, loggedInUserId, amsgs, dc: adc);
                         newact.ActivityGroupId = group.ID;
                         newact.ActivityScheduleId = null;

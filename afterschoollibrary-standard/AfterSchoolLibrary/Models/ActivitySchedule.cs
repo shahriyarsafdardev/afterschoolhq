@@ -578,19 +578,19 @@ namespace AfterSchoolLibrary
 
         }
 
-        public List<Activity> GetActivities(DatabaseConnection dc = null)
+        public List<Activity> GetActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.LoadByActivityScheduleId(this.ID.Value, dc: dc);
+            return Activity.LoadByActivityScheduleId(this.ID.Value, msgs, dc);
         }
 
-        public Account GetAccount(DatabaseConnection dc = null)
+        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(this.AccountId.Value, dc: dc);
+            return Account.Load(this.AccountId.Value, msgs, dc);
         }
 
-        public ActivityGroup GetActivityGroup(DatabaseConnection dc = null)
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
+            return ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
         }
 
         #endregion

@@ -22,8 +22,9 @@ namespace AfterSchool.Models
             var activities = accountActivityGroup.IsEmpty() ? activityGroup.GetActivities() : accountActivityGroup.GetActivities();
             activities = activities.Where(a => a.ID.Value != activity.ID.Value).ToList();
 
-            // var registrants = LoadEditStudentsViewBag(activity);
+            var period = activity.GetCurrentRegistrationPeriod();
 
+            // var registrants = LoadEditStudentsViewBag(activity);
 
             Database.ExecuteTransaction
             (
@@ -31,33 +32,41 @@ namespace AfterSchool.Models
                 {
                     registrants.ForEach(registrant =>
                     {
+                        var registration = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                            accountActivityGroup.ID.Value, 
+                            ParticipationObjectType.AccountActivityGroup, 
+                            registrant.ID.Value, 
+                            amsgs, 
+                            adc)
+                            .GetRegistration(amsgs, adc);
+
                         var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
 
                         if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
                         {
-
                             //check if students is registered for another team on the league
                             foreach (var otherTeam in activities)
                             {
                                 if (RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsNotEmpty())
                                 {
-                                    var otherRegAct = RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
-                                    var otherRegistration = otherRegAct.GetRegistration(adc);
-                                    amsgs.AddRange(otherRegistration.RemoveParticipation(otherTeam.ID.Value, ParticipationObjectType.Activity, adc));
+                                    //var otherRegAct = RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
+                                    //var otherRegistration = otherRegAct.GetRegistration(amsgs, adc);
+                                    amsgs.AddRange(registration.RemoveParticipation(otherTeam.ID.Value, ParticipationObjectType.Activity, adc));
                                 }
 
                             }
 
-                            //check if the student is already registered for this team
+                            //check if the student is not already registered for this team
                             if (RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsEmpty())
                             {
-                                var registration = registrant.AddRegistration(
-                                    SessionVariables.CurrentAccount.ID.Value,
-                                    activity.ActivityGroupId,
-                                    RegistrationCompletionStatus.Completed,
-                                    SessionVariables.LoggedInUser.ID.Value,
-                                    amsgs,
-                                    adc);
+                                //var registration = registrant.AddRegistration(
+                                //    SessionVariables.CurrentAccount.ID.Value,
+                                //    activity.ActivityGroupId,
+                                //    period?.ID,
+                                //    RegistrationCompletionStatus.Completed,
+                                //    SessionVariables.LoggedInUser.ID.Value,
+                                //    amsgs,
+                                //    adc);
 
                                 // manages seats and create registrantactivity record
                                 Registration.ProcessRegistration(
@@ -76,8 +85,7 @@ namespace AfterSchool.Models
                         }
                         else if (!Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsNotEmpty())
                         {
-                            var registration = ra.GetRegistration(adc);
-                            amsgs.AddRange(registration.RemoveParticipation(activity.ID.Value, ParticipationObjectType.Activity, adc));
+                            amsgs.AddRange(ra.GetRegistration(amsgs, adc).RemoveParticipation(activity.ID.Value, ParticipationObjectType.Activity, adc));
                         }
                     });
 

@@ -5,7 +5,7 @@
     var registrations = Model.GetCurrentRegistrations();
     var totalPaid = (decimal)ViewBag.TotalPaid;
     int registrationCount = Registration.TotalCurrentRegistrationsCount(Model.ID.Value);
-    var activityCount = Model.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, null, false);
+    var activityCount = Model.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, null, false);
     var dates = registrations.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
     var classes = Model.GetCompletedAttendance();
@@ -66,20 +66,48 @@
 
             @if (activityCount == 0)
             {
-                <div class="widget">
-                    <div class="widget-head">
-                        <h1>@Model.Name</h1>
-                    </div>
-                    <div class="widget-tile">
-                        <hr />
-                        <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
-                        <p>You haven't created any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(ActivityType.Activity).ToLower()</a>.</p>
-                        <p>&nbsp;</p>
-                        <p>
-                            <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(ActivityType.Activity) &raquo;</a>
-                        </p>
+                <div class="col-md-6 col-sm-12">
+                    <div class="widget">
+                        <div class="widget-head">
+                            <h1>@UILabel.ActivityLabel(ActivityType.Activity, true)</h1>
+                        </div>
+                        <div class="widget-tile">
+                            <hr />
+                            <p>You haven't created any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() yet. In order to get started, <a href="@addUrl">create your first @UILabel.ActivityLabel(ActivityType.Activity).ToLower()</a>.</p>
+                            <p>&nbsp;</p>
+                            <p>
+                                <a href="@addUrl" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(ActivityType.Activity) &raquo;</a>
+                            </p>
+                        </div>
                     </div>
                 </div>
+
+                if (SessionVariables.CurrentAccount.GetExternalLeagueCount() > 0)
+                {
+                    <div class="col-md-6 col-sm-12">
+                        <div class="widget">
+                        <div class="widget-head">
+                            <h1>Leagues</h1>
+                        </div>
+                        <div class="widget-tile">
+                            <hr />
+                            @if (hasOutstandingLeagueInvites)
+                            {
+                                <p>You have new invites to join leagues. <a href="@Url.Action("indexexternal", "league")">Review league invites</a>.</p>
+                            }
+                            else
+                            {
+                                <p>You have league teams to manage.</p>
+                            }
+                            <p>&nbsp;</p>
+                            <p>
+                                <a href="@Url.Action("indexexternal", "league")" class="btn btn-primary btn-lg">Manage your teams &raquo;</a>
+                            </p>
+                        </div>
+                    </div>
+                    </div>
+                }
+
             }
             else
             {

@@ -1765,7 +1765,7 @@ namespace AfterSchoolLibrary
                         completionStatusId in ({ValidCompletionStatus.ToArray().ToStringArray().ToStringList()}) and
                         (
                             select count(ra.id) 
-                            from RegistrationActivity ra
+                            from RegistrantActivity ra
                                 Inner Join Activity a on ra.ActivityId = a.ID
                                 Left Outer Join ActivityGroup ag on a.ActivityGroupid = ag.ID
                             where 
@@ -1779,7 +1779,8 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.UseDistinct = false;
-            DataTable dt = dq.ExecuteSelect(sql);
+
+            var dt = dq.ExecuteSelect(sql);
             if (dt.Rows.Any())
                 return dq.ExecuteSelect(sql).Rows[0][0].ToString().ToInteger();
 

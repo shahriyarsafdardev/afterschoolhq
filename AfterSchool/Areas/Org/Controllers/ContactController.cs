@@ -535,7 +535,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (period.ActivityGroupId.HasValue)
                     {
                         returnUrl = Url.Action("periods", "group", new { id = period.GetGroup().Uid });
-                        activities.AddRange(period.GetGroup(msgs).GetActivities(false, false, null, null));
+                        activities.AddRange(period.GetGroup(msgs).GetActivities(null, false, false, null, null));
                     }
                     else
                     {
@@ -548,7 +548,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 case "groupfromlists":
                     var group = ActivityGroup.LoadByUid(id.ToGuid());
                     returnUrl = Url.Action("lists", "contact");
-                    activities.AddRange(group.GetActivities(false, false, null, null));
+                    activities.AddRange(group.GetActivities(null, false, false, null, null));
 
                     break;
             }
@@ -631,7 +631,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var activityIds = group.GetActivities(false, false, null, null, false, adc)
+                        var activityIds = group.GetActivities(null, false, false, null, null, false, amsgs, adc)
                             .Where(x => Request["activity-" + x.ID.Value.ToString()].IsNotBlank())
                             .Select(x => x.ID.Value)
                             .ToList();

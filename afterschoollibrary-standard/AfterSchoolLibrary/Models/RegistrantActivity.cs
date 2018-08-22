@@ -524,10 +524,10 @@ namespace AfterSchoolLibrary
         }
 
         private Registration _Registration = null;
-        public Registration GetRegistration(DatabaseConnection dc = null)
+        public Registration GetRegistration(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Registration.IsEmpty() && this.RegistrationId.HasValue)
-                _Registration = Registration.Load(this.RegistrationId.Value, dc: dc);
+                _Registration = Registration.Load(this.RegistrationId.Value, msgs, dc);
 
             return _Registration;
         }

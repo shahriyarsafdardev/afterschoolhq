@@ -42,7 +42,7 @@
             {
                 foreach (var registration in Model)
                 {
-                    var editLink = Url.Action(editAction, editController, new { id = registration.Uid.ToString(), returnUrl = returnUrl });
+                    var editLink = Url.Action(editAction, editController, new { id = registration.Uid.ToString(), returnUrl });
                     var allRegistrations = registration.GetRelatedRegistrations();
                     allRegistrations.Add(registration);
                     var firstRegistration = allRegistrations.OrderBy(x => x.ID).FirstOrDefault();

@@ -27,9 +27,9 @@ namespace AfterSchoolLibrary
         {
             var roundDates = schedule.GetInstances(false, msgs, dc);
             var season = new Season() { ActivityGroup = league, byesPerTeam = new List<KeyValuePair<int, int>>() };
-            var ByesInWeeks = WeeklyByeCountCalculator(roundDates.Count, league.GetActivityCount(null, null, msgs, dc) * ByeCountPerTeam);
+            var ByesInWeeks = WeeklyByeCountCalculator(roundDates.Count, league.GetActivityCount(ActivityType.Team, null, null, msgs, dc) * ByeCountPerTeam);
             var datesForByes = MiddleOutSort(roundDates.Count);
-            var teams = league.GetActivities(dc);
+            var teams = league.GetActivities(msgs, dc);
             var byeCountPerWeekOrderedList = new List<KeyValuePair<int, int>>();
             season.Rounds = new List<List<TeamMatch>>();
             this.Rounds = new List<List<TeamMatch>>();

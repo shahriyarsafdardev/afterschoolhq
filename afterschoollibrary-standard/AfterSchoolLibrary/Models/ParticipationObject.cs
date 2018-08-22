@@ -329,6 +329,20 @@ namespace AfterSchoolLibrary
             return null;
         }
 
+        public RegistrationPeriod GetLatestRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+                return GetActivity().GetLatestRegistrationPeriod(msgs, dc);
+
+            if (IsActivityGroup())
+                return GetActivityGroup().GetLatestRegistrationPeriod(msgs, dc);
+
+            if (IsAccountActivityGroup())
+                return GetAccountActivityGroup().GetLatestRegistrationPeriod(msgs, dc);
+
+            return null;
+        }
+
         public bool IsActivity()
         {
             return ObjectType == ParticipationObjectType.Activity;

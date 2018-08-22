@@ -107,38 +107,63 @@
                             </div>
                         </div>
 
-                        @foreach (var ra in registrantActivities.OrderBy(x => x.Day))
+                        @foreach (var ra in registrantActivities)
                         {
                             var participationObject = ra.GetParticipationObject();
                             var dayText = "";
                             var schedule = ra.GetSchedule();
-                            
+
                             if (schedule.IsNotEmpty())
                             {
                                 dayText = schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ", " and ");
                             }
-                            
+
+                            var poController = "";
+
+                            if (participationObject.IsActivity())
+                            {
+                                var activity = participationObject.GetActivity();
+                                if (activity.ActivityTypeId == ActivityType.Team)
+                                {
+                                    poController = "leagueactivity";
+                                }
+                                else
+                                {
+                                    poController = "activity";
+                                }
+                            }
+                            else if (participationObject.IsAccountActivityGroup())
+                            {
+                                poController = "league";
+                            }
+                            else if (participationObject.IsActivityGroup())
+                            {
+                                poController = "group";
+                            }
+
+                            var poLink = Url.Action("summary", poController, new { id = participationObject.Uid });
+
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <div class="btn-group pull-right">
                                         <button class="btn btn-default md-trigger" data-modal="modal-move-seat" onclick="moveSeat(@ra.ID, @((int)ra.RegistrationAssignmentTypeId))"><i class="s7-gleam"></i> <span>Move Seat</span></button>
                                         <button class="btn btn-default md-trigger" data-modal="modal-confirmation-activity" onclick="deleteActivity(@ra.ActivityId, '@UI.JavascriptSafeString(participationObject.Name)')"><i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span></button>
                                     </div>
-                                    <a href="@Url.Action("summary", "activity", new { id = participationObject.Uid })">
+                                    <a href="@poLink">
                                         @participationObject.Name
                                     </a>                                    
                                 </div>
                                 <div class="panel-body">
                                     <div class="table-responsive">
                                         <table class="table table-striped">
-                                            @if(ra.Day != DayOfWeekASL.NotSet)
+                                            @if(dayText.IsNotEmpty())
                                             {
                                                 <tr>
                                                     <td width="33%" class="text-right">Day</td>
                                                     <td>@dayText</td>
                                                 </tr>
                                             }
-                                            @if (account.HasFeature(FeatureType.ManageActivityGroups) && ra.PreferenceNumber.HasValue)
+                                            @if (account.HasFeature(FeatureType.ManageActivityGroups) && ra.PreferenceNumber.HasValue && false)
                                             {
                                                 <tr>
                                                     <td class="text-right">Choice Number</td>

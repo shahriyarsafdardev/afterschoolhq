@@ -339,19 +339,24 @@ namespace AfterSchoolLibrary
             return Registration.GetCount(criterias: new Hashtable() { { "AccountActivityGroupId", this.ID.Value } }, dc: dc);
         }
 
-        public List<Activity> GetActivities(bool? isArchived = null, bool? isDeleted = null, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public List<Activity> GetActivities(ActivityType? activityType = null, bool? isArchived = null, bool? isDeleted = null, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.LoadByAccountId(this.AccountId.Value, null, this.ID, isArchived, isDeleted, start, length, msgs, dc);
+            return Activity.LoadByAccountId(this.AccountId.Value, null, this.ID, activityType, isArchived, isDeleted, start, length, msgs, dc);
         }
 
-        public int GetActivityCount(bool? isArchived = null, bool? isDeleted = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public int GetActivityCount(ActivityType? activityType = null, bool? isArchived = null, bool? isDeleted = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Activity.GetCountByActivityGroupId(this.ID.Value, isArchived, isDeleted, msgs, dc);
+            return Activity.GetCountByAccountActivityGroupId(this.ID.Value, activityType, isArchived, isDeleted, msgs, dc);
         }
 
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: assignmentType, participationObjectId: this.ID.Value, participationObjectType: ParticipationObjectType.AccountActivityGroup, msgs: msgs, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(
+                assignmentType: assignmentType, 
+                participationObjectId: this.ID.Value, 
+                participationObjectType: ParticipationObjectType.AccountActivityGroup, 
+                msgs: msgs, 
+                dc: dc);
         }
 
         public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)

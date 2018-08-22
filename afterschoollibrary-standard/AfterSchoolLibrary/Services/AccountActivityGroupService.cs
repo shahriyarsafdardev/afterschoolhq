@@ -44,6 +44,15 @@ namespace AfterSchoolLibrary.Services
             return ActivityGroup.Load(aag.ActivityGroupId.Value, msgs, dc);
         }
 
+        public static RegistrationPeriod GetLatestRegistrationPeriod(this AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var period = aag.GetCurrentOrNextRegistrationPeriod(msgs, dc: dc);
+            if (period.IsEmpty())
+                period = aag.GetRegistrationPeriods(msgs, dc: dc).OrderByDescending(p => p.EndDateTime).FirstOrDefault();
+
+            return period;
+        }
+
         public static RegistrationPeriod GetCurrentOrNextRegistrationPeriod(this AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var period = aag.GetCurrentRegistrationPeriod(msgs, dc);
@@ -57,7 +66,7 @@ namespace AfterSchoolLibrary.Services
         {
             var now = aag.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return aag.GetRegistrationPeriods(dc: dc)
+            return aag.GetRegistrationPeriods(msgs, dc)
                 .Where(x => now < x.StartDateTime.Value)
                 .OrderBy(x => x.StartDateTime.Value)
                 .FirstOrDefault();
@@ -67,7 +76,7 @@ namespace AfterSchoolLibrary.Services
         {
             var now = aag.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return aag.GetRegistrationPeriods(dc: dc)
+            return aag.GetRegistrationPeriods(msgs, dc)
                 .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
                 .FirstOrDefault();
         }

@@ -15,7 +15,7 @@
         publishClass = "btn-success";
     }
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
-    var activityCount = Model.GetActivityCount(null, false);
+    var activityCount = Model.GetActivityCount(null, null, false);
 }
 @if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0)
 {
@@ -35,7 +35,7 @@
 
             @if (ispublished)
             {
-                <a href="@Url.Action("leagueActivities", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
+                <a href="@Url.Action("leagueActivities", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "leagueactivities" ? "-active" : "")">
                     <i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
                 </a>
                 <a href="@Url.Action("registrations", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "registrations" ? "-active" : "")">
