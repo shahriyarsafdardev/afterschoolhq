@@ -734,7 +734,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var registration = student.AddRegistration(
                             ownerAccountId: SessionVariables.CurrentAccount.ID.Value,
                             activityGroupId: league.ID,
-                            periodId: period.ID,
+                            periodId: period?.ID,
                             completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
                             loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                             msgs: amsgs,
@@ -759,7 +759,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             registrant: student,
                             seatsRequested: 1,
                             activityGroupId: league.ID,
-                            periodId: period.ID,
+                            periodId: period?.ID,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);
