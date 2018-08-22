@@ -946,6 +946,15 @@ namespace AfterSchoolLibrary
                 .FirstOrDefault();
         }
 
+        public RegistrationPeriod GetLatestRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var period = this.GetCurrentOrNextRegistrationPeriod(msgs, dc: dc);
+            if (period.IsEmpty())
+                period = this.GetRegistrationPeriods(msgs, dc: dc).OrderByDescending(p => p.EndDateTime).FirstOrDefault();
+
+            return period;
+        }
+
         public RegistrationPeriod GetCurrentOrNextRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var period = this.GetCurrentRegistrationPeriod(msgs, dc);

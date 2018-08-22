@@ -600,9 +600,7 @@ namespace AfterSchoolLibrary
 
         public RegistrationPeriod GetLatestRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var period = this.GetCurrentRegistrationPeriod(msgs, dc: dc);
-            if (period.IsEmpty())
-                period = GetNextRegistrationPeriod(msgs, dc: dc);
+            var period = this.GetCurrentOrNextRegistrationPeriod(msgs, dc: dc);
             if (period.IsEmpty())
                 period = GetRegistrationPeriods(msgs, dc: dc).OrderByDescending(p => p.EndDateTime).FirstOrDefault();
 
@@ -613,7 +611,7 @@ namespace AfterSchoolLibrary
         {
             var period = this.GetCurrentRegistrationPeriod(msgs, dc: dc);
             if (period.IsEmpty())
-                return GetNextRegistrationPeriod(msgs, dc: dc);
+                period = GetNextRegistrationPeriod(msgs, dc: dc);
 
             return period;
         }
