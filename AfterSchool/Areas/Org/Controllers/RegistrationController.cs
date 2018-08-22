@@ -53,7 +53,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
                 var groupList = ActivityGroup.LoadList(groupIds, msgs);
                 groupList.ForEach(x => {
-                    activityIds.AddRange(x.GetActivities(false, false, null, null).Select(y => y.ID.Value));
+                    activityIds.AddRange(x.GetActivities(null, false, false, null, null).Select(y => y.ID.Value));
                 });
             }
 
@@ -88,6 +88,7 @@ namespace AfterSchool.Areas.Org.Controllers
             activities = SessionVariables.CurrentAccount.GetActivities(
                 UserType.Administrator, 
                 SessionVariables.LoggedInUser,
+                null,
                 false, 
                 false)
                 .OrderBy(x => x.Name)
@@ -146,7 +147,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
                 var groupList = ActivityGroup.LoadList(groupIds, msgs);
                 groupList.ForEach(x => {
-                    activityIds.AddRange(x.GetActivities(false, false, null, null).Select(y => y.ID.Value));
+                    activityIds.AddRange(x.GetActivities(null, false, false, null, null).Select(y => y.ID.Value));
                 });
             }
 
@@ -451,9 +452,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var activities = new List<Activity>();
 
             if (registration.ActivityGroupId.HasValue)
-                activities = registration.GetActivityGroup().GetActivities(false, false, null, null, false);
+                activities = registration.GetActivityGroup().GetActivities(null, false, false, null, null, false);
             else
-                activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.LoggedInUser, false, false, null, null);
+                activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.LoggedInUser, null, false, false, null, null);
 
             ViewBag.Activities = activities.Where(x =>
                     x.ID.Value.NotIn(registrantActivities.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity)

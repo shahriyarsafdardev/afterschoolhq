@@ -21,10 +21,7 @@
             nextLink = Url.Action("index", controller, new { pn = paging.PageNumber + 1, rpp = Request["rpp"], archive = Request["archive"] });
         }
     }
-
-
 }
- 
     <p>League Invitations</p>
     <div class="table-responsive">
         <table class="table table-hover">
@@ -48,7 +45,7 @@
                 {
                     foreach (var pendingInvite in pendingInvites)
                     {
-                        var period = pendingInvite.GetCurrentOrNextRegistrationPeriod();
+                        var period = pendingInvite.GetLatestRegistrationPeriod();
                         <tr>
                             <td>
                                 <a href="@Url.Action("summary", controller, new {id = pendingInvite.Uid})" class=" hide btn btn-default btn-sm"><i class="icon icon-left s7-date"></i> View</a>

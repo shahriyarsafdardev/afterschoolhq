@@ -1,20 +1,21 @@
 ﻿@model AfterSchoolLibrary.RegistrantActivity
 @{
-    ViewBag.Title = Model.AccountName;
+    ViewBag.Title = SessionVariables.CurrentAccount.Name;
+    var activity = Model.GetActivity();
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
-@{Html.RenderPartial("OrgAccountHeader", Model.ActivityAccountId.ToString());}
+@{Html.RenderPartial("OrgAccountHeader", SessionVariables.CurrentAccount.ID.ToString());}
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_LeagueActivityHeader.cshtml", Model.ToActivity(true));}
+    @{Html.RenderPartial("~/Views/Shared/_LeagueActivityHeader.cshtml", activity);}
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.ActivityName + " - " + UILabel.RegistrantLabel() +  " Detail"); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", $"{activity.Name} - {UILabel.RegistrantLabel()} Detail"); }
         </div>
         <div class="panel-body">
 
@@ -23,7 +24,7 @@
                 @{Html.RenderPartial("~/Views/Shared/_RegistrantDetail.cshtml", Model,
                                 new ViewDataDictionary() {
                                   { "BackToListAction", "Registrants" },
-                                  { "BackToListController", "Activity" },
+                                  { "BackToListController", "LeagueActivity" },
                                   { "ShowPaymentForm", true },
                                   { "IsActivityLeader", ViewBag.IsActivityLeader }
                                 }

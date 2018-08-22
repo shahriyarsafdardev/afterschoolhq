@@ -9,7 +9,6 @@
     var reservedSeats = (int)ViewBag.ReservedSeats;
     var waitingListSeats = (int)ViewBag.WaitingListSeats;
     var applicationSeats = (int)ViewBag.ApplicationSeats;
-    var returnUrl = ViewBag.ReturnUrl;
 
     decimal totalPaid = 0;
     if (registrations.Where(x => x.DatePaid.HasValue).Count() > 0)
@@ -116,7 +115,7 @@
                { "EditController", "registration" },
                { "Account", account },
                { "Paging", paging },
-               { "ReturnUrl", returnUrl }
+               { "ReturnUrl", Request.Url.ToString() }
             });}
 
         </div>

@@ -280,19 +280,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalCount = 0;
 
             registrations = group.GetRegistrations(start, length);
-            //probably a cleaner way to do this
-            var regsNoDupes = registrations.DistinctBy(r => r.Name).ToList();
             totalCount = group.GetRegistrationCount();
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
-            {
                 msgs.Add("An email will be sent shortly", MessageType.Success);
-            }
 
             ViewBag.Messages = msgs;
-            LoadRegistrationsViewBag(group, regsNoDupes);
+            LoadRegistrationsViewBag(group, registrations);
 
             ViewBag.PagingModel = new PagingModel()
             {
@@ -354,8 +350,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
             var account = SessionVariables.CurrentAccount;
-            var activities = accountActivityGroup.IsEmpty() ? group.GetActivities(isArchived, false, start, length) : accountActivityGroup.GetActivities(isArchived, false, start, length);
-            var totalCount = accountActivityGroup.IsEmpty() ? group.GetActivityCount(isArchived, false) : accountActivityGroup.GetActivityCount(isArchived, false);
+            var activities = accountActivityGroup.IsEmpty() ? group.GetActivities(null, isArchived, false, start, length) : accountActivityGroup.GetActivities(null, isArchived, false, start, length);
+            var totalCount = accountActivityGroup.IsEmpty() ? group.GetActivityCount(null, isArchived, false) : accountActivityGroup.GetActivityCount(null, isArchived, false);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var finalActivities = activities.OrderBy(x => x.Name).ToList();
 
@@ -363,7 +359,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Activities = finalActivities;
             ViewBag.NeedToUpgrade = finalActivities.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.Messages = new SystemMessages();
-            ViewBag.HasArchivedActivities = accountActivityGroup.IsEmpty() ? group.GetActivityCount(true, false) > 0 : accountActivityGroup.GetActivityCount(true, false) > 0;
+            ViewBag.HasArchivedActivities = accountActivityGroup.IsEmpty() ? group.GetActivityCount(null, true, false) > 0 : accountActivityGroup.GetActivityCount(null, true, false) > 0;
 
             ViewBag.PagingModel = new PagingModel()
             {
@@ -720,6 +716,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         var location = SessionVariables.CurrentAccount.GetDefaultLocation(amsgs, adc);
+                        var period = aag.GetCurrentRegistrationPeriod(amsgs, adc);
 
                         // create student registrant record associated to this account
                         student = SessionVariables.CurrentAccount.CreateRegistrant(
@@ -737,6 +734,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var registration = student.AddRegistration(
                             ownerAccountId: SessionVariables.CurrentAccount.ID.Value,
                             activityGroupId: league.ID,
+                            periodId: period.ID,
                             completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
                             loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                             msgs: amsgs,
@@ -761,7 +759,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             registrant: student,
                             seatsRequested: 1,
                             activityGroupId: league.ID,
-                            periodId: aag.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
+                            periodId: period.ID,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);

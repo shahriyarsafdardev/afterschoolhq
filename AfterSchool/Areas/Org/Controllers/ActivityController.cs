@@ -80,15 +80,15 @@ namespace AfterSchool.Areas.Org.Controllers
             if (group.IsGuid())
             {
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                totalActivityCount = activityGroup.GetActivityCount(isArchived, false);
-                activities = activityGroup.GetActivities(isArchived, false, start, length);
-                hasArchivedActivities = activityGroup.GetActivityCount(true, false) > 0;
+                totalActivityCount = activityGroup.GetActivityCount(ActivityType.Activity, isArchived, false);
+                activities = activityGroup.GetActivities(ActivityType.Activity, isArchived, false, start, length);
+                hasArchivedActivities = activityGroup.GetActivityCount(ActivityType.Activity, true, false) > 0;
             }
             else
             {
-                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, isArchived, false);
-                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, isArchived, false, start, length);
-                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, true, false) > 0;
+                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, isArchived, false);
+                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, isArchived, false, start, length);
+                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, true, false) > 0;
             }
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
@@ -1572,12 +1572,14 @@ namespace AfterSchool.Areas.Org.Controllers
                             }
 
                             var hasSeatsAvailable = activity.GetRegistrantCount(amsgs, adc) < activity.SeatsAvailable;
+                            var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
 
                             // TODO: need to verify if this really should be the master account. What is master
                             var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
                             var registration = registrant.AddRegistration(
                                 SessionVariables.CurrentAccount.ID.Value,
                                 activity.ActivityGroupId,
+                                period?.ID,
                                 RegistrationCompletionStatus.RequiresParentSignature,
                                 SessionVariables.LoggedInUser.ID.Value,
                                 amsgs,
@@ -1588,7 +1590,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 af.ActivityId.Value,
                                 ParticipationObjectType.Activity,
                                 RegistrationAssignmentType.Reserved,
-                                null,
+                                period?.ID,
                                 null,
                                 SessionVariables.LoggedInUser.ID.Value,
                                 amsgs, 
@@ -2054,6 +2056,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         var location = activity.GetLocation(amsgs, adc);
+                        var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
 
                         // create student registrant record associated to this account
                         student = SessionVariables.CurrentAccount.CreateRegistrant(
@@ -2071,6 +2074,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var registration = student.AddRegistration(
                             SessionVariables.CurrentAccount.ID.Value,
                             activity.ActivityGroupId,
+                            period?.ID,
                             RegistrationCompletionStatus.RequiresParentSignature,
                             SessionVariables.LoggedInUser.ID.Value,
                             amsgs,

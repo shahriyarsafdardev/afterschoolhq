@@ -57,7 +57,7 @@ namespace AfterSchoolLibrary.Services
         {
             var now = aag.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return aag.GetRegistrationPeriods(dc: dc)
+            return aag.GetRegistrationPeriods(msgs, dc)
                 .Where(x => now < x.StartDateTime.Value)
                 .OrderBy(x => x.StartDateTime.Value)
                 .FirstOrDefault();
@@ -67,7 +67,7 @@ namespace AfterSchoolLibrary.Services
         {
             var now = aag.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
 
-            return aag.GetRegistrationPeriods(dc: dc)
+            return aag.GetRegistrationPeriods(msgs, dc)
                 .Where(x => x.StartDateTime.Value <= now && now <= x.EndDateTime.Value)
                 .FirstOrDefault();
         }

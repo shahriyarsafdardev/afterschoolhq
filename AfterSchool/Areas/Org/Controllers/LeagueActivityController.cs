@@ -77,15 +77,15 @@ namespace AfterSchool.Areas.Org.Controllers
             if (group.IsGuid())
             {
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                totalActivityCount = activityGroup.GetActivityCount(isArchived, false);
-                activities = activityGroup.GetActivities(isArchived, false, start, length);
-                hasArchivedActivities = activityGroup.GetActivityCount(true, false) > 0;
+                totalActivityCount = activityGroup.GetActivityCount(null, isArchived, false);
+                activities = activityGroup.GetActivities(null, isArchived, false, start, length);
+                hasArchivedActivities = activityGroup.GetActivityCount(null, true, false) > 0;
             }
             else
             {
-                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, isArchived, false);
-                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, isArchived, false, start, length);
-                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, true, false) > 0;
+                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, null, isArchived, false);
+                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, null, isArchived, false, start, length);
+                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, null, true, false) > 0;
             }
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
@@ -1638,10 +1638,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             // TODO: need to verify if this really should be the master account. What is master
                             var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
+                            var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
 
                             var registration = registrant.AddRegistration(
                                 SessionVariables.CurrentAccount.ID.Value, 
-                                activity.ActivityGroupId, 
+                                activity.ActivityGroupId,
+                                period?.ID,
                                 RegistrationCompletionStatus.RequiresParentSignature,
                                 SessionVariables.LoggedInUser.ID.Value, 
                                 amsgs, 

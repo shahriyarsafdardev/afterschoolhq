@@ -1075,10 +1075,13 @@ namespace AfterSchool.Controllers
                         else if (participationObject.IsActivity())
                             activityGroupId = participationObject.GetActivity().ActivityGroupId;
 
+                        var period = participationObject.GetCurrentRegistrationPeriod(amsgs, adc);
+
                         registration = accountRegistrantCopy.AddRegistrationWithESignature(
                             ownerAccountId: participationObject.OwnerAccount.ID.Value,
                             activityGroupId: activityGroupId,
                             accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
+                            periodId: period?.ID,
                             esignature: signature,
                             completionStatus: RegistrationCompletionStatus.Started,
                             loggedInUserId: SessionVariables.LoggedInUser.ID.Value,

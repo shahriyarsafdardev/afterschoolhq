@@ -463,7 +463,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
         
-        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -472,6 +472,7 @@ namespace AfterSchoolLibrary
                 AccountId = ownerAccountId,
                 RegistrantId = this.ID,
                 ActivityGroupId = activityGroupId,
+                RegistrationPeriodId = periodId,
                 CompletionStatusId = completionStatus,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
@@ -487,7 +488,7 @@ namespace AfterSchoolLibrary
             return reg;
         }
 
-        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -497,6 +498,7 @@ namespace AfterSchoolLibrary
                 RegistrantId = this.ID,
                 ActivityGroupId = activityGroupId,
                 AccountActivityGroupId = accountActivityGroupId,
+                RegistrationPeriodId = periodId,
                 ESignature = esignature,
                 CompletionStatusId = completionStatus,
                 CreateDate = DateTime.UtcNow,

@@ -166,14 +166,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var schedule = ActivitySchedule.Load(id.ToInteger(), dc: adc);
-                        var currentActivities = schedule.GetActivities(adc);
-                        var activities = schedule.GetActivityGroup(adc).GetActivities(adc);
+                        var schedule = ActivitySchedule.Load(id.ToInteger(), amsgs, adc);
+                        var currentActivities = schedule.GetActivities(amsgs, adc);
+                        var activities = schedule.GetActivityGroup(amsgs, adc).GetActivities(amsgs, adc);
 
                         // remove
                         foreach (var item in currentActivities)
                         {
-                            if (!Request["activity-" + item.ID].IsNumber())
+                            if (!Request[$"activity-{item.ID}"].IsNumber())
                             {
                                 item.ActivityScheduleId = null;
                                 amsgs.AddRange(item.Save(adc));
@@ -183,7 +183,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         // add
                         foreach (var item in activities)
                         {
-                            if (Request["activity-" + item.ID].IsNumber())
+                            if (Request[$"activity-{item.ID}"].IsNumber())
                             {
                                 item.ActivityScheduleId = schedule.ID;
                                 amsgs.AddRange(item.Save(adc));
