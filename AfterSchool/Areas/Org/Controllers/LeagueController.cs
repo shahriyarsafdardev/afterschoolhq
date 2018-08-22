@@ -259,9 +259,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Registrations(string id, string pn, string rpp, string emailed)
         {
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var registrations = new List<Registration>();
             var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var registrations = new List<Registration>();
 
             int pageNumber = 1;
             int recordsPerPage = 10;
@@ -279,8 +280,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var length = recordsPerPage;
             var totalCount = 0;
 
-            registrations = group.GetRegistrations(start, length);
-            totalCount = group.GetRegistrationCount();
+            registrations = aag.GetRegistrations(start, length);
+            totalCount = aag.GetRegistrationCount();
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
@@ -734,6 +735,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var registration = student.AddRegistration(
                             ownerAccountId: SessionVariables.CurrentAccount.ID.Value,
                             activityGroupId: league.ID,
+                            accountActivityGroupId: aag?.ID,
                             periodId: period?.ID,
                             completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
                             loggedInUserId: SessionVariables.LoggedInUser.ID.Value,

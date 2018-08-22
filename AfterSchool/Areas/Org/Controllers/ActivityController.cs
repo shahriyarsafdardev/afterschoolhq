@@ -1579,6 +1579,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             var registration = registrant.AddRegistration(
                                 SessionVariables.CurrentAccount.ID.Value,
                                 activity.ActivityGroupId,
+                                activity.AccountActivityGroupId,
                                 period?.ID,
                                 RegistrationCompletionStatus.RequiresParentSignature,
                                 SessionVariables.LoggedInUser.ID.Value,
@@ -2074,6 +2075,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var registration = student.AddRegistration(
                             SessionVariables.CurrentAccount.ID.Value,
                             activity.ActivityGroupId,
+                            activity.AccountActivityGroupId,
                             period?.ID,
                             RegistrationCompletionStatus.RequiresParentSignature,
                             SessionVariables.LoggedInUser.ID.Value,
