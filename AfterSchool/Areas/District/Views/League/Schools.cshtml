@@ -43,18 +43,23 @@
                             <th></th>
                             <th>School</th>
                             <th>Status</th>
-                            <th class="text-center">Teams Registered</th>
+                            <th class="text-center">Teams Created</th>
+                            <th class="text-center">Teams Submitted</th>
                         </tr>
                         @foreach (var aag in invitedAccountActivityGroups)
                         {
-                            <tr>
-                                <td>
-                                    <a href="#" class="hide btn btn-default">View</a>
-                                </td>
-                                <td>@aag.AccountName</td>
-                                <td>@aag.InviteStatusId.ToString().SplitByUpperCase()</td>
-                                <td class="text-center">@Model.GetActivityCountByAccountId(aag.AccountId.Value, false, false)</td>
-                            </tr>
+                            var teams = aag.GetActivities();
+                            var submittedTeams = teams.Where(team => team.DateSubmittedToActivityGroup.HasValue);
+
+                        <tr>
+                            <td>
+                                <a href="#" class="hide btn btn-default">View</a>
+                            </td>
+                            <td>@aag.AccountName</td>
+                            <td>@aag.InviteStatusId.ToString().SplitByUpperCase()</td>
+                            <td class="text-center">@teams.Count()</td>
+                            <td class="text-center">@submittedTeams.Count()</td>
+                        </tr>
                         }
                     </table>
                 </div>
