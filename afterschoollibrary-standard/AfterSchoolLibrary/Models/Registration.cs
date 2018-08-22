@@ -1766,7 +1766,7 @@ namespace AfterSchoolLibrary
                         (
                             select count(ra.id) 
                             from RegistrantActivity ra
-                                Inner Join Activity a on ra.ActivityId = a.ID
+                                Inner Join Activity a on ra.ParticipationObjectId = a.ID and ParticipationObjectTypeId = {(int)ParticipationObjectType.Activity}
                                 Left Outer Join ActivityGroup ag on a.ActivityGroupid = ag.ID
                             where 
                                 ra.RegistrationId = r.ID and
@@ -1793,7 +1793,7 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            string sql = string.Format(@"
+            string sql = $@"
                     select 
 	                    distinct *
                     from 
@@ -1812,8 +1812,8 @@ namespace AfterSchoolLibrary
 			                    select r3.ID
 			                    from 
 				                    registration r3 inner join 
-				                    RegistrationActivity ra on r3.ID = ra.RegistrationId inner join 
-				                    Activity a on ra.activityid = a.id left outer join
+				                    RegistrantActivity ra on r3.ID = ra.RegistrationId inner join 
+				                    Activity a on ra.ParticipationObjectId = a.id and ra.ParticipationObjectTypeId = {(int)ParticipationObjectType.Activity} left outer join
 				                    ActivityGroup ag on ag.id = a.ActivityGroupId
 			                    where 
 				                    r3.AccountId = r.AccountId and
@@ -1823,7 +1823,7 @@ namespace AfterSchoolLibrary
 				                    )
 		                    )
 	                    ) and
-	                    r.AccountId = {0}", AccountId);
+	                    r.AccountId = {AccountId}";
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
