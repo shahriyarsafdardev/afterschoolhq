@@ -1,12 +1,14 @@
 ﻿@model AfterSchoolLibrary.Activity
 @{
-    
+
 
     var group = (ActivityGroup)ViewData["Group"];
     var mainColWidth = 10;
-    var registrantsPerColumn = 2;
+
     var registrants = (List<Registrant>)ViewData["Registrants"];
     var addedRegistrants = (List<Registrant>)ViewData["AddedRegistrants"];
+    var registrantsPerColumn = registrants.Count/3 + 1;
+    var addedRegistrantsPerColumn = addedRegistrants.Count / 3 + 1;
 }
 
 <div class="main-content">      
@@ -62,7 +64,7 @@
                     for (int i = 0; i < 3; i++)
                     {
                         <div class="col-md-4">
-                            @foreach (var registrant in addedRegistrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                            @foreach (var registrant in addedRegistrants.Skip(i * addedRegistrantsPerColumn).ToList().Take(addedRegistrantsPerColumn))
                             {
                                 <div class="am-checkbox">
                                     <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" checked />
