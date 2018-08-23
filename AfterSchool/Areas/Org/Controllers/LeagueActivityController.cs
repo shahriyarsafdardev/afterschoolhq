@@ -1943,9 +1943,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = activity.GetRegistrants()
-                                    .Where(x => x.Email.IsNotBlank() && !x.FirstRegistrantId.HasValue)
-                                    .OrderBy(x => x.FirstName)
-                                    .ToList();
+                .Where(x => x.Email.IsNotBlank()) // why?  && !x.FirstRegistrantId.HasValue
+                .OrderBy(x => x.FirstName)
+                .ThenBy(x => x.LastName)
+                .ToList();
             return View(activity);
         }
 
@@ -1966,7 +1967,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if(msgs.HasNoErrors())
             {
                 var registrantIds = activity.GetRegistrants()
-                    .Where(x => Request["registrant-" + x.ID.ToString()].IsNotBlank())
+                    .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
                 am = activity.AddMessage(subject, body, registrantIds, SessionVariables.LoggedInUser.ID.Value, msgs);

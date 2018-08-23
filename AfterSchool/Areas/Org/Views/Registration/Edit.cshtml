@@ -147,7 +147,11 @@
                                 <div class="panel-heading">
                                     <div class="btn-group pull-right">
                                         <button class="btn btn-default md-trigger" data-modal="modal-move-seat" onclick="moveSeat(@ra.ID, @((int)ra.RegistrationAssignmentTypeId))"><i class="s7-gleam"></i> <span>Move Seat</span></button>
-                                        <button class="btn btn-default md-trigger" data-modal="modal-confirmation-activity" onclick="deleteActivity(@ra.ActivityId, '@UI.JavascriptSafeString(participationObject.Name)')"><i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span></button>
+                                       
+                                        @if (participationObject.IsActivity() && participationObject.GetActivity().ActivityTypeId == ActivityType.Activity)
+                                        {
+                                            <button class="btn btn-default md-trigger" data-modal="modal-confirmation-activity" onclick="deleteActivity(@ra.ID, '@UI.JavascriptSafeString(participationObject.Name)')"><i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span></button>
+                                        }
                                     </div>
                                     <a href="@poLink">
                                         @participationObject.Name
@@ -256,10 +260,10 @@
         }
     }    
 
-    function deleteActivity(activity, name) {
+    function deleteActivity(ra, name) {
         $('#confirmation-activity-action').html('<strong>remove "' + name + '"</strong> from <strong>@selectedRegistration.ToRegistrant().Name</strong>');
         $('#confirmation-activity-additional-text').html('This cannot be undone');
-        $('#btnconfirm-activity').attr('href', '@Url.Action("RemoveActivity", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid.ToString(), returnUrl = Request["returnurl"] })&activity=' + activity);
+        $('#btnconfirm-activity').attr('href', '@Url.Action("RemoveActivity", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid.ToString(), returnUrl = Request["returnurl"] })&ra=' + ra);
     }
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {

@@ -255,7 +255,7 @@ namespace AfterSchoolLibrary
 
             if (msgs.HasNoErrors())
             {
-                var members = activity.GetTeamMembers(dc: dc);
+                var members = activity.GetTeamMembers(dc: dc).DistinctBy(member => member.WebUserId);
                 foreach (var member in members)
                 {
                     var body = am.Body;
@@ -268,7 +268,7 @@ namespace AfterSchoolLibrary
                         fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(member.WebUserEmail),
                         subject: am.Subject,
-                        body: string.Format("{0}{1}", body, Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message")),
+                        body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
                         replyTo: new SendGrid.Helpers.Mail.EmailAddress(
                             activity.ContactEmail, 
                             activity.ContactName),
@@ -293,7 +293,7 @@ namespace AfterSchoolLibrary
                 // send to account admin
                 SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Email.AppAdminEmailAddress, 
+                        Email.AppEmailAddress, 
                         $"CC: {account.Name} via {Utilities.AppName(account.IsAfterSchool)}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                     subject: am.Subject,
@@ -331,7 +331,7 @@ namespace AfterSchoolLibrary
 
                 var sendMsgs = SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Email.AppAdminEmailAddress, 
+                        Email.AppEmailAddress, 
                         $"{fromName} via {Utilities.AppName(account.IsAfterSchool)}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(amr.RegistrantEmail, amr.RegistrantDisplayName),
                     subject: this.Subject,
