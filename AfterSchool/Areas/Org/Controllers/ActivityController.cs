@@ -2015,6 +2015,23 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid(), msgs);
             var questions = activity.GetActiveForm(msgs).GetActiveQuestions(msgs);
 
+            questions.ForEach(question => {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantGrade:
+                    case QuestionDataType.RegistrantEthnicity:
+                    case QuestionDataType.RegistrantGender:
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        question.IsRequired = true;
+                        break;
+                    default:
+                        question.IsRequired = false;
+                        break;
+                }
+            });
+
             ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
             ViewBag.Messages = msgs;
 
@@ -2027,6 +2044,23 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid(), msgs);
             var questions = activity.GetActiveForm(msgs).GetActiveQuestions(msgs);
+
+            questions.ForEach(question => {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantGrade:
+                    case QuestionDataType.RegistrantEthnicity:
+                    case QuestionDataType.RegistrantGender:
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        question.IsRequired = true;
+                        break;
+                    default:
+                        question.IsRequired = false;
+                        break;
+                }
+            });
 
             questions.ForEach(question => {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
