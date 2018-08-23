@@ -1,8 +1,8 @@
 ﻿@model AfterSchoolLibrary.Attendance
 @{
-    var attendanceRegistrants = (List<AttendanceRegistrant>)ViewBag.AttendanceRegistrants;
+    var attendanceRegistrants = (List<AttendanceRegistrant>)ViewData["AttendanceRegistrants"];
     var account = SessionVariables.CurrentAccount;
-    var schedule = (ActivitySchedule)ViewBag.Schedule;
+    var schedule = (ActivitySchedule)ViewData["schedule"];
     var controller = (string)ViewData["controller"];
 }
 
