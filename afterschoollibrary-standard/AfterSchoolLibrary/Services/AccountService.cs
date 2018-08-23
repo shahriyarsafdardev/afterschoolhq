@@ -70,7 +70,7 @@ namespace AfterSchoolLibrary
             if (user.IsEmpty() || userType.In(new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }))
                 return Activity.GetCountByAccountId(account.ID.Value, null, activityType, isArchived, isDeleted, msgs, dc);
 
-            return account.GetActivityCount(userType, user, activityType, isArchived, isDeleted, msgs, dc);
+            return account.GetActivities(userType, user, activityType, isArchived, isDeleted, null, null, msgs, dc).Count();
         }
 
         public static int SearchContactCount(this Account account, string searchtext, int? contactListId, DatabaseConnection dc = null)
