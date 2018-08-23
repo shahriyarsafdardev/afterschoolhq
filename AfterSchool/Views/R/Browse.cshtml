@@ -86,7 +86,7 @@
              hasseatsremaining="@item.HasSeatsAvailable().ToString().ToLower()" 
              haswaitinglistremaining="@item.HasWaitingListSeatsAvailable().ToString().ToLower()"
              days="@ParticipationObjectUI.PrintDaysOfWeek(item)" 
-             location="@item.Location?.ID"
+             location="@(item.Location?.ID)"
              gender="@((int)item.GenderRestriction)"
              name="@item.Name">
 
@@ -124,7 +124,7 @@
                     </div>
 
                     <p class="activity-description text-muted">
-                        @Html.Raw(item.Description.MaxChars(100, "...").IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(item.Details).MaxChars(100, "...")))
+                        @Html.Raw(item.Description.MaxChars(80, "...").IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(item.Details).MaxChars(80, "...")))
                     </p>
 
                     <div>
