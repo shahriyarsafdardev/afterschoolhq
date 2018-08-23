@@ -498,7 +498,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
             ViewBag.Messages = new SystemMessages();
-            ViewBag.Registrants = group.GetRegistrants().Where(x => x.Email.IsNotBlank()).OrderBy(x => x.FirstName).ThenBy(x => x.LastName).ToList();
+            ViewBag.Registrants = group.GetRegistrants()
+                .Where(x => x.Email.IsNotBlank())
+                .OrderBy(x => x.FirstName)
+                .ThenBy(x => x.LastName)
+                .ToList();
             return View(group);
         }
 
@@ -519,7 +523,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var registrantIds = group.GetRegistrants()
-                    .Where(x => Request["registrant-" + x.ID.ToString()].IsNotBlank())
+                    .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
                 am = group.AddMessage(subject, body, registrantIds, SessionVariables.LoggedInUser.ID.Value, msgs);
