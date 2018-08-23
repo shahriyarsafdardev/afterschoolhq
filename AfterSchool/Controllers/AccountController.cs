@@ -809,14 +809,8 @@ namespace AfterSchool.Controllers
             questions.ForEach(question => {
                 switch (question.QuestionDataTypeId)
                 {
-                    case QuestionDataType.RegistrantDoctorName:
-                    // case QuestionDataType.RegistrantDoctorPhone:
-                    // case QuestionDataType.RegistrantAllergies:
-                    // case QuestionDataType.RegistrantMedicalConditions:
-                    // case QuestionDataType.RegistrantMedications:
-                    // case QuestionDataType.RegistrantImmunizations:
-                    case QuestionDataType.RegistrantPreferredHospital:
-                        question.IsRequired = true;
+                    default:
+                        question.IsRequired = false;
                         break;
                 }
             });
