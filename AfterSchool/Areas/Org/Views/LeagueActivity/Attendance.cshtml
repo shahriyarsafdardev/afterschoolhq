@@ -18,7 +18,7 @@
         </div>
         <div class="panel-body">
                         
-            @{Html.RenderPartial("~/Views/Shared/_AttendanceList.cshtml", Model);}            
+            @{Html.RenderPartial("~/Views/Shared/_AttendanceList.cshtml", Model, new ViewDataDictionary() { { "controller", "leagueactivity" } });}            
 
         </div>
     </div>

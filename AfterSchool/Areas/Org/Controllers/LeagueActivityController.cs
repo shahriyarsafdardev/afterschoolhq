@@ -1193,10 +1193,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 );                
             }
 
-            var activity = Activity.Load(attendance.ActivityId.Value);
+            var activity = Activity.LoadByUid(id.ToGuid());
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();
+            ViewBag.Schedule = activity.GetSchedule();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(attendance);
         }
