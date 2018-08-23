@@ -100,7 +100,7 @@
                             <span>
                                 @item.OwnerAccount.Name
                             </span>
-                            @if (item.Location.IsNotEmpty())
+                            @if (item.Location.IsNotEmpty() && item.Location.ID != item.OwnerAccount.DefaultLocationId)
                             {
                                 <span>
                                     @@
