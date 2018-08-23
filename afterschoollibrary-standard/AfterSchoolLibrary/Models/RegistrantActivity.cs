@@ -1248,17 +1248,24 @@ namespace AfterSchoolLibrary
         private List<ActivityInstance> GetScheduleInstances(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var instances = new List<ActivityInstance>();
+            ActivitySchedule schedule = null;
             switch (this.ParticipationObjectTypeId)
             {
                 case ParticipationObjectType.Activity:
-                    instances.AddRange(this.GetActivity(msgs, dc).GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc));
+                    schedule = this.GetActivity(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
+                    if (schedule.IsNotEmpty())
+                        instances.AddRange(schedule.GetInstances(msgs: msgs, dc: dc));
                     break;
                 case ParticipationObjectType.ActivityGroup:
-                    instances.AddRange(this.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc));
+                    schedule = this.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
+                    if (schedule.IsNotEmpty())
+                        instances.AddRange(schedule.GetInstances(msgs: msgs, dc: dc));
                     break;
                 case ParticipationObjectType.AccountActivityGroup:
                     var aag = this.GetAccountActivityGroup(msgs, dc);
-                    instances.AddRange(aag.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc));
+                    schedule = aag.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
+                    if (schedule.IsNotEmpty())
+                        instances.AddRange(schedule.GetInstances(msgs: msgs, dc: dc));
                     break;
             }
             return instances;
