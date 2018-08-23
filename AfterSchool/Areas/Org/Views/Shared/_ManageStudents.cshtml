@@ -40,9 +40,22 @@
                         <div class="col-md-4">
                             @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                             {
+                                var ra = registrant.GetRegistrantActivities().Where(item => item.ParticipationObjectTypeId == ParticipationObjectType.Activity).FirstOrDefault();
+                                var activity = ra?.GetActivity();
+
                                 <div class="am-checkbox">
                                     <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" />
-                                    <label for="registrant-@registrant.ID">@registrant.DisplayName</label>
+                                    <label for="registrant-@registrant.ID">
+                                        @registrant.DisplayName
+                                        @if (activity.IsNotEmpty())
+                                        {
+                                            <span>(@activity.Name)</span>
+                                        }
+                                        else
+                                        {
+                                            <span>No Team</span>
+                                        }
+                                    </label>
                                 </div>
                             }
                         </div>

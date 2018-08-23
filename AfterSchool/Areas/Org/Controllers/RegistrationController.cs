@@ -268,23 +268,25 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RemoveActivity(string id, string activity, string r)
+        public ActionResult RemoveActivity(string id, string ra, string r)
         {
             var msgs = new SystemMessages();
             var registration = Registration.LoadByUid(id.ToGuid());
             var selectedRegistration = Registration.LoadByUid(r.ToGuid());
+            var registrantActivity = RegistrantActivity.Load(ra.ToInteger(), msgs);
+            var activity = registrantActivity.GetActivity(msgs);
 
-            msgs.AddRange(selectedRegistration.RemoveParticipation(activity.ToInteger(), ParticipationObjectType.Activity));
+            msgs.AddRange(selectedRegistration.RemoveParticipation(registrantActivity.ParticipationObjectId.Value, registrantActivity.ParticipationObjectTypeId));
 
             if (msgs.HasNoErrors())
             {
-                var act = Activity.Load(activity.ToInteger());
+                var act = RegistrantActivity.Load(ra.ToInteger());
 
                 msgs.AddRange(selectedRegistration.WasUpdated());
 
                 UpdateSession(SessionActionType.RegistrationRemoveActivity, SessionVariables.CurrentAccount.ID, act.ID, null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId);
 
-                msgs.Add(string.Format("Removed Activity: {0}", act.Name), MessageType.Success);
+                msgs.Add($"Removed {UILabel.ActivityLabel(activity.ActivityTypeId)}: {activity.Name}", MessageType.Success);
             }
 
             LoadRegistrationViewBag(registration, r);
@@ -304,39 +306,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var regperiod = act.GetActiveRegistrationPeriod();            
             var msgs = new SystemMessages();
             var assignmentType = (RegistrationAssignmentType)activityassignment.ToInteger();
-
-            var seats = 0;
-            var wlseats = 0;
-            var aseats = 0;
-            var iseats = 0;
-            var dseats = 0;
-
-            switch (assignmentType)
-            {
-                case RegistrationAssignmentType.Reserved:
-                    seats = 1;
-                    break;
-                case RegistrationAssignmentType.WaitingList:
-                    wlseats = 1;
-                    break;
-                case RegistrationAssignmentType.Applied:
-                    aseats = 1;
-                    break;
-                case RegistrationAssignmentType.Invited:
-                    iseats = 1;
-                    break;
-                case RegistrationAssignmentType.Declined:
-                    dseats = 1;
-                    break;
-            }
-
-            var day = DayOfWeekASL.NotSet;
+            
             var choiceNumber = 1;
             var registrationPeriodId = new int?();
             if (regperiod.IsNotEmpty())
-            {
                 registrationPeriodId = regperiod.ID;
-            }
 
             registrant.AddOrUpdateParticipationObject(
                 selectedRegistration.ID.Value, 
@@ -372,9 +346,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             SessionVariables.Cart = null;
 
-            Response.Redirect("/reg/edit/" + id);
+            return Redirect("/reg/edit/" + id);
 
-            return View("edit", registration);
+            //return View("edit", registration);
         }
 
         [HttpGet]
