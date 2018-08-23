@@ -21,7 +21,7 @@
 
             <div class="col-md-10 col-md-offset-1">
 
-                @{Html.RenderPartial("~/Views/Shared/_RegistrantAttendance.cshtml", Model);}
+                @{Html.RenderPartial("~/Views/Shared/_RegistrantAttendance.cshtml", Model, new ViewDataDictionary() { { "controller", "leagueactivity" } });}
 
             </div>
         </div>
