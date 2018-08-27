@@ -1289,7 +1289,7 @@ namespace AfterSchoolLibrary
                 af = new ActivityForm();
                 af.ActivityId = this.ID;
                 af.AccountId = this.AccountId;
-                af.Name = this.Name + " Registration Form";
+                af.Name = (this.Name + " Registration Form").MaxChars(50);
                 af.Description = "Please fill in the registration form below";
                 af.FormId = form.ID;
                 af.IsPublished = isPublished;
@@ -2098,12 +2098,12 @@ namespace AfterSchoolLibrary
 
             if (registrationperiod.ToInteger() == 0)
             {
-                var periodname = RegistrationPeriod.GenerateUniqueName(account.ID.Value, string.Format("{0} - Reg Window", this.Name), dc: dc);
+                var periodname = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{this.Name} - Reg Window", dc: dc).MaxChars(50);
 
                 this.AddNewRegistrationPeriod(
                     periodname,
-                    string.Format("{0} {1}", registrationopendate, registrationopentime).ToDateTime(),
-                    string.Format("{0} {1}", registrationclosedate, registrationclosetime).ToDateTime(),
+                    $"{registrationopendate} {registrationopentime}".ToDateTime(),
+                    $"{registrationclosedate} {registrationclosetime}".ToDateTime(),
                     account.ID.Value,
                     loggedInUserId,
                     msgs,
