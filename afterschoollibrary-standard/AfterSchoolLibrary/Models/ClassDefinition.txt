@@ -72,6 +72,7 @@ property: Details, string, NVarChar "4000"
 property: LocationDetails, string, NVarChar "4000"
 property: ScheduleDetails, string, NVarChar "4000"
 property: RegistrationTimeZone, string, NVarChar "30"
+property: InstructorId, int?, Int
 property: ContactName, string, NVarChar "50"
 property: ContactPhone, string, NVarChar "50"
 property: ContactEmail, string, NVarChar "100"
@@ -80,6 +81,7 @@ property: WaitingListSeats, int?, Int
 -property: AcceptCreditCard, bool, Bit
 -property: ParentActivityId, int?, Int
 property: AllowToPayLater, bool, Bit
+property: AllowToRequestDiscount, bool, Bit
 -property: AllowOrganizationRegistration, bool, Bit
 property: GenderRestriction, GenderRestrictionType, Int
 property: RegistrationModeId, RegistrationMode, Int

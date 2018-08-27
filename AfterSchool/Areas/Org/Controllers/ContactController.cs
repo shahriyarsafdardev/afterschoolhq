@@ -63,7 +63,7 @@ namespace AfterSchool.Areas.Org.Controllers
         private void AddContacts(string step, string importtype, string emaillist, string createlist, string listname, string importtext, string listId)
         {
             var msgs = new SystemMessages();
-            var csvMsgs = new SystemMessages();
+            var validationMessages = new SystemMessages();
             ViewBag.Step = 1;
             ViewBag.ContactLists = SessionVariables.CurrentAccount.GetContactLists();
 
@@ -82,7 +82,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             }
                             else
                             {
-                                ViewBag.ImportText = ProcessImport(Request.Files[0], msgs);
+                                ViewBag.ImportText = ProcessImport(Request.Files[0], msgs, validationMessages);
                             }
                         }
                         else
@@ -163,7 +163,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                                 }
                                             }
 
-                                            amsgs.AddRange(AddContact(email, firstname, lastname, contactList, adc));
+                                            msgs.AddRange(AddContact(email, firstname, lastname, contactList, adc));
                                         }
                                     }
 
@@ -203,6 +203,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.ValidationMessages = validationMessages;
         }
 
         private SystemMessages AddContact(Registrant contact, ContactList contactList, DatabaseConnection dc = null)
@@ -255,7 +256,7 @@ namespace AfterSchool.Areas.Org.Controllers
         private string[] firstNameHeaders { get { return new string[] { "first", "fname", "firstname" }; } }
         private string[] lastNameHeaders { get { return new string[] { "last", "lname", "lastname" }; } }
 
-        private string ProcessImport(HttpPostedFileBase importfile, SystemMessages msgs)
+        private string ProcessImport(HttpPostedFileBase importfile, SystemMessages msgs, SystemMessages validationMessages)
         {
             var sr = new System.IO.StreamReader(importfile.InputStream);
             var extension = System.IO.Path.GetExtension(importfile.FileName);
@@ -271,6 +272,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 reader.Configuration.Delimiter = ",";
                 reader.Configuration.HasHeaderRecord = true;
                 reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
+                reader.Read();
+                reader.ReadHeader();
 
                 while (reader.Read())
                 {
@@ -317,19 +320,23 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                foreach (var row in rows)
+                for (var j = 0; j < rows.Count; j++)
                 {
+                    var row = rows[j];
                     var validatedRow = new List<ImportField>();
 
                     for (var i = 0; i < headersWithData.Count; i++)
                     {
-                        var validatedField = new ImportField();
-                        validatedField.Value = row[i];
-
-                        var field = row[i].ToLower();
                         var headerName = headersWithData[i];
+                        var validatedField = new ImportField();
+                        var field = "";
 
-                        validatedField.Value = field;
+                        if (row.Count > i)
+                        {
+                            validatedField.Value = row[i];
+                            field = row[i].ToLower();
+                            validatedField.Value = field;
+                        }
 
                         if (field.Length > 150)
                         {
@@ -341,10 +348,16 @@ namespace AfterSchool.Areas.Org.Controllers
                             if (field.IsBlank() || !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                             {
                                 hasErrors = true;
-                                validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
+                                validatedField.Messages.Add($"Row {(j+1)}: {field} must be a valid email address", MessageType.UserError);
                             }
                         }
+                        else
+                        {
+                            validatedField.Value = validatedField.Value.ToProperCase();
+                        }
+
                         validatedRow.Add(validatedField);
+                        validationMessages.AddRange(validatedField.Messages);
                     }
                     validatedRows.Add(validatedRow);
                 }
