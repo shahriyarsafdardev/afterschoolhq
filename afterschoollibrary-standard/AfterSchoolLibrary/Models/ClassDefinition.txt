@@ -1274,6 +1274,7 @@ property: IsActive, bool, Bit
 property: TotalPeriods, int?, Int
 property: StripePlanId, string, NVarChar "50"
 property: PlanTypeId, SubscriptionPlanType, Int
+property: StartDayOfMonth, int?, Int
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]

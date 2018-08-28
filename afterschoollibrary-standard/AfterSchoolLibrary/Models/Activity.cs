@@ -1339,6 +1339,11 @@ namespace AfterSchoolLibrary
             var contactname = values.GetValueOrDefault("contactname");
             var contactphone = values.GetValueOrDefault("contactphone");
             var contactemail = values.GetValueOrDefault("contactemail");
+            var instructor = values.GetValueOrDefault("instructor");
+            var instructorfirstname = values.GetValueOrDefault("instructorfirstname");
+            var instructorlastname = values.GetValueOrDefault("instructorlastname");
+            var instructoremail = values.GetValueOrDefault("instructoremail");
+            var instructorphone = values.GetValueOrDefault("instructorphone");
             var details = values.GetValueOrDefault("details");
             var location = values.GetValueOrDefault("location");
             var locationname = values.GetValueOrDefault("locationname");
@@ -1392,9 +1397,8 @@ namespace AfterSchoolLibrary
             if (activityId.IsNumber() == false || activityId.ToInteger() == 0)
             {
                 if (name.IsEmpty())
-                {
                     msgs.Add("Activity Name is required", MessageType.UserError);
-                }
+
                 if (!seatsavailable.IsNumber())
                 {
                     msgs.Add("Total Available Seats is required and must be greater than 0", MessageType.UserError);
@@ -1421,33 +1425,25 @@ namespace AfterSchoolLibrary
 
                 //pre-load account info
                 if (contactphone.IsBlank())
-                {
                     contactphone = account.Phone;
-                }
+
                 if (address1.IsBlank())
-                {
                     address1 = account.Address1;
-                }
+
                 if (address2.IsBlank())
-                {
                     address2 = account.Address2;
-                }
+
                 if (city.IsBlank())
-                {
                     city = account.City;
-                }
+
                 if (state.IsBlank())
-                {
                     state = account.State;
-                }
+
                 if (postalcode.IsBlank())
-                {
                     postalcode = account.PostalCode;
-                }
+
                 if (cost.IsBlank())
-                {
                     cost = "0";
-                }
 
             }            
 
@@ -1527,33 +1523,31 @@ namespace AfterSchoolLibrary
             if (genderrestrictions.IsNumber())
                 activity.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
             
-            if (contactname.IsNotEmpty()) activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);
+            if (contactname.IsNotEmpty())
+                activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);
+
             if (contactphone.IsNotEmpty())
             {
-               if(contactphone.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                {
+                if (contactphone.ToString().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                     activity.ContactPhone = contactphone.ToString().IfBlank("").MaxChars(50);
-                } else
-                {
+                else
                     msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);
-                }
-                
-                
             }
             
-            if (contactemail.IsNotEmpty()) activity.ContactEmail = contactemail.ToString().IfBlank("").MaxChars(100);
-            if (details.IsNotEmpty()) activity.Details = details.ToString().IfBlank("").MaxChars(4000);
-            if (description.IsNotEmpty()) activity.Description = description.ToString().IfBlank("").MaxChars(1000);
+            if (contactemail.IsNotEmpty())
+                activity.ContactEmail = contactemail.ToString().IfBlank("").MaxChars(100);
 
+            if (details.IsNotEmpty())
+                activity.Details = details.ToString().IfBlank("").MaxChars(4000);
+
+            if (description.IsNotEmpty())
+                activity.Description = description.ToString().IfBlank("").MaxChars(1000);
 
             if (cost.IsNumber())
-            {
                 activity.CostPerRegistrant = cost.ToString().ToDecimal();
-            }
+
             if (costdescription != null)
-            {
                 activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
-            }
             
             //if (acceptcreditcard.IsNotEmpty() && acceptcreditcard.ToString().IsBoolean())
             //{
@@ -1563,27 +1557,21 @@ namespace AfterSchoolLibrary
             //{
             //    activity.AcceptPayPal = acceptpaypal.ToString().ToBoolean();
             //}
+
             if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
-            {
                 activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
-            }
+
             //if (alloworganization.IsNotEmpty() && alloworganization.ToString().IsBoolean())
             //{
             //    activity.AllowOrganizationRegistration = alloworganization.ToString().ToBoolean();
             //}
+
             if (regmode.IsNumber())
-            {
                 activity.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
-            }
-            else
-            {
-                // activity.RegistrationModeId = RegistrationMode.Register;
-            }
 
             if(accountactivitygroup.IsNotEmpty())
-            {
                 activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
-            }
+
 
             //if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard &&!activity.AllowToPayLater)
             //{
@@ -1600,33 +1588,26 @@ namespace AfterSchoolLibrary
                             activity.RegistrationTimeZone = account.TimeZone;
 
                             if (contactname.IsEmpty())
-                            {
                                 activity.ContactName = account.GetAccountOwner(amsgs, adc).DisplayName;
-                            }
+
                             if (contactemail.IsEmpty())
-                            {
                                 activity.ContactEmail = account.Email;
-                            }
+
                             if (contactphone.IsEmpty())
-                            {
                                 activity.ContactPhone = account.Phone;
-                            }
                         }
+
                         if (group.IsNotEmpty() && group.ToString().IsGuid())
-                        {
                             activity.ActivityGroupId = ActivityGroup.LoadByUid(group.ToString().ToGuid(), amsgs, adc).ID.Value;
-                        }
 
                         amsgs.AddRange(activity.Save(adc));
 
-                        //skip if it is attached to a activity group
+                        // skip if it is attached to a activity group
                         if (!activity.ActivityGroupId.HasValue)
                         {
-                            //copy form
+                            // create / associate form
                             if (amsgs.HasNoErrors() && form.IsNumber())
-                            {
                                 amsgs.AddRange(activity.SetupNewForm(form.ToString().ToInteger(), account, loggedInUserId, adc));
-                            }
 
                             //create registration period if not created yet and there is no activitygroup (activity groups have their own registration period)
                             if (amsgs.HasNoErrors() && registrationperiod.IsNumber())
@@ -1645,15 +1626,7 @@ namespace AfterSchoolLibrary
 
                         //add creator to activity team if new activity
                         if (amsgs.HasNoErrors() && activityId.IsEmpty())
-                        {
                             amsgs.AddRange(activity.SetupTeam(account, loggedInUserId, adc));
-                        }
-
-                        //days // deprecated
-                        //if (amsgs.HasNoErrors() && days.IsNotEmpty())
-                        //{
-                        //    amsgs.AddRange(activity.SetupActivityDays(days.ToString(), account, loggedInUserId, adc));
-                        //}
 
                         // setup schedule
                         if(amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduledates.IsNotEmpty()))
@@ -1674,14 +1647,6 @@ namespace AfterSchoolLibrary
                                 adc));
                         }
 
-                        //grades
-                        /*
-                        if (amsgs.HasNoErrors() && gradeIds.IsNotEmpty())
-                        {
-                            amsgs.AddRange(activity.SetupGrades(gradeIds.ToString(), account, loggedInUserId, adc));
-                        }
-                        */
-
                         //setup initial activityProperties
                         if (amsgs.HasNoErrors())
                         {
@@ -1690,6 +1655,18 @@ namespace AfterSchoolLibrary
                                 applicationthankyouemail.IfEmpty(""), 
                                 loggedInUserId, 
                                 adc));
+                        }
+
+                        if (amsgs.HasNoErrors() && instructor.IsNotEmpty())
+                        {
+                            amsgs.AddRange(activity.SetupInstructor(
+                                instructor.IfEmpty(""),
+                                instructorfirstname.IfEmpty(""),
+                                instructorlastname.IfEmpty(""),
+                                instructoremail.IfEmpty(""),
+                                instructorphone.IfEmpty(""),
+                                adc
+                                ));
                         }
 
                         //setup location
@@ -1758,6 +1735,54 @@ namespace AfterSchoolLibrary
             }
 
             return activity;
+        }
+
+        private SystemMessages SetupInstructor(Account account, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            if (instructor.IsNumber())
+            {
+                //new instructor
+                if (instructor.ToInteger() == 0)
+                {
+                    if (instructorfirstname.IsEmpty())
+                        msgs.Add("Instructor First Name is required", MessageType.UserError);
+
+                    if (instructorlastname.IsEmpty())
+                        msgs.Add("Instructor Last Name is required", MessageType.UserError);
+
+                    if (instructoremail.IsEmpty())
+                        msgs.Add("Instructor Email is required", MessageType.UserError);
+                    else if (!instructor.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                        msgs.Add("Instructor Email must be a valid email", MessageType.UserError);
+
+                    if (instructorphone.IsNotEmpty() && !instructor.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        msgs.Add("Instructor Phone must be a valid phone number", MessageType.UserError);
+
+                    if (msgs.HasNoErrors())
+                    {
+                        // var newUser = account.AddUser(instructorfirstname, instructorlastname, instructoremail, instructorphone, UserType.Teacher, loggedInUserId, msgs, dc);
+                        account.InviteUser(
+                            instructorfirstname, 
+                            instructorlastname, 
+                            instructoremail, 
+                            instructorphone, 
+                            "", 
+                            UserType.Teacher, 
+                            new WebUser() { ID = loggedInUserId }, 
+                            msgs, 
+                            dc);
+                    }
+                }
+                else
+                {
+                    this.InstructorId = instructor.ToInteger();
+                    msgs.AddRange(this.Save(dc));
+                }
+            }
+
+            return msgs;
         }
 
         private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, int loggedInUserId, DatabaseConnection dc = null)
