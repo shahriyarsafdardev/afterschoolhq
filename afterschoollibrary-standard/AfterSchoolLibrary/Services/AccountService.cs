@@ -383,17 +383,17 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType userType, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, null, null, false, true, false, ut, loggedInUserId, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, null, null, false, true, false, userType, loggedInUserId, msgs, dc: dc);
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, phone, null, false, true, false, ut, loggedInUserId, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, phone, null, false, true, false, userType, loggedInUserId, msgs, dc: dc);
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType ut, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             WebUser user = null;
@@ -436,7 +436,7 @@ namespace AfterSchoolLibrary
             );
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(AddUser(account, user, ut, loggedInUserId, dc: dc));
+                msgs.AddRange(AddUser(account, user, userType, loggedInUserId, dc: dc));
 
             return user;
 
@@ -487,16 +487,16 @@ namespace AfterSchoolLibrary
             // return EmailHelper.SendTeamSubmmittedToDistrictNotifitication(vistorAccount, hostAccount, activity, activityGroup, isSubmitting);
         }
 
-        public static WebUser InviteUser(this Account account, string firstName, string lastName, string email, string phone, string message, UserType ut, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser InviteUser(this Account account, string firstName, string lastName, string email, string phone, string message, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var user = account.AddUser(firstName, lastName, email, phone, ut, loggedInUser.ID.Value, msgs, dc);
+            var user = account.AddUser(firstName, lastName, email, phone, userType, loggedInUser.ID.Value, msgs, dc);
             if (msgs.HasNoErrors())
-                msgs.AddRange(user.SendInviteToAccount(account, message, loggedInUser, dc: dc));
+                msgs.AddRange(account.SendInvitedEmail(user, loggedInUser, message, dc));
             
             if (msgs.HasErrors())
-                msgs.Add($"An invitation was not sent to ${email.Trim()}, a system error has occurred", MessageType.UserError);       
+                msgs.Add($"An invitation was not sent to {email.Trim()}, a system error has occurred", MessageType.UserError);       
 
             return user;
         }

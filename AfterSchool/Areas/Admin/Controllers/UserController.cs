@@ -159,7 +159,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                 foreach (string email in emails.Split(',').Select(x => x.Trim()))
                 {
-                    a.InviteUser("", "", email, Request.Params["message"], ut, SessionVariables.LoggedInUser, msgs);
+                    a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.LoggedInUser, msgs);
                 }
             }
 

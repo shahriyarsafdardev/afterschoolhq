@@ -40,6 +40,7 @@ namespace AfterSchoolLibrary
 		public int? TotalPeriods { get { return (int?)MDV["TotalPeriods"].Value; } set { MDV["TotalPeriods"].Value = value; } }
 		public string StripePlanId { get { return (string)MDV["StripePlanId"].Value; } set { MDV["StripePlanId"].Value = value; } }
 		public SubscriptionPlanType PlanTypeId { get { return (SubscriptionPlanType)MDV["PlanTypeId"].Value; } set { MDV["PlanTypeId"].Value = value; } }
+		public int? StartDayOfMonth { get { return (int?)MDV["StartDayOfMonth"].Value; } set { MDV["StartDayOfMonth"].Value = value; } }
 		
 
         public SubscriptionPlan()
@@ -71,6 +72,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "TotalPeriods", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripePlanId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PlanTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "StartDayOfMonth", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -190,6 +192,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["PlanTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StartDayOfMonth"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

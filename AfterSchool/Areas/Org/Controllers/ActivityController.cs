@@ -1940,7 +1940,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             ViewBag.Messages = new SystemMessages();
-            ViewBag.Users = SessionVariables.CurrentAccount.GetActiveMembers().Select(x => x.ToWebUser()).ToList();
+            ViewBag.Users = SessionVariables.CurrentAccount.GetMembers().Select(x => x.ToWebUser()).ToList();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             return View(activity);
         }
@@ -1958,7 +1958,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     activity = Activity.LoadByUid(id.ToGuid(), amsgs, adc);
                     account = activity.GetAccount(amsgs, adc);
-                    users = account.GetActiveMembers(adc).Select(x => x.ToWebUser()).ToList();
+                    users = account.GetMembers(adc).Select(x => x.ToWebUser()).ToList();
 
                     foreach (var user in users)
                     {

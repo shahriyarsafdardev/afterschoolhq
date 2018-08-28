@@ -132,7 +132,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 foreach (string email in emails.Split(',').Select(x => x.Trim()))
                 {
-                    a.InviteUser("", "", email, Request.Params["message"], ut, SessionVariables.LoggedInUser, msgs);
+                    a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.LoggedInUser, msgs);
                 }
             }
 
@@ -142,7 +142,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (Request["returnurl"].IsNotBlank())
                 {
-                    Response.Redirect(Request["returnurl"], true);
+                    return Redirect(Request["returnurl"]);
                 }
             }
 

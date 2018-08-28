@@ -41,11 +41,13 @@ namespace AfterSchoolLibrary
 		public string LocationDetails { get { return (string)MDV["LocationDetails"].Value; } set { MDV["LocationDetails"].Value = value; } }
 		public string ScheduleDetails { get { return (string)MDV["ScheduleDetails"].Value; } set { MDV["ScheduleDetails"].Value = value; } }
 		public string RegistrationTimeZone { get { return (string)MDV["RegistrationTimeZone"].Value; } set { MDV["RegistrationTimeZone"].Value = value; } }
+		public int? InstructorId { get { return (int?)MDV["InstructorId"].Value; } set { MDV["InstructorId"].Value = value; } }
 		public string ContactName { get { return (string)MDV["ContactName"].Value; } set { MDV["ContactName"].Value = value; } }
 		public string ContactPhone { get { return (string)MDV["ContactPhone"].Value; } set { MDV["ContactPhone"].Value = value; } }
 		public string ContactEmail { get { return (string)MDV["ContactEmail"].Value; } set { MDV["ContactEmail"].Value = value; } }
 		public int? WaitingListSeats { get { return (int?)MDV["WaitingListSeats"].Value; } set { MDV["WaitingListSeats"].Value = value; } }
 		public bool AllowToPayLater { get { return (bool)MDV["AllowToPayLater"].Value; } set { MDV["AllowToPayLater"].Value = value; } }
+		public bool AllowToRequestDiscount { get { return (bool)MDV["AllowToRequestDiscount"].Value; } set { MDV["AllowToRequestDiscount"].Value = value; } }
 		public GenderRestrictionType GenderRestriction { get { return (GenderRestrictionType)MDV["GenderRestriction"].Value; } set { MDV["GenderRestriction"].Value = value; } }
 		public RegistrationMode RegistrationModeId { get { return (RegistrationMode)MDV["RegistrationModeId"].Value; } set { MDV["RegistrationModeId"].Value = value; } }
 		public int? LocationId { get { return (int?)MDV["LocationId"].Value; } set { MDV["LocationId"].Value = value; } }
@@ -76,6 +78,7 @@ namespace AfterSchoolLibrary
 			this.AllowPreRegistration = false;
 			this.Uid = Guid.NewGuid();
 			this.AllowToPayLater = false;
+			this.AllowToRequestDiscount = false;
 			this.GenderRestriction = GenderRestrictionType.None;
 			this.RegistrationModeId = RegistrationMode.NotSet;
 			this.IsDeleted = false;
@@ -106,11 +109,13 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "LocationDetails", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "ScheduleDetails", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "RegistrationTimeZone", System.Data.SqlDbType.NVarChar , "30");
+				_dp.Add(className, "InstructorId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ContactName", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "ContactPhone", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "WaitingListSeats", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AllowToPayLater", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "AllowToRequestDiscount", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "GenderRestriction", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationModeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LocationId", System.Data.SqlDbType.Int);
@@ -269,6 +274,10 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["InstructorId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ContactName"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -286,6 +295,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AllowToPayLater"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["AllowToRequestDiscount"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -1660,11 +1673,13 @@ namespace AfterSchoolLibrary
                         if (amsgs.HasNoErrors() && instructor.IsNotEmpty())
                         {
                             amsgs.AddRange(activity.SetupInstructor(
+                                account,
                                 instructor.IfEmpty(""),
                                 instructorfirstname.IfEmpty(""),
                                 instructorlastname.IfEmpty(""),
                                 instructoremail.IfEmpty(""),
                                 instructorphone.IfEmpty(""),
+                                loggedInUserId,
                                 adc
                                 ));
                         }
@@ -1754,32 +1769,39 @@ namespace AfterSchoolLibrary
 
                     if (instructoremail.IsEmpty())
                         msgs.Add("Instructor Email is required", MessageType.UserError);
-                    else if (!instructor.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                    else if (!instructoremail.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                         msgs.Add("Instructor Email must be a valid email", MessageType.UserError);
 
-                    if (instructorphone.IsNotEmpty() && !instructor.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    if (instructorphone.IsNotEmpty() && !instructorphone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                         msgs.Add("Instructor Phone must be a valid phone number", MessageType.UserError);
 
                     if (msgs.HasNoErrors())
                     {
-                        // var newUser = account.AddUser(instructorfirstname, instructorlastname, instructoremail, instructorphone, UserType.Teacher, loggedInUserId, msgs, dc);
-                        account.InviteUser(
-                            instructorfirstname, 
-                            instructorlastname, 
-                            instructoremail, 
-                            instructorphone, 
-                            "", 
-                            UserType.Teacher, 
-                            new WebUser() { ID = loggedInUserId }, 
-                            msgs, 
-                            dc);
+                        // add user
+                        var user = account.InviteUser(
+                            firstName: instructorfirstname, 
+                            lastName: instructorlastname, 
+                            email: instructoremail, 
+                            phone: instructorphone, 
+                            message: "", 
+                            userType: UserType.Teacher, 
+                            loggedInUser: WebUser.Load(loggedInUserId, msgs, dc), 
+                            msgs: msgs, 
+                            dc: dc);
+
+                        // add to team
+                        // should they be a leader by default? For right now, no.
+                        this.AddTeamMember(user.ID.Value, false, loggedInUserId, msgs, dc);
+
+                        this.InstructorId = user.ID;
                     }
                 }
                 else
                 {
                     this.InstructorId = instructor.ToInteger();
-                    msgs.AddRange(this.Save(dc));
                 }
+
+                msgs.AddRange(this.Save(dc));
             }
 
             return msgs;
