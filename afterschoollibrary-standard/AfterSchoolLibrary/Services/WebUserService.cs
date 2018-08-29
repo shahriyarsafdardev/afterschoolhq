@@ -104,13 +104,13 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(user.Save(dc: dc));
             return msgs;
         }
-        public static bool HasAccessToFeature(this WebUser user, FeatureType ft, Account account, DatabaseConnection dc = null)
+        public static bool HasPermission(this WebUser user, PermissionType permissionType, Account account, DatabaseConnection dc = null)
         {
             if (!account.IsEmpty())
             {
                 var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: dc);
                 if (awu.IsEmpty() == false && awu.UserTypeId != UserType.NotSet)
-                    return awu.HasAccessToFeature(ft);
+                    return awu.HasPermission(permissionType);
             }
             return false;
         }

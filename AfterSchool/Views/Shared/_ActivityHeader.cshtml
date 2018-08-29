@@ -51,13 +51,17 @@
             {
                 if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 1)
                 {
-                    <a href="@Url.Action("team", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")"><i class="s7-users"></i> Team</a>
+                    <a href="@Url.Action("team", "activity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "team" ? "-active" : "")">
+                        <i class="s7-users"></i> Staff
+                    </a>
                 }
                 <a href="@Url.Action("publishdetail", "activity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
             }
             @if (Model.ActivityGroupId.HasValue)
             {
-                <a href="@Url.Action("activities", "group", new {id = group.Uid})" class="btn btn-alt5"><i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</a>
+                <a href="@Url.Action("activities", "group", new {id = group.Uid})" class="btn btn-alt5">
+                    <i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;
+                </a>
             }
         </div>
         <div class="hidden-lg hidden-sm hidden-md">

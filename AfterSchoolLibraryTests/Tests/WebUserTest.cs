@@ -246,29 +246,30 @@ namespace AfterSchoolLibraryTests
         }
 
         //cannot test because Feature is not fully implemeted always returns true currently
-        [Fact(Skip = "Not implemented")]
-        public void HasAcessToFeatureFalseTest()
-        {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
+        //[Fact(Skip = "Not implemented")]
+        //public void HasAcessToFeatureFalseTest()
+        //{
+        //    var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+        //    var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+        //    var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
 
-            msgs.AddRange(account.AddUser(user, UserType.Parent, user.ID.Value, dc: dc));
+        //    msgs.AddRange(account.AddUser(user, UserType.Parent, user.ID.Value, dc: dc));
 
-            Assert.False(user.HasAccessToFeature(FeatureType.ManageForms, account, dc: dc));
-        }
+        //    Assert.False(user.HasAccessToFeature(FeatureType.ManageForms, account, dc: dc));
+        //}
 
-        [Fact(Skip = "Not implemented")]
-        public void HasAcessToFeatureTrueTest()
-        {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
+        //[Fact(Skip = "Not implemented")]
+        //public void HasAcessToFeatureTrueTest()
+        //{
+        //    var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
+        //    var user = Factories.WebUserFactory.Create(msgs, dc: dc);
+        //    var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
 
-            msgs.AddRange(account.AddUser(user, UserType.SuperAdmin, user.ID.Value, dc: dc));
+        //    msgs.AddRange(account.AddUser(user, UserType.SuperAdmin, user.ID.Value, dc: dc));
 
-            Assert.True(user.HasAccessToFeature(FeatureType.ViewInsights, account, dc: dc));
-        }
+        //    Assert.True(user.HasAccessToFeature(FeatureType.ViewInsights, account, dc: dc));
+        //}
+
         [Fact(DisplayName = "Generate unique username")]
         public void GenerateUsernameTest()
         {
@@ -348,7 +349,7 @@ namespace AfterSchoolLibraryTests
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var user = Factories.WebUserFactory.Create(true, msgs, dc: dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
-            var awu = Factories.AccountWebUserFactory.Create(account, user, UserType.ActivityLeader, true, msgs, dc: dc);
+            var awu = Factories.AccountWebUserFactory.Create(account, user, UserType.ProgramDirector, true, msgs, dc: dc);
 
             Assert.True(user.IsActiveFor(account, dc: dc));
         }

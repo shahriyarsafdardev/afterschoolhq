@@ -302,9 +302,9 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public bool HasAccessToFeature(FeatureType ft)
+        public bool HasPermission(PermissionType permissionType)
         {
-            return Permissions.HasAccessToFeature(ft, this.UserTypeId, PermissionObjectType.Account);
+            return Permissions.HasPermission(this.UserTypeId, permissionType);
         }
 
         #endregion

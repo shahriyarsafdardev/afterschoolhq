@@ -43,38 +43,42 @@
             <li>
                 <img src="/public/images/footer-icon.png" class="side-menu-logo" />
             </li>
-            @if ((SessionVariables.AccountPackage.IsNotEmpty() &&
-                    (SessionVariables.AccountPackage.IsFree || SessionVariables.AccountPackage.IsDuringTrial)) || SessionVariables.CurrentAccount.HasPaymentCard)
+            
+            <li class="@homeactive"><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
+            
+            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
             {
-                <li class="@homeactive"><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
                 <li class="@activityactive"><a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a></li>
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups) && SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider && false)
-                {
-                    <li class="@leagueactive"><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
-                }
-                if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider && SessionVariables.CurrentAccount.GetExternalLeagueCount() > 0)
-                {
-                    <li class="@leagueactive"><a href="@Url.Action("indexexternal", "league")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
-                }
-                <li class="@registrationactive"><a href="@Url.Action("index", "registration")"><i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)</a></li>
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
-                {
-                    <li class="@formactive"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
-                }
-                if (SessionVariables.AccountPackage.HasFeature(FeatureType.ManageContacts))
-                {
-                    <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
-                }
-                if (SessionVariables.AccountUserType == UserType.Owner || SessionVariables.AccountUserType == UserType.Administrator)
-                {
-                    if (SessionVariables.AccountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value > 0)
-                    {
-                        <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
-                    }
-                    <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
-                }
             }
 
+            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.SessionsView))
+            {
+                <li class="hide @leagueactive"><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
+            }
+            @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider && SessionVariables.CurrentAccount.GetExternalLeagueCount() > 0 && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.LeaguesView))
+            {
+                <li class="@leagueactive"><a href="@Url.Action("indexexternal", "league")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
+            }
+            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.StudentsView))
+            {
+                <li class="@registrationactive"><a href="@Url.Action("index", "registration")"><i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)</a></li>
+            }
+            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.FormsView))
+            {
+                <li class="@formactive"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
+            }
+            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ContactsView))
+            {
+                <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
+            }
+            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.TeamView))
+            {
+                <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
+            }
+            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
+            {
+                <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>
+            }
             <li class="@profileactive"><a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i><span>Profile</span></a></li>
             <li class=""><a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a></li>
         </ul>

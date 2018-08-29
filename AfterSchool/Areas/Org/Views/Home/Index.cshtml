@@ -122,17 +122,20 @@
                                 <div class="icon"><span class="s7-users"></span></div>
                             </div>
                         </div>
-                        <div class="col-md-6">
 
-                            <div class="widget widget-tile widget-bordered">
-                                <div class="data-info">
-                                    <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
-                                    <div class="desc">Total Paid</div>
+                        @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                        {
+                            <div class="col-md-6">
+                                <div class="widget widget-tile widget-bordered">
+                                    <div class="data-info">
+                                        <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
+                                        <div class="desc">Total Paid</div>
+                                    </div>
+                                    <div class="icon"><span class="s7-cash"></span></div>
                                 </div>
-                                <div class="icon"><span class="s7-cash"></span></div>
                             </div>
+                        }
 
-                        </div>
                         <div class="col-md-6">
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">

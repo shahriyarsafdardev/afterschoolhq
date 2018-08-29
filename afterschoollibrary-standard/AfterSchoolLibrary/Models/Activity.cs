@@ -1784,7 +1784,7 @@ namespace AfterSchoolLibrary
                             email: instructoremail, 
                             phone: instructorphone, 
                             message: "", 
-                            userType: UserType.Teacher, 
+                            userType: UserType.Instructor, 
                             loggedInUser: WebUser.Load(loggedInUserId, msgs, dc), 
                             msgs: msgs, 
                             dc: dc);
