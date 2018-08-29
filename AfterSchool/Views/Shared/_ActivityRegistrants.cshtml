@@ -31,7 +31,10 @@
                 <th>Name</th>
                 <th class="text-center">Seat Index</th>
                 <th>Date Registered</th>
-                <th>Amount Paid</th>
+                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                {
+                    <th>Amount Paid</th>
+                }
                 <th>Status</th>
                 <th></th>
             </tr>
@@ -53,16 +56,19 @@
                         <td>@ra.RegistrantName.IfBlank(ra.RegistrantEmail)</td>
                         <td class="text-center">@ra.AssignmentSeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
-                        <td>
-                            @if (participationObject.IsFree)
-                            {
-                                @:FREE
-                            }
-                            else
-                            {
-                                @ra.GetAmountPaid().ToCurrency()
-                            }
-                        </td>
+                        @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                        {
+                            <td>
+                                @if (participationObject.IsFree)
+                                {
+                                    @:FREE
+                                }
+                                else
+                                {
+                                    @ra.GetAmountPaid().ToCurrency()
+                                }
+                            </td>
+                        }
                         <td>
                             <select name="newassignmenttype" 
                                     id="newassignmenttype-@ra.ID" 
@@ -84,7 +90,7 @@
                             </select>
                         </td>
                         <td>
-                            @if (participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
                             {
                                 <button class="btn btn-default btn-sm" 
                                         data-modal="modal-waitinglist" 
