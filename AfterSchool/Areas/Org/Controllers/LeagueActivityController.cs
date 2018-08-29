@@ -394,7 +394,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditContact(string id, string contactname, string contactphone, string contactemail, string cmd)
+        public ActionResult EditContact(string id, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = Activity.LoadByUid(id.ToGuid());
@@ -403,7 +403,12 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 { "contactname", contactname},
                 { "contactphone", contactphone},
-                { "contactemail", contactemail}
+                { "contactemail", contactemail},
+                { "instructor", instructor },
+                { "instructorfirstname", instructorfirstname },
+                { "instructorlastname", instructorlastname },
+                { "instructoremail", instructoremail },
+                { "instructorphone", instructorphone }
             };
 
             if (activity.IsNotEmpty())
