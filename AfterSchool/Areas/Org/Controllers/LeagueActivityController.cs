@@ -388,6 +388,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers();
             ViewBag.ActiveMenu = "EditContact";
             return View(activity);
         }
@@ -439,6 +440,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
+            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
             ViewBag.ActiveMenu = "EditContact";
             return View(activity);
         }
@@ -721,6 +723,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         //ViewBag.ActiveMenu = "EditDetails";
                         //return View("EditDetails", activity);
                         ViewBag.ActiveMenu = "EditContact";
+                        ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
                         return View("EditContact", activity);
                 }
             }
