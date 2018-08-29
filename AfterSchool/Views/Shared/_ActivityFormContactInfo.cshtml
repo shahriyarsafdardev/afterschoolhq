@@ -1,20 +1,111 @@
 ﻿@model AfterSchoolLibrary.Activity
+@{ 
+    var instructors = (List<WebUser>)ViewBag.Instructors;
+}
 
 <div class="panel panel-default">
+
     <div class="panel-heading">
-        Contact Information
+        Instructor
     </div>
+
     <div class="panel-body">
         <div class="form-group">
-            <label class="col-sm-3 control-label">Contact Name <span class="text-danger">*</span></label>
-            <div class="col-sm-9">
+            <label class="col-md-3 control-label">Instructor</label>
+            <div class="col-md-9">
+                <select class="form-control" id="instructor" name="instructor">
+                    <option value="">No Assigned Instructor</option>
+                    <option value="0" @(Request["instructor"] == "0" ? "selected=\"selected\"" : "")>+ New Instructor</option>
+                    @foreach (var instructor in instructors)
+                    {
+                        <option value="@instructor.ID" @(instructor.ID == Model.InstructorId ? "selected=\"selected\"" : "")>@instructor.DisplayName</option>
+                    }                 
+                </select>
+            </div>
+        </div>
+
+        <script>
+            function toggleNewInstructor() {
+                if ($('#instructor').val() == '0') {
+                    $('#newinstructor').removeClass('hide');
+                    $('#instructorfirstname').attr('required', 'required');
+                    $('#instructorlastname').attr('required', 'required');
+                    $('#instructoremail').attr('required', 'required');
+                    $('#instructorphone').attr('required', 'required');
+                } else {
+                    $('#newinstructor').addClass('hide');
+                    $('#instructorfirstname').removeAttr('required');
+                    $('#instructorlastname').removeAttr('required');
+                    $('#instructoremail').removeAttr('required');
+                    $('#instructorphone').removeAttr('required');
+                }
+            }
+
+            PageEvent.add(PageEvent.AFTER_INIT, function () {
+                $('#instructor').change(function () {
+                    toggleNewInstructor();
+                });
+
+                toggleNewInstructor();
+            });
+        </script>
+
+        <div id="newinstructor" class="hide">
+            <div class="form-group">
+                <label class="col-md-3 control-label">First Name</label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="instructorfirstname" name="instructorfirstname" onfocus="this.select()" value="@Request["instructorfirstname"]" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-3 control-label">Last Name</label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="instructorlastname" name="instructorlastname" onfocus="this.select()" value="@Request["instructorlastname"]" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-3 control-label">Phone</label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="instructorphone" name="instructorphone" onfocus="this.select()" value="@Request["instructorphone"]" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-3 control-label">Email</label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" id="instructoremail" name="instructoremail" onfocus="this.select()" value="@Request["instructoremail"]" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-heading">
+        @UILabel.ActivityLabel(Model.ActivityTypeId) Contact
+    </div>
+
+    <div class="panel-body">
+
+        <div class="form-group">
+            <div class="col-md-9 col-md-offset-3">
+                <p>Information listed here will be published out for parents who are browsing and/or registering.</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-9 col-md-offset-3">
+                <button type="button" class="btn btn-xs" id="btn-copy-instructor">Copy from Instructor</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-3 control-label">Contact Name <span class="text-danger">*</span></label>
+            <div class="col-md-9">
                 <input type="text" class="form-control" id="contactname" name="contactname" onfocus="this.select()" value="@Model.ContactName.IfBlank(SessionVariables.LoggedInUser.DisplayName)" required />
             </div>
         </div>
 
         <div class="form-group">
-            <label class="col-sm-3 control-label">Contact Phone <span class="text-danger">*</span></label>
-            <div class="col-sm-9">
+            <label class="col-md-3 control-label">Contact Phone <span class="text-danger">*</span></label>
+            <div class="col-md-9">
                 <input type="text" class="form-control" id="contactphone" name="contactphone" onfocus="this.select()" value="@Model.ContactPhone.IfBlank(SessionVariables.LoggedInUser.Phone)" required />
                 <p class="text-muted hide">
                     <em>
@@ -25,10 +116,43 @@
         </div>
 
         <div class="form-group">
-            <label class="col-sm-3 control-label">Contact Email <span class="text-danger">*</span></label>
-            <div class="col-sm-9">
+            <label class="col-md-3 control-label">Contact Email <span class="text-danger">*</span></label>
+            <div class="col-md-9">
                 <input type="email" class="form-control" id="contactemail" name="contactemail" onfocus="this.select()" value="@Model.ContactEmail.IfBlank(SessionVariables.LoggedInUser.Email)" required />
             </div>
         </div>
     </div>
 </div>
+
+@foreach(var instructor in instructors)
+{
+    <div class="hide">
+        <div id="instructor-@instructor.ID" name="@instructor.DisplayName" email="@instructor.Email" phone="@instructor.Phone"></div>
+    </div>
+}
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#btn-copy-instructor').click(function () {
+            var instructorId = $('#instructor').val();
+            var name = '';
+            var email = '';
+            var phone = '';
+
+            if (instructorId == '0') {
+                name = `${$('#instructorfirstname').val()} ${$('#instructorlastname').val()}`;
+                email = $('#instructoremail').val();
+                phone = $('#instructorphone').val();
+            }
+            else if (instructorId != '0') {
+                name = $(`#instructor-${instructorId}`).attr('name');
+                email = $(`#instructor-${instructorId}`).attr('email');
+                phone = $(`#instructor-${instructorId}`).attr('phone');
+            }
+
+            $('#contactname').val(name);
+            $('#contactemail').val(email);
+            $('#contactphone').val(phone);
+        });
+    });
+</script>

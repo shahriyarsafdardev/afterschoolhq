@@ -1274,6 +1274,7 @@ property: IsActive, bool, Bit
 property: TotalPeriods, int?, Int
 property: StripePlanId, string, NVarChar "50"
 property: PlanTypeId, SubscriptionPlanType, Int
+property: StartDayOfMonth, int?, Int
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|PlanTypeId, List<>, LoadByParticipationObject
 loadmethod: PlanOwnerAccountId, List<>
 [end]
@@ -1471,19 +1472,13 @@ values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, Regist
 [begin]
 type: Enum
 name: UserType
-values: NotSet, SuperAdmin, Owner, Administrator, Student, Teacher, Staff, Parent, ActivityLeader
+values: NotSet, SuperAdmin, Owner, Administrator, Student, Instructor, Staff, Parent, ProgramDirector
 [end]
 
 [begin]
 type: Enum
 name: FileType
 values: NotSet, Document, Image, Video, Audio, Text, Html
-[end]
-
-[begin]
-type: Enum
-name: PermissionObjectType
-values: NotSet, Account
 [end]
 
 [begin]
@@ -1652,4 +1647,10 @@ values: NotSet, Started, Completed, RequiresParentSignature
 type: Enum
 name: SubscriptionPlanType
 values: NotSet, Subscription, PaymentPlan
+[end]
+
+[begin]
+type: Enum
+name: PermissionType
+values: NotSet, AccountingView, AccountingEdit, AccountingManage, TeamView, TeamEdit, TeamManage, AccountSettingsView, AccountSettingsEdit, AccountSettingsManage, ContactsView, ContactsEdit, ContactsManage, FormsView, FormsEdit, FormsManage, StudentsView, StudentsEdit, StudentsManage, ActivitiesView, ActivitiesEdit, ActivitiesManage, SessionsView, SessionsEdit, SessionsManage, LeaguesView, LeaguesEdit, LeaguesManage
 [end]

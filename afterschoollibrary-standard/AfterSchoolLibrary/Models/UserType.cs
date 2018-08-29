@@ -5,8 +5,8 @@ public enum UserType
 	Owner,
 	Administrator,
 	Student,
-	Teacher,
+	Instructor,
 	Staff,
 	Parent,
-	ActivityLeader
+	ProgramDirector
 }

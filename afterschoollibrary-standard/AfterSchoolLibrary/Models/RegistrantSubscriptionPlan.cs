@@ -35,6 +35,7 @@ namespace AfterSchoolLibrary
 		/// </summary>
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
 		public string StripeSubscriptionId { get { return (string)MDV["StripeSubscriptionId"].Value; } set { MDV["StripeSubscriptionId"].Value = value; } }
+		public string StripeCustomerId { get { return (string)MDV["StripeCustomerId"].Value; } set { MDV["StripeCustomerId"].Value = value; } }
 		
 
         public RegistrantSubscriptionPlan()
@@ -56,6 +57,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "StripeSubscriptionId", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "StripeCustomerId", System.Data.SqlDbType.NVarChar , "50");
 				
                 return _dp;
             }
@@ -155,6 +157,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["StripeSubscriptionId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeCustomerId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

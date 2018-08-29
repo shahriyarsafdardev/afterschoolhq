@@ -78,7 +78,7 @@
                     </div>
                 </div>
 
-                @if (Model.CostPerRegistrant > 0)
+                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && Model.CostPerRegistrant > 0)
                 {
                     <div class="col-md-3">
                         <div class="widget widget-tile widget-bordered">

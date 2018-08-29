@@ -53,7 +53,7 @@
                     </div>
                     <div class="col-md-6">
 
-                        @if (Model.CostPerRegistrant > 0)
+                        @if (Model.CostPerRegistrant > 0 && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
                         {
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
