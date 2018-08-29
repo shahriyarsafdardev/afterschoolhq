@@ -388,7 +388,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers();
             ViewBag.ActiveMenu = "EditContact";
             return View(activity);
         }
