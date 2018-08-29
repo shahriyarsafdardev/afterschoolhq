@@ -459,6 +459,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         return View("EditSchedule", activity);
                     case "next":
                         ViewBag.ActiveMenu = "EditContact";
+                        ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
                         return View("EditContact", activity);
                 }
             }
@@ -660,6 +661,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditContact";
+                        ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
                         return View("EditContact", activity);
                     case "next":
                         if (SessionVariables.AccountPackage.HasFeature(FeatureType.AcceptPayments))
