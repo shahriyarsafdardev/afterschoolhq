@@ -369,16 +369,6 @@
     <Content Include="Assets\elegant-icons\fonts\ElegantIcons.svg" />
     <Content Include="Assets\elegant-icons\fonts\et-line.svg" />
     <Content Include="Assets\img\140x140.png" />
-    <Content Include="Assets\img\404-img-2x.png" />
-    <Content Include="Assets\img\404-img.png" />
-    <Content Include="Assets\img\avatar.jpg" />
-    <Content Include="Assets\img\avatar2.jpg" />
-    <Content Include="Assets\img\avatar3.jpg" />
-    <Content Include="Assets\img\avatar4.jpg" />
-    <Content Include="Assets\img\avatar5.jpg" />
-    <Content Include="Assets\img\avatar6.jpg" />
-    <Content Include="Assets\img\avatar7.jpg" />
-    <Content Include="Assets\img\avatar8.jpg" />
     <Content Include="Assets\img\bitbucket.png" />
     <Content Include="Assets\img\db-icon.png" />
     <Content Include="Assets\img\dribbble.png" />
