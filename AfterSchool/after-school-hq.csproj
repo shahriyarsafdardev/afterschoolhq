@@ -1079,7 +1079,6 @@
     <Content Include="Areas\Org\Views\Group\MessageAdd.cshtml" />
     <Content Include="Areas\Org\Views\Group\MessageDetail.cshtml" />
     <Content Include="Areas\Org\Views\Group\Messages.cshtml" />
-    <Content Include="Areas\Org\Views\Shared\_ZendeskWidget.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_FormEditMenu.cshtml" />
     <Content Include="Views\Shared\_EditRegistrationPeriodModal.cshtml" />
     <Content Include="Areas\Org\Views\Schedule\Edit.cshtml" />
