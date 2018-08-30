@@ -810,7 +810,6 @@
     <Content Include="Areas\Org\Views\League\PublishDetail.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsBank.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsEntity.cshtml" />
-    <Content Include="Areas\Org\Views\Account\PaymentsTOS.cshtml" />
     <Content Include="Areas\Admin\Views\Upload\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Upload\LocationsSubmitted.cshtml" />
     <Content Include="Areas\StripeHooks\Views\web.config" />
@@ -820,7 +819,6 @@
     <Content Include="Public\fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="Public\fonts\glyphicons-halflings-regular.woff" />
     <Content Include="Public\fonts\glyphicons-halflings-regular.woff2" />
-    <Content Include="Areas\Org\Views\Account\PaymentsTOS.cshtml" />
     <Content Include="Areas\District\Views\Provider\Index.cshtml" />
     <Content Include="Areas\District\Views\Provider\Invite.cshtml" />
     <Content Include="Areas\District\Views\Provider\InviteSent.cshtml" />
