@@ -138,6 +138,7 @@
                                                                        class="form-control col-sm-3"
                                                                        onfocus="this.select()"
                                                                        data-tooltip-id="text-@question.ID" />
+                                                                
                                                             }
                                                             else if (question.IsLocked)
                                                             {
@@ -456,6 +457,8 @@
 
         incrementQuestionCount();
     }
+
+
 
     function showEditButton(id) {
         var arr = [@Html.Raw(typesWithOptions.Select(x=> "'" + ((int)x) + "'").ToStringList())];
