@@ -167,8 +167,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                         var questiontypeString = Request.Params[$"questiontype-{question.ID}"];
                                         var questionTypeint = questiontypeString.ToInteger();
                                         var castquestiontype = (QuestionType)questionTypeint;
-                                        question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
-                                    }
+                                        //question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
+                                        question.QuestionTypeId = castquestiontype;
+                                        }
 
                                     question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
                                     question.LastModifiedDate = DateTime.UtcNow;
