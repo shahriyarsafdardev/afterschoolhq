@@ -11,6 +11,8 @@
     var account = (Account)ViewData["Account"];
     var returnUrl = (string)ViewData["ReturnUrl"];
 
+    
+
     var previousLink = "#";
     var nextLink = "#";
     if (paging.IsNotEmpty())
@@ -28,13 +30,14 @@
 
 <div class="table-responsive">
     <table class="table table-hover">
+
         <thead>
             <tr>
                 <th></th>
-                <th class="text-nowrap">Name</th>
-                <th class="text-nowrap">Email</th>
-                <th class="text-nowrap">First Enrolled</th>
-                <th class="text-nowrap">Latest Registration</th>
+                <th class="text-nowrap" onclick="sortBy('Name')">Name</th>
+                <th class="text-nowrap" onclick="sortBy('Email')">Email</th>
+                <th class="text-nowrap" onclick="sortBy('FirstEnrolled')">First Enrolled</th>
+                <th class="text-nowrap" onclick="sortBy('Registration')">Latest Registration</th>          
             </tr>
         </thead>
         <tbody>
@@ -87,3 +90,25 @@
         }
     );
 }
+
+
+<script>
+    
+    function sortBy(col) {
+        switch (col) {
+            case "Name":
+                @Model = @Model.OrderBy(o => o.Name).ToList();
+                break;
+            case "Email":
+                @Model = @Model.OrderBy(o => o.RegistrantEmail).ToList();
+                break;
+            case "FirstEnrolled":
+                 @Model = @Model.OrderBy(o => o.CreateDate).ToList();
+                break;
+            case "Registration":
+                 @Model = @Model.OrderBy(o => o.RegistrantRegistrantTypeId).ToList();
+                break;
+        }
+    };
+
+</script>
