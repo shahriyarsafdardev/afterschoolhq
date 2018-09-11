@@ -211,6 +211,7 @@ property: Day, DayOfWeekASL, Int
 property: StartDateTime, DateTime?, DateTime, required
 property: EndDateTime, DateTime?, DateTime, required
 property: InstanceTypeId, InstanceType, Int
+property: LocationId, int?, int
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
@@ -218,6 +219,20 @@ loadmethod: ActivityScheduleId|InstanceTypeId, List<>
 [end]
 
 [begin]
+type: Class
+name: Match
+description: way to track a match between two or more teams
+inherits: BasicObjectWithModified
+property: TeamId, int?, Int, required
+property: ActivityInstanceId, int?, Int, required
+property: Score, decimal?, decimal "10,2"
+property: TeamPlace, int?, Int
+loadmethod: TeamId, List<>
+loadmethod: ActivityInstanceId, List<>
+loadmethod: TeamId|ActivityInstanceId
+[end]
+
+[-begin]
 type: Class
 name: TeamMatch
 description: A competitive match played between two teams in the same league
@@ -228,7 +243,7 @@ property: LocationId, int?, Int
 property: HomeTeamScore, int?, Int
 property: AwayTeamScore, int?, Int
 property: ActivityInstanceId, int?, Int, required
-[end]
+[-end]
 
 [begin]
 type: Class
