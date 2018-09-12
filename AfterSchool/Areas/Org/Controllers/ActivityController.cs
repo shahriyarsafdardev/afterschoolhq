@@ -203,6 +203,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         values.Add("form", newForm.ID.Value.ToString());
                 }
 
+                values.Add("registrationthankyouemail", "Thank you for registering");
+                values.Add("applicationthankyouemail", "Thank you for applying");
+
                 activity = Activity.CreateNew(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
