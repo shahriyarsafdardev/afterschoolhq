@@ -138,6 +138,7 @@
                                                                        class="form-control col-sm-3"
                                                                        onfocus="this.select()"
                                                                        data-tooltip-id="text-@question.ID" />
+                                                                
                                                             }
                                                             else if (question.IsLocked)
                                                             {
@@ -151,15 +152,12 @@
                                                         else
                                                         {   
                                                             <textarea class="form-control" id="description-@question.ID" name="description-@question.ID">@question.Description</textarea>
-                                                            <input type="hidden"
-                                                                    value="@((int)QuestionType.TextBlock)"
-                                                                    id="questiontype-@question.ID"
-                                                                    name="questiontype-@question.ID" />
+                                                            
                                                         }
                                                     </td>
 
                                                     <td>
-                                                        @if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet)
+                                                        @if (!question.IsLocked && question.QuestionDataTypeId == QuestionDataType.NotSet && question.QuestionTypeId != QuestionType.TextBlock)
                                                         {
                                                             <select class="form-control questiontype-select"
                                                                     id="questiontype-@question.ID"
@@ -174,6 +172,12 @@
                                                                     </option>
                                                                 }
                                                             </select>
+                                                        } else if(question.QuestionTypeId == QuestionType.TextBlock)
+                                                        {
+                                                            <input type="hidden"
+                                                                   value="@((int)QuestionType.TextBlock)"
+                                                                   id="questiontype-@question.ID"
+                                                                   name="questiontype-@question.ID" />
                                                         }
                                                     </td>
                                                     <td>
@@ -456,6 +460,8 @@
 
         incrementQuestionCount();
     }
+
+
 
     function showEditButton(id) {
         var arr = [@Html.Raw(typesWithOptions.Select(x=> "'" + ((int)x) + "'").ToStringList())];

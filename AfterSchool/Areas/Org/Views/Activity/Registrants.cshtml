@@ -96,6 +96,8 @@
                 <div class="col-md-4">
                     <select id="assignmentType" onchange="changeAssignment()" class="form-control">
                         <option value="">View All Assignments</option>
+
+                        
                         @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet))
                         {
                             if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
