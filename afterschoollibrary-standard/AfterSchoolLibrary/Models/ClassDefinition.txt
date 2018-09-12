@@ -917,6 +917,7 @@ property: AccountActivityGroupId, int?, Int
 property: FirstRegistrationId, int?, Int
 property: ESignature, string, NVarChar "50"
 property: CompletionStatusId, RegistrationCompletionStatus, Int
+property: PurchaseId, int?, Int
 loadmethod: Uid
 loadmethod: RegistrantId, List<>
 loadmethod: AccountId, List<>

@@ -1,7 +1,8 @@
 @{ 
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
 
-    string homeactive = "", activityactive = "", leagueactive = "", registrationactive = "", formactive = "", contactactive = "", teamactive = "", accountactive = "", profileactive = "";
+    string homeactive = "", activityactive = "", leagueactive = "", registrationactive = "", formactive = "", contactactive = "", teamactive = "", accountactive = "", profileactive = "", accountingactive = "";
 
     switch(controller)
     {
@@ -23,15 +24,23 @@
         case "contact":
             contactactive = "active";
             break;
-        case "team":
-            teamactive = "active";
-            break;
         case "account":
-            accountactive = "active";
+            if (action == "team")
+            {
+                teamactive = "active";
+            }
+            else
+            {
+                accountactive = "active";
+            }
             break;
-        case "profileactive":
+        case "profile":
             profileactive = "active";
             break;
+        case "accounting":
+            accountingactive = "active";
+            break;
+
     }
 }
 
@@ -65,16 +74,20 @@
             }
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.FormsView))
             {
-                <li class="@formactive"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
+                <li class="@formactive hide"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
             }
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ContactsView))
             {
                 <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
             }
+
+            <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a></li>
+
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.TeamView))
             {
                 <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
             }
+
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
             {
                 <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>

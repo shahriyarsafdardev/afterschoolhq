@@ -529,7 +529,17 @@ namespace AfterSchoolLibrary
 
         public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return AddOrUpdateParticipationObject(registrationId, participationObjectId, participationObjectType, assignmentType, 1, registrationPeriodId, activityGroupId, loggedInUserId, msgs, dc);
+            return AddOrUpdateParticipationObject(
+                registrationId, 
+                participationObjectId, 
+                participationObjectType, 
+                assignmentType, 
+                1, 
+                registrationPeriodId, 
+                activityGroupId, 
+                loggedInUserId, 
+                msgs, 
+                dc);
         }
          public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int choiceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {

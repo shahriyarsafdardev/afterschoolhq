@@ -316,8 +316,9 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
+                    amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
 
-                    amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
+                    // amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
 
                     // amsgs.AddRange(DefaultTransactionTypes(adc));
 
@@ -366,6 +367,61 @@ namespace AfterSchoolLibrary
                     msgs.AddRange(fmsgs);
                 }
             );            
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateActivityPaymentWithTransactionIds(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var transactions = Transaction.Load(msgs: msgs, dc: dc);
+
+            transactions.ForEach(transaction => {
+                if (transaction.PurchaseId.HasValue)
+                {
+                    var purchase = Purchase.Load(transaction.PurchaseId.Value, msgs, dc);
+
+                    if (purchase.IsNotEmpty() && purchase.RegistrantId.HasValue)
+                    {
+                        var registrant = Registrant.Load(purchase.RegistrantId.Value, msgs, dc);
+
+                        if (registrant.IsNotEmpty())
+                        {
+                            var childRegistrants = registrant.GetChildren(msgs, dc);
+
+                            childRegistrants.ForEach(child => {
+                                var activityIds = RegistrantActivity.LoadByRegistrantId(child.ID.Value, msgs, dc)
+                                    .Where(ra => 
+                                        ra.RegistrationId.Value == purchase.RegistrationId.Value && 
+                                        ra.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                                    .Select(ra => ra.ParticipationObjectId.Value)
+                                    .ToList();
+
+                                activityIds.ForEach(activityId =>
+                                {
+                                    var payments = ActivityPayment.LoadByParticipationObjectByRegistrant(
+                                        activityId, 
+                                        ParticipationObjectType.Activity, 
+                                        child.ID.Value,
+                                        msgs, 
+                                        dc);
+
+                                    payments.Where(payment => !payment.TransactionId.HasValue)
+                                        .ToList()
+                                        .ForEach(payment =>
+                                        {
+                                            payment.TransactionId = transaction.ID;
+                                            msgs.AddRange(payment.Save(dc));
+                                        });
+
+                                });
+                            });
+                            
+                        }
+                    }
+                }
+            });
 
             return msgs;
         }

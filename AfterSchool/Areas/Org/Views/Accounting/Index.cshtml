@@ -1,0 +1,185 @@
+﻿@model List<AfterSchoolLibrary.Transaction>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
+    var totalTransactionAmount = Model.Sum(transaction => transaction.Amount.Value);
+    var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
+    var totalFees = Model.Sum(transaction => (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value);
+    var totalPayout = totalTransactionAmount - totalFees;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-note2"></i> Transactions
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
+                            <div class="desc">Total Transactions</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@avgTransactionAmount" data-decimals="2" data-suffix="" class="value">@avgTransactionAmount.ToCurrency()</div>
+                            <div class="desc">Avg Transaction Amt</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
+                            <div class="desc">Total Amt</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalPayout" data-decimals="2" data-suffix="" class="value">@totalPayout.ToCurrency()</div>
+                            <div class="desc">Total Payout</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-2">
+                    @{ 
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date"
+                            }
+                        ); 
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{ 
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date"
+                            }
+                        ); 
+                    }
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
+                </div>
+
+                <script>
+                    function search() {
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                    }
+                </script>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Created On</th>
+                            <th>Payer</th>
+                            <th>For</th>
+                            <th>Item Description</th>
+                            <th>Total Paid</th>
+                            <th>Platform Fee</th>
+                            <th>Payout</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var transaction in Model)
+                            {
+                                var purchase = transaction.GetPurchase();
+                                var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                                var participationObjects = transaction.GetParticipationObjects();
+                                var platformFee = transaction.GetPlatformFee();
+                                var payout = transaction.Amount.Value - platformFee;
+                                <tr>
+                                    <td>
+                                        @transaction.ID.ToString().PadLeft(8, '0')
+                                    </td>
+                                    <td>
+                                        @transaction.CreateDate.ToShortDateTimeString()
+                                    </td>
+                                    <td>
+                                        @transaction.GetPayerAccount().Name
+                                    </td>
+                                    <td>
+                                        @registrant.DisplayName
+                                    </td>
+                                    <td>
+                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                                    </td>
+                                    <td>
+                                        @transaction.Amount.ToCurrency()
+                                    </td>
+                                    <td>
+                                        @platformFee.ToCurrency()
+                                    </td>
+                                    <td>
+                                        @payout.ToCurrency()
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8">There are no transactions</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @{ 
+                Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    (PagingModel)ViewBag.PagingModel,
+                    new ViewDataDictionary()
+                    {
+                        { "controller", "accounting" },
+                        { "action", "index" },
+                        { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
+                    }
+                );
+            }
+        </div>
+    </div>
+</div>
+
