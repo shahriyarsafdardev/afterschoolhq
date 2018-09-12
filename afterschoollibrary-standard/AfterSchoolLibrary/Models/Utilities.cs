@@ -393,6 +393,7 @@ namespace AfterSchoolLibrary
                             childRegistrants.ForEach(child => {
                                 var activityIds = RegistrantActivity.LoadByRegistrantId(child.ID.Value, msgs, dc)
                                     .Where(ra => 
+                                        ra.RegistrationId.HasValue &&
                                         ra.RegistrationId.Value == purchase.RegistrationId.Value && 
                                         ra.ParticipationObjectTypeId == ParticipationObjectType.Activity)
                                     .Select(ra => ra.ParticipationObjectId.Value)
