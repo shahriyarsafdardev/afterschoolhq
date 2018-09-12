@@ -2016,11 +2016,19 @@ namespace AfterSchoolLibrary
             // if they're paying for a registration they already completed
             if (isPendingOrReserved)
                 return RegistrationAssignmentType.Reserved;
-            
+
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
+            // if there is room
             else if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
+            {
+                // if the person didn't pay
+                if (!participationObject.IsFree && participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal())
+                    return RegistrationAssignmentType.ReservedPendingPayment;
+
                 return RegistrationAssignmentType.Reserved;
+            }
+            // if there aren't any more seats available, but there's a waiting list
             else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
                 return RegistrationAssignmentType.WaitingList;
 

@@ -1,7 +1,7 @@
 @{ 
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
 
-    string homeactive = "", activityactive = "", leagueactive = "", registrationactive = "", formactive = "", contactactive = "", teamactive = "", accountactive = "", profileactive = "";
+    string homeactive = "", activityactive = "", leagueactive = "", registrationactive = "", formactive = "", contactactive = "", teamactive = "", accountactive = "", profileactive = "", accountingactive = "";
 
     switch(controller)
     {
@@ -32,6 +32,10 @@
         case "profileactive":
             profileactive = "active";
             break;
+        case "accountingactive":
+            accountingactive = "active";
+            break;
+
     }
 }
 
@@ -65,7 +69,7 @@
             }
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.FormsView))
             {
-                <li class="@formactive"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
+                <li class="@formactive hide"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
             }
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ContactsView))
             {
@@ -75,6 +79,9 @@
             {
                 <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
             }
+
+            <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-notebook"></i> Accounting</a></li>
+
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
             {
                 <li class="@accountactive"><a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a></li>

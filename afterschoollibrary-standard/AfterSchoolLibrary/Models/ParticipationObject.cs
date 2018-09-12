@@ -388,6 +388,16 @@ namespace AfterSchoolLibrary
             return IsActivity() ? ObjectID : null;
         }
 
+        public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
+                this.ObjectID.Value, 
+                this.ObjectType, 
+                registrantId, 
+                msgs, 
+                dc);
+        }
+
         public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var payment = new ActivityPayment()

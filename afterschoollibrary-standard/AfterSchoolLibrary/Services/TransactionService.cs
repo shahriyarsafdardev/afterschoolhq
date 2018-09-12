@@ -9,8 +9,26 @@ using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary.Services
 {
-    public class TransactionService
+    public static class TransactionService
     {
+        public static List<ParticipationObject> GetParticipationObjects(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.LoadByTransactionId(transaction.ID.Value, msgs, dc)
+                .Select(payment => 
+                    new ParticipationObject(payment.ParticipationObjectId.Value, payment.ParticipationObjectTypeId, msgs, dc)
+                )
+                .ToList();
+        }
+
+        public static Account GetBillerAccount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(transaction.BillerAccountId.Value, msgs, dc);
+        }
+        public static Account GetPayerAccount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(transaction.PayerAccountId.Value, msgs, dc);
+        }
+
         public static Transaction CreateNew(Account fromAccount, Account toAccount, CheckoutObject checkoutObject, int? purchaseId, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return CreateNew(fromAccount, toAccount, checkoutObject.RegistrationFee, checkoutObject.ParticipationObject.Name, purchaseId, transactionType, stripeChargeOrRefundId, loggedInUser, msgs, dc);

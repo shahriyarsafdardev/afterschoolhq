@@ -20,6 +20,26 @@ namespace AfterSchoolLibrary
             return WebUser.Load(account.OwnerId.Value, msgs, dc);
         }
 
+        public static List<Transaction> GetBilledTransactions(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByBillerAccountId(account.ID.Value, start, length, msgs, dc);
+        }
+
+        public static List<Transaction> GetPaidTransactions(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByPayerAccountId(account.ID.Value, start, length, msgs, dc);
+        }
+
+        public static int GetBilledTransactionCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetCountByBillerAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static int GetPaidTransactionCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetCountByPayerAccountId(account.ID.Value, msgs, dc);
+        }
+
         public static List<WebUser> GetAccountOwnersAndAdmins(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, msgs, dc)
