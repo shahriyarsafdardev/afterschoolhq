@@ -305,6 +305,7 @@
     <Compile Include="Models\IFrameViewModel.cs" />
     <Compile Include="Models\LeagueHelper.cs" />
     <Compile Include="Models\ModalViewModel.cs" />
+    <Compile Include="Models\FormInputViewModel.cs" />
     <Compile Include="Models\PagingModel.cs" />
     <Compile Include="Areas\Org\OrgAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\UserController.cs" />
@@ -1296,6 +1297,7 @@
     <Content Include="Views\Account\MakePayment.cshtml" />
     <Content Include="Views\Shared\_DashboardNotfications.cshtml" />
     <Content Include="Views\Shared\Layouts\_FullScreen.cshtml" />
+    <Content Include="Views\Shared\Components\_Date.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -11,6 +11,19 @@ namespace AfterSchoolLibrary.Services
 {
     public static class TransactionService
     {
+        public static decimal GetPlatformFee(this Transaction transaction)
+        {
+            return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
+        }
+
+        public static Purchase GetPurchase(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (transaction.PurchaseId.HasValue)
+                return Purchase.Load(transaction.PurchaseId.Value, msgs, dc);
+
+            return null;
+        }
+
         public static List<ParticipationObject> GetParticipationObjects(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.LoadByTransactionId(transaction.ID.Value, msgs, dc)

@@ -1,5 +1,6 @@
 @{ 
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
 
     string homeactive = "", activityactive = "", leagueactive = "", registrationactive = "", formactive = "", contactactive = "", teamactive = "", accountactive = "", profileactive = "", accountingactive = "";
 
@@ -23,16 +24,20 @@
         case "contact":
             contactactive = "active";
             break;
-        case "team":
-            teamactive = "active";
-            break;
         case "account":
-            accountactive = "active";
+            if (action == "team")
+            {
+                teamactive = "active";
+            }
+            else
+            {
+                accountactive = "active";
+            }
             break;
-        case "profileactive":
+        case "profile":
             profileactive = "active";
             break;
-        case "accountingactive":
+        case "accounting":
             accountingactive = "active";
             break;
 
@@ -75,12 +80,13 @@
             {
                 <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
             }
+
+            <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a></li>
+
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.TeamView))
             {
                 <li class="@teamactive"><a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a></li>
             }
-
-            <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-notebook"></i> Accounting</a></li>
 
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
             {

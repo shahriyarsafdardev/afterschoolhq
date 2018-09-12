@@ -1,0 +1,6 @@
+﻿@model FormInputViewModel
+
+<div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+    <input type="text" class="form-control" id="@Model.Id" name="@Model.Name" onfocus="this.select()" data-type="date" value="@Model.Value" placeholder="@Model.Placeholder" />
+    <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+</div>

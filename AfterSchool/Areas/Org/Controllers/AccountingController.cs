@@ -17,11 +17,11 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         // GET: Org/Accounting
-        public ActionResult Index(string pn, string rpp)
+        public ActionResult Index(string pn, string rpp, string sdate, string edate)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;
-            int recordsPerPage = 10;
+            int recordsPerPage = 25;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();
@@ -32,10 +32,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var totalTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount();
-            var transactions = SessionVariables.CurrentAccount.GetBilledTransactions(start, length);
-            var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
+            var startDate = sdate.IsDateTime() ? sdate.ToDateTime() : new DateTime?();
+            var endDate = edate.IsDateTime() ? edate.ToDateTime() : new DateTime?();
 
+            var totalTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate);
+            var transactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, start, length);
+            var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
+            
             ViewBag.Messages = new SystemMessages();
             ViewBag.PagingModel = new PagingModel()
             {

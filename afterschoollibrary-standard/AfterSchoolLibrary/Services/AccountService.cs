@@ -20,24 +20,24 @@ namespace AfterSchoolLibrary
             return WebUser.Load(account.OwnerId.Value, msgs, dc);
         }
 
-        public static List<Transaction> GetBilledTransactions(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Transaction> GetBilledTransactions(this Account account, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByBillerAccountId(account.ID.Value, start, length, msgs, dc);
+            return Transaction.LoadByBillerAccountId(account.ID.Value, startDate, endDate, start, length, msgs, dc);
         }
 
-        public static List<Transaction> GetPaidTransactions(this Account account, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Transaction> GetPaidTransactions(this Account account, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.LoadByPayerAccountId(account.ID.Value, start, length, msgs, dc);
+            return Transaction.LoadByPayerAccountId(account.ID.Value, startDate, endDate, start, length, msgs, dc);
         }
 
-        public static int GetBilledTransactionCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetBilledTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetCountByBillerAccountId(account.ID.Value, msgs, dc);
+            return Transaction.GetCountByBillerAccountId(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
-        public static int GetPaidTransactionCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetPaidTransactionCount(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetCountByPayerAccountId(account.ID.Value, msgs, dc);
+            return Transaction.GetCountByPayerAccountId(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
         public static List<WebUser> GetAccountOwnersAndAdmins(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
