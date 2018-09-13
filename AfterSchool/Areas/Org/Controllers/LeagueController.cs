@@ -379,7 +379,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var schedule = new ActivitySchedule();
             if (id.ToInteger() > 0)
             {
-                schedule = ActivitySchedule.Load(id.ToInteger());
+                schedule = ActivitySchedule.Load(id.ToInteger()); // this isnt right, you'll end up loading an activity group and an activity schedule by the same id??
             }
             else
             {

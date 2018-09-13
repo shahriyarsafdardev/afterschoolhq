@@ -4,12 +4,66 @@
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var forms = (List<Form>)ViewBag.Forms;
     var schedule = (ActivitySchedule)ViewBag.Schedule;
+    var activityInstances = (List<ActivityInstance>)ViewBag.ActivityInstances;
+    
 }
 
 @{Html.RenderPartial("DistrictHeader");}
 
 <div class="main-content">
 
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
     @{Html.RenderPartial("_LeagueHeader");}
 
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", Model.Name); }
+        </div>
+        <div class="panel-body">
+            
+            <div class="panel-heading">
+                <div class="pull-right">
+                    <a href="@Url.Action("addgame", "league", new { id = Model.Uid })" class="btn-primary btn-space margin-r-10 padding-10">
+                        <i class="icon icon-left s7-plus"></i>
+                        Add Game
+                    </a>
+                </div>
+               
+                <h2>
+                    Season Schedule
+                </h2>
+            </div>
+            @foreach(List<ActivityInstance> day in activityInstances.GroupBy(a => a.StartDateTime.Value.Date).Select(grp => grp.ToList()).ToList())
+            { 
+
+                <h4>@day.First().StartDateTime.Value.ToShortDateString()
+                    <a href="@Url.Action("addgame", "league", new { id = Model.Uid, d = day.First().StartDateTime.Value.ToShortDateString() })" class="btn-default  btn-space margin-r-10 padding-10">
+                        <i class="icon icon-left s7-plus"></i>
+                    </a>
+                </h4>
+                foreach (var activityInstance in day)
+                {
+
+                    var matches = Match.LoadByActivityInstanceId(activityInstance.ID.Value);
+
+                    <h6>
+                        <a href="@Url.Action("addgame", "league", new { id = Model.Uid, ai = activityInstance.ID.Value })">
+                            <i class="icon icon-left s7-more"></i>
+                            @activityInstance.StartDateTime.Value.ToShortTimeString()
+                        </a>
+                        @foreach( var match in matches)
+                        {
+                            Activity team = Activity.Load(match.TeamId.Value);
+                            <p>@team.Name</p>
+                        }
+
+                    </h6>
+                    
+                }
+
+                
+            }
+        </div>
+    </div>
 </div>

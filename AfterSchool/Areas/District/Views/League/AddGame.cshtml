@@ -1,0 +1,30 @@
+@model ActivityGroup
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var forms = (List<Form>)ViewBag.Forms;
+    var schedule = (ActivitySchedule)ViewBag.Schedule;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_LeagueHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", Model.Name); }
+        </div>
+        <div class="panel-body">
+            
+            <div class="panel-heading">
+                <h2>
+                    Add Game
+                </h2>
+            </div>
+        </div>
+    </div>
+</div>

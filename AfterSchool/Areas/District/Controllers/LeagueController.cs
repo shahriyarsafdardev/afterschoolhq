@@ -225,7 +225,13 @@ namespace AfterSchool.Areas.District.Controllers
         [HttpGet]
         public ActionResult Schedule(string id, string pn, string rpp)
         {
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
+            // ActivitySchedule schedule = ActivitySchedule.LoadByActivityGroupId(group.ID.Value);
+            //ActivitySchedule.L
+            //var activityInstances = ActivityInstance.LoadByActivityScheduleId(schedule.ID.Value);
+
+            //paging stuff, ???
             int pageNumber = 1;
             int recordsPerPage = 10;
 
@@ -250,7 +256,7 @@ namespace AfterSchool.Areas.District.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-            return View(group);
+            return View(league);
         }
 
         // GET: User
@@ -346,6 +352,7 @@ namespace AfterSchool.Areas.District.Controllers
             }
 
             ViewBag.Schedule = schedule;
+            ViewBag.ActivityInstances = schedule.GetInstances();
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
 
         }
@@ -471,6 +478,17 @@ namespace AfterSchool.Areas.District.Controllers
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("schools", new { id = activityGroup.Uid });
+
+            ViewBag.Messages = msgs;
+
+            return View(activityGroup);
+        }
+
+        [HttpGet]
+        public ActionResult AddGame(string id)
+        {
+            var msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
 
             ViewBag.Messages = msgs;
 
