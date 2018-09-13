@@ -211,7 +211,7 @@ property: Day, DayOfWeekASL, Int
 property: StartDateTime, DateTime?, DateTime, required
 property: EndDateTime, DateTime?, DateTime, required
 property: InstanceTypeId, InstanceType, Int
-property: LocationId, int?, int
+property: LocationId, int?, Int
 loadmethod: ActivityId, List<>
 loadmethod: ActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
@@ -225,7 +225,7 @@ description: way to track a match between two or more teams
 inherits: BasicObjectWithModified
 property: TeamId, int?, Int, required
 property: ActivityInstanceId, int?, Int, required
-property: Score, decimal?, decimal "10,2"
+property: Score, decimal?, Decimal "10,2"
 property: TeamPlace, int?, Int
 loadmethod: TeamId, List<>
 loadmethod: ActivityInstanceId, List<>

@@ -46,7 +46,7 @@ namespace AfterSchoolLibrary
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "TeamId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityInstanceId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Score", System.Data.SqlDbType.decimal , "10,2");
+				_dp.Add(className, "Score", System.Data.SqlDbType.Decimal , "10,2");
 				_dp.Add(className, "TeamPlace", System.Data.SqlDbType.Int);
 				
                 return _dp;

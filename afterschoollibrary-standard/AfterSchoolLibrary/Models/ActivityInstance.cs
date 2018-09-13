@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "StartDateTime", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "EndDateTime", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "InstanceTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "LocationId", System.Data.SqlDbType.int);
+				_dp.Add(className, "LocationId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
