@@ -485,11 +485,30 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpGet]
-        public ActionResult AddGame(string id)
+        public ActionResult AddGame(string id, string ai, string d, string t)
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
 
+            if(ai.IsNotEmpty() && ai.IsInteger())
+            {
+                ViewBag.ActivityInstance = ActivityInstance.Load(ai.ToInteger());
+            }
+
+            if(d.IsNotEmpty() && d.IsDate())
+            {
+                if (t.IsNotEmpty() && t.IsTime())
+                {
+                    ViewBag.Date = (d + t).ToDateTime();
+                } else
+                {
+                    ViewBag.Date = d.ToDateTime();
+                }
+                
+            }
+
+
+            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Messages = msgs;
 
             return View(activityGroup);

@@ -2624,7 +2624,38 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }
-       
+
+
+        public static List<Activity> Search(string query, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+                    select * from Activity
+                    where 
+                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') 
+                  
+                ";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Activity> SearchByActivityGroup(string query, int? start, int? length, int activityGroupId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+                    select * from Activity
+                    where 
+                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') and
+                        ActivityGroupId = '{activityGroupId}'
+                ";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }
