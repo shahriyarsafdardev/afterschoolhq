@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Transaction CreateNew(Account fromAccount, Account toAccount, CheckoutObject checkoutObject, int? purchaseId, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return CreateNew(fromAccount, toAccount, checkoutObject.RegistrationFee, checkoutObject.ParticipationObject.Name, purchaseId, transactionType, stripeChargeOrRefundId, loggedInUser, msgs, dc);
+            return CreateNew(fromAccount, toAccount, checkoutObject.TuitionFee, checkoutObject.ParticipationObject.Name, purchaseId, transactionType, stripeChargeOrRefundId, loggedInUser, msgs, dc);
         }
 
         public static Transaction CreateNew(Account fromAccount, Account toAccount, decimal? amount, string activityName, int? purchaseId, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

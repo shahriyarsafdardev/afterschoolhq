@@ -317,6 +317,7 @@ namespace AfterSchoolLibrary
                 {
                     amsgs.AddRange(AdditionalData(adc));
                     amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
+                    amsgs.AddRange(UpdateSeatIndexes(adc));
 
                     // amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
 
@@ -367,6 +368,41 @@ namespace AfterSchoolLibrary
                     msgs.AddRange(fmsgs);
                 }
             );            
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateSeatIndexes(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var ras = RegistrantActivity.Load(msgs: msgs, dc: dc)
+                .Where(ra => 
+                    ra.AssignmentTypeId == RegistrationAssignmentType.Applied || 
+                    ra.AssignmentTypeId == RegistrationAssignmentType.WaitingList
+                )
+                .ToList();
+
+            ras.ForEach(ra => {
+                switch(ra.AssignmentTypeId)
+                {
+                    case RegistrationAssignmentType.Applied:
+                        if (ra.ApplicationSeatIndex.HasValue)
+                        {
+                            ra.SeatIndex = ra.ApplicationSeatIndex;
+                            ra.ApplicationSeatIndex = null;
+                            msgs.AddRange(ra.Save(dc));
+                        }
+                        break;
+                    case RegistrationAssignmentType.WaitingList:
+                        if (ra.WaitingListSeatIndex.HasValue)
+                        {
+                            ra.SeatIndex = ra.WaitingListSeatIndex;
+                            ra.WaitingListSeatIndex = null;
+                            msgs.AddRange(ra.Save(dc));
+                        }
+                        break;
+                }
+            });
 
             return msgs;
         }
@@ -486,50 +522,50 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages UpdateRegistrantActivityParticipationObjects(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
+        //public static SystemMessages UpdateRegistrantActivityParticipationObjects(DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
 
-            var registrantActivities = RegistrantActivity.Load(
-                criterias: new Hashtable() { { "ParticipationObjectId", DBNull.Value } },
-                msgs: msgs,
-                dc: dc);
+        //    var registrantActivities = RegistrantActivity.Load(
+        //        criterias: new Hashtable() { { "ParticipationObjectId", DBNull.Value } },
+        //        msgs: msgs,
+        //        dc: dc);
 
-            registrantActivities.ForEach(registrantActivity => {
-                registrantActivity.ParticipationObjectId = registrantActivity.ActivityId;
-                registrantActivity.ParticipationObjectTypeId = ParticipationObjectType.Activity;
-                msgs.AddRange(registrantActivity.Save(dc));
-            });
+        //    registrantActivities.ForEach(registrantActivity => {
+        //        registrantActivity.ParticipationObjectId = registrantActivity.ActivityId;
+        //        registrantActivity.ParticipationObjectTypeId = ParticipationObjectType.Activity;
+        //        msgs.AddRange(registrantActivity.Save(dc));
+        //    });
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
-        public static SystemMessages UpdateAssignmentType(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
+        //public static SystemMessages UpdateAssignmentType(DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
 
-            var registrantActivities = RegistrantActivity.Load(
-                criterias: new Hashtable() { { "AssignmentTypeId", (int)RegistrationAssignmentType.NotSet } },
-                msgs: msgs,
-                dc: dc);
+        //    var registrantActivities = RegistrantActivity.Load(
+        //        criterias: new Hashtable() { { "AssignmentTypeId", (int)RegistrationAssignmentType.NotSet } },
+        //        msgs: msgs,
+        //        dc: dc);
 
-            registrantActivities.ForEach(registrantActivity => {
-                if (registrantActivity.NumberOfSeats > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Reserved;
-                else if (registrantActivity.NumberOfWaitingListSeats > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.WaitingList;
-                else if (registrantActivity.NumberOfApplicationSeats > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Applied;
-                else if (registrantActivity.NumberOfInvitationSeats > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Invited;
-                else if (registrantActivity.NumberOfSeatsDeclined > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Declined;
+        //    registrantActivities.ForEach(registrantActivity => {
+        //        if (registrantActivity.NumberOfSeats > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Reserved;
+        //        else if (registrantActivity.NumberOfWaitingListSeats > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.WaitingList;
+        //        else if (registrantActivity.NumberOfApplicationSeats > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Applied;
+        //        else if (registrantActivity.NumberOfInvitationSeats > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Invited;
+        //        else if (registrantActivity.NumberOfSeatsDeclined > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Declined;
 
-                msgs.AddRange(registrantActivity.Save(dc));
-            });
+        //        msgs.AddRange(registrantActivity.Save(dc));
+        //    });
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
         public static SystemMessages UpdateTransactions(DatabaseConnection dc = null)
         {

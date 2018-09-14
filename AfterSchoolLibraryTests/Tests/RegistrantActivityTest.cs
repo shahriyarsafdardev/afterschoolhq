@@ -127,11 +127,8 @@ namespace AfterSchoolLibraryTests
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc);
 
             int registrationPeriodID = registrationPeriod.ID.Value;
-            int numberOfSeats = 12;
-            int numberOfWaitingListSeats = 1;
-            int numberOfApplicationSeats = 1;
 
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, msgs, dc);
             registrationPeriod.AddActivity(activity, true, user.ID.Value, dc);
 
             // expect 13 seats, 12 seats + 1 waiting list seat
@@ -150,10 +147,7 @@ namespace AfterSchoolLibraryTests
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc);
 
             int registrationPeriodID = registrationPeriod.ID.Value;
-            int numberOfSeats = 12;
-            int numberOfWaitingListSeats = 1;
-            int numberOfApplicationSeats = 1;
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, msgs, dc);
             
             //expect 13 because we added a waiting list seat
             Assert.Equal(13 ,RegistrantActivity.GetSeatCountByRegistrationPeriodId(registrantActivity.RegistrationPeriodId.Value, dc: dc));

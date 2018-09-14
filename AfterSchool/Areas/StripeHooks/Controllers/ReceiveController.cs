@@ -132,14 +132,13 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var totalAmountInCents = ((string)stripeEvent.Data.Object.total).ToDecimal();
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
-            var registrant = registrantSubscription.GetRegistrant(msgs).GetMasterRegistrant(msgs);
-            var payingAccount = registrant.GetAccount(msgs);
+            var masterRegistrant = registrantSubscription.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+            var payingAccount = masterRegistrant.GetAccount(msgs);
             var planOwnerAccount = plan.GetAccount(msgs);
             var participationObject = plan.GetParticipationObject(msgs);
             
             if (msgs.HasNoErrors())
             {
-
                 // check if this same charge has been posted already and tracked.
                 var transaction = Transaction.LoadByStripeChargeOrRefundId(chargeId, msgs);
 
@@ -172,8 +171,28 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                             var payment = registrantSubscription.AddPayment(transaction, totalAmount, null, amsgs, adc);
 
                             // cancel stripe subscription at end of term
-                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && registrantSubscription.GetPaymentCount(amsgs, adc) >= plan.TotalPeriods.Value)
+                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && 
+                                registrantSubscription.GetPaymentCount(amsgs, adc) >= plan.TotalPeriods.Value)
                                 amsgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, planOwnerAccount.StripeUserId));
+
+                            // make sure registrant gets a reserved seat once they've paid
+                            if (msgs.HasNoErrors())
+                            {
+                                var registrant = registrantSubscription.GetRegistrant(amsgs, adc);
+
+                                var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                                    participationObject.ObjectID.Value,
+                                    participationObject.ObjectType,
+                                    registrant.ID.Value,
+                                    amsgs,
+                                    adc);
+
+                                if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                                    amsgs.AddRange(ra.ChangeSeatAssignment(
+                                        RegistrationAssignmentType.Reserved, 
+                                        0, 
+                                        adc));
+                            }
                         },
                         onSuccess: (SystemMessages smsgs) =>
                         {

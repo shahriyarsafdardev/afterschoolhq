@@ -695,26 +695,26 @@ name: RegistrantActivity
 description: How a registrant is placed in an activity/team. 
 inherits: BasicObjectWithModified
 property: RegistrantId, int?, Int, required
-property: ActivityId, int?, Int
+-property: ActivityId, int?, Int
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: RegistrationId, int?, Int
 property: Uid, Guid, UniqueIdentifier
-property: OnWaitingList, bool, Bit
-property: DatePaid, DateTime?, DateTime
-property: StripeChargeId, string, NVarChar "100"
-property: PayPalTransactionId, string, NVarChar "50"
-property: AmountPaid, decimal?, Money
-property: PaymentTypeId, PaymentType, Int
-property: NumberOfSeats, int?, Int
-property: NumberOfWaitingListSeats, int?, Int
-property: NumberOfApplicationSeats, int?, Int
-property: NumberOfInvitationSeats, int?, Int
-property: NumberOfSeatsDeclined, int?, Int
+-property: OnWaitingList, bool, Bit
+-property: DatePaid, DateTime?, DateTime
+-property: StripeChargeId, string, NVarChar "100"
+-property: PayPalTransactionId, string, NVarChar "50"
+-property: AmountPaid, decimal?, Money
+-property: PaymentTypeId, PaymentType, Int
+-property: NumberOfSeats, int?, Int
+-property: NumberOfWaitingListSeats, int?, Int
+-property: NumberOfApplicationSeats, int?, Int
+-property: NumberOfInvitationSeats, int?, Int
+-property: NumberOfSeatsDeclined, int?, Int
 property: SeatIndex, int?, Int
 property: WaitingListSeatIndex, int?, Int
 property: ApplicationSeatIndex, int?, Int
-property: Day, DayOfWeekASL, Int
+-property: Day, DayOfWeekASL, Int
 property: PreferenceNumber, int?, Int
 property: RegistrationPeriodId, int?, Int
 property: ActivityGroupId, int?, Int
@@ -1443,7 +1443,7 @@ values: NotSet, Percentage, FlatAmount
 [begin]
 type: Enum
 name: CouponApplyType
-values: NotSet, All, SubscriptionPlan, PaymentPlan, RegistrationFee, Product
+values: NotSet, All, SubscriptionPlan, PaymentPlan, TuitionFee, Product
 [end]
 
 [begin]

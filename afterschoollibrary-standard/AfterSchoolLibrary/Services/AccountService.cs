@@ -1686,8 +1686,8 @@ namespace AfterSchoolLibrary
                 fromCustomerId: customerId,
                 destinationAccountId: toAccount.StripeUserId,
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
-                totalAmount: checkoutObject.RegistrationFee,
-                platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.RegistrationFee, msgs, dc),
+                totalAmount: checkoutObject.TuitionFee,
+                platformFee: toAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionFee, msgs, dc),
                 description: $"{checkoutObject.ParticipationObject.Name} registration",
                 statementDescriptor: $"AFTRSCHL/{toAccount.Name}",
                 msgs: msgs
@@ -1747,7 +1747,7 @@ namespace AfterSchoolLibrary
             return copiedSource.Id;
         }
 
-        private static void ProcessRegistrationFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void ProcessTuitionFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Add Products
             // if they have products
@@ -1772,20 +1772,45 @@ namespace AfterSchoolLibrary
             // add purchase
             if (msgs.HasNoErrors())
             {
+                var registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
+
                 // tracks the whole purchase, could contain multiple activities/activity groups
                 var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
 
                 // charge successful so I need to create a transaction
-                var transaction = fromAccount.AddTransaction(toAccount, purchase, checkoutObject, TransactionType.Charge, stripeCharge?.Id, loggedInUser, msgs, dc);
+                var transaction = fromAccount.AddTransaction(
+                    toAccount, 
+                    purchase, 
+                    checkoutObject, 
+                    TransactionType.Charge, 
+                    stripeCharge?.Id, 
+                    loggedInUser, 
+                    msgs, 
+                    dc);
 
                 // need to track a payment for each activity/activitygroup
                 checkoutObject.ParticipationObject.AddPayment(
                     amount: checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats,
-                    registrant: checkoutObject.Registration.GetRegistrant(msgs, dc),
+                    registrant: registrant,
                     transaction: transaction,
                     loggedInUser: loggedInUser,
                     msgs: msgs,
                     dc: dc);
+
+                // if successful payment and reserved pending payment then it should be reserved
+                // TODO: Needs review!!
+                if (msgs.HasNoErrors())
+                {
+                    var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                        checkoutObject.ParticipationObject.ObjectID.Value,
+                        checkoutObject.ParticipationObject.ObjectType,
+                        registrant.ID.Value,
+                        msgs,
+                        dc);
+
+                    if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                        msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser.ID.Value, dc));
+                }
             }
         }
 
@@ -1796,10 +1821,10 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // mark as completed
-                    amsgs.AddRange(checkoutObject.Registration.FinalizeRegistration(loggedInUser, adc));
+                    amsgs.AddRange(checkoutObject.Registration.SetRegistrationToCompleted(loggedInUser, adc));
 
                     // TODO: Allow user to register for multiple activities in one session at once MAYBE
-                    Registration.ProcessRegistration(
+                    Registration.ProcessRegistrationAssignment(
                         checkoutObject: checkoutObject,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
@@ -1828,28 +1853,27 @@ namespace AfterSchoolLibrary
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-
                     fromAccount.ProcessRegistrationWithoutPayment(
-                        toAccount: toAccount, 
-                        checkoutObject: checkoutObject, 
-                        sendConfirmationEmail: false, 
-                        loggedInUser: loggedInUser, 
-                        msgs: amsgs, 
-                        dc: adc);                    
+                        toAccount: toAccount,
+                        checkoutObject: checkoutObject,
+                        sendConfirmationEmail: false,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
 
-                    // process payment by to account, includes registration fee and product purchases
+                    // process payment by to account, includes tuition fee and product purchases
                     // skip for payment plans and subscription plans
                     if (checkoutObject.PaymentPlan.IsEmpty() && checkoutObject.SubscriptionPlan.IsEmpty())
-                        toAccount.ProcessRegistrationFeeAndProducts(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
+                        toAccount.ProcessTuitionFeeAndProducts(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
 
-                    // Process Subscriptions separately, don't charge all at once for the Registration Fee
+                    // Process Subscriptions separately, don't charge all at once for the tuition Fee
 
                     // TODO: Decide if master account registrant should be added to plans or the account copy
                     // get the registrant record that was created just for the account
                     var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
 
                     // if they have a subscription plan
-                    // will also process registration fees
+                    // will also process tuition fees
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                     {
                         var rpp = accountRegistrant.StartSubscriptionPlan(
@@ -1875,8 +1899,7 @@ namespace AfterSchoolLibrary
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
-                    }
-
+                    }                    
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

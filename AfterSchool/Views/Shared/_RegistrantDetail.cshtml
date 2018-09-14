@@ -34,13 +34,6 @@
                             <td width="33%" class="text-right">Registration Date/Time</td>
                             <td>@account.ConvertToAccountTimeZone(Model.CreateDate.Value).ToLongDateTimeString()</td>
                         </tr>
-                        @if (Model.Day != DayOfWeekASL.NotSet)
-                        {
-                            <tr>
-                                <td width="33%" class="text-right">Day of the Week</td>
-                                <td>@Model.Day.ToString()</td>
-                            </tr>
-                        }
                         <tr>
                             <td width="33%" class="text-right">Status</td>
                             <td>@Model.AssignmentTypeId.ToString().SplitByUpperCase()</td>
@@ -93,7 +86,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                @if (isActivityLeader && !Model.DatePaid.HasValue)
+                                @if (isActivityLeader && false)
                                 {
                                     <tr>
                                         <td width="33%" class="text-right">Date Paid</td>
@@ -158,21 +151,6 @@
                                         <td>
                                             <button type="submit" class="btn btn-primary btn-lg">Update Payment Info</button>
                                         </td>
-                                    </tr>
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td width="33%" class="text-right">Date Paid</td>
-                                        <td>@Model.DatePaid.ToShortDateString("N/A")</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Amount Paid</td>
-                                        <td>@Model.AmountPaid.ToCurrency()</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Payment Method</td>
-                                        <td>@Model.PaymentTypeId.ToString().SplitByUpperCase()</td>
                                     </tr>
                                 }
                             

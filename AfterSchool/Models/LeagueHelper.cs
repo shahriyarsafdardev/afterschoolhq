@@ -69,7 +69,7 @@ namespace AfterSchool.Models
                                 //    adc);
 
                                 // manages seats and create registrantactivity record
-                                Registration.ProcessRegistration(
+                                Registration.ProcessRegistrationAssignment(
                                         registration: registration,
                                         participationObject: activity.ToParticipationObject(amsgs, adc),
                                         registrant: registrant,

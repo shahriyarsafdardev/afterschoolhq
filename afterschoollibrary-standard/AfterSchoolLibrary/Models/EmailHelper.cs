@@ -137,10 +137,10 @@ namespace AfterSchoolLibrary
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
                     cost = $"{checkoutObject.PaymentPlanCostToday.ToCurrency()} today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
                 else
-                    cost = $"{participationObject.Cost.ToCurrency()} - Registration fee";
+                    cost = $"{participationObject.Cost.ToCurrency()} - tuition fee";
 
-                // add registration fee row
-                var registrationFeeModel = new NameValueCollection()
+                // add tuition fee row
+                var tuitionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
                     { "Quantity",  "1"},
@@ -149,7 +149,7 @@ namespace AfterSchoolLibrary
 
                 receiptRows += ProcessTemplate(
                     EmailTemplates.Registration_Confirmation_Rows,
-                    registrationFeeModel,
+                    tuitionFeeModel,
                     "Registration_Confirmation_Rows",
                     msgs);
             }
@@ -160,7 +160,7 @@ namespace AfterSchoolLibrary
                 description = $"Subscription for {participationObject.Name}";
                 cost = $"{subscription.CostPerPeriod.ToCurrency()} per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
 
-                // add registration fee row
+                // add tuition fee row
                 var subscriptionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
