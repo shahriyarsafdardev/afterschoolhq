@@ -1286,6 +1286,24 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
+                var masterRegistrant = ra.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+                var purchaserAccount = masterRegistrant?.GetAccount(msgs);
+
+                SessionVariables.CurrentAccount.CreatePurchaseTransactionPayment(
+                    fromAccount: purchaserAccount,
+                    checkoutObject: new CheckoutObject()
+                    {
+                        NumberOfSeats = 1,
+                        ParticipationObject = ra.GetParticipationObject(msgs),
+                        Registrant = masterRegistrant,
+                        Registration = ra.GetRegistration(msgs),
+                        Purchaser = purchaserAccount
+                    },
+                    stripeCharge: null,
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs
+                    );
+
                 var payment = new ActivityPayment()
                 {
                     ParticipationObjectId = ra.ParticipationObjectId,
