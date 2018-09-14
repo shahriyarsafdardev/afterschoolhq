@@ -48,11 +48,11 @@ namespace AfterSchoolLibrary
                 if (PaymentPlan.IsNotEmpty())
                     return PaymentPlanCostToday + SubscriptionCostToday;
 
-                return RegistrationFee + SubscriptionCostToday;
+                return TuitionFee + SubscriptionCostToday;
             }
         }
 
-        public decimal RegistrationFee
+        public decimal TuitionFee
         {
             get
             {

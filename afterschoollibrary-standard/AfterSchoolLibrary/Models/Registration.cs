@@ -1953,7 +1953,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public SystemMessages FinalizeRegistration(WebUser loggedInUser, DatabaseConnection dc = null)
+        public SystemMessages SetRegistrationToCompleted(WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -2028,8 +2028,9 @@ namespace AfterSchoolLibrary
             // if there is room
             else if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
-                // if the person didn't pay
-                if (!participationObject.IsFree && participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal())
+                // if the person didn't pay yet
+                if (!participationObject.IsFree && 
+                    (ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal()))
                     return RegistrationAssignmentType.ReservedPendingPayment;
 
                 return RegistrationAssignmentType.Reserved;
@@ -2045,9 +2046,9 @@ namespace AfterSchoolLibrary
             return RegistrationAssignmentType.NotSet;
         }
 
-        public static void ProcessRegistration(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            ProcessRegistration(
+            ProcessRegistrationAssignment(
                 checkoutObject.Registration,
                 checkoutObject.ParticipationObject,
                 checkoutObject.Registration.GetRegistrant(msgs, dc),
@@ -2059,9 +2060,10 @@ namespace AfterSchoolLibrary
                 dc);
         }
 
-        public static void ProcessRegistration(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            //var participationObject = checkoutObject.ParticipationObject;
+            // NOTE: getting only one activity per registration at the moment, 
+            // but could be problem in the future
             var ra = registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
             var assignmentType = Registration.ProcessRegistrationSeats(participationObject, seatsRequested, ra, msgs, dc);
 

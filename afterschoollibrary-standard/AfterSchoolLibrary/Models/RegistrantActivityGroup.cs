@@ -294,21 +294,20 @@ namespace AfterSchoolLibrary
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
+                    // TODO: Fix
                     this.NumberOfSeatsDeclined = this.NumberOfInvitationSeats;
                     this.NumberOfInvitationSeats = 0;
                     this.LastModifiedBy = loggedInUserId;
                     this.LastModifiedDate = DateTime.UtcNow;
                     amsgs.AddRange(this.Save(adc));
-
-                    var ras = RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, dc: adc);
-                    foreach (var ra in ras)
-                    {
-                        ra.NumberOfSeatsDeclined = ra.NumberOfInvitationSeats;
-                        ra.NumberOfInvitationSeats = 0;
-                        ra.LastModifiedBy = loggedInUserId;
-                        ra.LastModifiedDate = DateTime.UtcNow;
-                        amsgs.AddRange(ra.Save(adc));
-                    }
+                    
+                    RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, amsgs, adc)
+                        .ForEach(ra => {
+                            amsgs.AddRange(ra.ChangeSeatAssignment(
+                                RegistrationAssignmentType.Declined,
+                                loggedInUserId,
+                                adc));
+                        });
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

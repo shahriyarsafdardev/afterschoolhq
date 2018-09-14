@@ -817,11 +817,11 @@ namespace AfterSchoolLibrary
             if (includeInvited)
                 ras = RegistrantActivity.LoadByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).ToList();
             else
-                ras = RegistrantActivity.LoadByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc).Where(x =>
-                    x.NumberOfApplicationSeats.HasValue ||
-                    x.NumberOfSeats.HasValue ||
-                    x.NumberOfWaitingListSeats.HasValue
-                ).ToList();
+                ras = RegistrantActivity.LoadByParticipationObject(this.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                    .Where(x =>
+                        x.AssignmentTypeId != RegistrationAssignmentType.Invited &&
+                        x.AssignmentTypeId != RegistrationAssignmentType.Declined
+                    ).ToList();
                 
             return ras;
         }
@@ -1231,18 +1231,11 @@ namespace AfterSchoolLibrary
                                 //ActivityId = copy.ID,
                                 CreateDate = DateTime.UtcNow,
                                 CreatedBy = loggedInUserId,
-                                ApplicationSeatIndex = registrantActivity.ApplicationSeatIndex,
                                 LastModifiedBy = loggedInUserId,
                                 LastModifiedDate = DateTime.UtcNow,
-                                NumberOfApplicationSeats = registrantActivity.NumberOfApplicationSeats,
-                                NumberOfInvitationSeats = registrantActivity.NumberOfInvitationSeats,
-                                NumberOfSeats = registrantActivity.NumberOfSeats,
-                                NumberOfSeatsDeclined = registrantActivity.NumberOfSeatsDeclined,
-                                NumberOfWaitingListSeats = registrantActivity.NumberOfWaitingListSeats,
                                 PreferenceNumber = registrantActivity.PreferenceNumber,
                                 RegistrantId = registrantActivity.RegistrantId,
                                 SeatIndex = registrantActivity.SeatIndex,
-                                WaitingListSeatIndex = registrantActivity.WaitingListSeatIndex,
                                 RegistrationId = newRegistration.ID
                             };
                             amsgs.AddRange(newRegistrantActivity.Save(adc));

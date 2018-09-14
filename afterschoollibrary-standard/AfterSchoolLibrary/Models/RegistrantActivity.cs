@@ -22,7 +22,6 @@ namespace AfterSchoolLibrary
 		/// Required.
 		/// </summary>
 		public int? RegistrantId { get { return (int?)MDV["RegistrantId"].Value; } set { MDV["RegistrantId"].Value = value; } }
-		public int? ActivityId { get { return (int?)MDV["ActivityId"].Value; } set { MDV["ActivityId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -33,21 +32,9 @@ namespace AfterSchoolLibrary
 		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		public int? RegistrationId { get { return (int?)MDV["RegistrationId"].Value; } set { MDV["RegistrationId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
-		public bool OnWaitingList { get { return (bool)MDV["OnWaitingList"].Value; } set { MDV["OnWaitingList"].Value = value; } }
-		public DateTime? DatePaid { get { return (DateTime?)MDV["DatePaid"].Value; } set { MDV["DatePaid"].Value = value; } }
-		public string StripeChargeId { get { return (string)MDV["StripeChargeId"].Value; } set { MDV["StripeChargeId"].Value = value; } }
-		public string PayPalTransactionId { get { return (string)MDV["PayPalTransactionId"].Value; } set { MDV["PayPalTransactionId"].Value = value; } }
-		public decimal? AmountPaid { get { return (decimal?)MDV["AmountPaid"].Value; } set { MDV["AmountPaid"].Value = value; } }
-		public PaymentType PaymentTypeId { get { return (PaymentType)MDV["PaymentTypeId"].Value; } set { MDV["PaymentTypeId"].Value = value; } }
-		public int? NumberOfSeats { get { return (int?)MDV["NumberOfSeats"].Value; } set { MDV["NumberOfSeats"].Value = value; } }
-		public int? NumberOfWaitingListSeats { get { return (int?)MDV["NumberOfWaitingListSeats"].Value; } set { MDV["NumberOfWaitingListSeats"].Value = value; } }
-		public int? NumberOfApplicationSeats { get { return (int?)MDV["NumberOfApplicationSeats"].Value; } set { MDV["NumberOfApplicationSeats"].Value = value; } }
-		public int? NumberOfInvitationSeats { get { return (int?)MDV["NumberOfInvitationSeats"].Value; } set { MDV["NumberOfInvitationSeats"].Value = value; } }
-		public int? NumberOfSeatsDeclined { get { return (int?)MDV["NumberOfSeatsDeclined"].Value; } set { MDV["NumberOfSeatsDeclined"].Value = value; } }
 		public int? SeatIndex { get { return (int?)MDV["SeatIndex"].Value; } set { MDV["SeatIndex"].Value = value; } }
 		public int? WaitingListSeatIndex { get { return (int?)MDV["WaitingListSeatIndex"].Value; } set { MDV["WaitingListSeatIndex"].Value = value; } }
 		public int? ApplicationSeatIndex { get { return (int?)MDV["ApplicationSeatIndex"].Value; } set { MDV["ApplicationSeatIndex"].Value = value; } }
-		public DayOfWeekASL Day { get { return (DayOfWeekASL)MDV["Day"].Value; } set { MDV["Day"].Value = value; } }
 		public int? PreferenceNumber { get { return (int?)MDV["PreferenceNumber"].Value; } set { MDV["PreferenceNumber"].Value = value; } }
 		public int? RegistrationPeriodId { get { return (int?)MDV["RegistrationPeriodId"].Value; } set { MDV["RegistrationPeriodId"].Value = value; } }
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
@@ -69,9 +56,6 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.ParticipationObjectTypeId = ParticipationObjectType.NotSet;
 			this.Uid = Guid.NewGuid();
-			this.OnWaitingList = false;
-			this.PaymentTypeId = PaymentType.NotSet;
-			this.Day = DayOfWeekASL.NotSet;
 			this.AssignmentTypeId = RegistrationAssignmentType.NotSet;
 			
         }
@@ -84,26 +68,13 @@ namespace AfterSchoolLibrary
                 string className = typeof(RegistrantActivity).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ActivityId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "OnWaitingList", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "DatePaid", System.Data.SqlDbType.DateTime);
-				_dp.Add(className, "StripeChargeId", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "PayPalTransactionId", System.Data.SqlDbType.NVarChar , "50");
-				_dp.Add(className, "AmountPaid", System.Data.SqlDbType.Money);
-				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "NumberOfSeats", System.Data.SqlDbType.Int);
-				_dp.Add(className, "NumberOfWaitingListSeats", System.Data.SqlDbType.Int);
-				_dp.Add(className, "NumberOfApplicationSeats", System.Data.SqlDbType.Int);
-				_dp.Add(className, "NumberOfInvitationSeats", System.Data.SqlDbType.Int);
-				_dp.Add(className, "NumberOfSeatsDeclined", System.Data.SqlDbType.Int);
 				_dp.Add(className, "SeatIndex", System.Data.SqlDbType.Int);
 				_dp.Add(className, "WaitingListSeatIndex", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ApplicationSeatIndex", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Day", System.Data.SqlDbType.Int);
 				_dp.Add(className, "PreferenceNumber", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrationPeriodId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ActivityGroupId", System.Data.SqlDbType.Int);
@@ -202,10 +173,6 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ActivityId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ParticipationObjectTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -222,50 +189,6 @@ namespace AfterSchoolLibrary
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["OnWaitingList"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["DatePaid"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripeChargeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PayPalTransactionId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AmountPaid"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PaymentTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["NumberOfSeats"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["NumberOfWaitingListSeats"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["NumberOfApplicationSeats"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["NumberOfInvitationSeats"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["NumberOfSeatsDeclined"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["SeatIndex"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -275,10 +198,6 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["ApplicationSeatIndex"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Day"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -358,33 +277,7 @@ namespace AfterSchoolLibrary
 
         #endregion
 
-		#region "UserDefined"
-
-        public RegistrationAssignmentType RegistrationAssignmentTypeId
-        {
-            get
-            {
-                return this.AssignmentTypeId;
-            }
-        }
-
-        public int? AssignmentSeatIndex
-        {
-            get
-            { 
-                switch (RegistrationAssignmentTypeId)
-                {
-                    case RegistrationAssignmentType.Reserved:
-                        return this.SeatIndex;
-                    case RegistrationAssignmentType.WaitingList:
-                        return this.WaitingListSeatIndex;
-                    case RegistrationAssignmentType.Applied:
-                        return this.ApplicationSeatIndex;
-                    default:
-                        return 1;
-                }
-            }
-        }
+		#region "UserDefined"        
 
         public string RegistrantName
         {
@@ -403,18 +296,7 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                var value = 0;
-
-                if (NumberOfSeats.HasValue)
-                    value += NumberOfSeats.Value;
-
-                if (NumberOfWaitingListSeats.HasValue)
-                    value += NumberOfWaitingListSeats.Value;
-
-                if (NumberOfApplicationSeats.HasValue)
-                    value += NumberOfApplicationSeats.Value;
-
-                return value;
+                return 1;
             }
         }
 
@@ -552,33 +434,14 @@ namespace AfterSchoolLibrary
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
-            dq.SelectParameters.Clear();
-            SelectParameter sp = null;
-
-            switch (assignmentType)
-            {
-                case RegistrationAssignmentType.Applied:
-                    sp = new SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
-                    break;
-                case RegistrationAssignmentType.Invited:
-                    sp = new SelectParameter(ObjectMap["NumberOfInvitationSeats"]);
-                    break;
-                case RegistrationAssignmentType.WaitingList:
-                    sp = new SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
-                    break;
-                default:
-                    sp = new SelectParameter(ObjectMap["NumberOfSeats"]);
-                    break;
-            }
-
-            sp.Function = "ISNULL(SUM(" + DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp);
 
             if (participationObjectId.HasValue)
             {
                 dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId.Value);
                 dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
             }
+
+            dq.Criterias.Add(ObjectMap["AssignmentTypeId"], (int)assignmentType);
 
             if (accountId.HasValue)
                 dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId.Value);
@@ -589,11 +452,7 @@ namespace AfterSchoolLibrary
             if (registrationPeriodId.HasValue)
                 dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], registrationPeriodId.Value);
 
-            var results = dq.Select(msgs);
-            if (results.Rows.Any())
-                return results.Rows[0][0].ToString().ToInteger();
-
-            return 0;
+            return dq.GetCount(msgs);
         }
 
         public static int GetSeatCountByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -601,113 +460,22 @@ namespace AfterSchoolLibrary
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
-            dq.SelectParameters.Clear();
-
-            BasicLibrary.DataAccess.SelectParameter sp1 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfSeats"]);
-            sp1.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp1);
-
-            BasicLibrary.DataAccess.SelectParameter sp2 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
-            sp2.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp2);
-
-            BasicLibrary.DataAccess.SelectParameter sp3 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
-            sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp3);
-
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
 
-            var results = dq.Select(msgs);
-            if(results.Rows.Any())
-                return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger() + results.Rows[0][2].ToString().ToInteger();
-
-            return 0;
-        }
-
-        //public static int GetSeatCountByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-        //    dq.Connection = dc;
-        //    dq.UseParameterizedQuery = false;
-        //    dq.SelectParameters.Clear();
-
-        //    BasicLibrary.DataAccess.SelectParameter sp1 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfSeats"]);
-        //    sp1.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-        //    dq.SelectParameters.Add(sp1);
-
-        //    BasicLibrary.DataAccess.SelectParameter sp2 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
-        //    sp2.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-        //    dq.SelectParameters.Add(sp2);
-
-        //    BasicLibrary.DataAccess.SelectParameter sp3 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
-        //    sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-        //    dq.SelectParameters.Add(sp3);
-
-        //    dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId);
-
-        //    var results = dq.Select(msgs);
-        //    if (results.Rows.Any())
-        //        return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
-
-        //    return 0;
-        //}
+            return dq.GetCount();
+        }        
 
         public static int GetSeatCountByRegistrationPeriodId(int RegistrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
-            dq.SelectParameters.Clear();
-
-            BasicLibrary.DataAccess.SelectParameter sp1 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfSeats"]);
-            sp1.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp1);
-
-            BasicLibrary.DataAccess.SelectParameter sp2 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
-            sp2.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp2);
-
-            BasicLibrary.DataAccess.SelectParameter sp3 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
-            sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-            dq.SelectParameters.Add(sp3);
 
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
 
-            var results = dq.Select(msgs);
-            if (results.Rows.Any())
-                return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
-
-            return 0;
+            return dq.GetCount();
         }
-
-        //public static int GetSeatCountByActivityGroupId(int ActivityGroupId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-        //    dq.Connection = dc;
-        //    dq.UseParameterizedQuery = false;
-        //    dq.SelectParameters.Clear();
-
-        //    BasicLibrary.DataAccess.SelectParameter sp1 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfSeats"]);
-        //    sp1.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-        //    dq.SelectParameters.Add(sp1);
-
-        //    BasicLibrary.DataAccess.SelectParameter sp2 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfWaitingListSeats"]);
-        //    sp2.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-        //    dq.SelectParameters.Add(sp2);
-
-        //    BasicLibrary.DataAccess.SelectParameter sp3 = new BasicLibrary.DataAccess.SelectParameter(ObjectMap["NumberOfApplicationSeats"]);
-        //    sp3.Function = "ISNULL(SUM(" + BasicLibrary.DataAccess.DatabaseQuery.FunctionReplaceValue + "), 0)";
-        //    dq.SelectParameters.Add(sp3);
-
-        //    dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-
-        //    var results = dq.Select(msgs);
-        //    if (results.Rows.Any())
-        //        return results.Rows[0][0].ToString().ToInteger() + results.Rows[0][1].ToString().ToInteger();
-
-        //    return 0;
-        //}
 
         public static List<RegistrantActivity> LoadByRegistrationIds(List<int> RegistrationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -725,48 +493,6 @@ namespace AfterSchoolLibrary
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        //public static List<RegistrantActivity> GetByActivityIds(List<int> activityIds, List<int> registrantIds, DateTime startDate, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    var dq = DatabaseQuery;
-        //    dq.Connection = dc;
-
-        //    dq.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"]);
-
-        //    dq.Criterias.Add(Activity.ObjectMap["Id"], activityIds, DatabaseCriteriaOperatorEnum.In);
-        //    dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
-        //    dq.Criterias.Add(ObjectMap["NumberOfSeats"], 1, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-        //    dq.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-
-        //    return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        //}
-
-        //public RegistrationActivity GetRegistrationActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (this.RegistrationId.HasValue && this.ActivityId.HasValue)
-        //        return RegistrationActivity.LoadByActivityIdByRegistrationId(this.ActivityId.Value, this.RegistrationId.Value, msgs, dc);
-
-        //    return null;
-        //}
-
-        //public RegistrationActivity GetRegistrationParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (this.RegistrationId.HasValue && this.ParticipationObjectId.HasValue)
-        //        return RegistrationActivity.LoadByActivityIdByRegistrationId(this.ActivityId.Value, this.RegistrationId.Value, msgs, dc);
-
-        //    return null;
-        //}
-
-        //public SystemMessages DeleteRegistrationActivity(DatabaseConnection dc = null)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var ra = this.GetRegistrationActivity(msgs, dc);
-
-        //    if (ra.IsNotEmpty())
-        //        msgs.AddRange(ra.Delete(dc));
-
-        //    return msgs;
-        //}
-
         public SystemMessages CancelRegistration(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -775,7 +501,6 @@ namespace AfterSchoolLibrary
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    //amsgs.AddRange(this.DeleteRegistrationActivity(adc));
                     amsgs.AddRange(this.AdjustPreferencesDuringRemoval(dc: adc));
                     amsgs.AddRange(this.AdjustSeatIndexesDuringRemoval(dc: adc));
                     amsgs.AddRange(this.Delete(adc));
@@ -794,241 +519,34 @@ namespace AfterSchoolLibrary
             return msgs;
         }        
 
-        public SystemMessages ChangeSeatAssignment(RegistrationAssignmentType to, DatabaseConnection dc = null)
+        public SystemMessages ChangeSeatAssignment(RegistrationAssignmentType to, int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
-            if(this.RegistrationAssignmentTypeId == to)
+            if(this.AssignmentTypeId == to)
                 return msgs;
 
             //if you move it before the change is made it will adjust everyone correctly. Has to be done before the change is saved.
             //need a better function that can allow setting which seat index parameter needs to be handled
             msgs.AddRange(this.AdjustSeatIndexesDuringRemoval(dc: dc));
-            // msgs.AddRange(this.AdjustPreferencesDuringRemoval(dc: dc));
 
-            if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Applied)
-            {
-                if (to == RegistrationAssignmentType.Reserved)
-                {
-                    this.NumberOfSeats = this.NumberOfApplicationSeats;
-                    this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: to, participationObjectId: this.ParticipationObjectId, participationObjectType: this.ParticipationObjectTypeId, msgs: msgs, dc: dc) + 1;
-                    this.NumberOfApplicationSeats = 0;
-                    this.ApplicationSeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.WaitingList)
-                {
-                    this.NumberOfWaitingListSeats = this.NumberOfApplicationSeats;
-                    this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to, 
-                        participationObjectId: this.ParticipationObjectId, 
-                        participationObjectType: this.ParticipationObjectTypeId, 
-                        msgs: msgs, 
-                        dc: dc) + 1;
-                    this.NumberOfApplicationSeats = 0;
-                    this.ApplicationSeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Invited)
-                {
-                    this.NumberOfInvitationSeats = this.NumberOfApplicationSeats;
-                    this.NumberOfApplicationSeats = 0;
-                    this.ApplicationSeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Declined)
-                {
-                    this.NumberOfSeatsDeclined = this.NumberOfApplicationSeats;
-                    this.NumberOfApplicationSeats = 0;
-                    this.ApplicationSeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-            }
-            else if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.WaitingList)
-            {
-                if (to == RegistrationAssignmentType.Reserved)
-                {
-                    this.NumberOfSeats = this.NumberOfWaitingListSeats;
-                    this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId, 
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfWaitingListSeats = 0;
-                    this.WaitingListSeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Applied)
-                {
-                    this.NumberOfApplicationSeats = this.NumberOfWaitingListSeats;
-                    this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId, 
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfWaitingListSeats = 0;
-                    this.WaitingListSeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Invited)
-                {
-                    this.NumberOfInvitationSeats = this.NumberOfWaitingListSeats;
-                    this.NumberOfWaitingListSeats = 0;
-                    this.WaitingListSeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Declined)
-                {
-                    this.NumberOfSeatsDeclined = this.NumberOfWaitingListSeats;
-                    this.NumberOfWaitingListSeats = 0;
-                    this.WaitingListSeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-            }
-            else if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Reserved)
-            {
-                if (to == RegistrationAssignmentType.WaitingList)
-                {
-                    this.NumberOfWaitingListSeats = this.NumberOfSeats;
-                    this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId, 
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfSeats = 0;
-                    this.SeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Applied)
-                {
-                    this.NumberOfApplicationSeats = this.NumberOfSeats;
-                    this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId, 
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfSeats = 0;
-                    this.SeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Invited)
-                {
-                    this.NumberOfInvitationSeats = this.NumberOfSeats;
-                    this.NumberOfSeats = 0;
-                    this.SeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Declined)
-                {
-                    this.NumberOfSeatsDeclined = this.NumberOfSeats;
-                    this.NumberOfSeats = 0;
-                    this.SeatIndex = null;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-            }
-            else if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Invited)
-            {
-                if (to == RegistrationAssignmentType.Reserved)
-                {
-                    this.NumberOfSeats = this.NumberOfInvitationSeats;
-                    this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId, 
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.WaitingList)
-                {
-                    this.NumberOfWaitingListSeats = this.NumberOfInvitationSeats;
-                    this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId, 
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Applied)
-                {
-                    this.NumberOfApplicationSeats = this.NumberOfInvitationSeats;
-                    this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId, 
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Declined)
-                {
-                    this.NumberOfSeatsDeclined = this.NumberOfInvitationSeats;
-                    this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-            }
-            else if (this.RegistrationAssignmentTypeId == RegistrationAssignmentType.Declined)
-            {
-                if (to == RegistrationAssignmentType.Reserved)
-                {
-                    this.NumberOfSeats = this.NumberOfSeatsDeclined;
-                    this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId,
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.WaitingList)
-                {
-                    this.NumberOfWaitingListSeats = this.NumberOfSeatsDeclined;
-                    this.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId,
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Applied)
-                {
-                    this.NumberOfApplicationSeats = this.NumberOfSeatsDeclined;
-                    this.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: to,
-                        participationObjectId: this.ParticipationObjectId,
-                        participationObjectType: this.ParticipationObjectTypeId,
-                        msgs: msgs,
-                        dc: dc) + 1;
-                    this.NumberOfInvitationSeats = 0;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-                else if (to == RegistrationAssignmentType.Invited)
-                {
-                    this.NumberOfInvitationSeats = this.NumberOfSeatsDeclined;
-                    this.NumberOfSeatsDeclined = 0;
-                    msgs.AddRange(this.Save(dc: dc));
-                }
-            }
+            this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
+                assignmentType: to, 
+                participationObjectId: this.ParticipationObjectId, 
+                participationObjectType: this.ParticipationObjectTypeId, 
+                msgs: msgs, 
+                dc: dc) + 1;
 
-            //adjust for the activities that they just left
-            //adjust seat indexes for others behind then
-            //adjust for preference numbers for one's they just left;
+            this.AssignmentTypeId = to;
+            this.LastModifiedBy = loggedInUserId;
+            this.LastModifiedDate = DateTime.UtcNow;
+
+            msgs.AddRange(this.Save(dc));
 
             return msgs;
         }
 
-        public SystemMessages AdjustSeatIndexesDuringRemoval(Registrant registrant = null, DatabaseConnection dc = null)
+        public SystemMessages AdjustSeatIndexesDuringRemoval(DatabaseConnection dc = null)
         {
             // get all all registrant activities where the activity id is the same, 
             // the day is the same, and ony update people with the same assignment type, 
@@ -1038,63 +556,37 @@ namespace AfterSchoolLibrary
             
             var msgs = new SystemMessages();
 
-            var otherPeoplesActivities = RegistrantActivity.LoadByParticipationObject(this.ParticipationObjectId.Value, this.ParticipationObjectTypeId, msgs, dc)
+            var otherPeoplesActivities = RegistrantActivity.LoadByParticipationObject(
+                    this.ParticipationObjectId.Value, 
+                    this.ParticipationObjectTypeId, 
+                    msgs, 
+                    dc
+                )
                 .Where(registrantActivity => registrantActivity.RegistrantId != this.RegistrantId)
                 .ToList();
 
-            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Reserved, -1, dc: dc);
-            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.WaitingList, -1, dc: dc);
-            AdjustSeatIndexes(otherPeoplesActivities, RegistrationAssignmentType.Applied, -1, dc: dc);
+            msgs.AddRange(AdjustSeatIndexes(otherPeoplesActivities, -1, dc: dc));
 
             return msgs;
         }
 
-        public SystemMessages AdjustSeatIndex(int amount, RegistrationAssignmentType rat, DatabaseConnection dc = null)
+        public SystemMessages AdjustSeatIndexes(List<RegistrantActivity> ras, int factor, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            switch (rat)
-            {
-                case RegistrationAssignmentType.Applied:
-                    this.ApplicationSeatIndex += amount;
-                    break;
-                case RegistrationAssignmentType.Reserved:
-                    this.SeatIndex += amount;
-                    break;
-                case RegistrationAssignmentType.WaitingList:
-                    this.WaitingListSeatIndex += amount;
-                    break;
-            }
+
+            ras.Where(x => x.AssignmentTypeId == this.AssignmentTypeId && x.SeatIndex > this.SeatIndex)
+                .ToList()
+                .ForEach(item => item.AdjustSeatIndex(1 * factor, dc));
+
+            return msgs;
+        }
+
+        public SystemMessages AdjustSeatIndex(int amount, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            this.SeatIndex += amount;
             msgs.AddRange(this.Save(dc: dc));
-            return msgs;
-        }
-
-        public SystemMessages AdjustSeatIndexes(List<RegistrantActivity> ras, RegistrationAssignmentType rat, int factor, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            switch (rat)
-            {
-                case RegistrationAssignmentType.Reserved:
-                    if (this.NumberOfSeats > 0)
-                        ras
-                            .Where(x => x.SeatIndex > this.SeatIndex)
-                            .ToList()
-                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfSeats.Value * factor, RegistrationAssignmentType.Reserved, dc: dc));
-                    break;
-                case RegistrationAssignmentType.WaitingList:
-                    if (this.NumberOfWaitingListSeats > 0)
-                        ras
-                            .Where(x => x.WaitingListSeatIndex > this.WaitingListSeatIndex)
-                            .ToList()
-                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfWaitingListSeats.Value * factor, RegistrationAssignmentType.WaitingList, dc: dc));
-                    break;
-                case RegistrationAssignmentType.Applied:
-                    if (this.NumberOfApplicationSeats > 0)
-                        ras
-                            .Where(x => x.ApplicationSeatIndex > this.ApplicationSeatIndex)
-                            .ToList()
-                            .ForEach(item => item.AdjustSeatIndex(this.NumberOfApplicationSeats.Value * factor, RegistrationAssignmentType.Applied, dc: dc));
-                    break;
-            }
 
             return msgs;
         }

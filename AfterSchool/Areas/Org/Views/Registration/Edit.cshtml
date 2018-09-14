@@ -146,7 +146,7 @@
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <div class="btn-group pull-right">
-                                        <button class="btn btn-default md-trigger" data-modal="modal-move-seat" onclick="moveSeat(@ra.ID, @((int)ra.RegistrationAssignmentTypeId))"><i class="s7-gleam"></i> <span>Move Seat</span></button>
+                                        <button class="btn btn-default md-trigger" data-modal="modal-move-seat" onclick="moveSeat(@ra.ID, @((int)ra.AssignmentTypeId))"><i class="s7-gleam"></i> <span>Move Seat</span></button>
                                        
                                         @if (participationObject.IsActivity() && participationObject.GetActivity().ActivityTypeId == ActivityType.Activity)
                                         {
@@ -176,13 +176,13 @@
                                             }    
                                             <tr>
                                                 <td width="33%" class="text-right">Status</td>
-                                                <td>@ra.RegistrationAssignmentTypeId.ToString().SplitByUpperCase()</td>
+                                                <td>@ra.AssignmentTypeId.ToString().SplitByUpperCase()</td>
                                             </tr>
-                                            @if (ra.AssignmentSeatIndex.HasValue)
+                                            @if (ra.SeatIndex.HasValue)
                                             {
                                                 <tr>
                                                     <td width="33%" class="text-right">Seat</td>
-                                                    <td>@ra.AssignmentSeatIndex</td>
+                                                    <td>@ra.SeatIndex</td>
                                                 </tr>
                                             }
                                         </table>

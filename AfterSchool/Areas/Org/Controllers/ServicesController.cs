@@ -417,17 +417,17 @@ namespace AfterSchool.Areas.Org.Controllers
             return View();
         }
 
-        public ActionResult GetRegistrationMaxChoiceNumbersForDay(string id, string day)
-        {
-            var ras = RegistrantActivity.LoadByRegistrationId(id.ToInteger());
-            var dow = (DayOfWeekASL)day.ToInteger();
+        //public ActionResult GetRegistrationMaxChoiceNumbersForDay(string id, string day)
+        //{
+        //    var ras = RegistrantActivity.LoadByRegistrationId(id.ToInteger());
+        //    var dow = (DayOfWeekASL)day.ToInteger();
 
-            Response.Clear();
-            WriteOutput(new { status = "ok", MaxChoices = ras.Where(x => x.Day == dow).Max(x => x.PreferenceNumber.Value) }, ResponseType.JSON);
-            Response.End();
+        //    Response.Clear();
+        //    WriteOutput(new { status = "ok", MaxChoices = ras.Where(x => x.Day == dow).Max(x => x.PreferenceNumber.Value) }, ResponseType.JSON);
+        //    Response.End();
 
-            return View();
-        }
+        //    return View();
+        //}
 
         public ActionResult SendVerificationEmail()
         {

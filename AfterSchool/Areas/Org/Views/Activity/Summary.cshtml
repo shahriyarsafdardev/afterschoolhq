@@ -5,13 +5,10 @@
     var registrants = Model.GetRegistrantActivities();
     var schedule = (ActivitySchedule)ViewBag.Schedule;
     var totalPaid = (decimal)ViewBag.TotalPaid;
-    int registrantCount = registrants.Sum(x => x.TotalSeats);
-    int waitingListCount = registrants.Sum(x => x.NumberOfWaitingListSeats.Value);
-
-    if (registrants.Where(x => x.DatePaid.HasValue).Count() > 0)
-    {
-        totalPaid = registrants.Where(x => x.DatePaid.HasValue).Sum(x => x.AmountPaid.Value);
-    }
+    int registrantCount = registrants.Count;
+    int waitingListCount = registrants
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList)
+        .Count();
 
     var dates = registrants.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 

@@ -147,7 +147,7 @@ namespace AfterSchoolLibrary.Services
 
             Stripe.StripeCharge stripeCharge = null;
 
-            // process registration fee if one exists and it has a subscription
+            // process tuition fee if one exists and it has a subscription
             if (!checkoutObject.ParticipationObject.IsFree)
             {
                 // create source for new card to charge             
@@ -165,8 +165,8 @@ namespace AfterSchoolLibrary.Services
             // need to create a purchase record first
             var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
 
-            // need to create a transaction if there's a registration fee
-            // need to create an activity payment if there's a registration fee
+            // need to create a transaction if there's a tuition fee
+            // need to create an activity payment if there's a tuition fee
             if (!checkoutObject.ParticipationObject.IsFree)
             {
                 fromAccount.AddTransaction(toAccount, purchase, checkoutObject, TransactionType.Charge, stripeCharge?.Id, loggedInUser, msgs, dc);

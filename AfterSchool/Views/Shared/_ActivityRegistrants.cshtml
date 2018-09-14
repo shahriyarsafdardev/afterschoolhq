@@ -46,7 +46,7 @@
                 {
                     <tr>
                         <td>
-                            @if (ra.RegistrationId.HasValue && ra.RegistrationAssignmentTypeId != RegistrationAssignmentType.Invited)
+                            @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
                             {
                                 <a href="@Url.Action(editaction, editcontroller, new { id = ra.ID })" class="btn btn-default btn-sm">
                                     <i class="icon icon-left s7-user"></i> View Details
@@ -54,7 +54,7 @@
                             }
                         </td>
                         <td>@ra.RegistrantName.IfBlank(ra.RegistrantEmail)</td>
-                        <td class="text-center">@ra.AssignmentSeatIndex</td>
+                        <td class="text-center">@ra.SeatIndex</td>
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
                         {
