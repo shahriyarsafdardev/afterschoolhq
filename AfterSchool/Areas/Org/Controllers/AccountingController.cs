@@ -32,13 +32,19 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var startDate = sdate.IsDateTime() ? sdate.ToDateTime() : new DateTime?();
-            var endDate = edate.IsDateTime() ? edate.ToDateTime() : new DateTime?();
+            var startDate = sdate.IsDateTime() ? 
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) : new DateTime?();
+            var endDate = edate.IsDateTime() ? 
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) : new DateTime?();
 
             var totalTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate);
             var transactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, start, length);
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
-            
+
+            transactions.ForEach(transaction => 
+                transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
+            );
+
             ViewBag.Messages = new SystemMessages();
             ViewBag.PagingModel = new PagingModel()
             {

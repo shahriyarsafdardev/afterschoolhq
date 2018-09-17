@@ -162,6 +162,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                                 participationObject.Name,
                                 registrantSubscription.PurchaseId,
                                 TransactionType.Charge,
+                                PaymentType.CreditCard,
                                 chargeId,
                                 null,
                                 amsgs,

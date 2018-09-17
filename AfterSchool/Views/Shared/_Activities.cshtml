@@ -106,15 +106,7 @@ else
                     <th class="text-center">Days</th>
                     <th class="text-center">Grades</th>
                     <!--<th class="text-center">Ages</th>-->
-                    <th class="text-center">Reserved</th>
-                    @if (account.HasFeature(FeatureType.WaitingList))
-                    {
-                        <th class="text-center">Waiting</th>
-                    }
-                    @if (account.HasFeature(FeatureType.AllowApplications))
-                    {
-                        <th class="text-center">Applied</th>
-                    }
+                    <th class="text-center">Students</th>
                     <th></th>
                 </tr>
             </thead>
@@ -161,22 +153,9 @@ else
                                 
                             </td>
                             <td class="text-center @reservedTextClass">
-                                @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable
+                                @activity.GetRegistrantCount()
                             </td>
 
-                            @if (account.HasFeature(FeatureType.WaitingList))
-                            {
-                                <td class="text-center @waitingTextClass">
-                                    @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList) / @activity.WaitingListSeats
-                                </td>
-                            }
-
-                            @if (account.HasFeature(FeatureType.AllowApplications))
-                            {
-                                <td class="text-center">
-                                    @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Applied)
-                                </td>
-                            }
                             <td>
                                 <div class="btn-group pull-right">
 

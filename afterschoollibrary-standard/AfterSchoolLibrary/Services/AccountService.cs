@@ -1043,6 +1043,27 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public static DateTime ConvertFromAccountTimeZone(this Account account, DateTime dt)
+        {
+            switch (account.TimeZoneAbbr)
+            {
+                case "EST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+                case "CST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time"));
+                case "MST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Mountain Standard Time"));
+                case "PST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Mountain Standard Time"));
+                case "AKST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Alaskan Standard Time"));
+                case "HAST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Hawaiian Standard Time"));
+                default:
+                    return dt;
+            }
+        }
+
         public static DateTime NowInAccountTimeZone(this Account account)
         {
             return account.ConvertToAccountTimeZone(DateTime.UtcNow);
@@ -1768,10 +1789,16 @@ namespace AfterSchoolLibrary
 
         public static void CreatePurchaseTransactionPayment(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, Stripe.StripeCharge stripeCharge, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            // not the master registrant record
             var registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
 
-            // tracks the whole purchase, could contain multiple activities/activity groups
-            var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
+            // purchase tracks the whole purchase, could contain multiple activities/activity groups
+            // check for existing purchase for this registration
+            var purchase = checkoutObject.Registration.GetPurchase();
+
+            // if registration has no existing purchase is empty then create a new one
+            if (purchase.IsEmpty())
+                purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
 
             // charge successful so I need to create a transaction
             var transaction = fromAccount.AddTransaction(
@@ -1784,9 +1811,14 @@ namespace AfterSchoolLibrary
                 msgs,
                 dc);
 
+            var amountPaid = checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats;
+
+            if (checkoutObject.OverrideAmount.HasValue)
+                amountPaid = checkoutObject.OverrideAmount.Value;
+
             // need to track a payment for each activity/activitygroup
             checkoutObject.ParticipationObject.AddPayment(
-                amount: checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats,
+                amount: amountPaid,
                 registrant: registrant,
                 transaction: transaction,
                 loggedInUser: loggedInUser,
@@ -1816,7 +1848,7 @@ namespace AfterSchoolLibrary
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
             if (msgs.HasNoErrors())
-                toAccount.CreatePurchaseRecords(fromAccount, checkoutObject, stripeCharge, loggedInUser, msgs, dc);
+                toAccount.CreatePurchaseTransactionPayment(fromAccount, checkoutObject, stripeCharge, loggedInUser, msgs, dc);
         }
 
         public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

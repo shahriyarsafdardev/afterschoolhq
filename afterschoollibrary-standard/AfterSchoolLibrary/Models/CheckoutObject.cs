@@ -19,6 +19,8 @@ namespace AfterSchoolLibrary
         public int NumberOfSeats { get; set; }
         public List<Product> Products { get; set; }
         public bool SavePaymentInfo { get; set; }
+        public PaymentType PaymentType { get; set; }
+        public decimal? OverrideAmount { get; set; }
 
         public CheckoutObject()
         {

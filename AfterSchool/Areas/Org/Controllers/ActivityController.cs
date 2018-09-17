@@ -1286,8 +1286,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var masterRegistrant = ra.GetRegistrant(msgs).GetMasterRegistrant(msgs);
-                var purchaserAccount = masterRegistrant?.GetAccount(msgs);
+                // the registrant that is only on the provider or school account
+                var registrant = ra.GetRegistrant(msgs);
+                
+                // from the parent account, see if the registrant has a parent account
+                var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+
+                // master registrant could be empty because a registrant can be created on the backend
+                // so we may not have a purchaser account
+                var purchaserAccount = masterRegistrant?.GetAccount(msgs);                
 
                 SessionVariables.CurrentAccount.CreatePurchaseTransactionPayment(
                     fromAccount: purchaserAccount,
@@ -1295,34 +1302,19 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         NumberOfSeats = 1,
                         ParticipationObject = ra.GetParticipationObject(msgs),
-                        Registrant = masterRegistrant,
                         Registration = ra.GetRegistration(msgs),
-                        Purchaser = purchaserAccount
+                        Purchaser = purchaserAccount,
+                        PaymentType = (PaymentType)paymenttype.ToInteger(),
+                        Registrant = masterRegistrant,
+                        OverrideAmount = amountpaid.ToDecimal()
                     },
                     stripeCharge: null,
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs
-                    );
-
-                var payment = new ActivityPayment()
-                {
-                    ParticipationObjectId = ra.ParticipationObjectId,
-                    ParticipationObjectTypeId = ra.ParticipationObjectTypeId,
-                    Amount = amountpaid.ToDecimal(),
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = SessionVariables.LoggedInUser.ID,
-                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
-                    LastModifiedDate = DateTime.UtcNow,
-                    RegistrantId = ra.RegistrantId,
-                    AccountId = SessionVariables.CurrentAccount.ID
-                };
-
-                msgs.AddRange(payment.Save());                
+                    );  
 
                 if (msgs.HasNoErrors())
-                {
-                    msgs.Add("Payment details have been updated", MessageType.Success);
-                }
+                    msgs.Add("Payment has been added", MessageType.Success);
             }
 
             ViewBag.Messages = msgs;

@@ -47,29 +47,14 @@ namespace AfterSchoolLibrary.Services
             return CreateNew(
                 fromAccount, 
                 toAccount, 
-                checkoutObject.TuitionFee, 
+                checkoutObject.OverrideAmount ?? checkoutObject.TuitionFee, 
                 checkoutObject.ParticipationObject.Name, 
                 purchaseId, 
                 transactionType, 
+                checkoutObject.PaymentType,
                 stripeChargeOrRefundId, 
                 loggedInUser, 
                 msgs, 
-                dc);
-        }
-
-        public static Transaction CreateNew(Account fromAccount, Account toAccount, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return CreateNew(
-                fromAccount,
-                toAccount,
-                amount,
-                participationObjectName,
-                purchaseId,
-                transactionType,
-                PaymentType.CreditCard,
-                stripeChargeOrRefundId,
-                loggedInUser,
-                msgs,
                 dc);
         }
 
@@ -82,7 +67,7 @@ namespace AfterSchoolLibrary.Services
                 Amount = amount,
                 BillerAccountId = toAccount.ID.Value,
                 Description = $"{participationObjectName} registration",
-                PayerAccountId = fromAccount.ID,
+                PayerAccountId = fromAccount?.ID,
                 PaymentTypeId = paymentType,
                 PurchaseId = purchaseId,
                 CreateDate = DateTime.UtcNow,

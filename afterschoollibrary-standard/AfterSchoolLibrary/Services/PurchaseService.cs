@@ -18,6 +18,9 @@ namespace AfterSchoolLibrary.Services
             else if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                 totalCost += checkoutObject.SubscriptionCostToday;
 
+            if (checkoutObject.OverrideAmount.HasValue)
+                totalCost = checkoutObject.OverrideAmount.Value;
+
             var purchase = new Purchase()
             {
                 AmountPaid = totalCost,
@@ -28,8 +31,8 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
                 NumberOfSeats = checkoutObject.NumberOfSeats,
-                PurchaserAccountId = purchasingAccount.ID,
-                RegistrantId = checkoutObject.Registrant.ID,
+                PurchaserAccountId = purchasingAccount?.ID,
+                RegistrantId = checkoutObject.Registrant?.ID,
                 RegistrationId = checkoutObject.Registration.ID,
                 StripeToken = checkoutObject.StripeToken,
                 StripeSourceId = checkoutObject.SourceId

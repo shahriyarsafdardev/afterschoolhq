@@ -1173,6 +1173,14 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
+        public Purchase GetPurchase(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.PurchaseId.HasValue)
+                return Purchase.Load(this.PurchaseId.Value, msgs, dc);
+
+            return null;
+        }
+
         #region CSVReport
 
         public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, RegistrationAssignmentType rat, string uiActivityLabel, string emails, string subject, string body)
