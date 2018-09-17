@@ -485,7 +485,7 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpGet]
-        public ActionResult AddGame(string id, string ai, string d, string t)
+        public ActionResult EditGame(string id, string ai, string d, string t)
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
@@ -507,11 +507,58 @@ namespace AfterSchool.Areas.District.Controllers
                 
             }
 
+            ActivityInstance activityInstance = null;
+            ViewBag.Location = null;
+            if (ai.IsNotEmpty() && ai.IsInteger())
+            {
+                activityInstance =  ActivityInstance.Load(ai.ToInteger());
+                if (activityInstance.LocationId.IsNotEmpty())
+                {
+                    ViewBag.Location = Location.Load(activityInstance.LocationId.Value);
+                }
+                
+            }
+
 
             ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Messages = msgs;
 
             return View(activityGroup);
+        }
+
+        [HttpPost]
+        public ActionResult EditGame(string id, string ai, string d, string t, string l,string teams, string cmd)
+        {
+            var msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+
+            //create or edit existing match
+            Match match = null;
+            //if (matchId.IsNotEmpty() && matchId.IsInteger())
+            //{
+            //    match = Match.Load(matchId.ToInteger());
+            //}
+
+            var date = Request["gamedate"].ToDateTime();
+            var time = Request["gametime"].ToDateTime();
+
+            
+            ViewBag.Messages = msgs;
+
+            switch (cmd)
+            {
+                //save
+                case "s":
+                    break;
+                //save and add
+                case "sa":
+                    break;
+                //cancel:
+                case "c":
+                    break;
+            }
+
+            return View("schedule", activityGroup);
         }
 
     }

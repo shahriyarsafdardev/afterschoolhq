@@ -24,7 +24,7 @@
             
             <div class="panel-heading">
                 <div class="pull-right">
-                    <a href="@Url.Action("addgame", "league", new { id = Model.Uid })" class="btn-primary btn-space margin-r-10 padding-10">
+                    <a href="@Url.Action("editgame", "league", new { id = Model.Uid })" class="btn-primary btn-space margin-r-10 padding-10">
                         <i class="icon icon-left s7-plus"></i>
                         Add Game
                     </a>
@@ -38,7 +38,7 @@
             { 
 
                 <h4>@day.First().StartDateTime.Value.ToShortDateString()
-                    <a href="@Url.Action("addgame", "league", new { id = Model.Uid, d = day.First().StartDateTime.Value.ToShortDateString() })" class="btn-default  btn-space margin-r-10 padding-10">
+                    <a href="@Url.Action("editgame", "league", new { id = Model.Uid, d = day.First().StartDateTime.Value.ToShortDateString() })" class="btn-default  btn-space margin-r-10 padding-10">
                         <i class="icon icon-left s7-plus"></i>
                     </a>
                 </h4>
@@ -48,7 +48,7 @@
                     var matches = Match.LoadByActivityInstanceId(activityInstance.ID.Value);
 
                     <h6>
-                        <a href="@Url.Action("addgame", "league", new { id = Model.Uid, ai = activityInstance.ID.Value })">
+                        <a href="@Url.Action("editgame", "league", new { id = Model.Uid, ai = activityInstance.ID.Value })">
                             <i class="icon icon-left s7-more"></i>
                             @activityInstance.StartDateTime.Value.ToShortTimeString()
                         </a>
