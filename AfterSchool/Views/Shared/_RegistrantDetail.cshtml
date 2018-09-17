@@ -66,93 +66,71 @@
             </div>
         </div>
 
-        @if (activity.CostPerRegistrant > 0 && false)
+        @if (activity.CostPerRegistrant > 0 && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
         {
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Payment Information
                 </div>
                 <div class="panel-body">
-                    <form action="@Url.Action("RegistrantDetail", "activity", new { id = Model.Uid })" method="post">
+                    <form action="@Url.Action("RegistrantDetail", "activity", new { id = Model.ID })" method="post">
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <tr>
                                     <td width="33%" class="text-right">
-                                        Amount Owed
+                                        Amount Paid
                                     </td>
                                     <td>
                                         <div class="col-md-6">
-                                            @((activity.CostPerRegistrant * Model.TotalSeats).ToCurrency()) (@activity.CostPerRegistrant.ToCurrency() x @Model.TotalSeats Seats)
+                                            @Model.GetAmountPaid().ToCurrency()
                                         </div>
                                     </td>
                                 </tr>
-                                @if (isActivityLeader && false)
-                                {
-                                    <tr>
-                                        <td width="33%" class="text-right">Date Paid</td>
-                                        <td>
-                                            <div class="col-md-6">
-                                                <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                                    <input size="16" type="text" class="form-control" id="datepaid" name="datepaid" onfocus="this.select()" value="" data-type="date" />
-                                                    <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                                </div>
+                                <tr>
+                                    <td width="33%" class="text-right">Date Paid</td>
+                                    <td>
+                                        <div class="col-md-6">
+                                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                                <input size="16" type="text" class="form-control" id="datepaid" name="datepaid" onfocus="this.select()" value="" data-type="date" />
+                                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
                                             </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Amount Paid</td>
-                                        <td>
-                                            <div class="col-md-6">
-                                                <div class="input-group input-group-lg xs-mb-15">
-                                                    <span class="input-group-addon">$</span>
-                                                    <input type="number" class="form-control" id="amountpaid" name="amountpaid" onfocus="this.select()" value="" min="0.00" step=".01" />
-                                                </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Amount Paid</td>
+                                    <td>
+                                        <div class="col-md-6">
+                                            <div class="input-group input-group-lg xs-mb-15">
+                                                <span class="input-group-addon">$</span>
+                                                <input type="number" class="form-control" id="amountpaid" name="amountpaid" onfocus="this.select()" value="" min="0.00" step=".01" />
                                             </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Payment Method</td>
-                                        <td>
-                                            <div class="col-md-6">
-                                                <select name="paymenttype" id="paymenttype" class="form-control">
-                                                    <option value="">Select...</option>
-                                                    @foreach (PaymentType type in System.Enum.GetValues(typeof(PaymentType)))
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Payment Method</td>
+                                    <td>
+                                        <div class="col-md-6">
+                                            <select name="paymenttype" id="paymenttype" class="form-control">
+                                                <option value="">Select...</option>
+                                                @foreach (PaymentType type in System.Enum.GetValues(typeof(PaymentType)))
+                                                {
+                                                    if (type != PaymentType.NotSet)
                                                     {
-                                                        if (type != PaymentType.NotSet)
-                                                        {
-                                                            <option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>
-                                                        }
+                                                        <option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>
                                                     }
-                                                </select>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <!--
-                                    <tr>
-                                        <td class="text-right">Accept as full payment</td>
-                                        <td>
-                                            @{Html.RenderPartial
-                                                (
-                                                  "~/Views/Shared/_SwitchButton.cshtml",
-                                                  true,
-                                                  new ViewDataDictionary()
-                                                  {
-                                                      { "checkboxname", "acceptasfullpayment" },
-                                                      { "checkboxid", "acceptasfullpayment" },
-                                                      { "disabled", false }
-                                                  }
-                                                );
-                                            }
-                                        </td>
-                                    </tr>
-                                    -->
-                                    <tr>
-                                        <td></td>
-                                        <td>
-                                            <button type="submit" class="btn btn-primary btn-lg">Update Payment Info</button>
-                                        </td>
-                                    </tr>
-                                }
+                                                }
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <button type="submit" class="btn btn-primary btn-lg">Add Payment</button>
+                                    </td>
+                                </tr>
                             
                             </table>
                         </div>

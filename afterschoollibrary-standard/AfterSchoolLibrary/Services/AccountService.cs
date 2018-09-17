@@ -1043,6 +1043,27 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public static DateTime ConvertFromAccountTimeZone(this Account account, DateTime dt)
+        {
+            switch (account.TimeZoneAbbr)
+            {
+                case "EST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+                case "CST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time"));
+                case "MST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Mountain Standard Time"));
+                case "PST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Mountain Standard Time"));
+                case "AKST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Alaskan Standard Time"));
+                case "HAST":
+                    return TimeZoneInfo.ConvertTimeToUtc(dt, TimeZoneInfo.FindSystemTimeZoneById("Hawaiian Standard Time"));
+                default:
+                    return dt;
+            }
+        }
+
         public static DateTime NowInAccountTimeZone(this Account account)
         {
             return account.ConvertToAccountTimeZone(DateTime.UtcNow);
@@ -1649,6 +1670,8 @@ namespace AfterSchoolLibrary
             return registrant;
         }
 
+        #region Finance
+
         public static decimal CalculatePlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
@@ -1747,15 +1770,8 @@ namespace AfterSchoolLibrary
             return copiedSource.Id;
         }
 
-        private static void ProcessTuitionFeeAndProducts(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static Stripe.StripeCharge ProcessTuitionWithStripe(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            // TODO: Add Products
-            // if they have products
-            //foreach (var product in purchaseObject.Products)
-            //{
-            //    purchaseObject.Registrant.PurchaseProduct();
-            //}
-
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
             if (msgs.HasNoErrors() && checkoutObject.SavePaymentInfo)
@@ -1768,50 +1784,71 @@ namespace AfterSchoolLibrary
             if (msgs.HasNoErrors())
                 stripeCharge = fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
 
+            return stripeCharge;
+        }
+
+        public static void CreatePurchaseTransactionPayment(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, Stripe.StripeCharge stripeCharge, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // not the master registrant record
+            var registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
+
+            // purchase tracks the whole purchase, could contain multiple activities/activity groups
+            // check for existing purchase for this registration
+            var purchase = checkoutObject.Registration.GetPurchase();
+
+            // if registration has no existing purchase is empty then create a new one
+            if (purchase.IsEmpty())
+                purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
+
+            // charge successful so I need to create a transaction
+            var transaction = fromAccount.AddTransaction(
+                toAccount,
+                purchase,
+                checkoutObject,
+                TransactionType.Charge,
+                stripeCharge?.Id,
+                loggedInUser,
+                msgs,
+                dc);
+
+            var amountPaid = checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats;
+
+            if (checkoutObject.OverrideAmount.HasValue)
+                amountPaid = checkoutObject.OverrideAmount.Value;
+
+            // need to track a payment for each activity/activitygroup
+            checkoutObject.ParticipationObject.AddPayment(
+                amount: amountPaid,
+                registrant: registrant,
+                transaction: transaction,
+                loggedInUser: loggedInUser,
+                msgs: msgs,
+                dc: dc);
+
+            // if successful payment and reserved pending payment then it should be reserved
+            // TODO: Needs review!!
+            if (msgs.HasNoErrors())
+            {
+                var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                    checkoutObject.ParticipationObject.ObjectID.Value,
+                    checkoutObject.ParticipationObject.ObjectType,
+                    registrant.ID.Value,
+                    msgs,
+                    dc);
+
+                if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser.ID.Value, dc));
+            }
+        }
+
+        public static void ProcessTuitionFee(this Account toAccount, Account fromAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var stripeCharge = toAccount.ProcessTuitionWithStripe(fromAccount, checkoutObject, msgs, dc);
+
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
             if (msgs.HasNoErrors())
-            {
-                var registrant = checkoutObject.Registration.GetRegistrant(msgs, dc);
-
-                // tracks the whole purchase, could contain multiple activities/activity groups
-                var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
-
-                // charge successful so I need to create a transaction
-                var transaction = fromAccount.AddTransaction(
-                    toAccount, 
-                    purchase, 
-                    checkoutObject, 
-                    TransactionType.Charge, 
-                    stripeCharge?.Id, 
-                    loggedInUser, 
-                    msgs, 
-                    dc);
-
-                // need to track a payment for each activity/activitygroup
-                checkoutObject.ParticipationObject.AddPayment(
-                    amount: checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats,
-                    registrant: registrant,
-                    transaction: transaction,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
-
-                // if successful payment and reserved pending payment then it should be reserved
-                // TODO: Needs review!!
-                if (msgs.HasNoErrors())
-                {
-                    var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                        checkoutObject.ParticipationObject.ObjectID.Value,
-                        checkoutObject.ParticipationObject.ObjectType,
-                        registrant.ID.Value,
-                        msgs,
-                        dc);
-
-                    if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
-                        msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser.ID.Value, dc));
-                }
-            }
+                toAccount.CreatePurchaseTransactionPayment(fromAccount, checkoutObject, stripeCharge, loggedInUser, msgs, dc);
         }
 
         public static void ProcessRegistrationWithoutPayment(this Account fromAccount, Account toAccount, CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1864,7 +1901,7 @@ namespace AfterSchoolLibrary
                     // process payment by to account, includes tuition fee and product purchases
                     // skip for payment plans and subscription plans
                     if (checkoutObject.PaymentPlan.IsEmpty() && checkoutObject.SubscriptionPlan.IsEmpty())
-                        toAccount.ProcessTuitionFeeAndProducts(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
+                        toAccount.ProcessTuitionFee(fromAccount, checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the tuition Fee
 
@@ -1965,7 +2002,9 @@ namespace AfterSchoolLibrary
                 msgs: msgs, 
                 dc: dc) > 0;
         }
-        
+
+        #endregion
+
         public static AccountActivityGroup InviteSchoolToLeague(this Account account, ActivityGroup activityGroup, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
            return AccountActivityGroupService.CreateNew(account, activityGroup, InviteStatus.Invited, user);

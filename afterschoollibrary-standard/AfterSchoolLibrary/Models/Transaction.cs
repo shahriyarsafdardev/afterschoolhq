@@ -292,6 +292,8 @@ namespace AfterSchoolLibrary
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
@@ -307,6 +309,8 @@ namespace AfterSchoolLibrary
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;

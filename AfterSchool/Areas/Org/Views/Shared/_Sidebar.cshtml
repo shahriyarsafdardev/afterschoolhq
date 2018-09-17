@@ -81,7 +81,10 @@
                 <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>
             }
 
-            <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a></li>
+            @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+            {
+                <li class="@accountingactive"><a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a></li>
+            }
 
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.TeamView))
             {

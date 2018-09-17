@@ -1286,25 +1286,35 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var payment = new ActivityPayment()
-                {
-                    ParticipationObjectId = ra.ParticipationObjectId,
-                    ParticipationObjectTypeId = ra.ParticipationObjectTypeId,
-                    Amount = amountpaid.ToDecimal(),
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = SessionVariables.LoggedInUser.ID,
-                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
-                    LastModifiedDate = DateTime.UtcNow,
-                    RegistrantId = ra.RegistrantId,
-                    AccountId = SessionVariables.CurrentAccount.ID
-                };
+                // the registrant that is only on the provider or school account
+                var registrant = ra.GetRegistrant(msgs);
+                
+                // from the parent account, see if the registrant has a parent account
+                var masterRegistrant = registrant.GetMasterRegistrant(msgs);
 
-                msgs.AddRange(payment.Save());                
+                // master registrant could be empty because a registrant can be created on the backend
+                // so we may not have a purchaser account
+                var purchaserAccount = masterRegistrant?.GetAccount(msgs);                
+
+                SessionVariables.CurrentAccount.CreatePurchaseTransactionPayment(
+                    fromAccount: purchaserAccount,
+                    checkoutObject: new CheckoutObject()
+                    {
+                        NumberOfSeats = 1,
+                        ParticipationObject = ra.GetParticipationObject(msgs),
+                        Registration = ra.GetRegistration(msgs),
+                        Purchaser = purchaserAccount,
+                        PaymentType = (PaymentType)paymenttype.ToInteger(),
+                        Registrant = masterRegistrant,
+                        OverrideAmount = amountpaid.ToDecimal()
+                    },
+                    stripeCharge: null,
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs
+                    );  
 
                 if (msgs.HasNoErrors())
-                {
-                    msgs.Add("Payment details have been updated", MessageType.Success);
-                }
+                    msgs.Add("Payment has been added", MessageType.Success);
             }
 
             ViewBag.Messages = msgs;

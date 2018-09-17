@@ -1176,7 +1176,8 @@ namespace AfterSchool.Controllers
                         ParticipationObject = participationObject,
                         Purchaser = SessionVariables.CurrentAccount,
                         Registration = registration,
-                        Registrant = SessionVariables.CurrentRegistrant
+                        Registrant = SessionVariables.CurrentRegistrant,
+                        PaymentType = PaymentType.CreditCard
                     },
                     sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.LoggedInUser,
@@ -1270,7 +1271,8 @@ namespace AfterSchool.Controllers
                         StripeToken = stripetoken,
                         SourceId = sourceId,
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
-                        Registrant = SessionVariables.CurrentRegistrant
+                        Registrant = SessionVariables.CurrentRegistrant,
+                        PaymentType = PaymentType.CreditCard
                     },
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);
