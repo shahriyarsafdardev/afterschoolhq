@@ -254,6 +254,29 @@ namespace AfterSchoolLibrary
         //    return ranges;
         //}
 
+        
+
+        public List<Match> GetMatches()
+        {
+            return Match.LoadByActivityInstanceId(this.ID.Value);
+        }
+
+        public List<Activity> GetTeams()
+        {
+            List<Match> matches = this.GetMatches();
+            List<Activity> teams = new List<Activity>();
+
+            foreach(Match match in matches)
+            {
+                Activity team = Activity.Load(match.TeamId.Value);
+                teams.Add(team);
+            }
+
+            return teams;
+            
+        }
+
+
         #endregion
     }
 }

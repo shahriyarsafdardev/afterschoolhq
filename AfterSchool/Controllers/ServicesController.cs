@@ -103,37 +103,6 @@ namespace AfterSchool.Controllers
             {
                 return new JsonResult { Data = new { status = "ok" } };
             }
-        }
-
-        //public ActionResult SearchActivities(string search)
-        //{
-        //    if (Request.UserHostAddress == "::1" || true)
-        //    {
-        //        var msgs = new SystemMessages();
-        //        var activities = Activity.Search(search.Trim(), 0, 10, msgs);
-
-        //        Response.Clear();
-        //        WriteOutput(new
-        //        {
-        //            status = "ok",
-        //            activities = activities.Select(activity => new
-        //            {
-        //                activity.ID,
-        //                activity.Name,
-        //            })
-        //        },
-        //        ResponseType.JSON);
-        //        Response.End();
-        //    }
-        //    else
-        //    {
-        //        Response.Clear();
-        //        WriteOutput(new { status = "ok" }, ResponseType.JSON);
-        //        Response.End();
-        //    }
-        //    return View();
-        //}
-
-       
+        }   
     }
 }

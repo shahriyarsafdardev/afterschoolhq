@@ -264,6 +264,7 @@ namespace AfterSchool.Areas.Org.Controllers
             LoadRegistrationViewBag(registration, r);
             ViewBag.Messages = msgs;
 
+            
             return View("edit", registration);
         }
 

@@ -495,31 +495,37 @@ namespace AfterSchool.Areas.District.Controllers
                 ViewBag.ActivityInstance = ActivityInstance.Load(ai.ToInteger());
             }
 
+            var dateTime = DateTime.UtcNow;
+
             if(d.IsNotEmpty() && d.IsDate())
             {
                 if (t.IsNotEmpty() && t.IsTime())
                 {
-                    ViewBag.Date = (d + t).ToDateTime();
+                    dateTime = (d + t).ToDateTime();
                 } else
                 {
-                    ViewBag.Date = d.ToDateTime();
+                    dateTime = d.ToDateTime();
                 }
                 
             }
 
-            ActivityInstance activityInstance = null;
-            ViewBag.Location = null;
+            ViewBag.Date = dateTime;
+            
+
+            ActivityInstance activityInstance = new ActivityInstance();
+            var location = new Location();
             if (ai.IsNotEmpty() && ai.IsInteger())
             {
                 activityInstance =  ActivityInstance.Load(ai.ToInteger());
                 if (activityInstance.LocationId.IsNotEmpty())
                 {
-                    ViewBag.Location = Location.Load(activityInstance.LocationId.Value);
+                    location = Location.Load(activityInstance.LocationId.Value);
                 }
                 
             }
 
-
+            ViewBag.ActivityInstance = activityInstance;
+            ViewBag.Location = location;
             ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Messages = msgs;
 
@@ -527,20 +533,70 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditGame(string id, string ai, string d, string t, string l,string teams, string cmd)
+        public ActionResult EditGame(string id, string ai, string match, string d, string st, string et, string location, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd)
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            var activityInstance = ActivityInstance.Load(ai.ToInteger());
 
-            //create or edit existing match
-            Match match = null;
-            //if (matchId.IsNotEmpty() && matchId.IsInteger())
-            //{
-            //    match = Match.Load(matchId.ToInteger());
-            //}
 
-            var date = Request["gamedate"].ToDateTime();
-            var time = Request["gametime"].ToDateTime();
+            var startDateTime = (d + st).ToDateTime();
+            var endDateTime = (d + et).ToDateTime();
+            activityInstance.StartDateTime = startDateTime;
+            activityInstance.EndDateTime = endDateTime;
+
+
+            //check if location exists
+            if (location.IsNotEmpty())
+            {
+                activityInstance.LocationId = location.ToInteger();
+            }
+            else //create a new location
+            {  
+                Location newLocation = new Location()
+                {
+                    Address1 = address1,
+                    Address2 = address2,
+                    City = city,
+                    State = state,
+                    PostalCode = postalcode,
+                    LocationTypeId = (LocationType)locationtype.ToInteger(),
+                    Description = locationdescription,
+                    Name = locationname
+                };
+
+                activityInstance.LocationId = newLocation.ID;
+            }
+
+            var teamIds = teams.Split(',').ToList();
+            List<Activity> listOfTeams = new List<Activity>();
+
+            List<Activity> activityInstanceTeams = activityInstance.GetTeams();
+            
+
+
+            foreach(var teamId in teamIds)
+            {
+                listOfTeams.Add(Activity.Load(teamId.ToInteger()));
+            }
+            
+            foreach(var activity in activityInstanceTeams)
+            {
+                if (listOfTeams.Contains(activity)) { 
+
+                    var checkMatch = Match.LoadByTeamIdByActivityInstanceId(activity.ID.Value, activityInstance.ID.Value);
+                    if (checkMatch.IsNotEmpty())
+                    {
+                        //create new match
+
+                    ///    activityInstance.CreateMatch(activity.ID.Value);
+                    }
+                } else
+                {
+                //    activityInstance.DeleteMatch(activity.ID.Value);
+                }
+            }
+
 
             
             ViewBag.Messages = msgs;
@@ -549,13 +605,10 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 //save
                 case "s":
-                    break;
+                    return View("schedule", activityGroup);
                 //save and add
                 case "sa":
-                    break;
-                //cancel:
-                case "c":
-                    break;
+                    return View("editgame", activityGroup);
             }
 
             return View("schedule", activityGroup);

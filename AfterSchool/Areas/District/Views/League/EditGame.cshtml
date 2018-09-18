@@ -5,15 +5,16 @@
     var forms = (List<Form>)ViewBag.Forms;
     var schedule = (ActivitySchedule)ViewBag.Schedule;
     var activityInstance = (ActivityInstance)ViewBag.ActivityInstance;
-    var date = ViewBag.Date != null ? ViewBag.Date : DateTime.UtcNow;
+    DateTime date = ViewBag.Date ?? DateTime.UtcNow;
+    var startTime =  DateTime.UtcNow;
+    var endTime = DateTime.UtcNow;
     var teams = (List<Activity>)ViewBag.Teams;
+
 
     Location location = new Location();
 
-    //if (ViewBag.Loc)
-    //{
-    //    location = ViewBag.Location;
-    //}
+   
+
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -53,32 +54,65 @@
                         </div>
                         <div class="form">
 
-                            <div class="form-group add-date">
-                                <label class="col-sm-3 control-label">Game Date<span class="text-danger">*</span></label>
-                                <div class="col-sm-5">
-                                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                        <input size="16" type="text" class="form-control" id="gamedate" name="gamedate" onfocus="this.select()" required value="@date.ToShortDateString()" data-type="datetime" />
-                                        <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group add-time">
-                                <div class="col-sm-4">
-                                    @*@{Html.RenderPartial(
-                                            "~/Views/Shared/_TimeSelect.cshtml",
-                                            date,
-                                            new ViewDataDictionary()
-                                            {
-                                                { "name", "gametime" },
-                                                { "id", "gametime" },
-                                                { "required", true }
-                                            }
-                                        );}*@
+                            <div class="form-group  schedule-date" id="schedule-date">
+                                <label class="col-md-3 control-label">
+                                    Game Date and Time
+                                </label>
+                                <div class="col-md-7">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                                    <input size="16" type="text" class="form-control" id="gamedate" name="gamedate" onfocus="this.select()" required value="@date.ToShortDateString()" data-type="date" />
+                                                    <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @{Html.RenderPartial(
+                                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                                    date,
+                                                    new ViewDataDictionary()
+                                                    {
+                                                    { "name", "gamestarttime" },
+                                                    { "id", "gamestarttime" },
+                                                    { "required", true }
+                                                    }
+                                                );
+                                                }
+                                            </td>
+                                            <td>
+                                                &nbsp;To&nbsp;
+                                            </td>
+                                            <td>
+                                                @{Html.RenderPartial(
+                                                     "~/Views/Shared/_TimeSelect.cshtml",
+                                                      date,
+                                                     new ViewDataDictionary()
+                                                     {
+                                                        { "name", "gameendtime"  },
+                                                        { "id", "gameendtime" },
+                                                        { "required", true }
+                                                     }
+                                                  );
+                                                }
+                                            </td>
+                                            <td>
+                                                &nbsp;
+                                            </td>
+                                            
+                                        </tr>
+                                    </table>
+
                                 </div>
                             </div>
                             <div class="form-group add-location">
-
-                                @{Html.RenderPartial("~/Views/Shared/_LocationEdit.cshtml", location, new ViewDataDictionary() { { "accountId", Model.AccountId.Value } });}
+                                @{
+            Html.RenderPartial(
+               "~/Views/Shared/_GameLocation.cshtml",
+               (Location)ViewBag.Location,
+               new ViewDataDictionary() { { "accountId", Model.ID.Value } }
+           );
+                                }
                             </div>
                             <div class="form-group add-teams">
                                 <label class="col-sm-3 control-label">Add Teams<span class="text-danger">*</span></label>
@@ -87,16 +121,16 @@
                                         <select id="teams" class="form-control select2 hide" multiple placeholder="Select Team">
 
                                             @foreach (var team in teams)
-                                            {
-                                                var selectedTeam = "";
-                                                if (Request["teams"].IsNotBlank() && Request["teams"].Split(',').Contains(team.ID.ToString()))
-                                                {
-                                                    selectedTeam = " selected=\"selected\" ";
-                                                }
-                                                <option value="team-@team.ID" @selectedTeam>
-                                                    @team.Name
-                                                </option>
-                                            }
+                    {
+                        var selectedTeam = "";
+                        if (Request["teams"].IsNotBlank() && Request["teams"].Split(',').Contains(team.ID.ToString()))
+                        {
+                            selectedTeam = " selected=\"selected\" ";
+                        }
+                        <option value="team-@team.ID" @selectedTeam>
+                            @team.Name
+                        </option>
+}
 
                                         </select>
                                     </div>
@@ -107,11 +141,6 @@
                         </div>
                         <input type="hidden" name="period" id="period-add" value="" />
                     </div>
-                    @*<div class="footer">
-                           <a  href="@Url.Action("schedule", "league", new { id = Model.Uid })"><button type="button" class="btn btn-default">Cancel</button></a>
-                            <button type="submit" class="btn btn-primary">Save Game &raquo;</button>
-                            <button type="submit" class="btn btn-primary">Save Game and Add New Game &raquo;</button>
-                        </div>*@
                     <div class="row">
                         <div class="col-md-12">
                             <a class="text-muted margin-10" href="@Url.Action("schedule", "league", new { id = Model.Uid })">Cancel</a>
@@ -158,13 +187,22 @@
     }
 
     function getTime() {
-        var time = $('#gametime').val();
-        return `t=${time}`;
+        var startTime = $('#gamestarttime').val();
+        var endTime = $('#gameendtime').val();
+        return `st=${startTime}&et=${endTime}`;
     }
 
     function getLocation() {
         var location = $('#location').val();
-        return `l=${location}`;
+        var address1 = $('#address1').val();
+        var address2 = $('#address2').val();
+        var city = $('#city').val();
+        var state = $('#state').val();
+        var postalcode = $('#postalcode').val();
+        var locationtype = $('#locationtype').val();
+        var locationdescription = $('#locationdescription').val();
+        var locationname = $('#locationname').val();
+        return `location=${location}&address1=${address1}&address2=${address2}&city=${city}&state=${state}&postalcode=${postalcode}&locationtype=${locationtype}&locationdescription=${locationdescription}&locationname=${locationname}`;
     }
 
 

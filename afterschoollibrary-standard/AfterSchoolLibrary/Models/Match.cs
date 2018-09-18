@@ -264,6 +264,13 @@ namespace AfterSchoolLibrary
             return match;
         }
 
+        public bool Exists(int teamId, int activityInstanceId)
+        {
+            var match = Match.LoadByTeamIdByActivityInstanceId(teamId, activityInstanceId);
+
+            return match.IsNotEmpty();
+        }
+
         #endregion
     }
 }
