@@ -23,7 +23,7 @@ namespace AfterSchoolLibrary
         public bool SavePaymentInfo { get; set; }
         public PaymentType PaymentType { get; set; }
         public decimal? OverrideAmount { get; set; }
-        public Stripe.StripeCharge StripeCharge { get; set; }
+        public string StripeChargeId { get; set; }
         public Purchase Purchase { get; set; }
         public PaymentSourceType PaymentSourceType { get; set; }
 
@@ -45,6 +45,14 @@ namespace AfterSchoolLibrary
             get
             {
                 return ParticipationObject.IsFree;
+            }
+        }
+
+        public bool IsTuitionFree
+        {
+            get
+            {
+                return ParticipationObject.IsTuitionFree;
             }
         }
 
@@ -110,6 +118,22 @@ namespace AfterSchoolLibrary
             }
 
             return total;
+        }
+
+        public decimal GetPlatformPercentFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (PaymentSourceType == PaymentSourceType.AfterSchoolPlatform)
+                return BillingAccount.GetPlatformPercentFee(msgs, dc);
+
+            return 0;
+        }
+
+        public decimal GetPlatformFlatFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!IsTuitionFree && PaymentSourceType == PaymentSourceType.AfterSchoolPlatform)
+                return BillingAccount.GetPlatformFlatFee(msgs, dc);
+
+            return 0;
         }
 
         public void CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

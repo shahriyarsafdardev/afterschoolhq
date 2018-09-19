@@ -1643,7 +1643,10 @@ namespace AfterSchoolLibrary
             // if any errors it'll just rollback the transaction anyway :)
             // don't process charge if the user is using a payment plan
             if (msgs.HasNoErrors())
-                checkoutObject.StripeCharge = AccountService.CreateStripeChargeDuringCheckout(checkoutObject, msgs, dc);
+            {
+                var charge = AccountService.CreateStripeChargeDuringCheckout(checkoutObject, msgs, dc);
+                checkoutObject.StripeChargeId = charge.Id;
+            }
         }
 
         public static void CreatePurchaseTransactionPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
