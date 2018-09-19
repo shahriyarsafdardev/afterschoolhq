@@ -1665,6 +1665,7 @@ namespace AfterSchoolLibrary
                 msgs,
                 dc);
 
+            // TODO: this is problematic
             var amountPaid = checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats;
 
             if (checkoutObject.OverrideAmount.HasValue)
@@ -1691,7 +1692,7 @@ namespace AfterSchoolLibrary
                     dc);
 
                 if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
-                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser.ID.Value, dc));
+                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser?.ID.IfEmpty(0), dc));
             }
         }
 
