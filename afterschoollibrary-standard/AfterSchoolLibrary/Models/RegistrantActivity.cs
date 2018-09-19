@@ -519,7 +519,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }        
 
-        public SystemMessages ChangeSeatAssignment(RegistrationAssignmentType to, int loggedInUserId, DatabaseConnection dc = null)
+        public SystemMessages ChangeSeatAssignment(RegistrationAssignmentType to, int? loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
