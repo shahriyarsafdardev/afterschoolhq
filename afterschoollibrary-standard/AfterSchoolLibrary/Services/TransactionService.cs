@@ -84,8 +84,8 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                PlatformFlatFee = billingAccount.GetPlatformFlatFee(msgs, dc),
-                PlatformPercentFee = billingAccount.GetPlatformPercentFee(msgs, dc),
+                PlatformFlatFee = platformFee,
+                PlatformPercentFee = platformPercentFee,
                 StripeChargeOrRefundId = stripeChargeOrRefundId,
                 TransactionTypeId = transactionType,
                 PaymentSourceTypeId = paymentSourceType
