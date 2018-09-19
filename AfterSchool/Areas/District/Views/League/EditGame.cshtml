@@ -9,11 +9,12 @@
     var startTime =  DateTime.UtcNow;
     var endTime = DateTime.UtcNow;
     var teams = (List<Activity>)ViewBag.Teams;
+    var currentTeams= (List<Activity>)ViewBag.CurrentTeams;
 
 
     Location location = new Location();
 
-   
+    bool loadedTeams = false;
 
 }
 
@@ -35,9 +36,10 @@
                 <a class="btn-default pull-right" href="@Url.Action("schedule", "league", new { id = Model.Uid })">
                     <i class="icon s7-back"></i>Back
                 </a>
-                <h2>
-                    Edit Game
-                </h2>
+                <div class="panel-header">
+
+                    <h3><i class="s7-edit"></i> Edit Game</h3>
+                </div>
             </div>
 
             @if (activityInstance.IsNotEmpty())
@@ -48,10 +50,7 @@
             <div>
                 <form id="form-add" action="@Url.Action("editGame", "league", new { id = Model.Uid, ai = activityInstance.ID.Value, })" method="post" class="form-horizontal">
                     <div class="panel-body">
-                        <div class="panel-header">
-
-                            <h3><i class="s7-edit"></i> Edit Game</h3>
-                        </div>
+                        
                         <div class="form">
 
                             <div class="form-group  schedule-date" id="schedule-date">
@@ -121,16 +120,20 @@
                                         <select id="teams" class="form-control select2 hide" multiple placeholder="Select Team">
 
                                             @foreach (var team in teams)
-                    {
-                        var selectedTeam = "";
-                        if (Request["teams"].IsNotBlank() && Request["teams"].Split(',').Contains(team.ID.ToString()))
-                        {
-                            selectedTeam = " selected=\"selected\" ";
-                        }
-                        <option value="team-@team.ID" @selectedTeam>
-                            @team.Name
-                        </option>
-}
+                                            {
+                                                var selectedTeam = "";
+                                                if ((Request["teams"].IsNotBlank() && Request["teams"].Split(',').Contains(team.ID.ToString())) || (currentTeams.Contains(team) && !loadedTeams))
+                                                {
+                                                    selectedTeam = " selected=\"selected\" ";
+                                                }
+                                                <option value="team-@team.ID" @selectedTeam>
+                                                    @team.Name
+                                                </option>
+                                            }
+
+                                            @{
+                                                loadedTeams = true;
+                                            }
 
                                         </select>
                                     </div>
@@ -163,7 +166,7 @@
 
     function getTeams() {
 
-        var arr = $('#team').val();
+        var arr = $('#teams').val();
         var team = '';
 
         if (!arr) return '';
@@ -202,12 +205,12 @@
         var locationtype = $('#locationtype').val();
         var locationdescription = $('#locationdescription').val();
         var locationname = $('#locationname').val();
-        return `location=${location}&address1=${address1}&address2=${address2}&city=${city}&state=${state}&postalcode=${postalcode}&locationtype=${locationtype}&locationdescription=${locationdescription}&locationname=${locationname}`;
+        return `l=${location}&address1=${address1}&address2=${address2}&city=${city}&state=${state}&postalcode=${postalcode}&locationtype=${locationtype}&locationdescription=${locationdescription}&locationname=${locationname}`;
     }
 
 
     function doSave(cmd){
-            location.href = `@Url.Action("editgame", "league")?id=@Model.Uid.ToString()&ai=@activityInstance.ID.Value.ToString()&${getDate()}&${getTime()}&${getLocation()}&${getTeams()}&cmd=${cmd}`;
+            location.href = `@Url.Action("savegame", "league")?id=@Model.Uid.ToString()&ai=@activityInstance.ID.Value.ToString()&${getDate()}&${getTime()}&${getLocation()}&${getTeams()}&cmd=${cmd}`;
     }
 
     </script>

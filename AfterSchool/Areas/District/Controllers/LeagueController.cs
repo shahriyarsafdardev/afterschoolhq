@@ -484,134 +484,199 @@ namespace AfterSchool.Areas.District.Controllers
             return View(activityGroup);
         }
 
-        [HttpGet]
-        public ActionResult EditGame(string id, string ai, string d, string t)
+        private ActivityGroup LoadEditGameViewBag(string id, string ai = null, string d = null, string t = null, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
-
-            if(ai.IsNotEmpty() && ai.IsInteger())
-            {
-                ViewBag.ActivityInstance = ActivityInstance.Load(ai.ToInteger());
-            }
+            ActivityInstance activityInstance = new ActivityInstance();
 
             var dateTime = DateTime.UtcNow;
 
-            if(d.IsNotEmpty() && d.IsDate())
+            if (d.IsNotEmpty() && d.IsDate())
             {
                 if (t.IsNotEmpty() && t.IsTime())
                 {
-                    dateTime = (d + t).ToDateTime();
-                } else
+                    dateTime = (d + " " + t).ToDateTime();
+                }
+                else
                 {
                     dateTime = d.ToDateTime();
                 }
-                
             }
 
-            ViewBag.Date = dateTime;
-            
-
-            ActivityInstance activityInstance = new ActivityInstance();
-            var location = new Location();
             if (ai.IsNotEmpty() && ai.IsInteger())
             {
-                activityInstance =  ActivityInstance.Load(ai.ToInteger());
-                if (activityInstance.LocationId.IsNotEmpty())
-                {
-                    location = Location.Load(activityInstance.LocationId.Value);
-                }
-                
+                activityInstance = ActivityInstance.Load(ai.ToInteger());
+            } else
+            {
+                var dateRange = new DateRange(dateTime, dateTime);
+                activityInstance = activityGroup.GetSchedule().AddInstance(dateRange, InstanceType.NotSet, SessionVariables.LoggedInUser.ID.Value, msgs);
+            }
+
+            var location = new Location();
+
+            if (activityInstance.LocationId.IsNotEmpty())
+            {
+                location = Location.Load(activityInstance.LocationId.Value);
             }
 
             ViewBag.ActivityInstance = activityInstance;
             ViewBag.Location = location;
+            ViewBag.Date = dateTime;
             ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
+            ViewBag.CurrentTeams = activityInstance.GetTeams();
             ViewBag.Messages = msgs;
+
+            return activityGroup;
+        }
+
+        [HttpGet]
+        public ActionResult EditGame(string id, string ai, string d, string t)
+        {
+            var msgs = new SystemMessages();
+
+            var activityGroup = LoadEditGameViewBag(id, ai, d, t, msgs);
 
             return View(activityGroup);
         }
 
-        [HttpPost]
-        public ActionResult EditGame(string id, string ai, string match, string d, string st, string et, string location, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd)
+        [HttpGet]
+        public ActionResult SaveGame(string id, string ai, string d, string st, string et, string l, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd)
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
-            var activityInstance = ActivityInstance.Load(ai.ToInteger());
+            ActivityInstance activityInstance =  new ActivityInstance();
 
+            var location = new Location();
 
-            var startDateTime = (d + st).ToDateTime();
-            var endDateTime = (d + et).ToDateTime();
-            activityInstance.StartDateTime = startDateTime;
-            activityInstance.EndDateTime = endDateTime;
+            var startDateTime = (d + " " + st).ToDateTime();
+            var endDateTime = (d + " " + et).ToDateTime();
+            var dateRange = new DateRange(startDateTime, endDateTime);
 
+            Database.ExecuteTransaction(
+                   action: (SystemMessages amsgs, DatabaseConnection adc) => {
 
-            //check if location exists
-            if (location.IsNotEmpty())
+                       //activityInstance
+                       
+
+                       if (ai.IsNotEmpty())
+                       {
+                           activityInstance = ActivityInstance.Load(ai.ToInteger());
+                       } else
+                       {
+                           activityInstance = activityGroup.GetSchedule().AddInstance(dateRange, InstanceType.InSession, SessionVariables.LoggedInUser.ID.Value, amsgs, adc);
+                       }
+
+                       activityInstance.StartDateTime = startDateTime;
+                       activityInstance.EndDateTime = endDateTime;
+
+                       if (amsgs.HasNoErrors())
+                       {
+                           amsgs.AddRange(activityInstance.Save(adc));
+                           activityInstance = activityInstance.Reload(amsgs, adc);
+                       }
+                       
+
+                       if (l.IsNotEmpty() && l.IsInteger())
+                       {
+                           location = Location.Load(l.ToInteger(), amsgs, adc);
+                       }
+
+                       //check if location exists
+                       if (location.IsEmpty())
+                       {
+                           //create a new location
+                           location = LocationService.CreateNewWithValidation
+                               (
+                                   locationname,
+                                   address1,
+                                   address2,
+                                   city,
+                                   state,
+                                   postalcode,
+                                   "USA",
+                                   (LocationType)locationtype.ToInteger(),
+                                   null,
+                                   SessionVariables.CurrentAccount,
+                                   SessionVariables.LoggedInUser,
+                                   msgs
+                                );
+                       }
+
+                       if (amsgs.HasNoErrors())
+                       {
+                           amsgs.AddRange(location.Save(adc));
+                           location = location.Reload(amsgs, adc);
+                       }
+
+                       activityInstance.LocationId = location.ID.Value;
+
+                       if (amsgs.HasNoErrors())
+                       {
+                           amsgs.AddRange(activityInstance.Save(adc));
+                           activityInstance = activityInstance.Reload(amsgs, adc);
+                       }
+
+                       var teamIds = teams.Split(',').ToList();
+                       List<Activity> listOfTeams = new List<Activity>();
+                       List<Activity> activityInstanceTeams = activityInstance.GetTeams(amsgs,adc);
+                       List<Match> matches = activityInstance.GetMatches(amsgs, adc);
+
+                       //matches
+                       foreach (var teamId in teamIds)
+                       {
+                           listOfTeams.Add(Activity.Load(teamId.ToInteger(), amsgs, adc));
+                       }
+
+                       foreach (var activity in activityInstanceTeams)
+                       {
+                           Match match = matches.Where(m => m.TeamId == activity.ID).FirstOrDefault();
+
+                           if (listOfTeams.Contains(activity))
+                           {
+                               // add match to activityInstance
+                               MatchService.CreateOrUpdate(SessionVariables.LoggedInUser, activity.ID.Value, activityInstance.ID.Value, match, match.Score.Value, match.TeamPlace.Value, amsgs, adc);
+                           }
+                           else
+                           {
+                               // remove a match from the activityInstance
+                               if (match.IsNotEmpty())
+                               {
+                                   match.Delete();
+                               }
+                           }
+                       }
+
+                   },
+                   onSuccess: (SystemMessages smsgs) => {
+                       msgs.AddRange(smsgs);
+                   },
+                   onFailure: (SystemMessages fmsgs) => {
+                       msgs.AddRange(fmsgs);
+                   }
+               );      
+
+            if (msgs.HasNoErrors())
             {
-                activityInstance.LocationId = location.ToInteger();
+                msgs.Add("Game Saved", MessageType.Success);
             }
-            else //create a new location
-            {  
-                Location newLocation = new Location()
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
                 {
-                    Address1 = address1,
-                    Address2 = address2,
-                    City = city,
-                    State = state,
-                    PostalCode = postalcode,
-                    LocationTypeId = (LocationType)locationtype.ToInteger(),
-                    Description = locationdescription,
-                    Name = locationname
-                };
-
-                activityInstance.LocationId = newLocation.ID;
-            }
-
-            var teamIds = teams.Split(',').ToList();
-            List<Activity> listOfTeams = new List<Activity>();
-
-            List<Activity> activityInstanceTeams = activityInstance.GetTeams();
-            
-
-
-            foreach(var teamId in teamIds)
-            {
-                listOfTeams.Add(Activity.Load(teamId.ToInteger()));
-            }
-            
-            foreach(var activity in activityInstanceTeams)
-            {
-                if (listOfTeams.Contains(activity)) { 
-
-                    var checkMatch = Match.LoadByTeamIdByActivityInstanceId(activity.ID.Value, activityInstance.ID.Value);
-                    if (checkMatch.IsNotEmpty())
-                    {
-                        //create new match
-
-                    ///    activityInstance.CreateMatch(activity.ID.Value);
-                    }
-                } else
-                {
-                //    activityInstance.DeleteMatch(activity.ID.Value);
+                    //save
+                    case "s":
+                        return View("schedule", activityGroup);
+                    //save and add, load viewbag with just activitygroupid and add a new activity instance
+                    case "sa":
+                        LoadEditGameViewBag(id);
+                        return View("editgame", activityGroup);
                 }
             }
 
-
-            
+            LoadEditGameViewBag(id,activityInstance.ID.Value.ToString());
             ViewBag.Messages = msgs;
-
-            switch (cmd)
-            {
-                //save
-                case "s":
-                    return View("schedule", activityGroup);
-                //save and add
-                case "sa":
-                    return View("editgame", activityGroup);
-            }
-
-            return View("schedule", activityGroup);
+            return View("editgame", activityGroup);
         }
 
     }

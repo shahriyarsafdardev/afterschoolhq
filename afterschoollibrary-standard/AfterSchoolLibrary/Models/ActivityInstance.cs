@@ -256,14 +256,22 @@ namespace AfterSchoolLibrary
 
         
 
-        public List<Match> GetMatches()
+        public List<Match> GetMatches(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Match.LoadByActivityInstanceId(this.ID.Value);
+            if (this.ID.IsNotEmpty())
+            {
+                return Match.LoadByActivityInstanceId(this.ID.Value, msgs, dc);
+            } else
+            {
+                return new List<Match>();
+            }
+
+            
         }
 
-        public List<Activity> GetTeams()
+        public List<Activity> GetTeams(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            List<Match> matches = this.GetMatches();
+            List<Match> matches = this.GetMatches(msgs, dc);
             List<Activity> teams = new List<Activity>();
 
             foreach(Match match in matches)
