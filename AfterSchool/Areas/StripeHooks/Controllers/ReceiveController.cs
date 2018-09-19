@@ -163,6 +163,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                                 registrantSubscription.PurchaseId,
                                 TransactionType.Charge,
                                 PaymentType.CreditCard,
+                                PaymentSourceType.AfterSchoolPlatform,
                                 chargeId,
                                 null,
                                 amsgs,

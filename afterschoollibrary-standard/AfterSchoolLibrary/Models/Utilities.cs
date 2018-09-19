@@ -318,6 +318,7 @@ namespace AfterSchoolLibrary
                     amsgs.AddRange(AdditionalData(adc));
                     amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
                     amsgs.AddRange(UpdateSeatIndexes(adc));
+                    amsgs.AddRange(UpdatePaymentSourceType(adc));
 
                     // amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
 
@@ -368,6 +369,19 @@ namespace AfterSchoolLibrary
                     msgs.AddRange(fmsgs);
                 }
             );            
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdatePaymentSourceType(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var transactions = Transaction.Load(criterias: new Hashtable() { { "PaymentSourceTypeId", 0 } }, msgs: msgs, dc: dc);
+
+            transactions.ForEach(transaction => {
+                transaction.PaymentSourceTypeId = PaymentSourceType.AfterSchoolPlatform;
+                msgs.AddRange(transaction.Save(dc));
+            });
 
             return msgs;
         }

@@ -302,7 +302,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Account a = SessionVariables.CurrentAccount;
             ViewBag.BillingHistory = a.GetStripeBillingHistory();
             ViewBag.RefundHistory = a.GetStripeRefundHistory();
-            ViewBag.Cards = a.GetStripeCards();
+            // ViewBag.Cards = a.GetStripeCards();
             ViewBag.Messages = new SystemMessages();
             return View(a);
         }
@@ -354,7 +354,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
 
-                    amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
+                    // amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
+
                     if (amsgs.HasNoErrors())
                         a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
 
@@ -380,7 +381,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 ViewBag.BillingHistory = a.GetStripeBillingHistory();
                 ViewBag.RefundHistory = a.GetStripeRefundHistory();
-                ViewBag.Cards = a.GetStripeCards();
+                // ViewBag.Cards = a.GetStripeCards();
                 return View("Billing", a);
             }
             else
@@ -397,8 +398,8 @@ namespace AfterSchool.Areas.Org.Controllers
             SystemMessages msgs = new SystemMessages();
 
             var a = SessionVariables.CurrentAccount;
-            msgs.AddRange(a.AddCreditCard(stripetoken, !makeprimary.IsEmpty(), SessionVariables.LoggedInUser));
-            ViewBag.Cards = a.GetStripeCards();
+            //msgs.AddRange(a.AddCreditCard(stripetoken, !makeprimary.IsEmpty(), SessionVariables.LoggedInUser));
+            //ViewBag.Cards = a.GetStripeCards();
             ViewBag.Messages = msgs;
             return View("Billing", a);
         }

@@ -83,15 +83,15 @@ namespace AfterSchoolLibrary
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, bool sendBcc)
         {
             var msgs = new SystemMessages();
-            var isAfterSchool = checkoutObject.Purchaser.IsAfterSchool;
-            var purchaserAccount = checkoutObject.Purchaser;
-            var purchaser = checkoutObject.Purchaser.GetAccountOwner(msgs);
+            var isAfterSchool = checkoutObject.PurchasingAccount.IsAfterSchool;
+            var purchaserAccount = checkoutObject.PurchasingAccount;
+            var purchaser = checkoutObject.PurchasingAccount.GetAccountOwner(msgs);
             var participationObject = checkoutObject.ParticipationObject;
             var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
             var billingAccountOwner = billingAccount.GetAccountOwner(msgs);
             var paymentPlan = checkoutObject.PaymentPlan;
             var subscription = checkoutObject.SubscriptionPlan;
-            var registrant = checkoutObject.Registrant;
+            var registrant = checkoutObject.MasterRegistrant;
             var parentOrGuardian = registrant.GetParentOrGuardian(msgs);
             var stripeAccount = billingAccount.GetStripeAccount(msgs);
             var canAccountAcceptPayments = stripeAccount.IsNotEmpty() && stripeAccount.IsVerified;

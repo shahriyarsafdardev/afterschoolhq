@@ -1332,6 +1332,7 @@ property: PlatformPercentFee, decimal?, Decimal "10,2"
 property: PlatformFlatFee, decimal?, Decimal "10,2"
 property: TransactionTypeId, TransactionType, Int, required
 property: StripeChargeOrRefundId, string, NVarChar "50"
+property: PaymentSourceTypeId, PaymentSourceType, Int
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid
@@ -1598,8 +1599,8 @@ values: NotSet, Activity, ActivityGroup, AccountActivityGroup
 
 [begin]
 type: Enum
-name: BillSourceType
-values: NotSet, RegistrantPaymentPlan, RegistrantSubscriptionPlan, ProductPurchase
+name: PaymentSourceType
+values: NotSet, AfterSchoolPlatform, Manual
 [end]
 
 [begin]
