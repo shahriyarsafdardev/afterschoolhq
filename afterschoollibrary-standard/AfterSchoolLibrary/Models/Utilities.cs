@@ -90,6 +90,12 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public static void SystemErrorLog(SystemMessages msgs)
+        {
+            Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });
+            Rollbar.RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
+        }
+
         public static string RollbarAccessToken { get { return "9d10f02799c544f5bf4c9e27e0743c54"; } }
 
         public static string GetRollbarEnvironment()
