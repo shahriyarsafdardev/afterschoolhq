@@ -53,24 +53,17 @@ namespace AfterSchoolLibrary.Services
                 transactionType, 
                 checkoutObject.PaymentType,
                 checkoutObject.PaymentSourceType,
-                checkoutObject.StripeCharge?.Id, 
+                checkoutObject.GetPlatformFlatFee(msgs, dc),
+                checkoutObject.GetPlatformPercentFee(msgs, dc),
+                checkoutObject.StripeChargeId,
                 loggedInUser, 
                 msgs, 
                 dc);
         }
 
-        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal platformFee, decimal platformPercentFee, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var platformFee = 0.ToDecimal();
-            var platformPercentFee = 0.ToDecimal();
-
-            if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
-            {
-                platformFee = billingAccount.GetPlatformFlatFee(msgs, dc);
-                platformPercentFee = billingAccount.GetPlatformPercentFee(msgs, dc);
-            }
+            if (msgs.IsEmpty()) msgs = new SystemMessages();            
 
             var transaction = new Transaction()
             {

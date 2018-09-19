@@ -132,11 +132,18 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var totalAmountInCents = ((string)stripeEvent.Data.Object.total).ToDecimal();
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
-            var masterRegistrant = registrantSubscription.GetRegistrant(msgs).GetMasterRegistrant(msgs);
-            var payingAccount = masterRegistrant.GetAccount(msgs);
-            var planOwnerAccount = plan.GetAccount(msgs);
+            var registrant = registrantSubscription.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var purchasingAccount = masterRegistrant.GetAccount(msgs);
+            var billingAccount = plan.GetAccount(msgs);
             var participationObject = plan.GetParticipationObject(msgs);
-            
+            var registrantActivity = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                participationObject.ObjectID.Value, 
+                participationObject.ObjectType, 
+                registrant.ID.Value, msgs);
+            var registration = registrantActivity.GetRegistration(msgs);
+
+
             if (msgs.HasNoErrors())
             {
                 // check if this same charge has been posted already and tracked.
@@ -145,7 +152,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 if (transaction.IsEmpty())
                 {
                     // send payment succeeded email;
-                    payingAccount.SendSubscriptionPaymentSucceeded(plan, null);
+                    purchasingAccount.SendSubscriptionPaymentSucceeded(plan, null);
 
                     // save transaction info and track payment to the activity as well.
                     Database.ExecuteTransaction
@@ -154,47 +161,31 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         {
                             var totalAmount = totalAmountInCents / 100;
 
-                            // must create a transaction first
-                            transaction = TransactionService.CreateNew(
-                                payingAccount,
-                                planOwnerAccount,
-                                totalAmount,
-                                participationObject.Name,
-                                registrantSubscription.PurchaseId,
-                                TransactionType.Charge,
-                                PaymentType.CreditCard,
-                                PaymentSourceType.AfterSchoolPlatform,
-                                chargeId,
+                            // cancel stripe subscription at end of term
+                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan &&
+                                registrantSubscription.GetPaymentCount(amsgs, adc) >= plan.TotalPeriods.Value)
+                                amsgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, billingAccount.StripeUserId));
+
+                            // manage transaction
+                            AccountService.CreatePurchaseTransactionPayment(
+                                new CheckoutObject()
+                                {
+                                    PurchasingAccount = purchasingAccount,
+                                    BillingAccount = billingAccount,
+                                    OverrideAmount = totalAmount,
+                                    ParticipationObject = participationObject,
+                                    PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                                    PaymentType = PaymentType.CreditCard,
+                                    StripeChargeId = chargeId,
+                                    SubscriptionPlan = plan,
+                                    MasterRegistrant = masterRegistrant,
+                                    NumberOfSeats = 1,
+                                    Registration = registration
+                                },
                                 null,
                                 amsgs,
-                                adc);
-
-                            // then track a payment
-                            var payment = registrantSubscription.AddPayment(transaction, totalAmount, null, amsgs, adc);
-
-                            // cancel stripe subscription at end of term
-                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && 
-                                registrantSubscription.GetPaymentCount(amsgs, adc) >= plan.TotalPeriods.Value)
-                                amsgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, planOwnerAccount.StripeUserId));
-
-                            // make sure registrant gets a reserved seat once they've paid
-                            if (msgs.HasNoErrors())
-                            {
-                                var registrant = registrantSubscription.GetRegistrant(amsgs, adc);
-
-                                var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                                    participationObject.ObjectID.Value,
-                                    participationObject.ObjectType,
-                                    registrant.ID.Value,
-                                    amsgs,
-                                    adc);
-
-                                if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
-                                    amsgs.AddRange(ra.ChangeSeatAssignment(
-                                        RegistrationAssignmentType.Reserved, 
-                                        0, 
-                                        adc));
-                            }
+                                adc
+                            );    
                         },
                         onSuccess: (SystemMessages smsgs) =>
                         {
@@ -203,6 +194,10 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         onFailure: (SystemMessages fmsgs) =>
                         {
                             msgs.AddRange(fmsgs);
+                        },
+                        onException: (SystemMessages emsgs) =>
+                        {
+                            AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
                         }
                     );
                 }
