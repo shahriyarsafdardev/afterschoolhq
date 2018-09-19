@@ -313,6 +313,10 @@ namespace AfterSchoolLibrary
                 {
                     msgs.AddRange(fmsgs);
                 },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Utilities.SystemErrorLog(emsgs);
+                },
                 dc: dc
             );
 
@@ -367,6 +371,10 @@ namespace AfterSchoolLibrary
                 onFailure: (SystemMessages fmsgs) =>
                 {
                     msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1019,6 +1027,10 @@ namespace AfterSchoolLibrary
                 onFailure: (SystemMessages fmsgs) =>
                 {
                     msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1718,6 +1730,10 @@ namespace AfterSchoolLibrary
                 {
                     msgs.AddRange(amsgs);
                 },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Utilities.SystemErrorLog(emsgs);
+                },
                 dc: dc
             );
         }
@@ -1779,6 +1795,10 @@ namespace AfterSchoolLibrary
                 onFailure: (SystemMessages amsgs) =>
                 {
                     msgs.AddRange(amsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1932,17 +1952,25 @@ namespace AfterSchoolLibrary
         {
             var accountActivityGroups = new List<AccountActivityGroup>();
 
-            Database.ExecuteTransaction(
-                   action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                       schools.ForEach(school => accountActivityGroups.Add(school.InviteSchoolToLeague(activityGroup, loggedInuser, amsgs, adc)));
-                   },
-                   onSuccess: (SystemMessages smsgs) => {
-                       msgs.AddRange(smsgs);
-                   },
-                   onFailure: (SystemMessages fmsgs) => {
-                       msgs.AddRange(fmsgs);
-                   }
-               );
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    schools.ForEach(school => accountActivityGroups.Add(school.InviteSchoolToLeague(activityGroup, loggedInuser, amsgs, adc)));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Utilities.SystemErrorLog(emsgs);
+                }
+            );
 
             return accountActivityGroups;
         }

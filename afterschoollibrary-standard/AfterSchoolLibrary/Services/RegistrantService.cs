@@ -176,7 +176,10 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasErrors())
                 return null;
- 
+
+            // have to have a purchase record
+            checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+
             var rpp = RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
                 plan,

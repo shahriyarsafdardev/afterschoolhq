@@ -76,13 +76,16 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr id="registration-fee-row">
-                                        <td>Tuition Fee</td>
-                                        <td>
-                                            <span id="fee-total-value" class="hide">@participationObject.Cost</span>
-                                            @participationObject.Cost.ToCurrency()
-                                        </td>
-                                    </tr>
+                                    @if (!participationObject.IsTuitionFree)
+                                    {
+                                        <tr id="registration-fee-row">
+                                            <td>Tuition Fee</td>
+                                            <td>
+                                                <span id="fee-total-value" class="hide">@participationObject.Cost</span>
+                                                @participationObject.Cost.ToCurrency()
+                                            </td>
+                                        </tr>
+                                    }
                                     @if (participationObject.PaymentPlans.Any())
                                     { 
                                         foreach (var plan in participationObject.PaymentPlans)
@@ -286,7 +289,11 @@
     }
 
     function getRegFee() {
-        return parseFloat($('#fee-total-value').html());
+        if (!isNaN($('#fee-total-value').html())) {
+            return parseFloat($('#fee-total-value').html());
+        } else {
+            return 0;
+        }
     }
 
     function sizePaymentBlock() {
