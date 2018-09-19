@@ -47,6 +47,7 @@ namespace AfterSchoolLibrary
 		/// </summary>
 		public TransactionType TransactionTypeId { get { return (TransactionType)MDV["TransactionTypeId"].Value; } set { MDV["TransactionTypeId"].Value = value; } }
 		public string StripeChargeOrRefundId { get { return (string)MDV["StripeChargeOrRefundId"].Value; } set { MDV["StripeChargeOrRefundId"].Value = value; } }
+		public PaymentSourceType PaymentSourceTypeId { get { return (PaymentSourceType)MDV["PaymentSourceTypeId"].Value; } set { MDV["PaymentSourceTypeId"].Value = value; } }
 		
 
         public Transaction()
@@ -56,6 +57,7 @@ namespace AfterSchoolLibrary
 			this.PaymentTypeId = PaymentType.NotSet;
 			this.Uid = Guid.NewGuid();
 			this.TransactionTypeId = TransactionType.NotSet;
+			this.PaymentSourceTypeId = PaymentSourceType.NotSet;
 			
         }
 
@@ -77,6 +79,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
 				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeChargeOrRefundId", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "PaymentSourceTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -204,6 +207,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["StripeChargeOrRefundId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PaymentSourceTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

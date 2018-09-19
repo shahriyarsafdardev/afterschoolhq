@@ -1,4 +1,5 @@
 ﻿using BasicLibrary;
+using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ namespace AfterSchoolLibrary
 {
     public class CheckoutObject
     {
-        public Registrant Registrant { get; set; }
+        public Registrant MasterRegistrant { get; set; }
         public Registration Registration { get; set; }
         public Coupon Coupon { get; set; }
         public SubscriptionPlan SubscriptionPlan { get; set; }
@@ -15,12 +16,16 @@ namespace AfterSchoolLibrary
         public string StripeToken { get; set; }
         public string SourceId { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
-        public Account Purchaser { get; set; }
+        public Account PurchasingAccount { get; set; }
+        public Account BillingAccount { get; set; }
         public int NumberOfSeats { get; set; }
         public List<Product> Products { get; set; }
         public bool SavePaymentInfo { get; set; }
         public PaymentType PaymentType { get; set; }
         public decimal? OverrideAmount { get; set; }
+        public Stripe.StripeCharge StripeCharge { get; set; }
+        public Purchase Purchase { get; set; }
+        public PaymentSourceType PaymentSourceType { get; set; }
 
         public CheckoutObject()
         {
@@ -105,6 +110,19 @@ namespace AfterSchoolLibrary
             }
 
             return total;
+        }
+
+        public void CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.Purchase.IsEmpty())
+                this.Purchase = this.Registration.GetPurchase(msgs, dc);
+
+            if (this.Purchase.IsEmpty())
+            {
+                this.Purchase = AccountService.AddPurchase(this, loggedInUser, msgs, dc);
+                this.Registration.PurchaseId = this.Purchase.ID;
+                msgs.AddRange(this.Registration.Save(dc));
+            }
         }
 
     }

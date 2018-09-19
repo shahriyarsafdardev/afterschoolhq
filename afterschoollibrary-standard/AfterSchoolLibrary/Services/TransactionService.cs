@@ -42,42 +42,53 @@ namespace AfterSchoolLibrary.Services
             return Account.Load(transaction.PayerAccountId.Value, msgs, dc);
         }
 
-        public static Transaction CreateNew(Account fromAccount, Account toAccount, CheckoutObject checkoutObject, int? purchaseId, TransactionType transactionType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return CreateNew(
-                fromAccount, 
-                toAccount, 
+                checkoutObject.PurchasingAccount, 
+                checkoutObject.BillingAccount, 
                 checkoutObject.OverrideAmount ?? checkoutObject.TuitionFee, 
                 checkoutObject.ParticipationObject.Name, 
-                purchaseId, 
+                checkoutObject.Purchase?.ID, 
                 transactionType, 
                 checkoutObject.PaymentType,
-                stripeChargeOrRefundId, 
+                checkoutObject.PaymentSourceType,
+                checkoutObject.StripeCharge?.Id, 
                 loggedInUser, 
                 msgs, 
                 dc);
         }
 
-        public static Transaction CreateNew(Account fromAccount, Account toAccount, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var platformFee = 0.ToDecimal();
+            var platformPercentFee = 0.ToDecimal();
+
+            if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
+            {
+                platformFee = billingAccount.GetPlatformFlatFee(msgs, dc);
+                platformPercentFee = billingAccount.GetPlatformPercentFee(msgs, dc);
+            }
 
             var transaction = new Transaction()
             {
                 Amount = amount,
-                BillerAccountId = toAccount.ID.Value,
+                BillerAccountId = billingAccount.ID.Value,
                 Description = $"{participationObjectName} registration",
-                PayerAccountId = fromAccount?.ID,
+                PayerAccountId = purchasingAccount?.ID,
                 PaymentTypeId = paymentType,
                 PurchaseId = purchaseId,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                PlatformFlatFee = toAccount.GetPlatformFlatFee(msgs, dc),
-                PlatformPercentFee = toAccount.GetPlatformPercentFee(msgs, dc),
+                PlatformFlatFee = platformFee,
+                PlatformPercentFee = platformPercentFee,
                 StripeChargeOrRefundId = stripeChargeOrRefundId,
-                TransactionTypeId = transactionType
+                TransactionTypeId = transactionType,
+                PaymentSourceTypeId = paymentSourceType
             };
             msgs.AddRange(transaction.Save(dc));
 

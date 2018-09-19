@@ -1296,19 +1296,19 @@ namespace AfterSchool.Areas.Org.Controllers
                 // so we may not have a purchaser account
                 var purchaserAccount = masterRegistrant?.GetAccount(msgs);                
 
-                SessionVariables.CurrentAccount.CreatePurchaseTransactionPayment(
-                    fromAccount: purchaserAccount,
+                AccountService.CreatePurchaseTransactionPayment(
                     checkoutObject: new CheckoutObject()
                     {
+                        BillingAccount = SessionVariables.CurrentAccount,
+                        PurchasingAccount = purchaserAccount,
                         NumberOfSeats = 1,
                         ParticipationObject = ra.GetParticipationObject(msgs),
                         Registration = ra.GetRegistration(msgs),
-                        Purchaser = purchaserAccount,
+                        MasterRegistrant = masterRegistrant,
                         PaymentType = (PaymentType)paymenttype.ToInteger(),
-                        Registrant = masterRegistrant,
+                        PaymentSourceType = PaymentSourceType.Manual,
                         OverrideAmount = amountpaid.ToDecimal()
                     },
-                    stripeCharge: null,
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs
                     );  
