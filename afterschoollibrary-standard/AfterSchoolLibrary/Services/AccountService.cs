@@ -1756,7 +1756,7 @@ namespace AfterSchoolLibrary
                         dc: adc);
 
                     // process payment by to account, includes tuition fee
-                    if (!checkoutObject.ParticipationObject.IsTuitionFree)
+                    if (!checkoutObject.ParticipationObject.IsTuitionFree && checkoutObject.PaymentPlan.IsEmpty())
                         AccountService.ProcessTuitionFee(checkoutObject, loggedInUser, amsgs, adc);
 
                     // Process Subscriptions separately, don't charge all at once for the tuition Fee
