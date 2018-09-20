@@ -73,10 +73,12 @@ namespace AfterSchoolLibrary.Services
                             };
                         }
 
-                        match.TeamId = teamPlace;
+                        match.TeamId = teamId;
                         match.ActivityInstanceId = activityInstanceId;
                         match.LastModifiedDate = DateTime.UtcNow;
                         match.LastModifiedBy = currentUser.ID.Value;
+                        match.TeamPlace = teamPlace;
+                        match.Score = score;
 
                         msgs.AddRange(match.Save(adc));
                     }

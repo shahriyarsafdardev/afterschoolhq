@@ -351,6 +351,7 @@ namespace AfterSchool.Areas.District.Controllers
                 schedule = ActivitySchedule.GetNewDefaultSchedule();
             }
 
+            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Schedule = schedule;
             ViewBag.ActivityInstances = schedule.GetInstances();
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
@@ -506,6 +507,7 @@ namespace AfterSchool.Areas.District.Controllers
             if (ai.IsNotEmpty() && ai.IsInteger())
             {
                 activityInstance = ActivityInstance.Load(ai.ToInteger());
+                dateTime = activityInstance.StartDateTime.Value;
             } else
             {
                 var dateRange = new DateRange(dateTime, dateTime);
@@ -524,6 +526,7 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.Date = dateTime;
             ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.CurrentTeams = activityInstance.GetTeams();
+            ViewBag.CurrentAccount = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
 
             return activityGroup;
@@ -582,7 +585,7 @@ namespace AfterSchool.Areas.District.Controllers
                        }
 
                        //check if location exists
-                       if (location.IsEmpty())
+                       if (location.ID.IsEmpty())
                        {
                            //create a new location
                            location = LocationService.CreateNewWithValidation
@@ -598,7 +601,8 @@ namespace AfterSchool.Areas.District.Controllers
                                    null,
                                    SessionVariables.CurrentAccount,
                                    SessionVariables.LoggedInUser,
-                                   msgs
+                                   amsgs,
+                                   adc
                                 );
                        }
 
@@ -617,32 +621,37 @@ namespace AfterSchool.Areas.District.Controllers
                        }
 
                        var teamIds = teams.Split(',').ToList();
-                       List<Activity> listOfTeams = new List<Activity>();
+                       List<Activity> selectedTeams = new List<Activity>();
                        List<Activity> activityInstanceTeams = activityInstance.GetTeams(amsgs,adc);
                        List<Match> matches = activityInstance.GetMatches(amsgs, adc);
 
                        //matches
                        foreach (var teamId in teamIds)
                        {
-                           listOfTeams.Add(Activity.Load(teamId.ToInteger(), amsgs, adc));
+                           selectedTeams.Add(Activity.Load(teamId.ToInteger(), amsgs, adc));
                        }
 
                        foreach (var activity in activityInstanceTeams)
                        {
                            Match match = matches.Where(m => m.TeamId == activity.ID).FirstOrDefault();
 
-                           if (listOfTeams.Contains(activity))
-                           {
-                               // add match to activityInstance
-                               MatchService.CreateOrUpdate(SessionVariables.LoggedInUser, activity.ID.Value, activityInstance.ID.Value, match, match.Score.Value, match.TeamPlace.Value, amsgs, adc);
-                           }
-                           else
+                           if (!selectedTeams.Contains(activity))
                            {
                                // remove a match from the activityInstance
                                if (match.IsNotEmpty())
                                {
                                    match.Delete();
+ 
                                }
+                           }
+                       }
+
+                       foreach(var selectedTeam in selectedTeams)
+                       {
+                           //create new match
+                           if (!activityInstanceTeams.Contains(selectedTeam))
+                           {
+                               MatchService.CreateOrUpdate(SessionVariables.LoggedInUser, selectedTeam.ID.Value, activityInstance.ID.Value,null, 0, 0, amsgs, adc);
                            }
                        }
 
@@ -666,10 +675,13 @@ namespace AfterSchool.Areas.District.Controllers
                 {
                     //save
                     case "s":
+                        LoadEditScheduleViewBag(activityGroup, activityGroup.ActivityScheduleId.ToString());
+                        ViewBag.Messages = msgs;
                         return View("schedule", activityGroup);
                     //save and add, load viewbag with just activitygroupid and add a new activity instance
                     case "sa":
-                        LoadEditGameViewBag(id);
+                        LoadEditGameViewBag(id,null,d,st);
+                        ViewBag.Messages = msgs;
                         return View("editgame", activityGroup);
                 }
             }

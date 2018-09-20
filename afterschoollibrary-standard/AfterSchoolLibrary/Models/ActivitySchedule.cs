@@ -376,8 +376,10 @@ namespace AfterSchoolLibrary
             return AddInstance(dateRange.StartDate, dateRange.EndDate, instanceType, loggedInUserId, msgs, dc);
         }
 
-        public ActivityInstance AddInstance(DateTime startDateTime, DateTime endDateTime, InstanceType instanceType, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public ActivityInstance AddInstance(DateTime startDateTime, DateTime endDateTime, InstanceType instanceType, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            msgs = msgs ?? new SystemMessages();
+
             var instance = new ActivityInstance();
             instance.ActivityScheduleId = this.ID;
             instance.StartDateTime = startDateTime;
