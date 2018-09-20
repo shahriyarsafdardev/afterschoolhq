@@ -180,7 +180,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                                     SubscriptionPlan = plan,
                                     MasterRegistrant = masterRegistrant,
                                     NumberOfSeats = 1,
-                                    Registration = registration
+                                    Registration = registration,
+                                    RegistrantSubscriptionPlan = registrantSubscription
                                 },
                                 null,
                                 amsgs,

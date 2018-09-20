@@ -26,6 +26,7 @@ namespace AfterSchoolLibrary
         public string StripeChargeId { get; set; }
         public Purchase Purchase { get; set; }
         public PaymentSourceType PaymentSourceType { get; set; }
+        public RegistrantSubscriptionPlan RegistrantSubscriptionPlan { get; set; }
 
         public CheckoutObject()
         {
@@ -130,7 +131,7 @@ namespace AfterSchoolLibrary
 
         public decimal GetPlatformFlatFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!IsTuitionFree && PaymentSourceType == PaymentSourceType.AfterSchoolPlatform)
+            if (!IsTuitionFree && RegistrantSubscriptionPlan.IsEmpty() && PaymentSourceType == PaymentSourceType.AfterSchoolPlatform)
                 return BillingAccount.GetPlatformFlatFee(msgs, dc);
 
             return 0;
