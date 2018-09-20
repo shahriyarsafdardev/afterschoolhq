@@ -651,9 +651,11 @@ property: Amount, decimal?, Money
 property: ParticipationObjectTypeId, ParticipationObjectType, Int, required
 property: ParticipationObjectId, int?, Int, required
 property: TransactionId, int?, Int
+property: RegistrantSubscriptionPlanId, int?, Int
 loadmethod: ActivityId, List<>
 loadmethod: AccountId, List<>
 loadmethod: RegistrantId, List<>
+loadmethod: RegistrantSubscriptionPlanId, List<>
 loadmethod: Uid
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId, List<>, LoadByParticipationObject
 loadmethod: ParticipationObjectId|ParticipationObjectTypeId|RegistrantId, List<>, LoadByParticipationObjectByRegistrant

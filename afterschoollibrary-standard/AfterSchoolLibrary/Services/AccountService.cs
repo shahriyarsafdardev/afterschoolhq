@@ -1677,6 +1677,7 @@ namespace AfterSchoolLibrary
                 amount: amountPaid,
                 registrant: registrant,
                 transaction: transaction,
+                registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);

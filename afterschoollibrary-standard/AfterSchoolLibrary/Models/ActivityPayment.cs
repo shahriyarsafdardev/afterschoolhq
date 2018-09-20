@@ -38,6 +38,7 @@ namespace AfterSchoolLibrary
 		/// </summary>
 		public int? ParticipationObjectId { get { return (int?)MDV["ParticipationObjectId"].Value; } set { MDV["ParticipationObjectId"].Value = value; } }
 		public int? TransactionId { get { return (int?)MDV["TransactionId"].Value; } set { MDV["TransactionId"].Value = value; } }
+		public int? RegistrantSubscriptionPlanId { get { return (int?)MDV["RegistrantSubscriptionPlanId"].Value; } set { MDV["RegistrantSubscriptionPlanId"].Value = value; } }
 		
 
         public ActivityPayment()
@@ -64,6 +65,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ParticipationObjectTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ParticipationObjectId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TransactionId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RegistrantSubscriptionPlanId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -177,6 +179,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["TransactionId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RegistrantSubscriptionPlanId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -208,6 +214,14 @@ namespace AfterSchoolLibrary
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<ActivityPayment> LoadByRegistrantSubscriptionPlanId(int RegistrantSubscriptionPlanId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["RegistrantSubscriptionPlanId"], RegistrantSubscriptionPlanId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
