@@ -22,6 +22,9 @@ namespace AfterSchoolLibrary
         public List<Product> Products { get; set; }
         public bool SavePaymentInfo { get; set; }
         public PaymentType PaymentType { get; set; }
+        /// <summary>
+        /// override will sometimes be the manual payment or the subscription payment
+        /// </summary>
         public decimal? OverrideAmount { get; set; }
         public string StripeChargeId { get; set; }
         public Purchase Purchase { get; set; }
@@ -72,7 +75,9 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue ? ParticipationObject.Cost.Value * NumberOfSeats : 0;
+                return ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue ? 
+                    ParticipationObject.Cost.Value * NumberOfSeats : 
+                    0;
             }
         }
 

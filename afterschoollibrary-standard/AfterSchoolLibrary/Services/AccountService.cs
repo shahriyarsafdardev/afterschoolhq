@@ -1665,8 +1665,9 @@ namespace AfterSchoolLibrary
                 msgs,
                 dc);
 
-            // TODO: this is problematic
-            var amountPaid = checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats;
+            // TODO: this is problematic, but a little better now
+            // you really don't know this is the amount paid, but it works for now
+            var amountPaid = checkoutObject.TuitionFee;
 
             if (checkoutObject.OverrideAmount.HasValue)
                 amountPaid = checkoutObject.OverrideAmount.Value;

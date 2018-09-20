@@ -92,18 +92,18 @@
 
         <div class="form-group">
             <div class="row">
-                <label class="col-sm-3 control-label">Allow Payment Plan</label>
+                <label class="col-sm-3 control-label">Tuition Payment Plan</label>
                 <div class="col-sm-1">
                     @{Html.RenderPartial
-                  (
-                      "~/Views/Shared/_SwitchButton.cshtml",
-                      Model.HasPaymentPlan(),
-                      new ViewDataDictionary()
-                      {
-                            { "checkboxname", "haspaymentplan" },
-                            { "checkboxid", "haspaymentplan" }
-                      }
-                  );
+                      (
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.HasPaymentPlan(),
+                          new ViewDataDictionary()
+                          {
+                                { "checkboxname", "haspaymentplan" },
+                                { "checkboxid", "haspaymentplan" }
+                          }
+                      );
                     }
                 </div>
             </div>
