@@ -188,6 +188,43 @@ Namespace DataAccess
             ThrowExceptions = False
         End Sub
 
+        Public Function ExecuteSql(ByVal sql As String) As SystemMessages
+            Dim msgs As New SystemMessages()
+            Dim closeConnection As Boolean
+
+            If Connection Is Nothing Then
+                Connection = New DatabaseConnection(BasicLibrary.Utilities.ConnectionString)
+                isSelfCreatedConnection = True
+            End If
+
+            closeConnection = Not Connection.IsOpen
+
+            Connection.Open()
+            Connection.CreateSqlCommand(sql.ToString)
+            If Timeout.HasValue Then
+                Connection.GetSqlCommand.CommandTimeout = Timeout.Value
+            End If
+
+            Try
+                Connection.GetSqlCommand.ExecuteNonQuery()
+            Catch ex As Exception
+                If ThrowExceptions Then
+                    Throw ex
+                Else
+                    msgs.Add(ex.Message, MessageType.Error, ex)
+                End If
+            Finally
+                If closeConnection Then
+                    Connection.Close()
+                    If isSelfCreatedConnection Then
+                        Connection.Dispose()
+                    End If
+                End If
+            End Try
+
+            Return msgs
+        End Function
+
         Public Function CreateDatabase(ByVal databaseDirectory As String, ByVal databaseName As String) As SystemMessages
             Dim msgs As New SystemMessages()
             Dim closeConnection As Boolean
