@@ -1665,8 +1665,9 @@ namespace AfterSchoolLibrary
                 msgs,
                 dc);
 
-            // TODO: this is problematic
-            var amountPaid = checkoutObject.ParticipationObject.Cost.Value * checkoutObject.NumberOfSeats;
+            // TODO: this is problematic, but a little better now
+            // you really don't know this is the amount paid, but it works for now
+            var amountPaid = checkoutObject.TuitionFee;
 
             if (checkoutObject.OverrideAmount.HasValue)
                 amountPaid = checkoutObject.OverrideAmount.Value;
@@ -1768,27 +1769,23 @@ namespace AfterSchoolLibrary
                     // if they have a subscription plan
                     // will also process tuition fees
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
-                    {
-                        var rpp = accountRegistrant.StartSubscriptionPlan(
+                        accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
                             subscriptionPlanType: SubscriptionPlanType.Subscription,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
-                    }
 
                     // if they have a payment plan
                     if (checkoutObject.PaymentPlan.IsNotEmpty())
-                    {
-                        var rpp = accountRegistrant.StartSubscriptionPlan(
+                        accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
                             subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
-                            dc: adc);
-                    }                    
+                            dc: adc);    
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

@@ -141,7 +141,7 @@ namespace AfterSchoolLibrary.Services
         }
 
 
-        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -175,12 +175,12 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs);
 
             if (msgs.HasErrors())
-                return null;
+                return;
 
             // have to have a purchase record
             checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
 
-            var rpp = RegistrantSubscriptionPlanService.CreateNew(
+            checkoutObject.RegistrantSubscriptionPlan = RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
                 plan,
                 startDateTime.IfEmpty(DateTime.UtcNow),
@@ -189,8 +189,6 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
-
-            return rpp;
         }
         
     }

@@ -22,10 +22,14 @@ namespace AfterSchoolLibrary
         public List<Product> Products { get; set; }
         public bool SavePaymentInfo { get; set; }
         public PaymentType PaymentType { get; set; }
+        /// <summary>
+        /// override will sometimes be the manual payment or the subscription payment
+        /// </summary>
         public decimal? OverrideAmount { get; set; }
         public string StripeChargeId { get; set; }
         public Purchase Purchase { get; set; }
         public PaymentSourceType PaymentSourceType { get; set; }
+        public RegistrantSubscriptionPlan RegistrantSubscriptionPlan { get; set; }
 
         public CheckoutObject()
         {
@@ -71,7 +75,9 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue ? ParticipationObject.Cost.Value * NumberOfSeats : 0;
+                return ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue ? 
+                    ParticipationObject.Cost.Value * NumberOfSeats : 
+                    0;
             }
         }
 
@@ -130,7 +136,7 @@ namespace AfterSchoolLibrary
 
         public decimal GetPlatformFlatFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!IsTuitionFree && PaymentSourceType == PaymentSourceType.AfterSchoolPlatform)
+            if (!IsTuitionFree && RegistrantSubscriptionPlan.IsEmpty() && PaymentSourceType == PaymentSourceType.AfterSchoolPlatform)
                 return BillingAccount.GetPlatformFlatFee(msgs, dc);
 
             return 0;
