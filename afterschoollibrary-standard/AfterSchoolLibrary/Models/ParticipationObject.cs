@@ -402,7 +402,7 @@ namespace AfterSchoolLibrary
                 dc);
         }
 
-        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var payment = new ActivityPayment()
             {
@@ -412,6 +412,7 @@ namespace AfterSchoolLibrary
                 RegistrantId = registrant.ID,
                 AccountId = this.OwnerAccount.ID,
                 TransactionId = transaction.ID,
+                RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
