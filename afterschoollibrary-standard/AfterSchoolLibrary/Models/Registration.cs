@@ -39,6 +39,7 @@ namespace AfterSchoolLibrary
 		public int? FirstRegistrationId { get { return (int?)MDV["FirstRegistrationId"].Value; } set { MDV["FirstRegistrationId"].Value = value; } }
 		public string ESignature { get { return (string)MDV["ESignature"].Value; } set { MDV["ESignature"].Value = value; } }
 		public RegistrationCompletionStatus CompletionStatusId { get { return (RegistrationCompletionStatus)MDV["CompletionStatusId"].Value; } set { MDV["CompletionStatusId"].Value = value; } }
+		public int? PurchaseId { get { return (int?)MDV["PurchaseId"].Value; } set { MDV["PurchaseId"].Value = value; } }
 		public string RegistrantEmail { get { return (string)MDV["RegistrantEmail"].Value; } }
 		public string RegistrantFirstName { get { return (string)MDV["RegistrantFirstName"].Value; } }
 		public string RegistrantLastName { get { return (string)MDV["RegistrantLastName"].Value; } }
@@ -80,6 +81,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "FirstRegistrationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ESignature", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "CompletionStatusId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PurchaseId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", System.Data.SqlDbType.NVarChar, "Registrant");
 				_dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", System.Data.SqlDbType.NVarChar, "Registrant");
@@ -223,6 +225,10 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["CompletionStatusId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PurchaseId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -1167,6 +1173,14 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
+        public Purchase GetPurchase(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.PurchaseId.HasValue)
+                return Purchase.Load(this.PurchaseId.Value, msgs, dc);
+
+            return null;
+        }
+
         #region CSVReport
 
         public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, RegistrationAssignmentType rat, string uiActivityLabel, string emails, string subject, string body)
@@ -1947,7 +1961,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public SystemMessages FinalizeRegistration(WebUser loggedInUser, DatabaseConnection dc = null)
+        public SystemMessages SetRegistrationToCompleted(WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
 
@@ -2016,11 +2030,20 @@ namespace AfterSchoolLibrary
             // if they're paying for a registration they already completed
             if (isPendingOrReserved)
                 return RegistrationAssignmentType.Reserved;
-            
+
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
+            // if there is room
             else if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
+            {
+                // if the person didn't pay yet
+                if (!participationObject.IsFree && 
+                    (ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal()))
+                    return RegistrationAssignmentType.ReservedPendingPayment;
+
                 return RegistrationAssignmentType.Reserved;
+            }
+            // if there aren't any more seats available, but there's a waiting list
             else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
                 return RegistrationAssignmentType.WaitingList;
 
@@ -2031,9 +2054,9 @@ namespace AfterSchoolLibrary
             return RegistrationAssignmentType.NotSet;
         }
 
-        public static void ProcessRegistration(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            ProcessRegistration(
+            ProcessRegistrationAssignment(
                 checkoutObject.Registration,
                 checkoutObject.ParticipationObject,
                 checkoutObject.Registration.GetRegistrant(msgs, dc),
@@ -2045,9 +2068,10 @@ namespace AfterSchoolLibrary
                 dc);
         }
 
-        public static void ProcessRegistration(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            //var participationObject = checkoutObject.ParticipationObject;
+            // NOTE: getting only one activity per registration at the moment, 
+            // but could be problem in the future
             var ra = registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
             var assignmentType = Registration.ProcessRegistrationSeats(participationObject, seatsRequested, ra, msgs, dc);
 

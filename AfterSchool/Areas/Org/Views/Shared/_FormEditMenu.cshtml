@@ -15,7 +15,7 @@
     {
         if (questionGroups[i].GetQuestionCount() == 0)
         {
-            continue;
+            // continue;
         }
         var active = "";
         if (questionGroupId == questionGroups[i].ID)
@@ -26,7 +26,7 @@
         <li data-id="@(i + 1)" class="dd-item">
             <div class="dd-handle @active">
                 &nbsp;&nbsp;&nbsp;&nbsp;
-                <a href="@Url.Action("edit", "form", new { id = Model.ID.ToString(), qg = questionGroups[i].ID.ToString() })">
+                <a href="@Url.Action("formedit", "account", new { id = Model.ID.ToString(), qg = questionGroups[i].ID.ToString() })">
                     @questionGroups[i].Name.IfBlank("-")
                 </a>
             </div>

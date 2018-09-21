@@ -228,14 +228,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var ratTo = RegistrationAssignmentType.NotSet;
 
             if (to.IsNotEmpty())
-            {
                 ratTo = (RegistrationAssignmentType)to.ToInteger();
-            }
 
             if(ratTo != RegistrationAssignmentType.NotSet)
-            {
-                msgs.AddRange(registrantActivity.ChangeSeatAssignment(ratTo));
-            }
+                msgs.AddRange(registrantActivity.ChangeSeatAssignment(ratTo, SessionVariables.LoggedInUser.ID.Value));
 
             if (msgs.HasNoErrors())
             {

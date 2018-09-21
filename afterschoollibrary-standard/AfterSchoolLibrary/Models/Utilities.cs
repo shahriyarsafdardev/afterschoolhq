@@ -90,6 +90,12 @@ namespace AfterSchoolLibrary
             }
         }
 
+        public static void SystemErrorLog(SystemMessages msgs)
+        {
+            Rollbar.RollbarLocator.RollbarInstance.Configure(new Rollbar.RollbarConfig(RollbarAccessToken) { Environment = GetRollbarEnvironment() });
+            Rollbar.RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
+        }
+
         public static string RollbarAccessToken { get { return "9d10f02799c544f5bf4c9e27e0743c54"; } }
 
         public static string GetRollbarEnvironment()
@@ -316,8 +322,11 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
+                    amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
+                    amsgs.AddRange(UpdateSeatIndexes(adc));
+                    amsgs.AddRange(UpdatePaymentSourceType(adc));
 
-                    amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
+                    // amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
 
                     // amsgs.AddRange(DefaultTransactionTypes(adc));
 
@@ -366,6 +375,110 @@ namespace AfterSchoolLibrary
                     msgs.AddRange(fmsgs);
                 }
             );            
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdatePaymentSourceType(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var transactions = Transaction.Load(criterias: new Hashtable() { { "PaymentSourceTypeId", 0 } }, msgs: msgs, dc: dc);
+
+            transactions.ForEach(transaction => {
+                transaction.PaymentSourceTypeId = PaymentSourceType.AfterSchoolPlatform;
+                msgs.AddRange(transaction.Save(dc));
+            });
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateSeatIndexes(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var ras = RegistrantActivity.Load(msgs: msgs, dc: dc)
+                .Where(ra => 
+                    ra.AssignmentTypeId == RegistrationAssignmentType.Applied || 
+                    ra.AssignmentTypeId == RegistrationAssignmentType.WaitingList
+                )
+                .ToList();
+
+            ras.ForEach(ra => {
+                switch(ra.AssignmentTypeId)
+                {
+                    case RegistrationAssignmentType.Applied:
+                        if (ra.ApplicationSeatIndex.HasValue)
+                        {
+                            ra.SeatIndex = ra.ApplicationSeatIndex;
+                            ra.ApplicationSeatIndex = null;
+                            msgs.AddRange(ra.Save(dc));
+                        }
+                        break;
+                    case RegistrationAssignmentType.WaitingList:
+                        if (ra.WaitingListSeatIndex.HasValue)
+                        {
+                            ra.SeatIndex = ra.WaitingListSeatIndex;
+                            ra.WaitingListSeatIndex = null;
+                            msgs.AddRange(ra.Save(dc));
+                        }
+                        break;
+                }
+            });
+
+            return msgs;
+        }
+
+        public static SystemMessages UpdateActivityPaymentWithTransactionIds(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            var transactions = Transaction.Load(msgs: msgs, dc: dc);
+
+            transactions.ForEach(transaction => {
+                if (transaction.PurchaseId.HasValue)
+                {
+                    var purchase = Purchase.Load(transaction.PurchaseId.Value, msgs, dc);
+
+                    if (purchase.IsNotEmpty() && purchase.RegistrantId.HasValue)
+                    {
+                        var registrant = Registrant.Load(purchase.RegistrantId.Value, msgs, dc);
+
+                        if (registrant.IsNotEmpty())
+                        {
+                            var childRegistrants = registrant.GetChildren(msgs, dc);
+
+                            childRegistrants.ForEach(child => {
+                                var activityIds = RegistrantActivity.LoadByRegistrantId(child.ID.Value, msgs, dc)
+                                    .Where(ra => 
+                                        ra.RegistrationId.HasValue &&
+                                        ra.RegistrationId.Value == purchase.RegistrationId.Value && 
+                                        ra.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+                                    .Select(ra => ra.ParticipationObjectId.Value)
+                                    .ToList();
+
+                                activityIds.ForEach(activityId =>
+                                {
+                                    var payments = ActivityPayment.LoadByParticipationObjectByRegistrant(
+                                        activityId, 
+                                        ParticipationObjectType.Activity, 
+                                        child.ID.Value,
+                                        msgs, 
+                                        dc);
+
+                                    payments.Where(payment => !payment.TransactionId.HasValue)
+                                        .ToList()
+                                        .ForEach(payment =>
+                                        {
+                                            payment.TransactionId = transaction.ID;
+                                            msgs.AddRange(payment.Save(dc));
+                                        });
+
+                                });
+                            });
+                            
+                        }
+                    }
+                }
+            });
 
             return msgs;
         }
@@ -429,50 +542,50 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages UpdateRegistrantActivityParticipationObjects(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
+        //public static SystemMessages UpdateRegistrantActivityParticipationObjects(DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
 
-            var registrantActivities = RegistrantActivity.Load(
-                criterias: new Hashtable() { { "ParticipationObjectId", DBNull.Value } },
-                msgs: msgs,
-                dc: dc);
+        //    var registrantActivities = RegistrantActivity.Load(
+        //        criterias: new Hashtable() { { "ParticipationObjectId", DBNull.Value } },
+        //        msgs: msgs,
+        //        dc: dc);
 
-            registrantActivities.ForEach(registrantActivity => {
-                registrantActivity.ParticipationObjectId = registrantActivity.ActivityId;
-                registrantActivity.ParticipationObjectTypeId = ParticipationObjectType.Activity;
-                msgs.AddRange(registrantActivity.Save(dc));
-            });
+        //    registrantActivities.ForEach(registrantActivity => {
+        //        registrantActivity.ParticipationObjectId = registrantActivity.ActivityId;
+        //        registrantActivity.ParticipationObjectTypeId = ParticipationObjectType.Activity;
+        //        msgs.AddRange(registrantActivity.Save(dc));
+        //    });
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
-        public static SystemMessages UpdateAssignmentType(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
+        //public static SystemMessages UpdateAssignmentType(DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
 
-            var registrantActivities = RegistrantActivity.Load(
-                criterias: new Hashtable() { { "AssignmentTypeId", (int)RegistrationAssignmentType.NotSet } },
-                msgs: msgs,
-                dc: dc);
+        //    var registrantActivities = RegistrantActivity.Load(
+        //        criterias: new Hashtable() { { "AssignmentTypeId", (int)RegistrationAssignmentType.NotSet } },
+        //        msgs: msgs,
+        //        dc: dc);
 
-            registrantActivities.ForEach(registrantActivity => {
-                if (registrantActivity.NumberOfSeats > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Reserved;
-                else if (registrantActivity.NumberOfWaitingListSeats > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.WaitingList;
-                else if (registrantActivity.NumberOfApplicationSeats > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Applied;
-                else if (registrantActivity.NumberOfInvitationSeats > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Invited;
-                else if (registrantActivity.NumberOfSeatsDeclined > 0)
-                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Declined;
+        //    registrantActivities.ForEach(registrantActivity => {
+        //        if (registrantActivity.NumberOfSeats > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Reserved;
+        //        else if (registrantActivity.NumberOfWaitingListSeats > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.WaitingList;
+        //        else if (registrantActivity.NumberOfApplicationSeats > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Applied;
+        //        else if (registrantActivity.NumberOfInvitationSeats > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Invited;
+        //        else if (registrantActivity.NumberOfSeatsDeclined > 0)
+        //            registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Declined;
 
-                msgs.AddRange(registrantActivity.Save(dc));
-            });
+        //        msgs.AddRange(registrantActivity.Save(dc));
+        //    });
 
-            return msgs;
-        }
+        //    return msgs;
+        //}
 
         public static SystemMessages UpdateTransactions(DatabaseConnection dc = null)
         {

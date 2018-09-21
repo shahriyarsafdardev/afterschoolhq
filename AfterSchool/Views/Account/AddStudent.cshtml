@@ -53,7 +53,13 @@
                             Html.RenderPartial(
                                "~/Views/Shared/_LocationEdit.cshtml",
                                school ?? new Location(),
-                               new ViewDataDictionary() { { "label", "Enter your school" }, { "searchOnly", true }, { "placeholderText", "Enter your school name" } });
+                               new ViewDataDictionary()
+                               {
+                                   { "label", "Enter your school" },
+                                   { "searchOnly", true },
+                                   { "placeholderText", "Enter your school name" }
+                               }
+                            );
                         }
 
                         <div class="padding-v-20">

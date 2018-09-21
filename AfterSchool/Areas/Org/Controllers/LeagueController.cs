@@ -789,7 +789,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         });
 
                         // manages seats and create registrantactivity record
-                        Registration.ProcessRegistration(
+                        Registration.ProcessRegistrationAssignment(
                             registration: registration,
                             participationObject: aag.ToParticipationObject(amsgs, adc),
                             registrant: student,

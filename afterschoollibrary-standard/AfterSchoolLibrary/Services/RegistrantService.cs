@@ -141,61 +141,25 @@ namespace AfterSchoolLibrary.Services
         }
 
 
-        public static RegistrantSubscriptionPlan StartSubscriptionPlan(this Registrant registrant, Account fromAccount, Account toAccount, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            Stripe.StripeCharge stripeCharge = null;
-
-            // process registration fee if one exists and it has a subscription
-            if (!checkoutObject.ParticipationObject.IsFree)
-            {
-                // create source for new card to charge             
-                if (checkoutObject.StripeToken.IsNotBlank())
-                    checkoutObject.SourceId = fromAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
-
-                // create charge for card
-                if (msgs.HasNoErrors())
-                    stripeCharge = fromAccount.CreateStripeChargeDuringCheckout(toAccount, checkoutObject, msgs, dc);
-            }
-
-            if (msgs.HasErrors())
-                return null;
-
-            // need to create a purchase record first
-            var purchase = fromAccount.AddPurchase(checkoutObject, loggedInUser, msgs, dc);
-
-            // need to create a transaction if there's a registration fee
-            // need to create an activity payment if there's a registration fee
-            if (!checkoutObject.ParticipationObject.IsFree)
-            {
-                fromAccount.AddTransaction(toAccount, purchase, checkoutObject, TransactionType.Charge, stripeCharge?.Id, loggedInUser, msgs, dc);
-
-                if (checkoutObject.ParticipationObject.ObjectType == ParticipationObjectType.Activity)
-                {
-                    // TODO: How much does a user pay for an activity if a coupon is used to purchase multiple activities at once?
-                    var activity = (Activity)checkoutObject.ParticipationObject.Object;
-                    var payment = activity.AddPayment(
-                        amount: activity.CostPerRegistrant.Value * checkoutObject.NumberOfSeats,
-                        registrant: checkoutObject.Registration.GetRegistrant(msgs, dc),
-                        loggedInUser: loggedInUser,
-                        msgs: msgs,
-                        dc: dc);
-                }
-            }
-
-            if (msgs.HasErrors())
-                return null;
+            var billingAccount = checkoutObject.BillingAccount;
+            var purchasingAccount = checkoutObject.PurchasingAccount;
 
             // have to copy the source from the platform to be able to move it to the stripe connected account
-            var copiedSourceId = fromAccount.CopyStripeSourceToAccount(toAccount, checkoutObject.StripeToken, msgs);
+            var copiedSourceId = purchasingAccount.CopyStripeSourceToAccount(
+                billingAccount, 
+                checkoutObject.StripeToken, 
+                msgs);
 
             // create the customer on the connected account
             var accountCustomer = Billing.StripeHelper.CreateCustomer(
-                description: fromAccount.Name,
-                email: fromAccount.Email,         
+                description: purchasingAccount.Name,
+                email: purchasingAccount.Email,         
                 sourceId: copiedSourceId,
-                stripeAccountId: toAccount.StripeUserId,
+                stripeAccountId: billingAccount.StripeUserId,
                 msgs: msgs);
 
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
@@ -205,25 +169,26 @@ namespace AfterSchoolLibrary.Services
                 customerId: accountCustomer.Id,
                 planId: plan.StripePlanId,
                 sourceId: copiedSourceId,
-                platformFeePercent: toAccount.GetPlatformPercentFee(msgs, dc),
+                platformFeePercent: billingAccount.GetPlatformPercentFee(msgs, dc),
                 trialEndDate: null,
-                stripeAccountId: toAccount.StripeUserId,
+                stripeAccountId: billingAccount.StripeUserId,
                 msgs: msgs);
 
             if (msgs.HasErrors())
-                return null;
- 
-            var rpp = RegistrantSubscriptionPlanService.CreateNew(
+                return;
+
+            // have to have a purchase record
+            checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+
+            checkoutObject.RegistrantSubscriptionPlan = RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
                 plan,
                 startDateTime.IfEmpty(DateTime.UtcNow),
-                purchase.ID,
+                checkoutObject.Purchase.ID,
                 subscription.Id,
                 loggedInUser,
                 msgs,
                 dc);
-
-            return rpp;
         }
         
     }

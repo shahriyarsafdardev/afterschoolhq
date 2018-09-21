@@ -1143,9 +1143,7 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
-
-            var stripeAccount = participationObject.OwnerAccount.GetStripeAccount(msgs);
-            var canAcceptPayments = stripeAccount.IsNotEmpty() ? stripeAccount.IsVerified : false;
+            var canAcceptPayments = participationObject.OwnerAccount.CanProcessPayments(msgs);
 
             // if you can't pay later
             if (!participationObject.AllowToPayLater && canAcceptPayments)
@@ -1160,28 +1158,28 @@ namespace AfterSchool.Controllers
             if (!registrationUid.IsGuid())
                 return RedirectToAction("register");
 
-            // current registrant is already registered
+            // current registrant is already registered, then select a different student
             if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
                 return RedirectToAction("select");
 
             var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);            
 
             if (msgs.HasNoErrors())
-            {
-                SessionVariables.CurrentAccount.ProcessRegistrationWithoutPayment(
-                    toAccount: participationObject.OwnerAccount,
+                AccountService.ProcessRegistrationWithoutPayment(
                     checkoutObject: new CheckoutObject()
                     {
+                        BillingAccount = participationObject.OwnerAccount,
+                        PurchasingAccount = SessionVariables.CurrentAccount,
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
-                        Purchaser = SessionVariables.CurrentAccount,
                         Registration = registration,
-                        Registrant = SessionVariables.CurrentRegistrant
+                        MasterRegistrant = SessionVariables.CurrentRegistrant,
+                        PaymentType = PaymentType.CreditCard,
+                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform
                     },
                     sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.LoggedInUser,
-                    msgs: msgs);                
-            }
+                    msgs: msgs);   
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("thankyou", new { id = registration.Uid });
@@ -1207,10 +1205,8 @@ namespace AfterSchool.Controllers
             ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(msgs);
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
-            ViewBag.Messages = msgs;
-
-            var stripeAccount = participationObject.OwnerAccount.GetStripeAccount(msgs);
-            ViewBag.AccountCanAcceptPayments = stripeAccount.IsNotEmpty() ? stripeAccount.IsVerified : false;
+            ViewBag.Messages = msgs;            
+            ViewBag.AccountCanAcceptPayments = participationObject.OwnerAccount.CanProcessPayments(msgs);
 
             return registration;
         }
@@ -1255,8 +1251,7 @@ namespace AfterSchool.Controllers
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                     paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);                
 
-                SessionVariables.CurrentAccount.ProcessRegistrationWithPayment(
-                    toAccount: participationObject.OwnerAccount,
+                AccountService.ProcessRegistrationWithPayment(
                     checkoutObject: new CheckoutObject()
                     {
                         Coupon = null,
@@ -1265,12 +1260,15 @@ namespace AfterSchool.Controllers
                         PaymentPlan = paymentPlan,
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         Products = new List<Product>(),
-                        Purchaser = SessionVariables.CurrentAccount,
+                        PurchasingAccount = SessionVariables.CurrentAccount,
+                        BillingAccount = participationObject.OwnerAccount,
                         Registration = registration,
                         StripeToken = stripetoken,
                         SourceId = sourceId,
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
-                        Registrant = SessionVariables.CurrentRegistrant
+                        MasterRegistrant = SessionVariables.CurrentRegistrant,
+                        PaymentType = PaymentType.CreditCard,
+                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform
                     },
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);

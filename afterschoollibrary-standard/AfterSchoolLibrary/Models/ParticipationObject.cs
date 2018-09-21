@@ -30,6 +30,7 @@ namespace AfterSchoolLibrary
         public Account OwnerAccount { get; set; }
         public bool AllowToPayLater { get; set; }
         public bool IsFree { get; set; }
+        public bool IsTuitionFree { get; set; }
         public Guid Uid { get; set; }
         public int? SeatsRemaining { get; set; }
         public int? WaitingListSeatsRemaining { get; set; }
@@ -102,7 +103,8 @@ namespace AfterSchoolLibrary
 
             PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
             SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
-            IsFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+            IsTuitionFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
+            IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
         private void InitActivityGroup(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -131,7 +133,8 @@ namespace AfterSchoolLibrary
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
-            IsFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+            IsTuitionFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal());
+            IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
         private void InitAccountActivityGroup(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -165,7 +168,8 @@ namespace AfterSchoolLibrary
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
 
-            IsFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal()) && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+            IsTuitionFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
+            IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
         }
 
         public ParticipationObject(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -388,7 +392,17 @@ namespace AfterSchoolLibrary
             return IsActivity() ? ObjectID : null;
         }
 
-        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
+                this.ObjectID.Value, 
+                this.ObjectType, 
+                registrantId, 
+                msgs, 
+                dc);
+        }
+
+        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var payment = new ActivityPayment()
             {
@@ -398,6 +412,7 @@ namespace AfterSchoolLibrary
                 RegistrantId = registrant.ID,
                 AccountId = this.OwnerAccount.ID,
                 TransactionId = transaction.ID,
+                RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,

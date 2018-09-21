@@ -7,16 +7,19 @@ namespace AfterSchoolLibrary.Services
 {
     public static class PurchaseService
     {
-        public static Purchase CreateNew(Account purchasingAccount, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Purchase CreateNew(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var totalCost = checkoutObject.RegistrationFee;
+            var totalCost = checkoutObject.TuitionFee;
 
             if (checkoutObject.PaymentPlan.IsNotEmpty())
                 totalCost = checkoutObject.PaymentPlanTotalCost;
             else if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                 totalCost += checkoutObject.SubscriptionCostToday;
+
+            if (checkoutObject.OverrideAmount.HasValue)
+                totalCost = checkoutObject.OverrideAmount.Value;
 
             var purchase = new Purchase()
             {
@@ -28,8 +31,8 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
                 NumberOfSeats = checkoutObject.NumberOfSeats,
-                PurchaserAccountId = purchasingAccount.ID,
-                RegistrantId = checkoutObject.Registrant.ID,
+                PurchaserAccountId = checkoutObject.PurchasingAccount?.ID,
+                RegistrantId = checkoutObject.MasterRegistrant?.ID,
                 RegistrationId = checkoutObject.Registration.ID,
                 StripeToken = checkoutObject.StripeToken,
                 StripeSourceId = checkoutObject.SourceId

@@ -164,8 +164,10 @@ namespace AfterSchool.Areas.Org.Controllers
                                         question.Description = Request.Params[$"description-{question.ID}"];
                                         question.Options = Request.Params[$"options-text-{question.ID}"];
                                         question.Link = Request.Params[$"link-text-{question.ID}"];
+                                       
                                         question.QuestionTypeId = (QuestionType)Request.Params[$"questiontype-{question.ID}"].ToInteger();
-                                    }
+                                        
+                                        }
 
                                     question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
                                     question.LastModifiedDate = DateTime.UtcNow;

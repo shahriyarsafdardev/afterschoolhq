@@ -1123,7 +1123,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             ar.NumberPresent = 0;
                             ar.IsLate = false;
                             ar.NumberLate = 0;
-                            ar.NumberPossible = registrant.NumberOfSeats;
+                            ar.NumberPossible = 1;
                             ar.RegistrantId = registrant.RegistrantId;
                             ar.LastModifiedDate = ar.CreateDate = DateTime.UtcNow;
                             ar.LastModifiedBy = ar.CreatedBy = SessionVariables.LoggedInUser.ID;
@@ -1221,37 +1221,13 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 rat = (RegistrationAssignmentType)atype.ToInteger();
                 if(rat == RegistrationAssignmentType.Invited)
-                {
                     ras = activity.GetRegistrantActivities(true);
-                }
             }
 
             if (ras.IsEmpty())
-            {
                 ras = activity.GetRegistrantActivities();
-            }
 
-            switch(rat)
-            {
-                case RegistrationAssignmentType.Applied:
-                    ras = ras.Where(x => x.NumberOfApplicationSeats > 0).OrderBy(x => x.ApplicationSeatIndex).ToList();
-                    break;
-                case RegistrationAssignmentType.WaitingList:
-                    ras = ras.Where(x => x.NumberOfWaitingListSeats > 0).OrderBy(x => x.WaitingListSeatIndex).ToList();
-                    break;
-                case RegistrationAssignmentType.Reserved:
-                    ras = ras.Where(x => x.NumberOfSeats > 0).OrderBy(x => x.SeatIndex).ToList();
-                    break;
-                case RegistrationAssignmentType.Invited:
-                    ras = ras.Where(x => x.NumberOfInvitationSeats > 0).ToList();
-                    break;
-                case RegistrationAssignmentType.Declined:
-                    ras = ras.Where(x => x.NumberOfSeatsDeclined > 0).ToList();
-                    break;
-                default:
-                    ras = ras.OrderBy(x => x.RegistrantName).ToList();
-                    break;
-            }
+            ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -1286,49 +1262,44 @@ namespace AfterSchool.Areas.Org.Controllers
             var af = activity.GetActiveActivityForm();
             var questions = af.GetAllQuestions();
 
-            var registrants = activity.GetRegistrantActivities();
+            var registrantActivities = activity.GetRegistrantActivities();
             var table = new List<List<string>>();
 
             var row = new List<string>();
+
             row.Add("Date Registered");
-            row.Add("Seats");
-            row.Add("Waiting List");
+            row.Add("Seat Assignment");
+
             if (activity.CostPerRegistrant > 0)
-            {
-                row.Add("Date Paid");
                 row.Add("Amount Paid");
-                row.Add("Payment Method");
-            }
+
             foreach (var question in questions)
             {
                 row.Add(question.QuestionDataTypeId.ToString());
             }
+
             table.Add(row);
 
-            foreach (var registrant in registrants)
+            foreach (var registrantActivity in registrantActivities)
             {
                 row = new List<string>();
-                row.Add(registrant.CreateDate.ToShortDateTimeString());
-                row.Add(registrant.NumberOfSeats.ToString());
-                row.Add(registrant.NumberOfWaitingListSeats.ToString());
+
+                row.Add(registrantActivity.CreateDate.ToShortDateTimeString());
+                row.Add(registrantActivity.AssignmentTypeId.ToString().SplitByUpperCase());
+
                 if (activity.CostPerRegistrant > 0)
-                {
-                    row.Add(registrant.DatePaid.ToShortDateString());
-                    row.Add(registrant.AmountPaid.ToCurrency());
-                    row.Add(registrant.PaymentTypeId.ToString().SplitByUpperCase());
-                }
+                    row.Add(registrantActivity.GetAmountPaid().ToCurrency());
+
                 foreach (var question in questions)
                 {
-                    var answer = question.GetAnswer(registrant.RegistrantId.Value);
+                    var answer = question.GetAnswer(registrantActivity.RegistrantId.Value);
+
                     if (answer.IsNotEmpty())
-                    {
                         row.Add(answer.Text);
-                    }
                     else
-                    {
                         row.Add("");
-                    }
                 }
+
                 table.Add(row);
             }
 
@@ -1363,29 +1334,34 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult RegistrantDetail(string id, string datepaid, string amountpaid, string paymenttype)
         {
             var msgs = new SystemMessages();
-
             var ra = RegistrantActivity.Load(id.ToInteger());
-            var activity = Activity.Load(ra.ParticipationObjectId.Value);
+            var activity = ra.GetActivity();
 
             if (!datepaid.IsDateTime())
-            {
                 msgs.Add("Date Paid must be a valid date", MessageType.UserError);
-            }
+
             if (!amountpaid.IsNumber() || amountpaid.ToDecimal() < 0)
-            {
                 msgs.Add("Amount Paid must be a number greater than or equal to 0", MessageType.UserError);
-            }
+
             if (!paymenttype.IsNumber())
-            {
                 msgs.Add("Please select a valid payment type", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
-                ra.DatePaid = datepaid.ToDateTime();
-                ra.AmountPaid = amountpaid.ToDecimal();
-                ra.PaymentTypeId = (PaymentType)paymenttype.ToInteger();
-                msgs.AddRange(ra.Save());
+                var payment = new ActivityPayment()
+                {
+                    ParticipationObjectId = ra.ParticipationObjectId,
+                    ParticipationObjectTypeId = ra.ParticipationObjectTypeId,
+                    Amount = amountpaid.ToDecimal(),
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = SessionVariables.LoggedInUser.ID,
+                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                    LastModifiedDate = DateTime.UtcNow,
+                    RegistrantId = ra.RegistrantId,
+                    AccountId = SessionVariables.CurrentAccount.ID
+                };
+
+                msgs.AddRange(payment.Save());
 
                 if (msgs.HasNoErrors())
                 {

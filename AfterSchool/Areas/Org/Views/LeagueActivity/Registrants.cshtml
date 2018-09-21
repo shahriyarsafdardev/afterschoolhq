@@ -5,12 +5,21 @@
     var registrants = (List<RegistrantActivity>)ViewBag.Registrants;
     var account = SessionVariables.CurrentAccount;
     decimal totalPaid = 0;
-    int registrantCount = registrants.Sum(x => x.NumberOfSeats.Value);
-    int waitingListCount = registrants.Sum(x => x.NumberOfWaitingListSeats.Value);
-    int applicationCount = registrants.Sum(x => x.NumberOfApplicationSeats.Value);
-    int invitationCount = registrants.Sum(x => x.NumberOfInvitationSeats.Value);
-    int declinedCount = registrants.Sum(x => x.NumberOfSeatsDeclined.Value);
-    var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
+    int registrantCount = registrants
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Reserved || x.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
+        .Count();
+    int waitingListCount = registrants
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList)
+        .Count();
+    int applicationCount = registrants
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied)
+        .Count();
+    int invitationCount = registrants
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Invited)
+        .Count();
+    int declinedCount = registrants
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Declined)
+        .Count();
 
     if (registrants.Where(x => x.DatePaid.HasValue).Count() > 0)
     {
@@ -138,6 +147,6 @@
 
 <script>
     function changeAssignment() {
-        location.href = '@Url.Action("registrants", "activity", new { id = Model.Uid })?atype=' + $('#assignmentType').val();
+        location.href = '@Url.Action("registrants", "leagueactivity", new { id = Model.Uid })?atype=' + $('#assignmentType').val();
     }
 </script>

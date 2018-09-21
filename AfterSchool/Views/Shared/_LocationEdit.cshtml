@@ -63,6 +63,7 @@
         locationList.addClass('hide');
 
         if (id > 0) {
+
             $('#add-location').addClass('hide');
             $('#location').val(id);
             locationSearch.val(fullAddress);
@@ -117,70 +118,102 @@
         }
     }
 
+    function doLocationSearch(locationSearch, locationList) {
+        if (locationSearch.val().length > 0 && !isSearching) {
+            isSearching = true;
+                
+            $.get(
+                `@Url.Action("searchlocations", "services")?search=${locationSearch.val()}`,
+                function (data) {
+
+                    isSearching = false;
+
+                    if (data && data.status == 'ok') {
+
+                        locationList.html('');
+
+                        for (let location of data.locations) {
+                            let addressEscaped = location.FullAddress.replace(/'/g, "\\'");
+                            locationList.append(`
+                                <div class="${listItemClass}" 
+                                    style="${listItemStyle}" 
+                                    id="location-${location.ID}" 
+                                    onmouseover="${listItemOnMouseOver}(${location.ID})" 
+                                    onmouseout="${listItemOnMouseOut}(${location.ID})" 
+                                    onclick="${listItemOnClick}(${location.ID},'${addressEscaped}','${location.HostAccountId}','${location.LocationType}')">
+                                    <strong>${location.FullAddress}</strong>
+                                </div>`);
+                        }
+
+                        if (locationSearch.val().length >= 4 && @searchOnly.ToString().ToLower() == false) {
+                            locationList.append(`
+                            <div class="${listItemClass}"
+                                style="${listItemStyle}" 
+                                id="location-0"
+                                onmouseover="${listItemOnMouseOver}(0)" 
+                                onmouseout="${listItemOnMouseOut}(0)" 
+                                onclick="${listItemOnClick}(0)">
+                                <strong>Location not found. Add a new location?</strong>
+                            </div>`);
+                        } else if (data.locations.length == 0) {
+                            locationList.append(`
+                            <div class="${listItemClass}"
+                                style="${listItemStyle}" 
+                                id="location-0">
+                                <strong>Searching... Type of the location name or address</strong>
+                            </div>`);
+                        }
+
+                        locationList.removeClass('hide');
+
+                    } else {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Error loading locations',
+                            success: false
+                        });
+                    }
+                }
+            );
+        } else {
+            // locationList.html('');
+            // locationList.addClass('hide');
+        }
+    }
+
+
+    var searchTimeout = null;
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         locationList = $('#location-list');
         locationSearch = $('#location-search');
 
         locationSearch.keyup(function () {
-            if (locationSearch.val().length > 0 && !isSearching) {
-                isSearching = true;
-                
-                $.get(
-                    `@Url.Action("searchlocations", "services")?search=${$(this).val()}`,
-                    function (data) {
-                        isSearching = false;
-                        if (data && data.status == 'ok') {
 
-                            locationList.html('');
-
-                            for (let location of data.locations) {
-                                let addressEscaped = location.FullAddress.replace(/'/g, "\\'");
-                                locationList.append(`
-                                    <div class="${listItemClass}" 
-                                        style="${listItemStyle}" 
-                                        id="location-${location.ID}" 
-                                        onmouseover="${listItemOnMouseOver}(${location.ID})" 
-                                        onmouseout="${listItemOnMouseOut}(${location.ID})" 
-                                        onclick="${listItemOnClick}(${location.ID},'${addressEscaped}','${location.HostAccountId}','${location.LocationType}')">
-                                        <strong>${location.FullAddress}</strong>
-                                    </div>`);
-                            }
-
-                            if (locationSearch.val().length >= 4 && @searchOnly.ToString().ToLower() == false) {
-                                locationList.append(`
-                                <div class="${listItemClass}"
-                                    style="${listItemStyle}" 
-                                    id="location-0"
-                                    onmouseover="${listItemOnMouseOver}(0)" 
-                                    onmouseout="${listItemOnMouseOut}(0)" 
-                                    onclick="${listItemOnClick}(0)">
-                                    <strong>Location not found. Add a new location?</strong>
-                                </div>`);
-                            } else if (data.locations.length == 0) {
-                                locationList.append(`
-                                <div class="${listItemClass}"
-                                    style="${listItemStyle}" 
-                                    id="location-0">
-                                    <strong>Searching... Type of the location name or address</strong>
-                                </div>`);
-                            }
-
-                            locationList.removeClass('hide');
-
-                        } else {
-                            Notifications.showBar({
-                                title: 'Error',
-                                message: 'Error loading locations',
-                                success: false
-                            });
-                        }
-                    }
-                );
-            } else {
+            if (locationSearch.val().length > 0) {
+                locationList.removeClass('hide');
+                locationList.html('');
+                locationList.append(`
+                    <div class="${listItemClass}"
+                        style="${listItemStyle}" 
+                        id="location-0">
+                        <strong>Searching... Type of the location name or address</strong>
+                    </div>`);
+            }
+            else {
                 locationList.html('');
                 locationList.addClass('hide');
             }
+
+            if (!isSearching) {
+                clearTimeout(searchTimeout);
+            }
+
+            searchTimeout = setTimeout(function () {
+                doLocationSearch($('#location-search'), $('#location-list'))
+            }, 250);
+
         });
 
     });

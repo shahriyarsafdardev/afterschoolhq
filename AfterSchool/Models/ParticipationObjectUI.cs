@@ -24,7 +24,7 @@ namespace AfterSchool.Models
             return "No Location Available";
         }
 
-        public static string PrintRegistrationFee(ParticipationObject participationObject)
+        public static string PrintTuitionFee(ParticipationObject participationObject)
         {
             if (participationObject.Cost.HasValue)
                 return participationObject.Cost.ToCurrency();

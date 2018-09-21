@@ -22,13 +22,13 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        Registration Fees
+        Tuition Fees
     </div>
 
     <div class="panel-body">
         
         <div class="form-group">
-            <label class="col-sm-3 control-label">Registration Fee</label>
+            <label class="col-sm-3 control-label">Tuition Fee</label>
             <div class="col-sm-9">
                 <div class="input-group input-group-lg xs-mb-15">
                     <span class="input-group-addon">$</span>
@@ -92,24 +92,24 @@
 
         <div class="form-group">
             <div class="row">
-                <label class="col-sm-3 control-label">Allow Payment Plan</label>
+                <label class="col-sm-3 control-label">Tuition Payment Plan</label>
                 <div class="col-sm-1">
                     @{Html.RenderPartial
-                  (
-                      "~/Views/Shared/_SwitchButton.cshtml",
-                      Model.HasPaymentPlan(),
-                      new ViewDataDictionary()
-                      {
-                            { "checkboxname", "haspaymentplan" },
-                            { "checkboxid", "haspaymentplan" }
-                      }
-                  );
+                      (
+                          "~/Views/Shared/_SwitchButton.cshtml",
+                          Model.HasPaymentPlan(),
+                          new ViewDataDictionary()
+                          {
+                                { "checkboxname", "haspaymentplan" },
+                                { "checkboxid", "haspaymentplan" }
+                          }
+                      );
                     }
                 </div>
             </div>
             <div id="paymentplansection" class="row">
                 <div class="col-md-3"></div>
-                <div class="col-sm-3">
+                <div class="col-sm-6 col-md-9">
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Payment Amt $</span>
                         <input type="number" class="form-control" id="paymentplancost"
@@ -118,7 +118,8 @@
                                required min="0.00" step=".01" @paymentdisabled />
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3"></div>
+                <div class="col-sm-6 col-md-9">
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Every</span>
                         <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
@@ -133,7 +134,8 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3"></div>
+                <div class="col-sm-6 col-md-9">
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon"># of Payments</span>
                         <input type="number" class="form-control" id="paymentplanperiodnumber"
@@ -147,7 +149,7 @@
 
                 <div class="col-sm-3"></div>
                 <div class="col-sm-9">
-                    <p class="text-muted padding-v-10">Payment plans are used to break up the Registration fee into monthly payments.</p>
+                    <p class="text-muted padding-v-10">Payment plans are used to break up the tuition fee into monthly payments.</p>
                 </div>
 
             </div>
@@ -205,7 +207,7 @@
             </div>
             <div id="subscriptionplansection" class="row">
                 <div class="col-md-3"></div>
-                <div class="col-sm-5">
+                <div class="col-sm-6 col-md-9">
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Payment Amt $</span>
                         <input type="number" class="form-control" id="subscriptionplancost"
@@ -214,7 +216,8 @@
                                required min="0.00" step=".01" @paymentdisabled />
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3"></div>
+                <div class="col-sm-6 col-md-9">
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Every</span>
                         <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>

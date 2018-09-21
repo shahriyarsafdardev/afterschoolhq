@@ -47,6 +47,7 @@ namespace AfterSchoolLibrary
 		/// </summary>
 		public TransactionType TransactionTypeId { get { return (TransactionType)MDV["TransactionTypeId"].Value; } set { MDV["TransactionTypeId"].Value = value; } }
 		public string StripeChargeOrRefundId { get { return (string)MDV["StripeChargeOrRefundId"].Value; } set { MDV["StripeChargeOrRefundId"].Value = value; } }
+		public PaymentSourceType PaymentSourceTypeId { get { return (PaymentSourceType)MDV["PaymentSourceTypeId"].Value; } set { MDV["PaymentSourceTypeId"].Value = value; } }
 		
 
         public Transaction()
@@ -56,6 +57,7 @@ namespace AfterSchoolLibrary
 			this.PaymentTypeId = PaymentType.NotSet;
 			this.Uid = Guid.NewGuid();
 			this.TransactionTypeId = TransactionType.NotSet;
+			this.PaymentSourceTypeId = PaymentSourceType.NotSet;
 			
         }
 
@@ -77,6 +79,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
 				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeChargeOrRefundId", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "PaymentSourceTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -206,6 +209,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["StripeChargeOrRefundId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PaymentSourceTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -279,6 +286,70 @@ namespace AfterSchoolLibrary
         public static decimal GetTotalAmountPaidByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByPayerAccountId(accountId, msgs, dc).Sum(transaction => transaction.Amount.Value);
+        }
+
+        public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Transaction> LoadByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCountByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            return dq.GetCount();
+        }
+
+        public static int GetCountByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            return dq.GetCount();
         }
 
         #endregion

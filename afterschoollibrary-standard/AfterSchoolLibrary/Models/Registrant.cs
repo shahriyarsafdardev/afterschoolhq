@@ -516,73 +516,44 @@ namespace AfterSchoolLibrary
             return reg;
         }
 
-        public List<Registration> GetRegistrations(DatabaseConnection dc = null)
+        public List<Registration> GetRegistrations(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadByRegistrantId(this.ID.Value, dc: dc);
+            return Registration.LoadByRegistrantId(this.ID.Value, msgs, dc: dc);
         }
 
-        public int GetRegistrationCount(DatabaseConnection dc = null)
+        public int GetRegistrationCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.GetCount(new Hashtable() { { "RegistrantId", this.ID.Value } }, dc: dc);
+            return Registration.GetCount(new Hashtable() { { "RegistrantId", this.ID.Value } }, msgs: msgs, dc: dc);
         }
 
 
-        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AddOrUpdateParticipationObject(registrationId, participationObjectId, participationObjectType, assignmentType, 1, registrationPeriodId, activityGroupId, loggedInUserId, msgs, dc);
-        }
-         public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int choiceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            int seats = 0, waitingListSeats = 0, applicationSeats = 0, invitationSeats = 0, declinedSeats = 0;
-
-            switch(assignmentType)
-            {
-                case RegistrationAssignmentType.Applied:
-                    applicationSeats = 1;
-                    break;
-                case RegistrationAssignmentType.Declined:
-                    declinedSeats = 1;
-                    break;
-                case RegistrationAssignmentType.Invited:
-                    invitationSeats = 1;
-                    break;
-                case RegistrationAssignmentType.Reserved:
-                    seats = 1;
-                    break;
-                case RegistrationAssignmentType.WaitingList:
-                    waitingListSeats = 1;
-                    break;
-            }
-
-            return AddOrUpdateParticipationObject(registrationId, participationObjectId, participationObjectType, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, assignmentType, 1, registrationPeriodId, activityGroupId, loggedInUserId, msgs, dc);
+            return AddOrUpdateParticipationObject(
+                registrationId, 
+                participationObjectId, 
+                participationObjectType, 
+                assignmentType, 
+                1, 
+                registrationPeriodId, 
+                activityGroupId, 
+                loggedInUserId, 
+                msgs, 
+                dc);
         }
 
-        [Obsolete]
-        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var assignmentType = RegistrationAssignmentType.NotSet;
-
-            if (seats > 0)
-                assignmentType = RegistrationAssignmentType.Reserved;
-            else if (waitingListSeats > 0)
-                assignmentType = RegistrationAssignmentType.WaitingList;
-            else if (applicationSeats > 0)
-                assignmentType = RegistrationAssignmentType.Applied;
-            else if (invitationSeats > 0)
-                assignmentType = RegistrationAssignmentType.Invited;
-            else if (declinedSeats > 0)
-                assignmentType = RegistrationAssignmentType.Declined;
-
-            return AddOrUpdateParticipationObject(registrationId, participationObjectId, participationObjectType, seats, waitingListSeats, applicationSeats, invitationSeats, declinedSeats, assignmentType, 1, null, null, loggedInUserId, msgs, dc);
-        }
-
-        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, int seats, int waitingListSeats, int applicationSeats, int invitationSeats, int declinedSeats, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var changingAssignment = false;
-            // var changingDays = false;
 
-            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(participationObjectId, participationObjectType, this.ID.Value, msgs, dc);
+            var changingAssignment = false;
+
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                participationObjectId, 
+                participationObjectType, 
+                this.ID.Value, 
+                msgs, 
+                dc);
 
             if (ra.IsEmpty())
             {
@@ -609,43 +580,9 @@ namespace AfterSchoolLibrary
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
             ra.PreferenceNumber = preferenceNumber;
-            ra.AssignmentTypeId = assignmentType;
 
-            //set indexes
-            if (changingAssignment)
-            {
-                ra.NumberOfSeats = seats;
-                ra.NumberOfWaitingListSeats = waitingListSeats;
-                ra.NumberOfApplicationSeats = applicationSeats;
-                ra.NumberOfInvitationSeats = invitationSeats;
-                ra.NumberOfSeatsDeclined = declinedSeats;
-
-                if (seats > 0)
-                    ra.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: RegistrationAssignmentType.Reserved, 
-                        participationObjectId: participationObjectId, 
-                        participationObjectType: participationObjectType,
-                        msgs: msgs, 
-                        dc: dc) + 1;
-
-                if (waitingListSeats > 0)
-                    ra.WaitingListSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: RegistrationAssignmentType.WaitingList,
-                        participationObjectId: participationObjectId,
-                        participationObjectType: participationObjectType,
-                        msgs: msgs, 
-                        dc: dc) + 1;
-
-                if (applicationSeats > 0)
-                    ra.ApplicationSeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
-                        assignmentType: RegistrationAssignmentType.Applied,
-                        participationObjectId: participationObjectId,
-                        participationObjectType: participationObjectType,
-                        msgs: msgs, 
-                        dc: dc) + 1;
-            }
-
-            msgs.AddRange(ra.Save(dc: dc));
+            msgs.AddRange(ra.Save(dc));
+            msgs.AddRange(ra.ChangeSeatAssignment(assignmentType, loggedInUserId, dc));
 
             return ra;
         }
@@ -720,9 +657,14 @@ namespace AfterSchoolLibrary
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activityId, ParticipationObjectType.Activity, this.ID.Value, msgs, dc);
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                activityId, 
+                ParticipationObjectType.Activity, 
+                this.ID.Value, 
+                msgs, 
+                dc);
+
             if (ra.IsEmpty())
-            {
                 ra = new RegistrantActivity
                 {
                     ParticipationObjectId = activityId,
@@ -732,19 +674,14 @@ namespace AfterSchoolLibrary
                     CreatedBy = loggedInUserId,
                     ActivityGroupId = activityGroupId
                 };
-            }
+
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
-
-            // TODO: re-evaluate if re-using this record for registration also
-            ra.NumberOfInvitationSeats = 1;
-            ra.NumberOfApplicationSeats = 0;
-            ra.NumberOfSeats = 0;
-            ra.NumberOfWaitingListSeats = 0;
-            ra.NumberOfSeatsDeclined = 0;
-
             ra.RegistrationPeriodId = registrationPeriodId;
+            ra.AssignmentTypeId = RegistrationAssignmentType.Invited;
+
             msgs.AddRange(ra.Save(dc: dc));
+
             return ra;
         }
 

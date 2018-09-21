@@ -68,7 +68,7 @@
                         if (!Model.PaymentPlans.Any())
                         {
                             <p>
-                                The registration fee is <strong>@Model.Cost.ToCurrency()</strong>
+                                The tuition fee is <strong>@Model.Cost.ToCurrency()</strong>
                                 @if (Model.SubscriptionPlans.Any())
                                 {
                                     <span>
@@ -80,10 +80,10 @@
                         else
                         {
                             <p>
-                                Registration Fee payment options:
+                                Tuition Fee payment options:
                                 <ul>
                                     <li>
-                                        1 payment of @ParticipationObjectUI.PrintRegistrationFee(Model)
+                                        1 payment of @ParticipationObjectUI.PrintTuitionFee(Model)
                                         @if(Model.PaymentPlans.Any())
                                         {
                                             <span>, or</span>

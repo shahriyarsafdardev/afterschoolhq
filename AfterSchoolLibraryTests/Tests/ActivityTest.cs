@@ -281,10 +281,7 @@ namespace AfterSchoolLibraryTests
             var registrationPeriod = Factories.RegistrationPeriodFactory.Create(account, msgs, dc);
 
             int registrationPeriodID = registrationPeriod.ID.Value;
-            int numberOfSeats = 12;
-            int numberOfWaitingListSeats = 1;
-            int numberOfApplicationSeats = 1;
-            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, numberOfSeats, numberOfWaitingListSeats, numberOfApplicationSeats, msgs, dc);
+            var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, registrationPeriodID, msgs, dc);
 
             Assert.Single(activity.GetRegistrants(msgs, dc));
         }
@@ -311,7 +308,7 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(user, msgs, dc: dc);
             var activity = Factories.ActivityFactory.Create(account, 12, msgs, dc);
             var registrant = Factories.RegistrantFactory.Create(msgs, dc);
-            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, 1, 0, 0, msgs, dc: dc);
+            var regitrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
          
             Assert.Equal(1, activity.GetRegistrantCount(msgs, dc));
         }
@@ -996,7 +993,6 @@ namespace AfterSchoolLibraryTests
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             activityInstance.StartDateTime = date;
             activityInstance.Save(dc);
-            registrantActivity.NumberOfSeats = 1;
             registrantActivity.Save(dc);
             schedule.AccountId = account.ID.Value;
             schedule.StartDate = date;

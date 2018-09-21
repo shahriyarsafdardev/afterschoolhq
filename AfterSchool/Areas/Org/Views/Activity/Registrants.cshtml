@@ -5,12 +5,22 @@
     var ras = (List<RegistrantActivity>)ViewBag.Registrants;
     var account = SessionVariables.CurrentAccount;
     var totalPaid = Model.GetTotalPaid();
-    var registrantCount = ras.Sum(x => x.NumberOfSeats.Value);
-    var waitingListCount = ras.Sum(x => x.NumberOfWaitingListSeats.Value);
-    var applicationCount = ras.Sum(x => x.NumberOfApplicationSeats.Value);
-    var invitationCount = ras.Sum(x => x.NumberOfInvitationSeats.Value);
-    var declinedCount = ras.Sum(x => x.NumberOfSeatsDeclined.Value);
-    var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;    
+    int registrantCount = ras
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Reserved || x.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
+        .Count();
+    int waitingListCount = ras
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList)
+        .Count();
+    int applicationCount = ras
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied)
+        .Count();
+    int invitationCount = ras
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Invited)
+        .Count();
+    int declinedCount = ras
+        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Declined)
+        .Count();
+    var assignmentType = (RegistrationAssignmentType)ViewBag.AssignmentType;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -96,6 +106,8 @@
                 <div class="col-md-4">
                     <select id="assignmentType" onchange="changeAssignment()" class="form-control">
                         <option value="">View All Assignments</option>
+
+                        
                         @foreach (var x in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>().Where(x => x != RegistrationAssignmentType.NotSet))
                         {
                             if (account.HasFeature(FeatureType.AllowApplications) || x != RegistrationAssignmentType.Applied)
