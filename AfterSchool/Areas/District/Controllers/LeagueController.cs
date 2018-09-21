@@ -691,5 +691,38 @@ namespace AfterSchool.Areas.District.Controllers
             return View("editgame", activityGroup);
         }
 
+        [HttpPost]
+        public ActionResult DeleteGame(string id, string ai)
+        {
+            var msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+
+            Database.ExecuteTransaction(
+                  action: (SystemMessages amsgs, DatabaseConnection adc) => {
+
+                      var activityInstance = ActivityInstance.Load(ai.ToInteger());
+                      List<Match> matches = activityInstance.GetMatches(amsgs, adc);
+
+                      foreach(Match match in matches)
+                      {
+                          match.Delete(adc);
+                      }
+
+                      activityInstance.Delete(adc);
+
+                  },
+                  onSuccess: (SystemMessages smsgs) => {
+                      msgs.AddRange(smsgs);
+                  },
+                  onFailure: (SystemMessages fmsgs) => {
+                      msgs.AddRange(fmsgs);
+                  }
+              );
+
+            LoadEditScheduleViewBag(activityGroup, activityGroup.ActivityScheduleId.ToString());
+            ViewBag.Messages = msgs;
+            return View("schedule", activityGroup);
+        }
+
     }
 }

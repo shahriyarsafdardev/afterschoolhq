@@ -49,23 +49,25 @@
                     var matches = Match.LoadByActivityInstanceId(activityInstance.ID.Value);
                     var matchTeams = "";
                     var location = new Location();
-                    var locationName = " @ - TBD";
+                    var locationName = " @ TBD";
                     if (activityInstance.LocationId.IsNotEmpty())
                     {
                         location = Location.Load(activityInstance.LocationId.Value);
-                        locationName = " @ - " + location.Name.ToString();
+                        locationName = " @ " + location.Name.ToString() + " - ";
                     }
-                    
 
-                    
 
-                    foreach( var match in matches)
+                    var vs = " ";
+
+                    foreach ( var match in matches)
                     {
                         Activity team = teams.Find(t => t.ID.Value == match.TeamId.Value);
 
+
                         if (team.IsNotEmpty())
                         {
-                            matchTeams += " " + team.Name.ToString();
+                            matchTeams += vs + team.Name.ToString();
+                            vs = " vs. ";
                         }
 
                     }
@@ -73,7 +75,7 @@
                     <h6>
                         <a href="@Url.Action("editgame", "league", new { id = Model.Uid, ai = activityInstance.ID.Value })">
                             <i class="icon icon-left s7-more"></i>
-                            @activityInstance.StartDateTime.Value.ToShortTimeString() @locationName | @matchTeams
+                            @activityInstance.StartDateTime.Value.ToShortTimeString() @locationName @matchTeams
                         </a>
                     </h6>
                        
