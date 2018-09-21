@@ -55,10 +55,20 @@ loadmethod: FacebookId
 
 [begin]
 type: Class
+name: Program
+description: A program is like a karate program and has multiple activities
+inherits: BasicLookUpObject
+property: DefaultInstructorId, int?, Int
+property: 
+[end]
+
+[begin]
+type: Class
 name: Activity
 description: The after school activity/team that a registrant/student is registering for
 inherits: BaseEventWithAddress
 property: SeatsAvailable, int?, Int, required
+property: ProgramId, int?, Int
 property: AccountId, int?, Int, required
 property: AgeStart, int?, Int
 property: AgeEnd, int?, Int
@@ -66,12 +76,12 @@ property: GradeLevelStart, int?, Int
 property: GradeLevelEnd, int?, Int
 property: CostPerRegistrant, decimal?, Money
 property: CostDescription, string, NVarChar "1000"
-property: AllowPreRegistration, bool, Bit
+-property: AllowPreRegistration, bool, Bit
 property: Uid, Guid, UniqueIdentifier, required
 property: Details, string, NVarChar "4000"
 property: LocationDetails, string, NVarChar "4000"
 property: ScheduleDetails, string, NVarChar "4000"
-property: RegistrationTimeZone, string, NVarChar "30"
+-property: RegistrationTimeZone, string, NVarChar "30"
 property: InstructorId, int?, Int
 property: ContactName, string, NVarChar "50"
 property: ContactPhone, string, NVarChar "50"
@@ -81,7 +91,7 @@ property: WaitingListSeats, int?, Int
 -property: AcceptCreditCard, bool, Bit
 -property: ParentActivityId, int?, Int
 property: AllowToPayLater, bool, Bit
-property: AllowToRequestDiscount, bool, Bit
+-property: AllowToRequestDiscount, bool, Bit
 -property: AllowOrganizationRegistration, bool, Bit
 property: GenderRestriction, GenderRestrictionType, Int
 property: RegistrationModeId, RegistrationMode, Int
