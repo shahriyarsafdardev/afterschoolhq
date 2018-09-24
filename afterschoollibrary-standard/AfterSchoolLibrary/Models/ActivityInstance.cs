@@ -259,29 +259,16 @@ namespace AfterSchoolLibrary
         public List<Match> GetMatches(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.IsNotEmpty())
-            {
                 return Match.LoadByActivityInstanceId(this.ID.Value, msgs, dc);
-            } else
-            {
-                return new List<Match>();
-            }
-
-            
+           
+            return new List<Match>(); 
         }
 
         public List<Activity> GetTeams(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            List<Match> matches = this.GetMatches(msgs, dc);
-            List<Activity> teams = new List<Activity>();
-
-            foreach(Match match in matches)
-            {
-                Activity team = Activity.Load(match.TeamId.Value);
-                teams.Add(team);
-            }
-
-            return teams;
-            
+            return this.GetMatches(msgs, dc)
+                .Select(match => Activity.Load(match.TeamId.Value, msgs, dc))
+                .ToList();
         }
 
 

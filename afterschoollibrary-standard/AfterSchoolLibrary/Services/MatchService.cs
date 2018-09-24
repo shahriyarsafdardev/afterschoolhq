@@ -15,8 +15,6 @@ namespace AfterSchoolLibrary.Services
            
             if (teamId.IsEmpty())
             {
-                // not creating an account, current account has no password
-
                 msgs.Add("Missing Team on Match", MessageType.Error);
                 return null;
             }
@@ -58,30 +56,26 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    if (amsgs.HasNoErrors())
+                    if (match.IsEmpty())
                     {
-                        if (match.IsEmpty())
+                        match = new Match
                         {
-                            match = new Match
-                            {
-                                CreateDate = DateTime.UtcNow,
-                                CreatedBy = currentUser.ID.Value,
-                                TeamId = teamId,
-                                ActivityInstanceId = activityInstanceId,
-                                Score = score,
-                                TeamPlace = teamPlace
-                            };
-                        }
-
-                        match.TeamId = teamId;
-                        match.ActivityInstanceId = activityInstanceId;
-                        match.LastModifiedDate = DateTime.UtcNow;
-                        match.LastModifiedBy = currentUser.ID.Value;
-                        match.TeamPlace = teamPlace;
-                        match.Score = score;
-
-                        msgs.AddRange(match.Save(adc));
+                            CreateDate = DateTime.UtcNow,
+                            CreatedBy = currentUser.ID.Value,
+                            TeamId = teamId,
+                            ActivityInstanceId = activityInstanceId
+                        };
                     }
+
+                    match.TeamId = teamId;
+                    match.ActivityInstanceId = activityInstanceId;
+                    match.LastModifiedDate = DateTime.UtcNow;
+                    match.LastModifiedBy = currentUser.ID.Value;
+                    match.TeamPlace = teamPlace;
+                    match.Score = score;
+
+                    msgs.AddRange(match.Save(adc));
+                    
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
