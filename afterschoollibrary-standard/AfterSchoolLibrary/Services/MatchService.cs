@@ -67,8 +67,6 @@ namespace AfterSchoolLibrary.Services
                         };
                     }
 
-                    match.TeamId = teamId;
-                    match.ActivityInstanceId = activityInstanceId;
                     match.LastModifiedDate = DateTime.UtcNow;
                     match.LastModifiedBy = currentUser.ID.Value;
                     match.TeamPlace = teamPlace;
