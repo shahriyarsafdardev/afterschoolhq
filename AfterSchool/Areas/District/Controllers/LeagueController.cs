@@ -622,7 +622,7 @@ namespace AfterSchool.Areas.District.Controllers
                         ViewBag.Messages = msgs;
                         return View("schedule", activityGroup);
                     //save and add, load viewbag with just activitygroupid and add a new activity instance
-                    case "saaveadd":
+                    case "add":
                         LoadEditGameViewBag(id,null,date,startTime);
                         ViewBag.Messages = msgs;
                         return View("editgame", activityGroup);
