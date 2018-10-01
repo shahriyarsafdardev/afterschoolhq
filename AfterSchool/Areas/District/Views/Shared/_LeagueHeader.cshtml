@@ -31,7 +31,7 @@
             <a href="@Url.Action("teams", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "teams" ? "-active" : "")">
                 <i class="s7-users"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
             </a>
-            <a href="@Url.Action("schedule", "league", new {id = Model.Uid})" class="btn hide btn-alt6@(actionName == "schedule" ? "-active" : "")">
+            <a href="@Url.Action("schedule", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "schedule" ? "-active" : "")">
                 <i class="s7-date"></i> Schedule
             </a>
 
@@ -46,12 +46,12 @@
                     </button>
                     <ul role="menu" class="dropdown-menu" id="list-add-menu">
                         <li>
-                            <a href="@Url.Action("schedules", "group", new {id = Model.Uid})">
-                                <i class="s7-date"></i> Schedules
+                            <a href="@Url.Action("schedule", "league", new {id = Model.Uid})">
+                                <i class="s7-date"></i> Schedule
                             </a>
                         </li>
                         <li>
-                            <a href="@Url.Action("messages", "group", new {id = Model.Uid})">
+                            <a href="@Url.Action("messages", "league", new {id = Model.Uid})">
                                 <i class="s7-mail"></i> Messaging
                             </a>
                         </li>

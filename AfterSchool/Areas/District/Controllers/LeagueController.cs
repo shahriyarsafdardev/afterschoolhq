@@ -165,7 +165,7 @@ namespace AfterSchool.Areas.District.Controllers
 
         private ActivityGroup LoadSchoolsViewBag(string id, string pn, string rpp)
         {
-            var msgs = new SystemMessages() { };
+            var msgs = new SystemMessages();
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
             int pageNumber = 1;
@@ -223,34 +223,14 @@ namespace AfterSchool.Areas.District.Controllers
         [ValidateInput(false)]
         // GET: District/School
         [HttpGet]
-        public ActionResult Schedule(string id, string pn, string rpp)
+        public ActionResult Schedule(string id)
         {
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            int pageNumber = 1;
-            int recordsPerPage = 10;
-
-            if (pn.IsNumber() && pn.ToInteger() > 0)
-                pageNumber = pn.ToInteger();
-
-            if (rpp.IsNumber() && rpp.ToInteger() > 0)
-                recordsPerPage = rpp.ToInteger();
-
-            var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-
-            int count = SessionVariables.CurrentAccount.GetVisitorAccountsCount(AccountType.School);
-            var visitorAccounts = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School, start, length);
-            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
-
+            var league = ActivityGroup.LoadByUid(id.ToGuid());
+            LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
+           
             ViewBag.Messages = new SystemMessages();
-            ViewBag.PagingModel = new PagingModel()
-            {
-                TotalCount = count,
-                PageNumber = pageNumber,
-                RecordsPerPage = recordsPerPage,
-                TotalPages = totalPages
-            };
-            return View(group);
+            
+            return View(league);
         }
 
         // GET: User
@@ -273,8 +253,7 @@ namespace AfterSchool.Areas.District.Controllers
             int userCount = SessionVariables.CurrentAccount.GetUserCount();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
             var teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
-           // var teams = activityGroup.GetActivities();
-          //  var teams = SessionVariables.CurrentAccount.GetActivities(UserType.ActivityLeader, WebUser.Load(SessionVariables.CurrentAccount.OwnerId.Value), null, null, null, null,null);
+    
             var totalPages = Math.Ceiling(userCount.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = new SystemMessages();
@@ -314,14 +293,7 @@ namespace AfterSchool.Areas.District.Controllers
 
         private void LoadEditScheduleViewBag(ActivityGroup activityGroup, string scheduleId)
         {
-            /*
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.ActivityId = activity.ID.Value.ToString();
-            ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ActiveMenu = "EditSchedule";
-            */
+         
 
             ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
 
@@ -345,7 +317,9 @@ namespace AfterSchool.Areas.District.Controllers
                 schedule = ActivitySchedule.GetNewDefaultSchedule();
             }
 
+            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Schedule = schedule;
+            ViewBag.ActivityInstances = schedule.GetInstances();
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
 
         }
@@ -475,6 +449,219 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.Messages = msgs;
 
             return View(activityGroup);
+        }
+
+        private ActivityGroup LoadEditGameViewBag(string id, string instance = null, string date = null, string time = null, SystemMessages msgs = null)
+        {
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            ActivityInstance activityInstance = new ActivityInstance();
+
+            var dateTime = DateTime.UtcNow;
+
+            if (date.IsNotEmpty() && date.IsDate())
+            {
+                if (time.IsNotEmpty() && time.IsTime())
+                {
+                    dateTime = $"{date} {time}".ToDateTime();
+                }
+                else
+                {
+                    dateTime = date.ToDateTime();
+                }
+            }
+
+            if (instance.IsNotEmpty() && instance.IsInteger())
+            {
+                activityInstance = ActivityInstance.Load(instance.ToInteger());
+                dateTime = activityInstance.StartDateTime.Value;
+            }
+            else
+            {
+                var dateRange = new DateRange(dateTime, dateTime);
+                activityInstance = activityGroup.GetSchedule().AddInstance(dateRange, InstanceType.NotSet, SessionVariables.LoggedInUser.ID.Value, msgs);
+            }
+
+            var location = new Location();
+
+            if (activityInstance.LocationId.IsNotEmpty())
+                location = Location.Load(activityInstance.LocationId.Value);
+
+            ViewBag.ActivityInstance = activityInstance;
+            ViewBag.Location = location;
+            ViewBag.Date = dateTime;
+            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
+            ViewBag.CurrentTeams = activityInstance.GetTeams();
+            ViewBag.CurrentAccount = SessionVariables.CurrentAccount;
+            ViewBag.Messages = msgs;
+
+            return activityGroup;
+        }
+
+        [HttpGet]
+        public ActionResult EditGame(string id, string instance, string date, string time)
+        {
+            var msgs = new SystemMessages();
+
+            var activityGroup = LoadEditGameViewBag(id, instance, date, time, msgs);
+
+            return View(activityGroup);
+        }
+
+        [HttpGet]
+        public ActionResult SaveGame(string id, string instance, string date, string startTime, string endTime, string locationId, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd)
+        {
+            var msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+            var activityInstance =  new ActivityInstance();
+
+            var location = new Location();
+
+            var startDateTime = $"{date} {startTime}".ToDateTime();
+            var endDateTime =  $"{date} {endTime}".ToDateTime();
+            var dateRange = new DateRange(startDateTime, endDateTime);
+
+            Database.ExecuteTransaction(
+                   action: (SystemMessages amsgs, DatabaseConnection adc) => {
+
+                       //activityInstance
+                       
+
+                       if (instance.IsNotEmpty())
+                       {
+                           activityInstance = ActivityInstance.Load(instance.ToInteger());
+                       }
+                       else
+                       {
+                           activityInstance = activityGroup.GetSchedule().AddInstance(dateRange, InstanceType.InSession, SessionVariables.LoggedInUser.ID.Value, amsgs, adc);
+                       }
+
+                       activityInstance.StartDateTime = startDateTime;
+                       activityInstance.EndDateTime = endDateTime;
+
+                       if (locationId.IsNotEmpty() && locationId.IsInteger())
+                           location = Location.Load(locationId.ToInteger(), amsgs, adc);
+                       
+                       //check if location exists
+                       if (location.ID.IsEmpty())
+                       {
+                           //create a new location
+                           location = LocationService.CreateNewWithValidation
+                               (
+                                   locationname,
+                                   address1,
+                                   address2,
+                                   city,
+                                   state,
+                                   postalcode,
+                                   "USA",
+                                   (LocationType)locationtype.ToInteger(),
+                                   null,
+                                   SessionVariables.CurrentAccount,
+                                   SessionVariables.LoggedInUser,
+                                   amsgs,
+                                   adc
+                                );
+                       }
+
+                       activityInstance.LocationId = location.ID.Value;
+
+                       if (amsgs.HasNoErrors())
+                           amsgs.AddRange(activityInstance.Save(adc));
+
+
+                       var teamIds = teams.Split(',').ToList();
+                       var selectedTeams = new List<Activity>();
+                       var activityInstanceTeams = activityInstance.GetTeams(amsgs,adc);
+                       var matches = activityInstance.GetMatches(amsgs, adc);
+
+                       //matches
+                       teamIds.ForEach(teamId => selectedTeams.Add(Activity.Load(teamId.ToInteger(), amsgs, adc)));
+
+                       foreach (var activity in activityInstanceTeams)
+                       {
+                           var match = matches.Where(m => m.TeamId == activity.ID).FirstOrDefault();
+
+                           // remove a match from the activityInstance
+                           if (!selectedTeams.Contains(activity) && match.IsNotEmpty())
+                                match.Delete();
+                       }
+
+                       selectedTeams.ForEach(selectedTeam => {
+                           if (!activityInstanceTeams.Contains(selectedTeam))
+                               MatchService.CreateOrUpdate(
+                                   currentUser: SessionVariables.LoggedInUser,
+                                   teamId: selectedTeam.ID.Value,
+                                   activityInstanceId: activityInstance.ID.Value,
+                                   match: null,
+                                   score: 0,
+                                   teamPlace: 0,
+                                   msgs: amsgs,
+                                   dc: adc
+                                   );
+                       });
+
+                   },
+                   onSuccess: (SystemMessages smsgs) => {
+                       msgs.AddRange(smsgs);
+                   },
+                   onFailure: (SystemMessages fmsgs) => {
+                       msgs.AddRange(fmsgs);
+                   }
+               );      
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Game Saved", MessageType.Success);
+
+            if (msgs.HasNoErrors())
+            {
+                switch (cmd)
+                {
+                    //save
+                    case "save":
+                        LoadEditScheduleViewBag(activityGroup, activityGroup.ActivityScheduleId.ToString());
+                        ViewBag.Messages = msgs;
+                        return View("schedule", activityGroup);
+                    //save and add, load viewbag with just activitygroupid and add a new activity instance
+                    case "add":
+                        LoadEditGameViewBag(id,null,date,startTime);
+                        ViewBag.Messages = msgs;
+                        return View("editgame", activityGroup);
+                }
+            }
+
+            LoadEditGameViewBag(id,activityInstance.ID.Value.ToString());
+            ViewBag.Messages = msgs;
+            return View("editgame", activityGroup);
+        }
+
+        [HttpPost]
+        public ActionResult DeleteGame(string id, string instance)
+        {
+            var msgs = new SystemMessages();
+            var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
+
+            Database.ExecuteTransaction(
+                  action: (SystemMessages amsgs, DatabaseConnection adc) => {
+
+                      var activityInstance = ActivityInstance.Load(instance.ToInteger());
+                      List<Match> matches = activityInstance.GetMatches(amsgs, adc);
+
+                      matches.ForEach(match => amsgs.AddRange(match.Delete(adc)));
+
+                      amsgs.AddRange(activityInstance.Delete(adc));
+
+                  },
+                  onSuccess: (SystemMessages smsgs) => {
+                      msgs.AddRange(smsgs);
+                  },
+                  onFailure: (SystemMessages fmsgs) => {
+                      msgs.AddRange(fmsgs);
+                  }
+              );
+
+            LoadEditScheduleViewBag(activityGroup, activityGroup.ActivityScheduleId.ToString());
+            ViewBag.Messages = msgs;
+            return View("schedule", activityGroup);
         }
 
     }

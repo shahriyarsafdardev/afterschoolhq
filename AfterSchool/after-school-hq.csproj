@@ -372,6 +372,7 @@
     <Compile Include="Areas\District\Controllers\ProfileController.cs" />
     <Compile Include="Areas\District\Controllers\ProviderController.cs" />
     <Compile Include="Areas\District\Controllers\SchoolController.cs" />
+    <Compile Include="Areas\District\Controllers\ServicesController.cs" />
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
     <Compile Include="Areas\Org\Controllers\AccountController.cs" />
@@ -972,6 +973,7 @@
     <Content Include="Areas\Org\Views\Shared\_ManageStudents.cshtml" />
     <Content Include="Areas\Org\Views\LeagueActivity\ManageStudents.cshtml" />
     <Content Include="Areas\Org\Views\League\TeamStudents.cshtml" />
+    <Content Include="Areas\District\Views\League\EditGame.cshtml" />
     <Content Include="Areas\Org\Views\Account\FormEdit.cshtml" />
     <Content Include="Areas\Org\Views\Account\Forms.cshtml" />
     <Content Include="Areas\Org\Views\Accounting\Index.cshtml" />
@@ -1406,6 +1408,7 @@
     <Content Include="Views\Account\MakePayment.cshtml" />
     <Content Include="Views\Shared\_DashboardNotfications.cshtml" />
     <Content Include="Views\Shared\Layouts\_FullScreen.cshtml" />
+    <Content Include="Views\Shared\_GameLocation.cshtml" />
     <Content Include="Views\Shared\Components\_Date.cshtml" />
   </ItemGroup>
   <ItemGroup>

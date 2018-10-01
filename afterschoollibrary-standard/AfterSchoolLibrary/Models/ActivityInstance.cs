@@ -34,6 +34,7 @@ namespace AfterSchoolLibrary
 		/// </summary>
 		public DateTime? EndDateTime { get { return (DateTime?)MDV["EndDateTime"].Value; } set { MDV["EndDateTime"].Value = value; } }
 		public InstanceType InstanceTypeId { get { return (InstanceType)MDV["InstanceTypeId"].Value; } set { MDV["InstanceTypeId"].Value = value; } }
+		public int? LocationId { get { return (int?)MDV["LocationId"].Value; } set { MDV["LocationId"].Value = value; } }
 		
 
         public ActivityInstance()
@@ -59,6 +60,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "StartDateTime", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "EndDateTime", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "InstanceTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "LocationId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -166,6 +168,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["InstanceTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["LocationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -247,6 +253,24 @@ namespace AfterSchoolLibrary
 
         //    return ranges;
         //}
+
+        
+
+        public List<Match> GetMatches(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.ID.IsNotEmpty())
+                return Match.LoadByActivityInstanceId(this.ID.Value, msgs, dc);
+           
+            return new List<Match>(); 
+        }
+
+        public List<Activity> GetTeams(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return this.GetMatches(msgs, dc)
+                .Select(match => Activity.Load(match.TeamId.Value, msgs, dc))
+                .ToList();
+        }
+
 
         #endregion
     }
