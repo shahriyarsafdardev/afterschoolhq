@@ -292,6 +292,7 @@ namespace AfterSchoolLibrary
                 msgs.AddRange(Database.CreateTables(dc2));
                 msgs.AddRange(Database.AlterTables(dc2));
                 msgs.AddRange(Database.UpdateData(dc2));
+                msgs.AddRange(Database.CreateIndexes(dc2));
                 dc2 = null;
             }
 
