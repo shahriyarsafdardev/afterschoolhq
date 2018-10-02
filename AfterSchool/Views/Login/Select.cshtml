@@ -14,19 +14,36 @@
                         <a href="/"><img src="@UILabel.ProductLogo()" alt="logo" height="80px" class="logo-img"></a>                        
                     </div>
                     <div class="panel-body">
-                        
+
                         @Html.Raw(UI.RenderMessagesToHtml(msgs))
 
                         <div>
-                            Please select your account below
+                            <p class="text-center text-white">
+                                Please select your account below
+                            </p>
                         </div>
 
-                        @foreach(var account in Model)
-                        {
-                            <a href="@Url.Action("select", new { id = account.Uid, returnurl = ViewBag.ReturnUrl })" class="btn btn-primary btn-xl btn-space btn-block">
-                                @account.Name &raquo;
-                            </a>
-                        }
+                        <div id="accounts">
+                            @foreach (var account in Model)
+                            {                            
+                                <button onclick="selectAccount('@account.Uid')"
+                                        class="btn btn-primary btn-xl btn-space btn-block">
+                                    @account.Name &raquo;
+                                </button>
+                            }
+                        </div>
+                        <div id="loading" class="hide padding-30">
+                            <p class="text-center text-white text-medium">
+                                Loading your account...
+                            </p>
+                        </div>
+                        <script>
+                            function selectAccount(uid) {
+                                $('#accounts').addClass('hide');
+                                $('#loading').removeClass('hide');
+                                location.href = '/login/select/' + uid + '?returnurl=@ViewBag.ReturnUrl';
+                            }
+                        </script>
 
                     </div>
                 </div>

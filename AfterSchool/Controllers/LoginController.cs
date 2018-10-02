@@ -81,14 +81,6 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Select(string returnurl)
-        {
-            ViewBag.ReturnUrl = returnurl;
-            ViewBag.Messages = new SystemMessages();
-            return View(SessionVariables.LoggedInUser.GetAccounts());
-        }
-
-        [HttpGet]
         public ActionResult Select(string id, string returnurl)
         {
             var msgs = new SystemMessages();
@@ -107,6 +99,7 @@ namespace AfterSchool.Controllers
                 return LoginRedirect();
             }
 
+            ViewBag.ReturnUrl = returnurl;
             ViewBag.Messages = msgs;
             return View(SessionVariables.LoggedInUser.GetAccounts());
         }

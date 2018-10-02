@@ -169,6 +169,7 @@ namespace AfterSchool.Models
         {
             var msgs = new SystemMessages();
 
+            SessionVariables.CurrentAccount = null;
             SessionVariables.LoggedInUser = user;
 
             if (account.IsNotEmpty())
