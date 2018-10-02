@@ -44,10 +44,14 @@ namespace AfterSchoolLibrary.Services
         {
             return Encryption.DecryptToString(Convert.FromBase64String(password), Utilities.AppAESKey, Utilities.AppIV);
         }
-        public static SystemMessages SendInviteToAccount(this WebUser user, Account account, string message, WebUser loggedInUser, DatabaseConnection dc = null)
+
+        private static string BuildAccountInviteSubject(Account account)
         {
-            var msgs = new SystemMessages();
-            var subject = $"You have been invited by {account.Name} to use {Utilities.AppName(account.IsAfterSchool)}";
+            return $"You have been invited by {account.Name} to use {Utilities.AppName(account.IsAfterSchool)}";
+        }
+
+        private static string BuildAccountInviteBody(WebUser user, Account account, string message)
+        {
             var body = "";
 
             if (!message.IsEmpty())
@@ -61,22 +65,25 @@ namespace AfterSchoolLibrary.Services
             body += "<p>Thank you!!</p>";
             body += Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
 
-            msgs.AddRange(SendGridHelper.SendMail(
+            return body;
+        }
+
+        public static SystemMessages SendInviteToAccount(this WebUser user, Account account, string message, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            return SendGridHelper.SendMail(
                 fromEmail: new EmailAddress(Email.AppEmailAddress, Utilities.AppName(account.IsAfterSchool)),
                 toEmail: new EmailAddress(user.Email),
-                subject: subject,
-                body: body,
+                subject: BuildAccountInviteSubject(account),
+                body: BuildAccountInviteBody(user, account, message),
                 replyTo: new EmailAddress(loggedInUser.Email, loggedInUser.DisplayName),
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                ));
-
-            return msgs;
+                );
         }
 
         public static List<Account> GetAccounts(this WebUser user, DatabaseConnection dc = null)
         {
             return AccountWebUser.LoadByWebUserIdByIsActive(user.ID.Value, true, dc: dc)
-                .Select(x => x.ToAccount())
+                .Select(x => x.ToAccount(loadFromDb: true, dc: dc))
                 .ToList();
         }
 
@@ -263,8 +270,10 @@ namespace AfterSchoolLibrary.Services
                 };                
 
                 msgs.AddRange(user.Save(dc));
+
                 return user;
             }
+
             return null;
         }
 
@@ -318,8 +327,10 @@ namespace AfterSchoolLibrary.Services
                     user.Password = WebUserService.EncryptPassword(password);
 
                 msgs.AddRange(user.Save(dc));
+
                 return user;
             }
+
             return null;
         }
 

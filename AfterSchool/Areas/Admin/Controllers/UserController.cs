@@ -199,6 +199,9 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
+                if (SessionVariables.CurrentAccount.IsEmpty())
+                    return RedirectToAction("select", "login", new { area = "" });
+
                 return LoginRedirect();
             }
             else
