@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 // var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
 
 
-                //if (!AfterSchoolLibrary.Utilities.IsLocalHost && stripeSignature.IsEmpty())
+                //if (!AfterSchoolLibrary.Helpers.Utilities.IsLocalHost && stripeSignature.IsEmpty())
                 //{
                 //    msgs.Add("Invalid Signature", MessageType.Error);
                 //    SendLogEmail(msgs);

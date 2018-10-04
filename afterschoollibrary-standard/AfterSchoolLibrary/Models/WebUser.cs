@@ -370,13 +370,13 @@ namespace AfterSchoolLibrary.Models
             if (!this.IsActive)
                 body += $"<p>Click on the following link to create your account and start using {Utilities.AppName(account.IsAfterSchool)}: <a href=\"{this.GetInviteUrl(account)}\">{this.GetInviteUrl(account)}</a></p>";
             else
-                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{AfterSchoolLibrary.Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{AfterSchoolLibrary.Email.HostName(account.IsAfterSchool)}/login</a></p>";
+                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{AfterSchoolLibrary.Helpers.Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{AfterSchoolLibrary.Helpers.Email.HostName(account.IsAfterSchool)}/login</a></p>";
 
             body += "<p>Thank you!!</p>";
-            body += AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
+            body += AfterSchoolLibrary.Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
 
             msgs.AddRange(SendGridHelper.SendMail(
-                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(AfterSchoolLibrary.Email.AppEmailAddress, Utilities.AppName(account.IsAfterSchool)),
+                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(AfterSchoolLibrary.Helpers.Email.AppEmailAddress, Utilities.AppName(account.IsAfterSchool)),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
                 subject: subject,
                 body: body,

@@ -5,8 +5,8 @@
     string disableAttr = "";
     string readonlyAttr = "";
     var features = (List<PackageFeature>)ViewBag.Features;
-    //disableAttr = Model.IsAnyAccountUsing() && AfterSchoolLibrary.Utilities.IsLiveServer ? " disabled=\"disabled\" " : "";
-    //readonlyAttr = Model.IsAnyAccountUsing() && AfterSchoolLibrary.Utilities.IsLiveServer ? " readonly=\"readonly\" " : "";
+    //disableAttr = Model.IsAnyAccountUsing() && AfterSchoolLibrary.Helpers.Utilities.IsLiveServer ? " disabled=\"disabled\" " : "";
+    //readonlyAttr = Model.IsAnyAccountUsing() && AfterSchoolLibrary.Helpers.Utilities.IsLiveServer ? " readonly=\"readonly\" " : "";
     var featureTypes = System.Enum.GetValues(typeof(FeatureType)).Cast<FeatureType>().OrderBy(x => x.ToString());
 }
 

@@ -1,4 +1,4 @@
-﻿@model AfterSchoolLibrary.Account
+﻿@model Account
 
 @{
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
@@ -30,7 +30,7 @@
             <label class="col-sm-3 control-label">Custom Url</label>
             <div class="col-sm-6">
                 <div class="input-group">
-                    <input type="text" class="form-control" name="uniquename" id="uniquename" value="@value" @customurldisabled /><span class="input-group-addon">.@AfterSchoolLibrary.Utilities.HostName</span>
+                    <input type="text" class="form-control" name="uniquename" id="uniquename" value="@value" @customurldisabled /><span class="input-group-addon">.@AfterSchoolLibrary.Helpers.Utilities.HostName</span>
                 </div>
             </div>
         </div>
