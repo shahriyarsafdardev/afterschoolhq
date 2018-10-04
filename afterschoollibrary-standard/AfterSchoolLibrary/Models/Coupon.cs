@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to give discounts to parents during the purchase of a registration, product, etc
@@ -39,6 +39,11 @@ namespace AfterSchoolLibrary
 		/// The amount of uses that a coupon can have across all users
 		/// </summary>
 		public int? MaxNumberOfUsesAll { get { return (int?)MDV["MaxNumberOfUsesAll"].Value; } set { MDV["MaxNumberOfUsesAll"].Value = value; } }
+		/// <summary>
+		/// If the provider wants to restrict to a specific object
+		/// </summary>
+		public int? PurchaseableObjectId { get { return (int?)MDV["PurchaseableObjectId"].Value; } set { MDV["PurchaseableObjectId"].Value = value; } }
+		public PurchaseableObjectType PurchaseableObjectTypeId { get { return (PurchaseableObjectType)MDV["PurchaseableObjectTypeId"].Value; } set { MDV["PurchaseableObjectTypeId"].Value = value; } }
 		
 
         public Coupon()
@@ -47,6 +52,7 @@ namespace AfterSchoolLibrary
             this.LoadObjectValues(ObjectMap);
 			this.AmountTypeId = AmountType.NotSet;
 			this.AppliesTo = CouponApplyType.NotSet;
+			this.PurchaseableObjectTypeId = PurchaseableObjectType.NotSet;
 			
         }
 
@@ -64,6 +70,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "AppliesTo", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxNumberOfUsesPerPerson", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxNumberOfUsesAll", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PurchaseableObjectId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PurchaseableObjectTypeId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -169,6 +177,14 @@ namespace AfterSchoolLibrary
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["MaxNumberOfUsesAll"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PurchaseableObjectId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PurchaseableObjectTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

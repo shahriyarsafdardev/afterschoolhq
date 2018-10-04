@@ -11,8 +11,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using System;
 using Hangfire;
-
-
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
@@ -294,9 +293,9 @@ namespace AfterSchool.Areas.Admin.Controllers
             Account districtAccount = null;
             var allGradeLevels = GradeLevel.Load();
 
-            if (AfterSchoolLibrary.Utilities.IsProduction)
+            if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
                 districtAccount = Account.Load(84);
-            else if (AfterSchoolLibrary.Utilities.IsQA)
+            else if (AfterSchoolLibrary.Helpers.Utilities.IsQA)
                 districtAccount = Account.Load(193);
             // else
             //     districtAccount = Account.Load(80);

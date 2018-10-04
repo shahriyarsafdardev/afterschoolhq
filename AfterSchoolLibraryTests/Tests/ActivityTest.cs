@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using BasicLibrary.DataAccess;
 using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests

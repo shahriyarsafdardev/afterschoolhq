@@ -6,11 +6,9 @@ using System.Web.Mvc;
 using System.IO;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
 using Hangfire;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -183,7 +181,7 @@ namespace AfterSchool.Areas.Org.Controllers
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -206,7 +204,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 values.Add("registrationthankyouemail", "Thank you for registering");
                 values.Add("applicationthankyouemail", "Thank you for applying");
 
-                activity = Activity.CreateNew(
+                activity = ActivityService.CreateNew(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     values: values,
@@ -297,7 +295,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                         loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                         account: SessionVariables.CurrentAccount,
                         activityId: activity.ID.Value.ToString(),
@@ -370,7 +368,7 @@ namespace AfterSchool.Areas.Org.Controllers
             activity = Activity.LoadByUid(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -433,7 +431,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "description", description}
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -549,7 +547,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "isongoing", isongoing }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -640,7 +638,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "locationtype", locationtype }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -725,7 +723,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "paymentplanperiodnumber", paymentplanperiodnumber }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -790,7 +788,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "applicationthankyouemail", applicationthankyouemail }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -974,6 +972,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             var attendance = activity.GetOrCreateNewAttendance(attendanceId, SessionVariables.LoggedInUser, msgs);
+
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();

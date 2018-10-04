@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
-using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibraryTests
 {

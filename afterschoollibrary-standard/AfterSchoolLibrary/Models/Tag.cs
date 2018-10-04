@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to tag Activities/Teams, Sessions/Leagues in order to make it easier to categorize. Such as Chess, Science, STEM, Basketball, etc

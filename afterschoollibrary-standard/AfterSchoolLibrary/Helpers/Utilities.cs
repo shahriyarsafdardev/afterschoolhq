@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
-using System.Net;
-using System.IO;
 using System.Collections;
 using BasicLibrary;
 using SendGrid.Helpers.Mail;
-using SendGrid;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Helpers
 {
     public class Utilities
     {

@@ -1,12 +1,12 @@
 ﻿using System;
 using BasicLibrary;
-using System.Reflection;
 using System.IO;
 using System.Collections.Specialized;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Linq;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Helpers
 {
     public class EmailHelper
     {

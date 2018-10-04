@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Services
 {
     public static class AccountService
     {
@@ -315,7 +315,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -374,7 +374,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -406,14 +406,14 @@ namespace AfterSchoolLibrary
 
         public static SystemMessages SendWelcomeEmailTrial(this Account account, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
+            return Helpers.EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
         }
 
         public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account, SubscriptionPlan plan, DatabaseConnection dc)
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);            
-            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, plan));
+            msgs.AddRange(Helpers.EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, plan));
             return msgs;
         }
 
@@ -421,7 +421,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);
-            msgs.AddRange(EmailHelper.SendSubscriptionPaymentFailed(account, accountOwner, plan, account.IsAfterSchool));
+            msgs.AddRange(Helpers.EmailHelper.SendSubscriptionPaymentFailed(account, accountOwner, plan, account.IsAfterSchool));
             return msgs;
         }
 
@@ -429,18 +429,18 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);
-            msgs.AddRange(EmailHelper.SendStripeAccountVerified(account, accountOwner, account.IsAfterSchool));
+            msgs.AddRange(Helpers.EmailHelper.SendStripeAccountVerified(account, accountOwner, account.IsAfterSchool));
             return msgs;
         }
 
         public static SystemMessages SendWelcomeEmailPurchase(this Account account, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
+            return Helpers.EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
         }
 
         public static SystemMessages SendInvitedEmail(this Account invitedAccount, WebUser invitedUser, WebUser loggedInUser, string customMessage = null, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
+            return Helpers.EmailHelper.SendAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
         }
 
         #endregion
@@ -787,7 +787,7 @@ namespace AfterSchoolLibrary
         /// <returns></returns>
         public static Form CreateDefaultForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var form = Form.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
+            var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
                 form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Standard Reg Form", msgs, dc);
@@ -1030,7 +1030,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1256,7 +1256,7 @@ namespace AfterSchoolLibrary
 
                 //TODO Notify Host account of request
                 if (msgs.HasNoErrors() && hostAccount.IsActive)
-                    msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
+                    msgs.AddRange(Helpers.EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
             }
             else
             {
@@ -1289,7 +1289,7 @@ namespace AfterSchoolLibrary
                 relationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, hostPermissionType, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
+                msgs.AddRange(Helpers.EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
 
             return relationship;
         }
@@ -1738,7 +1738,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1800,7 +1800,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1942,7 +1942,7 @@ namespace AfterSchoolLibrary
             var activityGroup = ActivityGroup.Load(activityGroupId, msgs);
             var sendingUser = WebUser.Load(sendingUserId, msgs);
 
-            return EmailHelper.SendLeagueAccountInvitedEmail(invitedAccount, activityGroup, sendingUser, customMessage);
+            return Helpers.EmailHelper.SendLeagueAccountInvitedEmail(invitedAccount, activityGroup, sendingUser, customMessage);
         }
 
         public static AccountActivityGroup InviteSchoolToLeague(this Account account, ActivityGroup activityGroup, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1970,7 +1970,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 }
             );
 

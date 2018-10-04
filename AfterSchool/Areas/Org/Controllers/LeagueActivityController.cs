@@ -12,6 +12,7 @@ using AfterSchool.Models;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Hangfire;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.Org.Controllers
 {

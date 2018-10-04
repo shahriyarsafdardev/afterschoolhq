@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// A single registrant for an activity, this is the main person who registered
@@ -329,11 +329,6 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public List<ParticipationObject> GetParticipationObjects(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, msgs, dc).Select(x => x.GetParticipationObject(msgs, dc)).ToList();
-        }
-
         public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivity.LoadByRegistrantId(this.ID.Value, msgs, dc).ToList();
@@ -423,12 +418,12 @@ namespace AfterSchoolLibrary
 
             SendGridHelper.SendMail(
                 fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                    AfterSchoolLibrary.Email.AppEmailAddress, 
-                    $"{af.ActivityContactName} via {Utilities.AppName(isAfterSchool)}"
+                     Helpers.Email.AppEmailAddress, 
+                    $"{af.ActivityContactName} via { Helpers.Utilities.AppName(isAfterSchool)}"
                     ),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.Email, reg.DisplayName.IfBlank(reg.Company)),
                 subject: $"Error processing your registration for {af.Name}",
-                body: $"{body}{(AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification"))}",
+                body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification"))}",
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(
                     af.ActivityContactEmail, 
                     af.ActivityContactName),
@@ -448,12 +443,12 @@ namespace AfterSchoolLibrary
 
             SendGridHelper.SendMail(
                 fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                    AfterSchoolLibrary.Email.AppEmailAddress, 
-                    $"{af.ActivityContactName} via {Utilities.AppName(isAfterSchool)}"
+                    Helpers.Email.AppEmailAddress, 
+                    $"{af.ActivityContactName} via {Helpers.Utilities.AppName(isAfterSchool)}"
                 ),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.Email, reg.DisplayName.IfBlank(reg.Company)),
                 subject: $"Error processing your registration for {af.Name}",
-                body: $"{body}{(AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification"))}",
+                body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification"))}",
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(
                     af.ActivityContactEmail, 
                     af.ActivityContactName),

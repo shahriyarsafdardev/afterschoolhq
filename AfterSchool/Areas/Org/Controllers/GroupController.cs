@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
-using System.Web.Script.Serialization;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
 using Hangfire;
 using AfterSchoolLibrary.Services;
 
@@ -120,7 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "isinviteonly", isinviteonly }
             };
 
-            var group = ActivityGroup.SaveSession(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+            var group = ActivityGroupService.SaveSession(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -240,7 +237,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var registrations = group.GetRegistrations(null, null, null);
 
             BackgroundJob.Enqueue(() =>
-                RegistrationPeriod.NotifyRegistrants(
+                RegistrationPeriodService.NotifyRegistrants(
                     regperiod.ID.Value, 
                     emailmessage, 
                     registrations.Select(x => x.ID.Value).ToList(), 
@@ -390,7 +387,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 questionId = question.ToInteger();
 
             BackgroundJob.Enqueue(() =>
-                Registration.EmailCSVReport(
+                RegistrationService.EmailCSVReport(
                     account.ID.Value, 
                     q, 
                     questionId,
@@ -804,7 +801,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "scheduledetails", scheduledetails}
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: id,

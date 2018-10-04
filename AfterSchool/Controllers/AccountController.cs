@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using System;
 using Hangfire;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Controllers
 {

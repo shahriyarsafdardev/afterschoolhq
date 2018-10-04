@@ -5,6 +5,7 @@ using BasicLibrary;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Controllers
 {

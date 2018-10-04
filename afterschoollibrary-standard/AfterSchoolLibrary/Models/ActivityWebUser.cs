@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// This is how you add a non-admin user on an account to an Activity/Team. This would be for adding volunteers, coaches, other assistants to a specific activity. A user must have a record in order to view an Activity/Team for an account.

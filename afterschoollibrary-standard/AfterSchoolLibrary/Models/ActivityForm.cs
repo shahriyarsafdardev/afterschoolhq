@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// The relationship between an Activity and a Form. An activity can have multiple forms assigned, but only one can be active at a time. Would love to deprecate this in the future and store the form id directly on the activity class.
@@ -333,7 +333,7 @@ namespace AfterSchoolLibrary
                     Details = this.ActivityDetails,
                     LocationDetails = this.ActivityLocationDetails,
                     Name = this.ActivityName,
-                    RegistrationTimeZone = this.ActivityRegistrationTimeZone,
+                    // RegistrationTimeZone = this.ActivityRegistrationTimeZone,
                     SeatsAvailable = this.ActivitySeatsAvailable,
                     ContactName = this.ActivityContactName,
                     ContactEmail = this.ActivityContactEmail,

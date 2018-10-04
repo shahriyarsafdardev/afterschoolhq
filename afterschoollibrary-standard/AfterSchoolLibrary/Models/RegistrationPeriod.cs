@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// The registration time window that the registrant/student has to be able to register online
@@ -196,18 +196,6 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public string GetStatus(DatabaseConnection dc = null)
-        {
-            if (WillOpen(dc: dc))
-                return "Not Open";
-            else if (IsOpen(dc: dc))
-                return "Open";
-            else if (IsClosed(dc: dc))
-                return "Closed";
-
-            return "N/A";
-        }
-
         public static List<RegistrationPeriod> LoadByActivityGroupIds(List<int> ActivityGroupIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -281,37 +269,6 @@ namespace AfterSchoolLibrary
             }
 
             return rtnName;
-        }
-
-        public bool IsOpen(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return this.StartDateTime.Value <= now && this.EndDateTime.Value >= now;
-        }
-
-        public bool IsClosed(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return !IsOpen(msgs, dc);
-            //var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            //return this.EndDateTime.Value < now;
-        }
-
-        public bool WillOpen(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return this.StartDateTime.Value > now;
-        }
-
-        public TimeSpan WillOpenIn(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return this.StartDateTime.Value - now;
-        }
-
-        public TimeSpan WillCloseIn(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var now = this.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            return this.EndDateTime.Value - now;
         }
 
         public List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -517,57 +474,6 @@ namespace AfterSchoolLibrary
                 }
             }
             return _Account;
-        }
-
-        public static SystemMessages NotifyRegistrants(int id, string emailmessage, List<int> registrationIds = null, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var regPeriod = RegistrationPeriod.Load(id, dc: dc);
-            var account = regPeriod.GetAccount(dc: dc);
-            var registrations = new List<Registration>();
-
-            if (registrationIds.IsEmpty())
-                registrations = regPeriod.GetGroup(dc: dc).GetRegistrations(dc: dc);
-            else
-                registrations = Registration.LoadList(registrationIds, dc: dc);
-
-            if (registrations.Any())
-            {
-                var subject = "";
-                var body = "";
-
-                if (regPeriod.IsOpen())
-                {
-                    subject = $"Registration for {account.Name} is open again";
-                    body = "<p>{0},</p>{3}<p>Please click the following link to add to your registration: {1}</p>{2}";
-                }
-                else if (regPeriod.WillOpen())
-                {
-                    subject = $"Registration for {account.Name} will open again soon";
-                    body = "<p>{0},</p>{3}<p>Registration will open " + regPeriod.StartDateTime.ToShortDateString() + ". Please click the following link to add to your registration: {1}</p>{2}";
-                }
-
-                foreach (var reg in registrations)
-                {
-                    SendGridHelper.SendMail(
-                        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                            Email.AppEmailAddress, 
-                            $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"),
-                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.RegistrantEmail, reg.Name),
-                        subject: subject,
-                        body: string.Format(
-                            body, 
-                            reg.RegistrantFirstName, 
-                            reg.AddToRegistrationUrl, 
-                            Email.GetAppSignature(account.IsAfterSchool, "invite_enrollees"), 
-                            emailmessage),
-                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                    );
-                }
-            }
-
-            return msgs;
         }
 
         #endregion

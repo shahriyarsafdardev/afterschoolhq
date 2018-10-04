@@ -1,4 +1,4 @@
-[namespace:AfterSchoolLibrary]
+[namespace:AfterSchoolLibrary.Models]
 
 [begin]
 type: Database
@@ -53,14 +53,14 @@ loadmethod: IsActive, List<>
 loadmethod: FacebookId
 [end]
 
-[begin]
+[-begin]
 type: Class
 name: Program
 description: A program is like a karate program and has multiple activities
 inherits: BasicLookUpObject
 property: DefaultInstructorId, int?, Int
 property: 
-[end]
+[-end]
 
 [begin]
 type: Class
@@ -1428,6 +1428,8 @@ property: ExpirationDate, DateTime?, DateTime
 property: AppliesTo, CouponApplyType, Int, , Determines what type of object the coupon will apply to during a purchase, All types of items in cart, or only one type of item
 property: MaxNumberOfUsesPerPerson, int?, Int
 property: MaxNumberOfUsesAll, int?, Int, , The amount of uses that a coupon can have across all users
+property: PurchaseableObjectId, int?, Int, , If the provider wants to restrict to a specific object
+property: PurchaseableObjectTypeId, PurchaseableObjectType, Int
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 [end]
@@ -1471,7 +1473,7 @@ values: NotSet, Percentage, FlatAmount
 [begin]
 type: Enum
 name: CouponApplyType
-values: NotSet, All, SubscriptionPlan, PaymentPlan, TuitionFee, Product
+values: NotSet, All, SubscriptionPlan, PaymentPlan, TuitionFee, Product, Activity
 [end]
 
 [begin]
@@ -1622,6 +1624,12 @@ values: NotSet, Charge, Refund
 type: Enum
 name: ParticipationObjectType
 values: NotSet, Activity, ActivityGroup, AccountActivityGroup
+[end]
+
+[begin]
+type: Enum
+name: PurchaseableObjectType
+values: NotSet, Activity, ActivityGroup, AccountActivityGroup, Product
 [end]
 
 [begin]

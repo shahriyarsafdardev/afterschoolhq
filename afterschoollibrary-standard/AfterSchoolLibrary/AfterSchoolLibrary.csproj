@@ -21,6 +21,7 @@
     <Compile Remove="Models\RegistrantPaymentPlan.cs" />
     <Compile Remove="Models\RegistrationActivity.cs" />
     <Compile Remove="Models\RegistrationRandomization.cs" />
+    <Compile Remove="Models\Season.cs" />
     <Compile Remove="RecurrenceType.cs" />
     <Compile Remove="Services\PaymentPlanService.cs" />
     <Compile Remove="Services\RegistrantPaymentPlanService.cs" />

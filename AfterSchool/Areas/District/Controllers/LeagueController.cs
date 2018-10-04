@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using AfterSchool.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using System.Collections.Specialized;
 using AfterSchoolLibrary.Services;
 using Hangfire;
@@ -149,7 +149,7 @@ namespace AfterSchool.Areas.District.Controllers
             var registrations = group.GetRegistrations(null, null, null);
 
             BackgroundJob.Enqueue(() =>
-                RegistrationPeriod.NotifyRegistrants(
+                RegistrationPeriodService.NotifyRegistrants(
                     regperiod.ID.Value,
                     emailmessage,
                     registrations.Select(x => x.ID.Value).ToList(),
@@ -356,7 +356,7 @@ namespace AfterSchool.Areas.District.Controllers
             values.Add("schedule", schedule);
             values.Add("isongoing", isongoing);
 
-            var league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+            var league = ActivityGroupService.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {

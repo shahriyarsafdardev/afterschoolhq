@@ -9,6 +9,8 @@ using AfterSchoolLibrary;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibraryTests.Factories;
+using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests
 {

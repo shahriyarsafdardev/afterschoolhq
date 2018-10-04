@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using System.Collections.Specialized;
 
 namespace AfterSchool.Models
@@ -21,7 +21,7 @@ namespace AfterSchool.Models
             return new FormQuestionViewModel(question);
         }
 
-        public static AddressViewModel ToAddressViewModel(this AfterSchoolLibrary.StripeAccount stripeAccount)
+        public static AddressViewModel ToAddressViewModel(this StripeAccount stripeAccount)
         {
             return new AddressViewModel()
             {

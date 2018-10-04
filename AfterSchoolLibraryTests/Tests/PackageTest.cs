@@ -3,6 +3,7 @@ using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibrary;
 using BasicLibrary;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests.Tests
 {

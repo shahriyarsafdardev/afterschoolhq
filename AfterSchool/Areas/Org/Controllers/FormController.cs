@@ -7,6 +7,8 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Areas.Org.Controllers
 {

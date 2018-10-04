@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibraryTests.Factories;
 using AfterSchoolLibrary.Services;
 using System.Linq;

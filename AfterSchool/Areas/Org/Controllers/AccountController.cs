@@ -7,8 +7,8 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Services;
-using System.IO;
 using Hangfire;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -30,8 +30,8 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult Edit(string id, string name, string email, string phone, string uniquename, string isactive, string timezone)
         {
-            SystemMessages msgs = new SystemMessages();
-            Account a = SessionVariables.CurrentAccount;                                
+            var msgs = new SystemMessages();
+            var a = SessionVariables.CurrentAccount;                                
 
             if (name.IsEmpty())
             {
@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (location.IsNumber())
             {
-                var currentLocation = AfterSchoolLibrary.Location.Load(location.ToInteger(), msgs);
+                var currentLocation = AfterSchoolLibrary.Models.Location.Load(location.ToInteger(), msgs);
 
                 if (currentLocation.IsOwnedByOrIsNotOwnedAtAll(SessionVariables.CurrentAccount))
                 {

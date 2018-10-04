@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Web;
 using BasicLibrary;
-using AfterSchoolLibrary;
-using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Models
 {

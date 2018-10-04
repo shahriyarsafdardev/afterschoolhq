@@ -3,8 +3,9 @@ using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AfterSchoolLibrary.Services;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
     public class CheckoutObject
     {

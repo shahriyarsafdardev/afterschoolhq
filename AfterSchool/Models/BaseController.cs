@@ -10,6 +10,7 @@ using System.Xml.Serialization;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Models
 {
