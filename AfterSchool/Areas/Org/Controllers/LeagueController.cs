@@ -204,7 +204,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var registrations = group.GetRegistrations(null, null, null);
 
             BackgroundJob.Enqueue(() =>
-                RegistrationPeriod.NotifyRegistrants(
+                RegistrationPeriodService.NotifyRegistrants(
                     regperiod.ID.Value,
                     emailmessage,
                     registrations.Select(x => x.ID.Value).ToList(),
@@ -506,7 +506,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "maxgrade", maxgrade }
                 };
 
-                league = ActivityGroup.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+                league = ActivityGroupService.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 
                 if (msgs.HasNoErrors())
                 {

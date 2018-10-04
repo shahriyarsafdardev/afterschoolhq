@@ -402,7 +402,6 @@
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
     <Compile Include="Controllers\OAuthController.cs" />
-    <Compile Include="Controllers\PricingController.cs" />
     <Compile Include="Controllers\RController.cs" />
     <Compile Include="Controllers\RegController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />

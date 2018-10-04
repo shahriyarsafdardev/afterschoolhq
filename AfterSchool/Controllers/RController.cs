@@ -37,7 +37,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Account(string accountname)
         {
-            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname);
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
             RestartRegistrationSession();
             SetRegistrationStartPage(account, true);
             return Redirect($"/{accountname}/browse");            
@@ -47,7 +47,7 @@ namespace AfterSchool.Controllers
         public ActionResult Browse(string accountname)
         {
             var msgs = new SystemMessages();
-            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname);
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname);
 
             RestartRegistrationSession();
             SetRegistrationStartPage(account, true);
@@ -94,11 +94,11 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
 
-            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
             SetRegistrationStartPage(account);
 
-            var activity = AfterSchoolLibrary.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
             
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
@@ -112,12 +112,12 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
 
-            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
 
             SetRegistrationStartPage(account);
 
-            var districtAccount = AfterSchoolLibrary.Account.LoadByUniqueName(districtname, msgs);
-            var league = AfterSchoolLibrary.ActivityGroup.LoadByAccountIdByUniqueName(districtAccount.ID.Value, leaguename, msgs);
+            var districtAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(districtname, msgs);
+            var league = AfterSchoolLibrary.Models.ActivityGroup.LoadByAccountIdByUniqueName(districtAccount.ID.Value, leaguename, msgs);
             var aag = league.GetAccountActivityGroup(account, msgs);
 
             ViewBag.Messages = msgs;
@@ -129,8 +129,8 @@ namespace AfterSchool.Controllers
         public ActionResult Register(string accountname, string activitytype, string activityname)
         {
             var msgs = new SystemMessages();
-            var account = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
-            var activity = AfterSchoolLibrary.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
             var participationObject = activity.ToParticipationObject(msgs);
 
             SetRegistrationStartPage(account);
@@ -147,9 +147,9 @@ namespace AfterSchool.Controllers
         public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group)
         {
             var msgs = new SystemMessages();
-            var currentAccount = AfterSchoolLibrary.Account.LoadByUniqueName(accountname, msgs);
+            var currentAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var activityGroupType = activitygrouptype.ParseEnum<ActivityGroupType>();
-            var externalAccount = AfterSchoolLibrary.Account.LoadByUniqueName(externalaccountname, msgs);
+            var externalAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(externalaccountname, msgs);
             var activityGroup = ActivityGroup.LoadByAccountIdByUniqueName(externalAccount.ID.Value, group, msgs);
             var aag = activityGroup.GetAccountActivityGroup(currentAccount, msgs);
             var participationObject = aag.ToParticipationObject(msgs);

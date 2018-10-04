@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchool.Models;
 
 namespace AfterSchool.Controllers
@@ -14,7 +14,7 @@ namespace AfterSchool.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            if (AfterSchool.Models.Utilities.IsAfterSchool())
+            if (Models.Utilities.IsAfterSchool())
             {
                 return Redirect("/public/");
             }
@@ -29,7 +29,7 @@ namespace AfterSchool.Controllers
         }
         public ActionResult ASHQ()
         {
-            AfterSchool.Models.Utilities.SetAfterSchool(true);
+            Models.Utilities.SetAfterSchool(true);
             var package = Package.LoadByIsActiveByIsAfterSchool(true, true).FirstOrDefault();
             ViewBag.Package = package;
             return View();

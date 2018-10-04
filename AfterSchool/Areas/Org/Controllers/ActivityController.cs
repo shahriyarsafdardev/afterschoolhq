@@ -811,7 +811,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "prev":
-                        if (activity.CanAcceptPayments)
+                        if (activity.CanAcceptPayments())
                         {
                             ViewBag.ActiveMenu = "EditCost";
                             ViewBag.PaymentPlan = activity.GetPaymentPlan();

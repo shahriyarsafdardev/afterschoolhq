@@ -1532,6 +1532,11 @@ namespace AfterSchoolLibrary.Services
             return now > instances.Last().StartDateTime;
         }
 
+        public static bool CanAcceptPayments(this Activity activity)
+        {
+            return activity.GetAccount().GetActiveAccountPackage().HasFeature(FeatureType.AcceptPayments);
+        }
+
 
         public static bool HasTeamMatches(this Activity actitivy, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

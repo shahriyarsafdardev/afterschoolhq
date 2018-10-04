@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 using AfterSchool.Models;
 using AfterSchool.Helpers;
@@ -60,40 +59,23 @@ namespace AfterSchool.Controllers
                 var status = "";
 
                 if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-                {
                     msgs.Add("Please enter an email", MessageType.UserError);
-                }
+
                 if (subject.IsBlank())
-                {
                     msgs.Add("Please enter a subject", MessageType.UserError);
-                }
+
                 if (message.IsBlank())
-                {
                     msgs.Add("Please enter a message", MessageType.UserError);
-                }
 
                 msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
 
                 if (msgs.HasNoErrors())
-                {
-                    /*
-                    var msg = new System.Net.Mail.MailMessage();
-                    msg.To.Add(AfterSchoolLibrary.Email.AppAdminEmailAddress);
-                    msg.From = new System.Net.Mail.MailAddress(AfterSchoolLibrary.Email.AppEmailAddress);
-                    msg.Subject = string.Format("WEBSITE FORM: {0}", subject);
-                    msg.Body = string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message);
-                    msg.IsBodyHtml = true;
-
-                    AfterSchoolLibrary.Email.SendMail(msg);
-                    */
-
                     msgs.AddRange(EmailHelper.SendEmail(
                         toEmail: "sales@afterschoolhq.com",
                         subject: string.Format("WEBSITE FORM: {0}", subject),
                         body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message),
                         isAfterSchool: true
-                        ));                    
-                }
+                        ));   
 
                 status = msgs.HasNoErrors() ? "ok" : "error";
 

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
-using AfterSchool.Models;
-using System.Threading.Tasks;
-using Hangfire;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
+using AfterSchool.Models;
+using Hangfire;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -164,7 +163,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
 
             BackgroundJob.Enqueue(() =>
-                Registration.EmailCSVReport(
+                RegistrationService.EmailCSVReport(
                     account.ID.Value,
                     q,
                     questionId,

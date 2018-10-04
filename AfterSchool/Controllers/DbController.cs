@@ -20,7 +20,12 @@ namespace AfterSchool.Controllers
             {
                 var msgs = new SystemMessages();
 
-                msgs.AddRange(AfterSchoolLibrary.Utilities.InitDatabase("darye@afterschoolhq.com", "help students learn", "317-316-0596", false, "AfterSchool HQ"));
+                msgs.AddRange(AfterSchoolLibrary.Helpers.Utilities.InitDatabase(
+                    "darye@afterschoolhq.com", 
+                    "help students learn", 
+                    "317-316-0596", 
+                    false, 
+                    "AfterSchool HQ"));
 
                 Response.Clear();
                 Response.Write(msgs.RenderMessageList(MessageOutputType.Text));

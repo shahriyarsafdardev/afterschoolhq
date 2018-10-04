@@ -237,7 +237,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id != "0") activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -257,7 +257,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         values.Add("form", newForm.ID.Value.ToString());
                 }
 
-                activity = Activity.CreateNew(
+                activity = ActivityService.CreateNew(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     values: values,
@@ -343,7 +343,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                         loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                         account: SessionVariables.CurrentAccount,
                         activityId: activity.ID.Value.ToString(),
@@ -415,7 +415,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -571,7 +571,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "scheduledetails", scheduledetails}
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -684,7 +684,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "isongoing", isongoing }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -775,7 +775,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "mylocation", mylocation }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -848,7 +848,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "allowtopaylater", allowtopaylater.IfBlank("0")}
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -911,7 +911,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "applicationthankyouemail", applicationthankyouemail }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -934,7 +934,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "prev":
-                        if (activity.CanAcceptPayments)
+                        if (activity.CanAcceptPayments())
                         {
                             ViewBag.ActiveMenu = "EditCost";
                             return View("EditCost", activity);

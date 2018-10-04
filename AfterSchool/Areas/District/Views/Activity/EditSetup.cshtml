@@ -1,7 +1,7 @@
-﻿@model AfterSchoolLibrary.Activity
+﻿@model Activity
 @{
     ViewBag.Title = ((Account)ViewBag.Account).Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var group = (ActivityGroup)ViewBag.Group;
     var mainColWidth = 10;

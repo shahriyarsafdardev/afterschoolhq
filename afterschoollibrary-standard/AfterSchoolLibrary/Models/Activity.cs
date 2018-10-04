@@ -480,14 +480,6 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        //public bool CanAcceptPayments
-        //{
-        //    get
-        //    {
-        //        return this.GetAccount().GetActiveAccountPackage().HasFeature(FeatureType.AcceptPayments);
-        //    }
-        //}
-
         public static List<Activity> LoadList(List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
