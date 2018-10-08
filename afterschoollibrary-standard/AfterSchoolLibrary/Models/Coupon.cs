@@ -27,7 +27,11 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// Either a percentage or a flat amount
 		/// </summary>
-		public AmountType AmountTypeId { get { return (AmountType)MDV["AmountTypeId"].Value; } set { MDV["AmountTypeId"].Value = value; } }
+		public CouponAmountType CouponAmountTypeId { get { return (CouponAmountType)MDV["CouponAmountTypeId"].Value; } set { MDV["CouponAmountTypeId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// the account that is the owner
+		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public DateTime? ExpirationDate { get { return (DateTime?)MDV["ExpirationDate"].Value; } set { MDV["ExpirationDate"].Value = value; } }
 		/// <summary>
@@ -39,20 +43,15 @@ namespace AfterSchoolLibrary.Models
 		/// The amount of uses that a coupon can have across all users
 		/// </summary>
 		public int? MaxNumberOfUsesAll { get { return (int?)MDV["MaxNumberOfUsesAll"].Value; } set { MDV["MaxNumberOfUsesAll"].Value = value; } }
-		/// <summary>
-		/// If the provider wants to restrict to a specific object
-		/// </summary>
-		public int? PurchaseableObjectId { get { return (int?)MDV["PurchaseableObjectId"].Value; } set { MDV["PurchaseableObjectId"].Value = value; } }
-		public PurchaseableObjectType PurchaseableObjectTypeId { get { return (PurchaseableObjectType)MDV["PurchaseableObjectTypeId"].Value; } set { MDV["PurchaseableObjectTypeId"].Value = value; } }
+		public string CouponCode { get { return (string)MDV["CouponCode"].Value; } set { MDV["CouponCode"].Value = value; } }
 		
 
         public Coupon()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(Coupon).Name, "ID");
             this.LoadObjectValues(ObjectMap);
-			this.AmountTypeId = AmountType.NotSet;
+			this.CouponAmountTypeId = CouponAmountType.NotSet;
 			this.AppliesTo = CouponApplyType.NotSet;
-			this.PurchaseableObjectTypeId = PurchaseableObjectType.NotSet;
 			
         }
 
@@ -64,14 +63,13 @@ namespace AfterSchoolLibrary.Models
                 string className = typeof(Coupon).Name;
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
-				_dp.Add(className, "AmountTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CouponAmountTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ExpirationDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "AppliesTo", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxNumberOfUsesPerPerson", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxNumberOfUsesAll", System.Data.SqlDbType.Int);
-				_dp.Add(className, "PurchaseableObjectId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "PurchaseableObjectTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CouponCode", System.Data.SqlDbType.NVarChar , "50");
 				
                 return _dp;
             }
@@ -125,8 +123,10 @@ namespace AfterSchoolLibrary.Models
 
 			if (this.Amount.IsEmpty())
 				msgs.Add("Amount is required on Coupon object", MessageType.Error);
-			if (this.AmountTypeId.IsEmpty())
-				msgs.Add("AmountTypeId is required on Coupon object", MessageType.Error);
+			if (this.CouponAmountTypeId.IsEmpty())
+				msgs.Add("CouponAmountTypeId is required on Coupon object", MessageType.Error);
+			if (this.AccountId.IsEmpty())
+				msgs.Add("AccountId is required on Coupon object", MessageType.Error);
 			if (this.Name.IsEmpty())
 				msgs.Add("Name is required on Coupon object", MessageType.Error);
 			
@@ -156,7 +156,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AmountTypeId"]);
+			dps.Add(ObjectMap["CouponAmountTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -180,11 +180,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PurchaseableObjectId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PurchaseableObjectTypeId"]);
+			dps.Add(ObjectMap["CouponCode"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -203,6 +199,15 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static Coupon LoadByAccountIdByCouponCode(int AccountId, string CouponCode, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["CouponCode"], CouponCode);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

@@ -1857,6 +1857,11 @@ namespace AfterSchoolLibrary.Services
                 dc: dc) > 0;
         }
 
+        public static void AttachCoupon(this Account account, Coupon coupon, DatabaseActionHelper databaseActivity)
+        {
+
+        }
+
         #endregion
 
         #region Leagues

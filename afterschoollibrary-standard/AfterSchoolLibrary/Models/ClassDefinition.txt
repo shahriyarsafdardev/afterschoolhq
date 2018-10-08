@@ -1422,27 +1422,41 @@ name: Coupon
 description: Used to give discounts to parents during the purchase of a registration, product, etc
 inherits: BasicLookUpObject
 property: Amount, decimal?, Money, required, Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
-property: AmountTypeId, AmountType, Int, required, Either a percentage or a flat amount
-property: AccountId, int?, Int
+property: CouponAmountTypeId, CouponAmountType, Int, required, Either a percentage or a flat amount
+property: AccountId, int?, Int, required, the account that is the owner
 property: ExpirationDate, DateTime?, DateTime
 property: AppliesTo, CouponApplyType, Int, , Determines what type of object the coupon will apply to during a purchase, All types of items in cart, or only one type of item
 property: MaxNumberOfUsesPerPerson, int?, Int
 property: MaxNumberOfUsesAll, int?, Int, , The amount of uses that a coupon can have across all users
-property: PurchaseableObjectId, int?, Int, , If the provider wants to restrict to a specific object
-property: PurchaseableObjectTypeId, PurchaseableObjectType, Int
+property: CouponCode, string, NVarChar "50"
 baseproperty: Name, required
 loadmethod: AccountId, List<>
+loadmethod: AccountId|CouponCode
 [end]
 
 [begin]
 type: Class
-name: AssignedCoupon
-description: Used to assign a coupon to an activity/activitygroup
+name: AttachedCoupon
+description: Used to specifically attach a coupon to an account so they don't have to worry about codes. Typically only parent accounts
+inherits: BasicObject
+property: CouponId, int?, Int, required
+property: AccountId, int?, Int, required
+loadmethod: CouponId, List<>
+loadmethod: AccountId, List<>
+loadmethod: CouponId|AccountId
+[end]
+
+[begin]
+type: Class
+name: PurchaseableObjectCoupon
+description: Used to limit coupons to particlar objects
 inherits: BasicObjectWithModified
-property: ParticipationObjectId, int?, Int
-property: ParticipationObjectTypeId, ParticipationObjectType, Int
-property: CouponId, int?, Int
-loadmethod: CouponId|ParticipationObjectId|ParticipationObjectTypeId, , LoadByCouponByParticipationObject
+property: PurchaseableObjectId, int?, Int, required
+property: PurchaseableObjectTypeId, PurchaseableObjectType, Int, required
+property: CouponId, int?, Int, required
+loadmethod: CouponId|PurchaseableObjectId|PurchaseableObjectTypeId, , LoadByCouponByPurchaseableObject
+loadmethod: CouponId, List<>
+loadmethod: PurchaseableObjectId|PurchaseableObjectTypeId, List<>, LoadByPurchaseableObject
 [end]
 
 [begin]
@@ -1466,7 +1480,7 @@ loadmethod: CouponId, List<>
 
 [begin]
 type: Enum
-name: AmountType
+name: CouponAmountType
 values: NotSet, Percentage, FlatAmount
 [end]
 
