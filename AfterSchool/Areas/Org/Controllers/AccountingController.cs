@@ -44,7 +44,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountPaidTo(startDate, endDate, msgs);
+            ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidBy(startDate, endDate, msgs);
+            ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = totalTransactionCount,

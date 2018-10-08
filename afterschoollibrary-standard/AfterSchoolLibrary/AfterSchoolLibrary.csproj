@@ -17,6 +17,7 @@
     <Compile Remove="ActivityRecurrence.cs" />
     <Compile Remove="Archive.cs" />
     <Compile Remove="Leader.cs" />
+    <Compile Remove="Models\AssignedCoupon.cs" />
     <Compile Remove="Models\PaymentPlan.cs" />
     <Compile Remove="Models\RegistrantPaymentPlan.cs" />
     <Compile Remove="Models\RegistrationActivity.cs" />

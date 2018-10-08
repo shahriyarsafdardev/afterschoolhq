@@ -761,7 +761,7 @@ namespace AfterSchoolLibrary.Models
             regQuery.SelectParameters.Add(
                 Registration.ObjectMap["Id"], 
                 "regid", 
-                string.Format("ISNULL({0}, {1})", DatabaseQuery.FunctionReplaceValue, ObjectMap["ID"].ParameterFullName)
+                $"ISNULL({DatabaseQuery.FunctionReplaceValue}, {ObjectMap["ID"].ParameterFullName})"
                 );
 
             regQuery.Criterias.Add(ObjectMap["AccountId"], accountId);

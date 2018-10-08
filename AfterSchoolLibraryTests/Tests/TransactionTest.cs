@@ -142,7 +142,7 @@ namespace AfterSchoolLibraryTests
                 var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
-            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountReceivedByAccountId(BillerAccount.ID.Value, msgs, dc));
+            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidToBillerAccount(BillerAccount.ID.Value, null, null, msgs, dc));
         }
 
         [Fact]
@@ -161,7 +161,7 @@ namespace AfterSchoolLibraryTests
                 var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
-            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidByAccountId(PayerAccount.ID.Value, msgs, dc));
+            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidByPayerAccount(PayerAccount.ID.Value, msgs, dc));
         }
     }
 }

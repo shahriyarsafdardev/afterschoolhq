@@ -20,5 +20,10 @@ namespace AfterSchoolLibrary.Models
         {
             this.Messages.AddRange(msgs);
         }
+
+        public void AddMessage(SystemMessage msg)
+        {
+            this.Messages.Add(msg);
+        }
     }
 }

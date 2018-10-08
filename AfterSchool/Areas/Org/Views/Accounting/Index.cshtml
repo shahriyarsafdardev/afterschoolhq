@@ -2,9 +2,9 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
-    var totalTransactionAmount = Model.Sum(transaction => transaction.Amount.Value);
+    var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
-    var totalFees = Model.Sum(transaction => (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value);
+    var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalTransactionAmount - totalFees;
 }
 

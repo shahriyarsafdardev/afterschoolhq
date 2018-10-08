@@ -1857,9 +1857,15 @@ namespace AfterSchoolLibrary.Services
                 dc: dc) > 0;
         }
 
-        public static void AttachCoupon(this Account account, Coupon coupon, DatabaseActionHelper databaseActivity)
+        public static AttachedCoupon AttachCoupon(this Account account, Coupon coupon, DatabaseActionHelper actionHelper)
         {
+            if (account.AccountTypeId != AccountType.Registrant)
+            {
+                actionHelper.AddMessage(new SystemMessage("Coupon can only be applied to Registrant accounts", MessageType.Error));
+                return null;
+            }
 
+            return AttachedCouponService.CreateNew(account, coupon, actionHelper);
         }
 
         #endregion
@@ -1981,10 +1987,15 @@ namespace AfterSchoolLibrary.Services
 
             return accountActivityGroups;
         }
-        
-        public static decimal GetTotalAmountPaid(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+
+        public static decimal GetTotalAmountPaidTo(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.GetTotalPaidByAccount(account.ID.Value, msgs, dc);
+            return Transaction.GetTotalAmountPaidToBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
+        }
+
+        public static decimal GetTotalFeesPaidBy(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
         #endregion

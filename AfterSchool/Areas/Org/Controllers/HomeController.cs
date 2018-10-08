@@ -39,7 +39,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Actions = actions;
             ViewBag.HasVisitorAccountsToApprove = SessionVariables.CurrentAccount.GetRequestedVisitorAccountsCount() > 0;
             ViewBag.HasOutstandingLeagueInvites = SessionVariables.CurrentAccount.GetExternalLeagueInviteCount() > 0;
-            ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountPaid();
+            ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountPaidTo();
             return View(account);
         }
     }
