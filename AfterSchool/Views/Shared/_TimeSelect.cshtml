@@ -13,7 +13,7 @@
     }
 }
 
-<select name="@ViewData["name"]" id="@ViewData["id"]" class="form-control" @required @disabled>
+<select name="@ViewData["name"]" id="@ViewData["id"]" class="form-control" @required @disabled >
     @foreach (var ampm in new string[] { "am", "pm" })
     {
         for (var h = 0; h < 12; h++)

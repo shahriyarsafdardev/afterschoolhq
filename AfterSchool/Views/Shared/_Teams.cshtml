@@ -90,9 +90,10 @@ else
     <div class="row">
         <div class="col-md-12">
             <div class="pull-right">
-                <a href="@currentListUrl" class="@currentClass">Current</a> |
                 @if (hasArchivedActivities)
                 {
+                    <a href="@currentListUrl" class="@currentClass">Current</a> 
+                    <span>|</span>
                     <a href="@archivedListUrl" class="@archiveClass">Archived</a>
                 }
             </div>
