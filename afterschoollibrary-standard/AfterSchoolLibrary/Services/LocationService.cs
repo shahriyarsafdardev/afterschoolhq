@@ -143,25 +143,25 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            List<KeyValuePair<string, string>> requiredFields = new List<KeyValuePair<string, string>>()
-            {
-               new  KeyValuePair<string, string>( "Address", address1),
-               new  KeyValuePair<string, string>( "City", city),
-               new  KeyValuePair<string, string>( "State", state),
-               new  KeyValuePair<string, string>( "Postal Code", postalCode),
-               new  KeyValuePair<string, string>( "Country", country),
-            };
+            //List<KeyValuePair<string, string>> requiredFields = new List<KeyValuePair<string, string>>()
+            //{
+            //   new  KeyValuePair<string, string>( "Address", address1),
+            //   new  KeyValuePair<string, string>( "City", city),
+            //   new  KeyValuePair<string, string>( "State", state),
+            //   new  KeyValuePair<string, string>( "Postal Code", postalCode),
+            //   new  KeyValuePair<string, string>( "Country", country),
+            //};
 
-            requiredFields.ForEach((field) =>
-            {
-                if (field.Value == "")
-                    msgs.Add(string.Format("{0} is required", field.Key), MessageType.UserError);
-            });
+            //requiredFields.ForEach((field) =>
+            //{
+            //    if (field.Value == "")
+            //        msgs.Add(string.Format("{0} is required", field.Key), MessageType.UserError);
+            //});
 
-            if (msgs.HasErrors())
-            {
-                return null;
-            }
+            //if (msgs.HasErrors())
+            //{
+            //    return null;
+            //}
             var location = new Location()
             {
                 Address1 = address1,

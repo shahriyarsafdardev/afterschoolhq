@@ -50,6 +50,8 @@
                     var matchTeams = "";
                     var location = new Location();
                     var locationName = " @ TBD";
+                    var startTime = activityInstance.StartDateTime.Value.ToShortTimeString();
+                    var endTime = activityInstance.EndDateTime.Value.ToShortTimeString();
                     if (activityInstance.LocationId.IsNotEmpty())
                     {
                         location = Location.Load(activityInstance.LocationId.Value);
@@ -75,7 +77,7 @@
                     <h6>
                         <a href="@Url.Action("editgame", "league", new { id = Model.Uid, instance = activityInstance.ID.Value})">
                             <i class="icon icon-left s7-more"></i>
-                            @activityInstance.StartDateTime.Value.ToShortTimeString() @locationName @matchTeams
+                            @startTime - @endTime @locationName @matchTeams
                         </a>
                     </h6>
                        

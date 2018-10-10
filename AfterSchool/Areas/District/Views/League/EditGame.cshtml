@@ -5,9 +5,8 @@
     var forms = (List<Form>)ViewBag.Forms;
     var schedule = (ActivitySchedule)ViewBag.Schedule;
     var activityInstance = (ActivityInstance)ViewBag.ActivityInstance;
-    DateTime date = ViewBag.Date ?? DateTime.UtcNow;
-    var startTime = DateTime.UtcNow;
-    var endTime = DateTime.UtcNow;
+    DateTime startDateTime = ViewBag.StartDateTime;
+    DateTime endDateTime = ViewBag.EndDateTime;
     var teams = (List<Activity>)ViewBag.Teams;
     var currentTeams = (List<Activity>)ViewBag.CurrentTeams;
     var currentAccount = (Account)ViewBag.CurrentAccount;
@@ -24,7 +23,14 @@
     if (ViewBag.Location != null)
     {
         location = ViewBag.Location;
-    } 
+    }
+
+    var hideDelete = "";
+
+    if (activityInstance.IsEmpty())
+    {
+        hideDelete = "hide";
+    }
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -72,7 +78,7 @@
                                                         {
                                                             Id = "gamedate",
                                                             Name = "gamedate",
-                                                            Value = date.ToShortDateString(),
+                                                            Value = startDateTime.ToShortDateString(),
                                                             Placeholder = "From Date"
                                                         }
                                                     );
@@ -81,7 +87,7 @@
                                             <td>
                                                 @{Html.RenderPartial(
                                                     "~/Views/Shared/_TimeSelect.cshtml",
-                                                    date,
+                                                    startDateTime,
                                                     new ViewDataDictionary()
                                                     {
                                                         { "name", "gamestarttime" },
@@ -97,7 +103,7 @@
                                             <td>
                                                 @{Html.RenderPartial(
                                                      "~/Views/Shared/_TimeSelect.cshtml",
-                                                      date,
+                                                      endDateTime,
                                                      new ViewDataDictionary()
                                                      {
                                                         { "name", "gameendtime"  },
@@ -136,12 +142,13 @@
                                             {
                                                 var selectedTeam = "";
                                                 var hasMatch = false;
-                                                if(currentTeams.IsNotEmpty() && currentTeams.Count > 0)
+
+                                                if (currentTeams.IsNotEmpty() && currentTeams.Count > 0)
                                                 {
                                                     hasMatch = currentTeams.Select(t => t.ID.Value).ToList().Contains(team.ID.Value);
                                                 }
 
-                                                if ((Request["teams"].IsNotBlank() && Request["teams"].Split(',').Contains(team.ID.ToString())) || hasMatch)
+                                                if (Request["teams"].IsNotBlank() && Request["teams"].Split(',').Contains(team.ID.ToString()) && activityInstance.IsNotEmpty() || hasMatch)
                                                 {
                                                     selectedTeam = " selected=\"selected\" ";
                                                 }
@@ -165,7 +172,7 @@
                         <a class="text-muted margin-10" href="@Url.Action("schedule", "league", new { id = Model.Uid })">Cancel</a>
                         <button id="saveAndAddGame" type="button" class="btn btn-primary pull-right margin-10" onclick="doSave('add')"  >Save and Add New Game</button>
                         <button id="saveGame" type="button" class="btn btn-primary pull-right margin-10" onclick="doSave('save')" >Save Game</button>    
-                        <button class="btn pull-right btn-danger margin-10 text-white md-trigger" onclick="" data-modal="modal-delete">Delete Game</button>   
+                        <button class="btn pull-right btn-danger margin-10 text-white md-trigger @hideDelete" onclick="" data-modal="modal-delete" >Delete Game</button>   
                     </div>
                 </div>
             </div>
@@ -200,22 +207,6 @@
 @section scripts
 {
     <script language="javascript">
-
-        var isDisabled;
-        disableSave();
-
-
-        $('#gamestarttime').prop('onchange', updateTime());
-        $('#gameendtime').prop('onchange', updateTime());
-      
-
-        function updateTime() {
-            var startTime = $('#gamestarttime');
-            var endTime = $('#gameendtime');
-
-            endTimeValue = startTime.val() > endtime.val() ? startime.val() : endTime.val();
-            endTime.val(endTimeValue);
-        }
 
     function getTeams() {
 
