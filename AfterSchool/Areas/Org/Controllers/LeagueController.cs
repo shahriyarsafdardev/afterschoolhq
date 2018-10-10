@@ -222,26 +222,39 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
-            var aag = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);            
+            var aag = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            Activity activity = null;
+            var otherActivities = activityGroup.GetActivities();
 
-            var activity = new Activity()
+            otherActivities.ForEach((oa) =>
             {
-                Name = teamname.MaxChars(50),
-                SeatsAvailable = seatsavailable.ToInteger(),
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = SessionVariables.LoggedInUser.ID,
-                LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = SessionVariables.LoggedInUser.ID,
-                AccountActivityGroupId = aag?.ID,
-                ActivityGroupId = activityGroup.ID,
-                AccountId = SessionVariables.CurrentAccount.ID,   
-                ActivityTypeId = ActivityType.Team,
-                ContactEmail = aag.ContactEmail,
-                ContactName = aag.ContactName,
-                ContactPhone = aag.ContactPhone
-            };
-            msgs.AddRange(activity.Save());
+                if(oa.Name == teamname)
+                {
+                    msgs.Add("Team name already exists in this League, please use a different name", MessageType.UserError);
+                }
+            });
 
+            if (msgs.HasNoErrors())
+            {
+                activity = new Activity()
+                {
+                    Name = teamname.MaxChars(50),
+                    SeatsAvailable = seatsavailable.ToInteger(),
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = SessionVariables.LoggedInUser.ID,
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                    AccountActivityGroupId = aag?.ID,
+                    ActivityGroupId = activityGroup.ID,
+                    AccountId = SessionVariables.CurrentAccount.ID,
+                    ActivityTypeId = ActivityType.Team,
+                    ContactEmail = aag.ContactEmail,
+                    ContactName = aag.ContactName,
+                    ContactPhone = aag.ContactPhone
+                };
+                msgs.AddRange(activity.Save());
+            }
+            
             if (msgs.HasNoErrors())
                 msgs.AddRange(activity.SetupTeam(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser.ID.Value));
 

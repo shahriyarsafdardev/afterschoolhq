@@ -129,6 +129,7 @@
                                        (Location)ViewBag.Location,
                                        new ViewDataDictionary() {
                                            { "accountId", currentAccount.ID.Value },
+                                          
                                        }
                                    );
                                 }
@@ -207,6 +208,9 @@
 @section scripts
 {
     <script language="javascript">
+
+        console.log("@startDateTime.ToShortTimeString()");
+        console.log("@endDateTime.ToShortTimeString()");
 
     function getTeams() {
 

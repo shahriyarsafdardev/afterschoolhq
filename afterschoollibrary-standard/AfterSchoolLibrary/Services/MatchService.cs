@@ -77,7 +77,7 @@ namespace AfterSchoolLibrary.Services
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
-                    msgs.Add("Match Saved", MessageType.Success);
+                    msgs.AddRange(smsgs);
                 },
                 onFailure: (SystemMessages fmsgs) =>
                 {

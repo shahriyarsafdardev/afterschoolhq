@@ -463,7 +463,7 @@ namespace AfterSchool.Areas.District.Controllers
                 }
                 else
                 {
-                    dateTime = date.ToDateTime();
+                    dateTime = $"{date} 12:00 PM".ToDateTime();
                 }
             }
 
@@ -620,12 +620,8 @@ namespace AfterSchool.Areas.District.Controllers
                                            dc: adc
                                            );
                                });
-                           }
-
-                           
-                       }
-                      
-
+                           }                          
+                       }                    
                    },
                    onSuccess: (SystemMessages smsgs) => {
                        msgs.AddRange(smsgs);
@@ -655,7 +651,7 @@ namespace AfterSchool.Areas.District.Controllers
                 }
             }
 
-            LoadEditGameViewBag(id, instance);
+            LoadEditGameViewBag(id, instance, date, date, startTime, endTime);
             ViewBag.Messages = msgs;
             return View("editgame", activityGroup);
         }
