@@ -228,10 +228,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             otherActivities.ForEach((oa) =>
             {
-                if(oa.Name == teamname)
-                {
+                if(oa.Name.IsSameAs(teamname))
                     msgs.Add("Team name already exists in this League, please use a different name", MessageType.UserError);
-                }
             });
 
             if (msgs.HasNoErrors())
@@ -351,17 +349,13 @@ namespace AfterSchool.Areas.Org.Controllers
             var isArchived = group.IsArchived;
 
             if (pn.IsNotEmpty() && pn.IsNumber() && pn.ToInteger() > 0)
-            {
                 pageNumber = pn.ToInteger();
-            }
+            
             if (rpp.IsNotEmpty() && rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
                 recordsPerPage = rpp.ToInteger();
-            }
+
             if (archive.IsNotEmpty() && archive.IsBoolean())
-            {
                 isArchived = archive.ToInteger().ToBoolean();
-            }
 
             var accountActivityGroup = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
 

@@ -96,15 +96,15 @@ namespace AfterSchoolLibrary
 			var msgs = new SystemMessages();
 
 			if (this.Name.IsEmpty())
-				msgs.Add("Name is required on Location object", MessageType.UserError);
+				msgs.Add("Name is required on Location object", MessageType.Error);
 			if (this.Address1.IsEmpty())
-				msgs.Add("Address1 is required on Location object", MessageType.UserError);
+				msgs.Add("Address1 is required on Location object", MessageType.Error);
 			if (this.City.IsEmpty())
-				msgs.Add("City is required on Location object", MessageType.UserError);
+				msgs.Add("City is required on Location object", MessageType.Error);
 			if (this.State.IsEmpty())
-				msgs.Add("State is required on Location object", MessageType.UserError);
+				msgs.Add("State is required on Location object", MessageType.Error);
 			if (this.PostalCode.IsEmpty())
-				msgs.Add("PostalCode is required on Location object", MessageType.UserError);
+				msgs.Add("PostalCode is required on Location object", MessageType.Error);
 			
 			if (msgs.HasNoErrors())
 				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Location).Name));
