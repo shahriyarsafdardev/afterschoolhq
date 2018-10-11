@@ -222,30 +222,44 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
-            var aag = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);            
+            var aag = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            Activity activity = null;
+            var otherActivities = Activity.LoadByActivityGroupId(activityGroup.ID.Value);
 
-            var activity = new Activity()
+            otherActivities.ForEach((oa) =>
             {
-                Name = teamname.MaxChars(50),
-                SeatsAvailable = seatsavailable.ToInteger(),
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = SessionVariables.LoggedInUser.ID,
-                LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = SessionVariables.LoggedInUser.ID,
-                AccountActivityGroupId = aag?.ID,
-                ActivityGroupId = activityGroup.ID,
-                AccountId = SessionVariables.CurrentAccount.ID,   
-                ActivityTypeId = ActivityType.Team,
-                ContactEmail = aag.ContactEmail,
-                ContactName = aag.ContactName,
-                ContactPhone = aag.ContactPhone
-            };
-            msgs.AddRange(activity.Save());
+                if(oa.Name.IsSameAs(teamname))
+                    msgs.Add("Team name already exists in this League, please use a different name", MessageType.UserError);
+            });
 
+            if (msgs.HasNoErrors())
+            {
+                activity = new Activity()
+                {
+                    Name = teamname.MaxChars(50),
+                    SeatsAvailable = seatsavailable.ToInteger(),
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = SessionVariables.LoggedInUser.ID,
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                    AccountActivityGroupId = aag?.ID,
+                    ActivityGroupId = activityGroup.ID,
+                    AccountId = SessionVariables.CurrentAccount.ID,
+                    ActivityTypeId = ActivityType.Team,
+                    ContactEmail = aag.ContactEmail,
+                    ContactName = aag.ContactName,
+                    ContactPhone = aag.ContactPhone
+                };
+                msgs.AddRange(activity.Save());
+            }
+            
             if (msgs.HasNoErrors())
                 msgs.AddRange(activity.SetupTeam(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser.ID.Value));
 
-            return RedirectToAction("LeagueActivities", new { id });
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            LoadLeagueActivityViewBag(group, id, "", "", "", msgs);
+
+            return View("LeagueActivities", group);
         }
 
         /// <summary>
@@ -319,32 +333,29 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // Teams in a league
         [HttpGet]
-        public ActionResult LeagueActivities(string id, string pn, string rpp, string archive)
+        public ActionResult LeagueActivities(string id, string pn, string rpp, string archive, SystemMessages msgs = null)
         {
             var group = ActivityGroup.LoadByUid(id.ToGuid());
-            LoadLeagueActivityViewBag(group, id, pn, rpp, archive);
+            LoadLeagueActivityViewBag(group, id, pn, rpp, archive, msgs);
             return View(group);
         }
 
-        private void LoadLeagueActivityViewBag(ActivityGroup group, string id, string pn, string rpp, string archive)
+        private void LoadLeagueActivityViewBag(ActivityGroup group, string id, string pn, string rpp, string archive, SystemMessages msgs = null)
         {
+            msgs = msgs.IsNotEmpty() ? msgs : new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 10;
 
             var isArchived = group.IsArchived;
 
-            if (pn.IsNumber() && pn.ToInteger() > 0)
-            {
+            if (pn.IsNotEmpty() && pn.IsNumber() && pn.ToInteger() > 0)
                 pageNumber = pn.ToInteger();
-            }
-            if (rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
+            
+            if (rpp.IsNotEmpty() && rpp.IsNumber() && rpp.ToInteger() > 0)
                 recordsPerPage = rpp.ToInteger();
-            }
-            if (archive.IsBoolean())
-            {
+
+            if (archive.IsNotEmpty() && archive.IsBoolean())
                 isArchived = archive.ToInteger().ToBoolean();
-            }
 
             var accountActivityGroup = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
 
@@ -359,7 +370,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Activities = finalActivities;
             ViewBag.NeedToUpgrade = finalActivities.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.HasArchivedActivities = accountActivityGroup.IsEmpty() ? group.GetActivityCount(null, true, false) > 0 : accountActivityGroup.GetActivityCount(null, true, false) > 0;
 
             ViewBag.PagingModel = new PagingModel()

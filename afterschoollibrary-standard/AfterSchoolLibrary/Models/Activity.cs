@@ -1450,7 +1450,6 @@ namespace AfterSchoolLibrary
 
                 if (cost.IsBlank())
                     cost = "0";
-
             }            
 
             Activity activity = null;
@@ -1583,6 +1582,8 @@ namespace AfterSchoolLibrary
             //{
             //    msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
             //}
+
+            
 
             if (msgs.HasNoErrors())
             {
