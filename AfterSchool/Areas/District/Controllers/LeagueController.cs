@@ -449,8 +449,8 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 if (time.IsNotEmpty() && time.IsTime())
                     return $"{date} {time}".ToDateTime();
-                else
-                    return $"{date} 12:00 PM".ToDateTime();
+                
+                 return $"{date} 12:00 PM".ToDateTime();
             }
 
             return DateTime.UtcNow.Date.AddHours(12);
@@ -530,7 +530,7 @@ namespace AfterSchool.Areas.District.Controllers
 
                            requiredFields.ForEach((field) =>
                            {
-                               if (field.Value == "")
+                               if (field.Value.IsEmpty())
                                    amsgs.Add(string.Format("{0} is required", field.Key), MessageType.UserError);
                            });
                        }
