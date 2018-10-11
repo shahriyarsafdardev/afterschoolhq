@@ -27,7 +27,7 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// Either a percentage or a flat amount
 		/// </summary>
-		public CouponAmountType CouponAmountTypeId { get { return (CouponAmountType)MDV["CouponAmountTypeId"].Value; } set { MDV["CouponAmountTypeId"].Value = value; } }
+		public CouponAmountType AmountTypeId { get { return (CouponAmountType)MDV["AmountTypeId"].Value; } set { MDV["AmountTypeId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// the account that is the owner
@@ -50,7 +50,7 @@ namespace AfterSchoolLibrary.Models
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(Coupon).Name, "ID");
             this.LoadObjectValues(ObjectMap);
-			this.CouponAmountTypeId = CouponAmountType.NotSet;
+			this.AmountTypeId = CouponAmountType.NotSet;
 			this.AppliesTo = CouponApplyType.NotSet;
 			
         }
@@ -63,7 +63,7 @@ namespace AfterSchoolLibrary.Models
                 string className = typeof(Coupon).Name;
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
 				_dp.Add(className, "Amount", System.Data.SqlDbType.Money);
-				_dp.Add(className, "CouponAmountTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "AmountTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ExpirationDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "AppliesTo", System.Data.SqlDbType.Int);
@@ -123,8 +123,8 @@ namespace AfterSchoolLibrary.Models
 
 			if (this.Amount.IsEmpty())
 				msgs.Add("Amount is required on Coupon object", MessageType.Error);
-			if (this.CouponAmountTypeId.IsEmpty())
-				msgs.Add("CouponAmountTypeId is required on Coupon object", MessageType.Error);
+			if (this.AmountTypeId.IsEmpty())
+				msgs.Add("AmountTypeId is required on Coupon object", MessageType.Error);
 			if (this.AccountId.IsEmpty())
 				msgs.Add("AccountId is required on Coupon object", MessageType.Error);
 			if (this.Name.IsEmpty())
@@ -156,7 +156,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["CouponAmountTypeId"]);
+			dps.Add(ObjectMap["AmountTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

@@ -1422,7 +1422,7 @@ name: Coupon
 description: Used to give discounts to parents during the purchase of a registration, product, etc
 inherits: BasicLookUpObject
 property: Amount, decimal?, Money, required, Store the amount a percentage or flat amount. If percentage it should be stored as a decimal meaning 100% should be stored as 1.00
-property: CouponAmountTypeId, CouponAmountType, Int, required, Either a percentage or a flat amount
+property: AmountTypeId, CouponAmountType, Int, required, Either a percentage or a flat amount
 property: AccountId, int?, Int, required, the account that is the owner
 property: ExpirationDate, DateTime?, DateTime
 property: AppliesTo, CouponApplyType, Int, , Determines what type of object the coupon will apply to during a purchase, All types of items in cart, or only one type of item
@@ -1438,11 +1438,13 @@ loadmethod: AccountId|CouponCode
 type: Class
 name: AttachedCoupon
 description: Used to specifically attach a coupon to an account so they don't have to worry about codes. Typically only parent accounts
-inherits: BasicObject
+inherits: BasicObjectWithModified
 property: CouponId, int?, Int, required
 property: AccountId, int?, Int, required
+property: IsUsed, bool, Bit
 loadmethod: CouponId, List<>
 loadmethod: AccountId, List<>
+loadmethod: AccountId|IsUsed, List<>
 loadmethod: CouponId|AccountId
 [end]
 
@@ -1487,7 +1489,7 @@ values: NotSet, Percentage, FlatAmount
 [begin]
 type: Enum
 name: CouponApplyType
-values: NotSet, All, SubscriptionPlan, PaymentPlan, TuitionFee, Product, Activity
+values: NotSet, All, Any, SubscriptionPlan, PaymentPlan, TuitionFee
 [end]
 
 [begin]

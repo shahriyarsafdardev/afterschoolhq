@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using System.Text;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class CouponService
     {
-        public static Coupon CreateNew(int accountId, decimal amount, DateTime expirationDate, CouponAmountType couponAmountType, CouponApplyType couponApplyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string label, string description, DatabaseActionHelper actionHelper)
+        public static Coupon CreateNew(int accountId, decimal amount, DateTime? expirationDate, CouponAmountType couponAmountType, CouponApplyType couponApplyType, int? maxUsesAll, int? maxUsesPerPerson, string couponCode, string label, string description, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var coupon = new Coupon()
             {
                 AccountId = accountId,
                 Amount = amount,
-                CouponAmountTypeId = couponAmountType,
+                AmountTypeId = couponAmountType,
                 CouponCode = couponCode,
                 AppliesTo = couponApplyType,
                 CreateDate = DateTime.UtcNow,
-                CreatedBy = actionHelper.LoggedInUser.ID,
+                CreatedBy = loggedInUser?.ID,
                 LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = actionHelper.LoggedInUser.ID,
+                LastModifiedBy = loggedInUser?.ID,
                 Description = description,
                 ExpirationDate = expirationDate,
                 MaxNumberOfUsesAll = maxUsesAll,
@@ -28,20 +29,38 @@ namespace AfterSchoolLibrary.Services
                 Name = label
             };
 
-            actionHelper.AddMessages(coupon.Save(actionHelper.Connection));
+            msgs.AddRange(coupon.Save(dc));
 
             return coupon;
         }
 
-        public static string GenerateCouponCode(int accountId, DatabaseActionHelper actionHelper)
+        public static string GenerateCouponCode(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var code = Guid.NewGuid().ToString("n").Substring(0, 8);
-            var coupon = Coupon.LoadByAccountIdByCouponCode(accountId, code, actionHelper.Messages, actionHelper.Connection);
+            var coupon = Coupon.LoadByAccountIdByCouponCode(accountId, code, msgs, dc);
 
             if (coupon.IsEmpty())
                 return code;
 
-            return GenerateCouponCode(accountId, actionHelper);
+            return GenerateCouponCode(accountId, msgs, dc);
+        }
+
+        public static Account GetAccount(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(coupon.AccountId.Value, msgs, dc);
+        }
+
+        public static List<PurchaseableObjectCoupon> GetPurchaseableObjectCoupons(this Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return PurchaseableObjectCoupon.LoadByCouponId(coupon.ID.Value, msgs, dc);
+        }
+
+        public static string GetAmountAsString(this Coupon coupon)
+        {
+            if (coupon.AmountTypeId == CouponAmountType.Percentage)
+                return $"{(coupon.Amount * 100)}%";
+
+            return $"{coupon.Amount.ToCurrency()}";
         }
     }
 }

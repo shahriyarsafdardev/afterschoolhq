@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Models
     /// Used to specifically attach a coupon to an account so they don't have to worry about codes. Typically only parent accounts
     /// </summary>
 	
-    public class AttachedCoupon : BasicObject
+    public class AttachedCoupon : BasicObjectWithModified
     {
 		#region "ClassGenerator"
 
@@ -26,12 +26,14 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		public bool IsUsed { get { return (bool)MDV["IsUsed"].Value; } set { MDV["IsUsed"].Value = value; } }
 		
 
         public AttachedCoupon()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(AttachedCoupon).Name, "ID");
             this.LoadObjectValues(ObjectMap);
+			this.IsUsed = false;
 			
         }
 
@@ -41,9 +43,10 @@ namespace AfterSchoolLibrary.Models
             {
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(AttachedCoupon).Name;
-                _dp = BasicObject.get_BaseObjectMap(className);
+                _dp = BasicObjectWithModified.get_BaseObjectMap(className);
 				_dp.Add(className, "CouponId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsUsed", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -129,6 +132,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["AccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsUsed"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -152,6 +159,15 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<AttachedCoupon> LoadByAccountIdByIsUsed(int AccountId, bool IsUsed, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["IsUsed"], IsUsed);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 

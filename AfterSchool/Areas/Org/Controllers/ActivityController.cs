@@ -1157,24 +1157,30 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Registrants", activity);
         }
 
+        private List<AttachedCoupon> GetAttachedCoupons(RegistrantActivity registrantActivity)
+        {
+            var masterRegistrant = registrantActivity.GetRegistrant().GetMasterRegistrant();
+            return masterRegistrant?.GetAccount().GetAttachedCoupons() ?? new List<AttachedCoupon>();
+        }
+
         [HttpGet]
         public ActionResult RegistrantDetail(string id)
         {
-            var ra = RegistrantActivity.Load(id.ToInteger());
-            // assuming that this registrant is coming from an activity, since it's in the activity controller
-            var activity = Activity.Load(ra.ParticipationObjectId.Value);
+            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var activity = Activity.Load(registrantActivity.ParticipationObjectId.Value);
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            return View(ra);
+            ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
+            return View(registrantActivity);
         }
 
         [HttpPost]
-        public ActionResult RegistrantDetail(string id, string datepaid, string amountpaid, string paymenttype)
+        public ActionResult AddPayment(string id, string datepaid, string amountpaid, string paymenttype)
         {
             var msgs = new SystemMessages();
-            var ra = RegistrantActivity.Load(id.ToInteger());
-            var activity = ra.GetActivity();
+            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var activity = registrantActivity.GetActivity();
 
             if (!datepaid.IsDateTime())
                 msgs.Add("Date Paid must be a valid date", MessageType.UserError);
@@ -1188,7 +1194,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 // the registrant that is only on the provider or school account
-                var registrant = ra.GetRegistrant(msgs);
+                var registrant = registrantActivity.GetRegistrant(msgs);
                 
                 // from the parent account, see if the registrant has a parent account
                 var masterRegistrant = registrant.GetMasterRegistrant(msgs);
@@ -1203,8 +1209,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         BillingAccount = SessionVariables.CurrentAccount,
                         PurchasingAccount = purchaserAccount,
                         NumberOfSeats = 1,
-                        ParticipationObject = ra.GetParticipationObject(msgs),
-                        Registration = ra.GetRegistration(msgs),
+                        ParticipationObject = registrantActivity.GetParticipationObject(msgs),
+                        Registration = registrantActivity.GetRegistration(msgs),
                         MasterRegistrant = masterRegistrant,
                         PaymentType = (PaymentType)paymenttype.ToInteger(),
                         PaymentSourceType = PaymentSourceType.Manual,
@@ -1219,8 +1225,76 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            return View(ra);
+            return View(registrantActivity);
+        }
+
+        [HttpPost]
+        public ActionResult AttachCoupon(string id, decimal couponAmount, CouponAmountType discountType, DateTime? expirationDate, CouponApplyType couponApplyType)
+        {
+
+            var msgs = new SystemMessages();
+            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var activity = registrantActivity.GetActivity();
+
+            if (couponAmount < 0)
+                msgs.Add("Coupon Amount must be a number greater than or equal to 0", MessageType.UserError);
+
+            if (expirationDate.HasValue && expirationDate <= DateTime.UtcNow.Date)
+                msgs.Add("Expiration date must be in the future", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var registrantAccount = registrantActivity.GetRegistrant().GetMasterRegistrant().GetAccount();
+                AttachedCoupon attachedCoupon = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // create new coupon
+                        var coupon = SessionVariables.CurrentAccount.CreateCoupon(
+                            amount: couponAmount,
+                            expirationDate: expirationDate,
+                            amountType: discountType,
+                            applyType: couponApplyType,
+                            loggedInUser: SessionVariables.LoggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        // assign coupon to the activity (only works for this activity)
+                        var poc = PurchaseableObjectCouponService.CreateNew(
+                            purchaseableObject: activity.GetPurchaseableObject(), 
+                            coupon: coupon, 
+                            loggedInUser: SessionVariables.LoggedInUser, 
+                            msgs: amsgs, 
+                            dc: adc);
+
+                        attachedCoupon = registrantAccount.AttachCoupon(coupon, SessionVariables.LoggedInUser, amsgs, adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+
+                        attachedCoupon.Send();                   
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        msgs.AddRange(emsgs);
+                    }
+                );
+
+            }
+
+            ViewBag.Messages = msgs;
+            ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
+            return View("RegistrantDetail", registrantActivity);
         }
 
         [HttpGet]
@@ -2027,7 +2101,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         // manages seats and create registrantactivity record
                         Registration.ProcessRegistrationAssignment(
                             registration: registration,
-                            participationObject: activity.ToParticipationObject(amsgs, adc),
+                            participationObject: activity.GetParticipationObject(amsgs, adc),
                             registrant: student,
                             seatsRequested: 1,
                             activityGroupId: activity.ActivityGroupId,

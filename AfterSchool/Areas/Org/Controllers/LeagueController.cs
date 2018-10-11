@@ -803,7 +803,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         // manages seats and create registrantactivity record
                         Registration.ProcessRegistrationAssignment(
                             registration: registration,
-                            participationObject: aag.ToParticipationObject(amsgs, adc),
+                            participationObject: aag.GetParticipationObject(amsgs, adc),
                             registrant: student,
                             seatsRequested: 1,
                             activityGroupId: league.ID,

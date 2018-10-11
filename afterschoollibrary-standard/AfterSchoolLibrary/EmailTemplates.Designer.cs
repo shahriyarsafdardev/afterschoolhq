@@ -39,7 +39,7 @@ namespace AfterSchoolLibrary {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AfterSchoolLibrary.Helpers.EmailTemplates", typeof(EmailTemplates).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AfterSchoolLibrary.EmailTemplates", typeof(EmailTemplates).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -66,6 +66,16 @@ namespace AfterSchoolLibrary {
         internal static byte[] Account_Invited {
             get {
                 object obj = ResourceManager.GetObject("Account_Invited", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Coupon_Attached {
+            get {
+                object obj = ResourceManager.GetObject("Coupon_Attached", resourceCulture);
                 return ((byte[])(obj));
             }
         }

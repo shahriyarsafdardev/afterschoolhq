@@ -5,7 +5,7 @@ using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
-namespace AfterSchoolLibraryTests
+namespace AfterSchoolLibraryTests.Tests
 {
     public class ProductTest : BaseTest
     {

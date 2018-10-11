@@ -39,7 +39,7 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void ToParticipationObjectActivityTestFull()
+        public void GetParticipationObjectActivityTestFull()
         {
             var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
             var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
@@ -49,15 +49,15 @@ namespace AfterSchoolLibraryTests.Tests
             var period = RegistrationPeriodFactory.Create(ActivityOwnerAccount, msgs, dc);
             var arp = ActivityRegistrationPeriodFactory.Create(activity, period, msgs, dc);
 
-            Assert.IsType<ParticipationObject>(activity.ToParticipationObject(msgs, dc));
+            Assert.IsType<ParticipationObject>(activity.GetParticipationObject(msgs, dc));
         }
 
         [Fact]
-        public void ToParticipationObjectActivityTestSimple()
+        public void GetParticipationObjectActivityTestSimple()
         {
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
 
-            Assert.IsType<ParticipationObject>(activity.ToParticipationObject(msgs, dc));
+            Assert.IsType<ParticipationObject>(activity.GetParticipationObject(msgs, dc));
         }
 
         [Fact]

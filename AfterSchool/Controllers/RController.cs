@@ -58,18 +58,18 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                participationObjects.AddRange(account.GetPublishedActivities(msgs).Select(activity => activity.ToParticipationObject(msgs)));
+                participationObjects.AddRange(account.GetPublishedActivities(msgs).Select(activity => activity.GetParticipationObject(msgs)));
 
                 var hostedLocationIds = account.GetHostedLocations(msgs).Select(location => location.ID.Value).ToList();
                 account.GetApprovedVisitorAccounts(msgs).ForEach(visitor =>
                 {
                     participationObjects.AddRange(
                         visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs)
-                            .Select(activity =>  activity.ToParticipationObject(msgs))
+                            .Select(activity =>  activity.GetParticipationObject(msgs))
                             .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
                 });
 
-                participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.ToParticipationObject(msgs)));
+                participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.GetParticipationObject(msgs)));
                 sessions.AddRange(account.GetPublishedSessions(msgs));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
             }
@@ -103,7 +103,7 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
 
-            return View(activity.ToParticipationObject());
+            return View(activity.GetParticipationObject());
         }
 
         public ActionResult League(string accountname, string districtname, string leaguename)
@@ -123,7 +123,7 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
 
-            return View("activity", aag.ToParticipationObject(msgs));
+            return View("activity", aag.GetParticipationObject(msgs));
         }
 
         public ActionResult Register(string accountname, string activitytype, string activityname)
@@ -131,7 +131,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
-            var participationObject = activity.ToParticipationObject(msgs);
+            var participationObject = activity.GetParticipationObject(msgs);
 
             SetRegistrationStartPage(account);
 
@@ -152,7 +152,7 @@ namespace AfterSchool.Controllers
             var externalAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(externalaccountname, msgs);
             var activityGroup = ActivityGroup.LoadByAccountIdByUniqueName(externalAccount.ID.Value, group, msgs);
             var aag = activityGroup.GetAccountActivityGroup(currentAccount, msgs);
-            var participationObject = aag.ToParticipationObject(msgs);
+            var participationObject = aag.GetParticipationObject(msgs);
 
             SetRegistrationStartPage(currentAccount);
 

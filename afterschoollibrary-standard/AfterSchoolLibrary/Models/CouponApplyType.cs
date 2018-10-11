@@ -2,9 +2,8 @@ public enum CouponApplyType
 {
 	NotSet = 0,
 	All,
+	Any,
 	SubscriptionPlan,
 	PaymentPlan,
-	TuitionFee,
-	Product,
-	Activity
+	TuitionFee
 }

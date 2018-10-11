@@ -1,12 +1,13 @@
 ﻿@model RegistrantActivity
 @{
-    var answers = Model.GetAnswers(); 
+    var answers = Model.GetAnswers();
     var isActivityLeader = false;
     var account = SessionVariables.CurrentAccount;
     var backtolistAction = ViewData["BackToListAction"].ToString();
     var backtolistController = ViewData["BackToListController"].ToString();
     var showPaymentForm = (bool)ViewData["ShowPaymentForm"];
     var activity = Model.GetActivity();
+    var attachedCoupons = (List<AttachedCoupon>)ViewData["AttachedCoupons"];
 
     if (showPaymentForm)
     {
@@ -40,7 +41,7 @@
                         </tr>
                     </table>
                 </div>
-                
+
                 @foreach (var group in answers.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID).OrderBy(x => x.DisplayOrder))
                 {
                     <div class="table-responsive">
@@ -73,7 +74,7 @@
                     Payment Information
                 </div>
                 <div class="panel-body">
-                    <form action="@Url.Action("RegistrantDetail", "activity", new { id = Model.ID })" method="post">
+                    <form action="@Url.Action("AddPayment", "activity", new { id = Model.ID })" method="post">
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <tr>
@@ -90,10 +91,18 @@
                                     <td width="33%" class="text-right">Date Paid</td>
                                     <td>
                                         <div class="col-md-6">
-                                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                                <input size="16" type="text" class="form-control" id="datepaid" name="datepaid" onfocus="this.select()" value="" data-type="date" />
-                                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                            </div>
+                                            @{
+                                                Html.RenderPartial(
+                                                    "~/Views/Shared/Components/_Date.cshtml",
+                                                    new FormInputViewModel()
+                                                    {
+                                                        Id = "datepaid",
+                                                        Name = "datepaid",
+                                                        Placeholder = "Date Paid",
+                                                        Value = ""
+                                                    }
+                                                    );
+                                            }
                                         </div>
                                     </td>
                                 </tr>
@@ -131,7 +140,93 @@
                                         <button type="submit" class="btn btn-primary btn-lg">Add Payment</button>
                                     </td>
                                 </tr>
-                            
+
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Coupons
+                </div>
+                <div class="panel-body">
+                    <form action="@Url.Action("attachcoupon", "activity", new { id = Model.ID })" method="post">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                @foreach (var attachedCoupon in attachedCoupons)
+                                {
+                                    var coupon = attachedCoupon.GetCoupon();
+
+                                    <tr>
+                                        <td width="33%" class="text-right">@coupon.CouponCode</td>
+                                        <td>@coupon.GetAmountAsString()  off</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td class="text-right">Discount Type</td>
+                                    <td>
+                                        @foreach (var amountType in Enum.GetValues(typeof(CouponAmountType)).Cast<CouponAmountType>().Where(type => type != CouponAmountType.NotSet))
+                                        {
+                                            var checkedstr = amountType == CouponAmountType.Percentage ? "checked=\"checked\"" : "";
+
+                                            <div class="am-radio">
+                                                <input type="radio" name="discounttype" id="discounttype-@((int)amountType)" value="@((int)amountType)" onclick="toggleDiscountType(@((int)amountType))" @checkedstr />
+                                                <label for="discounttype-@((int)amountType)">@amountType.ToString().SplitByUpperCase()</label>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Discount Amount</td>
+                                    <td>
+                                        <div class="col-md-6">
+                                            <div class="input-group input-group-lg xs-mb-15">
+                                                <span id="amounttype-flat" class="input-group-addon hide">$</span>
+                                                <input type="number" class="form-control" id="couponamount" name="couponamount" onfocus="this.select()" value="" min="0.00" step=".01" />
+                                                <span id="amounttype-percentage" class="input-group-addon">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Expiration Date</td>
+                                    <td>
+                                        <div class="col-md-6">
+                                            @{
+                                                Html.RenderPartial(
+                                                    "~/Views/Shared/Components/_Date.cshtml",
+                                                    new FormInputViewModel()
+                                                    {
+                                                        Id = "expirationdate",
+                                                        Name = "expirationdate",
+                                                        Placeholder = "Expiration Date",
+                                                        Value = ""
+                                                    }
+                                                    );
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Applies To</td>
+                                    <td>
+                                        @foreach (var applyType in Enum.GetValues(typeof(CouponApplyType)).Cast<CouponApplyType>().Where(type => type != CouponApplyType.NotSet))
+                                        {
+                                            <div class="am-radio">
+                                                <input type="radio" name="couponApplyType" id="couponApplyType-@((int)applyType)" value="@((int)applyType)" />
+                                                <label for="couponApplyType-@((int)applyType)">@applyType.ToString().SplitByUpperCase()</label>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <button type="submit" class="btn btn-primary btn-lg">Add &amp; Send Coupon to Parent</button>
+                                    </td>
+                                </tr>
                             </table>
                         </div>
                     </form>
@@ -140,3 +235,16 @@
         }
     </div>
 </div>
+
+
+<script type="text/javascript">
+    function toggleDiscountType(type) {
+        if (type == @((int)CouponAmountType.FlatAmount)) {
+            $('#amounttype-flat').removeClass('hide');
+            $('#amounttype-percentage').addClass('hide');
+        } else {
+            $('#amounttype-percentage').removeClass('hide');
+            $('#amounttype-flat').addClass('hide');
+        }
+    }
+</script>

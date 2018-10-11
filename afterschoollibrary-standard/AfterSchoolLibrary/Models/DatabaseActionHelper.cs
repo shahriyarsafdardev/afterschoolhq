@@ -9,6 +9,13 @@ namespace AfterSchoolLibrary.Models
         public DatabaseConnection Connection { get; set; }
         public WebUser LoggedInUser { get; set; }
 
+        public DatabaseActionHelper()
+        {
+            this.LoggedInUser = new WebUser() { ID = 0 };
+            this.Messages = new SystemMessages();
+            this.Connection = null;
+        }
+
         public DatabaseActionHelper(WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
         {
             this.LoggedInUser = loggedInUser ?? new WebUser() { ID = 0 };

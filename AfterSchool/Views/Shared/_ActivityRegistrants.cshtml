@@ -2,7 +2,7 @@
 @{ 
     var account = (Account)ViewData["Account"];
     var activity = (Activity)ViewData["Activity"];
-    var participationObject = activity.ToParticipationObject();
+    var participationObject = activity.GetParticipationObject();
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
     var assignmentType = (RegistrationAssignmentType)ViewData["assignmentType"];

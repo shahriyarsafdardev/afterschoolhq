@@ -1,0 +1,93 @@
+﻿using System;
+using Xunit;
+using Xunit.Abstractions;
+using AfterSchoolLibrary.Models;
+using BasicLibrary;
+using BasicLibrary.DataAccess;
+using AfterSchoolLibraryTests.Factories;
+using AfterSchoolLibrary.Services;
+
+namespace AfterSchoolLibraryTests.Tests
+{
+    public class PurchaseableObjectCouponTest : BaseTest
+    {
+        private WebUser SendingAccountOwner { get; set; }
+        private Account SendingAccount { get; set; }
+        private Activity Activity { get; set; }
+        private PurchaseableObject PurchaseableObject { get; set; }
+        private Coupon Coupon { get; set; }
+
+        public PurchaseableObjectCouponTest(ITestOutputHelper output) : base(output)
+        {
+            SendingAccountOwner = WebUserFactory.Create(msgs, dc);
+            SendingAccount = AccountFactory.Create(SendingAccountOwner, msgs, dc);
+            Activity = ActivityFactory.Create(SendingAccount, msgs, dc);
+            PurchaseableObject = Activity.GetPurchaseableObject();
+            Coupon = CouponFactory.Create(SendingAccount, msgs, dc);
+        }
+
+        [Fact]
+        public void LoadTest()
+        {
+            var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
+
+            Assert.True(PurchaseableObjectCoupon.Load(poc.ID.Value, msgs, dc).IsNotEmpty());
+        }
+
+        [Theory]
+        [InlineData(8, 10)]
+        [InlineData(15, 10)]
+        public void LoadPagingTest(int numberToCreate, int numberPerPage)
+        {
+            for (var i = 0; i < numberToCreate; i++)
+            {
+                var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
+            }
+
+            Assert.Equal(
+                Math.Min(numberPerPage, numberToCreate),
+                PurchaseableObjectCoupon.Load(null, 0, numberPerPage, msgs, dc).Count
+            );
+        }
+
+        [Theory]
+        [InlineData(8)]
+        [InlineData(2)]
+        public void GetCountTest(int numberToCreate)
+        {
+            for (var i = 0; i < numberToCreate; i++)
+            {
+                var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
+            }
+
+            Assert.Equal(numberToCreate, PurchaseableObjectCoupon.GetCount(msgs: msgs, dc: dc));
+        }
+
+        [Fact]
+        public void SaveTest()
+        {
+            var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
+
+            poc.LastModifiedBy = 1;
+            msgs.AddRange(poc.Save(dc));
+
+            Assert.True(msgs.HasNoErrors());
+        }
+        [Fact]
+        public void DeleteTest()
+        {
+            var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
+
+            msgs.AddRange(poc.Delete(dc));
+
+            Assert.Equal(0, PurchaseableObjectCoupon.GetCount(msgs: msgs, dc: dc));
+        }
+        [Fact]
+        public void ReloadTest()
+        {
+            var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
+
+            Assert.Equal(poc.ID, poc.Reload(msgs, dc).ID);
+        }
+    }
+}

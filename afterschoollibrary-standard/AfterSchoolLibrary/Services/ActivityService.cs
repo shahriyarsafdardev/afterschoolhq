@@ -29,7 +29,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static ParticipationObject ToParticipationObject(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static ParticipationObject GetParticipationObject(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return new ParticipationObject(activity, msgs, dc);
         }
@@ -1535,6 +1535,11 @@ namespace AfterSchoolLibrary.Services
         public static bool CanAcceptPayments(this Activity activity)
         {
             return activity.GetAccount().GetActiveAccountPackage().HasFeature(FeatureType.AcceptPayments);
+        }
+
+        public static PurchaseableObject GetPurchaseableObject(this Activity activity)
+        {
+            return PurchaseableObject.FromActivity(activity);
         }
 
 

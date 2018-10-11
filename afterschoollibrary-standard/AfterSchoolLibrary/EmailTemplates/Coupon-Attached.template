@@ -1,0 +1,23 @@
+﻿<div>
+  <p>Hey @Model.ReceivingFirstName,</p>
+  
+  <p>
+    @Model.SendingAccountName has sent you a coupon for <strong>@Model.CouponDiscount off</strong> the @Model.CouponFeeType for <strong>@Model.PurchaseableObjectName</strong>!
+  </p>
+  <p>
+    Your coupon code is: <strong>@Model.CouponCode</strong>
+  </p>
+  <p>
+    In order to utilize this coupon, go to <a href="@Model.RegistrationUrl">@Model.RegistrationUrl</a> and register your child. This coupon is good for <strong>@Model.GoodFor</strong> and expires on <strong>@Model.ExpirationDate</strong>.
+  </p>
+
+  <p>
+    If you have any questions or concerns please contact @Model.ContactName via email at <a href="mailto:@Model.ContactEmail">@Model.ContactEmail</a>.
+  </p>
+
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
+  
+</div>

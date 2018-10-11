@@ -324,7 +324,7 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
-        public ParticipationObject ToParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return new ParticipationObject(this, msgs, dc);
         }

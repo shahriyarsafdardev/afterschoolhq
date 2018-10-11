@@ -118,9 +118,9 @@ namespace AfterSchoolLibrary.Models
         {
             if (Coupon.IsNotEmpty() && Coupon.Amount.HasValue)
             {
-                if (Coupon.CouponAmountTypeId == CouponAmountType.FlatAmount)
+                if (Coupon.AmountTypeId == CouponAmountType.FlatAmount)
                     return Math.Max(0, total - Coupon.Amount.Value);
-                else if (Coupon.CouponAmountTypeId == CouponAmountType.Percentage)
+                else if (Coupon.AmountTypeId == CouponAmountType.Percentage)
                     return Math.Max(0, total - (total * Coupon.Amount.Value));
             }
 

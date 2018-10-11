@@ -341,13 +341,13 @@ namespace AfterSchoolLibrary.Services
                 {
                     case ParticipationObjectType.AccountActivityGroup:
                         return AccountActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
-                            .ToParticipationObject(msgs, dc);
+                            .GetParticipationObject(msgs, dc);
                     case ParticipationObjectType.ActivityGroup:
                         return ActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
-                            .ToParticipationObject(msgs, dc);
+                            .GetParticipationObject(msgs, dc);
                     case ParticipationObjectType.Activity:
                         return Activity.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc)
-                            .ToParticipationObject(msgs, dc);
+                            .GetParticipationObject(msgs, dc);
                 }
             }
 

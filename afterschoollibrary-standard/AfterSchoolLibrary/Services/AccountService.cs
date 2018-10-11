@@ -1857,15 +1857,52 @@ namespace AfterSchoolLibrary.Services
                 dc: dc) > 0;
         }
 
-        public static AttachedCoupon AttachCoupon(this Account account, Coupon coupon, DatabaseActionHelper actionHelper)
+        #endregion
+
+        #region Coupons
+
+        public static AttachedCoupon AttachCoupon(this Account account, Coupon coupon, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.AccountTypeId != AccountType.Registrant)
             {
-                actionHelper.AddMessage(new SystemMessage("Coupon can only be applied to Registrant accounts", MessageType.Error));
+                msgs.Add("Coupon can only be applied to Registrant accounts", MessageType.Error);
                 return null;
             }
 
-            return AttachedCouponService.CreateNew(account, coupon, actionHelper);
+            return AttachedCouponService.CreateNew(account, coupon, loggedInUser, msgs, dc);
+        }
+
+        public static List<AttachedCoupon> GetUnusedAttachedCoupons(this Account account, DatabaseActionHelper actionHelper)
+        {
+            return AttachedCoupon.LoadByAccountIdByIsUsed(account.ID.Value, false, actionHelper?.Messages, actionHelper?.Connection);
+        }
+
+        public static List<AttachedCoupon> GetUsedAttachedCoupons(this Account account, DatabaseActionHelper actionHelper)
+        {
+            return AttachedCoupon.LoadByAccountIdByIsUsed(account.ID.Value, false, actionHelper?.Messages, actionHelper?.Connection);
+        }
+
+        public static List<AttachedCoupon> GetAttachedCoupons(this Account account, DatabaseActionHelper actionHelper = null)
+        {
+            return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
+        }
+
+        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return CouponService.CreateNew(
+                            accountId: account.ID.Value,
+                            amount: amount,
+                            expirationDate: expirationDate,
+                            couponAmountType: amountType,
+                            couponApplyType: applyType,
+                            maxUsesAll: 1,
+                            maxUsesPerPerson: 1,
+                            couponCode: CouponService.GenerateCouponCode(account.ID.Value, null),
+                            label: $"Coupon - {account.NowInAccountTimeZone()}",
+                            description: "",
+                            loggedInUser: loggedInUser,
+                            msgs: msgs,
+                            dc: dc);
         }
 
         #endregion

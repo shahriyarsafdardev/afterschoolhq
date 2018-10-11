@@ -14,11 +14,11 @@ namespace AfterSchoolLibrary.Services
             switch (registrantActivity.ParticipationObjectTypeId)
             {
                 case ParticipationObjectType.AccountActivityGroup:
-                    return AccountActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
+                    return AccountActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc).GetParticipationObject(msgs, dc);
                 case ParticipationObjectType.Activity:
-                    return Activity.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
+                    return Activity.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc).GetParticipationObject(msgs, dc);
                 case ParticipationObjectType.ActivityGroup:
-                    return ActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
+                    return ActivityGroup.Load(registrantActivity.ParticipationObjectId.Value, msgs, dc).GetParticipationObject(msgs, dc);
             }
 
             return null;
