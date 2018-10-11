@@ -98,7 +98,7 @@ namespace AfterSchoolLibrary.Models
             CostUnitType = global::CostUnitType.PerRegistrant;
             AllowToPayLater = activity.AllowToPayLater;
             RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
-            Form = activity.GetActiveActivityForm(msgs, dc)?.ToForm();
+            Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm();
             OwnerAccount = activity.GetAccount(msgs, dc);
 
             PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);

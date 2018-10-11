@@ -1169,7 +1169,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
-            var questions = af.GetAllQuestions();
+            var questions = af.GetForm().GetAllQuestions();
 
             var registrantActivities = activity.GetRegistrantActivities();
             var table = new List<List<string>>();
@@ -1300,7 +1300,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
             string extension = "";
-            var questions = af.GetAllQuestions();
+            var questions = af.GetForm().GetAllQuestions();
 
             if (csv.IsBlank())
             {
@@ -1591,7 +1591,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
 
-            var questions = af.GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
+            var questions = af.GetForm().GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
 
             var swriter = new StringWriter();
             var csvWriter = new CsvHelper.CsvWriter(swriter);
@@ -1681,7 +1681,7 @@ namespace AfterSchool.Areas.Org.Controllers
             //    }
             //}
 
-            var questionGroups = activityForm.GetQuestionGroups();
+            var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
             var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
 
@@ -1783,7 +1783,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
             
-            var questionGroups = activityForm.GetQuestionGroups();
+            var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
             var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
             var currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);

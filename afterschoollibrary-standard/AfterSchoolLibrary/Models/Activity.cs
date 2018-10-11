@@ -840,7 +840,7 @@ namespace AfterSchoolLibrary.Models
 
         public List<Form> GetForms(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityForm.LoadByActivityId(this.ID.Value, msgs, dc).Select(x => x.ToForm()).ToList();
+            return ActivityForm.LoadByActivityId(this.ID.Value, dc: dc).Select(x => x.GetForm()).ToList();
         }
 
         public Form GetActiveForm(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -849,7 +849,7 @@ namespace AfterSchoolLibrary.Models
             if (af.IsEmpty())
                 return null;
 
-            return af.ToForm();
+            return af.GetForm();
         }
 
         public ActivityForm GetActiveActivityForm(SystemMessages msgs = null, DatabaseConnection dc = null)

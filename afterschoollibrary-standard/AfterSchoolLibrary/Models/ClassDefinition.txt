@@ -793,34 +793,6 @@ property: AccountId, int?, Int, required
 property: IsActive, bool, Bit
 property: IsPublished, bool, Bit
 property: Uid, Guid, UniqueIdentifier
-join: Form.ID, FormId, InnerJoin
-join: Activity.ID, ActivityId, InnerJoin
-join: Account.ID, AccountId, InnerJoin
-joinproperty: Activity.Name, string, NVarChar
-joinproperty: Activity.Details, string, NVarChar
-joinproperty: Activity.LocationDetails, string, NVarChar
-joinproperty: Activity.ScheduleDetails, string, NVarChar
-joinproperty: Activity.RegistrationTimeZone, string, NVarChar
-joinproperty: Activity.SeatsAvailable, int?, Int
-joinproperty: Activity.ContactName, string, NVarChar
-joinproperty: Activity.ContactPhone, string, NVarChar
-joinproperty: Activity.ContactEmail, string, NVarChar
-joinproperty: Activity.WaitingListSeats, int?, Int
-joinproperty: Activity.Address1, string, NVarChar
-joinproperty: Activity.Address2, string, NVarChar
-joinproperty: Activity.City, string, NVarChar
-joinproperty: Activity.State, string, NVarChar
-joinproperty: Activity.PostalCode, string, NVarChar
-joinproperty: Activity.CostPerRegistrant, decimal?, Money
-joinproperty: Activity.CostDescription, string, NVarChar
--joinproperty: Activity.AcceptPayPal, bool, Bit
--joinproperty: Activity.AcceptCreditCard, bool, Bit
-joinproperty: Form.Name, string, NVarChar
-joinproperty: Form.Description, string, NVarChar
-joinproperty: Form.IsActive, bool, Bit
-joinproperty: Form.Uid, Guid, UniqueIdentifier
-joinproperty: Account.Name, string, NVarChar
-joinproperty: Account.Uid, Guid, UniqueIdentifier
 loadmethod: FormId, List<>
 loadmethod: ActivityId, List<>
 loadmethod: ActivityId|FormId
