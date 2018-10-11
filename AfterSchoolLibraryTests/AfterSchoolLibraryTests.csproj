@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Remove="Factories\SeasonFactory.cs" />
+    <Compile Remove="Tests\PaymentPlanTest.cs" />
     <Compile Remove="Tests\SeasonSchedulerTests.cs" />
   </ItemGroup>
 
