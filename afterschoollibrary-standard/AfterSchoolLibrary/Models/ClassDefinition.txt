@@ -1489,7 +1489,7 @@ values: NotSet, Percentage, FlatAmount
 [begin]
 type: Enum
 name: CouponApplyType
-values: NotSet, All, Any, SubscriptionPlan, PaymentPlan, TuitionFee
+values: NotSet, All, Any, SubscriptionPlan, TuitionFee
 [end]
 
 [begin]
