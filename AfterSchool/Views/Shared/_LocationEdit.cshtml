@@ -5,6 +5,7 @@
     var searchOnly = false;
     var label = "Enter a location";
     var placeholderText = "Search Locations...";
+    var locationIsRequired = false;
 
     if (ViewData["searchonly"].IsNotEmpty())
     {
@@ -25,11 +26,20 @@
     {
         accountId = (int)ViewData["accountId"];
     }
+
+    if (ViewData["locationIsRequired"].IsNotEmpty() && ViewData["locationIsRequired"].IsNotEmpty().ToString().ToBoolean())
+    {
+        locationIsRequired = ViewData["locationIsRequired"].IsNotEmpty().ToString().ToBoolean();
+    }
 }
 
 <div class="form-group">
     <label class="col-sm-3 control-label">
         @label
+        if(@locationIsRequired)
+        {
+            <span class="text-danger">*</span>
+        }
     </label>
     <div class="col-sm-6" style="position:relative;">
         <input type="text" class="form-control" id="location-search" name="location-search" value="@Model.FormatAddress(false)" placeholder="@placeholderText" autocomplete="off" />

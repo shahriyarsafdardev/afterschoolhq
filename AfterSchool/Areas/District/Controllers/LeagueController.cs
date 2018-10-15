@@ -501,7 +501,7 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpGet]
-        public ActionResult SaveGame(string id, string instance, string date, string startTime, string endTime, string locationId, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd)
+        public ActionResult SaveGame(string id, string instance, string date, string startTime, string endTime, string locationId, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd, string locationishidden)
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
@@ -511,6 +511,7 @@ namespace AfterSchool.Areas.District.Controllers
             var startDateTime = $"{date} {startTime}".ToDateTime();
             var endDateTime =  $"{date} {endTime}".ToDateTime();
             var dateRange = new DateRange(startDateTime, endDateTime);
+            var locationIsHidden = locationishidden.ToBoolean();
 
             Database.ExecuteTransaction(
                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
@@ -528,11 +529,19 @@ namespace AfterSchool.Areas.District.Controllers
                                new  KeyValuePair<string, string>( "Postal Code", postalcode)
                            };
 
-                           requiredFields.ForEach((field) =>
+                           if (locationIsHidden)
                            {
-                               if (field.Value.IsEmpty())
-                                   amsgs.Add(string.Format("{0} is required", field.Key), MessageType.UserError);
-                           });
+                               amsgs.Add(string.Format("Location is Required"), MessageType.UserError);
+
+                           } else
+                           {
+                               requiredFields.ForEach((field) =>
+                               {
+                                   if (field.Value.IsEmpty())
+                                       amsgs.Add(string.Format("{0} is required", field.Key), MessageType.UserError);
+                               });
+                           }
+                           
                        }
                        
                        // validate start and end times

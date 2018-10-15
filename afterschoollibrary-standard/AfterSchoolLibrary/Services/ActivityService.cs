@@ -370,5 +370,15 @@ namespace AfterSchoolLibrary
         {
             return ActivityPayment.GetTotalPaidByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc);
         }
+
+        public static bool HasMatches(this Activity actitivy, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Match.LoadByTeamId(actitivy.ID.Value).IsNotEmpty();
+        }
+
+        public static bool HasNoMatches(this Activity actitivy, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Match.LoadByTeamId(actitivy.ID.Value).IsEmpty();
+        }
     }
 }

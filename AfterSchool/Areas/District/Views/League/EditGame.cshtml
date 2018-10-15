@@ -128,8 +128,7 @@
                                        "~/Views/Shared/_GameLocation.cshtml",
                                        (Location)ViewBag.Location,
                                        new ViewDataDictionary() {
-                                           { "accountId", currentAccount.ID.Value },
-                                          
+                                           { "accountId", currentAccount.ID.Value },          
                                        }
                                    );
                                 }
@@ -253,10 +252,13 @@
         return `locationId=${location}&address1=${address1}&address2=${address2}&city=${city}&state=${state}&postalcode=${postalcode}&locationtype=${locationtype}&locationdescription=${locationdescription}&locationname=${locationname}`;
     }
 
-        
+        function getLocationIsHidden() {
+            var locationisHidden = $("add-location").hasClass('hide');
+            return `locationishidden=${locationisHidden}`;
+        } 
 
         function doSave(cmd) {
-                location.href = `@Url.Action("savegame", "league")?id=@Model.Uid.ToString()&instance=@activityInstanceId&${getDate()}&${getTime()}&${getLocation()}&${getTeams()}&cmd=${cmd}`;
+            location.href = `@Url.Action("savegame", "league")?id=@Model.Uid.ToString()&instance=@activityInstanceId&${getDate()}&${getTime()}&${getLocation()}&${getTeams()}&cmd=${cmd}&${getLocationIsHidden()}`;
         }
 
     </script>
