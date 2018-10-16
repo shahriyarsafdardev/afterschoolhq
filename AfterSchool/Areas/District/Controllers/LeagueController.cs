@@ -501,7 +501,7 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpGet]
-        public ActionResult SaveGame(string id, string instance, string date, string startTime, string endTime, string locationId, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd, string locationishidden)
+        public ActionResult SaveGame(string id, string instance, string date, string startTime, string endTime, string locationId, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd, string addlocationishidden)
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
@@ -511,7 +511,7 @@ namespace AfterSchool.Areas.District.Controllers
             var startDateTime = $"{date} {startTime}".ToDateTime();
             var endDateTime =  $"{date} {endTime}".ToDateTime();
             var dateRange = new DateRange(startDateTime, endDateTime);
-            var locationIsHidden = locationishidden.ToBoolean();
+            var addLocationIsHidden = addlocationishidden.ToBoolean();
 
             Database.ExecuteTransaction(
                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
@@ -523,13 +523,14 @@ namespace AfterSchool.Areas.District.Controllers
                        {
                            List<KeyValuePair<string, string>> requiredFields = new List<KeyValuePair<string, string>>()
                            {
+                               new  KeyValuePair<string, string>( "Location Name", locationname),
                                new  KeyValuePair<string, string>( "Address", address1),
                                new  KeyValuePair<string, string>( "City", city),
                                new  KeyValuePair<string, string>( "State", state),
                                new  KeyValuePair<string, string>( "Postal Code", postalcode)
                            };
 
-                           if (locationIsHidden)
+                           if (addLocationIsHidden)
                            {
                                amsgs.Add(string.Format("Location is Required"), MessageType.UserError);
 
