@@ -22,72 +22,99 @@
             @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", Model.Name); }
         </div>
         <div class="panel-body">
-            
+
             <div class="panel-heading">
                 <div class="pull-right">
                     <a href="@Url.Action("editgame", "league", new { id = Model.Uid })" class="btn-primary btn-space margin-r-10 padding-10">
                         <i class="icon icon-left s7-plus"></i>
-                        Add Game
+                        Add Game Day
                     </a>
                 </div>
-               
+
                 <h2>
                     Season Schedule
                 </h2>
             </div>
-            @foreach(List<ActivityInstance> day in activityInstances.GroupBy(a => a.StartDateTime.Value.Date).Select(grp => grp.ToList()).ToList())
-            { 
-                
-                <h4 class="margin-10">@day.First().StartDateTime.Value.ToShortDateString() - @day.First().Day.ToDayOfWeek().ToString()
-                    <a href="@Url.Action("editgame", "league", new { id = Model.Uid, date = day.First().StartDateTime.Value.ToShortDateString() })" class="btn-default  btn-space margin-r-10 padding-10">
-                        <i class="icon icon-right s7-plus"></i>
-                    </a>
-                </h4>
-                foreach (var activityInstance in day)
-                {
-
-                    var matches = Match.LoadByActivityInstanceId(activityInstance.ID.Value);
-                    var matchTeams = "";
-                    var location = new Location();
-                    var locationName = " @ TBD";
-                    var startTime = activityInstance.StartDateTime.Value.ToShortTimeString();
-                    var endTime = activityInstance.EndDateTime.Value.ToShortTimeString();
-                    if (activityInstance.LocationId.IsNotEmpty())
-                    {
-                        location = Location.Load(activityInstance.LocationId.Value);
-                        locationName = " @ " + location.Name.ToString() + " - ";
-                    }
-
-
-                    var vs = " ";
-
-                    foreach ( var match in matches)
-                    {
-                        Activity team = teams.Find(t => t.ID.Value == match.TeamId.Value);
-
-
-                        if (team.IsNotEmpty())
-                        {
-                            matchTeams += vs + team.Name.ToString();
-                            vs = " vs. ";
-                        }
-
-                    }
-
-                    <h6>
-                        <a href="@Url.Action("editgame", "league", new { id = Model.Uid, instance = activityInstance.ID.Value})">
-                            <i class="icon icon-left s7-more"></i>
-                            @startTime - @endTime @locationName @matchTeams
-                        </a>
-                    </h6>
-                       
-
-                    
-                    
-                }
-                <br/>
-                
+            <div class="table-responsive">
+                <table class="table">
+                    @foreach (List<ActivityInstance> day in activityInstances.GroupBy(a => a.StartDateTime.Value.Date).Select(grp => grp.ToList()).ToList())
+            {
+                <tr>
+                    <td colspan="4">
+                        <h4 class="margin-10">
+                            <strong>
+                                @day.First().StartDateTime.Value.ToShortDateString() - @day.First().Day.ToDayOfWeek().ToString()
+                            </strong>
+                        </h4>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><strong>Time</strong></td>
+                    <td><strong>Location</strong></td>
+                    <td class="text-center"><strong>Teams</strong></td>
+                </tr>
+        foreach (var activityInstance in day)
+        {
+            var matches = Match.LoadByActivityInstanceId(activityInstance.ID.Value);
+            var matchTeams = "";
+            var location = new Location();
+            var locationName = "TBD";
+            var startTime = activityInstance.StartDateTime.Value.ToShortTimeString();
+            var endTime = activityInstance.EndDateTime.Value.ToShortTimeString();
+            if (activityInstance.LocationId.IsNotEmpty())
+            {
+                location = Location.Load(activityInstance.LocationId.Value);
+                locationName = location.Name.ToString();
             }
+
+            var vs = " ";
+
+            foreach (var match in matches)
+            {
+                Activity team = teams.Find(t => t.ID.Value == match.TeamId.Value);
+
+                if (team.IsNotEmpty())
+                {
+                    matchTeams += vs + team.Name.ToString();
+                    vs = " vs. ";
+                }
+
+            }
+
+            <tr>
+                <td>
+                    <a href="@Url.Action("editgame", "league", new { id = Model.Uid, instance = activityInstance.ID.Value})">
+                        <i class="icon icon-left s7-pen"></i>
+                        Edit Game
+                    </a>
+                </td>
+                <td>@startTime - @endTime</td>
+                <td>@locationName</td>
+                <td class="text-center">@matchTeams</td>
+            </tr>
+}
+        <tr>
+            <td colspan="4">
+                <a href="@Url.Action("editgame", "league", new { id = Model.Uid, date = day.First().StartDateTime.Value.ToShortDateString() })">
+                    Add Game <i class="icon icon-right s7-plus"></i>
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4"></td>
+        </tr>
+
+}
+
+                </table>
+            </div>
+            <div>
+            <a href="@Url.Action("editgame", "league", new { id = Model.Uid })" class="btn-primary btn-space margin-r-10 padding-10">
+                <i class="icon icon-left s7-plus"></i>
+                Add Game Day
+            </a>
         </div>
-    </div>
+        </div>
+        </div>
 </div>
