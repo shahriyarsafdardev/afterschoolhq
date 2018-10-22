@@ -531,10 +531,8 @@ namespace AfterSchool.Areas.District.Controllers
                            };
 
                            if (addLocationIsHidden)
-                           {
                                amsgs.Add(string.Format("Location is Required"), MessageType.UserError);
-
-                           } else
+                            else
                            {
                                requiredFields.ForEach((field) =>
                                {
@@ -581,7 +579,14 @@ namespace AfterSchool.Areas.District.Controllers
                            if (instance.IsNotEmpty())
                                activityInstance = ActivityInstance.Load(instance.ToInteger());
                            else
-                               activityInstance = activityGroup.GetSchedule().AddInstance(dateRange, InstanceType.InSession, SessionVariables.LoggedInUser.ID.Value, amsgs, adc);
+                               activityInstance = activityGroup.GetSchedule()
+                                    .AddInstance(
+                                        dateRange, 
+                                        InstanceType.InSession, 
+                                        SessionVariables.LoggedInUser.ID.Value, 
+                                        amsgs, 
+                                        adc
+                                     );
                            
                             activityInstance.StartDateTime = startDateTime;
                             activityInstance.EndDateTime = endDateTime;                       
@@ -594,11 +599,10 @@ namespace AfterSchool.Areas.District.Controllers
                        if (activityInstance.IsNotEmpty())
                        {
                            var teamIds = new List<String>();
-                           if (teams.IsNotEmpty())
-                           {
-                               teamIds = teams.Split(',').ToList();
-                           }
 
+                           if (teams.IsNotEmpty())
+                               teamIds = teams.Split(',').ToList();
+                           
                            var selectedTeams = new List<Activity>();
                            var activityInstanceTeams = activityInstance.GetTeams(amsgs, adc);
                            var matches = activityInstance.GetMatches(amsgs, adc);
@@ -606,14 +610,14 @@ namespace AfterSchool.Areas.District.Controllers
                            // matches
                            teamIds.ForEach(teamId => selectedTeams.Add(Activity.Load(teamId.ToInteger(), amsgs, adc)));
 
-                           foreach (var activity in activityInstanceTeams)
+                           activityInstanceTeams.ForEach(activity =>
                            {
                                var match = matches.Where(m => m.TeamId == activity.ID).FirstOrDefault();
 
                                // remove a match from the activityInstance
                                if (!selectedTeams.Contains(activity) && match.IsNotEmpty())
-                                   match.Delete();
-                           }
+                                  amsgs.AddRange(match.Delete(adc));
+                           });
                            
                             selectedTeams.ForEach(selectedTeam => {
                                 if (!activityInstanceTeams.Contains(selectedTeam))
