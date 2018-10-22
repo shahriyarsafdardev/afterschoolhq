@@ -128,17 +128,16 @@
                                        "~/Views/Shared/_GameLocation.cshtml",
                                        (Location)ViewBag.Location,
                                        new ViewDataDictionary() {
-                                           { "accountId", currentAccount.ID.Value },
-                                          
+                                           { "accountId", currentAccount.ID.Value },          
                                        }
                                    );
                                 }
                             </div>
                             <div class="form-group add-teams">
-                                <label class="col-sm-3 control-label">Add Teams<span class="text-danger">*</span></label>
+                                <label class="col-sm-3 control-label">Add Teams <span class="text-danger">*</span></label>
                                 <div class="col-md-5">
                                     <div class="form-group">
-                                        <select id="teams" class="form-control select2 hide" multiple placeholder="Select Team">
+                                        <select id="teams" class="form-control select2 hide" multiple placeholder="Select Team" required>
                                             @foreach (var team in teams)
                                             {
                                                 var selectedTeam = "";
@@ -253,10 +252,13 @@
         return `locationId=${location}&address1=${address1}&address2=${address2}&city=${city}&state=${state}&postalcode=${postalcode}&locationtype=${locationtype}&locationdescription=${locationdescription}&locationname=${locationname}`;
     }
 
-        
+        function getAddLocationIsHidden() {
+            var addLocationisHidden = $("#add-location").hasClass('hide');
+            return `addlocationishidden=${addLocationisHidden}`;
+        } 
 
         function doSave(cmd) {
-                location.href = `@Url.Action("savegame", "league")?id=@Model.Uid.ToString()&instance=@activityInstanceId&${getDate()}&${getTime()}&${getLocation()}&${getTeams()}&cmd=${cmd}`;
+            location.href = `@Url.Action("savegame", "league")?id=@Model.Uid.ToString()&instance=@activityInstanceId&${getDate()}&${getTime()}&${getLocation()}&${getTeams()}&cmd=${cmd}&${getAddLocationIsHidden()}`;
         }
 
     </script>

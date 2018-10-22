@@ -501,7 +501,7 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpGet]
-        public ActionResult SaveGame(string id, string instance, string date, string startTime, string endTime, string locationId, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd)
+        public ActionResult SaveGame(string id, string instance, string date, string startTime, string endTime, string locationId, string locationname, string locationdescription, string address1, string address2, string city, string state, string postalcode, string locationtype, string teams, string cmd, string addlocationishidden)
         {
             var msgs = new SystemMessages();
             var activityGroup = ActivityGroup.LoadByUid(id.ToGuid());
@@ -511,6 +511,7 @@ namespace AfterSchool.Areas.District.Controllers
             var startDateTime = $"{date} {startTime}".ToDateTime();
             var endDateTime =  $"{date} {endTime}".ToDateTime();
             var dateRange = new DateRange(startDateTime, endDateTime);
+            var addLocationIsHidden = addlocationishidden.ToBoolean();
 
             Database.ExecuteTransaction(
                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
@@ -522,17 +523,24 @@ namespace AfterSchool.Areas.District.Controllers
                        {
                            List<KeyValuePair<string, string>> requiredFields = new List<KeyValuePair<string, string>>()
                            {
+                               new  KeyValuePair<string, string>( "Location Name", locationname),
                                new  KeyValuePair<string, string>( "Address", address1),
                                new  KeyValuePair<string, string>( "City", city),
                                new  KeyValuePair<string, string>( "State", state),
                                new  KeyValuePair<string, string>( "Postal Code", postalcode)
                            };
 
-                           requiredFields.ForEach((field) =>
+                           if (addLocationIsHidden)
+                               amsgs.Add(string.Format("Location is Required"), MessageType.UserError);
+                            else
                            {
-                               if (field.Value.IsEmpty())
-                                   amsgs.Add(string.Format("{0} is required", field.Key), MessageType.UserError);
-                           });
+                               requiredFields.ForEach((field) =>
+                               {
+                                   if (field.Value.IsEmpty())
+                                       amsgs.Add(string.Format("{0} is required", field.Key), MessageType.UserError);
+                               });
+                           }
+                           
                        }
                        
                        // validate start and end times
@@ -571,7 +579,14 @@ namespace AfterSchool.Areas.District.Controllers
                            if (instance.IsNotEmpty())
                                activityInstance = ActivityInstance.Load(instance.ToInteger());
                            else
-                               activityInstance = activityGroup.GetSchedule().AddInstance(dateRange, InstanceType.InSession, SessionVariables.LoggedInUser.ID.Value, amsgs, adc);
+                               activityInstance = activityGroup.GetSchedule()
+                                    .AddInstance(
+                                        dateRange, 
+                                        InstanceType.InSession, 
+                                        SessionVariables.LoggedInUser.ID.Value, 
+                                        amsgs, 
+                                        adc
+                                     );
                            
                             activityInstance.StartDateTime = startDateTime;
                             activityInstance.EndDateTime = endDateTime;                       
@@ -584,11 +599,10 @@ namespace AfterSchool.Areas.District.Controllers
                        if (activityInstance.IsNotEmpty())
                        {
                            var teamIds = new List<String>();
-                           if (teams.IsNotEmpty())
-                           {
-                               teamIds = teams.Split(',').ToList();
-                           }
 
+                           if (teams.IsNotEmpty())
+                               teamIds = teams.Split(',').ToList();
+                           
                            var selectedTeams = new List<Activity>();
                            var activityInstanceTeams = activityInstance.GetTeams(amsgs, adc);
                            var matches = activityInstance.GetMatches(amsgs, adc);
@@ -596,14 +610,14 @@ namespace AfterSchool.Areas.District.Controllers
                            // matches
                            teamIds.ForEach(teamId => selectedTeams.Add(Activity.Load(teamId.ToInteger(), amsgs, adc)));
 
-                           foreach (var activity in activityInstanceTeams)
+                           activityInstanceTeams.ForEach(activity =>
                            {
                                var match = matches.Where(m => m.TeamId == activity.ID).FirstOrDefault();
 
                                // remove a match from the activityInstance
                                if (!selectedTeams.Contains(activity) && match.IsNotEmpty())
-                                   match.Delete();
-                           }
+                                  amsgs.AddRange(match.Delete(adc));
+                           });
                            
                             selectedTeams.ForEach(selectedTeam => {
                                 if (!activityInstanceTeams.Contains(selectedTeam))

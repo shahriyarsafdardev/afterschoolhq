@@ -171,7 +171,7 @@ else
                                                 <i class="s7-copy-file"></i> Submit to District
                                             </button>
                                     }
-                                    else
+                                    else if(activity.HasNoTeamMatches())
                                     {
                                             <button class="md-trigger btn btn-default btn-sm" data-modal="modal-withdraw-from-district"
                                                     onclick="withdrawFromDistrict('@activity.Name', '@Url.Action("withdrawFromDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>

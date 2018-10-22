@@ -24,7 +24,10 @@
             Html.RenderPartial(
             "~/Views/Shared/_LocationEdit.cshtml",
             location,
-            new ViewDataDictionary() { { "accountId", currentAccountId } }
+            new ViewDataDictionary() {
+                { "accountId", currentAccountId },
+                { "locationIsRequired", true }
+            }
         );
         }
 
@@ -53,7 +56,13 @@
             @{
             Html.RenderPartial(
               "~/Views/Shared/_Address.cshtml",
-              addressViewModel
+              addressViewModel,
+               new ViewDataDictionary() {  
+                    {"labeladdress1required", true },
+                    { "labelcityRequired", true },
+                    { "labelstateRequired", true },
+                    { "labelpostalCodeRequired", true }
+                }
              );
             }
 
