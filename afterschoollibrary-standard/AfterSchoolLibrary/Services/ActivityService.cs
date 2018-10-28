@@ -1438,8 +1438,8 @@ namespace AfterSchoolLibrary.Services
                 //if user doesn't have feature then we're updaing the period in the background
                 if (!account.HasFeature(FeatureType.ManageActivityGroups, dc: dc))
                 {
-                    period.StartDateTime = string.Format("{0} {1}", registrationopendate, registrationopentime).ToDateTime();
-                    period.EndDateTime = string.Format("{0} {1}", registrationclosedate, registrationclosetime).ToDateTime();
+                    period.StartDateTime = $"{registrationopendate} {registrationopentime}".ToDateTime();
+                    period.EndDateTime = $"{registrationclosedate} {registrationclosetime}".ToDateTime();
                     period.LastModifiedDate = DateTime.UtcNow;
                     period.LastModifiedBy = loggedInUserId;
                     msgs.AddRange(period.Save(dc: dc));
@@ -1545,12 +1545,12 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasTeamMatches(this Activity actitivy, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Match.LoadByTeamId(actitivy.ID.Value).IsNotEmpty();
+            return Models.Match.LoadByTeamId(actitivy.ID.Value).IsNotEmpty();
         }
 
         public static bool HasNoTeamMatches(this Activity actitivy, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Match.LoadByTeamId(actitivy.ID.Value).IsEmpty();
+            return Models.Match.LoadByTeamId(actitivy.ID.Value).IsEmpty();
         }
 
         public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
