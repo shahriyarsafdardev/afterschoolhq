@@ -117,6 +117,15 @@
                                     {
                                         <span id="subscription-total-value" class="hide">0</span>
                                     }
+                                    <tr>
+                                        <td>
+                                            Coupon
+                                        </td>
+                                        <td>
+                                            <input type="text" id="coupon-code" class="form-control" name="coupon-code" value="" />
+                                            <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
+                                        </td>
+                                    </tr>
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -252,6 +261,27 @@
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
+
+    function applyCoupon() {
+        $.get(
+            '/services/validatecoupon/?couponcode=' + encodeURIComponent($('#coupon-code').val()),
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: 'The coupon has been applied',
+                        success: true
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Invalid coupon',
+                        success: false
+                    });
+                }
+            }
+        )
+    }
 
     function allowContinue() {
         if ($('#payinperson').is(':checked')) {

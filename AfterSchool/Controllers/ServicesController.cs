@@ -15,12 +15,13 @@ namespace AfterSchool.Controllers
 
         public ActionResult SearchLocations(string search)
         {
+            Response.Clear();
+
             if (Request.UserHostAddress == "::1" || true)
             {
                 var msgs = new SystemMessages();
                 var locations = Location.Search(search.Trim(), 0, 10, msgs);
 
-                Response.Clear();
                 WriteOutput(new
                 {
                     status = "ok",
@@ -39,15 +40,34 @@ namespace AfterSchool.Controllers
                     })
                 },
                 ResponseType.JSON);
-                Response.End();
             }
             else
             {
-                Response.Clear();
                 WriteOutput(new { status = "ok" }, ResponseType.JSON);
-                Response.End();
             }
+            Response.End();
+
             return View();
+        }
+
+        public ActionResult ValidateCoupon(string couponcode, decimal totalCost)
+        {
+            var msgs = new SystemMessages();
+
+            if (Request.UserHostAddress == "::1" || true)
+            {
+                var coupon = Coupon.LoadByAccountIdByCouponCode(SessionVariables.CurrentAccount.ID.Value, couponcode, msgs);
+                var status = "";
+
+                if (coupon.IsEmpty())
+                    msgs.Add("Invalid coupon", MessageType.UserError);
+
+                status = msgs.HasNoErrors() ? "ok" : "error";
+
+                return new JsonResult { Data = new { status, messages = msgs } };
+            }
+
+            return new JsonResult { Data = new { status = "ok" } };
         }
 
         public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)
@@ -81,10 +101,8 @@ namespace AfterSchool.Controllers
 
                 return new JsonResult { Data = new { status, messages = msgs } };
             }
-            else
-            {
-                return new JsonResult { Data = new { status = "ok" } };
-            }
+
+            return new JsonResult { Data = new { status = "ok" } };
         }   
     }
 }
