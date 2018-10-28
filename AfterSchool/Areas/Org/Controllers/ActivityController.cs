@@ -1263,6 +1263,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             msgs: amsgs,
                             dc: adc);
 
+                        // if couponApplyType is "SubscriptionPlan" then 
+                        // create a Stripe coupon
+                        if (coupon.AppliesTo == CouponApplyType.SubscriptionPlan)
+                            registrantAccount.CreateStripeCoupon(coupon, msgs, adc);
+
                         // assign coupon to the activity (only works for this activity)
                         var poc = PurchaseableObjectCouponService.CreateNew(
                             purchaseableObject: activity.GetPurchaseableObject(), 

@@ -62,5 +62,20 @@ namespace AfterSchoolLibrary.Services
 
             return $"{coupon.Amount.ToCurrency()}";
         }
+
+        public static bool DoesApplyToTuitionFee(this Coupon coupon)
+        {
+            return coupon.AppliesTo == CouponApplyType.TuitionFee;
+        }
+
+        public static bool DoesApplyToSubscriptionPlan(this Coupon coupon)
+        {
+            return coupon.AppliesTo == CouponApplyType.SubscriptionPlan;
+        }
+
+        public static bool HasPercentageAmountType(this Coupon coupon)
+        {
+            return coupon.AmountTypeId == CouponAmountType.Percentage;
+        }
     }
 }

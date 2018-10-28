@@ -1403,6 +1403,7 @@ property: AppliesTo, CouponApplyType, Int, , Determines what type of object the 
 property: MaxNumberOfUsesPerPerson, int?, Int
 property: MaxNumberOfUsesAll, int?, Int, , The amount of uses that a coupon can have across all users
 property: CouponCode, string, NVarChar "50"
+property: StripeCouponId, string, NVarChar "100"
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|CouponCode

@@ -598,6 +598,20 @@ namespace AfterSchoolLibrary.Services
             return customer;
         }
 
+        public static SystemMessages CreateStripeCoupon(this Account account, Coupon coupon, SystemMessages msgs,  DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var StripeCoupon = Billing.StripeHelper.CreateCoupon(coupon, msgs);
+
+            if (StripeCoupon.IsNotEmpty())
+            {
+                coupon.StripeCouponId = StripeCoupon.Id;
+                msgs.AddRange(coupon.Save(dc: dc));
+            }
+            return msgs;
+        }
+
         #endregion
 
         #region Registrants
@@ -1571,7 +1585,6 @@ namespace AfterSchoolLibrary.Services
 
             if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
                 customerId = checkoutObject.PurchasingAccount.StripeCustomerId;
-
             var charge = Billing.StripeHelper.CreateCharge(
                 fromCustomerId: customerId,
                 destinationAccountId: checkoutObject.BillingAccount.StripeUserId,
@@ -1858,6 +1871,9 @@ namespace AfterSchoolLibrary.Services
                 {
                     msgs.AddRange(smsgs);
 
+                    // invalidate coupon
+                    if (checkoutObject.Coupon.IsNotEmpty())
+                        checkoutObject.PurchasingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
                     Registration.SendConfirmation(checkoutObject, true);
                 },
                 onFailure: (SystemMessages amsgs) =>
@@ -1969,6 +1985,59 @@ namespace AfterSchoolLibrary.Services
                             loggedInUser: loggedInUser,
                             msgs: msgs,
                             dc: dc);
+        }
+
+        public static Coupon ValidateCoupon(this Account account, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var coupon = Coupon.LoadByAccountIdByCouponCode(
+               participationObject.OwnerAccount.ID.Value,
+               couponCode,
+               msgs
+           );
+
+            if (coupon.IsEmpty())
+                msgs.Add("Invalid coupon", MessageType.UserError);
+            else
+            {
+                var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
+                    coupon.ID.Value,
+                    account.ID.Value,
+                    false
+                );
+                var purchaseableObjectCoupon = PurchaseableObjectCoupon.LoadByCouponByPurchaseableObject(
+                    coupon.ID.Value,
+                    participationObject.ObjectID.Value,
+                    (PurchaseableObjectType)participationObject.ObjectType
+                );
+
+                if (attachedCoupon.IsEmpty() || purchaseableObjectCoupon.IsEmpty())
+                    msgs.Add("You are not allowed to use this coupon", MessageType.UserError);
+                else
+                {
+                    if (DateTime.UtcNow > coupon.ExpirationDate)
+                        msgs.Add("Coupon is Expired", MessageType.UserError);
+
+                    if (coupon.AppliesTo == CouponApplyType.SubscriptionPlan && participationObject.SubscriptionPlans.FirstOrDefault() == null)
+                        msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
+                }
+            }
+
+            return coupon;
+        }
+
+        public static void MarkCouponAsUsed(this Account account, Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
+                coupon.ID.Value,
+                account.ID.Value,
+                false
+            );
+
+            attachedCoupon.IsUsed = true;
+
+            attachedCoupon.Save(dc);
         }
 
         #endregion

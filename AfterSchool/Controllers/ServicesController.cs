@@ -6,6 +6,7 @@ using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 using AfterSchool.Models;
 using AfterSchool.Helpers;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Controllers
 {
@@ -50,24 +51,19 @@ namespace AfterSchool.Controllers
             return View();
         }
 
-        public ActionResult ValidateCoupon(string couponcode, decimal totalCost)
+        public ActionResult ValidateCoupon(string couponcode)
         {
             var msgs = new SystemMessages();
+            var participationObject = SessionVariables.Cart.GetCartItems(msgs)
+                .FirstOrDefault()?
+                .GetParticipationObject(msgs);
 
-            if (Request.UserHostAddress == "::1" || true)
-            {
-                var coupon = Coupon.LoadByAccountIdByCouponCode(SessionVariables.CurrentAccount.ID.Value, couponcode, msgs);
-                var status = "";
+            var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
 
-                if (coupon.IsEmpty())
-                    msgs.Add("Invalid coupon", MessageType.UserError);
-
-                status = msgs.HasNoErrors() ? "ok" : "error";
-
-                return new JsonResult { Data = new { status, messages = msgs } };
-            }
-
-            return new JsonResult { Data = new { status = "ok" } };
+            if (msgs.HasNoErrors())
+                return Json(new { status = "ok", coupon, amount = participationObject.Cost }, JsonRequestBehavior.AllowGet);
+            else
+                return Json(new { status = "error", messages = msgs, amount = participationObject.Cost }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibrary.Billing
 {
@@ -744,7 +745,8 @@ namespace AfterSchoolLibrary.Billing
                 Billing = StripeBilling.ChargeAutomatically,
                 TrialEnd = trialEndDate,
                 ApplicationFeePercent = platformFeePercent * 100, // convert to integer
-                Source = sourceId
+                Source = sourceId,
+                
             };
 
             var requestOptions = new Stripe.StripeRequestOptions();
@@ -1273,6 +1275,47 @@ namespace AfterSchoolLibrary.Billing
         }
 
         #endregion
+
+        #region StripeCoupons
+
+        private static StripeCouponService GetCouponService()
+        {
+            return new StripeCouponService(StripeAccessToken);
+        }
+
+        public static StripeCoupon CreateCoupon(Coupon coupon, SystemMessages msgs)
+        {
+            return CreateCoupon(StripeCouponDuration.Once.ToString().ToLower(), coupon.Amount.Value, coupon.AmountTypeId, msgs);
+        }
+
+        public static StripeCoupon CreateCoupon(string duration, decimal discountValue, CouponAmountType couponAmountType, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new StripeCouponCreateOptions() { Duration = duration };
+            var value = (discountValue * 100).ToInteger();
+
+            if (couponAmountType == CouponAmountType.FlatAmount)
+                options.AmountOff = value;
+            else
+                options.PercentOff = value;
+
+            StripeCoupon coupon = null;
+
+            try
+            {
+                coupon = GetCouponService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Coupon was not created", MessageType.UserError);
+            }
+
+            return coupon;
+        }
+
+        #endregion
     }
 
     public enum StripeTestCardType
@@ -1313,6 +1356,14 @@ namespace AfterSchoolLibrary.Billing
     {
         Individual,
         Company
+    }
+
+    // Specifies how long the discount will be in effect
+    enum StripeCouponDuration
+    {
+        Forever,
+        Once,
+        Repeating
     }
 
     enum StripeRefundReason

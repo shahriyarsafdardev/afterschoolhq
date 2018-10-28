@@ -270,7 +270,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "SendingAccountName", sendingAccount.Name },
                 { "CouponDiscount", coupon.GetAmountAsString() },
                 { "PurchaseableObjectName", purchaseableObject.Name },
-                { "CouponeFeeType", coupon.AppliesTo.ToString().SplitByUpperCase() },
+                { "CouponFeeType", coupon.AppliesTo.ToString().SplitByUpperCase() },
                 { "CouponCode", coupon.CouponCode },
                 { "RegistrationUrl", sendingAccount.HomePageUrl },
                 { "GoodFor", $"{coupon.MaxNumberOfUsesPerPerson} use{(coupon.MaxNumberOfUsesPerPerson > 1 ? "s" : "")}" },

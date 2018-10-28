@@ -185,7 +185,15 @@ namespace AfterSchoolLibrary.Models
         #endregion
 
 		#region "UserDefined"
-
+            public static AttachedCoupon LoadByCouponIdByAccountIdIsUsed(int CouponId, int AccountId, bool IsUsed, SystemMessages msgs = null, DatabaseConnection dc = null)
+            {
+                var dq = DatabaseQuery;
+                dq.Connection = dc;
+                dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
+                dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+                dq.Criterias.Add(ObjectMap["IsUsed"], IsUsed);
+                return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            }
         #endregion
     }
 }

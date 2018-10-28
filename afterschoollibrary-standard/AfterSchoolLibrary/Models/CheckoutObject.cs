@@ -76,9 +76,20 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue ? 
-                    ParticipationObject.Cost.Value * NumberOfSeats : 
-                    0;
+                if (ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue)
+                {
+                    var total = ParticipationObject.Cost.Value * NumberOfSeats;
+
+                    if (Coupon.IsNotEmpty() && Coupon.DoesApplyToTuitionFee())
+                    {
+                        var couponAmount = Coupon.Amount.Value;
+                        if (Coupon.HasPercentageAmountType())
+                            couponAmount *=  total;
+                        return total - couponAmount;
+                    }
+                    return total;
+                }
+                return 0;
             }
         }
 

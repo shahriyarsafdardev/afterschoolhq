@@ -33,6 +33,14 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(AttachedCoupon.Load(attachedCoupon.ID.Value, msgs, dc).IsNotEmpty());
         }
 
+        [Fact]
+        public void LoadByCouponIdByAccountIdIsUsedTest()
+        {
+            var attachedCoupon = AttachedCouponFactory.Create(Coupon, ReceivingAccount, false, msgs, dc);
+
+            Assert.True(AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(Coupon.ID.Value, ReceivingAccount.ID.Value, false, msgs, dc).IsNotEmpty());
+        }
+
         [Theory]
         [InlineData(8, 10)]
         [InlineData(15, 10)]

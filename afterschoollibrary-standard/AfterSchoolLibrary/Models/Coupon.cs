@@ -44,6 +44,7 @@ namespace AfterSchoolLibrary.Models
 		/// </summary>
 		public int? MaxNumberOfUsesAll { get { return (int?)MDV["MaxNumberOfUsesAll"].Value; } set { MDV["MaxNumberOfUsesAll"].Value = value; } }
 		public string CouponCode { get { return (string)MDV["CouponCode"].Value; } set { MDV["CouponCode"].Value = value; } }
+		public string StripeCouponId { get { return (string)MDV["StripeCouponId"].Value; } set { MDV["StripeCouponId"].Value = value; } }
 		
 
         public Coupon()
@@ -70,6 +71,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "MaxNumberOfUsesPerPerson", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxNumberOfUsesAll", System.Data.SqlDbType.Int);
 				_dp.Add(className, "CouponCode", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "StripeCouponId", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }
@@ -181,6 +183,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["CouponCode"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeCouponId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
