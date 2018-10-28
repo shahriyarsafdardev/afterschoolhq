@@ -397,6 +397,10 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
+        public decimal GetStripeFeePercent()
+        {
+            return 0.029M + (0.3M / CostPerPeriod).Value;
+        }
         #endregion
     }
 }

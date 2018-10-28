@@ -1332,12 +1332,14 @@ property: PlatformFlatFee, decimal?, Decimal "10,2"
 property: TransactionTypeId, TransactionType, Int, required
 property: StripeChargeOrRefundId, string, NVarChar "50"
 property: PaymentSourceTypeId, PaymentSourceType, Int
+property: OriginalTransactionId, int?, Int
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid
 loadmethod: BillerAccountId|TransactionTypeId, List<>
 loadmethod: PayerAccountId|TransactionTypeId, List<>
 loadmethod: StripeChargeOrRefundId
+loadmethod: OriginalTransactionId, List<>
 [end]
 
 [begin]

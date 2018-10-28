@@ -272,9 +272,14 @@ namespace AfterSchoolLibrary.Models
                         subject: am.Subject,
                         body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
                         replyTo: new SendGrid.Helpers.Mail.EmailAddress(
-                            activity.ContactEmail, 
+                            activity.ContactEmail,
                             activity.ContactName),
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                    );
+
+                    TwilioHelper.SendSMS(
+                        member.WebUserPhone,
+                        $"{am.Subject}\n{body}"
                     );
                 }
             }
@@ -295,12 +300,17 @@ namespace AfterSchoolLibrary.Models
                 // send to account admin
                 SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                         Helpers.Email.AppEmailAddress, 
+                            Helpers.Email.AppEmailAddress,
                         $"CC: {account.Name} via { Helpers.Utilities.AppName(account.IsAfterSchool)}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                     subject: am.Subject,
                     body: $"{am.Body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activitygroup_message"))}",
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                );
+
+                TwilioHelper.SendSMS(
+                        account.Phone,
+                        $"{am.Subject}\n{am.Body}"
                 );
             }
 
@@ -330,26 +340,43 @@ namespace AfterSchoolLibrary.Models
                     body = body.Replace("[name]", amr.RegistrantCompany);
                     body = body.Replace("[lastname]", "");
                 }
+                SystemMessages sendEmailMsgs = new SystemMessages();
+                SystemMessages sendSMSMsgs = new SystemMessages();
 
-                var sendMsgs = SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                         Helpers.Email.AppEmailAddress, 
-                        $"{fromName} via { Helpers.Utilities.AppName(account.IsAfterSchool)}"),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(amr.RegistrantEmail, amr.RegistrantDisplayName),
-                    subject: this.Subject,
-                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
-                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                );
+                if (amr.RegistrantEmail.IsNotEmpty())
+                {
+                    sendEmailMsgs = SendGridHelper.SendMail(
+                        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                                Helpers.Email.AppEmailAddress,
+                            $"{fromName} via { Helpers.Utilities.AppName(account.IsAfterSchool)}"),
+                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(amr.RegistrantEmail, amr.RegistrantDisplayName),
+                        subject: this.Subject,
+                        body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
+                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                    );
+                }
 
-                if (sendMsgs.HasNoErrors())
+                if (amr.RegistrantPhone.IsNotEmpty())
+                {
+                    sendSMSMsgs = TwilioHelper.SendSMS(
+                                amr.RegistrantPhone,
+                                $"{this.Subject}\n{body}"
+                                );
+                }
+
+                if (sendEmailMsgs.HasNoErrors() || sendSMSMsgs.HasNoErrors())
                 {
                     amr.DateSent = DateTime.UtcNow;
                     msgs.AddRange(amr.Save(dc: dc));
                 }
                 else
                 {
-                    amr.SendErrors = sendMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000);
+                    string[] combinedResult = {
+                        sendEmailMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000),
+                        sendSMSMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000)
+                    };
+                    amr.SendErrors = string.Join(", ", combinedResult);
                     msgs.AddRange(amr.Save(dc: dc));
                 }
             }

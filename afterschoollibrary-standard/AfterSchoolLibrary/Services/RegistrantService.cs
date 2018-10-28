@@ -154,7 +154,7 @@ namespace AfterSchoolLibrary.Services
                 customerId: accountCustomer.Id,
                 planId: plan.StripePlanId,
                 sourceId: copiedSourceId,
-                platformFeePercent: billingAccount.GetPlatformPercentFee(msgs, dc),
+                platformFeePercent: billingAccount.GetSubscriptionPlatformPercentFee(plan),
                 trialEndDate: null,
                 stripeAccountId: billingAccount.StripeUserId,
                 msgs: msgs);

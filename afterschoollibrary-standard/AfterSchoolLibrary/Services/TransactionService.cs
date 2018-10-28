@@ -22,6 +22,22 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static decimal GetPayout(this Transaction transaction)
+        {
+            return transaction.Amount.Value - transaction.GetPlatformFee();
+        }
+
+        public static string GetTransactionNumber(this Transaction transaction)
+        {
+            return transaction.ID.ToString().PadLeft(8, '0');
+        }
+
+        public static bool IsCharge(this Transaction transaction)
+        {
+            return transaction.TransactionTypeId == TransactionType.Charge;
+        }
+
+
         public static List<ParticipationObject> GetParticipationObjects(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityPayment.LoadByTransactionId(transaction.ID.Value, msgs, dc)
@@ -59,6 +75,24 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
+        public static Transaction CreateNew(Transaction originalTransaction, decimal amount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return CreateNew(
+                originalTransaction.GetBillerAccount(),
+                originalTransaction.GetPayerAccount(),
+                amount,
+                originalTransaction.GetPurchase(),
+                originalTransaction.GetParticipationObjects().FirstOrDefault().Name,
+                transactionType,
+                paymentType,
+                paymentSourceType,
+                refundId,
+                originalTransaction,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
         public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal platformFee, decimal platformPercentFee, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();            
@@ -80,6 +114,34 @@ namespace AfterSchoolLibrary.Services
                 StripeChargeOrRefundId = stripeChargeOrRefundId,
                 TransactionTypeId = transactionType,
                 PaymentSourceTypeId = paymentSourceType
+            };
+            msgs.AddRange(transaction.Save(dc));
+
+            return transaction;
+        }
+
+        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, Purchase purchase, string participationObjectName, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, string stripeChargeOrRefundId, Transaction originalTransaction , WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var transaction = new Transaction()
+            {
+                Amount = amount,
+                BillerAccountId = billingAccount.ID.Value,
+                Description = $"{participationObjectName} refund",
+                PayerAccountId = purchasingAccount.ID.Value,
+                PurchaseId = purchase.ID.Value,
+                PaymentTypeId = paymentType,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                StripeChargeOrRefundId = stripeChargeOrRefundId,
+                TransactionTypeId = transactionType,
+                PaymentSourceTypeId = paymentSourceType,
+                PlatformFlatFee = 0,
+                PlatformPercentFee = 0,
+                OriginalTransactionId = originalTransaction.ID.Value, 
             };
             msgs.AddRange(transaction.Save(dc));
 

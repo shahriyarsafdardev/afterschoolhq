@@ -1857,7 +1857,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult MessageAdd(string id, string subject, string body)
+        public ActionResult MessageAdd(string id,string deliveryMethod, string subject, string body)
         {
             var msgs = new SystemMessages();
 

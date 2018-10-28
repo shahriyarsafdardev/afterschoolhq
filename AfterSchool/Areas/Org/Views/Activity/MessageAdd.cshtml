@@ -20,7 +20,7 @@
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Send Message"); }
         </div>
         <div class="panel-body">
-            <form method="post" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal">
+            <form method="post" id="message-form" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal">
 
                 @if (registrants.Count == 0)
                 {
@@ -31,7 +31,7 @@
                 }
                 else
                 {
-                    <div class="form-group">
+                    <div class="form-group" id="subject-group">
                         <label class="col-sm-3 control-label">Subject</label>
                         <div class="col-sm-6">
                             <input type="text" name="subject" id="subject" maxlength="150" class="form-control" required />
@@ -41,22 +41,13 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Body</label>
                         <div class="col-sm-6">
-                            @{ Html.RenderPartial(
-                              "~/Views/Shared/_TextEditor.cshtml",
-                              "",
-                              new ViewDataDictionary() {
-                                    { "required", true },
-                                    { "name", "body" },
-                                    { "id", "body" }
-                              }
-                              ); }
-
+                            <textarea name="body" id="body" required style="width: 100%"></textarea>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">
-                            Select @UILabel.RegistrantLabel(true)<br/>
+                            Select @UILabel.RegistrantLabel(true)<br />
                             <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                         </label>
                         <div class="col-sm-6">
@@ -65,7 +56,7 @@
                                 <div class="col-md-4">
                                     @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                     {
-                                        <div class="am-checkbox">
+                                        <div class="am-checkbox registrant" data-has-email="@registrant.Email.IsNotEmpty().ToInteger()" data-has-phone-number="@registrant.Phone.IsNotEmpty().ToInteger()">
                                             <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" checked="checked" />
                                             <label for="registrant-@registrant.ID">@registrant.DisplayName.MaxChars(20, "...")</label>
                                         </div>
@@ -78,7 +69,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>
                         <div class="col-sm-6">
-                            <button type="submit" class="btn btn-primary btn-lg btn-block pull-right"><i class="s7-diskette"></i> Send Message to Selected Registrants</button>
+                            <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right"><i class="s7-diskette"></i> Send Message to Selected Registrants</button>
                         </div>
                     </div>
                 }

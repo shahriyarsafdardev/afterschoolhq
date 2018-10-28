@@ -1225,6 +1225,31 @@ namespace AfterSchoolLibrary.Billing
             return new StripeRefundService(StripeAccessToken);
         }
 
+        public static StripeRefund CreateRefund(string chargeId, decimal totalAmount, string reason, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new StripeRefundCreateOptions
+            {
+                Amount = (totalAmount * 100).ToInteger(),
+                Reason = reason
+            };
+
+            StripeRefund refund = null;
+
+            try
+            {
+                refund = GetRefundService().Create(chargeId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error refunding", MessageType.UserError);
+            }
+
+            return refund;
+        }
+
         public static List<StripeRefund> GetRefunds(string chargeId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1288,5 +1313,20 @@ namespace AfterSchoolLibrary.Billing
     {
         Individual,
         Company
+    }
+
+    enum StripeRefundReason
+    {
+        Duplicate,
+        Fraudulent,
+        RequestedByCustomer
+    }
+
+    public enum StripeRefundStatus
+    {
+        Succeeded,
+        Failed,
+        Pending,
+        Canceled
     }
 }
