@@ -9,27 +9,29 @@ namespace AfterSchoolLibrary.Services
     public static class MatchService
     {
 
-        public static Match CreateOrUpdate(WebUser currentUser, int teamId, int activityInstanceId, Match match = null, decimal score = 0, int teamPlace = 0, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Match CreateOrUpdate(WebUser currentUser, int? teamId, int? activityInstanceId, Match match = null, decimal score = 0, int teamPlace = 0, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
            
             if (teamId.IsEmpty() )
-                msgs.Add("Missing Team on Match", MessageType.Error);
+                msgs.Add("Error Saving Match, Missing Team on Match", MessageType.Error);
 
-            // vactivityInstance
+            // activityInstance
             if (activityInstanceId.IsEmpty())
-                msgs.Add("Error Saving Match, invalid activityInstance ", MessageType.Error);
-
-            // validate activityInstanceId
-            if (ActivityInstance.Load(activityInstanceId, msgs, dc).IsEmpty())
-                msgs.Add("Error Saving Match, invalid activityInstance ", MessageType.Error);
-
-            // check that this team doesnt already have a match on this activity instance
-            var matches = Match.LoadByActivityInstanceId(activityInstanceId, msgs, dc);
-            matches.ForEach(m =>
+                msgs.Add("Error Saving Match, Missing ActivityInstance", MessageType.Error);
+            else
             {
-                if(m.TeamId == teamId)
-                    msgs.Add("Error Saving Match, team already has a match with this activity instance", MessageType.Error);
-            });
+                // validate activityInstanceId
+                if (ActivityInstance.Load((int)activityInstanceId, msgs, dc).IsEmpty())
+                    msgs.Add("Error Saving Match, Invalid ActivityInstance", MessageType.Error);
+
+                // check that this team doesnt already have a match on this activity instance
+                var matches = Match.LoadByActivityInstanceId((int)activityInstanceId, msgs, dc);
+                matches.ForEach(m =>
+                {
+                    if (m.TeamId == teamId)
+                        msgs.Add("Error Saving Match, team already has a match with this activity instance", MessageType.Error);
+                });
+            }
 
             if (msgs.HasErrors())
                 return null;
@@ -49,7 +51,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static Match CreateOrUpdateMatch(WebUser currentUser, int teamId, int activityInstanceId, Match match = null, decimal score = 0, int teamPlace = 0, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static Match CreateOrUpdateMatch(WebUser currentUser, int? teamId, int? activityInstanceId, Match match = null, decimal score = 0, int teamPlace = 0, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
            
