@@ -52,5 +52,27 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static ActivityGroup CreateWithSchedule(Account account, ActivityGroupType activityGroupType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);
+            var schedule = ActivityScheduleFactory.Create(account, msgs, dc);
+
+            return ActivityGroupFactory.Create(
+                account,
+                activityGroupType,
+                schedule,
+                GenderRestrictionType.None,
+                gradeLevels.First().ID,
+                gradeLevels.Last().ID,
+                0,
+                CostUnitType.NotSet,
+                true,
+                msgs,
+                dc
+                );
+        }
+
+        
     }
 }

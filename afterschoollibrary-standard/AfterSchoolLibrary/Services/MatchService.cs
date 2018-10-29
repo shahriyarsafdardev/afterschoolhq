@@ -9,29 +9,30 @@ namespace AfterSchoolLibrary.Services
     public static class MatchService
     {
 
-
         public static Match CreateOrUpdate(WebUser currentUser, int teamId, int activityInstanceId, Match match = null, decimal score = 0, int teamPlace = 0, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
            
-            if (teamId.IsEmpty())
-            {
+            if (teamId.IsEmpty() )
                 msgs.Add("Missing Team on Match", MessageType.Error);
-                return null;
-            }
 
-            // vactivityInstacne
+            // vactivityInstance
             if (activityInstanceId.IsEmpty())
-            {
                 msgs.Add("Error Saving Match, invalid activityInstance ", MessageType.Error);
-                return null;
-            }
 
-            //validate activityInstanceId
+            // validate activityInstanceId
             if (ActivityInstance.Load(activityInstanceId, msgs, dc).IsEmpty())
-            {
                 msgs.Add("Error Saving Match, invalid activityInstance ", MessageType.Error);
+
+            // check that this team doesnt already have a match on this activity instance
+            var matches = Match.LoadByActivityInstanceId(activityInstanceId, msgs, dc);
+            matches.ForEach(m =>
+            {
+                if(m.TeamId == teamId)
+                    msgs.Add("Error Saving Match, team already has a match with this activity instance", MessageType.Error);
+            });
+
+            if (msgs.HasErrors())
                 return null;
-            } 
             
             return CreateOrUpdateMatch(currentUser, teamId, activityInstanceId, match, score, teamPlace, msgs, dc: dc);
         }

@@ -182,7 +182,7 @@ namespace AfterSchoolLibrary
 
 		#region "UserDefined"
 
-        public bool Exists(int teamId, int activityInstanceId)
+        static public bool Exists(int teamId, int activityInstanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var match = Match.LoadByTeamIdByActivityInstanceId(teamId, activityInstanceId);
 
