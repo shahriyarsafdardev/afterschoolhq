@@ -2069,6 +2069,19 @@ namespace AfterSchool.Areas.Org.Controllers
             return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.LoggedInUser.IsActivityLeader(activity);            
         }
 
-       
+        [HttpGet]
+        public ActionResult Schedule(string id)
+        {
+            var msgs = new SystemMessages();
+
+            var team = Activity.LoadByUid(id.ToGuid());
+            var activityInstances = ActivityInstance.LoadByActivityId(team.ID.Value, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.ActivityInstances = activityInstances;
+
+            return View(team);
+        }
+
     }
 }
