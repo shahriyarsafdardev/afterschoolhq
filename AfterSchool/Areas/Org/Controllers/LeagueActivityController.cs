@@ -2075,7 +2075,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             var team = Activity.LoadByUid(id.ToGuid());
-            var activityInstances = ActivityInstance.LoadByActivityId(team.ID.Value, msgs);
+            var activityInstances = MatchService.GetTeamActivityInstances(team.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.ActivityInstances = activityInstances;
