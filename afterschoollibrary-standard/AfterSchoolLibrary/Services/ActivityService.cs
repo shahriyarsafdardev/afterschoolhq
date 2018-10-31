@@ -420,7 +420,7 @@ namespace AfterSchoolLibrary
             return attendance;
         }
 
-        public static void ClearEmptyAttendances(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static void ClearEmptyAttendances(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
             var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, msgs, dc);
