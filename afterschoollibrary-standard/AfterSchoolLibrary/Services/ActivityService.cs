@@ -431,6 +431,7 @@ namespace AfterSchoolLibrary
                     attendanceItem
                         .GetAttendanceRegistrants(msgs, dc)
                         .ForEach(attendaceRegistrant => msgs.AddRange(attendaceRegistrant.Delete(dc)));
+
                     msgs.AddRange(attendanceItem.Delete(dc));
                 });
             }

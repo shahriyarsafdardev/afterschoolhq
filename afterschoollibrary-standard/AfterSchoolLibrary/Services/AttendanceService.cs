@@ -58,16 +58,10 @@ namespace AfterSchoolLibrary.Services
                     attendance.IsCompleted = true;
                     attendance.LastModifiedBy = loggedInUser.ID;
                     attendance.LastModifiedDate = DateTime.UtcNow;
-                    msgs.AddRange(attendance.Save(dc));
+                    amsgs.AddRange(attendance.Save(adc));
 
-                    attendance.GetAttendanceRegistrants(msgs, dc).ForEach(attendanceRegistrant => {
-
-                        attendanceRegistrant.NumberPresent = 0;
-
-                        if (attendanceRegistrant.ID.Value.In(attendanceRegistrantIds))
-                            attendanceRegistrant.NumberPresent = 1;
-
-                        msgs.AddRange(attendanceRegistrant.Save(dc));
+                    attendance.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant => {
+                        attendanceRegistrant.UpdateIsPresent(attendanceRegistrant.ID.Value.In(attendanceRegistrantIds), loggedInUser, amsgs, adc);
                     });
                 },
                 onSuccess: (SystemMessages smsgs) =>

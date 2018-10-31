@@ -28,5 +28,18 @@ namespace AfterSchoolLibrary.Services
 
             return attendanceRegistrant;
         }
+
+        public static void UpdateIsPresent(this AttendanceRegistrant attendanceRegistrant, bool isPresent, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            attendanceRegistrant.NumberPresent = 0;
+
+            if (isPresent)
+                attendanceRegistrant.NumberPresent = 1;
+
+            attendanceRegistrant.LastModifiedDate = DateTime.UtcNow;
+            attendanceRegistrant.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+
+            msgs.AddRange(attendanceRegistrant.Save(dc));
+        }
     }
 }
