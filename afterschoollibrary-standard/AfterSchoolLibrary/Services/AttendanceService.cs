@@ -34,34 +34,21 @@ namespace AfterSchoolLibrary.Services
 
         private static void InitAttendanceRegistrants(this Attendance attendance, Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var registrants = activity.GetRegistrantActivities(msgs, dc);
+            var registrantActivities = activity.GetRegistrantActivities(msgs, dc);
             var assignmentTypes = new RegistrationAssignmentType[]
             {
                 RegistrationAssignmentType.Reserved,
                 RegistrationAssignmentType.ReservedPendingPayment
             };
 
-            foreach (var registrant in registrants.Where(registrant => registrant.AssignmentTypeId.In(assignmentTypes)))
-            {
-                var attendanceRegistrant = new AttendanceRegistrant
-                {
-                    AttendanceId = attendance.ID,
-                    IsPresent = false,
-                    NumberPresent = 0,
-                    IsLate = false,
-                    NumberLate = 0,
-                    NumberPossible = 1,
-                    RegistrantId = registrant.RegistrantId,
-                    LastModifiedDate = DateTime.UtcNow,
-                    CreateDate = DateTime.UtcNow,
-                    LastModifiedBy = loggedInUser.ID,
-                    CreatedBy = loggedInUser.ID
-                };
-                msgs.AddRange(attendanceRegistrant.Save(dc));
-            }
+            registrantActivities.Where(registrant => registrant.AssignmentTypeId.In(assignmentTypes))
+                .ToList()
+                .ForEach(registrantActivity => {
+                    AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, loggedInUser, msgs, dc);
+            });
         }
 
-        public static void UpdateAttendance(this Attendance attendance,int activityInstanceId, List<int> attendanceRegistrantIds, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void UpdateAttendance(this Attendance attendance, int activityInstanceId, List<int> attendanceRegistrantIds, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -74,7 +61,9 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(attendance.Save(dc));
 
                     attendance.GetAttendanceRegistrants(msgs, dc).ForEach(attendanceRegistrant => {
+
                         attendanceRegistrant.NumberPresent = 0;
+
                         if (attendanceRegistrant.ID.Value.In(attendanceRegistrantIds))
                             attendanceRegistrant.NumberPresent = 1;
 
@@ -92,7 +81,7 @@ namespace AfterSchoolLibrary.Services
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
+                    Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
