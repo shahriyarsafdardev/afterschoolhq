@@ -190,11 +190,11 @@ namespace AfterSchoolLibrary
 		#region "UserDefined"
 
         private List<ActivityMessageRegistrant> _ActivityMessageRegistrants = null;
-        public List<ActivityMessageRegistrant> GetActivityMessageRegistrants(DatabaseConnection dc = null)
+        public List<ActivityMessageRegistrant> GetActivityMessageRegistrants(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_ActivityMessageRegistrants.IsEmpty())
             {
-                _ActivityMessageRegistrants = ActivityMessageRegistrant.LoadByActivityMessageId(this.ID.Value, dc: dc);
+                _ActivityMessageRegistrants = ActivityMessageRegistrant.LoadByActivityMessageId(this.ID.Value, msgs, dc);
             }
             return _ActivityMessageRegistrants;
         }
@@ -308,7 +308,7 @@ namespace AfterSchoolLibrary
         private SystemMessages SendActivityMessage(Account account, string fromName, string replyToEmail, string replyToName, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var amrs = this.GetActivityMessageRegistrants(dc: dc);
+            var amrs = this.GetActivityMessageRegistrants(msgs, dc);
 
             foreach (var amr in amrs)
             {
@@ -329,27 +329,41 @@ namespace AfterSchoolLibrary
                     body = body.Replace("[lastname]", "");
                 }
 
-                var sendMsgs = SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Email.AppEmailAddress, 
-                        $"{fromName} via {Utilities.AppName(account.IsAfterSchool)}"),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(amr.RegistrantEmail, amr.RegistrantDisplayName),
-                    subject: this.Subject,
-                    body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
-                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                );
+                // send emails to the student email and the parent
+                var emails = new List<string>();
+                var registrant = amr.GetRegistrant(msgs, dc);
+
+                if (amr.RegistrantEmail.IsNotEmpty())
+                    emails.Add(amr.RegistrantEmail);
+
+                if (registrant.ParentRegistrantId.HasValue)
+                {
+                    var parentRegistrant = registrant.GetMasterRegistrant(msgs, dc).GetParentOrGuardian(msgs, dc);
+                    if (parentRegistrant.Email.NotIn(emails))
+                        emails.Add(parentRegistrant.Email);
+                }
+
+                var sendMsgs = new SystemMessages(); 
+
+                emails.ForEach(email => {
+                    sendMsgs.AddRange(SendGridHelper.SendMail(
+                        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                            Email.AppEmailAddress,
+                            $"{fromName} via {Utilities.AppName(account.IsAfterSchool)}"),
+                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(email, amr.RegistrantDisplayName),
+                        subject: this.Subject,
+                        body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
+                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                    ));
+                });
 
                 if (sendMsgs.HasNoErrors())
-                {
                     amr.DateSent = DateTime.UtcNow;
-                    msgs.AddRange(amr.Save(dc: dc));
-                }
                 else
-                {
                     amr.SendErrors = sendMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000);
-                    msgs.AddRange(amr.Save(dc: dc));
-                }
+
+                msgs.AddRange(amr.Save(dc: dc));
             }
 
             if (msgs.HasNoErrors())
@@ -359,9 +373,7 @@ namespace AfterSchoolLibrary
             }
             else
             {
-                // TODO: Fix Rollbar reporting
-                // RollbarLocator.RollbarInstance.Configure(new RollbarConfig(Utilities.RollbarAccessToken));
-                // RollbarLocator.RollbarInstance.Log(ErrorLevel.Error, msgs.RenderMessageList(MessageOutputType.Text));
+                AfterSchoolLibrary.Utilities.SystemErrorLog(msgs);
             }
 
             return msgs;

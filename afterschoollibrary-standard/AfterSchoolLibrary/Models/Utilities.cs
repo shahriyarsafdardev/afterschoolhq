@@ -323,9 +323,10 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
-                    amsgs.AddRange(UpdateSeatIndexes(adc));
-                    amsgs.AddRange(UpdatePaymentSourceType(adc));
+                    
+                    // amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
+                    // amsgs.AddRange(UpdateSeatIndexes(adc));
+                    // amsgs.AddRange(UpdatePaymentSourceType(adc));
 
                     // amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
 

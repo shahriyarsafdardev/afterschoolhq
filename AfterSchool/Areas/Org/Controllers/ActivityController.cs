@@ -980,19 +980,19 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         //create attendance records for this date and mark as absent by default (even if temporary)
                         attendance = new Attendance();
+
                         //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
                         var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, dc: adc);
                         if (attendanceList.Count > 0)
                         {
-                            foreach (var a in attendanceList)
+                            attendanceList.ForEach(attendanceItem =>
                             {
-                                var attendanceRegistrants = a.GetAttendanceRegistrants(adc);
-                                foreach (var ar in attendanceRegistrants)
+                                attendanceItem.GetAttendanceRegistrants(adc).ForEach(attendaceRegistrant =>
                                 {
-                                    amsgs.AddRange(ar.Delete(adc));
-                                }
-                                amsgs.AddRange(a.Delete(adc));
-                            }
+                                    amsgs.AddRange(attendaceRegistrant.Delete(adc));
+                                });
+                                amsgs.AddRange(attendanceItem.Delete(adc));
+                            });
                         }
 
                         attendance.Date = DateTime.UtcNow.Date;
@@ -1002,13 +1002,22 @@ namespace AfterSchool.Areas.Org.Controllers
                         attendance.ActivityId = activity.ID.Value;
 
                         var instances = activity.GetSchedule().GetInstances();
-                        var closestDate = instances.Select(y => y.StartDateTime.Value).ClosestDate(SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow));
+                        var closestDate = instances
+                            .Select(y => y.StartDateTime.Value)
+                            .ClosestDate(SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow));
+
                         attendance.ActivityInstanceId = instances.Where(x => x.StartDateTime.Value == closestDate).First().ID;
 
                         amsgs.AddRange(attendance.Save(adc));
 
                         var registrants = attendance.ToActivity(true, adc).GetRegistrantActivities(amsgs, adc);
-                        foreach (var registrant in registrants.Where(registrant => registrant.AssignmentTypeId == RegistrationAssignmentType.Reserved || registrant.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment))
+                        var assignmentTypes = new RegistrationAssignmentType[] 
+                        {
+                            RegistrationAssignmentType.Reserved,
+                            RegistrationAssignmentType.ReservedPendingPayment
+                        };
+
+                        foreach (var registrant in registrants.Where(registrant => registrant.AssignmentTypeId.In(assignmentTypes)))
                         {
                             var ar = new AttendanceRegistrant
                             {
@@ -1033,6 +1042,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     },
                     onFailure: (SystemMessages fmsgs) => {
                         msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
                     }
                 );
             }

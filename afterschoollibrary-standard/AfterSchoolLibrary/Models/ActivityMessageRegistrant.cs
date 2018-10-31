@@ -216,6 +216,14 @@ namespace AfterSchoolLibrary
             };
         }
 
+        public Registrant GetRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (this.RegistrantId.HasValue)
+                return Registrant.Load(this.RegistrantId.Value, msgs, dc);
+
+            return null;
+        }
+
         #endregion
     }
 }
