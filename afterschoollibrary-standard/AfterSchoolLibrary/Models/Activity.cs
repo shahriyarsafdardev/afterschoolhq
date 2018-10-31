@@ -2406,39 +2406,6 @@ namespace AfterSchoolLibrary
             return _Properties;
         }
 
-        public ActivityMessage AddMessage(string subject, string body, List<int> registrantIds, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            ActivityMessage am = null;
-
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
-                {
-                    am = new ActivityMessage();
-                    am.ActivityId = this.ID;
-                    am.AccountId = this.AccountId;
-                    am.Subject = subject.MaxChars(150);
-                    am.Body = body;
-                    am.CreateDate = DateTime.UtcNow;
-                    am.CreatedBy = loggedInUserId;
-                    amsgs.AddRange(am.Save(adc));
-
-                    registrantIds.ForEach(registrantId => am.AddRegistrant(registrantId, loggedInUserId, amsgs, dc: dc));
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                dc: dc
-            );
-
-            return am;
-        }
-
         public static List<Activity> GetActivitiesByRegistrantByDay(int registrantId, DayOfWeekASL day, DateTime startDate, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

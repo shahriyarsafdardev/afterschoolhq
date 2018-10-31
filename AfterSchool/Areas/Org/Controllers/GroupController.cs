@@ -10,6 +10,7 @@ using System.Web.Script.Serialization;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Hangfire;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -528,7 +529,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .ToList();
                 am = group.AddMessage(subject, body, registrantIds, SessionVariables.LoggedInUser.ID.Value, msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessage.Send(am.ID.Value, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
             }
 
             ViewBag.Messages = msgs;
@@ -553,7 +554,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var am = ActivityMessage.Load(id.ToInteger());
             var group = am.GetActivityGroup();
 
-            BackgroundJob.Enqueue(() => ActivityMessage.Send(am.ID.Value, null));
+            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
 
             ViewBag.Messages = msgs;
 

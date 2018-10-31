@@ -1805,7 +1805,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .ToList();
                 am = activity.AddMessage(subject, body, registrantIds, SessionVariables.LoggedInUser.ID.Value, msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessage.Send(am.ID.Value, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
             }
 
             ViewBag.Messages = msgs;
