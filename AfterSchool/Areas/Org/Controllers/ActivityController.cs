@@ -970,89 +970,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att)
         {
             var msgs = new SystemMessages();
-            AfterSchoolLibrary.Attendance attendance = null;
+            var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            if (!att.IsNumber())
-            {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-
-                        //create attendance records for this date and mark as absent by default (even if temporary)
-                        attendance = new Attendance();
-
-                        //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
-                        var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, dc: adc);
-                        if (attendanceList.Count > 0)
-                        {
-                            attendanceList.ForEach(attendanceItem =>
-                            {
-                                attendanceItem.GetAttendanceRegistrants(adc).ForEach(attendaceRegistrant =>
-                                {
-                                    amsgs.AddRange(attendaceRegistrant.Delete(adc));
-                                });
-                                amsgs.AddRange(attendanceItem.Delete(adc));
-                            });
-                        }
-
-                        attendance.Date = DateTime.UtcNow.Date;
-                        attendance.IsCompleted = false;
-                        attendance.LastModifiedDate = attendance.CreateDate = DateTime.UtcNow;
-                        attendance.LastModifiedBy = attendance.CreatedBy = SessionVariables.LoggedInUser.ID;
-                        attendance.ActivityId = activity.ID.Value;
-
-                        var instances = activity.GetSchedule().GetInstances();
-                        var closestDate = instances
-                            .Select(y => y.StartDateTime.Value)
-                            .ClosestDate(SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow));
-
-                        attendance.ActivityInstanceId = instances.Where(x => x.StartDateTime.Value == closestDate).First().ID;
-
-                        amsgs.AddRange(attendance.Save(adc));
-
-                        var registrants = attendance.ToActivity(true, adc).GetRegistrantActivities(amsgs, adc);
-                        var assignmentTypes = new RegistrationAssignmentType[] 
-                        {
-                            RegistrationAssignmentType.Reserved,
-                            RegistrationAssignmentType.ReservedPendingPayment
-                        };
-
-                        foreach (var registrant in registrants.Where(registrant => registrant.AssignmentTypeId.In(assignmentTypes)))
-                        {
-                            var ar = new AttendanceRegistrant
-                            {
-                                AttendanceId = attendance.ID,
-                                IsPresent = false,
-                                NumberPresent = 0,
-                                IsLate = false,
-                                NumberLate = 0,
-                                NumberPossible = 1,
-                                RegistrantId = registrant.RegistrantId,
-                                LastModifiedDate = DateTime.UtcNow,
-                                CreateDate = DateTime.UtcNow,
-                                LastModifiedBy = SessionVariables.LoggedInUser.ID,
-                                CreatedBy = SessionVariables.LoggedInUser.ID
-                            };
-                            amsgs.AddRange(ar.Save(adc));
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => {
-                        msgs.AddRange(smsgs);
-                        attendance = AfterSchoolLibrary.Attendance.Load(attendance.ID.Value);
-                    },
-                    onFailure: (SystemMessages fmsgs) => {
-                        msgs.AddRange(fmsgs);
-                    },
-                    onException: (SystemMessages emsgs) =>
-                    {
-                        AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
-                    }
-                );
-            }
-            else
-            {
-                attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger());
-            }
+            var attendance = activity.GetOrCreateNewAttendance(attendanceId, SessionVariables.LoggedInUser, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();
@@ -1068,45 +989,41 @@ namespace AfterSchool.Areas.Org.Controllers
             AfterSchoolLibrary.Attendance attendance = null;
 
             if (!activityinstance.IsNumber())
-            {
                 msgs.Add("Activity Date is required", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                        attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), dc: adc);
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) => 
+                    {
+                        attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), amsgs, adc);
                         attendance.ActivityInstanceId = activityinstance.ToInteger();
                         attendance.IsCompleted = true;
                         attendance.LastModifiedBy = SessionVariables.LoggedInUser.ID;
                         attendance.LastModifiedDate = DateTime.UtcNow;
                         amsgs.AddRange(attendance.Save(adc));
+                        
+                        attendance.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant => {
+                            attendanceRegistrant.NumberPresent = 0;
+                            if (Request.Params[$"present-{attendanceRegistrant.ID.ToString()}"].IsNumber())
+                                attendanceRegistrant.NumberPresent = Request.Params[$"present-{attendanceRegistrant.ID.ToString()}"].ToInteger();
 
-                        var ars = attendance.GetAttendanceRegistrants(adc);
-                        foreach (var ar in ars)
-                        {
-                            ar.NumberPresent = 0;
-                            if (Request.Params["present-" + ar.ID.ToString()].IsNumber())
-                            {
-                                ar.NumberPresent = Request.Params["present-" + ar.ID.ToString()].ToInteger();
-                            }
-                            /*
-                            ar.IsLate = false;
-                            if (Request.Params["late-" + ar.ID.ToString()].IsBoolean())
-                            {
-                                ar.IsLate = Request.Params["late-" + ar.ID.ToString()].ToBoolean();
-                            }
-                            */
-                            amsgs.AddRange(ar.Save(adc));
-                        }
+                            amsgs.AddRange(attendanceRegistrant.Save(adc));
+                        });
                     },
-                    onSuccess: (SystemMessages smsgs) => {
+                    onSuccess: (SystemMessages smsgs) => 
+                    {
                         msgs.AddRange(smsgs);
                         msgs.Add("Attendance saved", MessageType.Success);
                     },
-                    onFailure: (SystemMessages fmsgs) => {
+                    onFailure: (SystemMessages fmsgs) => 
+                    {
                         msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
                     }
                 );
             }

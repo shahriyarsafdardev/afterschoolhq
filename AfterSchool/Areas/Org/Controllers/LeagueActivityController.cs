@@ -1088,18 +1088,15 @@ namespace AfterSchool.Areas.Org.Controllers
                         //create attendance records for this date and mark as absent by default (even if temporary)
                         attendance = new Attendance();
                         //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
-                        var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, dc: adc);
+                        var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, amsgs, adc);
                         if (attendanceList.Count > 0)
                         {
-                            foreach (var a in attendanceList)
-                            {
-                                var attendanceRegistrants = a.GetAttendanceRegistrants(adc);
-                                foreach (var ar in attendanceRegistrants)
-                                {
-                                    amsgs.AddRange(ar.Delete(adc));
-                                }
-                                amsgs.AddRange(a.Delete(adc));
-                            }
+                            attendanceList.ForEach(attendanceItem => {
+                                attendanceItem.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant => {
+                                    amsgs.AddRange(attendanceRegistrant.Delete(adc));
+                                });
+                                amsgs.AddRange(attendanceItem.Delete(adc));
+                            });
                         }
 
                         attendance.Date = DateTime.UtcNow.Date;
@@ -1114,7 +1111,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         amsgs.AddRange(attendance.Save(adc));
 
-                        var registrants = attendance.ToActivity(true, adc).GetRegistrantActivities(amsgs, adc);
+                        var registrants = attendance.GetActivity(amsgs, adc).GetRegistrantActivities(amsgs, adc);
                         foreach (var registrant in registrants)
                         {
                             var ar = new AttendanceRegistrant();

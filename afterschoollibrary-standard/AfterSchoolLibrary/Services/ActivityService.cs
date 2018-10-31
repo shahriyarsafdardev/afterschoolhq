@@ -380,5 +380,94 @@ namespace AfterSchoolLibrary
         {
             return Match.LoadByTeamId(actitivy.ID.Value).IsEmpty();
         }
+
+        public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!attendanceId.HasValue)
+                return activity.CreateNewAttendance(loggedInUser, msgs, dc);
+
+            return Attendance.Load(attendanceId.Value, msgs, dc);
+        }
+
+        public static Attendance CreateNewAttendance(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            //create attendance records for this date and mark as absent by default (even if temporary)
+            var attendance = new Attendance();
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
+                    var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, amsgs, adc);
+                    if (attendanceList.Count > 0)
+                    {
+                        attendanceList.ForEach(attendanceItem =>
+                        {
+                            attendanceItem
+                                .GetAttendanceRegistrants(amsgs, adc)
+                                .ForEach(attendaceRegistrant => amsgs.AddRange(attendaceRegistrant.Delete(adc)));
+                            amsgs.AddRange(attendanceItem.Delete(adc));
+                        });
+                    }
+
+                    attendance.Date = DateTime.UtcNow.Date;
+                    attendance.IsCompleted = false;
+                    attendance.LastModifiedDate = attendance.CreateDate = DateTime.UtcNow;
+                    attendance.LastModifiedBy = attendance.CreatedBy = loggedInUser.ID;
+                    attendance.ActivityId = activity.ID.Value;
+
+                    var instances = activity.GetSchedule().GetInstances();
+                    var closestDate = instances
+                        .Select(y => y.StartDateTime.Value)
+                        .ClosestDate(activity.GetAccount(amsgs, adc).ConvertToAccountTimeZone(DateTime.UtcNow));
+
+                    attendance.ActivityInstanceId = instances.Where(x => x.StartDateTime.Value == closestDate).First().ID;
+
+                    amsgs.AddRange(attendance.Save(adc));
+
+                    var registrants = attendance.GetActivity(amsgs, adc).GetRegistrantActivities(amsgs, adc);
+                    var assignmentTypes = new RegistrationAssignmentType[]
+                    {
+                        RegistrationAssignmentType.Reserved,
+                        RegistrationAssignmentType.ReservedPendingPayment
+                    };
+
+                    foreach (var registrant in registrants.Where(registrant => registrant.AssignmentTypeId.In(assignmentTypes)))
+                    {
+                        var ar = new AttendanceRegistrant
+                        {
+                            AttendanceId = attendance.ID,
+                            IsPresent = false,
+                            NumberPresent = 0,
+                            IsLate = false,
+                            NumberLate = 0,
+                            NumberPossible = 1,
+                            RegistrantId = registrant.RegistrantId,
+                            LastModifiedDate = DateTime.UtcNow,
+                            CreateDate = DateTime.UtcNow,
+                            LastModifiedBy = loggedInUser.ID,
+                            CreatedBy = loggedInUser.ID
+                        };
+                        amsgs.AddRange(ar.Save(adc));
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    attendance = Attendance.Load(attendance.ID.Value);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Utilities.SystemErrorLog(emsgs);
+                }
+            );
+
+            return attendance;
+        }
     }
 }
