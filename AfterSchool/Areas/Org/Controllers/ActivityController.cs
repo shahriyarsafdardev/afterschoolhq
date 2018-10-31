@@ -986,49 +986,21 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att, string activityinstance)
         {
             var msgs = new SystemMessages();
-            AfterSchoolLibrary.Attendance attendance = null;
+            var presentStudents = new List<int>();
+            var activity = Activity.LoadByUid(id.ToGuid());
+            var attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), msgs);
 
             if (!activityinstance.IsNumber())
                 msgs.Add("Activity Date is required", MessageType.UserError);
 
+            attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant => {
+                if (Request.Params[$"present-{attendanceRegistrant.ID.ToString()}"].IsNumber())
+                    presentStudents.Add(attendanceRegistrant.ID.Value);
+            });
+
             if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => 
-                    {
-                        attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), amsgs, adc);
-                        attendance.ActivityInstanceId = activityinstance.ToInteger();
-                        attendance.IsCompleted = true;
-                        attendance.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                        attendance.LastModifiedDate = DateTime.UtcNow;
-                        amsgs.AddRange(attendance.Save(adc));
-                        
-                        attendance.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant => {
-                            attendanceRegistrant.NumberPresent = 0;
-                            if (Request.Params[$"present-{attendanceRegistrant.ID.ToString()}"].IsNumber())
-                                attendanceRegistrant.NumberPresent = Request.Params[$"present-{attendanceRegistrant.ID.ToString()}"].ToInteger();
+                attendance.UpdateAttendance(activityinstance.ToInteger(), presentStudents, SessionVariables.LoggedInUser, msgs);
 
-                            amsgs.AddRange(attendanceRegistrant.Save(adc));
-                        });
-                    },
-                    onSuccess: (SystemMessages smsgs) => 
-                    {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Attendance saved", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) => 
-                    {
-                        msgs.AddRange(fmsgs);
-                    },
-                    onException: (SystemMessages emsgs) =>
-                    {
-                        AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
-                    }
-                );
-            }
-
-            var activity = Activity.LoadByUid(id.ToGuid());
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();

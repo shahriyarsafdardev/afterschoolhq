@@ -398,59 +398,8 @@ namespace AfterSchoolLibrary
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
-                    var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, amsgs, adc);
-                    if (attendanceList.Count > 0)
-                    {
-                        attendanceList.ForEach(attendanceItem =>
-                        {
-                            attendanceItem
-                                .GetAttendanceRegistrants(amsgs, adc)
-                                .ForEach(attendaceRegistrant => amsgs.AddRange(attendaceRegistrant.Delete(adc)));
-                            amsgs.AddRange(attendanceItem.Delete(adc));
-                        });
-                    }
-
-                    attendance.Date = DateTime.UtcNow.Date;
-                    attendance.IsCompleted = false;
-                    attendance.LastModifiedDate = attendance.CreateDate = DateTime.UtcNow;
-                    attendance.LastModifiedBy = attendance.CreatedBy = loggedInUser.ID;
-                    attendance.ActivityId = activity.ID.Value;
-
-                    var instances = activity.GetSchedule().GetInstances();
-                    var closestDate = instances
-                        .Select(y => y.StartDateTime.Value)
-                        .ClosestDate(activity.GetAccount(amsgs, adc).ConvertToAccountTimeZone(DateTime.UtcNow));
-
-                    attendance.ActivityInstanceId = instances.Where(x => x.StartDateTime.Value == closestDate).First().ID;
-
-                    amsgs.AddRange(attendance.Save(adc));
-
-                    var registrants = attendance.GetActivity(amsgs, adc).GetRegistrantActivities(amsgs, adc);
-                    var assignmentTypes = new RegistrationAssignmentType[]
-                    {
-                        RegistrationAssignmentType.Reserved,
-                        RegistrationAssignmentType.ReservedPendingPayment
-                    };
-
-                    foreach (var registrant in registrants.Where(registrant => registrant.AssignmentTypeId.In(assignmentTypes)))
-                    {
-                        var ar = new AttendanceRegistrant
-                        {
-                            AttendanceId = attendance.ID,
-                            IsPresent = false,
-                            NumberPresent = 0,
-                            IsLate = false,
-                            NumberLate = 0,
-                            NumberPossible = 1,
-                            RegistrantId = registrant.RegistrantId,
-                            LastModifiedDate = DateTime.UtcNow,
-                            CreateDate = DateTime.UtcNow,
-                            LastModifiedBy = loggedInUser.ID,
-                            CreatedBy = loggedInUser.ID
-                        };
-                        amsgs.AddRange(ar.Save(adc));
-                    }
+                    activity.ClearEmptyAttendances(amsgs, adc);
+                    attendance.InitAttendance(activity, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -464,10 +413,27 @@ namespace AfterSchoolLibrary
                 onException: (SystemMessages emsgs) =>
                 {
                     Utilities.SystemErrorLog(emsgs);
-                }
+                },
+                dc: dc
             );
 
             return attendance;
+        }
+
+        public static void ClearEmptyAttendances(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
+            var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, msgs, dc);
+            if (attendanceList.Count > 0)
+            {
+                attendanceList.ForEach(attendanceItem =>
+                {
+                    attendanceItem
+                        .GetAttendanceRegistrants(msgs, dc)
+                        .ForEach(attendaceRegistrant => msgs.AddRange(attendaceRegistrant.Delete(dc)));
+                    msgs.AddRange(attendanceItem.Delete(dc));
+                });
+            }
         }
     }
 }
