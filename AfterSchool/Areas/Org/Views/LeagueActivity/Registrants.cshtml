@@ -29,7 +29,7 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    @{Html.RenderPartial("~/Views/Shared/_LeagueActivityHeader.cshtml", Model);}
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -126,23 +126,23 @@
                 <div class="col-md-8">
                     <div class="btn-group pull-right">
 
-                        <a href="@Url.Action("addregistration", "activity" , new { id = Model.Uid })" class="btn btn-primary btn-space">
-                            Add Student
+                        <a href="@Url.Action("teamstudents", "league" , new { id = ActivityGroup.Load((int)Model.ActivityGroupId.Value, msgs).Uid, team = Model.Uid })" class="btn btn-primary btn-space">
+                            Manage Students
                         </a>
 
-                        <a href="@Url.Action("registrantsummary", "activity" , new { id = Model.Uid })" class="btn btn-default btn-space">
+                        <a href="@Url.Action("registrantsummary", "leagueactivity" , new { id = Model.Uid })" class="btn btn-default btn-space">
                             Send Registration Report
                         </a>
 
-                        <a href="@Url.Action("inviteto", "contact", new { id = Model.GetActiveRegistrationPeriod().Uid, type = "period" })" class="btn btn-default btn-space">
+                        @*<a href="@Url.Action("inviteto", "contact", new { id = Model.GetActiveRegistrationPeriod().Uid, type = "period" })" class="btn btn-default btn-space">
                             Invite Contacts
-                        </a>
+                        </a>*@
                     </div>
 
-                    <a href="@Url.Action("registrantdownload", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
+                    <a href="@Url.Action("registrantdownload", "leagueactivity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
                         <i class="icon icon-left s7-download"></i> Download Registration Data
                     </a>
-                    <a href="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
+                    <a href="@Url.Action("registrantimport", "leagueactivity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">
                         <i class="icon icon-left s7-upload"></i> Import Registration Data
                     </a>
                 </div>
@@ -156,7 +156,7 @@
                         { "Activity", Model },
                         { "Account", account },
                         { "EditAction", "registrantdetail" },
-                        { "EditController", "activity" },
+                        { "EditController", "leagueactivity" },
                         { "AssignmentType", assignmentType }
                       }
                  );}
@@ -167,6 +167,6 @@
 
 <script>
     function changeAssignment() {
-        location.href = '@Url.Action("registrants", "activity", new { id = Model.Uid })?atype=' + $('#assignmentType').val();
+        location.href = '@Url.Action("registrants", "leagueactivity", new { id = Model.Uid })?atype=' + $('#assignmentType').val();
     }
 </script>

@@ -1227,7 +1227,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (ras.IsEmpty())
                 ras = activity.GetRegistrantActivities();
 
-            ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
+            if(rat != RegistrationAssignmentType.NotSet)
+                ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
