@@ -18,10 +18,10 @@ namespace AfterSchoolLibrary.Services
         private static SystemMessages SendForActivity(ActivityMessage am, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var activity = am.GetActivity(dc: dc);
-            var account = activity.GetAccount(dc: dc);
+            var activity = am.GetActivity(msgs, dc);
+            var account = activity.GetAccount(msgs, dc);
 
-            msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc: dc));
+            msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc));
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(am.SendMessageToTeamMembers(activity, account, dc));

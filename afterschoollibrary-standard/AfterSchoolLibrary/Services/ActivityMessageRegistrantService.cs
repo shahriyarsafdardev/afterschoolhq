@@ -25,11 +25,12 @@ namespace AfterSchoolLibrary.Services
 
         internal static SystemMessages SendEmail(this ActivityMessageRegistrant activityMessageRegistrant, Account account, string fromName, string replyToEmail, string replyToName, string subject, string body, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            var sendResultMessages = new SystemMessages();
 
-            activityMessageRegistrant.GetChildAndParentRegistrants(msgs, dc)
-                .ForEach(registrant => {
-                    msgs.AddRange(SendGridHelper.SendMail(
+            activityMessageRegistrant.GetChildAndParentRegistrants(sendResultMessages, dc)
+                .ForEach(registrant =>
+                {
+                    sendResultMessages.AddRange(SendGridHelper.SendMail(
                         fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                             Email.AppEmailAddress,
                             $"{fromName} via {Utilities.AppName(account.IsAfterSchool)}"),
@@ -40,9 +41,19 @@ namespace AfterSchoolLibrary.Services
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                     ));
                 }
-            );
+            );            
 
-            return msgs;
+            return activityMessageRegistrant.UpdateSendResults(sendResultMessages, dc);
+        }
+
+        private static SystemMessages UpdateSendResults(this ActivityMessageRegistrant activityMessageRegistrant, SystemMessages sendResultMessages, DatabaseConnection dc = null)
+        {
+            if (sendResultMessages.HasNoErrors())
+                activityMessageRegistrant.DateSent = DateTime.UtcNow;
+            else
+                activityMessageRegistrant.SendErrors = sendResultMessages.RenderMessageList(MessageOutputType.Text).MaxChars(1000);
+
+            return activityMessageRegistrant.Save(dc);
         }
 
     }
