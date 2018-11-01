@@ -872,14 +872,14 @@ namespace AfterSchoolLibrary
             return _GradeLevels;
         }
 
-        public List<ActivityWebUser> GetTeamMembers(DatabaseConnection dc = null)
+        public List<ActivityWebUser> GetTeamMembers(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityWebUser.LoadByActivityId(this.ID.Value, dc: dc);
+            return ActivityWebUser.LoadByActivityId(this.ID.Value, msgs, dc);
         }
 
-        public List<Form> GetForms(DatabaseConnection dc = null)
+        public List<Form> GetForms(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityForm.LoadByActivityId(this.ID.Value, dc: dc).Select(x => x.ToForm()).ToList();
+            return ActivityForm.LoadByActivityId(this.ID.Value, msgs, dc).Select(x => x.ToForm()).ToList();
         }
 
         public Form GetActiveForm(SystemMessages msgs = null, DatabaseConnection dc = null)

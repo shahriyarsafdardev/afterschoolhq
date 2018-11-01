@@ -199,48 +199,50 @@ namespace AfterSchoolLibrary
             return _ActivityMessageRegistrants;
         }
 
-        public int GetRegistrantCount(DatabaseConnection dc = null)
+        public int GetRegistrantCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityMessageRegistrant.GetCount(
                 new Hashtable()
                 {
                     { "ActivityMessageId", this.ID.Value }
-                }
+                },
+                msgs
                 );
         }
 
-        public int GetUnsentCount(DatabaseConnection dc = null)
+        public int GetUnsentCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityMessageRegistrant.GetCount(
                    new Hashtable()
                    {
                     { "ActivityMessageId", this.ID.Value },
                     { "DateSent", DBNull.Value }
-                   }
+                   },
+                   msgs
                );
         }
 
-        public int GetSentCount(DatabaseConnection dc = null)
+        public int GetSentCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetRegistrantCount(dc: dc) - this.GetUnsentCount(dc: dc);
+            return this.GetRegistrantCount(msgs, dc) - this.GetUnsentCount(msgs, dc);
         }
 
         private Activity _Activity = null;
-        public Activity GetActivity(DatabaseConnection dc = null)
+        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Activity.IsEmpty())
             {
-                _Activity = Activity.Load(this.ActivityId.Value, dc: dc);
+                _Activity = Activity.Load(this.ActivityId.Value, msgs, dc);
             }
             return _Activity;
         }
 
         private ActivityGroup _ActivityGroup = null;
-        public ActivityGroup GetActivityGroup(DatabaseConnection dc = null)
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_ActivityGroup.IsEmpty())
             {
-                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
+                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
             }
             return _ActivityGroup;
         }

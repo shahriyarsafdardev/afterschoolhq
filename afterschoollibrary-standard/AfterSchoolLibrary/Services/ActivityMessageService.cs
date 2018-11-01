@@ -2,12 +2,19 @@
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class ActivityMessageService
     {
+        public static SystemMessages UpdateDateSent(this ActivityMessage activityMessage, DatabaseConnection dc = null)
+        {
+            activityMessage.DateSent = DateTime.UtcNow;
+            return activityMessage.Save(dc);
+        }
+
         private static SystemMessages SendForActivity(ActivityMessage am, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -17,28 +24,34 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc: dc));
 
             if (msgs.HasNoErrors())
-            {
-                var members = activity.GetTeamMembers(dc: dc).DistinctBy(member => member.WebUserId);
-                foreach (var member in members)
-                {
-                    var body = am.Body;
-                    body = body.Replace("[firstname]", member.WebUserFirstName.IfBlank(""));
-                    body = body.Replace("[lastname]", member.WebUserLastName.IfBlank(""));
-                    body = body.Replace("[name]", member.WebUserDisplayName.IfBlank(""));
+                msgs.AddRange(am.SendMessageToTeamMembers(activity, account, dc));
 
-                    //send confirmation to team leaders
-                    SendGridHelper.SendMail(
-                        fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
-                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(member.WebUserEmail),
-                        subject: am.Subject,
-                        body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
-                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(
-                            activity.ContactEmail,
-                            activity.ContactName),
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                    );
-                }
-            }
+            return msgs;
+        }
+
+        private static SystemMessages SendMessageToTeamMembers(this ActivityMessage activityMessage, Activity activity, Account account, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var members = activity.GetTeamMembers(msgs, dc).DistinctBy(member => member.WebUserId).ToList();
+
+            members.ForEach(member => {
+                var body = SearchAndReplaceNameInText(
+                    activityMessage.Body,
+                    member.WebUserFirstName.IfBlank(""),
+                    member.WebUserLastName.IfBlank(""),
+                    member.WebUserDisplayName.IfBlank(""));
+
+                msgs.AddRange(SendGridHelper.SendMail(
+                    fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(member.WebUserEmail),
+                    subject: activityMessage.Subject,
+                    body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
+                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(
+                        activity.ContactEmail,
+                        activity.ContactName),
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                ));
+            });
 
             return msgs;
         }
@@ -68,25 +81,26 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        private static string SearchAndReplaceBodyText(this ActivityMessage activityMessage, ActivityMessageRegistrant amr)
+        private static string SearchAndReplaceNameInBodyText(this ActivityMessage activityMessage, ActivityMessageRegistrant amr)
         {
             var body = activityMessage.Body;
             //a person
             if (amr.RegistrantFirstName.IsNotBlank() || amr.RegistrantLastName.IsNotBlank())
-            {
-                body = body.Replace("[firstname]", amr.RegistrantFirstName.IfBlank(""));
-                body = body.Replace("[lastname]", amr.RegistrantLastName.IfBlank(""));
-                body = body.Replace("[name]", amr.RegistrantDisplayName.IfBlank(""));
-            }
+                body = SearchAndReplaceNameInText(body, amr.RegistrantFirstName, amr.RegistrantLastName, amr.RegistrantDisplayName);
             //an organization
             else if (amr.RegistrantCompany.IsNotBlank())
-            {
-                body = body.Replace("[firstname]", amr.RegistrantCompany);
-                body = body.Replace("[name]", amr.RegistrantCompany);
-                body = body.Replace("[lastname]", "");
-            }
+                body = SearchAndReplaceNameInText(body, amr.RegistrantCompany, "", amr.RegistrantCompany);
 
             return body;
+        }
+
+        private static string SearchAndReplaceNameInText(string text, string firstName, string lastName, string name)
+        {
+            text = text.Replace("[firstname]", firstName);
+            text = text.Replace("[lastname]", lastName);
+            text = text.Replace("[name]", name);
+
+            return text;
         }
 
         private static SystemMessages SendActivityMessage(this ActivityMessage activityMessage, Account account, string fromName, string replyToEmail, string replyToName, DatabaseConnection dc = null)
@@ -95,7 +109,7 @@ namespace AfterSchoolLibrary.Services
             var amrs = activityMessage.GetActivityMessageRegistrants(msgs, dc);
 
             amrs.ForEach(activityMessageRegistrant => {
-                var body = activityMessage.SearchAndReplaceBodyText(activityMessageRegistrant);
+                var body = activityMessage.SearchAndReplaceNameInBodyText(activityMessageRegistrant);
                 var sendMsgs = activityMessageRegistrant.SendEmail(account, fromName, replyToEmail, replyToName, activityMessage.Subject, body, dc);
 
                 if (sendMsgs.HasNoErrors())
@@ -107,14 +121,9 @@ namespace AfterSchoolLibrary.Services
             });
 
             if (msgs.HasNoErrors())
-            {
-                activityMessage.DateSent = DateTime.UtcNow;
-                msgs.AddRange(activityMessage.Save(dc: dc));
-            }
+                msgs.AddRange(activityMessage.UpdateDateSent(dc));
             else
-            {
                 Utilities.SystemErrorLog(msgs);
-            }
 
             return msgs;
         }
@@ -127,8 +136,8 @@ namespace AfterSchoolLibrary.Services
                 return ActivityMessageService.SendForActivity(am, dc: dc);
             else if (am.ActivityGroupId.HasValue)
                 return ActivityMessageService.SendForGroup(am, dc: dc);
-            else
-                return new SystemMessages() { new SystemMessage() { Text = "Error", MessageType = MessageType.Error } };
+
+            return new SystemMessages() { new SystemMessage() { Text = "Error", MessageType = MessageType.Error } };
         }
 
         public static ActivityMessageRegistrant AddRegistrant(this ActivityMessage activityMessage, int registrantId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
