@@ -92,11 +92,14 @@ namespace AfterSchoolLibrary.Services
         public static List<ActivityInstance> GetTeamActivityInstances(int teamId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var matches = Match.LoadByTeamId(teamId);
-            List<ActivityInstance> activityInstances = new List<ActivityInstance>();
+            var activityInstances = new List<ActivityInstance>();
 
             matches.ForEach(match =>
             {
-                activityInstances.Add(ActivityInstance.Load(match.ActivityInstanceId.Value));
+                var activityInstance = ActivityInstance.Load(match.ActivityInstanceId.Value);
+
+                if(activityInstance.IsNotEmpty())
+                    activityInstances.Add(activityInstance);
             });
 
             return activityInstances;
