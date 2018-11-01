@@ -1129,7 +1129,7 @@ namespace AfterSchoolLibrary
                     }
 
                     // copy team and permissions
-                    this.GetTeamMembers(adc).ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
+                    this.GetTeamMembers(amsgs, adc).ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
 
                     var activePeriod = this.GetActiveRegistrationPeriod(amsgs, adc);
                     if (activePeriod.IsNotEmpty())
