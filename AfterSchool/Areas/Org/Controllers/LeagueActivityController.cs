@@ -281,6 +281,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ActivePeriod = activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
             ViewBag.ActiveForm = activity.GetActiveActivityForm();
             ViewBag.ActivityGroupType = ActivityGroupType.League;
+            ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
 
             if (msgs.HasNoErrors())
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
@@ -1227,7 +1228,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (ras.IsEmpty())
                 ras = activity.GetRegistrantActivities();
 
-            ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
+            if(rat != RegistrationAssignmentType.NotSet)
+                ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -2069,6 +2071,19 @@ namespace AfterSchool.Areas.Org.Controllers
             return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.LoggedInUser.IsActivityLeader(activity);            
         }
 
-       
+        [HttpGet]
+        public ActionResult Schedule(string id)
+        {
+            var msgs = new SystemMessages();
+
+            var team = Activity.LoadByUid(id.ToGuid());
+            var activityInstances = MatchService.GetTeamActivityInstances(team.ID.Value, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.ActivityInstances = activityInstances;
+
+            return View(team);
+        }
+
     }
 }
