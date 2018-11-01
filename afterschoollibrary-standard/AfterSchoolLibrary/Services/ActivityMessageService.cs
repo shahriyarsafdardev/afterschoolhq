@@ -111,13 +111,6 @@ namespace AfterSchoolLibrary.Services
             amrs.ForEach(activityMessageRegistrant => {
                 var body = activityMessage.SearchAndReplaceNameInBodyText(activityMessageRegistrant);
                 var sendMsgs = activityMessageRegistrant.SendEmail(account, fromName, replyToEmail, replyToName, activityMessage.Subject, body, dc);
-
-                if (sendMsgs.HasNoErrors())
-                    activityMessageRegistrant.DateSent = DateTime.UtcNow;
-                else
-                    activityMessageRegistrant.SendErrors = sendMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000);
-
-                msgs.AddRange(activityMessageRegistrant.Save(dc: dc));
             });
 
             if (msgs.HasNoErrors())
