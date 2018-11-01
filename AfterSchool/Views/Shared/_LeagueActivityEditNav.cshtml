@@ -35,12 +35,12 @@
             </div>
         </li>*@
         <li data-id="4" class="dd-item">
-            <div class="dd-handle @editscheduleactive hide">
+            <div class="dd-handle @editscheduleactive">
                 @{Html.RenderPartial(
                       "~/Views/Shared/_ActiveLink.cshtml",
                       new ViewDataDictionary {
                                 { "Url", Url.Action("editschedule", "leagueactivity", new { id = Model.Uid.ToString() }) },
-                                { "Text", "Schedule" },
+                                { "Text", "Practice Schedule" },
                                 { "IsActive", isScheduleActive },
                       }
                   );

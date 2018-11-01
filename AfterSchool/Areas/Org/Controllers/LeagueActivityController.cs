@@ -281,6 +281,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ActivePeriod = activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
             ViewBag.ActiveForm = activity.GetActiveActivityForm();
             ViewBag.ActivityGroupType = ActivityGroupType.League;
+            ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
 
             if (msgs.HasNoErrors())
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
