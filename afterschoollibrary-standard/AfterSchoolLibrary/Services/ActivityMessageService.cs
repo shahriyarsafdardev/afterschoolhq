@@ -109,13 +109,19 @@ namespace AfterSchoolLibrary.Services
             var amrs = activityMessage.GetActivityMessageRegistrants(msgs, dc);
 
             amrs.ForEach(activityMessageRegistrant => {
-                var body = activityMessage.SearchAndReplaceNameInBodyText(activityMessageRegistrant);
-                var sendMsgs = activityMessageRegistrant.SendEmail(account, fromName, replyToEmail, replyToName, activityMessage.Subject, body, dc);
+                msgs.AddRange(activityMessageRegistrant.SendEmail(
+                    account, 
+                    fromName, 
+                    replyToEmail, 
+                    replyToName, 
+                    activityMessage.Subject,
+                    activityMessage.SearchAndReplaceNameInBodyText(activityMessageRegistrant), 
+                    dc));
             });
 
-            if (msgs.HasNoErrors())
-                msgs.AddRange(activityMessage.UpdateDateSent(dc));
-            else
+            msgs.AddRange(activityMessage.UpdateDateSent(dc));
+
+            if (msgs.HasErrors())
                 Utilities.SystemErrorLog(msgs);
 
             return msgs;
