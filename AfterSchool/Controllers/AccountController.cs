@@ -1239,7 +1239,7 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
-            Coupon coupon = null;
+            var coupon = new Coupon();
 
             if (couponCode.IsNotEmpty())
                 coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs);

@@ -1542,15 +1542,14 @@ namespace AfterSchoolLibrary.Services
             return PurchaseableObject.FromActivity(activity);
         }
 
-
-        public static bool HasTeamMatches(this Activity actitivy, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasTeamMatches(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Models.Match.LoadByTeamId(actitivy.ID.Value).IsNotEmpty();
+            return Models.Match.LoadByTeamId(activity.ID.Value).IsNotEmpty();
         }
 
-        public static bool HasNoTeamMatches(this Activity actitivy, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasNoTeamMatches(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Models.Match.LoadByTeamId(actitivy.ID.Value).IsEmpty();
+            return Models.Match.LoadByTeamId(activity.ID.Value).IsEmpty();
         }
 
         public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

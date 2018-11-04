@@ -733,7 +733,7 @@ namespace AfterSchoolLibrary.Billing
             return new StripeSubscriptionService(StripeAccessToken);
         }
 
-        public static StripeSubscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, SystemMessages msgs)
+        public static StripeSubscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -746,6 +746,7 @@ namespace AfterSchoolLibrary.Billing
                 TrialEnd = trialEndDate,
                 ApplicationFeePercent = platformFeePercent * 100, // convert to integer
                 Source = sourceId,
+                CouponId = stripeCouponId,
                 
             };
 
@@ -773,9 +774,9 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="plan"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static StripeSubscription CreateSubscription(StripeCustomer customer, StripePlan plan, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, SystemMessages msgs)
+        public static StripeSubscription CreateSubscription(StripeCustomer customer, StripePlan plan, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
         {
-            return CreateSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, trialEndDate, stripeAccountId, msgs);
+            return CreateSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, trialEndDate, stripeAccountId, stripeCouponId, msgs);
         }
 
         public static StripeSubscription UpdateSubscription(string subscriptionId, string newPlanId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, bool? endTrialNow, bool? prorate, string stripeAccountId, SystemMessages msgs)
@@ -1283,28 +1284,44 @@ namespace AfterSchoolLibrary.Billing
             return new StripeCouponService(StripeAccessToken);
         }
 
-        public static StripeCoupon CreateCoupon(Coupon coupon, SystemMessages msgs)
+        public static StripeCoupon CreateCoupon(Coupon coupon, string stripeAccountId, int? durationInMonths, SystemMessages msgs)
         {
-            return CreateCoupon(StripeCouponDuration.Once.ToString().ToLower(), coupon.Amount.Value, coupon.AmountTypeId, msgs);
+            return CreateCoupon(coupon.Amount.Value, durationInMonths, coupon.AmountTypeId, stripeAccountId, msgs);
         }
 
-        public static StripeCoupon CreateCoupon(string duration, decimal discountValue, CouponAmountType couponAmountType, SystemMessages msgs)
+        public static StripeCoupon CreateCoupon(decimal discountValue, int? durationInMonths, CouponAmountType couponAmountType, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeCouponCreateOptions() { Duration = duration };
+            var options = new StripeCouponCreateOptions();
+
+            if (durationInMonths.IsNotEmpty())
+            {
+                options.DurationInMonths = durationInMonths;
+                options.Duration = StripeCouponDuration.Repeating.ToString().ToLower();
+            }
+            else
+                options.Duration = StripeCouponDuration.Once.ToString().ToLower();
+
             var value = (discountValue * 100).ToInteger();
 
             if (couponAmountType == CouponAmountType.FlatAmount)
+            {
                 options.AmountOff = value;
+                options.Currency = "USD";
+            }
             else
                 options.PercentOff = value;
+
+            var requestOptions = new Stripe.StripeRequestOptions();
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeConnectAccountId = stripeAccountId;
 
             StripeCoupon coupon = null;
 
             try
             {
-                coupon = GetCouponService().Create(options);
+                coupon = GetCouponService().Create(options, requestOptions);
             }
             catch (StripeException ex)
             {

@@ -51,19 +51,31 @@ namespace AfterSchool.Controllers
             return View();
         }
 
-        public ActionResult ValidateCoupon(string couponcode)
+        public ActionResult ValidateCoupon(string couponcode, string paymentoption)
         {
             var msgs = new SystemMessages();
+            SubscriptionPlan paymentPlan = null;
+            
             var participationObject = SessionVariables.Cart.GetCartItems(msgs)
                 .FirstOrDefault()?
                 .GetParticipationObject(msgs);
 
+            if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
+                paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
+            SubscriptionPlan subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+
+
             var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
+            decimal amount = (paymentPlan.IsNotEmpty() ? paymentPlan.CostPerPeriod : participationObject.Cost).Value;
+            decimal subscriptionPlanAmount = 0;
+
+            if (subscriptionPlan.IsNotEmpty())
+                subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
             if (msgs.HasNoErrors())
-                return Json(new { status = "ok", coupon, amount = participationObject.Cost }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "ok", coupon, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
             else
-                return Json(new { status = "error", messages = msgs, amount = participationObject.Cost }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)

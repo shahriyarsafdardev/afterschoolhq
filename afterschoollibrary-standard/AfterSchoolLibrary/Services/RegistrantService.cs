@@ -146,8 +146,22 @@ namespace AfterSchoolLibrary.Services
                 sourceId: copiedSourceId,
                 stripeAccountId: billingAccount.StripeUserId,
                 msgs: msgs);
+            SubscriptionPlan plan = null;
+            var applyCoupon = false;
+            var coupon = checkoutObject.Coupon;
 
-            var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
+            if (subscriptionPlanType == SubscriptionPlanType.PaymentPlan)
+            {
+                plan = checkoutObject.PaymentPlan;
+                applyCoupon = coupon.ID.IsNotEmpty() && coupon.DoesApplyToTuitionFee();
+            }
+            else
+            {
+                plan = checkoutObject.SubscriptionPlan;
+                applyCoupon = coupon.ID.IsNotEmpty() && coupon.DoesApplyToSubscriptionPlan();
+            }
+
+            var stripeCouponId = applyCoupon ? coupon.StripeCouponId : null;
 
             // create the subscription on the connected account
             var subscription = Billing.StripeHelper.CreateSubscription(
@@ -157,6 +171,7 @@ namespace AfterSchoolLibrary.Services
                 platformFeePercent: billingAccount.GetSubscriptionPlatformPercentFee(plan),
                 trialEndDate: null,
                 stripeAccountId: billingAccount.StripeUserId,
+                stripeCouponId: stripeCouponId,
                 msgs: msgs);
 
             if (msgs.HasErrors())

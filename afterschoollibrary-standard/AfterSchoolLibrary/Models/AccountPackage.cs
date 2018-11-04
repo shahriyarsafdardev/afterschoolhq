@@ -328,6 +328,7 @@ namespace AfterSchoolLibrary.Models
                         platformFeePercent: null,
                         trialEndDate: this.TrialEndDate, 
                         stripeAccountId: null,
+                        stripeCouponId: null,
                         msgs: msgs);
 
                     if (subscription.IsNotEmpty())

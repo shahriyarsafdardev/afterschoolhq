@@ -1237,11 +1237,39 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var registrantActivity = RegistrantActivity.Load(id.ToInteger());
             var activity = registrantActivity.GetActivity();
+            
+            // check coupon's minimum amount
+            if (couponAmount <= 0)
+                msgs.Add("Coupon Amount must be a number greater than 0", MessageType.UserError);
 
-            if (couponAmount < 0)
-                msgs.Add("Coupon Amount must be a number greater than or equal to 0", MessageType.UserError);
+            // check coupon's amount percentage 
+            if (discountType == CouponAmountType.Percentage && couponAmount >1)
+                msgs.Add("Percentage must be a number less than or equal to 100%", MessageType.UserError);
+            
+            // by default the maximum amount is the activity's cost
+            var maxAmount = activity.CostPerRegistrant.Value;
+            int? durationInMonths = null;
 
-            if (expirationDate.HasValue && expirationDate <= DateTime.UtcNow.Date)
+            var plan = couponApplyType == CouponApplyType.SubscriptionPlan ? activity.GetSubscriptionPlan() : activity.GetPaymentPlan();
+
+            if (plan.IsNotEmpty())
+            {
+                if (discountType == CouponAmountType.FlatAmount)
+                    maxAmount = plan.CostPerPeriod.Value;
+                if (activity.getDurationInMonths().IsNotEmpty())
+                    durationInMonths = activity.getDurationInMonths();
+                else
+                    msgs.Add("Activity duration is not defined", MessageType.UserError);
+            }
+
+
+            
+            // check coupon's amount
+            if (couponAmount > maxAmount)
+                msgs.Add($"Coupon Amount must be a number less than or equal to {maxAmount.ToCurrency()}", MessageType.UserError);
+           
+            // check coupon's expiration date
+            if (expirationDate.IsEmpty() || expirationDate <= DateTime.UtcNow.Date)
                 msgs.Add("Expiration date must be in the future", MessageType.UserError);
 
             if (msgs.HasNoErrors())
@@ -1254,19 +1282,15 @@ namespace AfterSchool.Areas.Org.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         // create new coupon
-                        var coupon = SessionVariables.CurrentAccount.CreateCoupon(
+                       var coupon = SessionVariables.CurrentAccount.CreateCoupon(
                             amount: couponAmount,
                             expirationDate: expirationDate,
                             amountType: discountType,
                             applyType: couponApplyType,
+                            durationInMonths: durationInMonths,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);
-
-                        // if couponApplyType is "SubscriptionPlan" then 
-                        // create a Stripe coupon
-                        if (coupon.AppliesTo == CouponApplyType.SubscriptionPlan)
-                            registrantAccount.CreateStripeCoupon(coupon, msgs, adc);
 
                         // assign coupon to the activity (only works for this activity)
                         var poc = PurchaseableObjectCouponService.CreateNew(
@@ -1281,7 +1305,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-
+                   
                         attachedCoupon.Send();                   
                     },
                     onFailure: (SystemMessages fmsgs) =>

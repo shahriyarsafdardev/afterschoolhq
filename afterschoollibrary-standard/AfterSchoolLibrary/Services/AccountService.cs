@@ -598,11 +598,11 @@ namespace AfterSchoolLibrary.Services
             return customer;
         }
 
-        public static SystemMessages CreateStripeCoupon(this Account account, Coupon coupon, SystemMessages msgs,  DatabaseConnection dc = null)
+        public static SystemMessages CreateStripeCoupon(Coupon coupon, string stripeAccountId, int? durationInMonths, SystemMessages msgs,  DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var StripeCoupon = Billing.StripeHelper.CreateCoupon(coupon, msgs);
+            var StripeCoupon = Billing.StripeHelper.CreateCoupon(coupon, stripeAccountId, durationInMonths, msgs);
 
             if (StripeCoupon.IsNotEmpty())
             {
@@ -1779,7 +1779,8 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessTuitionFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            AccountService.ProcessTuitionWithStripe(checkoutObject, msgs, dc);
+            if (checkoutObject.TuitionFee > 0)
+              AccountService.ProcessTuitionWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
@@ -1845,6 +1846,7 @@ namespace AfterSchoolLibrary.Services
                     // TODO: Decide if master account registrant should be added to plans or the account copy
                     // get the registrant record that was created just for the account
                     var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
+                    var coupon = checkoutObject.Coupon;
 
                     // if they have a subscription plan
                     // will also process tuition fees
@@ -1969,9 +1971,9 @@ namespace AfterSchoolLibrary.Services
             return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
         }
 
-        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return CouponService.CreateNew(
+            Coupon coupon = CouponService.CreateNew(
                             accountId: account.ID.Value,
                             amount: amount,
                             expirationDate: expirationDate,
@@ -1985,6 +1987,16 @@ namespace AfterSchoolLibrary.Services
                             loggedInUser: loggedInUser,
                             msgs: msgs,
                             dc: dc);
+
+            AccountService.CreateStripeCoupon(
+                coupon,
+                account.StripeUserId,
+                durationInMonths,
+                msgs,
+                dc
+            );
+
+            return coupon;
         }
 
         public static Coupon ValidateCoupon(this Account account, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null)

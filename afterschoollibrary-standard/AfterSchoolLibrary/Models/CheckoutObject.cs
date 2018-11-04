@@ -80,7 +80,9 @@ namespace AfterSchoolLibrary.Models
                 {
                     var total = ParticipationObject.Cost.Value * NumberOfSeats;
 
-                    if (Coupon.IsNotEmpty() && Coupon.DoesApplyToTuitionFee())
+                    // if coupon applyTo is `TuitionFee`
+                    // then apply coupon discount
+                    if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToTuitionFee())
                     {
                         var couponAmount = Coupon.Amount.Value;
                         if (Coupon.HasPercentageAmountType())
