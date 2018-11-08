@@ -8,7 +8,7 @@
     var qgId = new int?();
     var questions = new List<FormQuestion>();
     var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.FileUpload, QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.FileUpload, QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
 
     if (questionGroup.IsNotEmpty())
     {
@@ -167,7 +167,7 @@
                                                                     onchange="showEditButton(@question.ID)"
                                                                     @(question.QuestionDataTypeId != QuestionDataType.NotSet ? "disabled=\"disabled\"" : "")>
 
-                                                                @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(x => x != QuestionType.NotSet && x != QuestionType.TextBlock))
+                                                               @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
                                                                 {
                                                                     <option value="@((int)type)" @(type == question.QuestionTypeId ? "selected=\"selected\"" : "")>
                                                                         @type.ToString().SplitByUpperCase()
@@ -222,7 +222,9 @@
                                                               });}
                                                     </td>
                                                     <td>
-                                                        @{Html.RenderPartial(
+                                                        @if (question.QuestionTypeId != QuestionType.TextBlock)
+                                                        {
+                                                             Html.RenderPartial(
                                                                     "~/Views/Shared/_SwitchButton.cshtml",
                                                                     question.IsRequired,
                                                                     new ViewDataDictionary()
@@ -231,7 +233,8 @@
                                                                                                             { "checkboxid", "required-" + question.ID },
                                                                                                             { "disabled", question.IsLocked },
                                                                                                             { "classname", "question-isrequired" }
-                                                                });}
+                                                                });
+                                                        }
                                                     </td>
                                                 </tr>
                                             }

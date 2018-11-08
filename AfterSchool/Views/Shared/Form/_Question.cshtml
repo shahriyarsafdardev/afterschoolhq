@@ -11,9 +11,12 @@
     }
     else
     {
-        <div class="col-md-3 control-label">
-            @{ Html.RenderPartial("~/Views/Shared/Form/_Label.cshtml", Model); }
-        </div>
+       if(Model.Question.QuestionTypeId != QuestionType.TextBlock)
+        {
+            <div class="col-md-3 control-label">
+                @{ Html.RenderPartial("~/Views/Shared/Form/_Label.cshtml", Model); }
+            </div>
+        }
 
         <div class="col-md-6">
             @switch (Model.Question.QuestionTypeId)
