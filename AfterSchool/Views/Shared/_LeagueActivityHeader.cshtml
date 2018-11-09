@@ -36,7 +36,7 @@
                 }
             }
             
-            <a href="@Url.Action("registrants", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")">
+            <a href="@Url.Action("registrants", "leagueactivity", new { id = Model.Uid, atype = 1 })" class="btn btn-alt6@(actionName == "registrants" ? "-active" : "")">
                 <i class="s7-user"></i> @UILabel.RegistrantLabel(true)
             </a>
 
@@ -62,6 +62,11 @@
                     <a href="@Url.Action("publishdetail", "leagueactivity", new { id = Model.Uid })" class="btn @publishClass"><i class="s7-link"></i> Publish...</a>
                 }
             }
+
+            <a href="@Url.Action("schedule", "leagueactivity", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "schedule" ? "-active" : "")">
+                <i class="s7-date"></i> Game Schedule
+            </a>
+
             @if (Model.ActivityGroupId.HasValue)
             {
                 <a href="@Url.Action("leagueactivities", "league", new {id = group.Uid})" class="btn btn-alt5"><i class="s7-date"></i> @UILabel.ActivityGroupLabel(group.ActivityGroupTypeId) &raquo;</a>

@@ -820,6 +820,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     onFailure: (SystemMessages fmsgs) =>
                     {
                         msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
                     }
                 );
             }

@@ -5,12 +5,14 @@
     var registrants = Model.GetRegistrantActivities();
     decimal totalPaid = 0;
     int registrantCount = registrants.Sum(x => x.TotalSeats);
-    int waitingListCount = registrants.Sum(x => x.NumberOfWaitingListSeats.Value);
+    int waitingListCount = Model.WaitingListSeats ?? 0;
+    //int waitingListCount = registrants.Sum(x => x.NumberOfWaitingListSeats.Value);
 
-    if (registrants.Where(x => x.DatePaid.HasValue).Count() > 0)
-    {
-        totalPaid = registrants.Where(x => x.DatePaid.HasValue).Sum(x => x.AmountPaid.Value);
-    }
+    //if (registrants.Where(x => x.GetAmountPaid() > 0).Count() > 0)
+    //{
+    //    totalPaid = registrants.Where(x => x.DatePaid.HasValue).Sum(x => x.AmountPaid.Value);
+    //}
+    totalPaid = registrants.Sum(x => x.GetAmountPaid());
 
     var dates = registrants.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
@@ -20,7 +22,7 @@
     var totalAbsent = totalPossible - totalPresent;
     var attendanceRate = "0";
 
-    if (totalPresent > 0) { 
+    if (totalPresent > 0) {
         attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
     }
 }
