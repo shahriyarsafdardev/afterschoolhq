@@ -240,7 +240,7 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static int GetPresentCount(int attendanceId, DatabaseConnection dc = null)
+        public static int GetPresentCount(int attendanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -252,14 +252,14 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
 
-        public static int GetPossibleCount(int attendanceId, DatabaseConnection dc = null)
+        public static int GetPossibleCount(int attendanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -271,7 +271,7 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger();
 

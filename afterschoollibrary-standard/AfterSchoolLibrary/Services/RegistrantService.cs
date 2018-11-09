@@ -190,6 +190,16 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
         }
-        
+     
+        public static string GetParentOrGuardianEmail(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (registrant.ParentRegistrantId.HasValue)
+                return registrant.GetMasterRegistrant(msgs, dc).GetParentOrGuardian(msgs, dc).Email;
+
+            if (registrant.IsMaster)
+                return registrant.GetParentOrGuardian(msgs, dc).Email;
+
+            return null;
+        }
     }
 }

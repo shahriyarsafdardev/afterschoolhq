@@ -26,9 +26,7 @@ namespace AfterSchoolLibrary
         {
             EmailAddress replyToEmail = null;
             if (replyTo.IsNotBlank())
-            {
                 replyToEmail = new EmailAddress(replyTo);
-            }
 
             return SendMail(new EmailAddress(fromEmail), new EmailAddress(toEmail), subject, body, replyToEmail, emailTemplateId);
         }

@@ -323,9 +323,10 @@ namespace AfterSchoolLibrary
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
-                    amsgs.AddRange(UpdateSeatIndexes(adc));
-                    amsgs.AddRange(UpdatePaymentSourceType(adc));
+                    
+                    // amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
+                    // amsgs.AddRange(UpdateSeatIndexes(adc));
+                    // amsgs.AddRange(UpdatePaymentSourceType(adc));
 
                     // amsgs.AddRange(FixRegistrationAccountActivityGroup(adc));
 
@@ -1853,9 +1854,9 @@ namespace AfterSchoolLibrary
         {
            return string.Format("<p>{0}<br /><a href=\"{1}\">{1}</a></p>", AppEmailFromName(isAfterSchool), BaseUrl(isAfterSchool));
         }
-        public static string GetAppSignature(bool isAfterSchool, string utm_campaign, string utm_source = "enrollhq", string utm_medium = "email")
+        public static string GetAppSignature(bool isAfterSchool, string utm_campaign, string utm_source = "afterschoolhq", string utm_medium = "email")
         {
-            return ""; // string.Format("<p>Powered by <a href=\"{1}?utm_source={2}&utm_medium={3}&utm_campaign={4}\">{0}</a></p>", AppEmailFromName(isAfterSchool), BaseUrl(isAfterSchool), utm_source, utm_medium, utm_campaign);
+            return $"<p>Powered by <a href=\"{BaseUrl(isAfterSchool)}?utm_source={utm_source}&utm_medium={utm_medium}&utm_campaign={utm_campaign}\">{AppEmailFromName(isAfterSchool)}</a></p>";
         }
         public static string AppReplyAboveLineText
         {
