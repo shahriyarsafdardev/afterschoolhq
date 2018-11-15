@@ -53,6 +53,11 @@ namespace AfterSchoolLibrary.Services
                         activity.ContactName),
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 ));
+
+                TwilioHelper.SendSMS(
+                    member.WebUserPhone,
+                    $"{activityMessage.Subject}\n{body}"
+                );
             });
 
             return msgs;

@@ -187,6 +187,47 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        internal static SystemMessages SendText(this Registrant registrant, string subject, string body)
+        {
+            var msgs = new SystemMessages();
+
+            if (registrant.Phone.IsEmpty())
+                msgs.Add($"{registrant.DisplayName} has no phone number available", MessageType.Notice);
+
+            if (!registrant.AllowTextMessages)
+                msgs.Add($"{registrant.DisplayName} does not allow text messaging", MessageType.Notice);
+
+            if (registrant.Phone.IsNotEmpty() && registrant.AllowTextMessages)
+                return TwilioHelper.SendSMS(
+                    registrant.Phone,
+                    $"{registrant.Phone}\n{body}"
+                    );
+
+            return msgs;
+        }
+
+        internal static SystemMessages SendEmail(this Registrant registrant, bool isAfterSchool, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "")
+        {
+            var msgs = new SystemMessages();
+
+            if (registrant.Email.IsEmpty())
+                msgs.Add("No email address available", MessageType.Notice);
+
+            if (registrant.Email.IsNotEmpty())
+                msgs.AddRange(SendGridHelper.SendMail(
+                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                        Helpers.Email.AppEmailAddress,
+                        $"{fromName} via {Helpers.Utilities.AppName(isAfterSchool)}"),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
+                    subject: subject,
+                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: utmCampaign))}",
+                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                ));
+
+            return msgs;
+        }
+
         public static List<ParticipationObject> GetParticipationObjects(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs, dc)
