@@ -1,1 +1,1 @@
-﻿powershell.exe -noprofile -command "Invoke-WebRequest -Uri http://localhost/db/update"
+powershell.exe -noprofile -command "Invoke-WebRequest -Uri http://localhost/db/update -UseBasicParsing"
