@@ -435,7 +435,7 @@ namespace AfterSchoolLibrary.Services
                     }
 
                     // copy team and permissions
-                    activity.GetTeamMembers(adc).ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
+                    activity.GetTeamMembers(amsgs, adc).ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
 
                     var activePeriod = activity.GetActiveRegistrationPeriod(amsgs, adc);
                     if (activePeriod.IsNotEmpty())
@@ -1584,7 +1584,7 @@ namespace AfterSchoolLibrary.Services
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1595,7 +1595,7 @@ namespace AfterSchoolLibrary.Services
         private static void ClearEmptyAttendances(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
-            var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, msgs, dc);
+            var attendanceList = Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, msgs, dc);
             if (attendanceList.Count > 0)
             {
                 attendanceList.ForEach(attendanceItem =>
@@ -1638,7 +1638,7 @@ namespace AfterSchoolLibrary.Services
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );

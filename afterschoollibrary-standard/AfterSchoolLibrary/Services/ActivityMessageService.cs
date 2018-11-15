@@ -1,4 +1,6 @@
-﻿using BasicLibrary;
+﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Helpers;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
@@ -42,10 +44,10 @@ namespace AfterSchoolLibrary.Services
                     member.WebUserDisplayName.IfBlank(""));
 
                 msgs.AddRange(SendGridHelper.SendMail(
-                    fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
+                    fromEmail: Helpers.Email.SendGridAppEmailAddress(account.IsAfterSchool),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(member.WebUserEmail),
                     subject: activityMessage.Subject,
-                    body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
+                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
                     replyTo: new SendGrid.Helpers.Mail.EmailAddress(
                         activity.ContactEmail,
                         activity.ContactName),
@@ -69,11 +71,11 @@ namespace AfterSchoolLibrary.Services
                 // send to account admin
                 SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Email.AppEmailAddress,
-                        $"CC: {account.Name} via {Utilities.AppName(account.IsAfterSchool)}"),
+                        Helpers.Email.AppEmailAddress,
+                        $"CC: {account.Name} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                     subject: am.Subject,
-                    body: $"{am.Body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activitygroup_message"))}",
+                    body: $"{am.Body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activitygroup_message"))}",
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
             }
@@ -122,7 +124,7 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(activityMessage.UpdateDateSent(dc));
 
             if (msgs.HasErrors())
-                Utilities.SystemErrorLog(msgs);
+                Helpers.Utilities.SystemErrorLog(msgs);
 
             return msgs;
         }

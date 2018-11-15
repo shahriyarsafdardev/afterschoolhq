@@ -1,8 +1,9 @@
+﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -32,11 +33,11 @@ namespace AfterSchoolLibrary.Services
                 {
                     sendResultMessages.AddRange(SendGridHelper.SendMail(
                         fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                            Email.AppEmailAddress,
-                            $"{fromName} via {Utilities.AppName(account.IsAfterSchool)}"),
+                            Helpers.Email.AppEmailAddress,
+                            $"{fromName} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
                         subject: subject,
-                        body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
+                        body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
                         replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                     ));
