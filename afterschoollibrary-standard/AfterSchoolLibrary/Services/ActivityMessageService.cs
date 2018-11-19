@@ -116,7 +116,7 @@ namespace AfterSchoolLibrary.Services
             var amrs = activityMessage.GetActivityMessageRegistrants(msgs, dc);
 
             amrs.ForEach(activityMessageRegistrant => {
-                msgs.AddRange(activityMessageRegistrant.SendEmail(
+                msgs.AddRange(activityMessageRegistrant.SendMessage(
                     account, 
                     fromName, 
                     replyToEmail, 
