@@ -824,7 +824,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     },
                     onException: (SystemMessages emsgs) =>
                     {
-                        AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
+                        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
                     }
                 );
             }

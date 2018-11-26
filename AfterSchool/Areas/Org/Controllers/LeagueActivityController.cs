@@ -1097,7 +1097,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var presentStudents = new List<int>();
             var activity = Activity.LoadByUid(id.ToGuid());
-            var attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), msgs);
+            var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
 
             if (!activityinstance.IsNumber())
                 msgs.Add("Activity Date is required", MessageType.UserError);
