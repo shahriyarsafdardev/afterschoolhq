@@ -1243,9 +1243,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Coupon Amount must be a number greater than 0", MessageType.UserError);
 
             // check coupon's amount percentage 
-            if (discountType == CouponAmountType.Percentage && couponAmount >1)
-                msgs.Add("Percentage must be a number less than or equal to 100%", MessageType.UserError);
-            
+            if (discountType == CouponAmountType.Percentage)
+            {
+                couponAmount /= 100;
+
+                if (couponAmount > 1)
+                    msgs.Add("Percentage must be a number less than or equal to 100%", MessageType.UserError);
+            }
+
             // by default the maximum amount is the activity's cost
             var maxAmount = activity.CostPerRegistrant.Value;
             int? durationInMonths = null;
@@ -1261,8 +1266,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 else
                     msgs.Add("Activity duration is not defined", MessageType.UserError);
             }
-
-
             
             // check coupon's amount
             if (couponAmount > maxAmount)
