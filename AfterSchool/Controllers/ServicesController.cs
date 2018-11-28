@@ -64,16 +64,22 @@ namespace AfterSchool.Controllers
                 paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
             SubscriptionPlan subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
 
-
             var coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponcode, msgs);
-            decimal amount = (paymentPlan.IsNotEmpty() ? paymentPlan.CostPerPeriod : participationObject.Cost).Value;
+            decimal amount = participationObject.Cost.Value;
             decimal subscriptionPlanAmount = 0;
+            int numberInMonths = 0;
+
+            if (paymentPlan.IsNotEmpty())
+            {
+                amount = paymentPlan.CostPerPeriod.Value;
+                numberInMonths = paymentPlan.TotalPeriods.Value;
+            }
 
             if (subscriptionPlan.IsNotEmpty())
                 subscriptionPlanAmount = subscriptionPlan.CostPerPeriod.Value;
 
             if (msgs.HasNoErrors())
-                return Json(new { status = "ok", coupon, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "ok", coupon, amount, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
             else
                 return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
         }

@@ -1284,24 +1284,24 @@ namespace AfterSchoolLibrary.Billing
             return new StripeCouponService(StripeAccessToken);
         }
 
-        public static StripeCoupon CreateCoupon(Coupon coupon, string stripeAccountId, int? durationInMonths, SystemMessages msgs)
+        public static StripeCoupon CreateCoupon(decimal discountValue, string stripeAccountId, CouponAmountType amountType, StripeCouponDuration couponDuration, int? durationInMonths, SystemMessages msgs)
         {
-            return CreateCoupon(coupon.Amount.Value, durationInMonths, coupon.AmountTypeId, stripeAccountId, msgs);
+            return CreateCoupon(discountValue, couponDuration, durationInMonths, amountType, stripeAccountId, msgs);
         }
 
-        public static StripeCoupon CreateCoupon(decimal discountValue, int? durationInMonths, CouponAmountType couponAmountType, string stripeAccountId, SystemMessages msgs)
+        public static StripeCoupon CreateCoupon(decimal discountValue, StripeCouponDuration couponDuration, int? durationInMonths, CouponAmountType couponAmountType, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var options = new StripeCouponCreateOptions();
 
-            if (durationInMonths.IsNotEmpty())
+            if (couponDuration == StripeCouponDuration.Repeating)
             {
                 options.DurationInMonths = durationInMonths;
                 options.Duration = StripeCouponDuration.Repeating.ToString().ToLower();
             }
             else
-                options.Duration = StripeCouponDuration.Once.ToString().ToLower();
+                options.Duration = StripeCouponDuration.Forever.ToString().ToLower();
 
             var value = (discountValue * 100).ToInteger();
 
@@ -1376,7 +1376,7 @@ namespace AfterSchoolLibrary.Billing
     }
 
     // Specifies how long the discount will be in effect
-    enum StripeCouponDuration
+    public enum StripeCouponDuration
     {
         Forever,
         Once,

@@ -1,4 +1,4 @@
-﻿@model RegistrantActivity
+@model RegistrantActivity
 @{
     var answers = Model.GetAnswers();
     var isActivityLeader = false;
@@ -220,12 +220,26 @@
                                             if (CouponApplyType.SubscriptionPlan != applyType || activity.HasSubscriptionPlan())
                                             {
                                                 <div class="am-radio">
-                                                    <input type="radio" checked="@applyType == CouponApplyType.TuitionFee" name="couponApplyType" id="couponApplyType-@((int)applyType)" value="@((int)applyType)" />
+                                                    <input data-flag="@applyType" type="radio" checked="@applyType == CouponApplyType.TuitionFee" name="couponApplyType" id="couponApplyType-@((int)applyType)" value="@((int)applyType)" />
                                                     <label for="couponApplyType-@((int)applyType)">@applyType.ToString().SplitByUpperCase()</label>
                                                 </div>
                                             }
 
                                         }
+                                    </td>
+                                </tr>
+                                <tr id="duration-section" class="hide">
+                                    <td class="text-right">Duration</td>
+                                    <td>
+                                        <div class="am-radio">
+                                            <input type="radio" name="duration" id="forever-option" value="0" checked />
+                                            <label for="forever-option">Forever</label>
+                                        </div>
+                                        <div class="am-radio">
+                                            <input type="radio" name="duration" id="duration-in-month-option" value="2" />
+                                            <label for="duration-in-month-option"># of Times</label>
+                                            <input type="number" style="display: inline; width: 100px;margin-left: 10px" class="form-control" id="duration-in-month-input" name="durationInMonths" onfocus="this.select()" value="1" min="1" step="1" />
+                                        </div>
                                     </td>
                                 </tr>
                                 <tr>
@@ -245,6 +259,16 @@
 
 
 <script type="text/javascript">
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('input[name="couponApplyType"]').click(function () {
+            if ($(this).data('flag') === 'SubscriptionPlan') {
+                $('#duration-section').removeClass('hide');
+            } else {
+                $('#duration-section').addClass('hide');
+            }
+        });
+    });
+
     function toggleDiscountType(type) {
         if (type == @((int)CouponAmountType.FlatAmount)) {
             $('#amounttype-flat').removeClass('hide');

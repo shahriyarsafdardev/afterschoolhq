@@ -5,6 +5,7 @@ using System.Linq;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -598,18 +599,17 @@ namespace AfterSchoolLibrary.Services
             return customer;
         }
 
-        public static SystemMessages CreateStripeCoupon(Coupon coupon, string stripeAccountId, int? durationInMonths, SystemMessages msgs,  DatabaseConnection dc = null)
+        public static void CreateStripeCoupon(Coupon coupon, string stripeAccountId, StripeCouponDuration couponDuration, int? durationInMonths, decimal discountValue, SystemMessages msgs,  DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var StripeCoupon = Billing.StripeHelper.CreateCoupon(coupon, stripeAccountId, durationInMonths, msgs);
+            var StripeCoupon = Billing.StripeHelper.CreateCoupon(discountValue, stripeAccountId, coupon.AmountTypeId, couponDuration, durationInMonths, msgs);
 
             if (StripeCoupon.IsNotEmpty())
             {
                 coupon.StripeCouponId = StripeCoupon.Id;
                 msgs.AddRange(coupon.Save(dc: dc));
             }
-            return msgs;
         }
 
         #endregion
@@ -1846,7 +1846,6 @@ namespace AfterSchoolLibrary.Services
                     // TODO: Decide if master account registrant should be added to plans or the account copy
                     // get the registrant record that was created just for the account
                     var accountRegistrant = checkoutObject.Registration.GetRegistrant(amsgs, adc);
-                    var coupon = checkoutObject.Coupon;
 
                     // if they have a subscription plan
                     // will also process tuition fees
@@ -1861,21 +1860,44 @@ namespace AfterSchoolLibrary.Services
 
                     // if they have a payment plan
                     if (checkoutObject.PaymentPlan.IsNotEmpty())
+                    {
+                        // create a stripe coupon if needed
+                        var coupon = checkoutObject.Coupon;
+                        if (coupon.IsNotEmpty() && coupon.DoesApplyToTuitionFee())
+                        {
+                            var discountValue = coupon.Amount;
+                            if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
+                                discountValue = (checkoutObject.ParticipationObject.Cost - coupon.Amount) / checkoutObject.PaymentPlan.TotalPeriods;
+
+                            AccountService.CreateStripeCoupon(
+                                coupon,
+                                checkoutObject.BillingAccount.StripeUserId,
+                                StripeCouponDuration.Repeating,
+                                checkoutObject.PaymentPlan.TotalPeriods,
+                                discountValue.Value,
+                                amsgs,
+                                dc
+                            );
+                        }
+
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
                             subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
-                            dc: adc);    
+                            dc: adc
+                        );
+                    }  
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
 
                     // invalidate coupon
-                    if (checkoutObject.Coupon.IsNotEmpty())
+                    if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PurchasingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
+
                     Registration.SendConfirmation(checkoutObject, true);
                 },
                 onFailure: (SystemMessages amsgs) =>
@@ -1971,9 +1993,9 @@ namespace AfterSchoolLibrary.Services
             return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
         }
 
-        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            Coupon coupon = CouponService.CreateNew(
+            var coupon = CouponService.CreateNew(
                             accountId: account.ID.Value,
                             amount: amount,
                             expirationDate: expirationDate,
@@ -1987,14 +2009,16 @@ namespace AfterSchoolLibrary.Services
                             loggedInUser: loggedInUser,
                             msgs: msgs,
                             dc: dc);
-
-            AccountService.CreateStripeCoupon(
-                coupon,
-                account.StripeUserId,
-                durationInMonths,
-                msgs,
-                dc
-            );
+            if (coupon.DoesApplyToSubscriptionPlan())
+                AccountService.CreateStripeCoupon(
+                    coupon,
+                    account.StripeUserId,
+                    couponDuration,
+                    durationInMonths,
+                    coupon.Amount.Value,
+                    msgs,
+                    dc
+                );
 
             return coupon;
         }

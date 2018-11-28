@@ -10,6 +10,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using Hangfire;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -1231,9 +1232,8 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult AttachCoupon(string id, decimal couponAmount, CouponAmountType discountType, DateTime? expirationDate, CouponApplyType couponApplyType)
+        public ActionResult AttachCoupon(string id, decimal couponAmount, CouponAmountType discountType, DateTime? expirationDate, CouponApplyType couponApplyType, StripeCouponDuration duration, int durationInMonths)
         {
-
             var msgs = new SystemMessages();
             var registrantActivity = RegistrantActivity.Load(id.ToInteger());
             var activity = registrantActivity.GetActivity();
@@ -1249,27 +1249,21 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (couponAmount > 1)
                     msgs.Add("Percentage must be a number less than or equal to 100%", MessageType.UserError);
-            }
-
-            // by default the maximum amount is the activity's cost
-            var maxAmount = activity.CostPerRegistrant.Value;
-            int? durationInMonths = null;
-
-            var plan = couponApplyType == CouponApplyType.SubscriptionPlan ? activity.GetSubscriptionPlan() : activity.GetPaymentPlan();
-
-            if (plan.IsNotEmpty())
+            } else
             {
-                if (discountType == CouponAmountType.FlatAmount)
-                    maxAmount = plan.CostPerPeriod.Value;
-                if (activity.getDurationInMonths().IsNotEmpty())
-                    durationInMonths = activity.getDurationInMonths();
-                else
-                    msgs.Add("Activity duration is not defined", MessageType.UserError);
+                // by default the maximum amount is the activity's cost
+                var maxAmount = activity.CostPerRegistrant.Value;
+
+                // check coupon's amount
+                if (couponAmount > maxAmount)
+                    msgs.Add($"Coupon Amount must be a number less than or equal to {maxAmount.ToCurrency()}", MessageType.UserError);
             }
-            
-            // check coupon's amount
-            if (couponAmount > maxAmount)
-                msgs.Add($"Coupon Amount must be a number less than or equal to {maxAmount.ToCurrency()}", MessageType.UserError);
+
+            if (couponApplyType == CouponApplyType.SubscriptionPlan)
+            {
+                if (duration == StripeCouponDuration.Repeating && durationInMonths < 1)
+                    msgs.Add("# of Times must be a number greater than 0", MessageType.UserError);
+            }
            
             // check coupon's expiration date
             if (expirationDate.IsEmpty() || expirationDate <= DateTime.UtcNow.Date)
@@ -1277,7 +1271,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var registrantAccount = registrantActivity.GetRegistrant().GetMasterRegistrant().GetAccount();
+                var registrantAccount = registrantActivity.GetRegistrant().GetMasterRegistrant()?.GetAccount();
                 AttachedCoupon attachedCoupon = null;
 
                 Database.ExecuteTransaction
@@ -1291,6 +1285,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             amountType: discountType,
                             applyType: couponApplyType,
                             durationInMonths: durationInMonths,
+                            couponDuration: duration,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,
                             dc: adc);

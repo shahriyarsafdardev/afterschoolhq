@@ -271,18 +271,25 @@
             function (data) {
                 var amount = data.amount;
                 var spAmount = data.subscriptionPlanAmount;
+                var numberInMonths = data.numberInMonths;
 
                 if (data && data.status == 'ok') {
                     var coupon = data.coupon;
                     var totalDueToday = 0;
-                    if (coupon.AmountTypeId === 1) { // percentage coupon type
-                        if (coupon.AppliesTo === 3) { // subscription plan
+                    if (coupon.AmountTypeId === @((int)CouponAmountType.Percentage)) { // percentage coupon type
+                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan)) { // subscription plan
                             totalDueToday = amount + (spAmount * (1 - coupon.Amount));
-                        } else if (coupon.AppliesTo === 4) { // Tuition Fee
+                        } else if (coupon.AppliesTo === @((int)CouponApplyType.TuitionFee)) { // Tuition Fee
                             totalDueToday = amount * (1 - coupon.Amount) + spAmount;
                         }
                     } else { // flat amount coupon type
-                        totalDueToday = amount - coupon.Amount + spAmount;
+                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan) || !paymentOption) { // subscription plan or tuition fee without payment plan
+                            totalDueToday = amount - coupon.Amount + spAmount;
+                        } else { // tuition fee with payment plan
+                            var totalCost = amount * numberInMonths;
+
+                            totalDueToday = (amount - ((totalCost - coupon.Amount) / numberInMonths)) + spAmount;
+                        }
                     }
 
                     $("#total-due-today").text(totalDueToday.toFixed(2));
