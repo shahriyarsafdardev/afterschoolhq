@@ -19,5 +19,25 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
+        public static ActivitySchedule Create(Account account, ParticipationObject participationObject, ParticipationObjectType participationObjectType, SystemMessages msgs, DatabaseConnection dc, ActivityGroup activityGroup = null)
+        {
+            var activitySchedule = new ActivitySchedule()
+            {
+                Name = "Test Activity Schedule",
+                AccountId = account.ID.Value,
+                ActivityGroupId = activityGroup?.ID.Value,
+                ScheduleDetails = "Test Schedule Details",
+                RepeatsWeekly = false,
+                IsOngoing = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(2),
+                DailyStartTime = null,
+                DailyEndTime = null
+            };
+
+            msgs.AddRange(activitySchedule.Save(dc));
+            return activitySchedule;
+
+        }
     }
 }
