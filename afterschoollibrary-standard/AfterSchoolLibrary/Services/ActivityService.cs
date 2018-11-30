@@ -380,5 +380,98 @@ namespace AfterSchoolLibrary
         {
             return Match.LoadByTeamId(actitivy.ID.Value).IsEmpty();
         }
+
+        public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!attendanceId.HasValue)
+                return activity.CreateNewAttendance(loggedInUser, msgs, dc);
+
+            return Attendance.Load(attendanceId.Value, msgs, dc);
+        }
+
+        public static Attendance CreateNewAttendance(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            //create attendance records for this date and mark as absent by default (even if temporary)
+            var attendance = new Attendance();
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    activity.ClearEmptyAttendances(amsgs, adc);
+                    attendance.InitAttendance(activity, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    attendance = Attendance.Load(attendance.ID.Value);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Utilities.SystemErrorLog(emsgs);
+                },
+                dc: dc
+            );
+
+            return attendance;
+        }
+
+        private static void ClearEmptyAttendances(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
+            var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, msgs, dc);
+            if (attendanceList.Count > 0)
+            {
+                attendanceList.ForEach(attendanceItem =>
+                {
+                    attendanceItem
+                        .GetAttendanceRegistrants(msgs, dc)
+                        .ForEach(attendaceRegistrant => msgs.AddRange(attendaceRegistrant.Delete(dc)));
+
+                    msgs.AddRange(attendanceItem.Delete(dc));
+                });
+            }
+        }
+
+        public static ActivityMessage AddMessage(this Activity activity, string subject, string body, List<int> registrantIds, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            ActivityMessage am = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
+                {
+                    am = new ActivityMessage();
+                    am.ActivityId = activity.ID;
+                    am.AccountId = activity.AccountId;
+                    am.Subject = subject.MaxChars(150);
+                    am.Body = body;
+                    am.CreateDate = DateTime.UtcNow;
+                    am.CreatedBy = loggedInUserId;
+                    amsgs.AddRange(am.Save(adc));
+
+                    registrantIds.ForEach(registrantId => am.AddRegistrant(registrantId, loggedInUserId, amsgs, adc));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
+                },
+                dc: dc
+            );
+
+            return am;
+        }
     }
 }

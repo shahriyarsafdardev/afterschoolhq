@@ -91,6 +91,22 @@ namespace AfterSchoolLibrary.Services
 
             return match;
         }
+
+        public static List<ActivityInstance> GetTeamActivityInstances(int teamId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var matches = Match.LoadByTeamId(teamId);
+            var activityInstances = new List<ActivityInstance>();
+
+            matches.ForEach(match =>
+            {
+                var activityInstance = ActivityInstance.Load(match.ActivityInstanceId.Value);
+
+                if(activityInstance.IsNotEmpty())
+                    activityInstances.Add(activityInstance);
+            });
+
+            return activityInstances;
+        }
     }
 
 }

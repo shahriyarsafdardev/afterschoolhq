@@ -281,6 +281,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.ActivePeriod = activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
             ViewBag.ActiveForm = activity.GetActiveActivityForm();
             ViewBag.ActivityGroupType = ActivityGroupType.League;
+            ViewBag.isExternalLeague = AccountActivityGroup.IsExternalLeague(SessionVariables.CurrentAccount.ID.Value, activityGroup.ID.Value);
 
             if (msgs.HasNoErrors())
                 msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
@@ -1077,72 +1078,10 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att)
         {
             var msgs = new SystemMessages();
-            AfterSchoolLibrary.Attendance attendance = null;
+            var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            if (!att.IsNumber())
-            {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                        
-                        //create attendance records for this date and mark as absent by default (even if temporary)
-                        attendance = new Attendance();
-                        //check for existing incomplete attendance and delete so that we're not just keeping a bunch of blank records
-                        var attendanceList = AfterSchoolLibrary.Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, false, dc: adc);
-                        if (attendanceList.Count > 0)
-                        {
-                            foreach (var a in attendanceList)
-                            {
-                                var attendanceRegistrants = a.GetAttendanceRegistrants(adc);
-                                foreach (var ar in attendanceRegistrants)
-                                {
-                                    amsgs.AddRange(ar.Delete(adc));
-                                }
-                                amsgs.AddRange(a.Delete(adc));
-                            }
-                        }
-
-                        attendance.Date = DateTime.UtcNow.Date;
-                        attendance.IsCompleted = false;
-                        attendance.LastModifiedDate = attendance.CreateDate = DateTime.UtcNow;
-                        attendance.LastModifiedBy = attendance.CreatedBy = SessionVariables.LoggedInUser.ID;
-                        attendance.ActivityId = activity.ID.Value;
-
-                        var instances = activity.GetSchedule().GetInstances();
-                        var closestDate = instances.Select(y => y.StartDateTime.Value).ClosestDate(SessionVariables.CurrentAccount.ConvertToAccountTimeZone(DateTime.UtcNow));
-                        attendance.ActivityInstanceId = instances.Where(x => x.StartDateTime.Value == closestDate).First().ID;
-
-                        amsgs.AddRange(attendance.Save(adc));
-
-                        var registrants = attendance.ToActivity(true, adc).GetRegistrantActivities(amsgs, adc);
-                        foreach (var registrant in registrants)
-                        {
-                            var ar = new AttendanceRegistrant();
-                            ar.AttendanceId = attendance.ID;
-                            ar.IsPresent = false;
-                            ar.NumberPresent = 0;
-                            ar.IsLate = false;
-                            ar.NumberLate = 0;
-                            ar.NumberPossible = 1;
-                            ar.RegistrantId = registrant.RegistrantId;
-                            ar.LastModifiedDate = ar.CreateDate = DateTime.UtcNow;
-                            ar.LastModifiedBy = ar.CreatedBy = SessionVariables.LoggedInUser.ID;
-                            amsgs.AddRange(ar.Save(adc));
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => {
-                        msgs.AddRange(smsgs);
-                        attendance = AfterSchoolLibrary.Attendance.Load(attendance.ID.Value);
-                    },
-                    onFailure: (SystemMessages fmsgs) => {
-                        msgs.AddRange(fmsgs);
-                    }
-                );                
-            }
-            else
-            {
-                attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger());
-            }
+            var attendance = activity.GetOrCreateNewAttendance(attendanceId, SessionVariables.LoggedInUser, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();
@@ -1155,53 +1094,21 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att, string activityinstance)
         {
             var msgs = new SystemMessages();
-            AfterSchoolLibrary.Attendance attendance = null;
+            var presentStudents = new List<int>();
+            var activity = Activity.LoadByUid(id.ToGuid());
+            var attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), msgs);
 
             if (!activityinstance.IsNumber())
-            {
                 msgs.Add("Activity Date is required", MessageType.UserError);
-            }
+
+            attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant => {
+                if (Request.Params[$"present-{attendanceRegistrant.ID.ToString()}"].IsNumber())
+                    presentStudents.Add(attendanceRegistrant.ID.Value);
+            });
 
             if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                        attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), dc: adc);
-                        attendance.ActivityInstanceId = activityinstance.ToInteger();
-                        attendance.IsCompleted = true;
-                        attendance.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                        attendance.LastModifiedDate = DateTime.UtcNow;
-                        amsgs.AddRange(attendance.Save(adc));
+                attendance.UpdateAttendance(activityinstance.ToInteger(), presentStudents, SessionVariables.LoggedInUser, msgs);
 
-                        var ars = attendance.GetAttendanceRegistrants(adc);
-                        foreach (var ar in ars)
-                        {
-                            ar.NumberPresent = 0;
-                            if (Request.Params["present-" + ar.ID.ToString()].IsNumber())
-                            {
-                                ar.NumberPresent = Request.Params["present-" + ar.ID.ToString()].ToInteger();
-                            }
-                            /*
-                            ar.IsLate = false;
-                            if (Request.Params["late-" + ar.ID.ToString()].IsBoolean())
-                            {
-                                ar.IsLate = Request.Params["late-" + ar.ID.ToString()].ToBoolean();
-                            }
-                            */
-                            amsgs.AddRange(ar.Save(adc));
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Attendance saved", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) => {
-                        msgs.AddRange(fmsgs);
-                    }
-                );                
-            }
-
-            var activity = Activity.LoadByUid(id.ToGuid());
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();
@@ -1227,7 +1134,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (ras.IsEmpty())
                 ras = activity.GetRegistrantActivities();
 
-            ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
+            if(rat != RegistrationAssignmentType.NotSet)
+                ras = ras.Where(x => x.AssignmentTypeId == rat).OrderBy(x => x.SeatIndex).ToList();
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -1957,7 +1865,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .ToList();
                 am = activity.AddMessage(subject, body, registrantIds, SessionVariables.LoggedInUser.ID.Value, msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessage.Send(am.ID.Value, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
             }                
 
             ViewBag.Messages = msgs;
@@ -2069,6 +1977,19 @@ namespace AfterSchool.Areas.Org.Controllers
             return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.LoggedInUser.IsActivityLeader(activity);            
         }
 
-       
+        [HttpGet]
+        public ActionResult Schedule(string id)
+        {
+            var msgs = new SystemMessages();
+
+            var team = Activity.LoadByUid(id.ToGuid());
+            var activityInstances = MatchService.GetTeamActivityInstances(team.ID.Value, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.ActivityInstances = activityInstances;
+
+            return View(team);
+        }
+
     }
 }

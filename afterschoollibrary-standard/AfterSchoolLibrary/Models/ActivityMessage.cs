@@ -190,207 +190,61 @@ namespace AfterSchoolLibrary
 		#region "UserDefined"
 
         private List<ActivityMessageRegistrant> _ActivityMessageRegistrants = null;
-        public List<ActivityMessageRegistrant> GetActivityMessageRegistrants(DatabaseConnection dc = null)
+        public List<ActivityMessageRegistrant> GetActivityMessageRegistrants(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_ActivityMessageRegistrants.IsEmpty())
             {
-                _ActivityMessageRegistrants = ActivityMessageRegistrant.LoadByActivityMessageId(this.ID.Value, dc: dc);
+                _ActivityMessageRegistrants = ActivityMessageRegistrant.LoadByActivityMessageId(this.ID.Value, msgs, dc);
             }
             return _ActivityMessageRegistrants;
         }
 
-        public int GetRegistrantCount(DatabaseConnection dc = null)
+        public int GetRegistrantCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityMessageRegistrant.GetCount(
                 new Hashtable()
                 {
                     { "ActivityMessageId", this.ID.Value }
-                }
+                },
+                msgs
                 );
         }
 
-        public int GetUnsentCount(DatabaseConnection dc = null)
+        public int GetUnsentCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityMessageRegistrant.GetCount(
                    new Hashtable()
                    {
                     { "ActivityMessageId", this.ID.Value },
                     { "DateSent", DBNull.Value }
-                   }
+                   },
+                   msgs
                );
         }
 
-        public int GetSentCount(DatabaseConnection dc = null)
+        public int GetSentCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetRegistrantCount(dc: dc) - this.GetUnsentCount(dc: dc);
+            return this.GetRegistrantCount(msgs, dc) - this.GetUnsentCount(msgs, dc);
         }
 
         private Activity _Activity = null;
-        public Activity GetActivity(DatabaseConnection dc = null)
+        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Activity.IsEmpty())
             {
-                _Activity = Activity.Load(this.ActivityId.Value, dc: dc);
+                _Activity = Activity.Load(this.ActivityId.Value, msgs, dc);
             }
             return _Activity;
         }
 
         private ActivityGroup _ActivityGroup = null;
-        public ActivityGroup GetActivityGroup(DatabaseConnection dc = null)
+        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_ActivityGroup.IsEmpty())
             {
-                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, dc: dc);
+                _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
             }
             return _ActivityGroup;
-        }
-
-        private static SystemMessages SendForActivity(ActivityMessage am, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var activity = am.GetActivity(dc: dc);
-            var account = activity.GetAccount(dc: dc);
-
-            msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc: dc));
-
-            if (msgs.HasNoErrors())
-            {
-                var members = activity.GetTeamMembers(dc: dc).DistinctBy(member => member.WebUserId);
-                foreach (var member in members)
-                {
-                    var body = am.Body;
-                    body = body.Replace("[firstname]", member.WebUserFirstName.IfBlank(""));
-                    body = body.Replace("[lastname]", member.WebUserLastName.IfBlank(""));
-                    body = body.Replace("[name]", member.WebUserDisplayName.IfBlank(""));
-
-                    //send confirmation to team leaders
-                    SendGridHelper.SendMail(
-                        fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
-                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(member.WebUserEmail),
-                        subject: am.Subject,
-                        body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
-                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(
-                            activity.ContactEmail, 
-                            activity.ContactName),
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                    );
-                }
-            }
-
-            return msgs;
-        }
-
-        private static SystemMessages SendForGroup(ActivityMessage am, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var group = am.GetActivityGroup(dc: dc);
-            var account = group.GetAccount(dc: dc);
-
-            msgs.AddRange(am.SendActivityMessage(account, account.Name, account.Email, account.Name, dc: dc));
-
-            if (msgs.HasNoErrors())
-            {
-                // send to account admin
-                SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Email.AppEmailAddress, 
-                        $"CC: {account.Name} via {Utilities.AppName(account.IsAfterSchool)}"),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
-                    subject: am.Subject,
-                    body: $"{am.Body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activitygroup_message"))}",
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                );
-            }
-
-            return msgs;
-        }
-
-        private SystemMessages SendActivityMessage(Account account, string fromName, string replyToEmail, string replyToName, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var amrs = this.GetActivityMessageRegistrants(dc: dc);
-
-            foreach (var amr in amrs)
-            {
-                var body = this.Body;
-
-                //a person
-                if (amr.RegistrantFirstName.IsNotBlank() || amr.RegistrantLastName.IsNotBlank())
-                {
-                    body = body.Replace("[firstname]", amr.RegistrantFirstName.IfBlank(""));
-                    body = body.Replace("[lastname]", amr.RegistrantLastName.IfBlank(""));
-                    body = body.Replace("[name]", amr.RegistrantDisplayName.IfBlank(""));
-                }
-                //an organization
-                else if (amr.RegistrantCompany.IsNotBlank())
-                {
-                    body = body.Replace("[firstname]", amr.RegistrantCompany);
-                    body = body.Replace("[name]", amr.RegistrantCompany);
-                    body = body.Replace("[lastname]", "");
-                }
-
-                var sendMsgs = SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Email.AppEmailAddress, 
-                        $"{fromName} via {Utilities.AppName(account.IsAfterSchool)}"),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(amr.RegistrantEmail, amr.RegistrantDisplayName),
-                    subject: this.Subject,
-                    body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
-                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                );
-
-                if (sendMsgs.HasNoErrors())
-                {
-                    amr.DateSent = DateTime.UtcNow;
-                    msgs.AddRange(amr.Save(dc: dc));
-                }
-                else
-                {
-                    amr.SendErrors = sendMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000);
-                    msgs.AddRange(amr.Save(dc: dc));
-                }
-            }
-
-            if (msgs.HasNoErrors())
-            {
-                this.DateSent = DateTime.UtcNow;
-                msgs.AddRange(this.Save(dc: dc));
-            }
-            else
-            {
-                // TODO: Fix Rollbar reporting
-                // RollbarLocator.RollbarInstance.Configure(new RollbarConfig(Utilities.RollbarAccessToken));
-                // RollbarLocator.RollbarInstance.Log(ErrorLevel.Error, msgs.RenderMessageList(MessageOutputType.Text));
-            }
-
-            return msgs;
-        }
-
-        public static SystemMessages Send(int id, DatabaseConnection dc = null)
-        {
-            var am = ActivityMessage.Load(id, dc: dc);
-
-            if (am.ActivityId.HasValue)
-                return ActivityMessage.SendForActivity(am, dc: dc);
-            else if(am.ActivityGroupId.HasValue)
-                return ActivityMessage.SendForGroup(am, dc: dc);
-            else
-                return new SystemMessages() { new SystemMessage() { Text = "Error", MessageType = MessageType.Error } };
-        }
-
-        public ActivityMessageRegistrant AddRegistrant(int registrantId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc= null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var amr = new ActivityMessageRegistrant
-            {
-                RegistrantId = registrantId,
-                ActivityMessageId = this.ID,
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUserId
-            };
-            msgs.AddRange(amr.Save(dc: dc));
-            return amr;
         }
 
         #endregion

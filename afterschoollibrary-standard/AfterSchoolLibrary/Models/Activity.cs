@@ -872,14 +872,14 @@ namespace AfterSchoolLibrary
             return _GradeLevels;
         }
 
-        public List<ActivityWebUser> GetTeamMembers(DatabaseConnection dc = null)
+        public List<ActivityWebUser> GetTeamMembers(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityWebUser.LoadByActivityId(this.ID.Value, dc: dc);
+            return ActivityWebUser.LoadByActivityId(this.ID.Value, msgs, dc);
         }
 
-        public List<Form> GetForms(DatabaseConnection dc = null)
+        public List<Form> GetForms(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityForm.LoadByActivityId(this.ID.Value, dc: dc).Select(x => x.ToForm()).ToList();
+            return ActivityForm.LoadByActivityId(this.ID.Value, msgs, dc).Select(x => x.ToForm()).ToList();
         }
 
         public Form GetActiveForm(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1129,7 +1129,7 @@ namespace AfterSchoolLibrary
                     }
 
                     // copy team and permissions
-                    this.GetTeamMembers(adc).ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
+                    this.GetTeamMembers(amsgs, adc).ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
 
                     var activePeriod = this.GetActiveRegistrationPeriod(amsgs, adc);
                     if (activePeriod.IsNotEmpty())
@@ -2404,39 +2404,6 @@ namespace AfterSchoolLibrary
                 _Properties = AccountProperty.LoadByActivityId(this.ID.Value, dc: dc);
             }
             return _Properties;
-        }
-
-        public ActivityMessage AddMessage(string subject, string body, List<int> registrantIds, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            ActivityMessage am = null;
-
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
-                {
-                    am = new ActivityMessage();
-                    am.ActivityId = this.ID;
-                    am.AccountId = this.AccountId;
-                    am.Subject = subject.MaxChars(150);
-                    am.Body = body;
-                    am.CreateDate = DateTime.UtcNow;
-                    am.CreatedBy = loggedInUserId;
-                    amsgs.AddRange(am.Save(adc));
-
-                    registrantIds.ForEach(registrantId => am.AddRegistrant(registrantId, loggedInUserId, amsgs, dc: dc));
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                dc: dc
-            );
-
-            return am;
         }
 
         public static List<Activity> GetActivitiesByRegistrantByDay(int registrantId, DayOfWeekASL day, DateTime startDate, DatabaseConnection dc = null)

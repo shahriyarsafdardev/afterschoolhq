@@ -1,9 +1,11 @@
-﻿version: 0.0
+version: 0.0
 os: windows
 files:
   - source: \
-    destination: C:\websites\afterschoolhq\afterschoolhq-qa\afterschool
+    destination: C:\temp\app
 hooks:
+  BeforeInstall:
+    - location: \Deploy\before-install.bat
   AfterInstall:
-    - location: \deploy\after-install.bat
+    - location: \Deploy\after-install.bat
       timeout: 900
