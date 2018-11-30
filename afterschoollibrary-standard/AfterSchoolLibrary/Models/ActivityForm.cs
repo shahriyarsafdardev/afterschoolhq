@@ -50,8 +50,6 @@ namespace AfterSchoolLibrary
 		public string ActivityPostalCode { get { return (string)MDV["ActivityPostalCode"].Value; } }
 		public decimal? ActivityCostPerRegistrant { get { return (decimal?)MDV["ActivityCostPerRegistrant"].Value; } }
 		public string ActivityCostDescription { get { return (string)MDV["ActivityCostDescription"].Value; } }
-		public bool ActivityAcceptPayPal { get { return (bool)MDV["ActivityAcceptPayPal"].Value; } }
-		public bool ActivityAcceptCreditCard { get { return (bool)MDV["ActivityAcceptCreditCard"].Value; } }
 		public string FormName { get { return (string)MDV["FormName"].Value; } }
 		public string FormDescription { get { return (string)MDV["FormDescription"].Value; } }
 		public bool FormIsActive { get { return (bool)MDV["FormIsActive"].Value; } }
@@ -100,8 +98,6 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "ActivityPostalCode", typeof(Activity).Name, "PostalCode", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityCostPerRegistrant", typeof(Activity).Name, "CostPerRegistrant", System.Data.SqlDbType.Money, "Activity");
 				_dp.Add(className, "ActivityCostDescription", typeof(Activity).Name, "CostDescription", System.Data.SqlDbType.NVarChar, "Activity");
-				_dp.Add(className, "ActivityAcceptPayPal", typeof(Activity).Name, "AcceptPayPal", System.Data.SqlDbType.Bit, "Activity");
-				_dp.Add(className, "ActivityAcceptCreditCard", typeof(Activity).Name, "AcceptCreditCard", System.Data.SqlDbType.Bit, "Activity");
 				_dp.Add(className, "FormName", typeof(Form).Name, "Name", System.Data.SqlDbType.NVarChar, "Form");
 				_dp.Add(className, "FormDescription", typeof(Form).Name, "Description", System.Data.SqlDbType.NVarChar, "Form");
 				_dp.Add(className, "FormIsActive", typeof(Form).Name, "IsActive", System.Data.SqlDbType.Bit, "Form");

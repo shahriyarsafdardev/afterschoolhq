@@ -803,8 +803,8 @@ joinproperty: Activity.State, string, NVarChar
 joinproperty: Activity.PostalCode, string, NVarChar
 joinproperty: Activity.CostPerRegistrant, decimal?, Money
 joinproperty: Activity.CostDescription, string, NVarChar
-joinproperty: Activity.AcceptPayPal, bool, Bit
-joinproperty: Activity.AcceptCreditCard, bool, Bit
+-joinproperty: Activity.AcceptPayPal, bool, Bit
+-joinproperty: Activity.AcceptCreditCard, bool, Bit
 joinproperty: Form.Name, string, NVarChar
 joinproperty: Form.Description, string, NVarChar
 joinproperty: Form.IsActive, bool, Bit
