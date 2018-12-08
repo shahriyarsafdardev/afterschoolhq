@@ -1,4 +1,4 @@
-﻿@model AfterSchoolLibrary.Form
+@model AfterSchoolLibrary.Form
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
@@ -164,7 +164,8 @@
                                                             <select class="form-control questiontype-select"
                                                                     id="questiontype-@question.ID"
                                                                     name="questiontype-@question.ID"
-                                                                    onchange="showEditButton(@question.ID)"
+                                                                    onclick="showEditButton(@question.ID)"
+                                                                    onchange="showDialog(this)"
                                                                     @(question.QuestionDataTypeId != QuestionDataType.NotSet ? "disabled=\"disabled\"" : "")>
 
                                                                @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
@@ -272,7 +273,7 @@
                     <div class="col-sm-8">
                         <button type="submit" class="btn btn-default btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
                     </div>
-                    @if (questionGroups.Last().ID != qgId)
+                    @if (questionGroups.Last().ID != qgId && qgId != 0)
                     {
                         <div class="col-sm-2">
                             <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">Next &raquo;</button>
@@ -385,10 +386,10 @@
     var newQuestionNumber = 0;
 
     PageEvent.add(PageEvent.AFTER_INIT, function(){
-        $('.questiontype-select').each(function(){
+        $('.questiontype-select').each(function () {
             var id = $(this).attr('id').split('-')[1];
             showEditButton(id);
-        })
+        });
     });
 
     function incrementQuestionCount() {
@@ -427,13 +428,29 @@
     }
 
     function getQuestionTypeList() {
-        var rtn = `<select class="form-control" onclick="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
+        var rtn = `<select class="form-control" onclick="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" onChange="showDialog(this)" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
             @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
         }
         rtn += '</select>';
         return rtn;
+    }
+
+    function showDialog(obj) {
+        var select = $(obj);
+        var optionTypes = [@((int)QuestionType.Checkbox), @((int)QuestionType.CheckboxList), @((int)QuestionType.RadioList), @((int)QuestionType.DropDownList)];
+        var i = 0;
+
+        if (optionTypes.includes(parseInt(select.val()))) {
+            if (@((int)QuestionType.Checkbox) == parseInt(select.val())) {
+                i = 1;
+            } else {
+                i = 0;
+            }
+
+           select.parent().next().find('button:eq('+i+')').click();
+        }
     }
 
     function getOptionsLinks() {
