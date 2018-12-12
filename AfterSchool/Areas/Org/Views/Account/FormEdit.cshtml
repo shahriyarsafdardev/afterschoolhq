@@ -164,11 +164,10 @@
                                                             <select class="form-control questiontype-select"
                                                                     id="questiontype-@question.ID"
                                                                     name="questiontype-@question.ID"
-                                                                    onclick="showEditButton(@question.ID)"
-                                                                    onchange="showDialog(this)"
+                                                                    onchange="showEditButton(@question.ID)"
                                                                     @(question.QuestionDataTypeId != QuestionDataType.NotSet ? "disabled=\"disabled\"" : "")>
 
-                                                               @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
+                                                                @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
                                                                 {
                                                                     <option value="@((int)type)" @(type == question.QuestionTypeId ? "selected=\"selected\"" : "")>
                                                                         @type.ToString().SplitByUpperCase()
@@ -212,29 +211,29 @@
 
                                                     <td>
                                                         @{Html.RenderPartial(
-                                                                "~/Views/Shared/_SwitchButton.cshtml",
-                                                                question.IsActive,
-                                                                new ViewDataDictionary()
-                                                                {
-                                                                                                            { "checkboxname", "active-" + question.ID },
-                                                                                                            { "checkboxid", "active-" + question.ID },
-                                                                                                            { "disabled", question.IsLocked },
-                                                                                                            { "classname", "question-isactive" }
-                                                              });}
+                                                                  "~/Views/Shared/_SwitchButton.cshtml",
+                                                                  question.IsActive,
+                                                                  new ViewDataDictionary()
+                                                                  {
+                                                                            { "checkboxname", "active-" + question.ID },
+                                                                            { "checkboxid", "active-" + question.ID },
+                                                                            { "disabled", question.IsLocked },
+                                                                            { "classname", "question-isactive" }
+                                                                });}
                                                     </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
                                                         {
-                                                             Html.RenderPartial(
-                                                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                                                    question.IsRequired,
-                                                                    new ViewDataDictionary()
-                                                                    {
-                                                                                                            { "checkboxname", "required-" + question.ID },
-                                                                                                            { "checkboxid", "required-" + question.ID },
-                                                                                                            { "disabled", question.IsLocked },
-                                                                                                            { "classname", "question-isrequired" }
-                                                                });
+                                                            Html.RenderPartial(
+                                                                   "~/Views/Shared/_SwitchButton.cshtml",
+                                                                   question.IsRequired,
+                                                                   new ViewDataDictionary()
+                                                                   {
+                                                                            { "checkboxname", "required-" + question.ID },
+                                                                            { "checkboxid", "required-" + question.ID },
+                                                                            { "disabled", question.IsLocked },
+                                                                            { "classname", "question-isrequired" }
+                                                               });
                                                         }
                                                     </td>
                                                 </tr>
@@ -273,7 +272,7 @@
                     <div class="col-sm-8">
                         <button type="submit" class="btn btn-default btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
                     </div>
-                    @if (questionGroups.Last().ID != qgId && qgId != 0)
+                    @if (questionGroups.Last().ID != qgId && qgId!=0)
                     {
                         <div class="col-sm-2">
                             <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="navigateForm('@Url.Action("formedit", "account", new { id = Model.ID, qg = qgId, cmd = "next" })')">Next &raquo;</button>
@@ -295,12 +294,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                               Model,
-                               new ViewDataDictionary() {
-                                    { "RegistrantType", RegistrantType.Individual },
-                                    { "QuestionGroups", individualGroups },
-                                    { "QuestionGroupId", qgId }
-                               });
+                                Model,
+                                new ViewDataDictionary() {
+                                        { "RegistrantType", RegistrantType.Individual },
+                                        { "QuestionGroups", individualGroups },
+                                        { "QuestionGroupId", qgId }
+                                });
                         }
 
                         <li class="dd-item">
@@ -313,12 +312,12 @@
                         </li>
 
                         @{ Html.RenderPartial("_FormEditMenu",
-                               Model,
-                               new ViewDataDictionary() {
-                                    { "RegistrantType", RegistrantType.Organization },
-                                    { "QuestionGroups", organizationGroups },
-                                    { "QuestionGroupId", qgId }
-                               });
+                                Model,
+                                new ViewDataDictionary() {
+                                        { "RegistrantType", RegistrantType.Organization },
+                                        { "QuestionGroups", organizationGroups },
+                                        { "QuestionGroupId", qgId }
+                                });
                         }
 
                     </ol>
@@ -386,10 +385,10 @@
     var newQuestionNumber = 0;
 
     PageEvent.add(PageEvent.AFTER_INIT, function(){
-        $('.questiontype-select').each(function () {
+        $('.questiontype-select').each(function(){
             var id = $(this).attr('id').split('-')[1];
             showEditButton(id);
-        });
+        })
     });
 
     function incrementQuestionCount() {
@@ -428,29 +427,13 @@
     }
 
     function getQuestionTypeList() {
-        var rtn = `<select class="form-control" onclick="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" onChange="showDialog(this)" name="new-questiontype-${getQuestionCount()}">`;
+        var rtn = `<select class="form-control" onclick="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
             @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
         }
         rtn += '</select>';
         return rtn;
-    }
-
-    function showDialog(obj) {
-        var select = $(obj);
-        var optionTypes = [@((int)QuestionType.Checkbox), @((int)QuestionType.CheckboxList), @((int)QuestionType.RadioList), @((int)QuestionType.DropDownList)];
-        var i = 0;
-
-        if (optionTypes.includes(parseInt(select.val()))) {
-            if (@((int)QuestionType.Checkbox) == parseInt(select.val())) {
-                i = 1;
-            } else {
-                i = 0;
-            }
-
-           select.parent().next().find('button:eq('+i+')').click();
-        }
     }
 
     function getOptionsLinks() {
