@@ -384,13 +384,6 @@
     var selectedQuestion = null;
     var newQuestionNumber = 0;
 
-    PageEvent.add(PageEvent.AFTER_INIT, function(){
-        $('.questiontype-select').each(function(){
-            var id = $(this).attr('id').split('-')[1];
-            showEditButton(id);
-        })
-    });
-
     function incrementQuestionCount() {
         $('#newquestioncount').val(getQuestionCount() + 1);
     }
@@ -427,7 +420,7 @@
     }
 
     function getQuestionTypeList() {
-        var rtn = `<select class="form-control" onclick="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
+        var rtn = `<select class="form-control" onChange="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
         @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
         {
             @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
@@ -538,11 +531,17 @@
                 $('#required-' + id).prop('checked', false);
             }
         });
+
         $('.question-isrequired').click(function () {
             if ($(this).is(':checked')) {
                 var id = $(this).attr('id').split('-')[1];
                 $('#active-' + id).prop('checked', true);
             }
+        });
+
+        $('.questiontype-select').each(function () {
+            var id = $(this).attr('id').split('-')[1];
+            showEditButton(id);
         });
     });
 </script>
