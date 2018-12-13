@@ -7,6 +7,12 @@ body {
     background-repeat: no-repeat;
     background-position: center top;
 }
+.for-bg-img-2 {
+    background: url(../images/pencil-banner.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center top;
+}
 .custom-header {
     opacity: 1;
     background-color: rgba(47, 60, 64, 0.90);
@@ -990,6 +996,47 @@ a {
 /*paid section end*/
 
 /*******Parents Landing page end**************/
+
+/*******Case study start**************/
+
+.banner-content-casestudy {
+    background: #000;
+    opacity: 0.8;
+    color: #fff;
+    padding: 10% 0px;
+}
+.h2-casestudy {
+    font-size: 42px;
+    font-weight: 700;
+    color: #ffad49;
+}
+.casestudy-challenege {
+  padding: 50px !important;
+}
+.casestudy-img img {
+    max-width: 70%;
+    padding-top: 50px !important;
+}
+#casestudy-intro {
+  margin-top: 50px;
+}
+.testimonial {
+  margin: 50px auto;
+  font-size: 18px;
+  color: #2f3c40;
+  max-width: 800px;
+  word-break: break-word;
+  line-height: 26px;
+}
+#quote {
+  padding-right: 5px;
+  max-width: 30px;
+}
+.casestudy-download {
+  margin-bottom: 70px;
+}
+
+/*******Case study end**************/
 
 /********* sign-up-header ***********/
 
