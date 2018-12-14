@@ -277,10 +277,12 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 ActivityGroupTypeId = ActivityGroupType.League,
                 RegistrationModeId = RegistrationMode.Register,
+                ID = 0
             };
 
             if (id.IsGuid())
                 league = ActivityGroup.LoadByUid(id.ToGuid());
+            
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
