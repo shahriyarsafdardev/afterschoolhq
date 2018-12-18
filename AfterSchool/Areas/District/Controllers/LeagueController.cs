@@ -313,7 +313,6 @@ namespace AfterSchool.Areas.District.Controllers
             if (schedule.IsEmpty())
                 schedule = ActivitySchedule.GetNewDefaultSchedule();
             
-           // ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Schedule = schedule;
             ViewBag.ActivityInstances = schedule.GetInstances();
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
