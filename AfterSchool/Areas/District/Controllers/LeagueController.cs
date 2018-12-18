@@ -227,7 +227,7 @@ namespace AfterSchool.Areas.District.Controllers
         {
             var league = ActivityGroup.LoadByUid(id.ToGuid());
             LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
-           
+            ViewBag.Teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Messages = new SystemMessages();
             
             return View(league);
@@ -277,7 +277,6 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 ActivityGroupTypeId = ActivityGroupType.League,
                 RegistrationModeId = RegistrationMode.Register,
-                ID = 0
             };
 
             if (id.IsGuid())
@@ -314,7 +313,6 @@ namespace AfterSchool.Areas.District.Controllers
             if (schedule.IsEmpty())
                 schedule = ActivitySchedule.GetNewDefaultSchedule();
             
-            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Schedule = schedule;
             ViewBag.ActivityInstances = schedule.GetInstances();
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
@@ -371,6 +369,7 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
             ViewBag.Grades = GradeLevel.Load();
             LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
+            ViewBag.Teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
 
             return View(league);
         }
@@ -695,6 +694,7 @@ namespace AfterSchool.Areas.District.Controllers
               );
 
             LoadEditScheduleViewBag(activityGroup, activityGroup.ActivityScheduleId.ToString());
+            ViewBag.Teams = activityGroup.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School);
             ViewBag.Messages = msgs;
             return View("schedule", activityGroup);
         }
