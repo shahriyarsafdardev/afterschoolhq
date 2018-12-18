@@ -411,8 +411,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var league = new ActivityGroup()
             {
                 ActivityGroupTypeId = ActivityGroupType.League,
-                RegistrationModeId = RegistrationMode.Apply,
-                ID = 0
+                RegistrationModeId = RegistrationMode.Apply
             };
 
             if (id.IsGuid())
