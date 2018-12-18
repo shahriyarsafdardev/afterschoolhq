@@ -13,16 +13,19 @@
             Welcome @SessionVariables.LoggedInUser.FirstName!
         </div>
         <div class="panel-body">
-            This is your district dashboard 
 
             @if (submittedActivites.Count > 0)
             {
-                foreach(Activity activity in submittedActivites)
-                {
-                    <p>@activity.Name has been submitted to @activity.GetActivityGroup().Name</p>
-                }
+                <span>Recent Team Submissions</span>
+
+                <ul>
+                    @foreach (var activity in submittedActivites)
+                    {
+                        <li>@activity.AccountName submitted @activity.Name to @activity.GetActivityGroup().Name</li>
+                    }
+                </ul>
             }
-            @* loop through notifications *@
+
         </div>
     </div>
 </div>
