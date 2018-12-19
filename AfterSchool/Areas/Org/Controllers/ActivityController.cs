@@ -1777,7 +1777,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Registrants = activity.GetRegistrants()
-                                    .Where(x => x.Email.IsNotBlank()) // why?  && !x.FirstRegistrantId.HasValue
                                     .OrderBy(x => x.FirstName)
                                     .ToList();
             return View(activity);
