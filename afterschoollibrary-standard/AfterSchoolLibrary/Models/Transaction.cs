@@ -352,6 +352,16 @@ namespace AfterSchoolLibrary
             return dq.GetCount();
         }
 
+
+        public static int GetCountByPurchaseId(int PurchaseId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["PurchaseId"], PurchaseId);
+
+            return dq.GetCount(msgs);
+        }
+
         #endregion
     }
 }

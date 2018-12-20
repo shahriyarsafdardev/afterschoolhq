@@ -1244,6 +1244,9 @@ namespace AfterSchool.Controllers
 
             var registration = PaymentViewBag(id, participationObject, msgs);
 
+            if (registration.IsAlreadyPaidFor(msgs))
+                return RedirectToAction("thankyou", new { id = registration.Uid });
+
             if (msgs.HasNoErrors())
             {
                 SubscriptionPlan paymentPlan = null;
