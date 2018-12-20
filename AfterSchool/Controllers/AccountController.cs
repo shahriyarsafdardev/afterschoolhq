@@ -1244,16 +1244,8 @@ namespace AfterSchool.Controllers
 
             var registration = PaymentViewBag(id, participationObject, msgs);
 
-            var purchase = registration.GetPurchase(msgs);
-            var transactions = new List<Transaction>();
-            if (purchase.IsNotEmpty())
-              transactions = Transaction.LoadByPurchaseId(purchase.ID.Value);
-
-            // prevent duplicate charge
-            // if there is a transaction found by the current purchase
-            // then don't process the payment
-            if (transactions.Count > 0)
-                msgs.Add("Payment already submitted", MessageType.UserError);
+            if (registration.IsAlreadyPaidFor(msgs))
+                return RedirectToAction("thankyou", new { id = registration.Uid });
 
             if (msgs.HasNoErrors())
             {
