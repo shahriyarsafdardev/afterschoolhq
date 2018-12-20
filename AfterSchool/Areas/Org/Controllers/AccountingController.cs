@@ -79,24 +79,18 @@ namespace AfterSchool.Areas.Org.Controllers
             var loggedInUser = SessionVariables.LoggedInUser;
 
             if (originalTransaction == null)
-            {
                 msgs.Add("Invalid transaction", MessageType.UserError);
-            }
             else
             {
                 var totalRefund = Transaction.GetTotalRefundByOriginalTransaction(originalTransaction.ID.Value);
                 var maximumRefund = originalTransaction.Amount + totalRefund;
 
                 if (amount.ToDecimal() > maximumRefund)
-                {
                     msgs.Add($"The maximum amount to refund is {maximumRefund.ToCurrency()}", MessageType.UserError);
-                }
             }
 
             if (amount.ToDouble() < 0.1)
-            {
                 msgs.Add("The minimum amount to refund is $0.10", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
@@ -124,9 +118,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     return new JsonResult { Data = new { status = "ok", transaction } };
                 }
                 else
-                {
                     msgs.Add("Error when processing the refund", MessageType.Error);
-                }
             }
 
             return new JsonResult { Data = new { status = "error", messages = msgs } };
