@@ -32,7 +32,7 @@ namespace AfterSchoolLibrary.Services
                 .ForEach(registrant =>
                 {
                     allResults.AddRange(registrant.SendEmail(account.IsAfterSchool, fromName, replyToEmail, replyToName, subject, body, "activity_message"));
-                    allResults.AddRange(registrant.SendText(subject, body));
+                    // allResults.AddRange(registrant.SendText(subject, body));
                 }
             );            
 

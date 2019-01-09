@@ -54,10 +54,10 @@ namespace AfterSchoolLibrary.Services
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 ));
 
-                TwilioHelper.SendSMS(
-                    member.WebUserPhone,
-                    $"{activityMessage.Subject}\n{body}"
-                );
+                //TwilioHelper.SendSMS(
+                //    member.WebUserPhone,
+                //    $"{activityMessage.Subject}\n{body}"
+                //);
             });
 
             return msgs;

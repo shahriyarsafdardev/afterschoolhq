@@ -277,10 +277,10 @@ namespace AfterSchoolLibrary.Models
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                     );
 
-                    TwilioHelper.SendSMS(
-                        member.WebUserPhone,
-                        $"{am.Subject}\n{body}"
-                    );
+                    //TwilioHelper.SendSMS(
+                    //    member.WebUserPhone,
+                    //    $"{am.Subject}\n{body}"
+                    //);
                 }
             }
 
@@ -308,10 +308,10 @@ namespace AfterSchoolLibrary.Models
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
 
-                TwilioHelper.SendSMS(
-                        account.Phone,
-                        $"{am.Subject}\n{am.Body}"
-                );
+                //TwilioHelper.SendSMS(
+                //        account.Phone,
+                //        $"{am.Subject}\n{am.Body}"
+                //);
             }
 
             return msgs;
@@ -357,13 +357,13 @@ namespace AfterSchoolLibrary.Models
                     );
                 }
 
-                if (amr.RegistrantPhone.IsNotEmpty())
-                {
-                    sendSMSMsgs = TwilioHelper.SendSMS(
-                                amr.RegistrantPhone,
-                                $"{this.Subject}\n{body}"
-                                );
-                }
+                //if (amr.RegistrantPhone.IsNotEmpty())
+                //{
+                //    sendSMSMsgs = TwilioHelper.SendSMS(
+                //                amr.RegistrantPhone,
+                //                $"{this.Subject}\n{body}"
+                //                );
+                //}
 
                 if (sendEmailMsgs.HasNoErrors() || sendSMSMsgs.HasNoErrors())
                 {
