@@ -573,10 +573,10 @@ namespace AfterSchoolLibrary
         //    return msgs;
         //}
 
-        public int GetActivityCount(ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public int GetActivityCount(ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? isSubmitted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.ID.HasValue)
-                return Activity.GetCountByActivityGroupId(this.ID.Value, activityType, isArchived, isDeleted, msgs, dc);
+                return Activity.GetCountByActivityGroupId(this.ID.Value, activityType, isArchived, isDeleted, isSubmitted, msgs, dc);
 
             return 0;
         }

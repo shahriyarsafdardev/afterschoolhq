@@ -264,7 +264,7 @@ namespace AfterSchool.Areas.District.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages
             };
-            ViewBag.Teams = teams.Where(t => t.DateSubmittedToActivityGroup.IsNotEmpty()).ToList();
+            ViewBag.Teams = teams.Where(t => t.DateSubmittedToActivityGroup.IsNotEmpty() && !t.IsDeleted).ToList();
             ViewBag.Activities = group.GetActivities();
             return View(group);
         }                        

@@ -77,9 +77,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (group.IsGuid())
             {
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                totalActivityCount = activityGroup.GetActivityCount(null, isArchived, false);
+                totalActivityCount = activityGroup.GetActivityCount(null, isArchived, false, null);
                 activities = activityGroup.GetActivities(null, isArchived, false, start, length);
-                hasArchivedActivities = activityGroup.GetActivityCount(null, true, false) > 0;
+                hasArchivedActivities = activityGroup.GetActivityCount(null, true, false, null) > 0;
             }
             else
             {

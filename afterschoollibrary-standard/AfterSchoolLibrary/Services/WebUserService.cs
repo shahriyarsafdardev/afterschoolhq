@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary.Services
             if (!user.IsActive)
                 body += $"<p>Click on the following link to create your account and start using {Utilities.AppName(account.IsAfterSchool)}: <a href=\"{user.GetInviteUrl(account)}\">{user.GetInviteUrl(account)}</a></p>";
             else
-                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{Email.HostName(account.IsAfterSchool)}/login</a></p>";
+                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{Email.HostName()}/login</a></p>";
 
             body += "<p>Thank you!!</p>";
             body += Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");

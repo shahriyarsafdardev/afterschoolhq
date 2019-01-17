@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -185,7 +185,7 @@ namespace AfterSchoolLibrary
             get
             {
                 if (Utilities.IsLocalHost)
-                    return "localhost: 54849";
+                    return "localhost:54849";
 
                 return ConfigurationManager.AppSettings["HostName"];
             }
@@ -1753,7 +1753,7 @@ namespace AfterSchoolLibrary
             return $"{Utilities.BaseUrl(isAfterSchool)}/";
         }
 
-        public static string HostName(bool isAfterSchool)
+        public static string HostName()
         {
             return Utilities.HostName;
         }
@@ -1774,9 +1774,9 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static string AppSupportEmailAddress(bool isAfterSchool)
+        public static string AppSupportEmailAddress()
         {
-            return "support@" + HostName(isAfterSchool);
+            return "support@" + Utilities.HostName;
         }
 
         public static string AppEmailAddress

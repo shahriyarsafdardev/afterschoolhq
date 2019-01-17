@@ -78,7 +78,7 @@
 
 .reg-login-bar {
     min-height: 40px;
-    background-color: #2f3c40;
+    background-color: rgba(47, 60, 64, 0.90);
 }
 
 .reg-login-bar-title {
