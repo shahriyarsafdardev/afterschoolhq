@@ -184,7 +184,7 @@ namespace AfterSchoolLibrary.Models
 
         public static bool Exists(int teamId, int activityInstanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var match = Match.LoadByTeamIdByActivityInstanceId(teamId, activityInstanceId);
+            var match = Match.LoadByTeamIdByActivityInstanceId(teamId, activityInstanceId, msgs, dc);
 
             return match.IsNotEmpty();
         }
