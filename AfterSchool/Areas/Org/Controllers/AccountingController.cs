@@ -57,6 +57,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
+            // sort transactions
+            allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
+
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountPaidTo(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefundedTo(startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidBy(startDate, endDate, msgs);
@@ -106,6 +109,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     var transaction = new
                     {
                         id = newTransaction.GetTransactionNumber(),
+                        originalTransactionUid = originalTransaction.Uid,
                         createdOn = newTransaction.CreateDate.ToShortDateTimeString(),
                         payer = newTransaction.GetPayerAccount().Name,
                         refundFor = newTransaction.GetBillerAccount().Name,
@@ -115,7 +119,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         payout = newTransaction.GetPayout(),
                     };
 
-                    return new JsonResult { Data = new { status = "ok", transaction } };
+                    return new JsonResult { Data = new { status = "ok", transaction, refundedAmount = originalTransaction.GetRefundedAmount() } };
                 }
                 else
                     msgs.Add("Error when processing the refund", MessageType.Error);

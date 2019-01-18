@@ -58,9 +58,9 @@ namespace AfterSchoolLibrary.Services
         public static string GetAmountAsString(this Coupon coupon)
         {
             if (coupon.AmountTypeId == CouponAmountType.Percentage)
-                return $"{(coupon.Amount * 100)}%";
+                return String.Format("{0:0.00}%", (coupon.Amount * 100).Value);
 
-            return $"{coupon.Amount.ToCurrency()}";
+            return coupon.Amount.ToCurrency();
         }
 
         public static bool DoesApplyToTuitionFee(this Coupon coupon)

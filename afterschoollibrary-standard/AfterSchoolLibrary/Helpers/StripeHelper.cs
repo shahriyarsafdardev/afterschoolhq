@@ -1235,7 +1235,8 @@ namespace AfterSchoolLibrary.Billing
             var options = new StripeRefundCreateOptions
             {
                 Amount = (totalAmount * 100).ToInteger(),
-                Reason = reason
+                Reason = reason,
+                ReverseTransfer = true
             };
 
             StripeRefund refund = null;

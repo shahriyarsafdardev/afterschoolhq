@@ -2,7 +2,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
-    var totalTransactionAmount = ((decimal)ViewBag.TotalAmountPaid + (decimal)ViewBag.TotalAmountRefunded);
+    var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalTransactionAmount - totalFees;
@@ -129,50 +129,50 @@
                                 var participationObjects = transaction.GetParticipationObjects();
                                 var platformFee = transaction.GetPlatformFee();
                                 var payout = transaction.Amount.Value - platformFee;
-                                <tr>
-                                    <td>
-                                        @transaction.GetTransactionNumber()
-                                    </td>
-                                    <td>
-                                        @transaction.CreateDate.ToShortDateTimeString()
-                                    </td>
-                                    <td>
-                                        @transaction.GetPayerAccount().Name
-                                    </td>
-                                    <td>
+                        <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                            <td>
+                                @transaction.GetTransactionNumber()
+                            </td>
+                            <td>
+                                @transaction.CreateDate.ToShortDateTimeString()
+                            </td>
+                            <td>
+                                @transaction.GetPayerAccount().Name
+                            </td>
+                            <td>
 
-                                        @if (transaction.IsCharge())
-                                        {
-                                            @registrant.DisplayName
-                                        }
-                                        else
-                                        {
-                                            @transaction.GetBillerAccount().Name
-                                        }
-                                    </td>
-                                    <td>
-                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
-                                    </td>
-                                    <td>
-                                        @transaction.Amount.ToCurrency()
-                                    </td>
-                                    <td>
-                                        @platformFee.ToCurrency()
-                                    </td>
-                                    <td>
-                                        @transaction.GetPayout().ToCurrency()
-                                    </td>
-                                    <td>
-                                        @if (transaction.IsCharge())
-                                        {
-                                            <button onclick="openDialog('@transaction.Uid')"
-                                                    class="md-trigger"
-                                                    data-modal="modal-refund">
-                                                Refund
-                                            </button>
-                                        }
-                                    </td>
-                                </tr>
+                                @if (transaction.IsCharge())
+                                {
+                                    @registrant.DisplayName
+                                }
+                                else
+                                {
+                                    @transaction.GetBillerAccount().Name
+                                }
+                            </td>
+                            <td>
+                                @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                            </td>
+                            <td>
+                                @transaction.Amount.ToCurrency()
+                            </td>
+                            <td>
+                                @platformFee.ToCurrency()
+                            </td>
+                            <td>
+                                @transaction.GetPayout().ToCurrency()
+                            </td>
+                            <td>
+                                @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                {
+                                    <button onclick="openDialog('@transaction.Uid')"
+                                            class="md-trigger"
+                                            data-modal="modal-refund">
+                                        Refund
+                                    </button>
+                                }
+                            </td>
+                        </tr>
                             }
                         }
                         else
@@ -212,6 +212,10 @@
             <div class="form-group">
                 <div class="col-sm-5">
                     <div class="input-group input-group-lg xs-mb-15">
+                        <span>Amount refunded: </span>
+                        <span id="refunded-amount" style="color: red"></span>
+                    </div>
+                    <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">$</span>
                         <input type="number" onblur="validateForm()" onchange="validateForm()" class="form-control" id="amount" placeholder="amount" required min="0.1" step="0.1" />
                     </div>
@@ -245,6 +249,7 @@
 
     function openDialog(newUid) {
         $("#modal-refund").data("uid", newUid);
+        $("#refunded-amount").text($("#" + newUid).data('refunded-amount'));
     }
 
     function confirmRefund() {
@@ -274,9 +279,10 @@
                         $("#totalTransactionAmount").text("$" + totalTransactionAmount);
                         $("#totalPayout").data("end", totalPayout);
                         $("#totalPayout").text("$" + totalPayout);
+                        $("#" + transaction.originalTransactionUid).data('refunded-amount', "$"+ data.refundedAmount.toFixed(2));
 
                         // update the transaction table
-                        $("#transaction-table > tbody").append('<tr>' +
+                        $("#transaction-table tr:first").after('<tr>' +
                             '<td>' + transaction.id + '</td>' +
                             '<td>' + transaction.createdOn + '</td>' +
                             '<td>' + transaction.payer + '</td>' +
@@ -296,12 +302,12 @@
                     } else {
                         var items = "";
                         for (var message of data.messages) {
-                            items += "<li>"+message.Text+"</li>";
+                            items += "<li>" + message.Text + "</li>";
                         }
 
                         Notifications.showBar({
                             title: 'Error',
-                            message: '<ul>'+items+'</ul>',
+                            message: '<ul>' + items + '</ul>',
                             success: false
                         });
                     }

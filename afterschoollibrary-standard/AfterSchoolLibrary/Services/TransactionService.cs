@@ -147,5 +147,22 @@ namespace AfterSchoolLibrary.Services
 
             return transaction;
         }
+
+        public static bool IsTotallyRefunded(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (transaction.IsCharge())
+            {
+                var totalRefund = - Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+
+                return totalRefund == transaction.Amount;
+            }
+
+            return false;
+        }
+
+        public static decimal GetRefundedAmount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return - Transaction.GetTotalRefundByOriginalTransaction(transaction.ID.Value, msgs, dc);
+        }
     }
 }
