@@ -363,7 +363,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var length = recordsPerPage;
             var account = SessionVariables.CurrentAccount;
             var activities = accountActivityGroup.IsEmpty() ? group.GetActivities(null, isArchived, false, start, length) : accountActivityGroup.GetActivities(null, isArchived, false, start, length);
-            var totalCount = accountActivityGroup.IsEmpty() ? group.GetActivityCount(null, isArchived, false) : accountActivityGroup.GetActivityCount(null, isArchived, false);
+            var totalCount = accountActivityGroup.IsEmpty() ? group.GetActivityCount(null, isArchived, false, null) : accountActivityGroup.GetActivityCount(null, isArchived, false);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var finalActivities = activities.OrderBy(x => x.Name).ToList();
 
@@ -371,7 +371,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Activities = finalActivities;
             ViewBag.NeedToUpgrade = finalActivities.Count >= SessionVariables.AccountPackage.GetFeature(FeatureType.Activities).GetMaxValue();
             ViewBag.Messages = msgs;
-            ViewBag.HasArchivedActivities = accountActivityGroup.IsEmpty() ? group.GetActivityCount(null, true, false) > 0 : accountActivityGroup.GetActivityCount(null, true, false) > 0;
+            ViewBag.HasArchivedActivities = accountActivityGroup.IsEmpty() ? group.GetActivityCount(null, true, false, null) > 0 : accountActivityGroup.GetActivityCount(null, true, false) > 0;
 
             ViewBag.PagingModel = new PagingModel()
             {

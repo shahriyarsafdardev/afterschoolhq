@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -33,60 +33,42 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-production"))
-                    return true;
-
-                return false;
+                return ConfigurationManager.AppSettings["NET_ENV"] == "Production";
             }
         }
         public static bool IsStaging
         {
             get
             {
-                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-staging"))
-                    return true;
-
-                return false;
+                return ConfigurationManager.AppSettings["NET_ENV"] == "Staging";
             }
         }
         public static bool IsTest
         {
             get
             {
-                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-test"))
-                    return true;
-
-                return false;
+                return ConfigurationManager.AppSettings["NET_ENV"] == "Test";
             }
         }
         public static bool IsCI
         {
             get
             {
-                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-ci"))
-                    return true;
-
-                return false;
+                return ConfigurationManager.AppSettings["NET_ENV"] == "CI";
             }
         }
         public static bool IsQA
         {
             get
             {
-                if (System.Reflection.Assembly.GetExecutingAssembly().CodeBase.ToLower().Contains("-qa"))
-                    return true;
-
-                return false;
+                return ConfigurationManager.AppSettings["NET_ENV"] == "QA";
             }
         }
         public static bool IsLocalHost
         {
             get
             {
-                if (!IsProduction && !IsStaging && !IsCI && !IsQA)
-                    return true;
-
-                return false;
+                return !IsProduction && !IsStaging && !IsCI && !IsQA;
             }
         }
 
@@ -96,7 +78,7 @@ namespace AfterSchoolLibrary
             Rollbar.RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
         }
 
-        public static string RollbarAccessToken { get { return "9d10f02799c544f5bf4c9e27e0743c54"; } }
+        public static string RollbarAccessToken { get { return ConfigurationManager.AppSettings["Rollbar.AccessToken"]; } }
 
         public static string GetRollbarEnvironment()
         {
@@ -127,8 +109,27 @@ namespace AfterSchoolLibrary
         public static string MasterAPIKey { get; set; }
         public static string MasterAPISecret { get; set; }
 
-        public static string AmazonAccessKeyId { get; set; }
-        public static string AmazonSecretAccessKeyId { get; set; }
+        public static string AmazonAccessKeyId
+        {
+            get
+            {
+                if (Utilities.IsLocalHost)
+                    return "AKIAJYT3PYXGXTSEMSAQ";
+
+                return ConfigurationManager.AppSettings["AmazonAccessKeyId"];
+            }
+        }
+
+        public static string AmazonSecretAccessKeyId
+        {
+            get
+            {
+                if (Utilities.IsLocalHost)
+                    return "rTkFaZuJ/65sc4QcpjA0tBNEaoIYOXCoUjvlVRBD";
+    
+                return ConfigurationManager.AppSettings["AmazonSecretAccessKeyId"];
+            }
+        }
 
         public static string ReCaptchaPrivateKey { get; set; }
         public static string ReCaptchaPublicKey { get; set; }
@@ -178,39 +179,21 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static string HostNameProductionAfterSchoolHQ = "";
-        public static string HostNameStagingAfterSchoolHQ = "";
-        public static string HostNameCIAfterSchoolHQ = "";
-        public static string HostNameQAAfterSchoolHQ = "";
-        public static string HostNameLocalAfterSchoolHQ = "";
 
-        public static string HostName(bool isAfterSchool)
+        public static string HostName
         {
-            if (Utilities.IsProduction)
+            get
             {
-                return HostNameProductionAfterSchoolHQ;
-            }
-            else if (Utilities.IsStaging)
-            {
-                return HostNameStagingAfterSchoolHQ;
-            }
-            else if (Utilities.IsCI)
-            {
-                return HostNameCIAfterSchoolHQ;
-            }
-            else if (Utilities.IsQA)
-            {
-                return HostNameQAAfterSchoolHQ;
-            }
-            else
-            {
-                return HostNameLocalAfterSchoolHQ;
+                if (Utilities.IsLocalHost)
+                    return "localhost:54849";
+
+                return ConfigurationManager.AppSettings["HostName"];
             }
         }
 
         public static string BaseUrl(bool isAfterSchool)
         {
-            return $"http{(Utilities.UseSSL() ? "s" : "")}://{HostName(isAfterSchool)}";
+            return $"http{(Utilities.UseSSL() ? "s" : "")}://{HostName}";
         }
 
         public static string LoginUrl(bool isAfterSchool, string redirectUrl = null)
@@ -228,11 +211,11 @@ namespace AfterSchoolLibrary
 
         public static string BaseUrlHttp(bool isAfterSchool)
         {
-            return $"http://{HostName(isAfterSchool)}";
+            return $"http://{HostName}";
         }
         public static string BaseUrlHttps(bool isAfterSchool)
         {
-            return $"https://{HostName(isAfterSchool)}";
+            return $"https://{HostName}";
         }
         
         public static string AppNameEnrollHQ { get; set; }
@@ -253,26 +236,11 @@ namespace AfterSchoolLibrary
             Utilities.MasterAPIKey = ""; //at least 45 random alphanumeric characters
             Utilities.MasterAPISecret = ""; //at least 65 random alphanumeric characters
 
-            Utilities.AmazonBucketNameCI = "afterschoolhq-ci"; //all files are stored in amazon bucket
-            Utilities.AmazonBucketNameQA = "afterschoolhq-qa"; //all files are stored in amazon bucket
-            Utilities.AmazonBucketNameStaging = "afterschoolhq-staging"; //all files are stored in amazon bucket
-            Utilities.AmazonBucketNameTest = "afterschoolhq-test"; //all files are stored in amazon bucket
-            Utilities.AmazonBucketNameProduction = "afterschoolhq-prod"; //all files are stored in amazon bucket
-            Utilities.AmazonBucketNameLocal = "afterschoolhq-local"; //all files are stored in amazon bucket
             Utilities.AmazonRegionEndPoint = Amazon.RegionEndpoint.USEast2;
-
-            Utilities.AmazonAccessKeyId = "AKIAJYT3PYXGXTSEMSAQ";
-            Utilities.AmazonSecretAccessKeyId = "rTkFaZuJ/65sc4QcpjA0tBNEaoIYOXCoUjvlVRBD";
 
             Email.AppAdminEmailAddress = "support@afterschoolhq.com"; //all app admin emails are sent to this email address
             Email.ReplyHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
             Email.SenderHostName = "mailer.afterschoolhq.com"; // can be modified based on live/dev/test server            
-
-            Utilities.HostNameProductionAfterSchoolHQ = "afterschoolhq.com"; //since the hostname may not be able to be picked up from the actual url that is processing the request
-            Utilities.HostNameStagingAfterSchoolHQ = "staging.afterschoolhq.com";
-            Utilities.HostNameCIAfterSchoolHQ = "ci.afterschoolhq.com";
-            Utilities.HostNameQAAfterSchoolHQ = "qa.afterschoolhq.com";
-            Utilities.HostNameLocalAfterSchoolHQ = "localhost:54849";
 
             Utilities.AppNameAfterSchoolHQ = "AfterSchool HQ";
             Utilities.AppNameEnrollHQ = "Enroll HQ";
@@ -1764,42 +1732,16 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static string AmazonBucketNameProduction { get; set; }
-        public static string AmazonBucketNameTest { get; set; }
-        public static string AmazonBucketNameStaging { get; set; }
-        public static string AmazonBucketNameCI { get; set; }
-        public static string AmazonBucketNameQA { get; set; }
-        public static string AmazonBucketNameLocal { get; set; }
         public static Amazon.RegionEndpoint AmazonRegionEndPoint { get; set; }
 
         public static string AmazonBucketName
         {
             get
             {
-                if (Utilities.IsProduction)
-                {
-                    return AmazonBucketNameProduction;
-                }
-                else if (Utilities.IsStaging)
-                {
-                    return AmazonBucketNameStaging;
-                }
-                else if (Utilities.IsQA)
-                {
-                    return AmazonBucketNameQA;
-                }
-                else if (Utilities.IsTest)
-                {
-                    return AmazonBucketNameTest;
-                }
-                else if (Utilities.IsCI)
-                {
-                    return AmazonBucketNameCI;
-                }
-                else
-                {
-                    return AmazonBucketNameLocal;
-                }
+                if (Utilities.IsLocalHost)
+                    return "afterschoolhq-local";
+
+                return ConfigurationManager.AppSettings["AmazonBucketName"];
             }
         }
     }
@@ -1811,9 +1753,9 @@ namespace AfterSchoolLibrary
             return $"{Utilities.BaseUrl(isAfterSchool)}/";
         }
 
-        public static string HostName(bool isAfterSchool)
+        public static string HostName()
         {
-            return Utilities.HostName(isAfterSchool);
+            return Utilities.HostName;
         }
 
         public static System.Net.Mail.MailAddress AppFromAddress(bool isAfterSchool)
@@ -1832,9 +1774,9 @@ namespace AfterSchoolLibrary
             }
         }
 
-        public static string AppSupportEmailAddress(bool isAfterSchool)
+        public static string AppSupportEmailAddress()
         {
-            return "support@" + HostName(isAfterSchool);
+            return "support@" + Utilities.HostName;
         }
 
         public static string AppEmailAddress

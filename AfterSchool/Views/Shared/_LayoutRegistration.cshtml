@@ -6,6 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href="/assets/img/favicon.png">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&amp;subset=cyrillic,cyrillic-ext,latin-ext,vietnamese" rel="stylesheet">
     <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
     <title>@ViewBag.Title - @UILabel.ProductName()</title>
 
@@ -17,6 +18,14 @@
     @Html.Raw(SessionVariables.CurrentAccount?.GetAccountProperty(AccountPropertyType.FacebookAdPixel)?.Value)
     @RenderSection("fbadevents", required: false)
 
+    <style>
+        .layout-footer a {
+            color: #fff;
+            font-weight: 300;
+            font-style: italic;
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
 </head>
 
 
@@ -27,9 +36,16 @@
         </div>
     </div>
 
-    <div id="layout-footer">
-        <a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank"><img src="/assets/img/powered-by.png" alt="Powered by AfterSchool" height="50" /></a>
-        @Html.Raw(AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: SessionVariables.IsAfterSchool.Value, utm_medium: "website", utm_campaign: "registration"))
+    <div class="layout-footer text-center">
+        <div class="container-footer" style="background: #212a2d">
+            <div class="row" style="padding: 20px">
+                <ul class="list-inline last-icon-ul">
+                    <li><a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank">AfterSchool HQ was created</a></li>
+                    <li><a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank"><img src="/assets/img/footer-copy-right-img.png" style="max-width: 60px"></a></li>
+                    <li><a href="https://afterschoolhq.com/?utm_source=app&utm_medium=registration" target="_blank">with love in Fishers, IN.</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     @{Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml");}

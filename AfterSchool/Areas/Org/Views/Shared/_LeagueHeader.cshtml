@@ -15,7 +15,7 @@
         publishClass = "btn-success";
     }
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
-    var activityCount = Model.GetActivityCount(null, null, false);
+    var activityCount = Model.GetActivityCount(null, null, false, null);
 }
 @if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0)
 {

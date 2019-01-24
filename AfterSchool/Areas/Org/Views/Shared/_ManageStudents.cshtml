@@ -47,7 +47,7 @@
                                     <input type="checkbox" id="registrant-@registrant.ID" name="registrant-@registrant.ID" value="1" />
                                     <label for="registrant-@registrant.ID">
                                         @registrant.DisplayName
-                                        @if (activity.IsNotEmpty())
+                                        @if (activity.IsNotEmpty() && !activity.IsDeleted)
                                         {
                                             <span>(@activity.Name)</span>
                                         }

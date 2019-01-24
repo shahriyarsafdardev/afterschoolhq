@@ -4,6 +4,7 @@ using Stripe;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Configuration;
 
 namespace AfterSchoolLibrary.Billing
 {
@@ -11,11 +12,11 @@ namespace AfterSchoolLibrary.Billing
     {
         private static string TestSecretKey { get { return "sk_test_gfeMjl5rgl16L1HHITh3YT5s"; } }
         private static string TestPublishableKey { get { return "pk_test_wuL50O8i1mAzrmV2xDAXuClJ"; } }
-        private static string LiveSecretKey { get { return "sk_live_SDa559erkpDCJ9BkrPS58GrC"; } }
-        private static string LivePublishableKey { get { return "pk_live_4q5JuU2JIxsjWfQauJ7bNISK"; } }
-
         private static string DevPlatformClientId { get { return "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv"; } }
-        private static string LivePlatformClientId { get { return "ca_7kmNqL4oMYfH5z7tY2N9riALjFpkMJAQ"; } }
+
+        private static string LiveSecretKey { get { return ConfigurationManager.AppSettings["Stripe.LiveSecretKey"]; } }
+        public static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Stripe.LivePublishableKey"]; } }
+        private static string LivePlatformClientId { get { return ConfigurationManager.AppSettings["Stripe.LivePlatformClientId"]; } }
 
         public static string SecretKey
         {

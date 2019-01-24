@@ -66,7 +66,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private void SendLogEmail(SystemMessages msgs)
         {
             string toEmail = "darye+stripe+errors@afterschoolhq.com";
-            string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Utilities.HostName(true)}";
+            string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Utilities.HostName}";
             string body = msgs.RenderMessageList(MessageOutputType.Html);
 
             EmailHelper.SendEmail(toEmail, subject, body, true);

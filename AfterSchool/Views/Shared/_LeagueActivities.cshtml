@@ -86,14 +86,18 @@ else
         <p></p>
     }
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="pull-right">
-                <a href="@currentListUrl" class="@currentClass">Current</a> |
-                <a href="@archivedListUrl" class="@archiveClass">Archived</a>
+    if (hasArchivedActivities)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pull-right">
+                    <a href="@currentListUrl" class="@currentClass">Current</a> |
+                    <a href="@archivedListUrl" class="@archiveClass">Archived</a>
+                </div>
             </div>
         </div>
-    </div>
+    }
+
 
     <div class="table-responsive">
         <table class="table table-hover">
@@ -145,7 +149,7 @@ else
                                     @if (activity.WaitingListSeats.HasValue)
                                     {
                                         <span>
-                                            @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList) / 
+                                            @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList) /
                                             @activity.WaitingListSeats
                                         </span>
                                     }
@@ -165,18 +169,18 @@ else
 
                                     @if (activity.DateSubmittedToActivityGroup.IsEmpty())
                                     {
-                                    
-                                            <button class="md-trigger btn btn-default btn-sm" data-modal="modal-submit-to-district"
-                                                    onclick="submitToDistrict('@activity.Name', '@Url.Action("submitToDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>
-                                                <i class="s7-copy-file"></i> Submit to District
-                                            </button>
+
+                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-submit-to-district"
+                                                onclick="submitToDistrict('@activity.Name', '@Url.Action("submitToDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>
+                                            <i class="s7-copy-file"></i> Submit to District
+                                        </button>
                                     }
-                                    else if(activity.HasNoTeamMatches())
+                                    else if (activity.HasNoTeamMatches())
                                     {
-                                            <button class="md-trigger btn btn-default btn-sm" data-modal="modal-withdraw-from-district"
-                                                    onclick="withdrawFromDistrict('@activity.Name', '@Url.Action("withdrawFromDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>
-                                                <i class="s7-junk"></i> Withdraw From District
-                                            </button>
+                                        <button class="md-trigger btn btn-default btn-sm" data-modal="modal-withdraw-from-district"
+                                                onclick="withdrawFromDistrict('@activity.Name', '@Url.Action("withdrawFromDistrict", "league", new { id = activity.Uid.ToString() , pn = paging.PageNumber.ToString(), rpp = paging.RecordsPerPage.ToString(), archive = "0" })')" )>
+                                            <i class="s7-junk"></i> Withdraw From District
+                                        </button>
                                     }
 
                                     <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@activity.Name', '@Url.Action("delete", "leagueactivity", new { id = activity.Uid.ToString() })')">

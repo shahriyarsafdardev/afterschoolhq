@@ -229,7 +229,7 @@ namespace AfterSchoolLibrary
                 { "ProductName", Utilities.AppName(isAfterSchool) },
                 { "ResetPasswordLink", $"{Email.BaseUrl(isAfterSchool)}login/changepassword/?token={token.Uid.ToString()}" },
                 { "ExpiresInDays", (token.ExpireDate.Value.Date - DateTime.UtcNow.Date).Days.ToString() },
-                { "SupportEmail", Email.AppSupportEmailAddress(isAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress() },
             };
 
             var body = ProcessTemplate(
@@ -373,7 +373,7 @@ namespace AfterSchoolLibrary
                 { "FirstName", user.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
                 { "VerificationLink", $"{Email.BaseUrl(isAfterSchool)}signup/verify/{user.Uid.ToString()}" },
-                { "SupportEmail", Email.AppSupportEmailAddress(isAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress() },
             };
 
             var body = ProcessTemplate(
@@ -445,7 +445,7 @@ namespace AfterSchoolLibrary
             {
                 { "FirstName", user.FirstName },
                 { "ProductName", Utilities.AppName(account.IsAfterSchool) },
-                { "SupportEmail", Email.AppSupportEmailAddress(account.IsAfterSchool) }
+                { "SupportEmail", Email.AppSupportEmailAddress() }
             };
 
             var body = ProcessTemplate(
@@ -489,7 +489,7 @@ namespace AfterSchoolLibrary
             {
                 { "FirstName", invitedUser.FirstName },
                 { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
-                { "SupportEmail", Email.AppSupportEmailAddress(invitedAccount.IsAfterSchool) },
+                { "SupportEmail", Email.AppSupportEmailAddress() },
                 { "InviteUrl", invitedUser.GetInviteUrl(invitedAccount) },
                 { "CustomMessage", customMessage }
             };
