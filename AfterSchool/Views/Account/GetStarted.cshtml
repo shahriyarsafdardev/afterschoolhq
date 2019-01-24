@@ -62,7 +62,7 @@
                                 <div class="row">
                                     <div class="col-md-6 col-md-offset-3">
                                         <div class="am-checkbox text-center">
-                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" ? " checked=\"checked\" " : "") />
+                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
                                             <label for="textnotifications">
                                                 I would like to receive text messages about my student&#39;s activities&#46;
                                                 Notifications may include information about attendance&#44; reminders&#44; and important information&#46;

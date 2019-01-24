@@ -117,7 +117,7 @@ else
                     {
                         var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
                         var regCount = aag.IsEmpty() ? group.GetRegistrationCount() : aag.GetRegistrationCount();
-                        var activityCount = aag.IsEmpty() ? group.GetActivityCount(null, isArchive, false) : aag.GetActivityCount(null, isArchive, false);
+                        var activityCount = aag.IsEmpty() ? group.GetActivityCount(null, isArchive, false, true) : aag.GetActivityCount(null, isArchive, false);
                         var period = group.GetLatestRegistrationPeriod();
 
                         <tr>

@@ -16,7 +16,7 @@
 
         <div class="panel-body">
 
-            <form class="form-horizontal" method="post" action="@Url.Action("invite", "school")">
+            <form class="form-horizontal" id="invitation-form" method="post" action="@Url.Action("invite", "school")">
 
                 <div class="form-group">
                     <div class="col-sm-3 control-label">
@@ -67,7 +67,7 @@
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
                         <button type="reset" class="btn btn-default" onclick="location.href='@Url.Action("index", "school")'">Cancel</button>
-                        <button type="submit" class="btn btn-primary pull-right"><i class="s7-paper-plane"></i> Send Invite</button>
+                        <button type="submit" id="submit-btn" class="btn btn-primary pull-right"><i class="s7-paper-plane"></i> Send Invite</button>
                     </div>
                 </div>
             </form>
@@ -75,4 +75,11 @@
     </div>
 </div>
 
-
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $("#invitation-form").submit(function (e) {
+            //disable the submit button
+            $("#submit-btn").attr("disabled", true);
+        });
+    });
+</script>

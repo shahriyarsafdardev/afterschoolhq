@@ -488,6 +488,7 @@
     <Content Include="Assets\img\enroll-logo.png" />
     <Content Include="Assets\img\fb-icon.png" />
     <Content Include="Assets\img\fl-icon.png" />
+    <Content Include="Assets\img\footer-copy-right-img.png" />
     <Content Include="Assets\img\gh-icon.png" />
     <Content Include="Assets\img\github.png" />
     <Content Include="Assets\img\gp-icon.png" />

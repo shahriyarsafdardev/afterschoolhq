@@ -7,7 +7,7 @@
     decimal totalPaid = 0;
     int registrationCount = registrations.Count();
     var inviteCount = Model.GetLeagueInviteCount();
-    var teamCount = Model.GetActivityCount(null, false, false);
+    var teamCount = Model.GetActivityCount(null, false, false, true);
 
     if (registrations.Where(x => x.DatePaid.HasValue).Any())
     {
