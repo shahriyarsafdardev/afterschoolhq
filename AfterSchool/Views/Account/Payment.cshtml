@@ -117,7 +117,7 @@
                                     {
                                         <span id="subscription-total-value" class="hide">0</span>
                                     }
-                                    <tr>
+                                    @*<tr>
                                         <td>
                                             Coupon
                                         </td>
@@ -125,7 +125,7 @@
                                             <input type="text" id="coupon-code" class="form-control" value="" />
                                             <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
                                         </td>
-                                    </tr>
+                                    </tr>*@
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -189,7 +189,7 @@
                             <p class="text-center text-large">Pay with a new card</p>
                             <form action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="payment-form" class="form-horizontal">
                                 <input type="hidden" name="paymentoption" id="paymentoption-new" class="payment-option" value="0" />
-                                <input type="hidden" name="coupon" class="coupon" value="" />
+                                @*<input type="hidden" name="coupon" class="coupon" value="" />*@
                                 <div class="form-group">
                                     <label for="card-element">
                                         Credit or debit card

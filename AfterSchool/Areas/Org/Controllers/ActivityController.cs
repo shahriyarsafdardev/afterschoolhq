@@ -1228,7 +1228,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            return View(registrantActivity);
+
+            return View("registrantdetail", registrantActivity);
         }
 
         [HttpPost]

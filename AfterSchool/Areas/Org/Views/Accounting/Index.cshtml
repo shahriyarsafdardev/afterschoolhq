@@ -116,7 +116,7 @@
                             <th>Total Paid</th>
                             <th>Platform Fee</th>
                             <th>Payout</th>
-                            <th>Refund</th>
+                            @*<th>Refund</th>*@
                         </tr>
                     </thead>
                     <tbody>
@@ -162,7 +162,7 @@
                             <td>
                                 @transaction.GetPayout().ToCurrency()
                             </td>
-                            <td>
+                            @*<td>
                                 @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
                                 {
                                     <button onclick="openDialog('@transaction.Uid')"
@@ -171,7 +171,7 @@
                                         Refund
                                     </button>
                                 }
-                            </td>
+                            </td>*@
                         </tr>
                             }
                         }
