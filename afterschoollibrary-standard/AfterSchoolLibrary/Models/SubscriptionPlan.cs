@@ -285,7 +285,6 @@ namespace AfterSchoolLibrary.Models
                 BillingPeriodTypeId = this.BillingPeriodTypeId,
                 DoesAutoRenew = this.DoesAutoRenew,
                 IsActive = this.IsActive,
-                StripePlanId = this.StripePlanId,
                 PlanTypeId = this.PlanTypeId,
                 TotalPeriods = this.TotalPeriods
             };
@@ -306,7 +305,7 @@ namespace AfterSchoolLibrary.Models
                    copy.CreatedBy = loggedInUserId;
                    copy.LastModifiedDate = DateTime.UtcNow;
                    copy.LastModifiedBy = loggedInUserId;
-                   amsgs.AddRange(copy.Save(adc));
+                   amsgs.AddRange(copy.SaveWithStripe(adc));
                },
                onSuccess: (SystemMessages smsgs) =>
                {
@@ -344,7 +343,7 @@ namespace AfterSchoolLibrary.Models
                 name = activity.Name;
                 uniqueName = activity.UniqueName;
             }
-            else
+            else if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
             {
                 var activityGroup = this.GetActivityGroup(msgs, dc);
                 account = activityGroup.GetAccount(msgs, dc);
@@ -352,12 +351,16 @@ namespace AfterSchoolLibrary.Models
                 name = activityGroup.Name;
                 uniqueName = activityGroup.UniqueName;
             }
+            else
+            {
+                msgs.Add("Invalid Object Type", MessageType.Error);
+                return msgs;
+            }
 
             // do stripe
-            Stripe.StripeProduct product = Billing.StripeHelper.GetProduct(uid, account.StripeUserId, msgs);
+            var product = Billing.StripeHelper.GetProduct(uid, account.StripeUserId, msgs);
 
             if (product.IsEmpty())
-            {
                 product = Billing.StripeHelper.CreateProduct(
                     uid,
                     name,
@@ -365,7 +368,6 @@ namespace AfterSchoolLibrary.Models
                     this.IsActive,
                     account.StripeUserId,
                     msgs);
-            }
 
             if (msgs.HasErrors())
                 return msgs;
