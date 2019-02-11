@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used when an external account is invited to add an activity or team to another account's session or league
@@ -324,7 +324,7 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public ParticipationObject ToParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return new ParticipationObject(this, msgs, dc);
         }

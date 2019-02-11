@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Either a Session or a League. This object has many Activities or Teams.
@@ -331,7 +331,7 @@ namespace AfterSchoolLibrary
 
         public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return $"{Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName}";
+            return $"{Helpers.Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityGroupTypeId.ToString().ToLower()}/{this.UniqueName}";
         }
 
         public string HomePageUrl
@@ -359,8 +359,6 @@ namespace AfterSchoolLibrary
                 return IsPublished && !IsArchived;
             }
         }
-
-        public bool ScheduleRequiresAllDays { get; private set; }
 
         public SystemMessages SetIsPublished(bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
         {
@@ -700,200 +698,7 @@ namespace AfterSchoolLibrary
                 return this.GetCurrentRegistrationPeriod(dc: dc).EndDateTime.Value - DateTime.UtcNow;
 
             return new TimeSpan();
-        }
-
-        internal static ActivityGroup SaveActivityGroup(WebUser loggedInUser, Account account, ActivityGroupType activityGroupType, string activityGroupUid, Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var name = values.GetValueOrDefault("name");
-            var regmode = values.GetValueOrDefault("regmode");
-            var form = values.GetValueOrDefault("form");
-            var description = values.GetValueOrDefault("description");
-            var isinviteonly = values.GetValueOrDefault("isinviteonly");
-            var maxgradeid = values.GetValueOrDefault("maxgrade");
-            var mingradeid = values.GetValueOrDefault("mingrade");
-            var genderrestrictions = values.GetValueOrDefault("genderrestrictions");
-            var daysoftheweek = values.GetValueOrDefault("daysoftheweek");
-            var repeatsweekly = values.GetValueOrDefault("repeatsweekly");
-            var startdate = values.GetValueOrDefault("startdate");
-            var enddate = values.GetValueOrDefault("enddate");
-            var dailystarttime = values.GetValueOrDefault("dailystarttime");
-            var dailyendtime = values.GetValueOrDefault("dailyendtime");
-            var scheduledetails = values.GetValueOrDefault("scheduledetails");
-            var scheduledates = values.GetValueOrDefault("scheduledates");
-            var scheduledatesClosed = values.GetValueOrDefault("scheduledatesclosed");
-            var schedule = values.GetValueOrDefault("schedule");
-            var isongoing = values.GetValueOrDefault("isongoing");
-
-            if (name.IsEmpty())
-                msgs.Add("Label is required", MessageType.UserError);
-            else if (ActivityGroup.ExistsByAccountIdByName(account.ID.Value, name.ToString(), activityGroupUid.ToGuid()))
-                msgs.Add("Label is already in use", MessageType.UserError);
-
-            if (regmode.IsEmpty())
-                msgs.Add("Registration Mode is required", MessageType.UserError);
-
-            if (activityGroupType == ActivityGroupType.Session && form.IsEmpty())
-                msgs.Add("Form is required", MessageType.UserError);
-
-            var group = ActivityGroup.LoadByUid(activityGroupUid.ToGuid(), msgs, dc);
-            var isNew = false;
-            if (group.IsEmpty())
-            {
-                group = new ActivityGroup();
-                group.CreateDate = DateTime.UtcNow;
-                group.CreatedBy = loggedInUser.ID;
-                group.Uid = activityGroupUid.ToGuid();
-                group.ActivityGroupTypeId = activityGroupType;
-                isNew = true;
-            }
-
-            if (name.IsNotEmpty())
-                group.Name = name.ToString().MaxChars(50);
-
-            if (description.IsNotEmpty())
-                group.Description = description.ToString().MaxChars(400);
-
-            if (regmode.IsNumber())
-                group.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
-
-            if (form.IsNumber())
-                group.FormId = form.ToString().ToInteger();
-
-            if (group.ActivityGroupTypeId == ActivityGroupType.League)
-            {
-                if (maxgradeid.IsNumber())
-                    group.MaxGradeLevelId = maxgradeid.ToString().ToInteger();
-
-                if (mingradeid.IsNumber())
-                    group.MinGradeLevelId = mingradeid.ToString().ToInteger();
-
-                if (genderrestrictions.IsNumber())
-                    group.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
-            }
-
-            group.IsInviteOnly = false;
-            if (isinviteonly.IsNotEmpty())
-                group.IsInviteOnly = isinviteonly.ToString().ToBoolean();
-
-            if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        if (form.IsNotEmpty())
-                        {
-                            if (form.ToString().ToInteger() == 0)
-                            {
-                                var defaultForm = account.GetOrCreateDefaultForm(loggedInUser, amsgs, adc);
-                                var newForm = defaultForm.Copy(
-                                    loggedInUser.ID.Value, 
-                                    account.ID.Value, 
-                                    (group.Name + " Form").MaxChars(100, "..."), 
-                                    amsgs, 
-                                    adc);
-                                group.FormId = newForm.ID;
-                            }
-                            else
-                            {
-                                group.FormId = form.ToString().ToInteger();
-                            }
-                        }
-
-                        group.AccountId = account.ID;
-
-                        if (isNew)
-                            group.UniqueName = ActivityGroup.GenerateUniqueName(group.Name, group.ID, group.AccountId, amsgs, adc);
-
-                        group.LastModifiedDate = DateTime.UtcNow;
-                        group.LastModifiedBy = loggedInUser.ID;
-                        amsgs.AddRange(group.Save(adc));
-                        
-                        group.GetActivities(null, false, false, null, null, false, amsgs, adc)
-                        .ForEach(activity => {
-                            activity.RegistrationModeId = group.RegistrationModeId;
-                            activity.GenderRestriction = group.GenderRestriction;
-                            activity.GradeLevelStart = group.MinGradeLevelId;
-                            activity.GradeLevelEnd = group.MaxGradeLevelId;
-                            amsgs.AddRange(activity.Save(adc));
-                        });
-
-                        if (isNew)
-                        {
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, "Please register below.", loggedInUser.ID.Value, amsgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, "Thank you for registering.", loggedInUser.ID.Value, amsgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, "Thank you for applying.", loggedInUser.ID.Value, amsgs, adc);
-                            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, "Registration is now closed.", loggedInUser.ID.Value, amsgs, adc);
-                        }
-
-                        // setup schedule
-                        if (amsgs.HasNoErrors() && (schedule.IsNotEmpty() || scheduledates.IsNotEmpty()))
-                        {
-                            amsgs.AddRange(group.SetupSchedule(
-                                account,
-                                schedule.IfEmpty(""),
-                                (List<DateRange>)scheduledates,
-                                (List<DateTime>)scheduledatesClosed,
-                                scheduledetails.IfEmpty(""),
-                                repeatsweekly.IfEmpty(""),
-                                startdate.IfEmpty(""),
-                                enddate.ToString(),
-                                dailystarttime.IfEmpty(""),
-                                dailyendtime.IfEmpty(""),
-                                isongoing.IfEmpty(""),
-                                loggedInUser.ID.Value,
-                                adc));
-                        }
-
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    },
-                    dc: dc
-                );    
-            }
-
-            return group;
-        }
-
-         private SystemMessages SetupSchedule(Account account, string schedule, List<DateRange> scheduledates, List<DateTime> scheduledatesclosed, string scheduledetails, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            this.ScheduleRequiresAllDays = true;
-
-            var newSchedule = Services.ActivityScheduleService.SetupSchedule(
-                 this.AccountId.Value,
-                 schedule.IfEmpty("0").ToInteger(),
-                 $"{this.Name} - Schedule",
-                 scheduledetails.ToString(),
-                 repeatsweekly.ToString(),
-                 isongoing.ToString(),
-                 startdate.ToString(),
-                 enddate.ToString(),
-                 dailystarttime.ToString(),
-                 dailyendtime.ToString(),
-                 scheduledates,
-                 scheduledatesclosed,
-                 account,
-                 this.ID,
-                 loggedInUserId,
-                 msgs,
-                 dc);
-
-            this.ActivityScheduleId = newSchedule.ID;
-
-            msgs.AddRange(this.Save(dc));
-
-            return msgs;
-        }
+        }        
 
         public AccountProperty AddOrUpdateGroupProperty(AccountPropertyType type, string value, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -1025,77 +830,6 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages EmailInvitedContacts(int id, int periodId, List<int> contactIds, string emailmessage, string inviteUrl, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var group = ActivityGroup.Load(id, dc: dc);
-            var account = group.GetAccount(dc: dc);
-            var period = RegistrationPeriod.Load(periodId, dc: dc);
-            var loggedInUser = WebUser.Load(loggedInUserId, dc: dc);
-            var contacts = Registrant.LoadList(contactIds, dc: dc);
-
-            if (contacts.IsNotEmpty() && contacts.Any())
-            {
-                var subject = "";
-                var body = "";
-
-                subject = string.Format("You have been invited to register for {0}", group.Name);
-
-                var regOpenText = "";
-                if (period.IsNotEmpty())
-                {
-                    if (period.IsOpen(dc: dc))
-                        regOpenText = "Registration is open now.";
-                    else if (group.WillOpen(dc: dc))
-                        regOpenText = "Registration will open " + period.StartDateTime.ToShortDateString() + ".";
-                }
-
-                var acceptInviteText = "To accept this invite and register, please click the following link: <a href=\"{0}\">{0}</a>";
-                var declineInviteText = "<p>To decline this invite, please click the following link: <a href=\"{0}\">{0}</a></p>";
-                var userSignature = string.Format("<p>Regards,<br />{0}</p>", loggedInUser.DisplayName);
-                var declineUrl = "";
-
-                body = "{0}{1}<p>{2} {3}</p>{4}{5}{6}";
-
-                contacts.ForEach(contact => {
-                    var finalInviteUrl = inviteUrl;
-                    var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(group.ID.Value, contact.ID.Value, dc: dc);
-
-                    var salutation = "<p>Hello,</p>";
-                    if (contact.FirstName.IsNotBlank())
-                        salutation = string.Format("<p>Hello {0},</p>", contact.FirstName);
-
-                    finalInviteUrl += (finalInviteUrl.Contains("?") ? "&" : "?") + "invite=" + rag.Uid.ToString();
-                    declineUrl = finalInviteUrl + "&declined=1";
-
-                    var acceptInviteTextWithLink = string.Format(acceptInviteText, finalInviteUrl);
-                    var declineInviteTextWithLink = string.Format(declineInviteText, declineUrl);
-
-                    SendGridHelper.SendMail(
-                        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                            Email.AppEmailAddress,
-                            string.Format("{0} via {1}", account.Name,
-                            Utilities.AppName(account.IsAfterSchool))),
-                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(contact.Email, contact.Name),
-                        subject: subject,
-                        body: string.Format(
-                            body,
-                            salutation,
-                            emailmessage,
-                            regOpenText,
-                            acceptInviteTextWithLink,
-                            declineInviteTextWithLink,
-                            userSignature,
-                            Email.GetAppSignature(account.IsAfterSchool, "invite_contacts")),
-                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                    );
-                });
-            }
-
-            return msgs;
-        }
-
         public List<RegistrantActivityGroup> GetInvitedContacts(int? start, int? length, DatabaseConnection dc = null)
         {
             return RegistrantActivityGroup.LoadByActivityGroupId(this.ID.Value, start, length, dc: dc);
@@ -1107,98 +841,6 @@ namespace AfterSchoolLibrary
                     criterias: new Hashtable() { { "ActivityGroupId", this.ID.Value } },
                     dc: dc
                 ); 
-        }
-
-        //public static SystemMessages SendRegistrationConfirmations(int id, List<Registration> registrations = null, DatabaseConnection dc = null)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var group = ActivityGroup.Load(id, dc: dc);
-
-        //    if (registrations.IsEmpty())
-        //        registrations = group.GetRegistrations(dc: dc);
-
-        //    var firstReg = registrations.First();
-
-        //    // send one bcc for first reg
-        //    registrations.ForEach(reg => msgs.AddRange(Registration.SendConfirmation(reg.ID.Value, firstReg.ID == reg.ID, null)));
-
-        //    return msgs;
-        //}
-
-        public ActivityGroup Copy(string newName, bool useSameForm, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            ActivityGroup group = null;
-
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    // copy group
-                    group = new ActivityGroup
-                    {
-                        AccountId = this.AccountId,
-                        CreateDate = DateTime.UtcNow,
-                        LastModifiedDate = DateTime.UtcNow,
-                        CreatedBy = loggedInUserId,
-                        LastModifiedBy = loggedInUserId,
-                        Description = this.Description,
-                        FormId = this.FormId,
-                        IsArchived = this.IsArchived,
-                        IsInviteOnly = this.IsInviteOnly,
-                        IsPublished = false,
-                        Name = newName,
-                        RegistrationModeId = this.RegistrationModeId,
-                        UniqueName = ActivityGroup.GenerateUniqueName(newName, null, this.AccountId, amsgs, adc),
-                        ActivityGroupTypeId = this.ActivityGroupTypeId,
-                        ActivityScheduleId = this.ActivityScheduleId,
-                        GenderRestriction = this.GenderRestriction,
-                        MaxGradeLevelId = this.MaxGradeLevelId,
-                        MinGradeLevelId = this.MinGradeLevelId
-                    };
-                    msgs.AddRange(group.Save(adc));
-
-                    // copy AccountProperties / Content
-                    this.GetGroupProperties(adc).ForEach(item => {
-                        var newprop = new AccountProperty();
-                        newprop.AccountPropertyTypeId = item.AccountPropertyTypeId;
-                        newprop.ActivityGroupId = group.ID;
-                        newprop.CreateDate = newprop.LastModifiedDate = DateTime.UtcNow;
-                        newprop.CreatedBy = newprop.LastModifiedBy = loggedInUserId;
-                        newprop.Value = item.Value;
-                        msgs.AddRange(newprop.Save(adc));
-                    });
-
-                    // activities
-                    this.GetActivities(amsgs, adc).ForEach(activity => {
-                        var newact = activity.Copy(activity.Name, true, loggedInUserId, amsgs, dc: adc);
-                        newact.ActivityGroupId = group.ID;
-                        newact.ActivityScheduleId = null;
-                        newact.IsPublished = true;
-                        msgs.AddRange(newact.Save(adc));
-                    });
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                dc: dc
-            );
-
-            return group;
-        }
-
-        public static ActivityGroup SaveSession(WebUser loggedInUser, Account account, string activityGroupUid, Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return SaveActivityGroup(loggedInUser, account, ActivityGroupType.Session, activityGroupUid, values, msgs, dc);
-        }
-
-        public static ActivityGroup SaveLeague(WebUser loggedInUser, Account account, string activityGroupUid, Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return SaveActivityGroup(loggedInUser, account, ActivityGroupType.League, activityGroupUid, values, msgs, dc);
         }
         
         private ActivitySchedule _Schedule = null;
@@ -1218,7 +860,7 @@ namespace AfterSchoolLibrary
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public ParticipationObject ToParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return new ParticipationObject(this, msgs, dc);
         }

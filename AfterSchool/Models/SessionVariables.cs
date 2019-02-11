@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using AfterSchoolLibrary;
+﻿using System.Web;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
 namespace AfterSchool.Models

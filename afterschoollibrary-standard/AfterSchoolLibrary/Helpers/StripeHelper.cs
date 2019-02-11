@@ -4,7 +4,8 @@ using Stripe;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Configuration;
+using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibrary.Billing
 {
@@ -12,52 +13,40 @@ namespace AfterSchoolLibrary.Billing
     {
         private static string TestSecretKey { get { return "sk_test_gfeMjl5rgl16L1HHITh3YT5s"; } }
         private static string TestPublishableKey { get { return "pk_test_wuL50O8i1mAzrmV2xDAXuClJ"; } }
-        private static string DevPlatformClientId { get { return "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv"; } }
+        private static string LiveSecretKey { get { return "sk_live_SDa559erkpDCJ9BkrPS58GrC"; } }
+        private static string LivePublishableKey { get { return "pk_live_4q5JuU2JIxsjWfQauJ7bNISK"; } }
 
-        private static string LiveSecretKey { get { return ConfigurationManager.AppSettings["Stripe.LiveSecretKey"]; } }
-        public static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Stripe.LivePublishableKey"]; } }
-        private static string LivePlatformClientId { get { return ConfigurationManager.AppSettings["Stripe.LivePlatformClientId"]; } }
+        private static string DevPlatformClientId { get { return "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv"; } }
+        private static string LivePlatformClientId { get { return "ca_7kmNqL4oMYfH5z7tY2N9riALjFpkMJAQ"; } }
 
         public static string SecretKey
         {
             get
             {
-                if(Utilities.IsProduction)
-                {
+                if(Helpers.Utilities.IsProduction)
                     return LiveSecretKey;
-                }
-                else
-                {
-                    return TestSecretKey;
-                }
+
+                return TestSecretKey;
             }
         }
         public static string PublishableKey
         {
             get
             {
-                if (Utilities.IsProduction)
-                {
+                if (Helpers.Utilities.IsProduction)
                     return LivePublishableKey;
-                }
-                else
-                {
-                    return TestPublishableKey;
-                }
+
+                return TestPublishableKey;
             }
         }
         public static string PlatformClientId
         {
             get
             {
-                if (Utilities.IsProduction)
-                {
+                if (Helpers.Utilities.IsProduction)
                     return LivePlatformClientId;
-                }
-                else
-                {
-                    return DevPlatformClientId;
-                }
+
+                return DevPlatformClientId;
             }
         }
 
@@ -744,7 +733,7 @@ namespace AfterSchoolLibrary.Billing
             return new StripeSubscriptionService(StripeAccessToken);
         }
 
-        public static StripeSubscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, SystemMessages msgs)
+        public static StripeSubscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -756,7 +745,9 @@ namespace AfterSchoolLibrary.Billing
                 Billing = StripeBilling.ChargeAutomatically,
                 TrialEnd = trialEndDate,
                 ApplicationFeePercent = platformFeePercent * 100, // convert to integer
-                Source = sourceId
+                Source = sourceId,
+                CouponId = stripeCouponId,
+                
             };
 
             var requestOptions = new Stripe.StripeRequestOptions();
@@ -783,9 +774,9 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="plan"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static StripeSubscription CreateSubscription(StripeCustomer customer, StripePlan plan, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, SystemMessages msgs)
+        public static StripeSubscription CreateSubscription(StripeCustomer customer, StripePlan plan, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
         {
-            return CreateSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, trialEndDate, stripeAccountId, msgs);
+            return CreateSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, trialEndDate, stripeAccountId, stripeCouponId, msgs);
         }
 
         public static StripeSubscription UpdateSubscription(string subscriptionId, string newPlanId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, bool? endTrialNow, bool? prorate, string stripeAccountId, SystemMessages msgs)
@@ -1237,6 +1228,32 @@ namespace AfterSchoolLibrary.Billing
             return new StripeRefundService(StripeAccessToken);
         }
 
+        public static StripeRefund CreateRefund(string chargeId, decimal totalAmount, string reason, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new StripeRefundCreateOptions
+            {
+                Amount = (totalAmount * 100).ToInteger(),
+                Reason = reason,
+                ReverseTransfer = true
+            };
+
+            StripeRefund refund = null;
+
+            try
+            {
+                refund = GetRefundService().Create(chargeId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Error refunding", MessageType.UserError);
+            }
+
+            return refund;
+        }
+
         public static List<StripeRefund> GetRefunds(string chargeId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1257,6 +1274,63 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return refunds;
+        }
+
+        #endregion
+
+        #region StripeCoupons
+
+        private static StripeCouponService GetCouponService()
+        {
+            return new StripeCouponService(StripeAccessToken);
+        }
+
+        public static StripeCoupon CreateCoupon(decimal discountValue, string stripeAccountId, CouponAmountType amountType, StripeCouponDuration couponDuration, int? durationInMonths, SystemMessages msgs)
+        {
+            return CreateCoupon(discountValue, couponDuration, durationInMonths, amountType, stripeAccountId, msgs);
+        }
+
+        public static StripeCoupon CreateCoupon(decimal discountValue, StripeCouponDuration couponDuration, int? durationInMonths, CouponAmountType couponAmountType, string stripeAccountId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new StripeCouponCreateOptions();
+
+            if (couponDuration == StripeCouponDuration.Repeating)
+            {
+                options.DurationInMonths = durationInMonths;
+                options.Duration = StripeCouponDuration.Repeating.ToString().ToLower();
+            }
+            else
+                options.Duration = StripeCouponDuration.Forever.ToString().ToLower();
+
+            var value = (discountValue * 100).ToInteger();
+
+            if (couponAmountType == CouponAmountType.FlatAmount)
+            {
+                options.AmountOff = value;
+                options.Currency = "USD";
+            }
+            else
+                options.PercentOff = value;
+
+            var requestOptions = new Stripe.StripeRequestOptions();
+            if (stripeAccountId.IsNotEmpty())
+                requestOptions.StripeConnectAccountId = stripeAccountId;
+
+            StripeCoupon coupon = null;
+
+            try
+            {
+                coupon = GetCouponService().Create(options, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Coupon was not created", MessageType.UserError);
+            }
+
+            return coupon;
         }
 
         #endregion
@@ -1300,5 +1374,28 @@ namespace AfterSchoolLibrary.Billing
     {
         Individual,
         Company
+    }
+
+    // Specifies how long the discount will be in effect
+    public enum StripeCouponDuration
+    {
+        Forever,
+        Once,
+        Repeating
+    }
+
+    enum StripeRefundReason
+    {
+        Duplicate,
+        Fraudulent,
+        RequestedByCustomer
+    }
+
+    public enum StripeRefundStatus
+    {
+        Succeeded,
+        Failed,
+        Pending,
+        Canceled
     }
 }

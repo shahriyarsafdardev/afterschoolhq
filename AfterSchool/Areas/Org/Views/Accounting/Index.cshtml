@@ -1,10 +1,10 @@
-﻿@model List<AfterSchoolLibrary.Transaction>
+﻿@model List<Transaction>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var transactionCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
-    var totalTransactionAmount = Model.Sum(transaction => transaction.Amount.Value);
+    var totalTransactionAmount = (decimal)ViewBag.TotalAmountPaid;
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
-    var totalFees = Model.Sum(transaction => (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value);
+    var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalTransactionAmount - totalFees;
 }
 
@@ -22,12 +22,11 @@
         </div>
 
         <div class="panel-body">
-
             <div class="row">
                 <div class="col-md-3">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
+                            <div data-toggle="counter" data-end="@transactionCount" id="transactionCount" data-decimals="0" data-suffix="" class="value">@transactionCount</div>
                             <div class="desc">Total Transactions</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
@@ -37,7 +36,7 @@
                 <div class="col-md-3">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@avgTransactionAmount" data-decimals="2" data-suffix="" class="value">@avgTransactionAmount.ToCurrency()</div>
+                            <div data-toggle="counter" data-end="@avgTransactionAmount" id="avgTransactionAmount" data-decimals="2" data-suffix="" class="value">@avgTransactionAmount.ToCurrency()</div>
                             <div class="desc">Avg Transaction Amt</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
@@ -47,7 +46,7 @@
                 <div class="col-md-3">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
+                            <div data-toggle="counter" data-end="@totalTransactionAmount" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">@totalTransactionAmount.ToCurrency()</div>
                             <div class="desc">Total Amt</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
@@ -57,17 +56,17 @@
                 <div class="col-md-3">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@totalPayout" data-decimals="2" data-suffix="" class="value">@totalPayout.ToCurrency()</div>
+                            <div data-toggle="counter" data-end="@totalPayout" id="totalPayout" data-decimals="2" data-suffix="" class="value">@totalPayout.ToCurrency()</div>
                             <div class="desc">Total Payout</div>
                         </div>
                         <div class="icon"><span class=""></span></div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-2">
-                    @{ 
+                    @{
                         Html.RenderPartial(
                             "~/Views/Shared/Components/_Date.cshtml",
                             new FormInputViewModel()
@@ -77,11 +76,11 @@
                                 Value = Request["sdate"],
                                 Placeholder = "From Date"
                             }
-                        ); 
+                        );
                     }
                 </div>
                 <div class="col-md-2">
-                    @{ 
+                    @{
                         Html.RenderPartial(
                             "~/Views/Shared/Components/_Date.cshtml",
                             new FormInputViewModel()
@@ -91,7 +90,7 @@
                                 Value = Request["edate"],
                                 Placeholder = "To Date"
                             }
-                        ); 
+                        );
                     }
                 </div>
                 <div class="col-md-2">
@@ -99,14 +98,14 @@
                 </div>
 
                 <script>
-                    function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
-                    }
+            function search() {
+                window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+            }
                 </script>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover table-condensed">
+                <table class="table table-hover table-condensed" id="transaction-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -117,6 +116,7 @@
                             <th>Total Paid</th>
                             <th>Platform Fee</th>
                             <th>Payout</th>
+                            @*<th>Refund</th>*@
                         </tr>
                     </thead>
                     <tbody>
@@ -129,32 +129,50 @@
                                 var participationObjects = transaction.GetParticipationObjects();
                                 var platformFee = transaction.GetPlatformFee();
                                 var payout = transaction.Amount.Value - platformFee;
-                                <tr>
-                                    <td>
-                                        @transaction.ID.ToString().PadLeft(8, '0')
-                                    </td>
-                                    <td>
-                                        @transaction.CreateDate.ToShortDateTimeString()
-                                    </td>
-                                    <td>
-                                        @transaction.GetPayerAccount().Name
-                                    </td>
-                                    <td>
-                                        @registrant.DisplayName
-                                    </td>
-                                    <td>
-                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
-                                    </td>
-                                    <td>
-                                        @transaction.Amount.ToCurrency()
-                                    </td>
-                                    <td>
-                                        @platformFee.ToCurrency()
-                                    </td>
-                                    <td>
-                                        @payout.ToCurrency()
-                                    </td>
-                                </tr>
+                        <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                            <td>
+                                @transaction.GetTransactionNumber()
+                            </td>
+                            <td>
+                                @transaction.CreateDate.ToShortDateTimeString()
+                            </td>
+                            <td>
+                                @transaction.GetPayerAccount().Name
+                            </td>
+                            <td>
+
+                                @if (transaction.IsCharge())
+                                {
+                                    @registrant.DisplayName
+                                }
+                                else
+                                {
+                                    @transaction.GetBillerAccount().Name
+                                }
+                            </td>
+                            <td>
+                                @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                            </td>
+                            <td>
+                                @transaction.Amount.ToCurrency()
+                            </td>
+                            <td>
+                                @platformFee.ToCurrency()
+                            </td>
+                            <td>
+                                @transaction.GetPayout().ToCurrency()
+                            </td>
+                            @*<td>
+                                @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                {
+                                    <button onclick="openDialog('@transaction.Uid')"
+                                            class="md-trigger"
+                                            data-modal="modal-refund">
+                                        Refund
+                                    </button>
+                                }
+                            </td>*@
+                        </tr>
                             }
                         }
                         else
@@ -167,19 +185,135 @@
                 </table>
             </div>
 
-            @{ 
+            @{
                 Html.RenderPartial(
                     "~/Views/Shared/_Paging.cshtml",
                     (PagingModel)ViewBag.PagingModel,
                     new ViewDataDictionary()
                     {
-                        { "controller", "accounting" },
-                        { "action", "index" },
-                        { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
+                                    { "controller", "accounting" },
+                                    { "action", "index" },
+                                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
                     }
                 );
             }
         </div>
     </div>
+ </div>
+
+<div id="modal-refund" class="md-modal colored-header custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Refund</h3>
+        </div>
+        <div class="modal-body form">
+            <div class="form-group">
+                <div class="col-sm-5">
+                    <div class="input-group input-group-lg xs-mb-15">
+                        <span>Amount refunded: </span>
+                        <span id="refunded-amount" style="color: red"></span>
+                    </div>
+                    <div class="input-group input-group-lg xs-mb-15">
+                        <span class="input-group-addon">$</span>
+                        <input type="number" onblur="validateForm()" onchange="validateForm()" class="form-control" id="amount" placeholder="amount" required min="0.1" step="0.1" />
+                    </div>
+                </div>
+
+                <div class="col-sm-7">
+                </div>
+            </div>
+            <br />
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <h5 style="margin-left: 50px"><b style="color: #ef6262">This is not reversable!</b></h5>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" id="confirm-refund-btn" disabled data-dismiss="modal" onclick="confirmRefund()" class="btn btn-primary md-close">Refund</button>
+        </div>
+    </div>
 </div>
 
+
+<script>
+    function validateForm() {
+        var val = parseFloat($("#amount").val());
+        var isValid = val >= 0.1;
+
+        $("#confirm-refund-btn").attr('disabled', !isValid);
+    }
+
+    function openDialog(newUid) {
+        $("#modal-refund").data("uid", newUid);
+        $("#refunded-amount").text($("#" + newUid).data('refunded-amount'));
+    }
+
+    function confirmRefund() {
+        var amount = $("#amount").val();
+
+        if (!!amount) {
+            var uid = $("#modal-refund").data("uid");
+
+            $.post(
+                "@Url.Action("refund", "Accounting")",
+                { uid: uid, amount: amount },
+                function (data) {
+                    if (data.status === "ok") {
+                        var transaction = data.transaction;
+
+                        // update the page header
+                        var transactionNumber = parseInt($("#transactionCount").data("end")) + 1;
+                        var totalTransactionAmount = (parseFloat($("#totalTransactionAmount").data("end")) + parseFloat(transaction.totalPaid)).toFixed(2);
+                        var totalPayout = (parseFloat($("#totalPayout").data("end")) + parseFloat(transaction.payout)).toFixed(2);
+                        var avgTransactionAmount = (totalTransactionAmount / transactionNumber).toFixed(2);
+
+                        $("#transactionCount").data("end", transactionNumber);
+                        $("#transactionCount").text(transactionNumber);
+                        $("#avgTransactionAmount").data("end", avgTransactionAmount);
+                        $("#avgTransactionAmount").text("$" + avgTransactionAmount);
+                        $("#totalTransactionAmount").data("end", totalTransactionAmount);
+                        $("#totalTransactionAmount").text("$" + totalTransactionAmount);
+                        $("#totalPayout").data("end", totalPayout);
+                        $("#totalPayout").text("$" + totalPayout);
+                        $("#" + transaction.originalTransactionUid).data('refunded-amount', "$"+ data.refundedAmount.toFixed(2));
+
+                        // update the transaction table
+                        $("#transaction-table tr:first").after('<tr>' +
+                            '<td>' + transaction.id + '</td>' +
+                            '<td>' + transaction.createdOn + '</td>' +
+                            '<td>' + transaction.payer + '</td>' +
+                            '<td>' + transaction.refundFor + '</td>' +
+                            '<td>' + transaction.itemDescription + '</td>' +
+                            '<td>-$' + (-transaction.totalPaid).toFixed(2) + '</td>' +
+                            '<td>$' + transaction.platformFee.toFixed(2) + '</td>' +
+                            '<td>-$' + (-transaction.payout).toFixed(2) + '</td>' +
+                            '<td></td>' +
+                            '</tr>'
+                        );
+                        Notifications.showBar({
+                            title: 'Success',
+                            message: `<strong>Successful operation!</strong>`,
+                            success: true
+                        });
+                    } else {
+                        var items = "";
+                        for (var message of data.messages) {
+                            items += "<li>" + message.Text + "</li>";
+                        }
+
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: '<ul>' + items + '</ul>',
+                            success: false
+                        });
+                    }
+                },
+                "json"
+            );
+        }
+    }
+</script>

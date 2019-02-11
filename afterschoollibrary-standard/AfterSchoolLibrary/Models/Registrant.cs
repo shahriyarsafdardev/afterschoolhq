@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// A single registrant for an activity, this is the main person who registered
@@ -329,11 +329,6 @@ namespace AfterSchoolLibrary
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public List<ParticipationObject> GetParticipationObjects(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, msgs, dc).Select(x => x.GetParticipationObject(msgs, dc)).ToList();
-        }
-
         public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivity.LoadByRegistrantId(this.ID.Value, msgs, dc).ToList();
@@ -411,56 +406,6 @@ namespace AfterSchoolLibrary
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             return dq.GetCount();
-        }
-
-        public static SystemMessages SendIncompletePayPalPaymentEmail(int id, ActivityForm af)
-        {
-            var msgs = new SystemMessages();
-            var reg = Registrant.Load(id);
-            var isAfterSchool = af.ToActivity().GetAccount().IsAfterSchool;
-
-            var body = $"<p>{reg.DisplayName.IfBlank(reg.Company)},</p><p>Our records from PayPal show you have not paid the full amount of {af.ActivityCostPerRegistrant.ToCurrency()} required to register for {af.ActivityName}.</p><p>If you believe this is incorrect, please get in contact with {af.ActivityContactName} via email (<a href=\"mailto:{af.ActivityContactEmail}\">{af.ActivityContactEmail}</a>) to resolve the issue. Until this issue is resolved your registration will be placed on the waiting list.</p>";
-
-            SendGridHelper.SendMail(
-                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                    AfterSchoolLibrary.Email.AppEmailAddress, 
-                    $"{af.ActivityContactName} via {Utilities.AppName(isAfterSchool)}"
-                    ),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.Email, reg.DisplayName.IfBlank(reg.Company)),
-                subject: $"Error processing your registration for {af.Name}",
-                body: $"{body}{(AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification"))}",
-                replyTo: new SendGrid.Helpers.Mail.EmailAddress(
-                    af.ActivityContactEmail, 
-                    af.ActivityContactName),
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
-            );
-
-            return msgs;
-        }
-
-        public static SystemMessages SendPayPalPaymentError(int id, ActivityForm af)
-        {
-            var msgs = new SystemMessages();
-            var reg = Registrant.Load(id);
-            var isAfterSchool = af.ToActivity().GetAccount().IsAfterSchool;
-
-            var body = $"<p>Hey {reg.DisplayName.IfBlank(reg.Company)},</p><p>Our records from PayPal show your PayPal account or credit card has not been processed for the amount of {af.ActivityCostPerRegistrant.ToCurrency()} required to register for {af.ActivityName}.</p><p>If you believe this is incorrect, please get in contact with {af.ActivityContactName} via email (<a href=\"mailto:{af.ActivityContactEmail}\">{af.ActivityContactEmail}</a>) to resolve the issue. Until this issue is resolved your registration will be placed on the waiting list.</p>";
-
-            SendGridHelper.SendMail(
-                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                    AfterSchoolLibrary.Email.AppEmailAddress, 
-                    $"{af.ActivityContactName} via {Utilities.AppName(isAfterSchool)}"
-                ),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.Email, reg.DisplayName.IfBlank(reg.Company)),
-                subject: $"Error processing your registration for {af.Name}",
-                body: $"{body}{(AfterSchoolLibrary.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: "paypal_notification"))}",
-                replyTo: new SendGrid.Helpers.Mail.EmailAddress(
-                    af.ActivityContactEmail, 
-                    af.ActivityContactName),
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
-            );
-
-            return msgs;
         }
         
         public Registration AddRegistration(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)

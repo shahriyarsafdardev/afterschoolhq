@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Keeps files with one specific activity. Not currently used.

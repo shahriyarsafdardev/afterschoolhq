@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to give discounts to parents during the purchase of a registration, product, etc
@@ -27,7 +27,11 @@ namespace AfterSchoolLibrary
 		/// Required.
 		/// Either a percentage or a flat amount
 		/// </summary>
-		public AmountType AmountTypeId { get { return (AmountType)MDV["AmountTypeId"].Value; } set { MDV["AmountTypeId"].Value = value; } }
+		public CouponAmountType AmountTypeId { get { return (CouponAmountType)MDV["AmountTypeId"].Value; } set { MDV["AmountTypeId"].Value = value; } }
+		/// <summary>
+		/// Required.
+		/// the account that is the owner
+		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
 		public DateTime? ExpirationDate { get { return (DateTime?)MDV["ExpirationDate"].Value; } set { MDV["ExpirationDate"].Value = value; } }
 		/// <summary>
@@ -39,13 +43,15 @@ namespace AfterSchoolLibrary
 		/// The amount of uses that a coupon can have across all users
 		/// </summary>
 		public int? MaxNumberOfUsesAll { get { return (int?)MDV["MaxNumberOfUsesAll"].Value; } set { MDV["MaxNumberOfUsesAll"].Value = value; } }
+		public string CouponCode { get { return (string)MDV["CouponCode"].Value; } set { MDV["CouponCode"].Value = value; } }
+		public string StripeCouponId { get { return (string)MDV["StripeCouponId"].Value; } set { MDV["StripeCouponId"].Value = value; } }
 		
 
         public Coupon()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(Coupon).Name, "ID");
             this.LoadObjectValues(ObjectMap);
-			this.AmountTypeId = AmountType.NotSet;
+			this.AmountTypeId = CouponAmountType.NotSet;
 			this.AppliesTo = CouponApplyType.NotSet;
 			
         }
@@ -64,6 +70,8 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "AppliesTo", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxNumberOfUsesPerPerson", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxNumberOfUsesAll", System.Data.SqlDbType.Int);
+				_dp.Add(className, "CouponCode", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "StripeCouponId", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }
@@ -119,6 +127,8 @@ namespace AfterSchoolLibrary
 				msgs.Add("Amount is required on Coupon object", MessageType.Error);
 			if (this.AmountTypeId.IsEmpty())
 				msgs.Add("AmountTypeId is required on Coupon object", MessageType.Error);
+			if (this.AccountId.IsEmpty())
+				msgs.Add("AccountId is required on Coupon object", MessageType.Error);
 			if (this.Name.IsEmpty())
 				msgs.Add("Name is required on Coupon object", MessageType.Error);
 			
@@ -171,6 +181,14 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["MaxNumberOfUsesAll"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CouponCode"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeCouponId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -187,6 +205,15 @@ namespace AfterSchoolLibrary
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static Coupon LoadByAccountIdByCouponCode(int AccountId, string CouponCode, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["CouponCode"], CouponCode);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

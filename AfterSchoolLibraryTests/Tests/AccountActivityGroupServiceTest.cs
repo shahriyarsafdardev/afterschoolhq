@@ -1,7 +1,6 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibraryTests.Factories;
 using AfterSchoolLibrary.Services;
 
@@ -41,21 +40,21 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void ToParticipationObjectTestSimple()
+        public void GetParticipationObjectTestSimple()
         {
             var aag = AccountActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroup, msgs, dc);
 
-            Assert.NotNull(aag.ToParticipationObject(msgs, dc));
+            Assert.NotNull(aag.GetParticipationObject(msgs, dc));
         }
 
         [Fact]
-        public void ToParticipationObjectTestFull()
+        public void GetParticipationObjectTestFull()
         {
             var schedule = ActivityScheduleFactory.Create(ActivityGroupOwner, msgs, dc);
             var aag = AccountActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroup, 35, InviteStatus.Invited, false, msgs, dc);
             var activityInstance = ActivityInstanceFactory.Create(ActivityGroup, schedule, msgs, dc);
 
-            Assert.NotNull(aag.ToParticipationObject(msgs, dc));
+            Assert.NotNull(aag.GetParticipationObject(msgs, dc));
         }
     }
 }

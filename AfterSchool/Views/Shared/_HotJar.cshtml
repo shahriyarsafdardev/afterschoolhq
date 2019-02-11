@@ -1,5 +1,5 @@
 ﻿@*
-    @if (AfterSchoolLibrary.Utilities.IsLiveServer)
+    @if (AfterSchoolLibrary.Helpers.Utilities.IsLiveServer)
     {
         <!-- Hotjar Tracking Code for https://www.enrollhq.com -->
         <script>
@@ -13,7 +13,7 @@
         })(window,document,'//static.hotjar.com/c/hotjar-','.js?sv=');
         </script>
     }
-    else if (AfterSchoolLibrary.Utilities.IsTestServer)
+    else if (AfterSchoolLibrary.Helpers.Utilities.IsTestServer)
     {
         <!-- Hotjar Tracking Code for http://staging.enrollhq.com -->
         <script>
@@ -27,7 +27,7 @@
         })(window,document,'//static.hotjar.com/c/hotjar-','.js?sv=');
         </script>
     }
-    else if (AfterSchoolLibrary.Utilities.isLocalHost)
+    else if (AfterSchoolLibrary.Helpers.Utilities.isLocalHost)
     {
         <!-- Hotjar Tracking Code for http://localhost:54849 -->
         <script>

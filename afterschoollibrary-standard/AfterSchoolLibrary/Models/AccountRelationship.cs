@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to keep track of which host has allowed which visitor access to post activities. Activity Providers can request access to a School or other host account, the host can approve of it.

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
-using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests
 {
@@ -144,7 +143,7 @@ namespace AfterSchoolLibraryTests
                 var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
-            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountReceivedByAccountId(BillerAccount.ID.Value, msgs, dc));
+            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidToBillerAccount(BillerAccount.ID.Value, null, null, msgs, dc));
         }
 
         [Fact]
@@ -163,7 +162,31 @@ namespace AfterSchoolLibraryTests
                 var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
-            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidByAccountId(PayerAccount.ID.Value, msgs, dc));
+            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidByPayerAccount(PayerAccount.ID.Value, null, null, msgs, dc));
+        }
+
+        [Fact]
+        public void CreateNewTest()
+        {
+            var amount = 100;
+            var originalTransaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, msgs, dc);
+            var purchase = Factories.PurchaseFactory.Create(PayerAccount, amount, msgs, dc);
+            var transaction = TransactionService.CreateNew(
+                BillerAccount,
+                PayerAccount,
+                amount,
+                purchase,
+                "Net Club refund",
+                TransactionType.Refund,
+                PaymentType.ACH,
+                PaymentSourceType.AfterSchoolPlatform,
+                "re_1DNlPlCEgXQRZLhk3Rzzyzj6",
+                originalTransaction,
+                BillerAccountOwner,
+                msgs: msgs,
+                dc: dc);
+
+            Assert.True(transaction.ID.HasValue);
         }
     }
 }

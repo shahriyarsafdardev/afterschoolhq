@@ -1,12 +1,10 @@
-﻿using AfterSchoolLibrary;
+﻿using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Hangfire;
 using Newtonsoft.Json;
 using Stripe;
 using System;
-using System.Linq;
 using System.Web.Http;
 
 namespace AfterSchool.Areas.StripeHooks.Controllers
@@ -26,7 +24,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 // var stripeSignature = Request.Headers.Contains("Stripe-Signature") ? Request.Headers.GetValues("Stripe-Signature").First() : null;
 
 
-                //if (!AfterSchoolLibrary.Utilities.IsLocalHost && stripeSignature.IsEmpty())
+                //if (!AfterSchoolLibrary.Helpers.Utilities.IsLocalHost && stripeSignature.IsEmpty())
                 //{
                 //    msgs.Add("Invalid Signature", MessageType.Error);
                 //    SendLogEmail(msgs);
@@ -39,7 +37,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
-                var stripeEvent = AfterSchoolLibrary.Utilities.IsLocalHost ?
+                var stripeEvent = AfterSchoolLibrary.Helpers.Utilities.IsLocalHost ?
                     (StripeEvent)StripeEventUtility.ParseEvent(serializedJson) :
                     (StripeEvent)StripeEventUtility.ParseEvent(
                         serializedJson);
@@ -66,10 +64,10 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private void SendLogEmail(SystemMessages msgs)
         {
             string toEmail = "darye+stripe+errors@afterschoolhq.com";
-            string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Utilities.HostName}";
+            string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
             string body = msgs.RenderMessageList(MessageOutputType.Html);
 
-            EmailHelper.SendEmail(toEmail, subject, body, true);
+            AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
@@ -198,7 +196,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                         },
                         onException: (SystemMessages emsgs) =>
                         {
-                            AfterSchoolLibrary.Utilities.SystemErrorLog(emsgs);
+                            AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
                         }
                     );
                 }

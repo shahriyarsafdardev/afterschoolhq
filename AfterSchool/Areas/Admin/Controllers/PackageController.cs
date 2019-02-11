@@ -7,6 +7,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
@@ -21,9 +22,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Index(int? start = null, int? length = null)
         {
-            return View(Package.Load(
-                start: start,
-                length: length));
+            return View(Package.Load(start: start, length: length));
         }
 
         [HttpGet]

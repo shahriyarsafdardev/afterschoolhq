@@ -9,6 +9,8 @@ using AfterSchoolLibrary;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibraryTests.Factories;
+using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests
 {
@@ -258,7 +260,7 @@ namespace AfterSchoolLibraryTests
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc: dc);
             var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
 
-            Assert.True(registrantActivity.SendNewRegistrationNotice(activity.ToParticipationObject(msgs, dc), dc).HasNoErrors());
+            Assert.True(registrantActivity.SendNewRegistrationNotice(activity.GetParticipationObject(msgs, dc), dc).HasNoErrors());
         }
 
     }

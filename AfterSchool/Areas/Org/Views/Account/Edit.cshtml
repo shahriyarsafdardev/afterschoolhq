@@ -1,4 +1,4 @@
-﻿@model AfterSchoolLibrary.Account
+﻿@model Account
 @{
     ViewBag.Title = Model.Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
@@ -46,12 +46,12 @@
                             <label class="col-sm-3 control-label">Organization Url</label>
                             <div class="col-sm-8">
                                 <div class="input-group">
-                                    <span class="input-group-addon">http://@AfterSchoolLibrary.Utilities.HostName/</span>
+                                    <span class="input-group-addon">http://@AfterSchoolLibrary.Helpers.Utilities.HostName/</span>
                                     <input type="text" class="form-control" name="uniquename" id="uniquename" value="@value" />
                                 </div>
                             </div>
                             <div class="col-sm-1">
-                                <a href="http://@AfterSchoolLibrary.Utilities.HostName/@value" target="_blank" class="btn btn-block btn-link">View</a>
+                                <a href="http://@AfterSchoolLibrary.Helpers.Utilities.HostName/@value" target="_blank" class="btn btn-block btn-link">View</a>
                             </div>
                         </div>
                     </div>

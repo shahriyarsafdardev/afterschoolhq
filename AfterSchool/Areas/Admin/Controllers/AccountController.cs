@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using System.Collections;

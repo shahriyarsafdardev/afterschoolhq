@@ -1,4 +1,5 @@
-﻿using BasicLibrary;
+﻿using AfterSchoolLibrary.Models;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
@@ -75,7 +76,7 @@ namespace AfterSchoolLibrary.Services
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );

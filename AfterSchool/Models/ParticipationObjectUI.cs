@@ -1,8 +1,9 @@
 ﻿using System;
 using BasicLibrary;
-using AfterSchoolLibrary;
 using System.Linq;
 using System.Collections.Generic;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Models
 {

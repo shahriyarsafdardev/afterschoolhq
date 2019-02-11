@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to create subscription options for a particular activity or activity group
@@ -397,6 +397,10 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
+        public decimal GetStripeFeePercent()
+        {
+            return 0.029M + (0.3M / CostPerPeriod).Value;
+        }
         #endregion
     }
 }

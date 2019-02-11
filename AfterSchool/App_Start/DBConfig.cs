@@ -13,7 +13,7 @@ namespace AfterSchool
     {
         public static void RegisterDatabase()
         {
-            BasicLibrary.Utilities.ConnectionString = AfterSchoolLibrary.Utilities.ConnectionString;
+            BasicLibrary.Utilities.ConnectionString = AfterSchoolLibrary.Helpers.Utilities.ConnectionString;
         }
     }
 }

@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to keep track of where money is coming and going in the system. A system of record for payments.
@@ -48,6 +48,7 @@ namespace AfterSchoolLibrary
 		public TransactionType TransactionTypeId { get { return (TransactionType)MDV["TransactionTypeId"].Value; } set { MDV["TransactionTypeId"].Value = value; } }
 		public string StripeChargeOrRefundId { get { return (string)MDV["StripeChargeOrRefundId"].Value; } set { MDV["StripeChargeOrRefundId"].Value = value; } }
 		public PaymentSourceType PaymentSourceTypeId { get { return (PaymentSourceType)MDV["PaymentSourceTypeId"].Value; } set { MDV["PaymentSourceTypeId"].Value = value; } }
+		public int? OriginalTransactionId { get { return (int?)MDV["OriginalTransactionId"].Value; } set { MDV["OriginalTransactionId"].Value = value; } }
 		
 
         public Transaction()
@@ -80,6 +81,7 @@ namespace AfterSchoolLibrary
 				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeChargeOrRefundId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PaymentSourceTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "OriginalTransactionId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -213,6 +215,10 @@ namespace AfterSchoolLibrary
 			dps.Add(ObjectMap["PaymentSourceTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["OriginalTransactionId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -273,20 +279,19 @@ namespace AfterSchoolLibrary
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
+		public static List<Transaction> LoadByOriginalTransactionId(int OriginalTransactionId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["OriginalTransactionId"], OriginalTransactionId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		
 
         #endregion
 
 		#region "UserDefined"
-
-        public static decimal GetTotalAmountReceivedByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Transaction.LoadByBillerAccountId(accountId, msgs, dc).Sum(transaction => transaction.Amount.Value);
-        }
-        public static decimal GetTotalAmountPaidByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Transaction.LoadByPayerAccountId(accountId, msgs, dc).Sum(transaction => transaction.Amount.Value);
-        }
 
         public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
@@ -360,6 +365,106 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["PurchaseId"], PurchaseId);
 
             return dq.GetCount(msgs);
+        }
+
+        public static decimal GetTotalFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["PlatformFlatFee"].ParameterFullName} + ({ObjectMap["PlatformPercentFee"].ParameterFullName} * {ObjectMap["Amount"].ParameterFullName})), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalAmountPaidToBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalAmountPaidByPayerAccount(int PayerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalRefundByOriginalTransaction(int OriginalTransactionId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["OriginalTransactionId"], OriginalTransactionId);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
         }
 
         #endregion

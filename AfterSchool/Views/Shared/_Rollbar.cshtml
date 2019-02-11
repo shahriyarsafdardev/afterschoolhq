@@ -1,4 +1,4 @@
-﻿@if (!AfterSchoolLibrary.Utilities.IsLocalHost)
+﻿@if (!AfterSchoolLibrary.Helpers.Utilities.IsLocalHost)
 {
     <script>
     var _rollbarConfig = {
@@ -6,7 +6,7 @@
         captureUncaught: true,
         captureUnhandledRejections: true,
         payload: {
-            environment: '@AfterSchoolLibrary.Utilities.GetRollbarEnvironment()'
+            environment: '@AfterSchoolLibrary.Helpers.Utilities.GetRollbarEnvironment()'
         }
     };
     // Rollbar Snippet

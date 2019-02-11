@@ -117,6 +117,15 @@
                                     {
                                         <span id="subscription-total-value" class="hide">0</span>
                                     }
+                                    @*<tr>
+                                        <td>
+                                            Coupon
+                                        </td>
+                                        <td>
+                                            <input type="text" id="coupon-code" class="form-control" value="" />
+                                            <button type="button" class="btn btn-sm btn-default" onclick="applyCoupon()">Apply</button>
+                                        </td>
+                                    </tr>*@
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -127,7 +136,7 @@
                                         </td>
                                         <td>
                                             <p class="text-medium">
-                                                $<span id="total-due-today"></span>
+                                                <span id="dollar-prefix">$</span><span id="total-due-today"></span>
                                             </p>
                                         </td>
                                     </tr>
@@ -146,6 +155,7 @@
                                 <p class="text-center text-large">Pay using an existing card</p>
                                 <form class="form-horizontal" action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="existing-payment-form">
                                     <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
+                                    <input type="hidden" name="coupon" class="coupon" value="" />
                                     <div class="form-group">
                                         <label class="col-md-3 control-label">
                                             Select Card
@@ -179,6 +189,7 @@
                             <p class="text-center text-large">Pay with a new card</p>
                             <form action="@Url.Action("payment", "account", new { id = registration.Uid })" method="post" id="payment-form" class="form-horizontal">
                                 <input type="hidden" name="paymentoption" id="paymentoption-new" class="payment-option" value="0" />
+                                @*<input type="hidden" name="coupon" class="coupon" value="" />*@
                                 <div class="form-group">
                                     <label for="card-element">
                                         Credit or debit card
@@ -252,6 +263,64 @@
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
+    function applyCoupon() {
+        var couponCode = $('#coupon-code').val();
+        var paymentOption = $('input[name=paymentoption]:checked').val();
+        $.get(
+            '/services/validatecoupon?couponcode=' + encodeURIComponent(couponCode)+'&paymentoption='+ paymentOption,
+            function (data) {
+                var amount = data.amount;
+                var spAmount = data.subscriptionPlanAmount;
+                var numberInMonths = data.numberInMonths;
+
+                if (data && data.status == 'ok') {
+                    var coupon = data.coupon;
+                    var totalDueToday = 0;
+                    if (coupon.AmountTypeId === @((int)CouponAmountType.Percentage)) { // percentage coupon type
+                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan)) { // subscription plan
+                            totalDueToday = amount + (spAmount * (1 - coupon.Amount));
+                        } else if (coupon.AppliesTo === @((int)CouponApplyType.TuitionFee)) { // Tuition Fee
+                            totalDueToday = amount * (1 - coupon.Amount) + spAmount;
+                        }
+                    } else { // flat amount coupon type
+                        if (coupon.AppliesTo === @((int)CouponApplyType.SubscriptionPlan) || !paymentOption) { // subscription plan or tuition fee without payment plan
+                            totalDueToday = amount - coupon.Amount + spAmount;
+                        } else { // tuition fee with payment plan
+                            var totalCost = amount * numberInMonths;
+
+                            totalDueToday = (amount - ((totalCost - coupon.Amount) / numberInMonths)) + spAmount;
+                        }
+                    }
+
+                    $("#total-due-today").text(totalDueToday.toFixed(2));
+                    $("#total-due-today").css("color", "red");
+                    $("#dollar-prefix").css("color", "red");
+                    $(".coupon").val(couponCode);
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: 'The coupon has been applied',
+                        success: true
+                    });
+                } else {
+                    $(".coupon").val('');
+                    $("#total-due-today").text((amount + spAmount).toFixed(2));
+                    $("#total-due-today").removeAttr("style");
+                    $("#dollar-prefix").removeAttr("style");
+
+                    var items = "";
+
+                    for (var message of data.messages) {
+                        items += "<li>" + message.Text + "</li>";
+                    }
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: '<ul>' + items + '</ul>',
+                        success: false
+                    });
+                }
+            }
+        )
+    }
 
     function allowContinue() {
         if ($('#payinperson').is(':checked')) {
@@ -323,6 +392,11 @@
 
             let paymentPlanId = $(this).attr('id').split('-')[1];
             updatePaymentOptionCost(paymentPlanId);
+            // unapply coupon
+            $("#total-due-today").removeAttr("style");
+            $("#dollar-prefix").removeAttr("style");
+            $("#coupon-code").val('');
+            $(".coupon").val('');
         });
 
         @if (participationObject.PaymentPlans.Any())

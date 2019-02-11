@@ -5,7 +5,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Collections.Generic;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
     public class ParticipationObject
     {
@@ -98,7 +98,7 @@ namespace AfterSchoolLibrary
             CostUnitType = global::CostUnitType.PerRegistrant;
             AllowToPayLater = activity.AllowToPayLater;
             RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
-            Form = activity.GetActiveActivityForm(msgs, dc)?.ToForm();
+            Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm();
             OwnerAccount = activity.GetAccount(msgs, dc);
 
             PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
@@ -218,8 +218,8 @@ namespace AfterSchoolLibrary
         {
             if (this.ObjectType == ParticipationObjectType.Activity)
                 return this.ActivityType.Value == global::ActivityType.Team;
-            else
-                return this.ActivityGroupType == global::ActivityGroupType.League;
+
+            return this.ActivityGroupType == global::ActivityGroupType.League;
         }
 
         public Tuple<GradeLevel, GradeLevel> GetMinAndMaxGradeLevels(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -274,10 +274,10 @@ namespace AfterSchoolLibrary
                 else if (IsActivityGroup())
                     return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
                 else if (IsAccountActivityGroup())
-                {
-                    var aag = this.GetAccountActivityGroup();
-                    return aag.GetActivityGroup(msgs, dc).GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
-                }
+                    return this.GetAccountActivityGroup()
+                        .GetActivityGroup(msgs, dc)
+                        .GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?
+                        .Value;
             }
             else
             {
@@ -285,11 +285,11 @@ namespace AfterSchoolLibrary
                     return this.GetActivity().GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
                 else if (IsActivityGroup())
                     return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
-                else if (IsAccountActivityGroup())
-                {
-                    var aag = this.GetAccountActivityGroup();
-                    return aag.GetActivityGroup(msgs, dc).GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
-                }
+                else if (IsAccountActivityGroup())                
+                    return this.GetAccountActivityGroup()
+                        .GetActivityGroup(msgs, dc)
+                        .GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?
+                        .Value;
             }
 
             return "";
@@ -418,7 +418,9 @@ namespace AfterSchoolLibrary
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
             };
+
             msgs.AddRange(payment.Save(dc));
+
             return payment;
         }
     }

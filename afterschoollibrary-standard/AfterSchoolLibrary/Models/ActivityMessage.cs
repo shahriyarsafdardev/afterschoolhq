@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to store a message that is sent in regards to an session/league, activity/team, or even on the whole account
@@ -245,6 +245,181 @@ namespace AfterSchoolLibrary
                 _ActivityGroup = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
             }
             return _ActivityGroup;
+        }
+
+        private static SystemMessages SendForActivity(ActivityMessage am, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var activity = am.GetActivity(dc: dc);
+            var account = activity.GetAccount(dc: dc);
+
+            msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc: dc));
+
+            if (msgs.HasNoErrors())
+            {
+                var members = activity.GetTeamMembers(dc: dc).DistinctBy(member => member.WebUserId);
+                foreach (var member in members)
+                {
+                    var body = am.Body;
+                    body = body.Replace("[firstname]", member.WebUserFirstName.IfBlank(""));
+                    body = body.Replace("[lastname]", member.WebUserLastName.IfBlank(""));
+                    body = body.Replace("[name]", member.WebUserDisplayName.IfBlank(""));
+
+                    //send confirmation to team leaders
+                    SendGridHelper.SendMail(
+                        fromEmail: Helpers.Email.SendGridAppEmailAddress(account.IsAfterSchool),
+                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(member.WebUserEmail),
+                        subject: am.Subject,
+                        body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
+                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(
+                            activity.ContactEmail,
+                            activity.ContactName),
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                    );
+
+                    //TwilioHelper.SendSMS(
+                    //    member.WebUserPhone,
+                    //    $"{am.Subject}\n{body}"
+                    //);
+                }
+            }
+
+            return msgs;
+        }
+
+        private static SystemMessages SendForGroup(ActivityMessage am, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var group = am.GetActivityGroup(dc: dc);
+            var account = group.GetAccount(dc: dc);
+
+            msgs.AddRange(am.SendActivityMessage(account, account.Name, account.Email, account.Name, dc: dc));
+
+            if (msgs.HasNoErrors())
+            {
+                // send to account admin
+                SendGridHelper.SendMail(
+                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                            Helpers.Email.AppEmailAddress,
+                        $"CC: {account.Name} via { Helpers.Utilities.AppName(account.IsAfterSchool)}"),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
+                    subject: am.Subject,
+                    body: $"{am.Body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activitygroup_message"))}",
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                );
+
+                //TwilioHelper.SendSMS(
+                //        account.Phone,
+                //        $"{am.Subject}\n{am.Body}"
+                //);
+            }
+
+            return msgs;
+        }
+
+        private SystemMessages SendActivityMessage(Account account, string fromName, string replyToEmail, string replyToName, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var amrs = this.GetActivityMessageRegistrants(dc: dc);
+
+            foreach (var amr in amrs)
+            {
+                var body = this.Body;
+
+                //a person
+                if (amr.RegistrantFirstName.IsNotBlank() || amr.RegistrantLastName.IsNotBlank())
+                {
+                    body = body.Replace("[firstname]", amr.RegistrantFirstName.IfBlank(""));
+                    body = body.Replace("[lastname]", amr.RegistrantLastName.IfBlank(""));
+                    body = body.Replace("[name]", amr.RegistrantDisplayName.IfBlank(""));
+                }
+                //an organization
+                else if (amr.RegistrantCompany.IsNotBlank())
+                {
+                    body = body.Replace("[firstname]", amr.RegistrantCompany);
+                    body = body.Replace("[name]", amr.RegistrantCompany);
+                    body = body.Replace("[lastname]", "");
+                }
+                SystemMessages sendEmailMsgs = new SystemMessages();
+                SystemMessages sendSMSMsgs = new SystemMessages();
+
+                if (amr.RegistrantEmail.IsNotEmpty())
+                {
+                    sendEmailMsgs = SendGridHelper.SendMail(
+                        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                                Helpers.Email.AppEmailAddress,
+                            $"{fromName} via { Helpers.Utilities.AppName(account.IsAfterSchool)}"),
+                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(amr.RegistrantEmail, amr.RegistrantDisplayName),
+                        subject: this.Subject,
+                        body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
+                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                    );
+                }
+
+                //if (amr.RegistrantPhone.IsNotEmpty())
+                //{
+                //    sendSMSMsgs = TwilioHelper.SendSMS(
+                //                amr.RegistrantPhone,
+                //                $"{this.Subject}\n{body}"
+                //                );
+                //}
+
+                if (sendEmailMsgs.HasNoErrors() || sendSMSMsgs.HasNoErrors())
+                {
+                    amr.DateSent = DateTime.UtcNow;
+                    msgs.AddRange(amr.Save(dc: dc));
+                }
+                else
+                {
+                    string[] combinedResult = {
+                        sendEmailMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000),
+                        sendSMSMsgs.RenderMessageList(MessageOutputType.Text).MaxChars(1000)
+                    };
+                    amr.SendErrors = string.Join(", ", combinedResult);
+                    msgs.AddRange(amr.Save(dc: dc));
+                }
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                this.DateSent = DateTime.UtcNow;
+                msgs.AddRange(this.Save(dc: dc));
+            }
+            else
+            {
+                // TODO: Fix Rollbar reporting
+                // RollbarLocator.RollbarInstance.Configure(new RollbarConfig(Utilities.RollbarAccessToken));
+                // RollbarLocator.RollbarInstance.Log(ErrorLevel.Error, msgs.RenderMessageList(MessageOutputType.Text));
+            }
+
+            return msgs;
+        }
+
+        public static SystemMessages Send(int id, DatabaseConnection dc = null)
+        {
+            var am = ActivityMessage.Load(id, dc: dc);
+
+            if (am.ActivityId.HasValue)
+                return ActivityMessage.SendForActivity(am, dc: dc);
+            else if(am.ActivityGroupId.HasValue)
+                return ActivityMessage.SendForGroup(am, dc: dc);
+            else
+                return new SystemMessages() { new SystemMessage() { Text = "Error", MessageType = MessageType.Error } };
+        }
+
+        public ActivityMessageRegistrant AddRegistrant(int registrantId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc= null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var amr = new ActivityMessageRegistrant
+            {
+                RegistrantId = registrantId,
+                ActivityMessageId = this.ID,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId
+            };
+            msgs.AddRange(amr.Save(dc: dc));
+            return amr;
         }
 
         #endregion

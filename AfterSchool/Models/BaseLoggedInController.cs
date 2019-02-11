@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Web.Mvc;
 
@@ -31,14 +31,14 @@ namespace AfterSchool.Models
                 {
                     try
                     {
-                        Guid userGuid = Guid.Parse(BasicLibrary.Encryption.DecryptToString(
+                        var userGuid = Guid.Parse(BasicLibrary.Encryption.DecryptToString(
                             Convert.FromBase64String(Request.Cookies["sessionuser"].Value),
-                            AfterSchoolLibrary.Utilities.AppAESKey, AfterSchoolLibrary.Utilities.AppIV));
+                            AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV));
                         user = WebUser.LoadByUid(userGuid);
 
-                        string AccountUniqueName = BasicLibrary.Encryption.DecryptToString(
+                        var AccountUniqueName = BasicLibrary.Encryption.DecryptToString(
                             Convert.FromBase64String(Request.Cookies["sessionAccount"].Value),
-                            AfterSchoolLibrary.Utilities.AppAESKey, AfterSchoolLibrary.Utilities.AppIV);
+                            AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV);
                         Account = Account.LoadByUniqueName(AccountUniqueName);
                     }
                     catch
@@ -129,7 +129,7 @@ namespace AfterSchool.Models
                     }
                 }
 
-                //AfterSchoolLibrary.RebornMail.Send(new System.Net.Mail.MailMessage(AfterSchoolLibrary.Email.AppEmailAddress, "darye@reborncode.com", "Testing Account", msgs.RenderMessageList(MessageOutputType.Html)));
+                //AfterSchoolLibrary.RebornMail.Send(new System.Net.Mail.MailMessage(AfterSchoolLibrary.Helpers.Email.AppEmailAddress, "darye@reborncode.com", "Testing Account", msgs.RenderMessageList(MessageOutputType.Html)));
             }
 
             return msgs;

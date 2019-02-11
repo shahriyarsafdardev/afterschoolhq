@@ -6,12 +6,11 @@ using System.Web.Mvc;
 using System.IO;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
 using Hangfire;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -183,7 +182,7 @@ namespace AfterSchool.Areas.Org.Controllers
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -206,7 +205,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 values.Add("registrationthankyouemail", "Thank you for registering");
                 values.Add("applicationthankyouemail", "Thank you for applying");
 
-                activity = Activity.CreateNew(
+                activity = ActivityService.CreateNew(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     values: values,
@@ -297,7 +296,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                         loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                         account: SessionVariables.CurrentAccount,
                         activityId: activity.ID.Value.ToString(),
@@ -370,7 +369,7 @@ namespace AfterSchool.Areas.Org.Controllers
             activity = Activity.LoadByUid(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -433,7 +432,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "description", description}
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -549,7 +548,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "isongoing", isongoing }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -640,7 +639,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "locationtype", locationtype }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -725,7 +724,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "paymentplanperiodnumber", paymentplanperiodnumber }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -790,7 +789,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "applicationthankyouemail", applicationthankyouemail }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -813,7 +812,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "prev":
-                        if (activity.CanAcceptPayments)
+                        if (activity.CanAcceptPayments())
                         {
                             ViewBag.ActiveMenu = "EditCost";
                             ViewBag.PaymentPlan = activity.GetPaymentPlan();
@@ -975,6 +974,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var attendance = activity.GetOrCreateNewAttendance(attendanceId, SessionVariables.LoggedInUser, msgs);
 
+
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();
             ViewBag.Schedule = activity.GetSchedule();
@@ -988,7 +988,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var presentStudents = new List<int>();
             var activity = Activity.LoadByUid(id.ToGuid());
-            var attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), msgs);
+            var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
 
             if (!activityinstance.IsNumber())
                 msgs.Add("Activity Date is required", MessageType.UserError);
@@ -1099,7 +1099,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
-            var questions = af.GetAllQuestions();
+            var questions = af.GetForm().GetAllQuestions();
 
             var registrantActivities = activity.GetRegistrantActivities();
             var table = new List<List<string>>();
@@ -1158,24 +1158,30 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("Registrants", activity);
         }
 
+        private List<AttachedCoupon> GetAttachedCoupons(RegistrantActivity registrantActivity)
+        {
+            var masterRegistrant = registrantActivity.GetRegistrant().GetMasterRegistrant();
+            return masterRegistrant?.GetAccount().GetAttachedCoupons() ?? new List<AttachedCoupon>();
+        }
+
         [HttpGet]
         public ActionResult RegistrantDetail(string id)
         {
-            var ra = RegistrantActivity.Load(id.ToInteger());
-            // assuming that this registrant is coming from an activity, since it's in the activity controller
-            var activity = Activity.Load(ra.ParticipationObjectId.Value);
+            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var activity = Activity.Load(registrantActivity.ParticipationObjectId.Value);
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            return View(ra);
+            ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
+            return View(registrantActivity);
         }
 
         [HttpPost]
-        public ActionResult RegistrantDetail(string id, string datepaid, string amountpaid, string paymenttype)
+        public ActionResult AddPayment(string id, string datepaid, string amountpaid, string paymenttype)
         {
             var msgs = new SystemMessages();
-            var ra = RegistrantActivity.Load(id.ToInteger());
-            var activity = ra.GetActivity();
+            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var activity = registrantActivity.GetActivity();
 
             if (!datepaid.IsDateTime())
                 msgs.Add("Date Paid must be a valid date", MessageType.UserError);
@@ -1189,7 +1195,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 // the registrant that is only on the provider or school account
-                var registrant = ra.GetRegistrant(msgs);
+                var registrant = registrantActivity.GetRegistrant(msgs);
                 
                 // from the parent account, see if the registrant has a parent account
                 var masterRegistrant = registrant.GetMasterRegistrant(msgs);
@@ -1204,8 +1210,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         BillingAccount = SessionVariables.CurrentAccount,
                         PurchasingAccount = purchaserAccount,
                         NumberOfSeats = 1,
-                        ParticipationObject = ra.GetParticipationObject(msgs),
-                        Registration = ra.GetRegistration(msgs),
+                        ParticipationObject = registrantActivity.GetParticipationObject(msgs),
+                        Registration = registrantActivity.GetRegistration(msgs),
                         MasterRegistrant = masterRegistrant,
                         PaymentType = (PaymentType)paymenttype.ToInteger(),
                         PaymentSourceType = PaymentSourceType.Manual,
@@ -1220,8 +1226,103 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            return View(ra);
+
+            return View("registrantdetail", registrantActivity);
+        }
+
+        [HttpPost]
+        public ActionResult AttachCoupon(string id, decimal couponAmount, CouponAmountType discountType, DateTime? expirationDate, CouponApplyType couponApplyType, StripeCouponDuration duration, int durationInMonths)
+        {
+            var msgs = new SystemMessages();
+            var registrantActivity = RegistrantActivity.Load(id.ToInteger());
+            var activity = registrantActivity.GetActivity();
+            
+            // check coupon's minimum amount
+            if (couponAmount <= 0)
+                msgs.Add("Coupon Amount must be a number greater than 0", MessageType.UserError);
+
+            // check coupon's amount percentage 
+            if (discountType == CouponAmountType.Percentage)
+            {
+                couponAmount /= 100;
+
+                if (couponAmount > 1)
+                    msgs.Add("Percentage must be a number less than or equal to 100%", MessageType.UserError);
+            } else
+            {
+                // by default the maximum amount is the activity's cost
+                var maxAmount = activity.CostPerRegistrant.Value;
+
+                // check coupon's amount
+                if (couponAmount > maxAmount)
+                    msgs.Add($"Coupon Amount must be a number less than or equal to {maxAmount.ToCurrency()}", MessageType.UserError);
+            }
+
+            if (couponApplyType == CouponApplyType.SubscriptionPlan)
+            {
+                if (duration == StripeCouponDuration.Repeating && durationInMonths < 1)
+                    msgs.Add("# of Times must be a number greater than 0", MessageType.UserError);
+            }
+           
+            // check coupon's expiration date
+            if (expirationDate.IsEmpty() || expirationDate <= DateTime.UtcNow.Date)
+                msgs.Add("Expiration date must be in the future", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var registrantAccount = registrantActivity.GetRegistrant().GetMasterRegistrant()?.GetAccount();
+                AttachedCoupon attachedCoupon = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // create new coupon
+                       var coupon = SessionVariables.CurrentAccount.CreateCoupon(
+                            amount: couponAmount,
+                            expirationDate: expirationDate,
+                            amountType: discountType,
+                            applyType: couponApplyType,
+                            durationInMonths: durationInMonths,
+                            couponDuration: duration,
+                            loggedInUser: SessionVariables.LoggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        // assign coupon to the activity (only works for this activity)
+                        var poc = PurchaseableObjectCouponService.CreateNew(
+                            purchaseableObject: activity.GetPurchaseableObject(), 
+                            coupon: coupon, 
+                            loggedInUser: SessionVariables.LoggedInUser, 
+                            msgs: amsgs, 
+                            dc: adc);
+
+                        attachedCoupon = registrantAccount.AttachCoupon(coupon, SessionVariables.LoggedInUser, amsgs, adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                   
+                        attachedCoupon.Send();                   
+                    },
+                    onFailure: (SystemMessages fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        msgs.AddRange(emsgs);
+                    }
+                );
+
+            }
+
+            ViewBag.Messages = msgs;
+            ViewBag.AttachedCoupons = GetAttachedCoupons(registrantActivity);
+            ViewBag.IsActivityLeader = IsActivityLeader(activity);
+            return View("RegistrantDetail", registrantActivity);
         }
 
         [HttpGet]
@@ -1241,7 +1342,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
             string extension = "";
-            var questions = af.GetAllQuestions();
+            var questions = af.GetForm().GetAllQuestions();
 
             if (csv.IsBlank())
             {
@@ -1531,7 +1632,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
 
-            var questions = af.GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
+            var questions = af.GetForm().GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
 
             var swriter = new StringWriter();
             var csvWriter = new CsvHelper.CsvWriter(swriter);
@@ -1621,7 +1722,7 @@ namespace AfterSchool.Areas.Org.Controllers
             //    }
             //}
 
-            var questionGroups = activityForm.GetQuestionGroups();
+            var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
             var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
 
@@ -1723,7 +1824,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
-            var questionGroups = activityForm.GetQuestionGroups();
+            var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
             var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
             var currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
@@ -1784,7 +1885,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult MessageAdd(string id, string subject, string body)
+        public ActionResult MessageAdd(string id,string deliveryMethod, string subject, string body)
         {
             var msgs = new SystemMessages();
 
@@ -1803,7 +1904,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Select(x => x.ID.Value)
                     .ToList();
                 am = activity.AddMessage(subject, body, registrantIds, SessionVariables.LoggedInUser.ID.Value, msgs);
-
+                
                 BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
             }
 
@@ -2028,7 +2129,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         // manages seats and create registrantactivity record
                         Registration.ProcessRegistrationAssignment(
                             registration: registration,
-                            participationObject: activity.ToParticipationObject(amsgs, adc),
+                            participationObject: activity.GetParticipationObject(amsgs, adc),
                             registrant: student,
                             seatsRequested: 1,
                             activityGroupId: activity.ActivityGroupId,

@@ -1,4 +1,5 @@
 ﻿using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -71,7 +72,7 @@ namespace AfterSchool.Models
                                 // manages seats and create registrantactivity record
                                 Registration.ProcessRegistrationAssignment(
                                         registration: registration,
-                                        participationObject: activity.ToParticipationObject(amsgs, adc),
+                                        participationObject: activity.GetParticipationObject(amsgs, adc),
                                         registrant: registrant,
                                         seatsRequested: 1,
                                         activityGroupId: activity.ActivityGroupId,

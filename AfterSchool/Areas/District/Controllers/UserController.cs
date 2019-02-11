@@ -7,6 +7,7 @@ using BasicLibrary;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.District.Controllers
 {
@@ -67,8 +68,8 @@ namespace AfterSchool.Areas.District.Controllers
         [HttpPost]
         public ActionResult Edit(string id, string firstname, string lastname, string username, string password1, string password2, string isactive)
         {
-            SystemMessages msgs = new SystemMessages();
-            WebUser user = WebUser.Load(id.ToInteger());
+            var msgs = new SystemMessages();
+            var user = WebUser.Load(id.ToInteger());
 
             if (password1 != password2)
             {

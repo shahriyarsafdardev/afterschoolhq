@@ -4,6 +4,7 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using System.Linq;
 using System;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -23,6 +24,7 @@ namespace AfterSchoolLibraryTests.Factories
                                       );
           
             msgs.AddRange(match.Save(dc));
+
             return match;
         }
 
@@ -49,8 +51,6 @@ namespace AfterSchoolLibraryTests.Factories
                     dc);
             }
 
-            var participationObject = league.ToParticipationObject(msgs, dc);
-
             if(team.IsEmpty())
                 team = ActivityFactory.Create(visitorAccount, league, msgs, dc);
 
@@ -60,7 +60,6 @@ namespace AfterSchoolLibraryTests.Factories
                 activityInstance = league.GetSchedule().AddInstance(dateRange, InstanceType.InSession, accountOwner.ID.Value, msgs, dc);
             }
             
-
             return MatchFactory.Create(vistorAccountUser, team, activityInstance, msgs, dc); 
         }
     }

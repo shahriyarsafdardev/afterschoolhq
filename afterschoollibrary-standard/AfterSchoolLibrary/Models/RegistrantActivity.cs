@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// How a registrant is placed in an activity/team.
@@ -321,50 +321,6 @@ namespace AfterSchoolLibrary
             return Registrant.Load(this.RegistrantId.Value, msgs, dc);
         }
 
-        //public Activity ToActivity(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (loadFromDb)
-        //        return Activity.Load(this.ActivityId.Value, msgs, dc);
-        //    else
-        //        return new Activity()
-        //        {
-        //            ID = this.ActivityId,
-        //            Name = this.ActivityName,
-        //            Uid = this.ActivityUid,
-        //            ActivityGroupId = this.ActivityActivityGroupId,
-        //            ActivityScheduleId = this.ActivityActivityScheduleId,
-        //            IsArchived = this.ActivityIsArchived,
-        //            AccountId = this.ActivityAccountId,
-        //            CostPerRegistrant = this.ActivityCostPerRegistrant,
-        //            IsDeleted = this.ActivityIsDeleted
-        //        };
-        //}
-
-        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            switch(this.ParticipationObjectTypeId)
-            {
-                case ParticipationObjectType.AccountActivityGroup:
-                    return AccountActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
-                case ParticipationObjectType.Activity:
-                    return Activity.Load(this.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
-                case ParticipationObjectType.ActivityGroup:
-                    return ActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
-            }
-
-            return null;
-        }
-
-        //public static List<RegistrantActivity> LoadByActivityId(int ActivityId, int? start, int? length, DatabaseConnection dc = null)
-        //{
-        //    BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-        //    dq.Connection = dc;
-        //    dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-        //    dq.SelectRange.Start = start;
-        //    dq.SelectRange.Length = length;
-        //    return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
-        //}
-
         public static List<RegistrantActivity> LoadByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, int? start, int? length, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -645,12 +601,12 @@ namespace AfterSchoolLibrary
                 $"</ul>" +
                 $"</p>";
 
-            var message = $"<p>Hello {participationObject.ContactName},</p>{details}<p>{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
+            var message = $"<p>Hello {participationObject.ContactName},</p>{details}<p>{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
 
             return SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                    Email.AppEmailAddress,
-                                    Utilities.AppName(account.IsAfterSchool)
+                                    Helpers.Email.AppEmailAddress,
+                                    Helpers.Utilities.AppName(account.IsAfterSchool)
                                ),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                     subject: $"You have a new registration for {participationObject.Name}",
@@ -671,7 +627,7 @@ namespace AfterSchoolLibrary
         
         public SystemMessages SendPaymentReminder()
         {
-            return EmailHelper.SendPaymentReminder(this);
+            return Helpers.EmailHelper.SendPaymentReminder(this);
         }
 
         public bool IsForActivity()

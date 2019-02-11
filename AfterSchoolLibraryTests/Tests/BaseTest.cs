@@ -8,6 +8,8 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests
 {
@@ -26,7 +28,7 @@ namespace AfterSchoolLibraryTests
 
             if (UseDatabase)
             {
-                AfterSchoolLibrary.Utilities.InitializeApp();
+                AfterSchoolLibrary.Helpers.Utilities.InitializeApp();
 
                 dc = new DatabaseConnection(Database.TestCredentials.ConnectionString);
                 msgs = new SystemMessages();

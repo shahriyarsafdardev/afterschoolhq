@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
-using System.Net;
-using System.IO;
 using System.Collections;
 using BasicLibrary;
 using SendGrid.Helpers.Mail;
-using SendGrid;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Helpers
 {
     public class Utilities
     {
@@ -230,7 +228,7 @@ namespace AfterSchoolLibrary
         public static void InitializeApp()
         {
             // Utilities.UseSSL = true; //can put in a if statement depending on if is live, etc.
-            // AfterSchoolLibrary.Utilities.AppName = "Enroll HQ"; //used in email signatures, etc
+            // AfterSchoolLibrary.Helpers.Utilities.AppName = "Enroll HQ"; //used in email signatures, etc
             Utilities.AppAESKey = System.Text.Encoding.UTF8.GetBytes("9dj3nshcnshf73heydsg1nshdyciefh7"); //32 alphanumeric chars - only set once per app, never changed afterwards, required
 
             Utilities.MasterAPIKey = ""; //at least 45 random alphanumeric characters

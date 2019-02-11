@@ -1,6 +1,6 @@
 ﻿using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests.Factories
 {

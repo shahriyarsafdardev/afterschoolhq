@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// An activity that is kept in a cart for when a user is trying to register for activities.
@@ -201,43 +201,6 @@ namespace AfterSchoolLibrary
                 _Activity = Activity.Load(this.ParticipationObjectId.Value, msgs, dc);
 
             return _Activity;
-        }
-
-        [NonSerialized]
-        private ActivityGroup _ActivityGroup = null;
-        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (_ActivityGroup.IsEmpty())
-                _ActivityGroup = ActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
-
-            return _ActivityGroup;
-        }
-
-        [NonSerialized]
-        private AccountActivityGroup _AccountActivityGroup = null;
-        public AccountActivityGroup GetAccountActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (_AccountActivityGroup.IsEmpty())
-                _AccountActivityGroup = AccountActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
-
-            return _AccountActivityGroup;
-        }
-
-        [NonSerialized]
-        private ParticipationObject _ParticipationObject = null;
-        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (_ParticipationObject.IsEmpty())
-            {
-                if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                    _ParticipationObject = this.GetActivity(msgs, dc).ToParticipationObject(msgs, dc);
-                else if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
-                    _ParticipationObject = this.GetActivityGroup(msgs, dc).ToParticipationObject(msgs, dc);
-                else if (this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
-                    _ParticipationObject = this.GetAccountActivityGroup(msgs, dc).ToParticipationObject(msgs, dc);
-            }
-
-            return _ParticipationObject;
         }
 
         #endregion

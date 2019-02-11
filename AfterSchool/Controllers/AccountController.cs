@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
 using System;
 using Hangfire;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Controllers
 {
@@ -1234,10 +1235,14 @@ namespace AfterSchool.Controllers
             return HandleIsLoggedIn() ?? PaymentActionGet(id);
         }
 
-        private ActionResult PaymentActionPost(string id, string stripetoken, string sourceId, string savepaymentinfo, string paymentoption)
+        private ActionResult PaymentActionPost(string id, string stripetoken, string sourceId, string savepaymentinfo, string paymentoption, string couponCode)
         {
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).FirstOrDefault()?.GetParticipationObject(msgs);
+            var coupon = new Coupon();
+
+            if (couponCode.IsNotEmpty())
+                coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs);
 
             if (sourceId.IsEmpty() && stripetoken.IsEmpty())
                 msgs.Add("Please enter your payment information", MessageType.UserError);
@@ -1257,7 +1262,7 @@ namespace AfterSchool.Controllers
                 AccountService.ProcessRegistrationWithPayment(
                     checkoutObject: new CheckoutObject()
                     {
-                        Coupon = null,
+                        Coupon = coupon,
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         PaymentPlan = paymentPlan,
@@ -1271,7 +1276,7 @@ namespace AfterSchool.Controllers
                         SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
                         MasterRegistrant = SessionVariables.CurrentRegistrant,
                         PaymentType = PaymentType.CreditCard,
-                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform
+                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                     },
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);
@@ -1284,9 +1289,9 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Payment(string id, string source, string stripetoken, string savepaymentinfo, string paymentoption)
+        public ActionResult Payment(string id, string source, string stripetoken, string savepaymentinfo, string paymentoption, string coupon)
         {
-            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo, paymentoption);
+            return HandleIsLoggedIn() ?? PaymentActionPost(id, stripetoken, source, savepaymentinfo, paymentoption, coupon);
         }
 
         private ActionResult MakePaymentActionGet(string id)

@@ -6,6 +6,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Linq;
 using SendGrid.Helpers.Mail;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -37,17 +38,17 @@ namespace AfterSchoolLibrary.Services
 
         public static string EncryptPassword(string password)
         {
-            return Convert.ToBase64String(Encryption.Encrypt(password, Utilities.AppAESKey, Utilities.AppIV));
+            return Convert.ToBase64String(Encryption.Encrypt(password, Helpers.Utilities.AppAESKey, Helpers.Utilities.AppIV));
         }
 
         public static string DecryptPassword(string password)
         {
-            return Encryption.DecryptToString(Convert.FromBase64String(password), Utilities.AppAESKey, Utilities.AppIV);
+            return Encryption.DecryptToString(Convert.FromBase64String(password), Helpers.Utilities.AppAESKey, Helpers.Utilities.AppIV);
         }
 
         private static string BuildAccountInviteSubject(Account account)
         {
-            return $"You have been invited by {account.Name} to use {Utilities.AppName(account.IsAfterSchool)}";
+            return $"You have been invited by {account.Name} to use {Helpers.Utilities.AppName(account.IsAfterSchool)}";
         }
 
         private static string BuildAccountInviteBody(WebUser user, Account account, string message)
@@ -58,12 +59,12 @@ namespace AfterSchoolLibrary.Services
                 body += "<p>" + message + "</p><p>-------------------------------</p>";
 
             if (!user.IsActive)
-                body += $"<p>Click on the following link to create your account and start using {Utilities.AppName(account.IsAfterSchool)}: <a href=\"{user.GetInviteUrl(account)}\">{user.GetInviteUrl(account)}</a></p>";
+                body += $"<p>Click on the following link to create your account and start using {Helpers.Utilities.AppName(account.IsAfterSchool)}: <a href=\"{user.GetInviteUrl(account)}\">{user.GetInviteUrl(account)}</a></p>";
             else
-                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{Email.HostName()}/login</a></p>";
+                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{Helpers.Utilities.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{Helpers.Utilities.HostName}/login</a></p>";
 
             body += "<p>Thank you!!</p>";
-            body += Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
+            body += Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
 
             return body;
         }
@@ -71,7 +72,7 @@ namespace AfterSchoolLibrary.Services
         public static SystemMessages SendInviteToAccount(this WebUser user, Account account, string message, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             return SendGridHelper.SendMail(
-                fromEmail: new EmailAddress(Email.AppEmailAddress, Utilities.AppName(account.IsAfterSchool)),
+                fromEmail: new EmailAddress(Helpers.Email.AppEmailAddress, Helpers.Utilities.AppName(account.IsAfterSchool)),
                 toEmail: new EmailAddress(user.Email),
                 subject: BuildAccountInviteSubject(account),
                 body: BuildAccountInviteBody(user, account, message),
@@ -168,7 +169,7 @@ namespace AfterSchoolLibrary.Services
 
         public static SystemMessages SendVerificationEmail(this WebUser user, bool isAfterSchool)
         {
-            return EmailHelper.SendEmailVerification(user, isAfterSchool);
+            return Helpers.EmailHelper.SendEmailVerification(user, isAfterSchool);
         }
 
         public static SystemMessages MarkAsVerified(this WebUser user, DatabaseConnection dc = null)
@@ -193,7 +194,7 @@ namespace AfterSchoolLibrary.Services
             var token = PasswordResetToken.AddOrUpdateToken(user, msgs, dc);
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(EmailHelper.SendPasswordReset(user, token, isAfterSchool));
+                msgs.AddRange(Helpers.EmailHelper.SendPasswordReset(user, token, isAfterSchool));
 
             return msgs;
         }
@@ -238,7 +239,7 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetInviteUrl(this WebUser user, Account account)
         {
-            return Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
+            return Helpers.Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
         public static WebUser InviteNew(string firstName, string lastName, string email, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
