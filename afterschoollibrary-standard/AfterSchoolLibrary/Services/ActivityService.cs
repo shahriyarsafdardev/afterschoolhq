@@ -80,6 +80,20 @@ namespace AfterSchoolLibrary.Services
             return Math.Max(0, rtn);
         }
 
+        public static SubscriptionPlan GetSubscriptionPlan(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadActiveByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.Subscription && plan.IsActive)
+                .FirstOrDefault();
+        }
+
+        public static SubscriptionPlan GetPaymentPlan(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionPlan.LoadActiveByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                .Where(plan => plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.IsActive)
+                .FirstOrDefault();
+        }
+
         public static SubscriptionPlan AddPaymentPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, int totalPeriods, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return SubscriptionPlanService.CreateNewPaymentPlan(
@@ -452,7 +466,7 @@ namespace AfterSchoolLibrary.Services
                     }
 
                     // copy Activity Properties
-                    activity.GetActivityProperties(adc).ForEach(property => {
+                    activity.GetActivityProperties(msgs, adc).ForEach(property => {
                         var newProperty = new AccountProperty
                         {
                             ActivityId = copy.ID,
@@ -466,29 +480,6 @@ namespace AfterSchoolLibrary.Services
                         amsgs.AddRange(newProperty.Save(adc));
                     });
 
-                    //// copy days
-                    //// deprecated
-                    //this.GetDays(amsgs, adc).ForEach(day => {
-                    //    var newDay = new ActivityDay
-                    //    {
-                    //        ActivityId = copy.ID,
-                    //        ActivityRecurrenceId = day.ActivityRecurrenceId,
-                    //        Day = day.Day,
-                    //        EndTime = day.EndTime,
-                    //        StartTime = day.StartTime,
-                    //        CreateDate = DateTime.UtcNow,
-                    //        LastModifiedDate = DateTime.UtcNow,
-                    //        CreatedBy = loggedInUserId,
-                    //        LastModifiedBy = loggedInUserId
-                    //    };
-                    //    amsgs.AddRange(newDay.Save(adc));
-                    //});
-
-                    // copy grades
-                    //this.GetGradeLevels(amsgs, adc).ForEach(grade => {
-                    //    copy.AddGrade(grade.ID.Value, loggedInUserId, amsgs, dc: adc);
-                    //});
-
                     // NOTE: copy schedule?
                     if (activity.ActivityScheduleId.HasValue)
                     {
@@ -500,15 +491,11 @@ namespace AfterSchoolLibrary.Services
 
                     var oldSubPlan = activity.GetSubscriptionPlan(amsgs, adc);
                     if (oldSubPlan.IsNotEmpty())
-                    {
-                        var newSubPlan = oldSubPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
-                    }
+                        oldSubPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
 
                     var oldPaymentPlan = activity.GetPaymentPlan(amsgs, adc);
                     if (oldPaymentPlan.IsNotEmpty())
-                    {
-                        var newPaymentPlan = oldPaymentPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
-                    }
+                        oldPaymentPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
 
                     if (includeRegistrants)
                     {
@@ -561,7 +548,6 @@ namespace AfterSchoolLibrary.Services
                 },
                 dc: dc
             );
-
 
             return copy;
         }
@@ -630,20 +616,19 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             //deactivate all other ones
-            var afs = activity.GetActivityForms(dc: dc);
-            foreach (var item in afs)
-            {
+            activity.GetActivityForms(msgs, dc).ForEach(item => {
                 item.IsActive = false;
-                msgs.AddRange(item.Save(dc: dc));
-            }
+                msgs.AddRange(item.Save(dc));
+            });
 
             var af = ActivityForm.LoadByActivityIdByFormId(activity.ID.Value, form.ID.Value, dc: dc);
+
             if (af.IsEmpty())
             {
                 af = new ActivityForm();
                 af.ActivityId = activity.ID;
                 af.AccountId = activity.AccountId;
-                af.Name = (activity.Name + " Registration Form").MaxChars(50);
+                af.Name = $"{activity.Name} Registration Form".MaxChars(50);
                 af.Description = "Please fill in the registration form below";
                 af.FormId = form.ID;
                 af.IsPublished = isPublished;
@@ -654,11 +639,10 @@ namespace AfterSchoolLibrary.Services
             af.LastModifiedDate = DateTime.UtcNow;
             af.LastModifiedBy = loggedInUserId;
             af.IsActive = true;
-            msgs.AddRange(af.Save(dc: dc));
+            msgs.AddRange(af.Save(dc));
 
             return af;
         }
-
 
         public static Activity EditExisting(int loggedInUserId, Account account, string activityId, Dictionary<string, object> values, SystemMessages msgs = null)
         {
@@ -1099,10 +1083,10 @@ namespace AfterSchoolLibrary.Services
 
                     if (instructoremail.IsEmpty())
                         msgs.Add("Instructor Email is required", MessageType.UserError);
-                    else if (!instructoremail.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                    else if (!instructoremail.IsRegExMatch(Utilities.EmailRegEx))
                         msgs.Add("Instructor Email must be a valid email", MessageType.UserError);
 
-                    if (instructorphone.IsNotEmpty() && !instructorphone.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    if (instructorphone.IsNotEmpty() && !instructorphone.IsRegExMatch(Utilities.PhoneRegEx))
                         msgs.Add("Instructor Phone must be a valid phone number", MessageType.UserError);
 
                     if (msgs.HasNoErrors())
@@ -1643,6 +1627,359 @@ namespace AfterSchoolLibrary.Services
             );
 
             return am;
+        }
+
+        public static List<DayOfWeekASL> GetDaysOfTheWeek(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek(msgs, dc).Any() ?? false)
+                return activity.GetSchedule(msgs: msgs, dc: dc)?.GetDaysOfTheWeek();
+
+            return new List<DayOfWeekASL>();
+        }
+
+        public static int GetRegistrantCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByParticipationObject(
+                activity.ID.Value,
+                ParticipationObjectType.Activity,
+                msgs,
+                dc);
+        }
+
+        public static int GetRegistrantCountByAssignmentType(this Activity activity, RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentType(
+                assignmentType: assignmentType,
+                participationObjectId: activity.ID,
+                participationObjectType: ParticipationObjectType.Activity,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static List<Registrant> GetRegistrants(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.GetRegistrantActivities(msgs, dc).Select(x => x.ToRegistrant()).ToList();
+        }
+
+        public static List<RegistrantActivity> GetRegistrantActivities(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.GetRegistrantActivities(false, msgs, dc);
+        }
+
+        public static List<RegistrantActivity> GetRegistrantActivities(this Activity activity, bool includeInvited, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var ras = new List<RegistrantActivity>();
+
+            if (includeInvited)
+                ras = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc).ToList();
+            else
+                ras = RegistrantActivity.LoadByParticipationObject(activity.ID.Value, ParticipationObjectType.Activity, msgs, dc)
+                    .Where(x =>
+                        x.AssignmentTypeId != RegistrationAssignmentType.Invited &&
+                        x.AssignmentTypeId != RegistrationAssignmentType.Declined
+                    ).ToList();
+
+            return ras;
+        }
+
+        public static RegistrationPeriod AddNewRegistrationPeriod(this Activity activity, string name, DateTime startDateTime, DateTime endDateTime, int accountId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var period = new RegistrationPeriod();
+            period.StartDateTime = startDateTime;
+            period.EndDateTime = endDateTime;
+            period.Name = name;
+            period.AccountId = accountId;
+            period.CreateDate = period.LastModifiedDate = DateTime.UtcNow;
+            period.CreatedBy = period.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(period.Save(dc: dc));
+
+            msgs.AddRange(period.AddActivity(activity, true, loggedInUserId, dc: dc));
+
+            return period;
+        }
+
+        public static ActivityWebUser AddTeamMember(this Activity activity, int webUserId, bool isLeader, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var teammember = new ActivityWebUser
+            {
+                WebUserId = webUserId,
+                ActivityId = activity.ID,
+                IsLeader = isLeader,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUserId
+            };
+            msgs.AddRange(teammember.Save(dc));
+
+            return teammember;
+        }
+
+        public static List<ActivityWebUser> GetTeamMembers(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityWebUser.LoadByActivityId(activity.ID.Value, msgs, dc);
+        }
+
+        public static List<Form> GetForms(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityForm.LoadByActivityId(activity.ID.Value, dc: dc).Select(x => x.GetForm()).ToList();
+        }
+
+        public static Form GetActiveForm(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var af = activity.GetActiveActivityForm(msgs, dc);
+
+            if (af.IsEmpty())
+                return null;
+
+            return af.GetForm(msgs, dc);
+        }
+
+        public static ActivityForm GetActiveActivityForm(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ID.HasValue)
+                return ActivityForm.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc);
+
+            return null;
+        }
+
+        public static List<ActivityForm> GetActivityForms(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ID.HasValue)
+                return ActivityForm.LoadByActivityId(activity.ID.Value, msgs: msgs, dc: dc);
+
+            return new List<ActivityForm>();
+        }
+
+        public static List<Attendance> GetAttendance(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityId(activity.ID.Value, msgs: msgs, dc: dc);
+        }
+
+        public static List<Attendance> GetCompletedAttendance(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityIdByIsCompleted(activity.ID.Value, true, msgs: msgs, dc: dc);
+        }
+
+        public static int GetAttendancePresentCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AttendanceRegistrant.GetPresentCountByActivityId(activity.ID.Value, msgs: msgs, dc: dc);
+        }
+
+        public static int GetAttendancePossibleCount(this Activity activity, SystemMessages msgs = null,  DatabaseConnection dc = null)
+        {
+            return AttendanceRegistrant.GetPossibleCountByActivityId(activity.ID.Value, msgs: msgs, dc: dc);
+        }
+
+        public static List<Attendance> GetAttendanceByDate(this Activity activity, DateTime date, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByActivityIdByDate(activity.ID.Value, date, msgs: msgs, dc: dc);
+        }
+
+        public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityRegistrationPeriod.LoadByActivityId(activity.ID.Value, msgs, dc);
+        }
+
+        public static List<RegistrationPeriod> GetRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.GetActivityRegistrationPeriods(msgs, dc)
+                .Select(x => x.ToRegistrationPeriod())
+                .ToList();
+        }
+
+        public static List<RegistrationPeriod> GetUpcomingRegistrationPeriods(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.GetRegistrationPeriods(msgs, dc)
+                .Where(x => x.StartDateTime.Value > DateTime.UtcNow)
+                .OrderBy(x => x.StartDateTime.Value)
+                .ToList();
+        }
+
+        public static RegistrationPeriod GetCurrentRegistrationPeriod(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.GetRegistrationPeriods(msgs, dc)
+                .Where(x => x.StartDateTime.Value <= DateTime.UtcNow && x.EndDateTime.Value >= DateTime.UtcNow)
+                .FirstOrDefault();
+        }
+
+        public static RegistrationPeriod GetLatestRegistrationPeriod(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var period = activity.GetCurrentOrNextRegistrationPeriod(msgs, dc: dc);
+            if (period.IsEmpty())
+                period = activity.GetRegistrationPeriods(msgs, dc: dc).OrderByDescending(p => p.EndDateTime).FirstOrDefault();
+
+            return period;
+        }
+
+        public static RegistrationPeriod GetCurrentOrNextRegistrationPeriod(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var period = activity.GetCurrentRegistrationPeriod(msgs, dc);
+            if (period.IsEmpty())
+                return activity.GetUpcomingRegistrationPeriods(msgs, dc).FirstOrDefault();
+
+            return period;
+        }
+
+        public static RegistrationPeriod GetActiveRegistrationPeriod(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ID.HasValue)
+            {
+                var item = ActivityRegistrationPeriod.LoadByActivityIdByIsActive(activity.ID.Value, true, msgs, dc);
+                if (item.IsNotEmpty())
+                    return item.ToRegistrationPeriod(true, msgs, dc);
+            }
+            return null;
+        }
+
+        public static Account GetAccount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Account.Load(activity.AccountId.Value, msgs, dc);
+        }
+
+        public static SystemMessages MarkAsDeleted(this Activity activity, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            activity.IsDeleted = true;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUserId;
+            return activity.Save(dc);
+        }
+
+        public static SystemMessages MoveToArchive(this Activity activity, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            activity.IsArchived = true;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUserId;
+            return activity.Save(dc);
+        }
+
+        public static SystemMessages MoveFromArchive(this Activity activity, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            activity.IsArchived = false;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            activity.LastModifiedBy = loggedInUserId;
+            return activity.Save(dc);
+        }
+
+        public static AccountProperty AddOrUpdateActivityProperty(this Activity activity, AccountPropertyType type, string value, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var ap = activity.GetActivityProperty(type, msgs, dc);
+
+            if (ap.IsEmpty())
+            {
+                ap = new AccountProperty();
+                ap.ActivityId = activity.ID.Value;
+                ap.AccountPropertyTypeId = type;
+                ap.CreateDate = DateTime.UtcNow;
+                ap.CreatedBy = loggedInUserId;
+            }
+
+            ap.Value = value;
+            ap.LastModifiedDate = DateTime.UtcNow;
+            ap.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(ap.Save(dc: dc));
+
+            return ap;
+        }
+
+        public static AccountProperty GetActivityProperty(this Activity activity, AccountPropertyType propertyType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.GetActivityProperties(msgs, dc)?.Find(x => x.AccountPropertyTypeId == propertyType);
+        }
+
+        public static List<GenderType> GetAllowedGenders(this Activity activity)
+        {
+            switch (activity.GenderRestriction)
+            {
+                case GenderRestrictionType.None:
+                    return new List<GenderType>() { GenderType.Female, GenderType.Male };
+                case GenderRestrictionType.MaleOnly:
+                    return new List<GenderType>() { GenderType.Male };
+                case GenderRestrictionType.FemaleOnly:
+                    return new List<GenderType>() { GenderType.Female };
+            }
+            return new List<GenderType>();
+        }
+
+
+        /// <summary>
+        /// gets the first scheduled date for the activity, also gets the start time
+        /// </summary>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static DateTime? GetFirstDate(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return activity.GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc).FirstOrDefault()?.StartDateTime;
+        }
+
+        /// <summary>
+        /// gets the last scheduled date for the activity, also gets the start time
+        /// </summary>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static DateTime? GetLastDate(this Activity activity, DatabaseConnection dc = null)
+        {
+            return activity.GetSchedule(dc: dc).GetInstances(dc: dc).LastOrDefault()?.StartDateTime;
+        }
+
+        public static SystemMessages SendRegistrationSummaryReport(int activityId, string uiActivityLabel, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.Load(activityId, msgs, dc);
+            var registrants = activity.GetRegistrants(msgs, dc);
+
+            string subject = $"{activity.Name} Registration Summary Report";
+            string body = $"<p>{activity.ContactName},</p><p>Here's your registration summary report for <strong>{activity.Name}</strong>. You have <strong>{registrants.Count.ToString()}</strong> registrations.</p>";
+
+            msgs.AddRange(Services.RegistrationService.EmailCSVReport(
+                activity.GetAccount(msgs, dc).ID.Value,
+                null,
+                null,
+                activityId.AsList(),
+                ParticipationObjectType.Activity,
+                "registrations",
+                RegistrationReportType.SingleActivity,
+                RegistrationAssignmentType.NotSet,
+                uiActivityLabel,
+                activity.ContactEmail,
+                subject,
+                body));
+
+            return msgs;
+        }
+
+        public static SystemMessages SetIsPublished(this Activity activity, bool isPublished, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            activity.IsPublished = isPublished;
+            activity.LastModifiedBy = loggedInUserId;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            return activity.Save(dc);
+        }
+
+        public static ActivityGroup GetActivityGroup(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ActivityGroupId.HasValue)
+                return ActivityGroup.Load(activity.ActivityGroupId.Value, msgs, dc: dc);
+
+            return null;
+        }
+
+        public static ActivitySchedule GetSchedule(this Activity activity, bool reload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ActivityScheduleId.HasValue)
+                return ActivitySchedule.LoadWithInstances(activity.ActivityScheduleId.Value, msgs, dc);
+
+            return null;
+        }
+
+        public static List<AccountProperty> GetActivityProperties(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ID.HasValue)
+                return AccountProperty.LoadByActivityId(activity.ID.Value, msgs, dc: dc);
+
+            return new List<AccountProperty>();
         }
     }
 }

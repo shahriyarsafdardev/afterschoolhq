@@ -40,7 +40,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(plan.ID.HasValue);
         }
 
-        [Fact]
+        [Fact(DisplayName = "CreateNewActivityGroupObjectTest")]
         public void CreateNewActivityGroupObjectTest()
         {
             var activityGroup = ActivityGroupFactory.Create(PlanOwner, ActivityGroupType.Session, msgs, dc);

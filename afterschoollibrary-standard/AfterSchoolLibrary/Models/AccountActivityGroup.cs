@@ -361,7 +361,10 @@ namespace AfterSchoolLibrary.Models
 
         public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Form.Load(this.FormId.Value, msgs, dc);
+            if (this.FormId.HasValue)
+                return Form.Load(this.FormId.Value, msgs, dc);
+
+            return null;
         }
 
         public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -319,45 +319,6 @@ namespace AfterSchoolLibrary.Models
             );
         }
 
-        public SystemMessages AddActivity(Activity activity, bool isActive, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var item = ActivityRegistrationPeriod.LoadByRegistrationPeriodIdByActivityId(this.ID.Value, activity.ID.Value, dc: dc);
-
-            if ((item.IsEmpty() || (item.IsNotEmpty() && !item.IsActive)) && isActive)
-            {
-                activity.GetActivityRegistrationPeriods(dc: dc).ForEach(period => {
-                    period.IsActive = false;
-                    period.LastModifiedDate = DateTime.UtcNow;
-                    period.LastModifiedBy = loggedInUserId;
-                    msgs.AddRange(period.Save(dc: dc));
-                });
-            }
-
-            //if record doesn't already exist
-            if (item.IsEmpty())
-            {
-                var activityperiod = new ActivityRegistrationPeriod
-                {
-                    RegistrationPeriodId = this.ID,
-                    ActivityId = activity.ID,
-                    IsActive = isActive,
-                    CreateDate = DateTime.UtcNow,
-                    LastModifiedDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId,
-                    LastModifiedBy = loggedInUserId
-                };
-                msgs.AddRange(activityperiod.Save(dc: dc));
-            }
-            else
-            {
-                item.IsActive = isActive;
-                msgs.AddRange(item.Save(dc: dc));
-            }
-
-            return msgs;
-        }
-
         public RegistrationPeriod Copy(string newName, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc)
         {
             var period = new RegistrationPeriod
@@ -455,25 +416,6 @@ namespace AfterSchoolLibrary.Models
                 _Group = ActivityGroup.Load(this.ActivityGroupId.Value, msgs, dc);
 
             return _Group;
-        }
-
-        private Account _Account = null;
-        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (_Account.IsEmpty())
-            {
-                if (this.AccountId.HasValue)
-                {
-                    _Account = Account.Load(this.AccountId.Value, msgs, dc);
-                }
-                else
-                {
-                    var arps = this.GetActivityRegistrationPeriods(msgs, dc).Where(x => x.IsActive).ToList();
-                    if (arps.Any())
-                        _Account = arps.First().GetActivity(msgs, dc).GetAccount(msgs, dc);
-                }
-            }
-            return _Account;
         }
 
         #endregion

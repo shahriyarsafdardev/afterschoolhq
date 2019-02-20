@@ -27,7 +27,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors())
             {
                 // TODO: Write this
-                msgs.Add("No email sent", MessageType.Error);
+                msgs.Add("No email sent", MessageType.Warning);
             }
 
             return msgs;
@@ -379,7 +379,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(group.Save(adc));
 
                     // copy AccountProperties / Content
-                    activityGroup.GetGroupProperties(adc).ForEach(item => {
+                    activityGroup.GetGroupProperties(msgs, adc).ForEach(item => {
                         var newprop = new AccountProperty();
                         newprop.AccountPropertyTypeId = item.AccountPropertyTypeId;
                         newprop.ActivityGroupId = group.ID;
