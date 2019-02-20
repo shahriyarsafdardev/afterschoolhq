@@ -1981,5 +1981,10 @@ namespace AfterSchoolLibrary.Services
 
             return new List<AccountProperty>();
         }
+
+        public static List<ActivityMessage> GetMessages(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return ActivityMessage.LoadByActivityId(activity.ID.Value, msgs, dc);
+        }
     }
 }

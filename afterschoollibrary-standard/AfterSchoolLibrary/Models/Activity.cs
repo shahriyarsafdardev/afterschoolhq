@@ -707,34 +707,7 @@ namespace AfterSchoolLibrary.Models
                 return this.GetActivityGroup().IsNotEmpty() && this.GetActivityGroup().IsArchived;
             }
         }
-
-
-        //public bool HasGradeLevel(GradeLevel grade, DatabaseConnection dc = null)
-        //{
-        //    return GetGradeLevels(dc: dc).Where(x => x.ID.Value == grade.ID.Value).Count() > 0;
-        //}
-
-        //private List<GradeLevel> _GradeLevels = null;
-        //public List<GradeLevel> GetGradeLevels(SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (_GradeLevels.IsEmpty())
-        //        _GradeLevels = ActivityGradeLevel.LoadByActivityId(this.ID.Value, msgs, dc: dc)
-        //            .Select(x => x.ToGradeLevel())
-        //            .OrderBy(x => x.ID)
-        //            .ToList();
-
-        //    return _GradeLevels;
-        //}
-      
-        private List<ActivityMessage> _ActivityMessages = null;
-        public List<ActivityMessage> GetMessages(DatabaseConnection dc = null)
-        {
-            if (_ActivityMessages.IsEmpty())
-                _ActivityMessages = ActivityMessage.LoadByActivityId(this.ID.Value, dc: dc);
-
-            return _ActivityMessages;
-        }        
-
+        
         public bool HasAddress
         {
             get
@@ -743,42 +716,6 @@ namespace AfterSchoolLibrary.Models
             }
         }          
         
-        //private ActivityDay AddActivityDay(DayOfWeekASL day, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
-        //    var newDay = new ActivityDay();
-        //    newDay.Day = day;
-        //    newDay.ActivityId = this.ID;
-        //    newDay.CreateDate = newDay.LastModifiedDate = DateTime.UtcNow;
-        //    newDay.CreatedBy = newDay.LastModifiedBy = loggedInUserId;
-        //    msgs.AddRange(newDay.Save(dc: dc));
-        //    return newDay;
-        //}
-
-        //private SystemMessages SetupActivityDays(string days, Account account, int loggedInUserId, DatabaseConnection dc = null)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var daysList = days.Split(',').Select(x => (DayOfWeekASL)x.ToInteger()).ToList();
-        //    var currentDaysOfWeek = this.GetDaysOfTheWeek(dc: dc);
-        //    var currentDays = this.GetDays(dc: dc);
-
-        //    // delete days
-        //    currentDaysOfWeek
-        //        .Where(x => !daysList.Contains(x))
-        //        .ToList()
-        //        .ForEach(day => msgs.AddRange(currentDays.Where(x => x.Day == day).First().Delete(dc: dc)));
-
-        //    // add days
-        //    daysList
-        //        .Where(x => !currentDaysOfWeek.Contains(x))
-        //        .ToList()
-        //        .ForEach(day => this.AddActivityDay(day, loggedInUserId, msgs, dc: dc));  
-            
-        //    //forces reload of days
-        //    this._Days = null;
-        //    return msgs;
-        //}        
-        
         public bool HasSchedule
         {
             get
@@ -786,106 +723,6 @@ namespace AfterSchoolLibrary.Models
                 return this.ActivityScheduleId.HasValue;
             }
         }        
-
-        //public static List<Activity> GetActivitiesByRegistrantByDay(int registrantId, DayOfWeekASL day, DateTime startDate, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    var dq = DatabaseQuery;
-        //    dq.Connection = dc;
-
-        //    dq.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
-        //    dq.Joins.Add(RegistrantActivity.ObjectMap["ActivityId"], ObjectMap["ID"]);
-
-        //    dq.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], registrantId);
-        //    dq.Criterias.Add(ActivityInstance.ObjectMap["Day"], (int)day);
-        //    dq.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-
-        //    return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        //}
-
-        //public static List<Activity> GetByActivitiesByRegistrants(List<int> activityIds, List<int> registrantIds, DayOfWeekASL? day = DayOfWeekASL.NotSet, RegistrationStatus regStatus = RegistrationStatus.NotSet, List<int> groupIds = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    var dq = DatabaseQuery;
-        //    dq.Connection = dc;
-        //    dq.UseParameterizedQuery = false;
-
-        //    dq.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
-        //    dq.Joins.Add(RegistrantActivity.ObjectMap["ActivityId"], ObjectMap["ID"]);
-
-        //    dq.Criterias.Add(ObjectMap["Id"], activityIds, DatabaseCriteriaOperatorEnum.In);
-        //    dq.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
-
-        //    if (groupIds.IsNotEmpty() && groupIds.Any())
-        //    {
-        //        dq.Criterias.Add(ObjectMap["ActivityGroupId"], groupIds, DatabaseCriteriaOperatorEnum.In);
-        //    }
-
-        //    if (day != DayOfWeekASL.NotSet)
-        //    {
-        //        dq.Criterias.Add(ActivityInstance.ObjectMap["Day"], (int)day);
-        //    }
-        //    // dq.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-
-        //    if (regStatus == RegistrationStatus.Current)
-        //    {
-        //        var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
-        //        aQuery.UseParameterizedQuery = false;
-        //        aQuery.SelectParameters.Clear();
-        //        aQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
-        //        aQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
-        //        aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-        //        dq.Criterias.Add(ObjectMap["ActivityScheduleId"], aQuery, DatabaseCriteriaOperatorEnum.In);
-
-        //        var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
-        //        bQuery.UseParameterizedQuery = false;
-        //        bQuery.SelectParameters.Clear();
-        //        bQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
-        //        bQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
-        //        bQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-        //        dq.Criterias.Add(ObjectMap["ActivityScheduleId"], bQuery, DatabaseCriteriaOperatorEnum.In);
-        //    }
-        //    else if (regStatus == RegistrationStatus.Future)
-        //    {
-        //        // has no end dates in the past
-        //        var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
-        //        aQuery.UseParameterizedQuery = false;
-        //        aQuery.SelectParameters.Clear();
-        //        aQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
-        //        aQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
-        //        aQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-        //        dq.Criterias.Add(ObjectMap["ActivityScheduleId"], aQuery, DatabaseCriteriaOperatorEnum.NotIn);
-
-        //        // has some records in the activity instance table though
-        //        var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
-        //        bQuery.UseParameterizedQuery = false;
-        //        bQuery.SelectParameters.Clear();
-        //        bQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
-        //        bQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
-        //        dq.Criterias.Add(ObjectMap["ActivityScheduleId"], bQuery, DatabaseCriteriaOperatorEnum.In);
-        //    }
-        //    else if (regStatus == RegistrationStatus.Past)
-        //    {
-        //        // has no start dates in the future
-        //        var aQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
-        //        aQuery.UseParameterizedQuery = false;
-        //        aQuery.SelectParameters.Clear();
-        //        aQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
-        //        aQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
-        //        aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-        //        dq.Criterias.Add(ObjectMap["ActivityScheduleId"], aQuery, DatabaseCriteriaOperatorEnum.NotIn);
-
-        //        // has some records in the activity instance table though
-        //        var bQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ActivityInstance).Name);
-        //        bQuery.UseParameterizedQuery = false;
-        //        bQuery.SelectParameters.Clear();
-        //        bQuery.SelectParameters.Add(ActivityInstance.ObjectMap["ActivityScheduleId"]);
-        //        bQuery.Criterias.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], ObjectMap["ActivityScheduleId"]);
-        //        dq.Criterias.Add(ObjectMap["ActivityScheduleId"], bQuery, DatabaseCriteriaOperatorEnum.In);
-        //    }
-
-
-        //    return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        //}
-
 
         #endregion
     }
