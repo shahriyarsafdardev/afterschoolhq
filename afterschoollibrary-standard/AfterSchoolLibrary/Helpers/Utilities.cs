@@ -975,30 +975,6 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        //public static SystemMessages UpdateGradeLevels(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        //{
-        //    var msgs = new SystemMessages();
-
-        //    var activities = Activity.Load(dc: dc);
-        //    activities = activities.Where(x => x.GradeLevelStart.HasValue && x.GradeLevelEnd.HasValue).ToList();
-        //    foreach (var activity in activities)
-        //    {
-        //        if (activity.GetGradeLevels(dc: dc).Count == 0)
-        //        {
-        //            for (var i = activity.GradeLevelStart.Value; i <= activity.GradeLevelEnd.Value; i++)
-        //            {
-        //                var grade = GradeLevel.Load(i, dc: dc);
-        //                if (grade.IsNotEmpty())
-        //                {
-        //                    activity.AddGrade(grade.ID.Value, activity.LastModifiedBy.Value, msgs, dc: dc);
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    return msgs;
-        //}
-
         //public static SystemMessages AddBellecChasseCustomQuestions(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         //{
         //    var msgs = new SystemMessages();
