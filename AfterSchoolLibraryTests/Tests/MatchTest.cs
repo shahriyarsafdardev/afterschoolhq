@@ -21,7 +21,7 @@ namespace AfterSchoolLibraryTests.Tests
             HostAccount = AccountFactory.Create(AccountOwner, msgs, dc);
         }
 
-        [Fact]
+        [Fact(Skip = "TODO")]
         public void LoadTest()
         {
             var match = MatchFactory.Create(HostAccount, AccountOwner, msgs, dc);
@@ -30,7 +30,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(Match.Load(match.ID.Value, msgs, dc).ID.Value == match.ID.Value);
         }
 
-       [Theory]
+       [Theory(Skip = "TODO")]
        [InlineData(5)]
        public void LoadByTeamIdTest(int numberToCreate)
         {
@@ -61,7 +61,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(loadedMatchesIds.SequenceEqual(matchesIds));
         }
 
-        [Theory]
+        [Theory(Skip = "TODO")]
         [InlineData(5)]
         public void LoadByActivityInstanceIdTest(int numberToCreate)
         {
@@ -95,7 +95,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(loadedMatchesIds.SequenceEqual(matchesIds));
         }
 
-        [Fact]
+        [Fact(Skip = "TODO")]
         public void LoadByTeamIdByActivityInstanceIdTest()
         {
             var visitorAccountUser = WebUserFactory.Create(msgs, dc);
@@ -121,7 +121,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(loadedMatch.ID.Value == match.ID.Value);
         }
 
-        [Fact]
+        [Fact(Skip = "TODO")]
         public void ExistsTest()
         {
             var visitorAccountUser = WebUserFactory.Create(msgs, dc);

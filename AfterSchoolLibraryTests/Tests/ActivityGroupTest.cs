@@ -54,7 +54,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(numberToCreate, ActivityGroup.GetCount(msgs: msgs, dc: dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "SaveTest")]
         public void SaveTest()
         {
             var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
@@ -64,7 +64,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
         }
 
-        [Fact]
+        [Fact(DisplayName = "DeleteTest")]
         public void DeleteTest()
         {
             var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
@@ -74,7 +74,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(0, ActivityGroup.GetCount(msgs: msgs, dc: dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "DisplayName")]
         public void ReloadTest()
         {
             var activityGroup = Factories.ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);

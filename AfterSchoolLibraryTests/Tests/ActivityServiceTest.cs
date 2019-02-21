@@ -54,7 +54,7 @@ namespace AfterSchoolLibraryTests.Tests
 
         [Fact]
         public void GetParticipationObjectActivityTestSimple()
-        {
+        {           
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
 
             Assert.IsType<ParticipationObject>(activity.GetParticipationObject(msgs, dc));

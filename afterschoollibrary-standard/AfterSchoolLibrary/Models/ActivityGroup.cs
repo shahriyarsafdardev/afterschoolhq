@@ -723,16 +723,16 @@ namespace AfterSchoolLibrary.Models
             return ap;
         }
 
-        public AccountProperty GetGroupProperty(AccountPropertyType propertyType, DatabaseConnection dc = null)
+        public AccountProperty GetGroupProperty(AccountPropertyType propertyType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return GetGroupProperties(dc: dc).Find(x => x.AccountPropertyTypeId == propertyType);
+            return GetGroupProperties(msgs, dc: dc).Find(x => x.AccountPropertyTypeId == propertyType);
         }
 
         private List<AccountProperty> _Properties = null;
-        public List<AccountProperty> GetGroupProperties(DatabaseConnection dc = null)
+        public List<AccountProperty> GetGroupProperties(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Properties.IsEmpty())
-                _Properties = AccountProperty.LoadByActivityGroupId(this.ID.Value, dc: dc);
+                _Properties = AccountProperty.LoadByActivityGroupId(this.ID.Value, msgs, dc: dc);
 
             return _Properties;
         }
@@ -843,14 +843,12 @@ namespace AfterSchoolLibrary.Models
                 ); 
         }
         
-        private ActivitySchedule _Schedule = null;
-        public ActivitySchedule GetSchedule(bool reload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public ActivitySchedule GetSchedule(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (this.ActivityScheduleId.HasValue && (reload || _Schedule.IsEmpty()))
-            {
-                _Schedule = ActivitySchedule.LoadWithInstances(this.ActivityScheduleId.Value, msgs, dc);
-            }
-            return _Schedule;
+            if (this.ActivityScheduleId.HasValue)
+                return ActivitySchedule.LoadWithInstances(this.ActivityScheduleId.Value, msgs, dc);
+
+            return null;
         }
 
         /// <summary>

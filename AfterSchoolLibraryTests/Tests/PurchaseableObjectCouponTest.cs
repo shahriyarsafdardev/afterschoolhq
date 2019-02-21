@@ -68,9 +68,6 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var poc = PurchaseableObjectCouponFactory.Create(PurchaseableObject, Coupon, msgs, dc);
 
-            poc.LastModifiedBy = 1;
-            msgs.AddRange(poc.Save(dc));
-
             Assert.True(msgs.HasNoErrors());
         }
         [Fact]
