@@ -1203,9 +1203,9 @@ a {
 }
 /************ sign-up-header end **********/
 
-/********* Contact us *************/
+/********* Contact Us & About (Company Info) *************/
 
-.contact-section {
+.co-info-section {
     padding-top: 10%;
     padding-bottom: 10%;
     position: relative;
@@ -1213,7 +1213,7 @@ a {
     display: block;
     width: 100%;
 }
-.contact-us {
+.co-info-header {
     font-family: Montserrat;
     font-size: 66px;
     font-weight: bold;
@@ -1221,6 +1221,36 @@ a {
     margin-top: 0px;
     margin-bottom: 0px;
 }
+.co-info-body {
+    font-family: Montserrat;
+    font-size: 18px;
+    font-weight: 400;
+    color: #072a27;
+    margin-top: 0px;
+}
+#about-type-top, #about-body-top {
+  margin-top: 100px;
+}
+@media (max-width: 990px) {
+  #about-type-top, #about-body-top {
+    margin-top: 30px;
+  }
+}
+.about-body {
+  margin-left: 30px;
+}
+.about-row {
+  margin-top: 30px;
+}
+.about-valueprop {
+  padding-left: 35px;
+}
+.about-bold {
+  color: #00ae85;
+  font-size: 20px;
+  font-weight: 700;
+}
+
 .address-ul li {
     position: relative;
     font-family: Montserrat;
@@ -1233,13 +1263,6 @@ a {
     list-style: none;
     margin-top: 30px;
     padding-left: 30px;
-}
-.contact-msg {
-    font-family: Montserrat;
-    font-size: 18px;
-    font-weight: 400;
-    color: #072a27;
-    margin-top: 0px;
 }
 ul li.address-li:after {
     content: "\f041";
@@ -1327,7 +1350,7 @@ ul li.phone-li:after {
 .form-section .form-dv {
     padding-bottom: 10px;
 }
-/*********Contact us end***************/
+/*********Company Info End***************/
 
 .top-green {
     background: #00ae85;
