@@ -13,12 +13,20 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static ActivitySchedule Create(Account account, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new ActivitySchedule() { Name = "Session 4 Schedule", StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(35), DailyStartTime = DateTime.UtcNow, DailyEndTime = DateTime.UtcNow.AddHours(2), AccountId = account.ID };
+            var obj = new ActivitySchedule()
+            {
+                Name = "Session 4 Schedule",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(35),
+                DailyStartTime = DateTime.UtcNow,
+                DailyEndTime = DateTime.UtcNow.AddHours(2),
+                AccountId = account.ID               
+            };
             msgs.AddRange(obj.Save(dc));
             return obj;
         }
 
-        public static ActivitySchedule Create(Account account, ParticipationObject participationObject, ParticipationObjectType participationObjectType, SystemMessages msgs, DatabaseConnection dc, ActivityGroup activityGroup = null)
+        public static ActivitySchedule Create(Account account, ActivityGroup activityGroup, SystemMessages msgs, DatabaseConnection dc)
         {
             var activitySchedule = new ActivitySchedule()
             {

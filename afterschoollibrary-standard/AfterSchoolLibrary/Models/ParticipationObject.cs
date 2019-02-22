@@ -115,7 +115,7 @@ namespace AfterSchoolLibrary.Models
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
             Details = activityGroup.Description;
-            Schedule = activityGroup.GetSchedule(false, msgs, dc);
+            Schedule = activityGroup.GetSchedule(msgs, dc);
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;
@@ -146,7 +146,7 @@ namespace AfterSchoolLibrary.Models
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
             Details = activityGroup.Description;
-            Schedule = activityGroup.GetSchedule(false, msgs, dc);
+            Schedule = activityGroup.GetSchedule(msgs, dc);
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;
@@ -270,25 +270,25 @@ namespace AfterSchoolLibrary.Models
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
             {
                 if (IsActivity())
-                    return this.GetActivity().GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                    return this.GetActivity().GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?.Value;
                 else if (IsActivityGroup())
-                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?.Value;
+                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?.Value;
                 else if (IsAccountActivityGroup())
                     return this.GetAccountActivityGroup()
                         .GetActivityGroup(msgs, dc)
-                        .GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, dc)?
+                        .GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?
                         .Value;
             }
             else
             {
                 if (ObjectType == ParticipationObjectType.Activity)
-                    return this.GetActivity().GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                    return this.GetActivity().GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc)?.Value;
                 else if (IsActivityGroup())
-                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?.Value;
+                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc)?.Value;
                 else if (IsAccountActivityGroup())                
                     return this.GetAccountActivityGroup()
                         .GetActivityGroup(msgs, dc)
-                        .GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, dc)?
+                        .GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc)?
                         .Value;
             }
 

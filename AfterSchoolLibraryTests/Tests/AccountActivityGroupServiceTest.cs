@@ -23,7 +23,7 @@ namespace AfterSchoolLibraryTests.Tests
             ActivityGroup = ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.Session, msgs, dc);
         }
 
-        [Fact]
+        [Fact(DisplayName = "CreateNewTest")]
         public void CreateNewTest()
         {
             var aag = AccountActivityGroupService.CreateNew(ActivityGroupOwner, ActivityGroup, InviteStatus.Invited, LoggedInUser, msgs, dc);
@@ -31,7 +31,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(aag);
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetActivityGroupTest")]
         public void GetActivityGroupTest()
         {
             var aag = AccountActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroup, msgs, dc);
@@ -39,7 +39,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(aag.GetActivityGroup(msgs, dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetParticipationObjectTestSimple")]
         public void GetParticipationObjectTestSimple()
         {
             var aag = AccountActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroup, msgs, dc);
@@ -47,7 +47,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(aag.GetParticipationObject(msgs, dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetParticipationObjectTestFull")]
         public void GetParticipationObjectTestFull()
         {
             var schedule = ActivityScheduleFactory.Create(ActivityGroupOwner, msgs, dc);
