@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -41,7 +39,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Actions = actions;
             ViewBag.HasVisitorAccountsToApprove = SessionVariables.CurrentAccount.GetRequestedVisitorAccountsCount() > 0;
             ViewBag.HasOutstandingLeagueInvites = SessionVariables.CurrentAccount.GetExternalLeagueInviteCount() > 0;
-            ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountPaid();
+            ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountPaidTo();
             return View(account);
         }
     }

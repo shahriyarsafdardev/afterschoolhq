@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BasicLibrary;
+﻿using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -19,7 +14,8 @@ namespace AfterSchoolLibraryTests.Factories
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 CostPerPeriod = 49.95.ToDecimal(),
                 PlanOwnerAccountId = planOwnerAccount.ID,
-                PlanTypeId = planType
+                PlanTypeId = planType,
+                IsActive = true
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
@@ -32,7 +28,8 @@ namespace AfterSchoolLibraryTests.Factories
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 CostPerPeriod = costPerPeriod,
                 PlanOwnerAccountId = planOwnerAccount.ID,
-                PlanTypeId = planType
+                PlanTypeId = planType,
+                IsActive = true
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
@@ -45,7 +42,8 @@ namespace AfterSchoolLibraryTests.Factories
                 ParticipationObjectTypeId = ParticipationObjectType.ActivityGroup,
                 CostPerPeriod = 49.95.ToDecimal(),
                 PlanOwnerAccountId = planOwnerAccount.ID,
-                PlanTypeId = planType
+                PlanTypeId = planType,
+                IsActive = true
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
@@ -58,7 +56,8 @@ namespace AfterSchoolLibraryTests.Factories
                 ParticipationObjectTypeId = ParticipationObjectType.ActivityGroup,
                 CostPerPeriod = costPerPeriod,
                 PlanOwnerAccountId = planOwnerAccount.ID,
-                PlanTypeId = planType
+                PlanTypeId = planType,
+                IsActive = true
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

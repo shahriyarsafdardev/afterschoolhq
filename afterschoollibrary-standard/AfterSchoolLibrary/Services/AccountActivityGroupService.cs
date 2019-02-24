@@ -1,6 +1,7 @@
 ﻿using System;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
 using System.Linq;
 
 namespace AfterSchoolLibrary.Services
@@ -89,7 +90,7 @@ namespace AfterSchoolLibrary.Services
         public static string GetHomePageUrl(this AccountActivityGroup aag, bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var externalAccount = Account.Load(aag.ActivityGroupAccountId.Value, msgs, dc);
-            return $"{Utilities.BaseUrl(isAfterSchool)}/{aag.GetAccount(msgs, dc).UniqueName.ToLower()}/{aag.ActivityGroupActivityGroupTypeId.ToString().ToLower()}/{externalAccount.UniqueName}/{aag.ActivityGroupUniqueName.ToLower()}";
+            return $"{Helpers.Utilities.BaseUrl(isAfterSchool)}/{aag.GetAccount(msgs, dc).UniqueName.ToLower()}/{aag.ActivityGroupActivityGroupTypeId.ToString().ToLower()}/{externalAccount.UniqueName}/{aag.ActivityGroupUniqueName.ToLower()}";
         }
 
         public static SystemMessages SendInviteStatusUpdateEmail(this AccountActivityGroup accountActivityGroup, InviteStatus inviteStatus, Account account, WebUser currentUser, SystemMessages msgs = null, DatabaseConnection dc = null)

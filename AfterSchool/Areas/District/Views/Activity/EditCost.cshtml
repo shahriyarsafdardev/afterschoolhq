@@ -1,4 +1,4 @@
-﻿@model AfterSchoolLibrary.Activity
+﻿@model Activity
 @{
     ViewBag.Title = ((Account)ViewBag.Account).Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
@@ -30,7 +30,7 @@
             <div class="col-md-8 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editcost", "activity", new { id = Model.ID })" class="form-horizontal">
 
-                    @if (Model.CanAcceptPayments)
+                    @if (Model.CanAcceptPayments())
                     {
                         if (!Model.ActivityGroupId.HasValue)
                         {
@@ -42,7 +42,7 @@
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model);}
 
-                    @if (Model.CanAcceptPayments)
+                    @if (Model.CanAcceptPayments())
                     {
                         <div class="form-group">
                             <div class="col-sm-2 col-sm-offset-3">

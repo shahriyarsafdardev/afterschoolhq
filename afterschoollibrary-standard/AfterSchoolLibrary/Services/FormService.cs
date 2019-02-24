@@ -4,11 +4,24 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Collections;
 using System.Linq;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibrary.Services
 {
     public class FormService
     {
+        /// <summary>
+        /// get template from default afterschool account with ID = 1
+        /// </summary>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static Form GetOrCreateAfterSchoolAccountTemplateForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var afterSchoolAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
+            return Form.GetLatestTemplateForm(accountId: afterSchoolAccount.ID.Value, msgs: msgs, dc: dc) ??
+                AddNewAfterSchoolDefaultForm(msgs, dc);
+        }
 
         public static Form AddNewAfterSchoolDefaultForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

@@ -3,8 +3,9 @@ using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AfterSchoolLibrary.Services;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
     public class CheckoutObject
     {
@@ -75,9 +76,22 @@ namespace AfterSchoolLibrary
         {
             get
             {
-                return ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue ? 
-                    ParticipationObject.Cost.Value * NumberOfSeats : 
-                    0;
+                if (ParticipationObject.IsNotEmpty() && ParticipationObject.Cost.HasValue)
+                {
+                    var total = ParticipationObject.Cost.Value * NumberOfSeats;
+
+                    // if coupon applyTo is `TuitionFee`
+                    // then apply coupon discount
+                    if (Coupon.IsNotEmpty() && Coupon.ID.IsNotEmpty() && Coupon.DoesApplyToTuitionFee())
+                    {
+                        var couponAmount = Coupon.Amount.Value;
+                        if (Coupon.HasPercentageAmountType())
+                            couponAmount *=  total;
+                        return total - couponAmount;
+                    }
+                    return total;
+                }
+                return 0;
             }
         }
 
@@ -117,9 +131,9 @@ namespace AfterSchoolLibrary
         {
             if (Coupon.IsNotEmpty() && Coupon.Amount.HasValue)
             {
-                if (Coupon.AmountTypeId == AmountType.FlatAmount)
+                if (Coupon.AmountTypeId == CouponAmountType.FlatAmount)
                     return Math.Max(0, total - Coupon.Amount.Value);
-                else if (Coupon.AmountTypeId == AmountType.Percentage)
+                else if (Coupon.AmountTypeId == CouponAmountType.Percentage)
                     return Math.Max(0, total - (total * Coupon.Amount.Value));
             }
 

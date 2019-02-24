@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 using BasicLibrary;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests
 {
@@ -404,8 +405,8 @@ namespace AfterSchoolLibraryTests
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
             var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
-            var encrypt = AfterSchoolLibrary.Utilities.EncryptToBase64("test");
-            var decrypt = AfterSchoolLibrary.Utilities.DecryptFromBase64(encrypt);
+            var encrypt = AfterSchoolLibrary.Helpers.Utilities.EncryptToBase64("test");
+            var decrypt = AfterSchoolLibrary.Helpers.Utilities.DecryptFromBase64(encrypt);
             var saltAndHashed = WebUserService.SaltandHashPassword(decrypt);
 
             Assert.NotEqual(decrypt, saltAndHashed.hashedbytes.ToString());
@@ -420,7 +421,7 @@ namespace AfterSchoolLibraryTests
             var origInBytes = ASCIIEncoding.ASCII.GetBytes(orig);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
-            var message = AfterSchoolLibrary.Utilities.LoadAndHashAllUsers(dc);
+            var message = AfterSchoolLibrary.Helpers.Utilities.LoadAndHashAllUsers(dc);
             var newBytes = user.Password;
 
             Assert.NotEqual(orig, newBytes);
@@ -436,7 +437,7 @@ namespace AfterSchoolLibraryTests
             var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
 
             var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
-            var message = AfterSchoolLibrary.Utilities.LoadAndHashAllUsers(dc);
+            var message = AfterSchoolLibrary.Helpers.Utilities.LoadAndHashAllUsers(dc);
             user.Reload(dc: dc);
 
             user = WebUser.LoginByEmailHashed("notDarye", "nothisPassword", dc);

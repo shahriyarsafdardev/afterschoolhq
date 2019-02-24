@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// This keeps track of the attendance marking for one particular student
@@ -278,7 +278,7 @@ namespace AfterSchoolLibrary
             return 0;
         }
 
-        public static int GetPresentCountByActivityId(int activityId, DatabaseConnection dc = null)
+        public static int GetPresentCountByActivityId(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -290,14 +290,14 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
 
-        public static int GetPossibleCountByActivityId(int activityId, DatabaseConnection dc = null)
+        public static int GetPossibleCountByActivityId(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -309,7 +309,7 @@ namespace AfterSchoolLibrary
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger();
 

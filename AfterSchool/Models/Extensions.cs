@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 using System.Collections.Specialized;
 
 namespace AfterSchool.Models
@@ -21,7 +19,7 @@ namespace AfterSchool.Models
             return new FormQuestionViewModel(question);
         }
 
-        public static AddressViewModel ToAddressViewModel(this AfterSchoolLibrary.StripeAccount stripeAccount)
+        public static AddressViewModel ToAddressViewModel(this StripeAccount stripeAccount)
         {
             return new AddressViewModel()
             {
@@ -83,20 +81,14 @@ namespace AfterSchool.Models
         {
             var text = activity.Name;
 
-            if (activity.GetDays().Count > 0)
-            {
-                text += " - " + activity.GetDaysOfTheWeek().Select(x => x.ToString().MaxChars(2)).ToStringList(", ");
-            }
+            if (activity.GetDaysOfTheWeek().Count > 0)
+                text += $" - {activity.GetDaysOfTheWeek().Select(x => x.ToString().MaxChars(2)).ToStringList(", ")}";
 
-            if (activity.GetGradeLevels().Count > 0)
-            {
-                text += " - " + activity.GetGradeLevels().Select(x => x.Abbreviation).ToStringList(", ");
-            }
+            if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
+                text += $" - Grades {GradeLevel.Load(activity.GradeLevelStart.Value).Abbreviation} to {GradeLevel.Load(activity.GradeLevelEnd.Value).Abbreviation}";
 
             if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
-            {
-                text += " - Ages " + activity.AgeStart + " to " + activity.AgeEnd;
-            }
+                text += $" - Ages {activity.AgeStart} to {activity.AgeEnd}";
 
             return text;
         }

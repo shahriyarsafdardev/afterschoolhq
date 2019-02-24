@@ -1,5 +1,5 @@
 ﻿@using System.Collections.Specialized;
-@model AfterSchoolLibrary.Account
+@model Account
 
 @{
     var questions = (List<FormQuestion>)ViewBag.Questions;
@@ -16,7 +16,7 @@
     var activities = items.Select(x => x.GetActivity()).ToList();
 
     var costPerRegistrant = activities.Sum(x => x.CostPerRegistrant);
-    var acceptPayments = activities.Where(x => x.CanAcceptPayments).Count() > 0;
+    var acceptPayments = activities.Where(x => x.CanAcceptPayments()).Count() > 0;
     var acceptCreditCard = activities.Where(x => x.AcceptCreditCard).Count() > 0;
     var acceptPayPal = activities.Where(x => x.AcceptPayPal).Count() > 0;
     var allowToPayLater = activities.Where(x => x.AllowToPayLater).Count() > 0;

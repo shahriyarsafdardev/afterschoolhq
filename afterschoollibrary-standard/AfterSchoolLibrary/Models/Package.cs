@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// This is an actual package that an account/organization can purchase when signing up. There are multiple packages that are able to be purchased at a time. A package containts multiple Features.
@@ -278,7 +278,7 @@ namespace AfterSchoolLibrary
                 product = Billing.StripeHelper.CreateProduct(
                     this.GetStripePlanId(billingPeriodType),
                     this.GetStripePlanName(billingPeriodType),
-                    $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
+                    $"{Helpers.Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
                     true,
                     null,
                     msgs);
@@ -288,7 +288,7 @@ namespace AfterSchoolLibrary
                 product = Billing.StripeHelper.UpdateProduct(
                     this.GetStripePlanId(billingPeriodType),
                     this.GetStripePlanName(billingPeriodType),
-                    $"{Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
+                    $"{Helpers.Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
                     true,
                     null,
                     msgs);

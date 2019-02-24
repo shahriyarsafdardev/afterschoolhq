@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// This is how an package is assigned to an account. This is the only way an account can actually login and also have features that are accessible.
@@ -328,6 +328,7 @@ namespace AfterSchoolLibrary
                         platformFeePercent: null,
                         trialEndDate: this.TrialEndDate, 
                         stripeAccountId: null,
+                        stripeCouponId: null,
                         msgs: msgs);
 
                     if (subscription.IsNotEmpty())

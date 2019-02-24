@@ -10,6 +10,7 @@ using System.Xml.Serialization;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Models
 {
@@ -28,7 +29,7 @@ namespace AfterSchool.Models
 
             if (SessionVariables.VisitorSession.IsEmpty())
             {
-                var session = new AfterSchoolLibrary.Session();
+                var session = new Session();
                 session.LastModifiedDate = session.CreateDate = session.LastActivity = DateTime.UtcNow;
                 session.LastModifiedBy = session.CreatedBy = 0;
                 session.UrlReferrer = Request.UrlReferrer.IsNotEmpty() ? Request.UrlReferrer.ToString() : null;
@@ -195,14 +196,14 @@ namespace AfterSchool.Models
             if (doRememberMe)
             {
                 var cookieUser = new HttpCookie("sessionuser", Convert.ToBase64String(Encryption.Encrypt(
-                    SessionVariables.LoggedInUser.Uid.ToString(), AfterSchoolLibrary.Utilities.AppAESKey, AfterSchoolLibrary.Utilities.AppIV)));
+                    SessionVariables.LoggedInUser.Uid.ToString(), AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV)));
                 cookieUser.Expires = DateTime.Now.AddMonths(1);
                 Response.Cookies.Add(cookieUser);
 
                 if (!SessionVariables.CurrentAccount.IsEmpty())
                 {
                     var cookieAccount = new HttpCookie("sessionAccount", Convert.ToBase64String(Encryption.Encrypt(
-                        SessionVariables.CurrentAccount.UniqueName, AfterSchoolLibrary.Utilities.AppAESKey, AfterSchoolLibrary.Utilities.AppIV)));
+                        SessionVariables.CurrentAccount.UniqueName, AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV)));
                     cookieAccount.Expires = DateTime.Now.AddMonths(1);
                     Response.Cookies.Add(cookieAccount);
                 }

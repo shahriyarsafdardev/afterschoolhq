@@ -1,8 +1,9 @@
+﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -21,29 +22,21 @@ namespace AfterSchoolLibrary.Services
                 registrants.Add(childRegistrant);
 
             return registrants;
-        }
+        }        
 
-        internal static SystemMessages SendEmail(this ActivityMessageRegistrant activityMessageRegistrant, Account account, string fromName, string replyToEmail, string replyToName, string subject, string body, DatabaseConnection dc = null)
+        internal static SystemMessages SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, Account account, string fromName, string replyToEmail, string replyToName, string subject, string body, DatabaseConnection dc = null)
         {
-            var sendResultMessages = new SystemMessages();
+            var allResults = new SystemMessages();
 
-            activityMessageRegistrant.GetChildAndParentRegistrants(sendResultMessages, dc)
+            activityMessageRegistrant.GetChildAndParentRegistrants(allResults, dc)
                 .ForEach(registrant =>
                 {
-                    sendResultMessages.AddRange(SendGridHelper.SendMail(
-                        fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                            Email.AppEmailAddress,
-                            $"{fromName} via {Utilities.AppName(account.IsAfterSchool)}"),
-                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
-                        subject: subject,
-                        body: $"{body}{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
-                        replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                    ));
+                    allResults.AddRange(registrant.SendEmail(account.IsAfterSchool, fromName, replyToEmail, replyToName, subject, body, "activity_message"));
+                    // allResults.AddRange(registrant.SendText(subject, body));
                 }
             );            
 
-            return activityMessageRegistrant.UpdateSendResults(sendResultMessages, dc);
+            return activityMessageRegistrant.UpdateSendResults(allResults, dc);
         }
 
         private static SystemMessages UpdateSendResults(this ActivityMessageRegistrant activityMessageRegistrant, SystemMessages sendResultMessages, DatabaseConnection dc = null)

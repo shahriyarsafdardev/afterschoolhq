@@ -1,29 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class RegistrantService
     {
-        //public static Registrant CreateNew(Account registrantOwner, RegistrantType registrantType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        //{
-        //    var registrant = new Registrant
-        //    {
-        //        AccountId = registrantOwner.ID,
-        //        RegistrantTypeId = registrantType,
-        //        IsMaster = false,
-        //        CreateDate = DateTime.UtcNow,
-        //        LastModifiedDate = DateTime.UtcNow,
-        //        CreatedBy = loggedInUser?.ID.IfEmpty(0),
-        //        LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                 
-        //    };
-        //    msgs.AddRange(registrant.Save(dc: dc));
-        //}
-
         public static WebUser MatchCreateOrUpdateUser(this Registrant registrant, string firstname, string lastname, string email, string password = null, bool isAfterSchool = false, bool forceMatch = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // connecting with an existing account that has a password
@@ -161,17 +146,32 @@ namespace AfterSchoolLibrary.Services
                 sourceId: copiedSourceId,
                 stripeAccountId: billingAccount.StripeUserId,
                 msgs: msgs);
+            SubscriptionPlan plan = null;
+            var applyCoupon = false;
+            var coupon = checkoutObject.Coupon;
 
-            var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
+            if (subscriptionPlanType == SubscriptionPlanType.PaymentPlan)
+            {
+                plan = checkoutObject.PaymentPlan;
+                applyCoupon = coupon.ID.IsNotEmpty() && coupon.DoesApplyToTuitionFee();
+            }
+            else
+            {
+                plan = checkoutObject.SubscriptionPlan;
+                applyCoupon = coupon.ID.IsNotEmpty() && coupon.DoesApplyToSubscriptionPlan();
+            }
+
+            var stripeCouponId = applyCoupon ? coupon.StripeCouponId : null;
 
             // create the subscription on the connected account
             var subscription = Billing.StripeHelper.CreateSubscription(
                 customerId: accountCustomer.Id,
                 planId: plan.StripePlanId,
                 sourceId: copiedSourceId,
-                platformFeePercent: billingAccount.GetPlatformPercentFee(msgs, dc),
+                platformFeePercent: billingAccount.GetSubscriptionPlatformPercentFee(plan),
                 trialEndDate: null,
                 stripeAccountId: billingAccount.StripeUserId,
+                stripeCouponId: stripeCouponId,
                 msgs: msgs);
 
             if (msgs.HasErrors())
@@ -201,5 +201,54 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        internal static SystemMessages SendText(this Registrant registrant, string subject, string body)
+        {
+            var msgs = new SystemMessages();
+
+            if (registrant.Phone.IsEmpty())
+                msgs.Add($"{registrant.DisplayName} has no phone number available", MessageType.Notice);
+
+            if (!registrant.AllowTextMessages)
+                msgs.Add($"{registrant.DisplayName} does not allow text messaging", MessageType.Notice);
+
+            if (registrant.Phone.IsNotEmpty() && registrant.AllowTextMessages)
+                return TwilioHelper.SendSMS(
+                    registrant.Phone,
+                    $"{registrant.Phone}\n{body}"
+                    );
+
+            return msgs;
+        }
+
+        internal static SystemMessages SendEmail(this Registrant registrant, bool isAfterSchool, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "")
+        {
+            var msgs = new SystemMessages();
+
+            if (registrant.Email.IsEmpty())
+                msgs.Add("No email address available", MessageType.Notice);
+
+            if (registrant.Email.IsNotEmpty())
+                msgs.AddRange(SendGridHelper.SendMail(
+                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                        Helpers.Email.AppEmailAddress,
+                        $"{fromName} via {Helpers.Utilities.AppName(isAfterSchool)}"),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
+                    subject: subject,
+                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: utmCampaign))}",
+                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                ));
+
+            return msgs;
+        }
+
+        public static List<ParticipationObject> GetParticipationObjects(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs, dc)
+                .Select(x => x.GetParticipationObject(msgs, dc))
+                .ToList();
+        }
+
     }
 }

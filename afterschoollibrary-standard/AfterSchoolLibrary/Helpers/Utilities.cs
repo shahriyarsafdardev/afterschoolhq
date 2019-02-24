@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
-using System.Net;
-using System.IO;
 using System.Collections;
 using BasicLibrary;
 using SendGrid.Helpers.Mail;
-using SendGrid;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Helpers
 {
     public class Utilities
     {
@@ -230,7 +228,7 @@ namespace AfterSchoolLibrary
         public static void InitializeApp()
         {
             // Utilities.UseSSL = true; //can put in a if statement depending on if is live, etc.
-            // AfterSchoolLibrary.Utilities.AppName = "Enroll HQ"; //used in email signatures, etc
+            // AfterSchoolLibrary.Helpers.Utilities.AppName = "Enroll HQ"; //used in email signatures, etc
             Utilities.AppAESKey = System.Text.Encoding.UTF8.GetBytes("9dj3nshcnshf73heydsg1nshdyciefh7"); //32 alphanumeric chars - only set once per app, never changed afterwards, required
 
             Utilities.MasterAPIKey = ""; //at least 45 random alphanumeric characters
@@ -972,30 +970,6 @@ namespace AfterSchoolLibrary
             {
                 activity.RegistrationModeId = RegistrationMode.Register;
                 msgs.AddRange(activity.Save(dc: dc));
-            }
-
-            return msgs;
-        }
-
-        public static SystemMessages UpdateGradeLevels(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            var activities = Activity.Load(dc: dc);
-            activities = activities.Where(x => x.GradeLevelStart.HasValue && x.GradeLevelEnd.HasValue).ToList();
-            foreach (var activity in activities)
-            {
-                if (activity.GetGradeLevels(dc: dc).Count == 0)
-                {
-                    for (var i = activity.GradeLevelStart.Value; i <= activity.GradeLevelEnd.Value; i++)
-                    {
-                        var grade = GradeLevel.Load(i, dc: dc);
-                        if (grade.IsNotEmpty())
-                        {
-                            activity.AddGrade(grade.ID.Value, activity.LastModifiedBy.Value, msgs, dc: dc);
-                        }
-                    }
-                }
             }
 
             return msgs;

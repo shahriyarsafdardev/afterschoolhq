@@ -17,10 +17,12 @@
     <Compile Remove="ActivityRecurrence.cs" />
     <Compile Remove="Archive.cs" />
     <Compile Remove="Leader.cs" />
+    <Compile Remove="Models\AssignedCoupon.cs" />
     <Compile Remove="Models\PaymentPlan.cs" />
     <Compile Remove="Models\RegistrantPaymentPlan.cs" />
     <Compile Remove="Models\RegistrationActivity.cs" />
     <Compile Remove="Models\RegistrationRandomization.cs" />
+    <Compile Remove="Models\Season.cs" />
     <Compile Remove="RecurrenceType.cs" />
     <Compile Remove="Services\PaymentPlanService.cs" />
     <Compile Remove="Services\RegistrantPaymentPlanService.cs" />
@@ -38,6 +40,7 @@
     <PackageReference Include="Sendgrid" Version="9.9.0" />
     <PackageReference Include="Stripe.net" Version="17.6.0" />
     <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
+    <PackageReference Include="Twilio" Version="5.20.1" />
   </ItemGroup>
 
   <ItemGroup>

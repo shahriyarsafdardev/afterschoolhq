@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// way to track a match between two or more teams
@@ -184,7 +184,7 @@ namespace AfterSchoolLibrary
 
         public static bool Exists(int teamId, int activityInstanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var match = Match.LoadByTeamIdByActivityInstanceId(teamId, activityInstanceId);
+            var match = Match.LoadByTeamIdByActivityInstanceId(teamId, activityInstanceId, msgs, dc);
 
             return match.IsNotEmpty();
         }

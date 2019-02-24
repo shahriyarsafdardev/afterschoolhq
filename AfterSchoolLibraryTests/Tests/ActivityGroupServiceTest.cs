@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibraryTests.Factories;
 using AfterSchoolLibrary.Services;
 using System.Linq;
@@ -22,15 +22,15 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact(DisplayName = "Convert activity group to participation object with no vars set")]
-        public void ToParticipationObjectTestSimple()
+        public void GetParticipationObjectTestSimple()
         {
             var actvityGroup = ActivityGroupFactory.Create(ActivityGroupOwner, ActivityGroupType.League, msgs, dc);
 
-            Assert.NotNull(actvityGroup.ToParticipationObject(msgs, dc));
+            Assert.NotNull(actvityGroup.GetParticipationObject(msgs, dc));
         }
 
         [Fact(DisplayName = "Convert activity group to participation object with all vars set")]
-        public void ToParticipationObjectTestFull()
+        public void GetParticipationObjectTestFull()
         {
             var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);
             var schedule = ActivityScheduleFactory.Create(ActivityGroupOwner, msgs, dc);
@@ -49,7 +49,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityInstance = ActivityInstanceFactory.Create(actvityGroup, schedule, msgs, dc);
             var period = RegistrationPeriodFactory.Create(ActivityGroupOwner, actvityGroup, msgs, dc);
 
-            Assert.NotNull(actvityGroup.ToParticipationObject(msgs, dc));
+            Assert.NotNull(actvityGroup.GetParticipationObject(msgs, dc));
         }
 
         [Fact]

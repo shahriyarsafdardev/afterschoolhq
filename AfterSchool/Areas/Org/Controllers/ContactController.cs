@@ -4,7 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using BasicLibrary.DataAccess;
 using Hangfire;
@@ -660,7 +661,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var loggedInUser = SessionVariables.LoggedInUser;
 
                         BackgroundJob.Enqueue(() =>
-                            ActivityGroup.EmailInvitedContacts(
+                            ActivityGroupService.EmailInvitedContacts(
                                 group.ID.Value,
                                 period.ID.Value,
                                 contacts.Select(x => x.ID.Value).ToList(),

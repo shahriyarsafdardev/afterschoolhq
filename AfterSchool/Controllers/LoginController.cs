@@ -3,7 +3,7 @@ using System.Web.Mvc;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchool.Models;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Controllers
@@ -16,17 +16,17 @@ namespace AfterSchool.Controllers
         public ActionResult Index(string regaccount)
         {
             var msgs = new SystemMessages();
-            if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty() && (regaccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant))
-            {
+            var loggedInWithAnAccount = SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty();
+
+            if (loggedInWithAnAccount && (regaccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant))
                 return LoginRedirect();
-            }
+
             else if (!Request["Account"].IsEmpty())
             {
-                Account Account = AfterSchoolLibrary.Account.Load(Request["Account"].ToInteger());
-                if (!Account.IsEmpty() && !Account.UniqueName.IsEmpty())
-                {
-                    return Redirect($"/{Account.UniqueName}");
-                }
+                var account = Account.Load(Request["Account"].ToInteger());
+
+                if (!account.IsEmpty() && !account.UniqueName.IsEmpty())
+                    return Redirect($"/{account.UniqueName}");
             }
 
             ViewBag.LoginType = "Internal";

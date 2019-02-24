@@ -12,6 +12,7 @@ using AfterSchool.Models;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Hangfire;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -236,7 +237,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id != "0") activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -256,7 +257,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         values.Add("form", newForm.ID.Value.ToString());
                 }
 
-                activity = Activity.CreateNew(
+                activity = ActivityService.CreateNew(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     values: values,
@@ -342,7 +343,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                         loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                         account: SessionVariables.CurrentAccount,
                         activityId: activity.ID.Value.ToString(),
@@ -414,7 +415,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.IsNotEmpty())
             {
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -570,7 +571,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "scheduledetails", scheduledetails}
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -683,7 +684,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "isongoing", isongoing }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -774,7 +775,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "mylocation", mylocation }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -847,7 +848,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "allowtopaylater", allowtopaylater.IfBlank("0")}
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -910,7 +911,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "applicationthankyouemail", applicationthankyouemail }
                 };
 
-                activity = Activity.EditExisting(
+                activity = ActivityService.EditExisting(
                     loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
@@ -933,7 +934,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "prev":
-                        if (activity.CanAcceptPayments)
+                        if (activity.CanAcceptPayments())
                         {
                             ViewBag.ActiveMenu = "EditCost";
                             return View("EditCost", activity);
@@ -1096,7 +1097,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var presentStudents = new List<int>();
             var activity = Activity.LoadByUid(id.ToGuid());
-            var attendance = AfterSchoolLibrary.Attendance.Load(att.ToInteger(), msgs);
+            var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
 
             if (!activityinstance.IsNumber())
                 msgs.Add("Activity Date is required", MessageType.UserError);
@@ -1151,7 +1152,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             BackgroundJob.Enqueue(() => 
-                Activity.SendRegistrationSummaryReport(activity.ID.Value, UILabel.ActivityLabel(activity.ActivityTypeId, false), null)
+                ActivityService.SendRegistrationSummaryReport(activity.ID.Value, UILabel.ActivityLabel(activity.ActivityTypeId, false), null)
             );
 
             msgs.Add("Your report will be sent shortly", MessageType.Success);
@@ -1168,7 +1169,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
-            var questions = af.GetAllQuestions();
+            var questions = af.GetForm().GetAllQuestions();
 
             var registrantActivities = activity.GetRegistrantActivities();
             var table = new List<List<string>>();
@@ -1299,7 +1300,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
             string extension = "";
-            var questions = af.GetAllQuestions();
+            var questions = af.GetForm().GetAllQuestions();
 
             if (csv.IsBlank())
             {
@@ -1590,7 +1591,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
             var af = activity.GetActiveActivityForm();
 
-            var questions = af.GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
+            var questions = af.GetForm().GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
 
             var swriter = new StringWriter();
             var csvWriter = new CsvHelper.CsvWriter(swriter);
@@ -1680,7 +1681,7 @@ namespace AfterSchool.Areas.Org.Controllers
             //    }
             //}
 
-            var questionGroups = activityForm.GetQuestionGroups();
+            var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
             var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
 
@@ -1782,7 +1783,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
             
-            var questionGroups = activityForm.GetQuestionGroups();
+            var questionGroups = activityForm.GetForm().GetQuestionGroups();
             var individualGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Individual).ToList();
             var organizationGroups = questionGroups.Where(x => x.RegistrantTypeId == RegistrantType.Organization).ToList();
             var currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);

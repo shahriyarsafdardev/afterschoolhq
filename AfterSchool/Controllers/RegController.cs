@@ -824,8 +824,8 @@
 //                msgs.Add(new SystemMessage(key + ": " + Request.Params[key], MessageType.Notice));
 
 //            SendGridHelper.SendMail(
-//                fromEmail: AfterSchoolLibrary.Email.AppEmailAddress,
-//                toEmail: AfterSchoolLibrary.Email.AppAdminEmailAddress,
+//                fromEmail: AfterSchoolLibrary.Helpers.Email.AppEmailAddress,
+//                toEmail: AfterSchoolLibrary.Helpers.Email.AppAdminEmailAddress,
 //                subject: "EnrollHQ PayPal Errors",
 //                body: msgs.RenderMessageList(MessageOutputType.Html)
 //            );

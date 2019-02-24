@@ -1,12 +1,12 @@
 ﻿using System;
 using BasicLibrary;
-using System.Reflection;
 using System.IO;
 using System.Collections.Specialized;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Linq;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Helpers
 {
     public class EmailHelper
     {
@@ -244,6 +244,54 @@ namespace AfterSchoolLibrary
             var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
+        public static SystemMessages SendAttachedCoupon(AttachedCoupon attachedCoupon)
+        {
+            var msgs = new SystemMessages();
+            var receivingAccountOwner = attachedCoupon.GetAccount(msgs).GetAccountOwner(msgs);
+            var sendingAccount = attachedCoupon.GetCoupon(msgs).GetAccount(msgs);
+            var sendingAccountOwner = sendingAccount.GetAccountOwner(msgs);
+            var isAfterSchool = sendingAccount.IsAfterSchool;
+            var coupon = attachedCoupon.GetCoupon(msgs);
+            var purchaseableObjectCoupons = coupon.GetPurchaseableObjectCoupons(msgs);
+            var purchaseableObject = purchaseableObjectCoupons.Select(purchaseableObjectCoupon => purchaseableObjectCoupon.GetPurchaseableObject(msgs)).First();
+
+            var model = new NameValueCollection()
+            {
+                { "ReceivingFirstName", receivingAccountOwner.FirstName },
+                { "SendingAccountName", sendingAccount.Name },
+                { "CouponDiscount", coupon.GetAmountAsString() },
+                { "PurchaseableObjectName", purchaseableObject.Name },
+                { "CouponFeeType", coupon.AppliesTo.ToString().SplitByUpperCase() },
+                { "CouponCode", coupon.CouponCode },
+                { "RegistrationUrl", sendingAccount.HomePageUrl },
+                { "GoodFor", $"{coupon.MaxNumberOfUsesPerPerson} use{(coupon.MaxNumberOfUsesPerPerson > 1 ? "s" : "")}" },
+                { "ExpirationDate", coupon.ExpirationDate.ToShortDateString() },
+                { "ContactName", sendingAccountOwner.DisplayName },
+                { "ContactEmail", sendingAccount.Email },
+                { "ProductName", sendingAccount.Name },
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.Coupon_Attached,
+                model,
+                "couponattached-1.0.1",
+                msgs
+                );
+
+            var subject = $"You've received a coupon from {sendingAccount.Name}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(receivingAccountOwner.Email),
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)

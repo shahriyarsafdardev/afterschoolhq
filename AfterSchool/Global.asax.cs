@@ -13,7 +13,7 @@ namespace AfterSchool
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
 
-            if (!AfterSchoolLibrary.Utilities.IsLocalHost)
+            if (!AfterSchoolLibrary.Helpers.Utilities.IsLocalHost)
                 GlobalFilters.Filters.Add(new RollbarExceptionFilter());
 
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

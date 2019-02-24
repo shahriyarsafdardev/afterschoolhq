@@ -13,7 +13,7 @@ namespace AfterSchool
             ConfigureAuth(app);
 
             GlobalConfiguration.Configuration
-                .UseSqlServerStorage(AfterSchoolLibrary.Database.Credentials.ConnectionString);
+                .UseSqlServerStorage(AfterSchoolLibrary.Models.Database.Credentials.ConnectionString);
 
             app.UseHangfireDashboard();
             app.UseHangfireServer();

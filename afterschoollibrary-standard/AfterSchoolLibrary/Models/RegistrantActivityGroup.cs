@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to track registrants to an session/league, usually from an invitation (invite only session/league) or when a student is registering for a league where there are no specific teams created
@@ -317,12 +317,12 @@ namespace AfterSchoolLibrary
 
                         SendGridHelper.SendMail(
                             fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                Email.AppEmailAddress, 
-                                string.Format("{0} via {1}", account.Name, Utilities.AppName(account.IsAfterSchool))
+                                Helpers.Email.AppEmailAddress, 
+                                string.Format("{0} via {1}", account.Name, Helpers.Utilities.AppName(account.IsAfterSchool))
                             ),
                             toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
                             subject: string.Format("An invitation was declined for {0}", groupName),
-                            body: string.Format(body, registrantName, groupName, Email.GetAppSignature(account.IsAfterSchool, "declined_invite_notice")),        
+                            body: string.Format(body, registrantName, groupName, Helpers.Email.GetAppSignature(account.IsAfterSchool, "declined_invite_notice")),        
                             emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                         );
                     }

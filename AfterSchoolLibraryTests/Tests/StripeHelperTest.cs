@@ -5,6 +5,7 @@ using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibraryTests.Factories;
 using System;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Tests
 {

@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// A registration form object. It contains multiple Form Question Groups.
@@ -180,19 +180,6 @@ namespace AfterSchoolLibrary
                 },
                 dc: dc
             );
-        }
-
-        /// <summary>
-        /// get template from default afterschool account with ID = 1
-        /// </summary>
-        /// <param name="msgs"></param>
-        /// <param name="dc"></param>
-        /// <returns></returns>
-        public static Form GetOrCreateAfterSchoolAccountTemplateForm(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var afterSchoolAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
-            return Form.GetLatestTemplateForm(accountId: afterSchoolAccount.ID.Value, msgs: msgs, dc: dc) ?? 
-                Services.FormService.AddNewAfterSchoolDefaultForm(msgs, dc);
         }
 
         public static Form GetLatestTemplateForm(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)

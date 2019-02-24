@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BasicLibrary;
+﻿using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -36,14 +31,14 @@ namespace AfterSchoolLibraryTests.Factories
             return obj;
         }
 
-        public static RegistrantActivity Create(Activity activity, Registrant registrant, int registrationPeriodID, SystemMessages msgs, DatabaseConnection dc)
+        public static RegistrantActivity Create(Activity activity, Registrant registrant, RegistrationPeriod registrationPeriod, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new RegistrantActivity()
             {
                 ParticipationObjectId = activity.ID,
                 ParticipationObjectTypeId = ParticipationObjectType.Activity,
                 RegistrantId = registrant.ID,
-                RegistrationPeriodId = registrationPeriodID
+                RegistrationPeriodId = registrationPeriod.ID
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

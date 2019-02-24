@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// How a registrant is placed in an activity/team.
@@ -321,50 +321,6 @@ namespace AfterSchoolLibrary
             return Registrant.Load(this.RegistrantId.Value, msgs, dc);
         }
 
-        //public Activity ToActivity(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (loadFromDb)
-        //        return Activity.Load(this.ActivityId.Value, msgs, dc);
-        //    else
-        //        return new Activity()
-        //        {
-        //            ID = this.ActivityId,
-        //            Name = this.ActivityName,
-        //            Uid = this.ActivityUid,
-        //            ActivityGroupId = this.ActivityActivityGroupId,
-        //            ActivityScheduleId = this.ActivityActivityScheduleId,
-        //            IsArchived = this.ActivityIsArchived,
-        //            AccountId = this.ActivityAccountId,
-        //            CostPerRegistrant = this.ActivityCostPerRegistrant,
-        //            IsDeleted = this.ActivityIsDeleted
-        //        };
-        //}
-
-        public ParticipationObject GetParticipationObject(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            switch(this.ParticipationObjectTypeId)
-            {
-                case ParticipationObjectType.AccountActivityGroup:
-                    return AccountActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
-                case ParticipationObjectType.Activity:
-                    return Activity.Load(this.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
-                case ParticipationObjectType.ActivityGroup:
-                    return ActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc).ToParticipationObject(msgs, dc);
-            }
-
-            return null;
-        }
-
-        //public static List<RegistrantActivity> LoadByActivityId(int ActivityId, int? start, int? length, DatabaseConnection dc = null)
-        //{
-        //    BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-        //    dq.Connection = dc;
-        //    dq.Criterias.Add(ObjectMap["ActivityId"], ActivityId);
-        //    dq.SelectRange.Start = start;
-        //    dq.SelectRange.Length = length;
-        //    return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
-        //}
-
         public static List<RegistrantActivity> LoadByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, int? start, int? length, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -645,12 +601,12 @@ namespace AfterSchoolLibrary
                 $"</ul>" +
                 $"</p>";
 
-            var message = $"<p>Hello {participationObject.ContactName},</p>{details}<p>{(Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
+            var message = $"<p>Hello {participationObject.ContactName},</p>{details}<p>{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "registration_notification"))}</p>";
 
             return SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                                    Email.AppEmailAddress,
-                                    Utilities.AppName(account.IsAfterSchool)
+                                    Helpers.Email.AppEmailAddress,
+                                    Helpers.Utilities.AppName(account.IsAfterSchool)
                                ),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                     subject: $"You have a new registration for {participationObject.Name}",
@@ -671,7 +627,7 @@ namespace AfterSchoolLibrary
         
         public SystemMessages SendPaymentReminder()
         {
-            return EmailHelper.SendPaymentReminder(this);
+            return Helpers.EmailHelper.SendPaymentReminder(this);
         }
 
         public bool IsForActivity()
@@ -709,112 +665,6 @@ namespace AfterSchoolLibrary
         {
             if (this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
                 return this.ParticipationObjectId;
-
-            return null;
-        }
-
-        public Activity GetActivity(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                return Activity.Load(this.ParticipationObjectId.Value, msgs, dc);
-
-            return null;
-        }
-
-        public ActivityGroup GetActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (this.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
-                return ActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
-
-            return null;
-        }
-
-        public AccountActivityGroup GetAccountActivityGroup(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (this.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
-                return AccountActivityGroup.Load(this.ParticipationObjectId.Value, msgs, dc);
-
-            return null;
-        }
-
-        private List<ActivityInstance> GetScheduleInstances(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var instances = new List<ActivityInstance>();
-            ActivitySchedule schedule = null;
-            switch (this.ParticipationObjectTypeId)
-            {
-                case ParticipationObjectType.Activity:
-                    schedule = this.GetActivity(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
-                    if (schedule.IsNotEmpty())
-                        instances.AddRange(schedule.GetInstances(msgs: msgs, dc: dc));
-                    break;
-                case ParticipationObjectType.ActivityGroup:
-                    schedule = this.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
-                    if (schedule.IsNotEmpty())
-                        instances.AddRange(schedule.GetInstances(msgs: msgs, dc: dc));
-                    break;
-                case ParticipationObjectType.AccountActivityGroup:
-                    var aag = this.GetAccountActivityGroup(msgs, dc);
-                    schedule = aag.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
-                    if (schedule.IsNotEmpty())
-                        instances.AddRange(schedule.GetInstances(msgs: msgs, dc: dc));
-                    break;
-            }
-            return instances;
-        }
-
-        public bool IsInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var now = DateTime.UtcNow;
-            var instances = GetScheduleInstances(msgs, dc);
-            if (instances.Any())
-                return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
-
-            return false;
-        }
-
-        public bool WasInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var now = DateTime.UtcNow;
-            var instances = GetScheduleInstances(msgs, dc);
-            if (instances.Any())
-                return instances.Last().EndDateTime < now;
-
-            return false;
-        }
-
-        public bool WillBeInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var now = DateTime.UtcNow;
-            var instances = GetScheduleInstances(msgs, dc);
-            if (instances.Any())
-                return now < instances.First().StartDateTime;
-
-            return false;
-        }
-
-        public bool IsOutOfSession(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var now = DateTime.UtcNow;
-            var instances = GetScheduleInstances(msgs, dc);
-            if (instances.Any())
-                return now > instances.Last().StartDateTime;
-
-            return true;
-        }
-
-        public ActivitySchedule GetSchedule(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            switch(this.ParticipationObjectTypeId)
-            {
-                case ParticipationObjectType.AccountActivityGroup:
-                    var aag = this.GetAccountActivityGroup(msgs, dc);
-                    return aag.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
-                case ParticipationObjectType.Activity:
-                    return this.GetActivity(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
-                case ParticipationObjectType.ActivityGroup:
-                    return this.GetActivityGroup(msgs, dc).GetSchedule(msgs: msgs, dc: dc);
-            }
 
             return null;
         }

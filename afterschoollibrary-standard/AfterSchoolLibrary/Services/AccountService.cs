@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Billing;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Services
 {
     public static class AccountService
     {
@@ -315,7 +316,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -374,7 +375,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -406,14 +407,14 @@ namespace AfterSchoolLibrary
 
         public static SystemMessages SendWelcomeEmailTrial(this Account account, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
+            return Helpers.EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
         }
 
         public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account, SubscriptionPlan plan, DatabaseConnection dc)
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);            
-            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, plan));
+            msgs.AddRange(Helpers.EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, plan));
             return msgs;
         }
 
@@ -421,7 +422,7 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);
-            msgs.AddRange(EmailHelper.SendSubscriptionPaymentFailed(account, accountOwner, plan, account.IsAfterSchool));
+            msgs.AddRange(Helpers.EmailHelper.SendSubscriptionPaymentFailed(account, accountOwner, plan, account.IsAfterSchool));
             return msgs;
         }
 
@@ -429,18 +430,18 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);
-            msgs.AddRange(EmailHelper.SendStripeAccountVerified(account, accountOwner, account.IsAfterSchool));
+            msgs.AddRange(Helpers.EmailHelper.SendStripeAccountVerified(account, accountOwner, account.IsAfterSchool));
             return msgs;
         }
 
         public static SystemMessages SendWelcomeEmailPurchase(this Account account, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
+            return Helpers.EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
         }
 
         public static SystemMessages SendInvitedEmail(this Account invitedAccount, WebUser invitedUser, WebUser loggedInUser, string customMessage = null, DatabaseConnection dc = null)
         {
-            return EmailHelper.SendAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
+            return Helpers.EmailHelper.SendAccountInvitedEmail(invitedUser, invitedAccount, loggedInUser, customMessage);
         }
 
         #endregion
@@ -596,6 +597,19 @@ namespace AfterSchoolLibrary
                 customer = Billing.StripeHelper.GetCustomer(account.StripeCustomerId, null, msgs);
             }
             return customer;
+        }
+
+        public static void CreateStripeCoupon(Coupon coupon, string stripeAccountId, StripeCouponDuration couponDuration, int? durationInMonths, decimal discountValue, SystemMessages msgs,  DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var StripeCoupon = Billing.StripeHelper.CreateCoupon(discountValue, stripeAccountId, coupon.AmountTypeId, couponDuration, durationInMonths, msgs);
+
+            if (StripeCoupon.IsNotEmpty())
+            {
+                coupon.StripeCouponId = StripeCoupon.Id;
+                msgs.AddRange(coupon.Save(dc: dc));
+            }
         }
 
         #endregion
@@ -787,7 +801,7 @@ namespace AfterSchoolLibrary
         /// <returns></returns>
         public static Form CreateDefaultForm(this Account formOwner, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var form = Form.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
+            var form = FormService.GetOrCreateAfterSchoolAccountTemplateForm(msgs, dc);
 
             if (form.AccountId != formOwner.ID)
                 form = form.Copy(loggedInUser.ID.Value, formOwner.ID.Value, "Standard Reg Form", msgs, dc);
@@ -1030,7 +1044,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1256,7 +1270,7 @@ namespace AfterSchoolLibrary
 
                 //TODO Notify Host account of request
                 if (msgs.HasNoErrors() && hostAccount.IsActive)
-                    msgs.AddRange(EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
+                    msgs.AddRange(Helpers.EmailHelper.SendAccessRequestToHost(visitorAccount, hostAccount));
             }
             else
             {
@@ -1289,7 +1303,7 @@ namespace AfterSchoolLibrary
                 relationship = AccountRelationshipService.CreateNew(hostAccount, visitorAccount, ApprovalStatus.Approved, hostPermissionType, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
+                msgs.AddRange(Helpers.EmailHelper.SendApprovalNotificationToVisitor(visitorAccount, hostAccount));
 
             return relationship;
         }
@@ -1571,7 +1585,6 @@ namespace AfterSchoolLibrary
 
             if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
                 customerId = checkoutObject.PurchasingAccount.StripeCustomerId;
-
             var charge = Billing.StripeHelper.CreateCharge(
                 fromCustomerId: customerId,
                 destinationAccountId: checkoutObject.BillingAccount.StripeUserId,
@@ -1584,6 +1597,18 @@ namespace AfterSchoolLibrary
                 );
 
             return charge;
+        }
+
+        public static Stripe.StripeRefund ProcessRefund(string chargeId, decimal totalAmount, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var refund = Billing.StripeHelper.CreateRefund(
+                chargeId: chargeId,
+                totalAmount: totalAmount,
+                reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
+                msgs: msgs
+                );
+
+            return refund;
         }
 
         internal static Purchase AddPurchase(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
@@ -1600,6 +1625,20 @@ namespace AfterSchoolLibrary
             return TransactionService.CreateNew(
                     checkoutObject,
                     transactionType,
+                    loggedInUser,
+                    msgs,
+                    dc);
+        }
+
+        internal static Transaction AddTransaction(Transaction orginalTransaction, string stripeRefundId, decimal amount, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return TransactionService.CreateNew(
+                    orginalTransaction,
+                    amount,
+                    stripeRefundId,
+                    transactionType,
+                    paymentType,
+                    paymentSourceType,
                     loggedInUser,
                     msgs,
                     dc);
@@ -1698,9 +1737,50 @@ namespace AfterSchoolLibrary
             }
         }
 
+
+        public static Transaction CreateRefundTransactionPayment(Transaction originalTransaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+
+            var refund = AccountService.ProcessRefund(
+                originalTransaction.StripeChargeOrRefundId,
+                amount,
+                originalTransaction.GetPayerAccount(),
+                msgs
+            );
+
+            if (refund != null && refund.Status == Billing.StripeRefundStatus.Succeeded.ToString().ToLower())
+            {
+                var transaction = AccountService.AddTransaction(
+                    originalTransaction,
+                    refund.Id,
+                    - amount,
+                    TransactionType.Refund,
+                    PaymentType.ACH,
+                    PaymentSourceType.AfterSchoolPlatform,
+                    loggedInUser,
+                    msgs,
+                    dc);
+                var registrant = Registrant.Load(originalTransaction.GetPurchase().RegistrantId.Value);
+
+                // need to track the refund
+                originalTransaction.GetParticipationObjects().FirstOrDefault().AddPayment(
+                    amount: - amount,
+                    registrant: registrant,
+                    transaction: transaction,
+                    registrantSubscriptionPlan: null,
+                    loggedInUser: loggedInUser,
+                    msgs: msgs,
+                    dc: dc);
+                return transaction;
+            }
+
+            return null;
+        }
+
         public static void ProcessTuitionFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            AccountService.ProcessTuitionWithStripe(checkoutObject, msgs, dc);
+            if (checkoutObject.TuitionFee > 0)
+              AccountService.ProcessTuitionWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
@@ -1738,7 +1818,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1780,17 +1860,43 @@ namespace AfterSchoolLibrary
 
                     // if they have a payment plan
                     if (checkoutObject.PaymentPlan.IsNotEmpty())
+                    {
+                        // create a stripe coupon if needed
+                        var coupon = checkoutObject.Coupon;
+                        if (coupon.IsNotEmpty() && coupon.DoesApplyToTuitionFee())
+                        {
+                            var discountValue = coupon.Amount;
+                            if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
+                                discountValue = (checkoutObject.ParticipationObject.Cost - coupon.Amount) / checkoutObject.PaymentPlan.TotalPeriods;
+
+                            AccountService.CreateStripeCoupon(
+                                coupon,
+                                checkoutObject.BillingAccount.StripeUserId,
+                                StripeCouponDuration.Repeating,
+                                checkoutObject.PaymentPlan.TotalPeriods,
+                                discountValue.Value,
+                                amsgs,
+                                dc
+                            );
+                        }
+
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
                             startDateTime: DateTime.UtcNow,
                             subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
-                            dc: adc);    
+                            dc: adc
+                        );
+                    }  
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
+
+                    // invalidate coupon
+                    if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
+                        checkoutObject.PurchasingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
 
                     Registration.SendConfirmation(checkoutObject, true);
                 },
@@ -1800,7 +1906,7 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -1855,6 +1961,119 @@ namespace AfterSchoolLibrary
                 }, 
                 msgs: msgs, 
                 dc: dc) > 0;
+        }
+
+        #endregion
+
+        #region Coupons
+
+        public static AttachedCoupon AttachCoupon(this Account account, Coupon coupon, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (account.AccountTypeId != AccountType.Registrant)
+            {
+                msgs.Add("Coupon can only be applied to Registrant accounts", MessageType.Error);
+                return null;
+            }
+
+            return AttachedCouponService.CreateNew(account, coupon, loggedInUser, msgs, dc);
+        }
+
+        public static List<AttachedCoupon> GetUnusedAttachedCoupons(this Account account, DatabaseActionHelper actionHelper)
+        {
+            return AttachedCoupon.LoadByAccountIdByIsUsed(account.ID.Value, false, actionHelper?.Messages, actionHelper?.Connection);
+        }
+
+        public static List<AttachedCoupon> GetUsedAttachedCoupons(this Account account, DatabaseActionHelper actionHelper)
+        {
+            return AttachedCoupon.LoadByAccountIdByIsUsed(account.ID.Value, false, actionHelper?.Messages, actionHelper?.Connection);
+        }
+
+        public static List<AttachedCoupon> GetAttachedCoupons(this Account account, DatabaseActionHelper actionHelper = null)
+        {
+            return AttachedCoupon.LoadByAccountId(account.ID.Value, actionHelper?.Messages, actionHelper?.Connection);
+        }
+
+        public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var coupon = CouponService.CreateNew(
+                            accountId: account.ID.Value,
+                            amount: amount,
+                            expirationDate: expirationDate,
+                            couponAmountType: amountType,
+                            couponApplyType: applyType,
+                            maxUsesAll: 1,
+                            maxUsesPerPerson: 1,
+                            couponCode: CouponService.GenerateCouponCode(account.ID.Value, null),
+                            label: $"Coupon - {account.NowInAccountTimeZone()}",
+                            description: "",
+                            loggedInUser: loggedInUser,
+                            msgs: msgs,
+                            dc: dc);
+            if (coupon.DoesApplyToSubscriptionPlan())
+                AccountService.CreateStripeCoupon(
+                    coupon,
+                    account.StripeUserId,
+                    couponDuration,
+                    durationInMonths,
+                    coupon.Amount.Value,
+                    msgs,
+                    dc
+                );
+
+            return coupon;
+        }
+
+        public static Coupon ValidateCoupon(this Account account, ParticipationObject participationObject, string couponCode, SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var coupon = Coupon.LoadByAccountIdByCouponCode(
+               participationObject.OwnerAccount.ID.Value,
+               couponCode,
+               msgs
+           );
+
+            if (coupon.IsEmpty())
+                msgs.Add("Invalid coupon", MessageType.UserError);
+            else
+            {
+                var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
+                    coupon.ID.Value,
+                    account.ID.Value,
+                    false
+                );
+                var purchaseableObjectCoupon = PurchaseableObjectCoupon.LoadByCouponByPurchaseableObject(
+                    coupon.ID.Value,
+                    participationObject.ObjectID.Value,
+                    (PurchaseableObjectType)participationObject.ObjectType
+                );
+
+                if (attachedCoupon.IsEmpty() || purchaseableObjectCoupon.IsEmpty())
+                    msgs.Add("You are not allowed to use this coupon", MessageType.UserError);
+                else
+                {
+                    if (DateTime.UtcNow > coupon.ExpirationDate)
+                        msgs.Add("Coupon is Expired", MessageType.UserError);
+
+                    if (coupon.AppliesTo == CouponApplyType.SubscriptionPlan && participationObject.SubscriptionPlans.FirstOrDefault() == null)
+                        msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
+                }
+            }
+
+            return coupon;
+        }
+
+        public static void MarkCouponAsUsed(this Account account, Coupon coupon, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var attachedCoupon = AttachedCoupon.LoadByCouponIdByAccountIdIsUsed(
+                coupon.ID.Value,
+                account.ID.Value,
+                false
+            );
+
+            attachedCoupon.IsUsed = true;
+
+            attachedCoupon.Save(dc);
         }
 
         #endregion
@@ -1942,7 +2161,7 @@ namespace AfterSchoolLibrary
             var activityGroup = ActivityGroup.Load(activityGroupId, msgs);
             var sendingUser = WebUser.Load(sendingUserId, msgs);
 
-            return EmailHelper.SendLeagueAccountInvitedEmail(invitedAccount, activityGroup, sendingUser, customMessage);
+            return Helpers.EmailHelper.SendLeagueAccountInvitedEmail(invitedAccount, activityGroup, sendingUser, customMessage);
         }
 
         public static AccountActivityGroup InviteSchoolToLeague(this Account account, ActivityGroup activityGroup, WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1970,18 +2189,32 @@ namespace AfterSchoolLibrary
                 },
                 onException: (SystemMessages emsgs) =>
                 {
-                    Utilities.SystemErrorLog(emsgs);
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 }
             );
 
             return accountActivityGroups;
         }
-        
-        public static decimal GetTotalAmountPaid(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+
+        public static decimal GetTotalAmountPaidTo(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityPayment.GetTotalPaidByAccount(account.ID.Value, msgs, dc);
+            return Transaction.GetTotalAmountPaidToBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
+        public static decimal GetTotalFeesPaidBy(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountRefundedTo(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, msgs, dc);
+        }
+
+        public static decimal GetSubscriptionPlatformPercentFee(this Account account, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Math.Round(account.GetPlatformPercentFee(msgs, dc) - plan.GetStripeFeePercent(), 4);// round by 4 to get the exact precision
+        }
         #endregion
     }
 }

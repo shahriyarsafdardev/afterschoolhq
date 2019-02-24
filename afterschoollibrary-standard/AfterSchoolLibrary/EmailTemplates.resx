@@ -121,6 +121,9 @@
   <data name="Account_Invited" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\Account-Invited.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Coupon_Attached" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\coupon-attached.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Email_Verification" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\Email-Verification.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

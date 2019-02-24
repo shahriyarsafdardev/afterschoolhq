@@ -2,7 +2,7 @@
 using Xunit;
 using Xunit.Abstractions;
 using BasicLibrary;
-using AfterSchoolLibrary;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
 
@@ -40,7 +40,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(plan.ID.HasValue);
         }
 
-        [Fact]
+        [Fact(DisplayName = "CreateNewActivityGroupObjectTest")]
         public void CreateNewActivityGroupObjectTest()
         {
             var activityGroup = ActivityGroupFactory.Create(PlanOwner, ActivityGroupType.Session, msgs, dc);

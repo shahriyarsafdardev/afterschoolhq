@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// The schedule an activity/team, session/league will follow. This is the schedule definition. Actual dates are stored in the ActivityInstance

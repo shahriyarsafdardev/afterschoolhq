@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to create subscription options for a particular activity or activity group
@@ -275,128 +275,10 @@ namespace AfterSchoolLibrary
             return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
         }
 
-        private SubscriptionPlan CopyFields()
+        public decimal GetStripeFeePercent()
         {
-            return new SubscriptionPlan()
-            {
-                ParticipationObjectTypeId = this.ParticipationObjectTypeId,
-                PlanOwnerAccountId = this.PlanOwnerAccountId,
-                CostPerPeriod = this.CostPerPeriod,
-                BillingPeriodTypeId = this.BillingPeriodTypeId,
-                DoesAutoRenew = this.DoesAutoRenew,
-                IsActive = this.IsActive,
-                StripePlanId = this.StripePlanId,
-                PlanTypeId = this.PlanTypeId,
-                TotalPeriods = this.TotalPeriods
-            };
+            return 0.029M + (0.3M / CostPerPeriod).Value;
         }
-
-        public SubscriptionPlan Copy(int newParticipationObjectId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            SubscriptionPlan copy = null;
-
-            Database.ExecuteTransaction(
-               action: (SystemMessages amsgs, DatabaseConnection adc) =>
-               {
-                   copy = this.CopyFields();
-                   copy.ParticipationObjectId = newParticipationObjectId;
-                   copy.CreateDate = DateTime.UtcNow;
-                   copy.CreatedBy = loggedInUserId;
-                   copy.LastModifiedDate = DateTime.UtcNow;
-                   copy.LastModifiedBy = loggedInUserId;
-                   amsgs.AddRange(copy.Save(adc));
-               },
-               onSuccess: (SystemMessages smsgs) =>
-               {
-                   msgs.AddRange(smsgs);
-               },
-               onFailure: (SystemMessages fmsgs) =>
-               {
-                   msgs.AddRange(fmsgs);
-               },
-               dc: dc
-           );
-
-            return copy;
-        }
-
-        public SystemMessages SaveWithStripe(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            msgs.AddRange(this.Save(dc));
-
-            if (msgs.HasErrors())
-                return msgs;
-
-            Account account = null;
-            string uid = "";
-            string name = "";
-            string uniqueName = "";
-
-            if (this.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-            {
-                var activity = this.GetActivity(msgs, dc);
-                account = activity.GetAccount(msgs, dc);
-                uid = activity.Uid.ToString();
-                name = activity.Name;
-                uniqueName = activity.UniqueName;
-            }
-            else
-            {
-                var activityGroup = this.GetActivityGroup(msgs, dc);
-                account = activityGroup.GetAccount(msgs, dc);
-                uid = activityGroup.Uid.ToString();
-                name = activityGroup.Name;
-                uniqueName = activityGroup.UniqueName;
-            }
-
-            // do stripe
-            Stripe.StripeProduct product = Billing.StripeHelper.GetProduct(uid, account.StripeUserId, msgs);
-
-            if (product.IsEmpty())
-            {
-                product = Billing.StripeHelper.CreateProduct(
-                    uid,
-                    name,
-                    uniqueName,
-                    this.IsActive,
-                    account.StripeUserId,
-                    msgs);
-            }
-
-            if (msgs.HasErrors())
-                return msgs;
-
-            Stripe.StripePlan plan = null;
-
-            if (this.StripePlanId.IsNotEmpty())
-            {
-                plan = Billing.StripeHelper.GetPlan(this.StripePlanId, account.StripeUserId, msgs);
-                Billing.StripeHelper.UpdatePlan(this.StripePlanId, plan.Nickname, plan.Active, account.StripeUserId, msgs);
-            }
-            else
-            {
-                plan = Billing.StripeHelper.CreatePlan(
-                    product,
-                    null,
-                    this.CostPerPeriod.Value,
-                    this.BillingPeriodTypeId,
-                    this.GetNickName(name),
-                    account.StripeUserId,
-                    msgs
-                    );
-            }
-
-            // update stripe plan id
-            this.StripePlanId = plan.Id;
-            msgs.AddRange(this.Save(dc));
-
-            return msgs;
-        }
-
         #endregion
     }
 }

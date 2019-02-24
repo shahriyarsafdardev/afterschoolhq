@@ -544,6 +544,13 @@ Namespace DataAccess
                 End If
                 BuildOrderBys(sql)
             End If
+
+            If SelectRange.Length.HasValue Then
+                sql.Append(" option (fast ")
+                sql.Append(SelectRange.Length.ToString())
+                sql.Append(") ")
+            End If
+
         End Sub
         Private Sub BuildGroupBys(ByRef sql As StringBuilder)
             If GroupBys.Count > 0 Then

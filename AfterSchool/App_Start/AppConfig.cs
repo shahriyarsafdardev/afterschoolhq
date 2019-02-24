@@ -11,9 +11,9 @@ namespace AfterSchool
     {
         public static void Init()
         {
-            RollbarSharp.Configuration.DefaultEnvironment = AfterSchoolLibrary.Utilities.GetRollbarEnvironment();
+            RollbarSharp.Configuration.DefaultEnvironment = AfterSchoolLibrary.Helpers.Utilities.GetRollbarEnvironment();
 
-            AfterSchoolLibrary.Utilities.InitializeApp();
+            AfterSchoolLibrary.Helpers.Utilities.InitializeApp();
         }
     }
 }

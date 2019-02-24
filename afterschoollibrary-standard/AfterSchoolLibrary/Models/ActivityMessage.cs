@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
 	/// <summary>
     /// Used to store a message that is sent in regards to an session/league, activity/team, or even on the whole account
@@ -246,7 +246,7 @@ namespace AfterSchoolLibrary
             }
             return _ActivityGroup;
         }
-
+        
         #endregion
     }
 }
