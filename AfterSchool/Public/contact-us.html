@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-		<title>Contact us</title>
+		<title>Contact Us | AfterSchool HQ</title>
 		<link href="css/bootstrap.css" rel="stylesheet">
 		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="css/style.css">
@@ -61,11 +61,11 @@
 <div class="custom-contact">
 	<div class="container">
 		<div class="row">
-			<div class="contact-section">
+			<div class="co-info-section">
 				<div class="site_container">
 					<div class="col-md-5 col-sm-6 left-address">
-						<h1 class="contact-us">Contact Us</h1>
-						<p class="contact-msg">We would love to hear from you.</p>
+						<h1 class="co-info-header">Contact Us</h1>
+						<p class="co-info-body">We would love to hear from you.</p>
 						<ul class="address-ul">
 							<li class="address-li"> 	12175 Visionary Way #710,<br>
 								Fishers, Indiana, USA
@@ -76,74 +76,74 @@
 					</div>
 					<div class="col-md-5 col-sm-6 right-form">
 
-                        <div class="form-section">
+              <div class="form-section">
 
-                            <div class="hide submit-contact-success">Your message has been sent</div>
-                            <div class="hide submit-contact-error">Error sending message</div>
+                  <div class="hide submit-contact-success">Your message has been sent</div>
+                  <div class="hide submit-contact-error">Error sending message</div>
 
-                            <form method="post" action="assets/contact.php">
-                                <div class="form-dv">
-                                    <input type="text" name="email" placeholder="Email" id="email" class="form-control contact-email form-input" required>
-                                </div>
-                                <div class="form-dv">
-                                    <input type="text" name="subject" placeholder="Subject" id="subject" class="form-control contact-subject form-input" required>
-                                </div>
-                                <div class="form-dv">
-                                    <textarea name="message" class="form-control form-textarea" id="message" rows="5" placeholder="Message" required></textarea>
-                                </div>
-                                <div class="margin-b-10">
-                                    <div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO"></div>
-                                </div>
-                                <button type="button" id="btn-submit-contact-form" class="btn btn-contact btn-send" onclick="submitContactForm()">Submit</button>
-                            </form>
-                            <script>
-                                function submitContactForm() {
+                  <form method="post" action="assets/contact.php">
+                      <div class="form-dv">
+                          <input type="text" name="email" placeholder="Email" id="email" class="form-control contact-email form-input" required>
+                      </div>
+                      <div class="form-dv">
+                          <input type="text" name="subject" placeholder="Subject" id="subject" class="form-control contact-subject form-input" required>
+                      </div>
+                      <div class="form-dv">
+                          <textarea name="message" class="form-control form-textarea" id="message" rows="5" placeholder="Message" required></textarea>
+                      </div>
+                      <div class="margin-b-10">
+                          <div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO"></div>
+                      </div>
+                      <button type="button" id="btn-submit-contact-form" class="btn btn-contact btn-send" onclick="submitContactForm()">Submit</button>
+                  </form>
+                  <script>
+                      function submitContactForm() {
 
-                                    var params = 'email=' + $('#email').val() +
-                                        '&subject=' + $('#subject').val() +
-                                        '&message=' + $('#message').val() +
-                                        '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+                          var params = 'email=' + $('#email').val() +
+                              '&subject=' + $('#subject').val() +
+                              '&message=' + $('#message').val() +
+                              '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
 
-                                    $('#btn-submit-contact-form').html('Submitting...');
-                                    $('#btn-submit-contact-form').prop('disabled', true);
+                          $('#btn-submit-contact-form').html('Submitting...');
+                          $('#btn-submit-contact-form').prop('disabled', true);
 
-                                    $.post(
-                                        '/services/submitcontactform',
-                                        params,
-                                        function (data) {
+                          $.post(
+                              '/services/submitcontactform',
+                              params,
+                              function (data) {
 
-                                            $('#btn-submit-contact-form').html('Submit');
-                                            $('#btn-submit-contact-form').prop('disabled', false);
-                                            grecaptcha.reset();
+                                  $('#btn-submit-contact-form').html('Submit');
+                                  $('#btn-submit-contact-form').prop('disabled', false);
+                                  grecaptcha.reset();
 
-                                            if (data && data.status == 'ok') {
+                                  if (data && data.status == 'ok') {
 
-                                                $('#email').val('');
-                                                $('#subject').val('');
-                                                $('#message').val('');
+                                      $('#email').val('');
+                                      $('#subject').val('');
+                                      $('#message').val('');
 
-                                                $('.submit-contact-error').addClass('hide');
-                                                $('.submit-contact-success').removeClass('hide');
+                                      $('.submit-contact-error').addClass('hide');
+                                      $('.submit-contact-success').removeClass('hide');
 
-                                            } else {
+                                  } else {
 
-                                                $('.submit-contact-success').addClass('hide');
-                                                $('.submit-contact-error').removeClass('hide');
-                                                $('.submit-contact-error').html('');
+                                      $('.submit-contact-success').addClass('hide');
+                                      $('.submit-contact-error').removeClass('hide');
+                                      $('.submit-contact-error').html('');
 
-                                                for (var message of data.messages) {
-                                                    $('.submit-contact-error').append('<p>');
-                                                    $('.submit-contact-error').append(message.Text);
-                                                    $('.submit-contact-error').append('</p>');
-                                                }
+                                      for (var message of data.messages) {
+                                          $('.submit-contact-error').append('<p>');
+                                          $('.submit-contact-error').append(message.Text);
+                                          $('.submit-contact-error').append('</p>');
+                                      }
 
-                                            }
-                                        }
-                                    );
-                                }
-                            </script>
+                                  }
+                              }
+                          );
+                      }
+                  </script>
 
-                        </div>
+              </div>
 					</div>
 				</div>
 			</div>
@@ -189,7 +189,7 @@
 								<div class="ft-company">
 									<ul class="list-unstyled">
 										<li><a href="https://afterschoolhq.zendesk.com/" target="_blank">FAQ</a></li>
-										<!--<li><a href="">About</a></li>-->
+										<li><a href="./about.html">About</a></li>
 										<li><a href="./contact-us.html">Contact</a></li>
 										<li><a href="./tos.html">Terms & Conditions</a></li>
 										<li><a href="./privacy.html">Privacy Policy</a></li>
