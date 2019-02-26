@@ -29,9 +29,9 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static List<Form> GetForms(this Account account, DatabaseConnection dc = null)
+        public static List<Form> GetForms(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Form.LoadByAccountId(account.ID.Value, dc: dc);
+            return Form.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
         public static List<ActivitySchedule> GetActivitySchedules(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1081,11 +1081,12 @@ namespace AfterSchoolLibrary.Services
 
         public static RegistrationPeriod GetDefaultNewRegistrationPeriod(this Account account)
         {
-            var activePeriod = new RegistrationPeriod();
-            activePeriod.ID = 0;
-            activePeriod.StartDateTime = string.Format("{0} {1}", account.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString(), "8:00 AM").ToDateTime();
-            activePeriod.EndDateTime = string.Format("{0} {1}", account.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString(), "12:00 AM").ToDateTime();
-            return activePeriod;
+            return new RegistrationPeriod()
+            {
+                ID = 0,
+                StartDateTime = $"{account.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString()} {"8:00 AM"}".ToDateTime(),
+                EndDateTime = $"{account.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString()} {"12:00 AM"}".ToDateTime()
+            };
         }
 
         public static Account CreateNewGhostAccount(string orgName, AccountType accountType, WebUser loggedInUser, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)

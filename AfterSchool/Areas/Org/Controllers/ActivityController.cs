@@ -246,11 +246,11 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetRegistrationPeriods();
+            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();
+            ViewBag.Periods = SessionVariables.CurrentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.ActivePeriod = activiePeriod ?? activity.GetActiveRegistrationPeriod() ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-            ViewBag.ActiveForm = activity.GetActiveActivityForm();
+            ViewBag.ActivePeriod = activiePeriod ?? activity.GetActiveRegistrationPeriod(msgs) ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+            ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs);
         }
 
         [HttpGet]
