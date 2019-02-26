@@ -241,15 +241,24 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        private void LoadEditSetupViewBag(Activity activity, RegistrationPeriod activiePeriod, SystemMessages msgs)
+        private void LoadEditSetupViewBag(Activity activity, RegistrationPeriod activePeriod, SystemMessages msgs)
         {
+            var periods = SessionVariables.CurrentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
+
+            if (activePeriod.IsEmpty())
+                activePeriod = activity.GetActiveRegistrationPeriod(msgs) ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+
+            periods.Add(activePeriod);
+
+            periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
+
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();
-            ViewBag.Periods = SessionVariables.CurrentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
+            ViewBag.Periods = periods;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
-            ViewBag.ActivePeriod = activiePeriod ?? activity.GetActiveRegistrationPeriod(msgs) ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+            ViewBag.ActivePeriod = activePeriod;
             ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs);
         }
 
