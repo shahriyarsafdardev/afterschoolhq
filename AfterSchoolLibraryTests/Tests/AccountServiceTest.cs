@@ -226,26 +226,36 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(expectedPlatformFee, account.CalculatePlatformFeeAmount(totalAmountToCharge, msgs, dc));
         }
 
-        [Theory(DisplayName = "CalculateSubscriptionPlatformFeeAmountTest")]
-        [InlineData(.99, .05, 2, 0)]
-        [InlineData(.99, .05, 20, 1.00)]
-        [InlineData(.99, .05, 100, 5.00)]
-        public void CalculateSubscriptionPlatformFeeAmountTest(decimal platformFlatFee, decimal platformPercentageFee, decimal totalAmountToCharge, decimal expectedPlatformFee)
-        {
-            var accountOwner = WebUserFactory.Create(msgs, dc);
-            var account = AccountFactory.Create(accountOwner, msgs, dc);
-            var package = PackageFactory.Create(msgs, dc);
-            var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
-            var apfPlatformFeePercentage = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFee, platformPercentageFee, msgs, dc);
-            var apfPlatformFeeFlat = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFlatFee, platformFlatFee, msgs, dc);
+        //[Theory(DisplayName = "CalculateSubscriptionPlatformFeeAmountTest")]
+        //[InlineData(.99, .05, 2, 0)]
+        //[InlineData(.99, .05, 20, 1.00)]
+        //[InlineData(.99, .05, 100, 5.00)]
+        //public void CalculateSubscriptionPlatformFeeAmountTest(decimal platformFlatFee, decimal platformPercentageFee, decimal totalAmountToCharge, decimal expectedPlatformFee)
+        //{
+        //    var accountOwner = WebUserFactory.Create(msgs, dc);
+        //    var account = AccountFactory.Create(accountOwner, msgs, dc);
+        //    var package = PackageFactory.Create(msgs, dc);
+        //    var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+        //    var apfPlatformFeePercentage = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFee, platformPercentageFee, msgs, dc);
+        //    var apfPlatformFeeFlat = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFlatFee, platformFlatFee, msgs, dc);
 
-            Assert.Equal(expectedPlatformFee, account.CalculateSubscriptionPlatformFeeAmount(totalAmountToCharge, msgs, dc));
-        }
+        //    Assert.Equal(expectedPlatformFee, account.CalculateSubscriptionPlatformFeeAmount(totalAmountToCharge, msgs, dc));
+        //}
 
+        /// <summary>
+        /// should calculate the percentage that AHQ gets when processing a subscription payment
+        /// Should be equal to 
+        /// (((cost per period * AHQ percent fee) +  AHQ flat fee) - ((cost per period * stripe percent fee) + stripe flat fee) / cost per period
+        /// to get the final percentage
+        /// </summary>
+        /// <param name="platformFlatFee"></param>
+        /// <param name="platformPercentageFee"></param>
+        /// <param name="costPerPeriod"></param>
+        /// <param name="expectedPlatformPercentage"></param>
         [Theory(DisplayName = "GetSubscriptionPlatformFeePercentTest")]
-        [InlineData(.99, .05, 2, 0)]
-        [InlineData(.99, .05, 20, 0.006)]
-        [InlineData(.99, .05, 100, 0.018)]
+        [InlineData(.99, .05, 2, 0.366)]
+        [InlineData(.99, .05, 20, 0.0555)]
+        [InlineData(.99, .05, 100, 0.0279)]
         public void GetSubscriptionPlatformFeePercentTest(decimal platformFlatFee, decimal platformPercentageFee, decimal costPerPeriod, decimal expectedPlatformPercentage)
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);

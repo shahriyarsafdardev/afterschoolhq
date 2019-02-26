@@ -1561,17 +1561,15 @@ namespace AfterSchoolLibrary.Services
             return (totalAmountToCharge * percentageFee) + flatFee;
         }
 
-        public static decimal CalculateSubscriptionPlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
-            var platformFeeAmount = totalAmountToCharge * percentageFee;
-            var stripeFeeAmount = StripeHelper.GetStripeFee(totalAmountToCharge);
+        //public static decimal CalculateSubscriptionPlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+        //    var platformFeeAmount = totalAmountToCharge * percentageFee;
+        //    var stripeFeeAmount = StripeHelper.GetStripeFee(totalAmountToCharge);
 
-            // if the platform fee is less than stripe, then at least charge stripe
-            // platform fee is assumed to include stripe fees
-            // TODO: Revisit
-            return stripeFeeAmount > platformFeeAmount ? 0 : platformFeeAmount;
-        }
+        //    // we should always charge the flat fee amount even on subscriptions.
+        //    return stripeFeeAmount > platformFeeAmount ? 0 : platformFeeAmount;
+        //}
 
         public static decimal GetPlatformPercentFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -2226,7 +2224,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetSubscriptionPlatformFeePercent(this Account account, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var platformFeeAmount = account.CalculateSubscriptionPlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
+            var platformFeeAmount = account.CalculatePlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
             var stripeFeeAmount = plan.GetStripeFeeAmount();
             
             if (platformFeeAmount > stripeFeeAmount)
