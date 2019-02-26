@@ -1738,10 +1738,8 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-
         public static Transaction CreateRefundTransactionPayment(Transaction originalTransaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-
             var refund = AccountService.ProcessRefund(
                 originalTransaction.StripeChargeOrRefundId,
                 amount,
