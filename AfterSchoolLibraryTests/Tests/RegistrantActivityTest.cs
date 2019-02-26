@@ -12,7 +12,7 @@ using AfterSchoolLibraryTests.Factories;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibrary.Models;
 
-namespace AfterSchoolLibraryTests
+namespace AfterSchoolLibraryTests.Tests
 {
     public class RegistrantActivityTest : BaseTest
     {

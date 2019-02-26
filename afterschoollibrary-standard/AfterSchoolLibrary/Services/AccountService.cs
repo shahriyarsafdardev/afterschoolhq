@@ -1561,6 +1561,18 @@ namespace AfterSchoolLibrary.Services
             return (totalAmountToCharge * percentageFee) + flatFee;
         }
 
+        public static decimal CalculateSubscriptionPlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+            var platformFeeAmount = totalAmountToCharge * percentageFee;
+            var stripeFeeAmount = StripeHelper.GetStripeFee(totalAmountToCharge);
+
+            // if the platform fee is less than stripe, then at least charge stripe
+            // platform fee is assumed to include stripe fees
+            // TODO: Revisit
+            return stripeFeeAmount > platformFeeAmount ? 0 : platformFeeAmount;
+        }
+
         public static decimal GetPlatformPercentFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
@@ -1585,7 +1597,8 @@ namespace AfterSchoolLibrary.Services
 
             if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
                 customerId = checkoutObject.PurchasingAccount.StripeCustomerId;
-            var charge = Billing.StripeHelper.CreateCharge(
+
+            var charge = StripeHelper.CreateCharge(
                 fromCustomerId: customerId,
                 destinationAccountId: checkoutObject.BillingAccount.StripeUserId,
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
@@ -2211,9 +2224,15 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
-        public static decimal GetSubscriptionPlatformPercentFee(this Account account, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetSubscriptionPlatformFeePercent(this Account account, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Math.Round(account.GetPlatformPercentFee(msgs, dc) - plan.GetStripeFeePercent(), 4);// round by 4 to get the exact precision
+            var platformFeeAmount = account.CalculateSubscriptionPlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
+            var stripeFeeAmount = plan.GetStripeFeeAmount();
+            
+            if (platformFeeAmount > stripeFeeAmount)
+                return Math.Round((platformFeeAmount - stripeFeeAmount) / plan.CostPerPeriod.Value, 4);
+
+            return 0;
         }
         #endregion
     }

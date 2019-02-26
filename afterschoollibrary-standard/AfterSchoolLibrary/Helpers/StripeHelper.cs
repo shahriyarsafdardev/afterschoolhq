@@ -19,6 +19,14 @@ namespace AfterSchoolLibrary.Billing
         private static string DevPlatformClientId { get { return "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv"; } }
         private static string LivePlatformClientId { get { return "ca_7kmNqL4oMYfH5z7tY2N9riALjFpkMJAQ"; } }
 
+        private static decimal StripePercentFee { get { return .029M; } }
+        private static decimal StripeFlatFee { get { return .3M; } }
+
+        public static decimal GetStripeFee(decimal cost)
+        {
+            return (cost * StripePercentFee) + StripeFlatFee;
+        }
+
         public static string SecretKey
         {
             get
