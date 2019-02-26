@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
-namespace AfterSchoolLibraryTests
+namespace AfterSchoolLibraryTests.Tests
 {
     public class SubscriptionPlanTest : BaseTest
     {

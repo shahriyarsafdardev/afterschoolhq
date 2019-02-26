@@ -38,7 +38,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(SubscriptionPlan.LoadByParticipationObject(activityGroup.ID.Value, ParticipationObjectType.ActivityGroup, SubscriptionPlanType.PaymentPlan, msgs, dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetParticipationObjectActivityTestFull")]
         public void GetParticipationObjectActivityTestFull()
         {
             var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
@@ -52,7 +52,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.IsType<ParticipationObject>(activity.GetParticipationObject(msgs, dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetParticipationObjectActivityTestSimple")]
         public void GetParticipationObjectActivityTestSimple()
         {           
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
@@ -60,7 +60,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.IsType<ParticipationObject>(activity.GetParticipationObject(msgs, dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetPaymentPlansTest")]
         public void GetPaymentPlansTest()
         {
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
@@ -69,7 +69,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetActivePaymentPlans(msgs, dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetSubscriptionPlansTest")]
         public void GetSubscriptionPlansTest()
         {
             var activity = ActivityFactory.Create(ActivityOwnerAccount, msgs, dc);
@@ -78,7 +78,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Single(activity.GetActiveSubscriptionPlans(msgs, dc));
         }
 
-        [Fact]
+        [Fact(DisplayName = "CreateNewTest")]
         public void CreateNewTest()
         {
             var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
@@ -115,7 +115,7 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(activity.ID);
         }
 
-        [Theory]
+        [Theory(DisplayName = "GenerateUniqueName")]
         [InlineData("My Sample Account", "MySampleAccount")]
         [InlineData("My Sample Account Rocks Bud Boy", "MySampleAccountRocksBud")]
         [InlineData("My!@#$%^&*()-_+<>/,.?[]{}\\|'\":;~`", "My-_")]
@@ -124,66 +124,7 @@ namespace AfterSchoolLibraryTests.Tests
             var output = ActivityService.GenerateUniqueName(input, null, ActivityOwnerAccount.ID, msgs, dc);
 
             Assert.Equal(expectedOutput, output);
-        }
-
-        //[Fact]
-        //public void UpdateTest()
-        //{
-        //    var schedule = ActivityScheduleFactory.Create(ActivityOwnerAccount, msgs, dc);
-        //    var location = LocationFactory.Create(ActivityOwnerAccount, msgs, dc);
-        //    var activityGroup = ActivityGroupFactory.Create(ActivityOwnerAccount, ActivityGroupType.Session, msgs, dc);
-        //    var gradeLevels = GradeLevel.Load(msgs: msgs, dc: dc);
-        //    var activity = ActivityService.CreateNew(
-        //        activityName: "Test Activity",
-        //        activityDetails: "<p>Here are some details</p>",
-        //        seatsAvailable: 100,
-        //        waitingListSeatsAvailable: 10,
-        //        contactName: "Test User",
-        //        contactPhone: "123-123-1234",
-        //        contactEmail: "dave@dave.com",
-        //        costPerRegistrant: 12,
-        //        costDescription: "Here is the main reason for the cost and what you get",
-        //        acceptCreditCard: false,
-        //        allowToPayLater: true,
-        //        registrationMode: RegistrationMode.Register,
-        //        accountId: ActivityOwnerAccount.ID,
-        //        scheduleId: schedule.ID,
-        //        locationId: location.ID,
-        //        groupId: activityGroup.ID,
-        //        minGradeLevelId: gradeLevels.First().ID,
-        //        maxGradeLevelId: gradeLevels.Last().ID,
-        //        loggedInUser: this.LoggedInUser,
-        //        msgs: msgs,
-        //        dc: dc
-        //        );
-
-        //    var newActivityName = "Test Activity Update";
-
-        //    msgs.AddRange(activity.UpdateValues(
-        //        activityName: newActivityName,
-        //        activityDetails: activity.Description,
-        //        seatsAvailable: activity.SeatsAvailable.Value,
-        //        waitingListSeatsAvailable: activity.WaitingListSeats,
-        //        contactName: activity.ContactName
-        //        contactPhone: activity.ContactPhone
-        //        contactEmail: "dave@dave.com",
-        //        costPerRegistrant: 12,
-        //        costDescription: "Here is the main reason for the cost and what you get",
-        //        acceptCreditCard: false,
-        //        allowToPayLater: true,
-        //        registrationMode: RegistrationMode.Register,
-        //        accountId: ActivityOwnerAccount.ID,
-        //        scheduleId: schedule.ID,
-        //        locationId: location.ID,
-        //        groupId: activityGroup.ID,
-        //        minGradeLevelId: gradeLevels.First().ID,
-        //        maxGradeLevelId: gradeLevels.Last().ID,
-        //        loggedInUser: this.LoggedInUser,
-        //        dc: dc
-        //        ));
-
-        //    Assert.NotNull(activity);
-        //}
+        }       
 
     }
 }

@@ -7,7 +7,7 @@ using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using AfterSchoolLibrary.Services;
 
-namespace AfterSchoolLibraryTests
+namespace AfterSchoolLibraryTests.Tests
 {
     public class TransactionTest : BaseTest
     {
