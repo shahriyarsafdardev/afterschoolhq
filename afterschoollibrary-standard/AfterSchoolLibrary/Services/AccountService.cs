@@ -1561,16 +1561,6 @@ namespace AfterSchoolLibrary.Services
             return (totalAmountToCharge * percentageFee) + flatFee;
         }
 
-        //public static decimal CalculateSubscriptionPlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
-        //{
-        //    var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
-        //    var platformFeeAmount = totalAmountToCharge * percentageFee;
-        //    var stripeFeeAmount = StripeHelper.GetStripeFee(totalAmountToCharge);
-
-        //    // we should always charge the flat fee amount even on subscriptions.
-        //    return stripeFeeAmount > platformFeeAmount ? 0 : platformFeeAmount;
-        //}
-
         public static decimal GetPlatformPercentFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();

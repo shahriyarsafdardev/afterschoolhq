@@ -224,23 +224,7 @@ namespace AfterSchoolLibraryTests.Tests
             var apfPlatformFeeFlat = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFlatFee, platformFlatFee, msgs, dc);
 
             Assert.Equal(expectedPlatformFee, account.CalculatePlatformFeeAmount(totalAmountToCharge, msgs, dc));
-        }
-
-        //[Theory(DisplayName = "CalculateSubscriptionPlatformFeeAmountTest")]
-        //[InlineData(.99, .05, 2, 0)]
-        //[InlineData(.99, .05, 20, 1.00)]
-        //[InlineData(.99, .05, 100, 5.00)]
-        //public void CalculateSubscriptionPlatformFeeAmountTest(decimal platformFlatFee, decimal platformPercentageFee, decimal totalAmountToCharge, decimal expectedPlatformFee)
-        //{
-        //    var accountOwner = WebUserFactory.Create(msgs, dc);
-        //    var account = AccountFactory.Create(accountOwner, msgs, dc);
-        //    var package = PackageFactory.Create(msgs, dc);
-        //    var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
-        //    var apfPlatformFeePercentage = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFee, platformPercentageFee, msgs, dc);
-        //    var apfPlatformFeeFlat = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFlatFee, platformFlatFee, msgs, dc);
-
-        //    Assert.Equal(expectedPlatformFee, account.CalculateSubscriptionPlatformFeeAmount(totalAmountToCharge, msgs, dc));
-        //}
+        }        
 
         /// <summary>
         /// should calculate the percentage that AHQ gets when processing a subscription payment
