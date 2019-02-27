@@ -162,13 +162,13 @@ else
                                     @if (activity.ActivityScheduleId.HasValue && false)
                                     {
                                         <button class="md-trigger btn btn-default btn-sm" data-modal="modal-schedule" id="edit-schedule-@activity.Uid"
-                                                onclick="editSchedule('@activity.Name', '@activity.Uid', @activity.ActivityScheduleId)">
+                                                onclick="editSchedule('@UI.JavascriptSafeString(@activity.Name)', '@activity.Uid', @activity.ActivityScheduleId)">
                                             <i class="s7-edit"></i> Schedule
                                         </button>
                                     }
 
                                     <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy"
-                                            onclick="setCopyActivity('@activity.Name', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString() })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                            onclick="setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString() })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
                                         <i class="s7-copy-file"></i> Copy
                                     </button>
                                     @if (SessionVariables.LoggedInUser.IsActivityLeader(activity))
@@ -177,15 +177,15 @@ else
                                     {
                                         if (!activity.IsArchived)
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@activity.Name', '@Url.Action("archive", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Archive</button>
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("archive", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Archive</button>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@activity.Name', '@Url.Action("restore", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("restore", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
                                         }
                                     }
 
-                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@activity.Name', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                     }
                                 </div>
                             </td>
