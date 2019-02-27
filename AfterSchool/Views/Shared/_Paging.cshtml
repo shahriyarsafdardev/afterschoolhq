@@ -7,7 +7,7 @@
     var controller = (string)ViewData["controller"];
     var queryString = ViewData["querystring"];
 
-    var pageUrl = $"{Url.Action(action, controller, new { id = id, rpp = Request["rpp"] })}?{queryString}";
+    var pageUrl = $"{Url.Action(action, controller, new { id = id })}?{queryString}";
 
     var previousLink = "#";
     var nextLink = "#";
@@ -53,42 +53,59 @@
         iEnd = potentialIEnd < iEnd ? potentialIEnd : iEnd;
     }
 
+    var itemsPerPageOptions = new int[] { 10, 25, 50, 100, 250, 500, 1000 };
+
     if (Model.TotalCount > 1)
     {
-        var fullUrl = pageUrl + (!pageUrl.Contains("?") ? "?" : "&") + "pn={0}";
+        var itemsPerPageFullUrl = pageUrl + (!pageUrl.Contains("?") ? "?" : "&") + "pn=1";
+        var pageSelectFullUrl = pageUrl + (!pageUrl.Contains("?") ? "?" : "&") + "pn={0}&rpp=" + Request["rpp"];
 
         <div class="row">
+            <div class="col-md-2">
+                <div class="padding-10">
+                    Showing @Model.StartingRecord - @Model.EndingRecord of @Model.TotalCount
+                </div>
+            </div>
+
             <div class="col-md-4">
-                Showing @Model.StartingRecord - @Model.EndingRecord of @Model.TotalCount
+                <form class="form-inline">
+                    <select class="form-control form-control-sm" name="rpp" id="rpp" onchange="location.href='@itemsPerPageFullUrl&rpp='+this.value;">
+                        @foreach (var x in itemsPerPageOptions.Where(x => x < Model.TotalCount))
+                        {
+                            <option value="@x" @(Request["rpp"] == x.ToString() ? " selected=\"selected\" " : "")>@x Per Page</option>
+                        }
+                        <option value="@Model.TotalCount" @(Request["rpp"] == Model.TotalCount.ToString() ? " selected=\"selected\" " : "")>All</option>
+                    </select>
+                </form>
             </div>
         
             @if (Model.TotalPages > 1)
             {
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <div class="btn-group pull-right">
                         <a class="btn btn-default" href="@previousLink">Previous</a>
                     
-                        <a class="btn @("1" == Request["pn"] || Request["pn"].IsBlank() ? "btn-primary" : "btn-default")" href="@string.Format(fullUrl, 1)">1</a>  
+                        <a class="btn @("1" == Request["pn"] || Request["pn"].IsBlank() ? "btn-primary" : "btn-default")" href="@string.Format(pageSelectFullUrl, 1)">1</a>  
                                   
                         @if (Model.TotalPages > 2)
                         {
-                            if (iStart - 1 > 1)
-                            {
-                                <a class="btn btn-default" href="@string.Format(fullUrl, iStart - 1)">...</a>
+            if (iStart - 1 > 1)
+            {
+                                <a class="btn btn-default" href="@string.Format(pageSelectFullUrl, iStart - 1)">...</a>
                             }
 
                             for (var i = iStart; i <= iEnd; i++)
                             {
-                                <a class="btn @(i.ToString() == Request["pn"] ? "btn-primary" : "btn-default")" href="@string.Format(fullUrl, i)">@i</a>
-                            }
+                                <a class="btn @(i.ToString() == Request["pn"] ? "btn-primary" : "btn-default")" href="@string.Format(pageSelectFullUrl, i)">@i</a>
+}
 
                             if (Model.TotalPages - iEnd > 1)
                             {
-                                <a class="btn btn-default" href="@string.Format(fullUrl, iEnd + 1)">...</a>
+                                <a class="btn btn-default" href="@string.Format(pageSelectFullUrl, iEnd + 1)">...</a>
                             }
                         }
 
-                        <a class="btn @(Model.TotalPages.ToString() == Request["pn"] ? "btn-primary" : "btn-default")" href="@string.Format(fullUrl, Model.TotalPages)">@Model.TotalPages</a>  
+                        <a class="btn @(Model.TotalPages.ToString() == Request["pn"] ? "btn-primary" : "btn-default")" href="@string.Format(pageSelectFullUrl, Model.TotalPages)">@Model.TotalPages</a>  
 
                         <a class="btn btn-default" href="@nextLink">Next</a>
                     </div>
@@ -96,4 +113,4 @@
             }
         </div>
     }
-    }
+}
