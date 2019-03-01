@@ -7,7 +7,6 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
-using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -416,11 +415,11 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         public bool HasSubscriptionPlan(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

@@ -123,14 +123,20 @@
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Every</span>
                         <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
-                            <option value="@((int)BillingPeriodType.Month)"
-                                    @(paymentPlan.IsEmpty() || paymentPlan.BillingPeriodTypeId == BillingPeriodType.Month ? "selected=\" selected\"" : "")>
-                                @BillingPeriodType.Month.ToString().SplitByUpperCase()
-                            </option>
-                            <option value="@((int)BillingPeriodType.Year)"
-                                    @(paymentPlan.IsNotEmpty() && paymentPlan.BillingPeriodTypeId == BillingPeriodType.Year ? "selected=\" selected\"" : "")>
-                                @BillingPeriodType.Year.ToString().SplitByUpperCase()
-                            </option>
+                            @foreach(var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x != BillingPeriodType.NotSet))
+                            {
+                                var selected = "";
+                                if (paymentPlan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
+                                {
+                                    selected = " selected=\"selected\" ";
+                                }
+                                else if (paymentPlan.IsNotEmpty() && billingPeriodType == paymentPlan.BillingPeriodTypeId)
+                                {
+                                    selected = " selected=\"selected\" ";
+                                }
+
+                                <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString()</option>
+                            }
                         </select>
                     </div>
                 </div>

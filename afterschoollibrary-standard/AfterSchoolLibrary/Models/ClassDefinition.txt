@@ -1560,7 +1560,7 @@ values: NotSet, Basic, Detailed, SingleActivity
 [begin]
 type: Enum
 name: BillingPeriodType
-values: NotSet, Month, Year, Week
+values: NotSet, Month, Year, Week, Day
 [end]
 
 [begin]
