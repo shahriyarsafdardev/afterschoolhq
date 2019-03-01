@@ -2,35 +2,16 @@
 
 [begin]
 type: Database
-productionname: AfterSchool
-productionserver: afterschool-production.cdyenngbc33v.us-east-2.rds.amazonaws.com
-productionusername: AfterSchoolProd
-productionpassword: pNeiDj$nwpPynDhXfghT
-
-stagingname: AfterSchoolStaging
-stagingserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
-stagingusername: AfterSchoolUser
-stagingpassword: Nj8Ed$wpLfJ
-
-qaname: AfterSchoolQA
-qaserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
-qausername: AfterSchoolUser
-qapassword: Nj8Ed$wpLfJ
-
-ciname: AfterSchoolCI
-ciserver: afterschool-nonprod.cdyenngbc33v.us-east-2.rds.amazonaws.com
-ciusername: AfterSchoolUser
-cipassword: Nj8Ed$wpLfJ
 
 localname: AfterSchool
 localserver: localhost
 localusername: AfterSchoolUser
 localpassword: Nj8Ed$wpLfJ
 
-testname: AfterSchoolTest
-testserver: localhost
-testusername: AfterSchoolUser
-testpassword: Nj8Ed$wpLfJ
+localtestname: AfterSchoolTest
+localtestserver: localhost
+localtestusername: AfterSchoolUser
+localtestpassword: Nj8Ed$wpLfJ
 [end]
 
 [begin]
