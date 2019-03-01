@@ -345,6 +345,17 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public static bool CanProcessPayments(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var validStatuses = new StripeVerificationStatus[] { StripeVerificationStatus.Verified, StripeVerificationStatus.Pending };
+
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["VerificationStatusId"], validStatuses.Select(status => (int)status), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+            return dq.GetCount(msgs) > 0;
+        }
+
         #endregion
     }
 }
