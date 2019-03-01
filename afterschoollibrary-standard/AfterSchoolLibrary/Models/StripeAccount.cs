@@ -351,7 +351,7 @@ namespace AfterSchoolLibrary.Models
 
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["VerificationStatusId"], validStatuses.Select(status => (int)status), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["VerificationStatusId"], validStatuses.Select(status => (int)status).ToList(), DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
             return dq.GetCount(msgs) > 0;
         }
