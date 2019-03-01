@@ -11,6 +11,96 @@ namespace AfterSchoolLibrary.Services
 {
     public static class ActivityService
     {
+        public static double GetPercentPublishable(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            int totalFields = 0;
+            int totalErrors = 0;
+
+            totalFields++;
+            if (activity.Name.IsEmpty())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (activity.SeatsAvailable.HasValue == false)
+            {
+                totalErrors++;
+            }
+
+            if (!activity.ActivityGroupId.HasValue)
+            {
+                totalFields++;
+                if (activity.GetActiveRegistrationPeriod(msgs, dc).IsEmpty())
+                {
+                    totalErrors++;
+                }
+                totalFields++;
+                if (activity.GetActiveActivityForm(msgs, dc).IsEmpty())
+                {
+                    totalErrors++;
+                }
+            }
+
+            totalFields++;
+            if (activity.ContactName.IsBlank())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (activity.ContactEmail.IsBlank())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (activity.ContactPhone.IsBlank())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (!activity.HasSchedule)
+            {
+                totalErrors++;
+            }
+            totalFields++;
+            if (!activity.LocationId.HasValue)
+            {
+                totalErrors++;
+            }
+            //totalFields++;
+            //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
+            //{
+            //    totalErrors++;
+            //}
+            if (!activity.ActivityGroupId.HasValue)
+            {
+                totalFields++;
+                if (activity.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc).IsEmpty() ||
+                    activity.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc).Value.IsEmpty())
+                {
+                    totalErrors++;
+                }
+                totalFields++;
+                if (activity.GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc).IsEmpty() ||
+                    activity.GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc).Value.IsEmpty())
+                {
+                    totalErrors++;
+                }
+            }
+
+            return ((totalFields - totalErrors) / totalFields) * 100;
+
+        }
+
+        public static string GetHomePageUrl(this Activity activity, bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return $"{Helpers.Utilities.BaseUrl(isAfterSchool)}/{activity.GetAccount(msgs, dc).UniqueName.ToLower()}/{activity.ActivityTypeId.ToString().ToLower()}/{activity.UniqueName.ToLower()}";
+        }
+
         public static bool IsFull(this Activity activity, DatabaseConnection dc = null)
         {
             return activity.GetSeatsRemaining(dc: dc) == 0;

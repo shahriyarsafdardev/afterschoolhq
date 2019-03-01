@@ -447,16 +447,11 @@ namespace AfterSchoolLibrary.Models
                dc) > 0;
         }
 
-        public string GetHomePageUrl(bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return $"{Helpers.Utilities.BaseUrl(isAfterSchool)}/{this.GetAccount(msgs, dc).UniqueName.ToLower()}/{this.ActivityTypeId.ToString().ToLower()}/{this.UniqueName.ToLower()}";
-        }
-
         public string HomePageUrl
         {
             get
             {
-                return GetHomePageUrl(true);
+                return Services.ActivityService.GetHomePageUrl(this, true);
             }
         }
 
@@ -598,96 +593,11 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public double GetPercentPublishable(DatabaseConnection dc = null)
-        {
-            int totalFields = 0;
-            int totalErrors = 0;
-
-            totalFields++;
-            if (Name.IsEmpty())
-            {
-                totalErrors++;
-            }
-            totalFields++;
-            if (SeatsAvailable.HasValue == false)
-            {
-                totalErrors++;
-            }
-
-            if (!this.ActivityGroupId.HasValue)
-            {
-                totalFields++;
-                if (this.GetActiveRegistrationPeriod(dc: dc).IsEmpty())
-                {
-                    totalErrors++;
-                }
-                totalFields++;
-                if (this.GetActiveActivityForm(dc: dc).IsEmpty())
-                {
-                    totalErrors++;
-                }
-            }
-
-            totalFields++;
-            if (ContactName.IsBlank())
-            {
-                totalErrors++;
-            }
-            totalFields++;
-            if (ContactEmail.IsBlank())
-            {
-                totalErrors++;
-            }
-            totalFields++;
-            if (ContactPhone.IsBlank())
-            {
-                totalErrors++;
-            }
-            totalFields++;
-            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(Details).IsBlank())
-            {
-                totalErrors++;
-            }
-            totalFields++;
-            if (!HasSchedule)
-            {
-                totalErrors++;
-            }
-            totalFields++;
-            if (!LocationId.HasValue)
-            {
-                totalErrors++;
-            }
-            //totalFields++;
-            //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
-            //{
-            //    totalErrors++;
-            //}
-            if (!this.ActivityGroupId.HasValue)
-            {
-                totalFields++;
-                if (this.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail).IsEmpty() ||
-                    this.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail).Value.IsEmpty())
-                {
-                    totalErrors++;
-                }
-                totalFields++;
-                if (this.GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail).IsEmpty() ||
-                    this.GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail).Value.IsEmpty())
-                {
-                    totalErrors++;
-                }
-            }
-
-            return ((totalFields - totalErrors) / totalFields) * 100;
-
-        }
-
         public bool IsPublishable
         {
             get
             {
-                return (GetPercentPublishable() == 100.ToDouble() ? true : false) && !IsArchived && (this.GetActivityGroup().IsEmpty() || !this.GetActivityGroup().IsArchived);
+                return (Services.ActivityService.GetPercentPublishable(this) == 100.ToDouble() ? true : false) && !IsArchived && (Services.ActivityService.GetActivityGroup(this).IsEmpty() || !Services.ActivityService.GetActivityGroup(this).IsArchived);
             }
         }
 
@@ -695,7 +605,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return IsPublished && !IsArchived && (this.GetActivityGroup().IsEmpty() || !this.GetActivityGroup().IsArchived) && !IsDeleted;
+                return IsPublished && !IsArchived && (Services.ActivityService.GetActivityGroup(this).IsEmpty() || !Services.ActivityService.GetActivityGroup(this).IsArchived) && !IsDeleted;
             }
         }
 
@@ -703,7 +613,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return this.GetActivityGroup().IsNotEmpty() && this.GetActivityGroup().IsArchived;
+                return Services.ActivityService.GetActivityGroup(this).IsNotEmpty() && Services.ActivityService.GetActivityGroup(this).IsArchived;
             }
         }
         
