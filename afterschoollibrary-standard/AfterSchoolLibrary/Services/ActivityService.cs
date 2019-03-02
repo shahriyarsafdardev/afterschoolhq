@@ -18,78 +18,65 @@ namespace AfterSchoolLibrary.Services
 
             totalFields++;
             if (activity.Name.IsEmpty())
-            {
                 totalErrors++;
-            }
+
             totalFields++;
-            if (activity.SeatsAvailable.HasValue == false)
-            {
+            if (!activity.SeatsAvailable.HasValue)
                 totalErrors++;
-            }
 
             if (!activity.ActivityGroupId.HasValue)
             {
                 totalFields++;
                 if (activity.GetActiveRegistrationPeriod(msgs, dc).IsEmpty())
-                {
                     totalErrors++;
-                }
+
                 totalFields++;
+
                 if (activity.GetActiveActivityForm(msgs, dc).IsEmpty())
-                {
                     totalErrors++;
-                }
             }
 
             totalFields++;
             if (activity.ContactName.IsBlank())
-            {
                 totalErrors++;
-            }
+
             totalFields++;
             if (activity.ContactEmail.IsBlank())
-            {
                 totalErrors++;
-            }
+
             totalFields++;
             if (activity.ContactPhone.IsBlank())
-            {
                 totalErrors++;
-            }
+
             totalFields++;
-            if (BasicLibrary.Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
-            {
+            if (Utilities.RemoveHTMLAndEntities(activity.Details).IsBlank())
                 totalErrors++;
-            }
+
             totalFields++;
             if (!activity.HasSchedule)
-            {
                 totalErrors++;
-            }
+
             totalFields++;
             if (!activity.LocationId.HasValue)
-            {
                 totalErrors++;
-            }
+
             //totalFields++;
             //if (CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0 && !AllowToPayLater && !AcceptCreditCard)
             //{
             //    totalErrors++;
             //}
+
             if (!activity.ActivityGroupId.HasValue)
             {
                 totalFields++;
                 if (activity.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc).IsEmpty() ||
                     activity.GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc).Value.IsEmpty())
-                {
                     totalErrors++;
-                }
+
                 totalFields++;
                 if (activity.GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc).IsEmpty() ||
                     activity.GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc).Value.IsEmpty())
-                {
                     totalErrors++;
-                }
             }
 
             return ((totalFields - totalErrors) / totalFields) * 100;
