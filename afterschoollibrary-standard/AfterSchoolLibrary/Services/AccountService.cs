@@ -1953,14 +1953,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return StripeAccount.GetCount(criterias: 
-                new Hashtable()
-                {
-                    { "VerificationStatusId", (int)StripeVerificationStatus.Verified },
-                    { "AccountId", account.ID.Value }
-                }, 
-                msgs: msgs, 
-                dc: dc) > 0;
+            return StripeAccount.CanProcessPayments(account.ID.Value, msgs, dc);
         }
 
         #endregion

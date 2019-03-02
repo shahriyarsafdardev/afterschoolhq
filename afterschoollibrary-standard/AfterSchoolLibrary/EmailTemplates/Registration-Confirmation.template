@@ -1,7 +1,7 @@
 ﻿<div>
   <p>Hello @Model.FirstName,</p>
-  
-  @Model.CustomMessage
+
+  <p>@Model.CustomMessage</p>
 
   <div style="margin: 20px">
     <table style="border: 2px solid #f7f7f7; width: 600px;" border="0">
