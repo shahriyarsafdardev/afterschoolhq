@@ -252,5 +252,20 @@ namespace AfterSchoolLibraryTests.Tests
             var subscriptionPlan = SubscriptionPlanFactory.Create(account, activity, SubscriptionPlanType.Subscription, costPerPeriod, msgs, dc);            
             Assert.Equal(expectedPlatformPercentage, account.GetSubscriptionPlatformFeePercent(subscriptionPlan, msgs, dc));
         }
+
+        [Theory]
+        [InlineData(StripeVerificationStatus.NotSet, false)]
+        [InlineData(StripeVerificationStatus.Pending, true)]
+        [InlineData(StripeVerificationStatus.Unverified, false)]
+        [InlineData(StripeVerificationStatus.Verified, true)]
+        public void CanProcessPaymentsTest(StripeVerificationStatus stripeVerificationStatus, bool expectedResult)
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var stripeAccount = StripeAccountFactory.Create(account, stripeVerificationStatus, msgs, dc);
+
+            Assert.Equal(account.CanProcessPayments(msgs, dc), expectedResult);
+
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace AfterSchoolLibraryTests
             {
                 AfterSchoolLibrary.Helpers.Utilities.InitializeApp();
 
-                dc = new DatabaseConnection(Database.TestCredentials.ConnectionString);
+                dc = new DatabaseConnection(Database.LocalTestCredentials.ConnectionString);
                 msgs = new SystemMessages();
                 dc.Open();
                 Database.CreateTables(dc);
