@@ -4,13 +4,13 @@
     var stripe = Model.AccountStripePublishableKey;
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
     var paymentPlan = (SubscriptionPlan)ViewBag.PaymentPlan;
-    
-    if(!Model.ID.HasValue)
+
+    if (!Model.ID.HasValue)
     {
         var a = Model.GetAccount();
         stripe = a.StripePublishableKey;
     }
-    
+
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
 
     var paymentdisabled = "";
@@ -26,7 +26,7 @@
     </div>
 
     <div class="panel-body">
-        
+
         <div class="form-group">
             <label class="col-sm-3 control-label">Tuition Fee</label>
             <div class="col-sm-9">
@@ -35,7 +35,7 @@
                     <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@Model.CostPerRegistrant.ToCurrency().Replace("$", "")" required min="0.00" step=".01" @paymentdisabled />
                 </div>
             </div>
-        </div>                  
+        </div>
 
         <div class="form-group">
             <label class="col-sm-3 control-label">
@@ -56,18 +56,18 @@
             <label class="col-sm-3 control-label">Accept Credit Cards</label>
             <div class="col-sm-1">
                 @*
-                @{Html.RenderPartial
-                    (
-                        "~/Views/Shared/_SwitchButton.cshtml",
-                        Model.AcceptCreditCard,
-                        new ViewDataDictionary()
-                        {
-                            { "checkboxname", "acceptcreditcard" },
-                            { "checkboxid", "acceptcreditcard" },
-                            { "disabled", !accountPackage.HasFeature(FeatureType.AcceptPayments) || stripe.IsBlank() }
-                        }
-                    );
-                }
+                    @{Html.RenderPartial
+                        (
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.AcceptCreditCard,
+                            new ViewDataDictionary()
+                            {
+                                { "checkboxname", "acceptcreditcard" },
+                                { "checkboxid", "acceptcreditcard" },
+                                { "disabled", !accountPackage.HasFeature(FeatureType.AcceptPayments) || stripe.IsBlank() }
+                            }
+                        );
+                    }
                 *@
             </div>
             <div class="col-sm-3">
@@ -80,8 +80,8 @@
                     <a href="@Url.Action("payments", "account")" target="_blank">Connect Stripe <i class="s7-link"></i></a>
                 }
             </div>
-        </div>        
-        
+        </div>
+
     </div>
 
     <div class="panel-heading">
@@ -95,15 +95,15 @@
                 <label class="col-sm-3 control-label">Tuition Payment Plan</label>
                 <div class="col-sm-1">
                     @{Html.RenderPartial
-                      (
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.HasPaymentPlan(),
-                          new ViewDataDictionary()
-                          {
-                                { "checkboxname", "haspaymentplan" },
-                                { "checkboxid", "haspaymentplan" }
-                          }
-                      );
+                          (
+                              "~/Views/Shared/_SwitchButton.cshtml",
+                              Model.HasPaymentPlan(),
+                              new ViewDataDictionary()
+                              {
+                                            { "checkboxname", "haspaymentplan" },
+                                            { "checkboxid", "haspaymentplan" }
+                              }
+                          );
                     }
                 </div>
             </div>
@@ -123,20 +123,7 @@
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Every</span>
                         <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
-                            @foreach(var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x != BillingPeriodType.NotSet))
-                            {
-                                var selected = "";
-                                if (paymentPlan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
-                                {
-                                    selected = " selected=\"selected\" ";
-                                }
-                                else if (paymentPlan.IsNotEmpty() && billingPeriodType == paymentPlan.BillingPeriodTypeId)
-                                {
-                                    selected = " selected=\"selected\" ";
-                                }
-
-                                <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString()</option>
-                            }
+                            @BillingPeriodOptions(paymentPlan)
                         </select>
                     </div>
                 </div>
@@ -165,18 +152,18 @@
             <label class="col-sm-3 control-label">Allow to Pay Later</label>
             <div class="col-sm-9">
                 @{Html.RenderPartial
-                (
-                    "~/Views/Shared/_SwitchButton.cshtml",
-                    Model.AllowToPayLater,
-                    new ViewDataDictionary()
-                    {
-                        { "checkboxname", "allowtopaylater" },
-                        { "checkboxid", "allowtopaylater" },
-                        { "disabled", !accountPackage.HasFeature(FeatureType.AcceptPayments) }
-                    }
-                );
+                    (
+                        "~/Views/Shared/_SwitchButton.cshtml",
+                        Model.AllowToPayLater,
+                        new ViewDataDictionary()
+                        {
+                                        { "checkboxname", "allowtopaylater" },
+                                        { "checkboxid", "allowtopaylater" },
+                                        { "disabled", !accountPackage.HasFeature(FeatureType.AcceptPayments) }
+                        }
+                    );
                 }
-                    
+
                 <p class="text-muted">
                     <em>
                         Allowing a @UILabel.RegistrantLabel().ToLower() to pay later means a @UILabel.RegistrantLabel().ToLower() can register and occupy a seat for your @Model.ActivityTypeId.ToString().ToLower() without paying. <br />
@@ -193,21 +180,21 @@
     </div>
 
     <div class="panel-body">
-        
+
         <div class="form-group">
             <div class="row">
                 <label class="col-sm-3 control-label">Subscription</label>
                 <div class="col-sm-1">
                     @{Html.RenderPartial
-                      (
-                          "~/Views/Shared/_SwitchButton.cshtml",
-                          Model.HasSubscriptionPlan(),
-                          new ViewDataDictionary()
-                          {
-                                { "checkboxname", "hassubscriptionplan" },
-                                { "checkboxid", "hassubscriptionplan" }
-                          }
-                      );
+                          (
+                              "~/Views/Shared/_SwitchButton.cshtml",
+                              Model.HasSubscriptionPlan(),
+                              new ViewDataDictionary()
+                              {
+                                                        { "checkboxname", "hassubscriptionplan" },
+                                                        { "checkboxid", "hassubscriptionplan" }
+                              }
+                          );
                     }
                 </div>
             </div>
@@ -227,20 +214,7 @@
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Every</span>
                         <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
-                            @foreach(var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x != BillingPeriodType.NotSet))
-                            {
-                                var selected = "";
-                                if (subscriptionPlan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
-                                {
-                                    selected = " selected=\"selected\" ";
-                                }
-                                else if (subscriptionPlan.IsNotEmpty() && billingPeriodType == paymentPlan.BillingPeriodTypeId)
-                                {
-                                    selected = " selected=\"selected\" ";
-                                }
-
-                                <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString()</option>
-                            }
+                            @BillingPeriodOptions(subscriptionPlan)
                         </select>
                     </div>
 
@@ -266,11 +240,11 @@
 
         $('#hassubscriptionplan').change(function (cb) {
             setSubscriptionPlanSection();
-        }); 
+        });
 
         $('#haspaymentplan').change(function (cb) {
             setPaymentPlanSection();
-        }); 
+        });
     });
 
     function setSubscriptionPlanSection() {
@@ -293,3 +267,21 @@
         }
     }
 </script>
+
+@helper BillingPeriodOptions(SubscriptionPlan plan)
+{
+    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x != BillingPeriodType.NotSet))
+    {
+        var selected = "";
+        if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
+        {
+            selected = " selected=\"selected\" ";
+        }
+        else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
+        {
+            selected = " selected=\"selected\" ";
+        }
+
+        <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString()</option>
+    }
+}
