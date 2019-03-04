@@ -37,6 +37,13 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", title); }
+            
+            @if (fullscreen)
+            {
+                <div class="pull-right">
+                    <a href="@Url.Action("index", "activity")" class="btn btn-default">X</a>
+                </div>
+            }
         </div>
         <div class="panel-body">
 
