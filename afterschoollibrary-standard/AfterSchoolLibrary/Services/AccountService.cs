@@ -2073,17 +2073,17 @@ namespace AfterSchoolLibrary.Services
 
         #region Leagues
 
-        public static List<ActivityGroup> GetLeagues(this Account account, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetLeagues(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.League, dc: dc);
+            return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.League, msgs, dc);
         }
 
-        public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, start, length, dc: dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, start, length, msgs, dc);
         }
 
-        public static int GetLeagueCount(this Account account, bool IsArchived, DatabaseConnection dc = null)
+        public static int GetLeagueCount(this Account account, bool IsArchived, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityGroup.GetCount(
                 new Hashtable() {
@@ -2091,6 +2091,7 @@ namespace AfterSchoolLibrary.Services
                     { "ActivityGroupTypeId", (int)ActivityGroupType.League },
                     { "IsArchived", IsArchived }
                 },
+                msgs: msgs,
                 dc: dc);
         }
 
@@ -2111,9 +2112,10 @@ namespace AfterSchoolLibrary.Services
         {
             var aags = AccountActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
             var periods = RegistrationPeriod.LoadByAccountActivityGroupIds(
-                aags.Select(x => x.ID.Value).ToList(),
-                msgs,
-                dc)
+                    aags.Select(x => x.ID.Value).ToList(),
+                    msgs,
+                    dc
+                )
                 .Where(period => period.IsOpen() || period.WillOpen())
                 .ToList();
 

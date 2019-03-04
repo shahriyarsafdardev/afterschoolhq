@@ -78,16 +78,16 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivityGroup activityGroup = null;
             if (group.IsGuid())
             {
-                activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                totalActivityCount = activityGroup.GetActivityCount(ActivityType.Activity, isArchived, false, null);
-                activities = activityGroup.GetActivities(ActivityType.Activity, isArchived, false, start, length);
-                hasArchivedActivities = activityGroup.GetActivityCount(ActivityType.Activity, true, false, null) > 0;
+                activityGroup = ActivityGroup.LoadByUid(group.ToGuid(), msgs);
+                totalActivityCount = activityGroup.GetActivityCount(ActivityType.Activity, isArchived, false, null, msgs);
+                activities = activityGroup.GetActivities(ActivityType.Activity, isArchived, false, start, length, msgs: msgs);
+                hasArchivedActivities = activityGroup.GetActivityCount(ActivityType.Activity, true, false, null, msgs) > 0;
             }
             else
             {
-                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, isArchived, false);
-                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, isArchived, false, start, length);
-                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, true, false) > 0;
+                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, isArchived, false, msgs);
+                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, isArchived, false, start, length, msgs);
+                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, true, false, msgs) > 0;
             }
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
