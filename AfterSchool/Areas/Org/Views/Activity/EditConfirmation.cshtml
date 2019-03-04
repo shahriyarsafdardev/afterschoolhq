@@ -3,51 +3,63 @@
     ViewBag.Title = ((Account)ViewBag.Account).Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+
+    var fullscreen = Request["isnew"] == "1" && !Model.IsPublished;
+    if (fullscreen)
+    {
+        Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    }
 }
 
-@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@if (!fullscreen)
+{
+    Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());
+}
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    
+    @if (!fullscreen)
+    {
+        Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);
+    }
 
     <div class="panel panel-default">
-        <div class="panel-heading">            
+        <div class="panel-heading">
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
         </div>
         <div class="panel-body">
 
             <div class="col-md-8 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editconfirmation", "activity", new { id = Model.Uid })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editconfirmation", "activity", new { id = Model.Uid, isnew = Request["isnew"] })" class="form-horizontal">
 
-                    @if(!Model.IsPublished)
-                    { 
-                        <button type="submit" class="btn btn-primary pull-right btn-space" onclick="navigateActivity('@Url.Action("editconfirmation", "activity", new { id = Model.Uid, cmd = "publish" })')">Publish &raquo;</button>
+                    @if (!Model.IsPublished)
+                    {
+                        @: @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "publish", true, true, Request))
                     }
-                    <button type="submit" class="btn btn-default pull-right btn-space"><i class="s7-diskette"></i> Save</button>
-                    <button type="submit" class="btn btn-default pull-right btn-space" onclick="navigateActivity('@Url.Action("editconfirmation", "activity", new { id = Model.Uid, cmd = "prev" })')">&laquo;</button>
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "prev", true, false, Request))
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormConfirmation.cshtml", Model);}
 
                     <div class="form-group">
                         <div class="col-sm-2 col-sm-offset-3">
-                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editconfirmation", "activity", new { id = Model.Uid, cmd = "prev" })')">&laquo; Previous</button>
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "prev", false, false, Request))
                         </div>
                         @if (!Model.IsPublished)
                         {
-                            <div class="col-sm-3">
-                                <button type="submit" class="btn btn-default btn-space btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
+                            <div class="col-sm-5">
+                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                             </div>
-                            <div class="col-sm-4">
-                                <button type="submit" class="btn btn-primary btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editconfirmation", "activity", new { id = Model.Uid, cmd = "publish" })')">Publish &raquo;</button>
+                            <div class="col-sm-2">
+                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editconfirmation", "publish", false, true, Request))
                             </div>
                         }
                         else
                         {
                             <div class="col-sm-7">
-                                <button type="submit" class="btn btn-default btn-space btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
+                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                             </div>
                         }
                     </div>

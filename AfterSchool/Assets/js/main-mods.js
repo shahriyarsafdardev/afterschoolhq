@@ -295,5 +295,8 @@ var ActivitySetup = {
             $('.advanced-settings').addClass('hide');
             $('#btn-advanced-settings').html('Show Advanced Settings');
         }
+    },
+    navigateActivity: function (url) {
+        $('#form1').attr('action', url);
     }
 }

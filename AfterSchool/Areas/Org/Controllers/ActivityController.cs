@@ -210,9 +210,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
 
                 if (msgs.HasNoErrors())
-                {
                     UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
-                }
             }
 
             if (group.IsGuid())

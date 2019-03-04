@@ -9,14 +9,14 @@
     </div>
     <div class="panel-body">
 
-        @ShowEmailContent(properties, AccountPropertyType.RegistrationThankYouEmail);
+        @ShowEmailContent(properties, AccountPropertyType.RegistrationThankYouEmail)
 
         <div class="col-md-offset-3 col-md-9 padding-v-30">
             <span><a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a></span>
         </div>
 
         <div class="hide advanced-settings">
-            @ShowEmailContent(properties, AccountPropertyType.ApplicationThankYouEmail);
+            @ShowEmailContent(properties, AccountPropertyType.ApplicationThankYouEmail)
         </div>       
 
     </div>
