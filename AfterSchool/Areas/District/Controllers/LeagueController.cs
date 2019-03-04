@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.District.Controllers
         [HttpGet]
         public ActionResult Index(string pn, string rpp, string archive)
         {
-            var groups = new List<ActivityGroup>();
+            var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 10;
             bool isArchived = false;
@@ -36,22 +36,23 @@ namespace AfterSchool.Areas.District.Controllers
                 recordsPerPage = rpp.ToInteger();
 
             if (archive.IsBoolean())
-                isArchived = archive.ToInteger().ToBoolean();
+                isArchived = archive.ToBoolean();
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
+
+            var groups = new List<ActivityGroup>();
             var totalCount = 0;
             var hasArchivedGroups = false;
 
-            totalCount = SessionVariables.CurrentAccount.GetLeagueCount(isArchived);
-            groups = SessionVariables.CurrentAccount.GetLeagues(isArchived, start, length).OrderByDescending(x => x.CreateDate).ToList();
-
-            hasArchivedGroups = SessionVariables.CurrentAccount.GetLeagueCount(true) > 0;
+            totalCount = SessionVariables.CurrentAccount.GetLeagueCount(isArchived, msgs);
+            groups = SessionVariables.CurrentAccount.GetLeagues(isArchived, start, length, msgs).OrderByDescending(x => x.CreateDate).ToList();
+            hasArchivedGroups = SessionVariables.CurrentAccount.GetLeagueCount(true, msgs) > 0;
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.GroupController = "league";
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.HasArchivedGroups = hasArchivedGroups;
             ViewBag.ActivityGroupType = ActivityGroupType.League;
             ViewBag.PagingModel = new PagingModel()
