@@ -8,7 +8,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using AfterSchoolLibraryTests.Factories;
 
-namespace AfterSchoolLibraryTests
+namespace AfterSchoolLibraryTests.Tests
 {
     public class ActivityTest : BaseTest
     {

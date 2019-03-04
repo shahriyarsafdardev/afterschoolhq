@@ -146,6 +146,7 @@ namespace AfterSchoolLibrary.Services
                 sourceId: copiedSourceId,
                 stripeAccountId: billingAccount.StripeUserId,
                 msgs: msgs);
+
             SubscriptionPlan plan = null;
             var applyCoupon = false;
             var coupon = checkoutObject.Coupon;
@@ -168,7 +169,7 @@ namespace AfterSchoolLibrary.Services
                 customerId: accountCustomer.Id,
                 planId: plan.StripePlanId,
                 sourceId: copiedSourceId,
-                platformFeePercent: billingAccount.GetSubscriptionPlatformPercentFee(plan),
+                platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan),
                 trialEndDate: null,
                 stripeAccountId: billingAccount.StripeUserId,
                 stripeCouponId: stripeCouponId,

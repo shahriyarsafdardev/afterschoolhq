@@ -11,7 +11,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibraryTests.Factories;
 using AfterSchoolLibrary.Models;
 
-namespace AfterSchoolLibraryTests
+namespace AfterSchoolLibraryTests.Tests
 {
     public class RegistrantTest: BaseTest
     {

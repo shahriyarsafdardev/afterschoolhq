@@ -255,13 +255,6 @@ namespace AfterSchoolLibrary.Models
 
                 var monthlyPlan = AddOrUpdateStripePlan(monthlyProduct, this.Price.Value, BillingPeriodType.Month, msgs);
                 var yearlyPlan = AddOrUpdateStripePlan(yearlyProduct, this.PricePerYear.Value, BillingPeriodType.Year, msgs);
-
-                //var planService = new Stripe.StripePlanService(StripeHelper.SecretKey);
-                //var requestOptions = new Stripe.StripeRequestOptions();
-                //requestOptions.ApiKey = StripeHelper.SecretKey;
-
-                //msgs.AddRange(AddOrUpdateStripePlan(planService, requestOptions, BillingPeriodType.Month, this.Price.Value));
-                //msgs.AddRange(AddOrUpdateStripePlan(planService, requestOptions, BillingPeriodType.Year, this.PricePerYear.Value));
             }
 
             return msgs;

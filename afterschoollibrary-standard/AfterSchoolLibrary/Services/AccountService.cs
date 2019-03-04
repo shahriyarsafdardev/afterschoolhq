@@ -29,9 +29,9 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static List<Form> GetForms(this Account account, DatabaseConnection dc = null)
+        public static List<Form> GetForms(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Form.LoadByAccountId(account.ID.Value, dc: dc);
+            return Form.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
         public static List<ActivitySchedule> GetActivitySchedules(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1081,11 +1081,12 @@ namespace AfterSchoolLibrary.Services
 
         public static RegistrationPeriod GetDefaultNewRegistrationPeriod(this Account account)
         {
-            var activePeriod = new RegistrationPeriod();
-            activePeriod.ID = 0;
-            activePeriod.StartDateTime = string.Format("{0} {1}", account.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString(), "8:00 AM").ToDateTime();
-            activePeriod.EndDateTime = string.Format("{0} {1}", account.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString(), "12:00 AM").ToDateTime();
-            return activePeriod;
+            return new RegistrationPeriod()
+            {
+                ID = 0,
+                StartDateTime = $"{account.ConvertToAccountTimeZone(DateTime.UtcNow).ToShortDateString()} {"8:00 AM"}".ToDateTime(),
+                EndDateTime = $"{account.ConvertToAccountTimeZone(DateTime.UtcNow).AddWeeks(1).ToShortDateString()} {"12:00 AM"}".ToDateTime()
+            };
         }
 
         public static Account CreateNewGhostAccount(string orgName, AccountType accountType, WebUser loggedInUser, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
@@ -1585,7 +1586,8 @@ namespace AfterSchoolLibrary.Services
 
             if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
                 customerId = checkoutObject.PurchasingAccount.StripeCustomerId;
-            var charge = Billing.StripeHelper.CreateCharge(
+
+            var charge = StripeHelper.CreateCharge(
                 fromCustomerId: customerId,
                 destinationAccountId: checkoutObject.BillingAccount.StripeUserId,
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
@@ -1737,10 +1739,8 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-
         public static Transaction CreateRefundTransactionPayment(Transaction originalTransaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-
             var refund = AccountService.ProcessRefund(
                 originalTransaction.StripeChargeOrRefundId,
                 amount,
@@ -1953,14 +1953,7 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return StripeAccount.GetCount(criterias: 
-                new Hashtable()
-                {
-                    { "VerificationStatusId", (int)StripeVerificationStatus.Verified },
-                    { "AccountId", account.ID.Value }
-                }, 
-                msgs: msgs, 
-                dc: dc) > 0;
+            return StripeAccount.CanProcessPayments(account.ID.Value, msgs, dc);
         }
 
         #endregion
@@ -2080,17 +2073,17 @@ namespace AfterSchoolLibrary.Services
 
         #region Leagues
 
-        public static List<ActivityGroup> GetLeagues(this Account account, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetLeagues(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.League, dc: dc);
+            return ActivityGroup.LoadByAccountIdByActivityGroupTypeId(account.ID.Value, ActivityGroupType.League, msgs, dc);
         }
 
-        public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, DatabaseConnection dc = null)
+        public static List<ActivityGroup> GetLeagues(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, start, length, dc: dc);
+            return ActivityGroup.LoadByAccountId(account.ID.Value, ActivityGroupType.League, start, length, msgs, dc);
         }
 
-        public static int GetLeagueCount(this Account account, bool IsArchived, DatabaseConnection dc = null)
+        public static int GetLeagueCount(this Account account, bool IsArchived, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return ActivityGroup.GetCount(
                 new Hashtable() {
@@ -2098,6 +2091,7 @@ namespace AfterSchoolLibrary.Services
                     { "ActivityGroupTypeId", (int)ActivityGroupType.League },
                     { "IsArchived", IsArchived }
                 },
+                msgs: msgs,
                 dc: dc);
         }
 
@@ -2118,9 +2112,10 @@ namespace AfterSchoolLibrary.Services
         {
             var aags = AccountActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
             var periods = RegistrationPeriod.LoadByAccountActivityGroupIds(
-                aags.Select(x => x.ID.Value).ToList(),
-                msgs,
-                dc)
+                    aags.Select(x => x.ID.Value).ToList(),
+                    msgs,
+                    dc
+                )
                 .Where(period => period.IsOpen() || period.WillOpen())
                 .ToList();
 
@@ -2211,9 +2206,15 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
-        public static decimal GetSubscriptionPlatformPercentFee(this Account account, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetSubscriptionPlatformFeePercent(this Account account, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Math.Round(account.GetPlatformPercentFee(msgs, dc) - plan.GetStripeFeePercent(), 4);// round by 4 to get the exact precision
+            var platformFeeAmount = account.CalculatePlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
+            var stripeFeeAmount = plan.GetStripeFeeAmount();
+            
+            if (platformFeeAmount > stripeFeeAmount)
+                return Math.Round((platformFeeAmount - stripeFeeAmount) / plan.CostPerPeriod.Value, 4);
+
+            return 0;
         }
         #endregion
     }
