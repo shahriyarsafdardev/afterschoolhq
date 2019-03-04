@@ -829,6 +829,16 @@ namespace AfterSchoolLibrary.Services
             return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
         }
 
+        public static ActivityForm GetDefaultActivityForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ActivityForm()
+            {
+                FormId = account.GetDefaultForm(msgs, dc).ID,
+                IsActive = true,
+                AccountId = account.ID
+            };
+        }
+
         public static Location GetDefaultLocation(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.DefaultLocationId.HasValue ? Location.Load(account.DefaultLocationId.Value, msgs, dc) : null;
@@ -1074,7 +1084,7 @@ namespace AfterSchoolLibrary.Services
                 CostPerRegistrant = 0,
                 AccountId = account.ID,
                 RegistrationModeId = RegistrationMode.Register,
-                AllowToPayLater = true
+                AllowToPayLater = true,               
             };
             return activity;
         }

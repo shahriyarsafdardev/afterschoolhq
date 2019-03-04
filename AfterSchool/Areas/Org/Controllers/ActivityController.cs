@@ -140,19 +140,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 //this means a new activity is not being added to an existing enrollment group
                 if (!group.IsGuid())
-                {
                     activePeriod = SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-                }
                 else
-                {
                     activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                }
+
             }
 
             LoadEditSetupViewBag(activity, activePeriod, new SystemMessages());
             ViewBag.ActiveMenu = "EditSetup";
             ViewBag.Group = activityGroup;
-
+            
             return View(activity);
         }
 
@@ -259,7 +256,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Periods = periods;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.ActivePeriod = activePeriod;
-            ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs);
+            ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultActivityForm(msgs);
         }
 
         [HttpGet]
@@ -834,7 +831,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return RedirectToAction("publishdetail", new { id = activity.Uid });
+                        return RedirectToAction("publish", new { id = activity.Uid });
                 }
             }
 

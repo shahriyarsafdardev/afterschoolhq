@@ -17,7 +17,7 @@
     <ol class="dd-list">
         <li data-id="1" class="dd-item">
             <div class="dd-handle @editsetupactive">
-                <a href="@Url.Action("editsetup", "activity", new { id = Model.Uid.ToString() })">Settings</a>
+                <a href="@Url.Action("editsetup", "activity", new { id = Model.ID.HasValue && Model.ID > 0 ? Model.Uid.ToString() : "" })">Settings</a>
             </div>
         </li>
         <li data-id="4" class="dd-item">
