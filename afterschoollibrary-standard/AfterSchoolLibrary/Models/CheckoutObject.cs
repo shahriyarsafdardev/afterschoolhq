@@ -150,7 +150,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPlatformFlatFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (!IsTuitionFree && RegistrantSubscriptionPlan.IsEmpty() && PaymentSourceType == PaymentSourceType.AfterSchoolPlatform)
+            if (!IsTuitionFree && PaymentSourceType == PaymentSourceType.AfterSchoolPlatform)
                 return BillingAccount.GetPlatformFlatFee(msgs, dc);
 
             return 0;
