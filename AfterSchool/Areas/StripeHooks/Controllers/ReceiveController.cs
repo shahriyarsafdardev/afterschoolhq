@@ -125,10 +125,10 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private IHttpActionResult InvoicePaymentSucceeded(StripeEvent stripeEvent, SystemMessages msgs)
         {
             var customerId = (string)stripeEvent.Data.Object.customer;
-            var subscriptionId = (string)stripeEvent.Data.Object.subscription;
+            var stripeSubscriptionId = (string)stripeEvent.Data.Object.subscription;
             var chargeId = (string)stripeEvent.Data.Object.charge;
             var totalAmountInCents = ((string)stripeEvent.Data.Object.total).ToDecimal();
-            var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
+            var registrantSubscriptionPlan = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
             var registrant = registrantSubscription.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
@@ -150,55 +150,26 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 if (transaction.IsEmpty())
                 {
                     // send payment succeeded email;
-                    purchasingAccount.SendSubscriptionPaymentSucceeded(plan, null);
-
+                    msgs.AddRange(purchasingAccount.SendSubscriptionPaymentSucceeded(plan));
+                    
                     // save transaction info and track payment to the activity as well.
-                    Database.ExecuteTransaction
-                    (
-                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                        {
-                            var totalAmount = totalAmountInCents / 100;                            
+                    var checkoutObject = new CheckoutObject()
+                    {
+                        PurchasingAccount = purchasingAccount,
+                        BillingAccount = billingAccount,
+                        OverrideAmount = totalAmountInCents / 100,
+                        ParticipationObject = participationObject,
+                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                        PaymentType = PaymentType.CreditCard,
+                        StripeChargeId = chargeId,
+                        SubscriptionPlan = plan,
+                        MasterRegistrant = masterRegistrant,
+                        NumberOfSeats = 1,
+                        Registration = registration,
+                        RegistrantSubscriptionPlan = registrantSubscriptionPlan
+                    };
 
-                            // manage transaction
-                            AccountService.CreatePurchaseTransactionPayment(
-                                new CheckoutObject()
-                                {
-                                    PurchasingAccount = purchasingAccount,
-                                    BillingAccount = billingAccount,
-                                    OverrideAmount = totalAmount,
-                                    ParticipationObject = participationObject,
-                                    PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                                    PaymentType = PaymentType.CreditCard,
-                                    StripeChargeId = chargeId,
-                                    SubscriptionPlan = plan,
-                                    MasterRegistrant = masterRegistrant,
-                                    NumberOfSeats = 1,
-                                    Registration = registration,
-                                    RegistrantSubscriptionPlan = registrantSubscription
-                                },
-                                null,
-                                amsgs,
-                                adc
-                            );
-
-                            // cancel stripe subscription at end of term
-                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan &&
-                                registrantSubscription.GetPaymentCount(amsgs, adc) >= plan.TotalPeriods.Value)
-                                amsgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, billingAccount.StripeUserId));
-                        },
-                        onSuccess: (SystemMessages smsgs) =>
-                        {
-                            msgs.AddRange(smsgs);
-                        },
-                        onFailure: (SystemMessages fmsgs) =>
-                        {
-                            msgs.AddRange(fmsgs);
-                        },
-                        onException: (SystemMessages emsgs) =>
-                        {
-                            AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
-                        }
-                    );
+                    billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, registrantSubscriptionPlan, msgs);
                 }
             }
 

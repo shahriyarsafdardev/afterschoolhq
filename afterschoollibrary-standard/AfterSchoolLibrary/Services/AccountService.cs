@@ -410,7 +410,7 @@ namespace AfterSchoolLibrary.Services
             return Helpers.EmailHelper.SendWelcomeTrial(account.GetAccountOwner(dc: dc), account);
         }
 
-        public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account, SubscriptionPlan plan, DatabaseConnection dc)
+        public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account, SubscriptionPlan plan, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);            
@@ -1688,6 +1688,39 @@ namespace AfterSchoolLibrary.Services
                 var charge = AccountService.CreateStripeChargeDuringCheckout(checkoutObject, msgs, dc);
                 checkoutObject.StripeChargeId = charge.Id;
             }
+        }
+
+        public static void ProcessSubscriptionPlanPayment(this Account billingAccount, CheckoutObject checkoutObject, SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscriptionPlan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {                           
+                    // manage transaction
+                    AccountService.CreatePurchaseTransactionPayment(
+                        checkoutObject,
+                        null,
+                        amsgs,
+                        adc
+                    );
+
+                    // cancel stripe subscription at end of term
+                    plan.CheckAndCancelPaymentPlan(registrantSubscriptionPlan, billingAccount, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
+                },
+                dc: dc
+            );
         }
 
         public static void CreatePurchaseTransactionPayment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
