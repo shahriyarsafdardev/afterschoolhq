@@ -206,12 +206,15 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
-        public static void CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscription, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscriptionPlan, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var totalPayments = registrantSubscription.GetPaymentCount(msgs, dc);
+            var totalPayments = registrantSubscriptionPlan.GetPaymentCount(msgs, dc);
 
             if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && totalPayments >= plan.TotalPeriods.Value)
-                msgs.AddRange(Billing.StripeHelper.CancelSubscription(registrantSubscription.StripeSubscriptionId, billingAccount.StripeUserId));
+                msgs.AddRange(Billing.StripeHelper.CancelSubscription(
+                    registrantSubscriptionPlan.StripeSubscriptionId, 
+                    billingAccount.StripeUserId
+                ));
         }
     }
 }
