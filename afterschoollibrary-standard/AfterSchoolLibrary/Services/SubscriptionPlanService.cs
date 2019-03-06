@@ -236,7 +236,7 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
-        public static void CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscriptionPlan, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscriptionPlan, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var totalPayments = registrantSubscriptionPlan.GetPaymentCount(msgs, dc);
             string stripeUserId = null;
@@ -245,10 +245,17 @@ namespace AfterSchoolLibrary.Services
                 stripeUserId = billingAccount.StripeUserId;
 
             if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && totalPayments >= plan.TotalPeriods.Value)
+            {
                 msgs.AddRange(Billing.StripeHelper.CancelSubscription(
                     registrantSubscriptionPlan.StripeSubscriptionId,
                     stripeUserId
                 ));
+
+                if (msgs.HasNoErrors())
+                    return true;
+            }
+
+            return false;
         }
 
         public static decimal GetTotalCostWithFees(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)

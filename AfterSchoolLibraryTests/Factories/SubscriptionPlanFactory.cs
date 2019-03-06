@@ -1,6 +1,7 @@
 ﻿using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -17,7 +18,7 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanTypeId = planType,
                 IsActive = true
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;
         }
         public static SubscriptionPlan Create(Account planOwnerAccount, Activity activity, SubscriptionPlanType planType, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc)
@@ -31,7 +32,22 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanTypeId = planType,
                 IsActive = true
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.SaveWithStripe(dc: dc));
+            return obj;
+        }
+        public static SubscriptionPlan CreatePaymentPlan(Account planOwnerAccount, Activity activity, SubscriptionPlanType planType, decimal costPerPeriod, int totalPeriods, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new SubscriptionPlan()
+            {
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                CostPerPeriod = costPerPeriod,
+                PlanOwnerAccountId = planOwnerAccount.ID,
+                PlanTypeId = SubscriptionPlanType.PaymentPlan,
+                IsActive = true,
+                TotalPeriods = totalPeriods
+            };
+            msgs.AddRange(obj.SaveWithStripe(dc));
             return obj;
         }
         public static SubscriptionPlan Create(Account planOwnerAccount, ActivityGroup activityGroup, SubscriptionPlanType planType, SystemMessages msgs, DatabaseConnection dc)
@@ -45,7 +61,7 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanTypeId = planType,
                 IsActive = true
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;
         }
         public static SubscriptionPlan Create(Account planOwnerAccount, ActivityGroup activityGroup, SubscriptionPlanType planType, decimal costPerPeriod, SystemMessages msgs, DatabaseConnection dc)
@@ -59,7 +75,7 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanTypeId = planType,
                 IsActive = true
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;
         }
     }
