@@ -129,8 +129,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var chargeId = (string)stripeEvent.Data.Object.charge;
             var totalAmountInCents = ((string)stripeEvent.Data.Object.total).ToDecimal();
             var registrantSubscriptionPlan = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
-            var plan = registrantSubscription.GetSubscriptionPlan(msgs);
-            var registrant = registrantSubscription.GetRegistrant(msgs);
+            var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs);
+            var registrant = registrantSubscriptionPlan.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var purchasingAccount = masterRegistrant.GetAccount(msgs);
             var billingAccount = plan.GetAccount(msgs);
