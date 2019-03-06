@@ -157,12 +157,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                     (
                         action: (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            var totalAmount = totalAmountInCents / 100;
-
-                            // cancel stripe subscription at end of term
-                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan &&
-                                registrantSubscription.GetPaymentCount(amsgs, adc) >= plan.TotalPeriods.Value)
-                                amsgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, billingAccount.StripeUserId));
+                            var totalAmount = totalAmountInCents / 100;                            
 
                             // manage transaction
                             AccountService.CreatePurchaseTransactionPayment(
@@ -184,7 +179,12 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                                 null,
                                 amsgs,
                                 adc
-                            );    
+                            );
+
+                            // cancel stripe subscription at end of term
+                            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan &&
+                                registrantSubscription.GetPaymentCount(amsgs, adc) >= plan.TotalPeriods.Value)
+                                amsgs.AddRange(AfterSchoolLibrary.Billing.StripeHelper.CancelSubscription(subscriptionId, billingAccount.StripeUserId));
                         },
                         onSuccess: (SystemMessages smsgs) =>
                         {
