@@ -150,7 +150,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 if (transaction.IsEmpty())
                 {
                     // send payment succeeded email;
-                    msgs.AddRange(purchasingAccount.SendSubscriptionPaymentSucceeded(plan));
+                    purchasingAccount.SendSubscriptionPaymentSucceeded(plan);
                     
                     // save transaction info and track payment to the activity as well.
                     var checkoutObject = new CheckoutObject()
