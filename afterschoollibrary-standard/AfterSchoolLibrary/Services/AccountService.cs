@@ -2205,6 +2205,17 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
+        public static Stripe.StripeCustomer AddCustomerToConnectedAccount(this Account billingAccount, Account purchasingAccount, string stripeBillToSourceId, SystemMessages msgs)
+        {
+            // create the customer on the connected account
+           return StripeHelper.CreateCustomer(
+                description: purchasingAccount.Name,
+                email: purchasingAccount.Email,
+                sourceId: stripeBillToSourceId,
+                stripeAccountId: billingAccount.StripeUserId,
+                msgs: msgs);
+        }
+
         #endregion
 
         #region Coupons
