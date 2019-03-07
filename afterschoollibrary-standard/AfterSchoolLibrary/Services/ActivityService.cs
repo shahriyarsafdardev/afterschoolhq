@@ -197,7 +197,7 @@ namespace AfterSchoolLibrary.Services
 
         public static SubscriptionPlan AddSubscriptionPlan(this Activity activity, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return SubscriptionPlanService.CreateNewSubscription(
+            return SubscriptionPlanService.CreateNewSubscriptionPlan(
                 activity.GetAccount(msgs, dc), 
                 activity,
                 costPerPeriod, 
@@ -1266,7 +1266,7 @@ namespace AfterSchoolLibrary.Services
                 // let's create a new one
                 if (!activity.HasSubscriptionPlan(msgs, dc))
                 {
-                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscription(
+                    var subscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscriptionPlan(
                             account,
                             ParticipationObjectType.Activity,
                             activity.ID.Value,
@@ -1289,7 +1289,7 @@ namespace AfterSchoolLibrary.Services
                         msgs.AddRange(subscriptionPlan.Deactivate(loggedInUserId, dc));
 
                         // second: create a new plan
-                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscription(
+                        var newSubscriptionPlan = Services.SubscriptionPlanService.CreateNewSubscriptionPlan(
                                 account,
                                 ParticipationObjectType.Activity,
                                 activity.ID.Value,

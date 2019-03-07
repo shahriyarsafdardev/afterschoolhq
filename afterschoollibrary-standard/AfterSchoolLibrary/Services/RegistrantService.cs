@@ -125,7 +125,6 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
-
         public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -186,16 +185,12 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasErrors())
                 return;
-
-            // have to have a purchase record
-            checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
-
-            checkoutObject.RegistrantSubscriptionPlan = RegistrantSubscriptionPlanService.CreateNew(
+            
+            checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                 registrant,
-                plan,
-                startDateTime.IfEmpty(DateTime.UtcNow),
-                checkoutObject.Purchase.ID,
-                subscription.Id,
+                startDateTime,
+                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc),
+                stripeSubscription.Id,
                 loggedInUser,
                 msgs,
                 dc);

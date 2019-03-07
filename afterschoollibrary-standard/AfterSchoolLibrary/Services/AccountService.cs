@@ -499,16 +499,14 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc: dc));
 
             if (msgs.HasNoErrors())
-            {
-                msgs.AddRange(account.CreateStripeCustomer(dc));
-            }
+                account.CreateStripeCustomer(msgs, dc);
 
             return msgs;
         }
 
         public static void CreateStripeCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var stripeAccount = Billing.StripeHelper.CreateCustomAccount(account.Name, account.Email, msgs);
+            var stripeAccount = StripeHelper.CreateCustomAccount(account.Name, account.Email, msgs);
 
             if(stripeAccount.IsNotEmpty())
             {
@@ -519,9 +517,9 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static SystemMessages CreateStripeCustomer(this Account account, DatabaseConnection dc = null)
+        public static Stripe.StripeCustomer CreateStripeCustomer(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var customer = account.GetStripeCustomer(msgs);
 
@@ -539,7 +537,8 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(account.Save(dc: dc));
                 }
             }
-            return msgs;
+
+            return customer;
         }
 
         public static Stripe.StripeSource GetStripeSource(this Account account, string sourceId, SystemMessages msgs = null)
@@ -1850,8 +1849,8 @@ namespace AfterSchoolLibrary.Services
 
             if (customer.DefaultSourceId.IsEmpty())
             {
-                var source = Billing.StripeHelper.CreateSource(stripeToken, msgs);
-                msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+                var source = StripeHelper.CreateSource(stripeToken, msgs);
+                msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
                 sourceId = source.Id;
             }
             else
@@ -2213,6 +2212,19 @@ namespace AfterSchoolLibrary.Services
                 email: purchasingAccount.Email,
                 sourceId: stripeBillToSourceId,
                 stripeAccountId: billingAccount.StripeUserId,
+                msgs: msgs);
+        }
+
+        public static Stripe.StripeSubscription CreateStripeSubscription(this Account billingAccount, string stripeCustomerId, SubscriptionPlan plan, string stripeBillToSourceId, string stripeCouponId, SystemMessages msgs)
+        {
+            return StripeHelper.CreateSubscription(
+                customerId: stripeCustomerId,
+                planId: plan.StripePlanId,
+                sourceId: stripeBillToSourceId,
+                platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan),
+                trialEndDate: null,
+                stripeAccountId: billingAccount.StripeUserId,
+                stripeCouponId: stripeCouponId,
                 msgs: msgs);
         }
 

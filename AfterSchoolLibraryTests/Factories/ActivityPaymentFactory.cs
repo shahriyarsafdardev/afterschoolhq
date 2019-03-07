@@ -1,0 +1,25 @@
+﻿using BasicLibrary;
+using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
+
+namespace AfterSchoolLibraryTests.Factories
+{
+    public class ActivityPaymentFactory
+    {
+        public static ActivityPayment Create(Account account, Activity activity, RegistrantSubscriptionPlan registrantSubscriptionPlan, Transaction transaction, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new ActivityPayment()
+            {
+                AccountId = account.ID,
+                ParticipationObjectId = activity.ID,
+                ParticipationObjectTypeId = ParticipationObjectType.Activity,
+                Amount = 100,
+                RegistrantSubscriptionPlanId = registrantSubscriptionPlan.ID,
+                RegistrantId = registrantSubscriptionPlan.RegistrantId,
+                TransactionId = transaction.ID
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
+    }
+}

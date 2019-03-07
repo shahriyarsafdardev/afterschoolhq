@@ -35,7 +35,7 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;
         }
-        public static SubscriptionPlan CreatePaymentPlan(Account planOwnerAccount, Activity activity, SubscriptionPlanType planType, decimal costPerPeriod, int totalPeriods, SystemMessages msgs, DatabaseConnection dc)
+        public static SubscriptionPlan CreatePaymentPlan(Account planOwnerAccount, Activity activity, decimal costPerPeriod, int totalPeriods, SystemMessages msgs, DatabaseConnection dc)
         {
             var obj = new SubscriptionPlan()
             {
@@ -45,7 +45,7 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanOwnerAccountId = planOwnerAccount.ID,
                 PlanTypeId = SubscriptionPlanType.PaymentPlan,
                 IsActive = true,
-                TotalPeriods = totalPeriods
+                TotalPeriods = totalPeriods,               
             };
             msgs.AddRange(obj.SaveWithStripe(dc));
             return obj;

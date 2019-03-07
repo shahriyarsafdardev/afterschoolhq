@@ -256,7 +256,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public void CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Purchase CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.Purchase.IsEmpty())
                 this.Purchase = this.Registration.GetPurchase(msgs, dc);
@@ -267,6 +267,8 @@ namespace AfterSchoolLibrary.Models
                 this.Registration.PurchaseId = this.Purchase.ID;
                 msgs.AddRange(this.Registration.Save(dc));
             }
+
+            return this.Purchase;
         }
 
         private bool? _UseStripeConnectedAccount = null;
