@@ -143,7 +143,6 @@ namespace AfterSchoolLibrary.Services
             else
             {
                 // if running the billing through stripe connected account
-
                 sourceId = purchasingAccount.CopyStripeSourceToAccount(checkoutObject.BillingAccount, checkoutObject.StripeToken, msgs);
 
                 // create the customer on the connected account
@@ -190,7 +189,7 @@ namespace AfterSchoolLibrary.Services
                 registrant,
                 startDateTime,
                 checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc),
-                stripeSubscription.Id,
+                subscription.Id,
                 loggedInUser,
                 msgs,
                 dc);

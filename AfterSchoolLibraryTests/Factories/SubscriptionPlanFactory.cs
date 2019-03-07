@@ -16,7 +16,8 @@ namespace AfterSchoolLibraryTests.Factories
                 CostPerPeriod = 49.95.ToDecimal(),
                 PlanOwnerAccountId = planOwnerAccount.ID,
                 PlanTypeId = planType,
-                IsActive = true
+                IsActive = true,
+                BillingPeriodTypeId = BillingPeriodType.Month
             };
             msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;
@@ -30,7 +31,8 @@ namespace AfterSchoolLibraryTests.Factories
                 CostPerPeriod = costPerPeriod,
                 PlanOwnerAccountId = planOwnerAccount.ID,
                 PlanTypeId = planType,
-                IsActive = true
+                IsActive = true,
+                BillingPeriodTypeId = BillingPeriodType.Month
             };
             msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;
@@ -46,6 +48,7 @@ namespace AfterSchoolLibraryTests.Factories
                 PlanTypeId = SubscriptionPlanType.PaymentPlan,
                 IsActive = true,
                 TotalPeriods = totalPeriods,               
+                BillingPeriodTypeId = BillingPeriodType.Month
             };
             msgs.AddRange(obj.SaveWithStripe(dc));
             return obj;
@@ -59,7 +62,8 @@ namespace AfterSchoolLibraryTests.Factories
                 CostPerPeriod = 49.95.ToDecimal(),
                 PlanOwnerAccountId = planOwnerAccount.ID,
                 PlanTypeId = planType,
-                IsActive = true
+                IsActive = true,
+                BillingPeriodTypeId = BillingPeriodType.Month
             };
             msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;
@@ -73,7 +77,8 @@ namespace AfterSchoolLibraryTests.Factories
                 CostPerPeriod = costPerPeriod,
                 PlanOwnerAccountId = planOwnerAccount.ID,
                 PlanTypeId = planType,
-                IsActive = true
+                IsActive = true,
+                BillingPeriodTypeId = BillingPeriodType.Month
             };
             msgs.AddRange(obj.SaveWithStripe(dc: dc));
             return obj;

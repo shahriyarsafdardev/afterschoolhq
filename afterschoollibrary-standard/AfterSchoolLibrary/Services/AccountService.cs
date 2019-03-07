@@ -2215,13 +2215,13 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs);
         }
 
-        public static Stripe.StripeSubscription CreateStripeSubscription(this Account billingAccount, string stripeCustomerId, SubscriptionPlan plan, string stripeBillToSourceId, string stripeCouponId, SystemMessages msgs)
+        public static Stripe.StripeSubscription CreateStripeSubscription(this Account billingAccount, string stripeCustomerId, SubscriptionPlan plan, string stripeBillToSourceId, string stripeCouponId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return StripeHelper.CreateSubscription(
                 customerId: stripeCustomerId,
                 planId: plan.StripePlanId,
                 sourceId: stripeBillToSourceId,
-                platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan),
+                platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc),
                 trialEndDate: null,
                 stripeAccountId: billingAccount.StripeUserId,
                 stripeCouponId: stripeCouponId,
