@@ -609,7 +609,10 @@
     <Content Include="Content\i18n\site-es.json" />
     <Content Include="favicon.png" />
     <Content Include="Icon.png" />
+    <Content Include="Public\about.html" />
+    <Content Include="Public\case-study-cfi70.html" />
     <Content Include="Public\contact-us.html" />
+    <Content Include="Public\copyright.html" />
     <Content Include="Public\css\bootstrap.css" />
     <Content Include="Public\css\bootstrap.min.css" />
     <Content Include="Public\css\responsive.css" />
@@ -666,9 +669,11 @@
     <Content Include="Public\js\custom.js" />
     <Content Include="Public\js\npm.js" />
     <Content Include="Public\parents.html" />
+    <Content Include="Public\privacy.html" />
     <Content Include="Public\providers.html" />
     <Content Include="Public\schools.html" />
     <Content Include="Public\sign-up.html" />
+    <Content Include="Public\tos.html" />
     <Content Include="Scripts\app\app.init.js" />
     <Content Include="Scripts\app\modules\bootstrap-start.js" />
     <Content Include="Scripts\app\modules\clear-storage.js" />
@@ -992,6 +997,7 @@
     <Content Include="Deploy\after-install.bat" />
     <Content Include="appspec.yml" />
     <Content Include="Areas\Org\Views\LeagueActivity\Schedule.cshtml" />
+    <Content Include="Public\pdf\casestudy-ahq.pdf" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
