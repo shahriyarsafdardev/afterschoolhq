@@ -34,7 +34,12 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Summary"); }            
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Summary"); }   
+            
+            <div class="pull-right">
+                <a href="@Url.Action("editsetup", "activity", new {id = Model.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;</a>
+            </div>
+
         </div>
         <div class="panel-body">
 
@@ -94,8 +99,8 @@
 
                     </div>
 
-                    @if (registrantCount > 0) 
-                    { 
+                    @if (registrantCount > 0)
+                    {
                         <div class="col-md-12">
 
                             <div class="panel panel-default">
@@ -119,6 +124,9 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 Pricing
+                                <div class="pull-right">
+                                    <a href="@Url.Action("editcost", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                </div>
                             </div>
                             <div class="panel-body">
                                 @if (!participationObject.PaymentPlans.Any())
@@ -138,6 +146,9 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 Schedule
+                                <div class="pull-right">
+                                    <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                </div>
                             </div>
                             <div class="panel-body">
                                 @{

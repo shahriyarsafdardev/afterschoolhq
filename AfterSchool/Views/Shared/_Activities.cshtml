@@ -127,33 +127,37 @@ else
                                 @if (activity.LocationId.HasValue)
                                 { 
                                     <span>
-                                        @@ @(activity.GetLocation()?.Name)
+                                        @@ <a href="@Url.Action("editlocation", "activity", new { id = activity.Uid })">@(activity.GetLocation()?.Name)</a>
                                     </span>
                                 }
                             </td>
                             <td class="text-center">
                                 @if (activity.GetDaysOfTheWeek().Any())
                                 {
-                                    @:@activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                                    <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
+                                        @activity.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().MaxChars(2)).ToStringList(", ")
+                                    </a>
                                 }
                                 else
                                 {
-                                    @:-
+                                    <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
                                 }
                             </td>
                             <td class="text-center">
                                 @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
                                 {
-                                    <span>@activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name</span>
+                                    <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
+                                        @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                    </a>
                                 }
                                 else
                                 {
-                                    @:-
+                                    <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
                                 }
                                 
                             </td>
                             <td class="text-center @reservedTextClass">
-                                @activity.GetRegistrantCount()
+                                <a href="@Url.Action("registrants", "activity", new { id = activity.Uid })">@activity.GetRegistrantCount()</a>
                             </td>
 
                             <td>
