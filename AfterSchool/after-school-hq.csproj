@@ -1432,6 +1432,9 @@
     <Content Include="Views\Shared\_GameLocation.cshtml" />
     <Content Include="Views\Shared\Components\_Date.cshtml" />
     <Content Include="Views\Shared\Form\_CheckboxList.cshtml" />
+    <Content Include="Views\Shared\ParticipationObject\_TuitionAndNoPaymentPlans.cshtml" />
+    <Content Include="Views\Shared\ParticipationObject\_TuitionAndPaymentPlans.cshtml" />
+    <Content Include="Views\Shared\ParticipationObject\_FreeTuition.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

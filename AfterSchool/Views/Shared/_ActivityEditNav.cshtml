@@ -65,7 +65,7 @@
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
                             { "Url", Url.Action("editcontact", "activity", new { id = Model.Uid.ToString() }) },
-                            { "Text", "Instructor / Contact" },
+                            { "Text", "Contact" },
                             { "IsActive", isActive },
                         }
                     ); 
@@ -91,7 +91,7 @@
                         "~/Views/Shared/_ActiveLink.cshtml",
                         new ViewDataDictionary {
                             { "Url", Url.Action("editcost", "activity", new { id = Model.Uid.ToString() }) },
-                            { "Text", "Payment" },
+                            { "Text", "Pricing & Payment" },
                             { "IsActive", isActive && Model.CanAcceptPayments() },
                         }
                     );

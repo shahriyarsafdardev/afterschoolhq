@@ -593,6 +593,14 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public bool IsFree
+        {
+            get
+            {
+                return !this.CostPerRegistrant.HasValue || this.CostPerRegistrant.Value == 0;
+            }
+        }
+
         public bool IsPublishable
         {
             get

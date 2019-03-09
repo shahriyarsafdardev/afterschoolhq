@@ -69,7 +69,7 @@ namespace AfterSchoolLibrary.Models
             Uid = activity.Uid;
             Name = activity.Name;
             Details = activity.Details;
-            Schedule = activity.GetSchedule(false, msgs, dc);
+            Schedule = activity.GetSchedule(msgs, dc);
             Location = activity.GetLocation(msgs, dc);
             GenderRestriction = activity.GenderRestriction;
             ActivityType = activity.ActivityTypeId;

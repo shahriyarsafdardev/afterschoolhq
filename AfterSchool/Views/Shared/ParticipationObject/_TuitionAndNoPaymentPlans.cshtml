@@ -1,0 +1,11 @@
+﻿@model ParticipationObject
+
+<p>
+    The tuition fee is <strong>@Model.Cost.ToCurrency()</strong>
+    @if (Model.SubscriptionPlans.Any())
+    {
+        <span>
+            plus <strong>@Model.SubscriptionPlans.First().CostPerPeriod.ToCurrency()</strong> each @Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
+        </span>
+    }
+</p>
