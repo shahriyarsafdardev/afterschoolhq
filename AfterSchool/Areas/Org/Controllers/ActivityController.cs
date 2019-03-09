@@ -478,36 +478,33 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private void LoadEditScheduleViewBag(Activity activity, string scheduleId)
         {
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.ActivityId = activity.Uid.ToString();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditSchedule";
-            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
+            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules(msgs);
 
             ActivitySchedule schedule = null;
 
             // changing schedule
             if (scheduleId.IsNumber())
             {
-                schedule = ActivitySchedule.Load(scheduleId.ToInteger());
+                schedule = ActivitySchedule.Load(scheduleId.ToInteger(), msgs);
                 if (schedule.AccountId != SessionVariables.CurrentAccount.ID)
-                {
                     schedule = null;
-                }
-            }
-            if (schedule.IsEmpty())
-            {
-                schedule = activity.GetSchedule();
-            }
-            if (schedule.IsEmpty())
-            {
-                schedule = ActivitySchedule.GetNewDefaultSchedule();
             }
 
+            if (schedule.IsEmpty())
+                schedule = activity.GetSchedule();
+
+            if (schedule.IsEmpty())
+                schedule = ActivitySchedule.GetNewDefaultSchedule(activity.GetActiveRegistrationPeriod(msgs));
+
             ViewBag.Schedule = schedule;
-            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
+            ViewBag.Messages = msgs;
         }
 
         [HttpGet]
