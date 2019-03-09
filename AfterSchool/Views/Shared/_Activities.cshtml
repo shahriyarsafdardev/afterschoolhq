@@ -171,25 +171,26 @@ else
                                         </button>
                                     }
 
-                                    <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy"
-                                            onclick="setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString() })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
+                                    <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
+                                            onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new { id = activity.Uid.ToString(), isnew = 1 })')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
                                         <i class="s7-copy-file"></i> Copy
                                     </button>
+
                                     @if (SessionVariables.LoggedInUser.IsActivityLeader(activity))
                                     {
-                                    if (!activity.IsGroupArchived)
-                                    {
-                                        if (!activity.IsArchived)
+                                        if (!activity.IsGroupArchived)
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("archive", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Archive</button>
+                                            if (!activity.IsArchived)
+                                            {
+                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("archive", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Archive</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("restore", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                            }
                                         }
-                                        else
-                                        {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("restore", "activity", new { id = activity.Uid.ToString() })')"><i class="s7-albums"></i> Restore</button>
-                                        }
-                                    }
 
-                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("delete", "activity", new { id = activity.Uid.ToString() })')"><span class="text-danger"><i class="s7-trash"></i></span></button>
                                     }
                                 </div>
                             </td>
@@ -272,42 +273,7 @@ else
     </form>
 </div>
 
-<div id="modal-copy" class="md-modal colored-header custom-width md-effect-9">
-    <form id="form-copy" action="" method="post">
-        <div class="md-content">
-            <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">Copy @UILabel.ActivityLabel(activityType)</h3>
-            </div>
-            <div class="modal-body form">
-
-                <p>This is used to create an exact copy of the existing @UILabel.ActivityLabel(activityType).ToLower(). Once copied you can make any modifications as needed.</p>
-
-                <div class="form-group">
-                    <label>@UILabel.ActivityLabel(activityType) Name</label>
-                    <input type="text" placeholder="Your @UILabel.ActivityLabel(activityType) Name" class="form-control" id="activitynamecopy" name="activitynamecopy" onfocus="this.select()">
-                </div>
-
-                <div class="form-group">
-                    <div class="am-checkbox inline">
-                        <input type="checkbox" class="form-control" value="1" name="copywithregistrants" id="copywithregistrants" />
-                        <label for="copywithregistrants">
-                            Copy with @UILabel.RegistrantLabel(true).ToLower()?
-                        </label>
-                    </div>
-                    <p class="text-muted">
-                        <em>This will automatically register all @UILabel.RegistrantLabel(true).ToLower() in the current @UILabel.ActivityLabel(ActivityType.Activity, false) for the new copied @UILabel.ActivityLabel(ActivityType.Activity, false).</em>
-                    </p>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="submit" class="btn btn-primary">Create Copy &raquo;</button>
-            </div>
-        </div>
-    </form>
-</div>
+@{ Html.RenderPartial("_CopyActivityModal", activityType); }
 
 <div id="modal-delete" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
@@ -363,7 +329,6 @@ else
     </div>
 </div>
 
-
 <script>
     function updateSchedule() {
         var schedule = $('#schedule').val();
@@ -402,10 +367,7 @@ else
         $('#activitynameoffer').val(name + ' [new offering]');
         $('#form-offer').attr('action', url);
     }
-    function setCopyActivity(name, url) {
-        $('#activitynamecopy').val(name + ' [copy]');
-        $('#form-copy').attr('action', url);
-    }
+    
     function deleteActivity(name, url) {
         $('#delete-activity-name').html(name);
         $('#delete-activity-button').attr('href', url);

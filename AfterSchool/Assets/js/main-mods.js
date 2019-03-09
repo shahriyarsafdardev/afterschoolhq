@@ -298,5 +298,9 @@ var ActivitySetup = {
     },
     navigateActivity: function (url) {
         $('#form1').attr('action', url);
+    },
+    setCopyActivity: function (name, url) {
+        $('#activitynamecopy').val(name + ' [copy]');
+        $('#form-copy').attr('action', url);
     }
 }

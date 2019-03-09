@@ -851,14 +851,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
+
             if (msgs.HasNoErrors())
-            {
-                return RedirectToAction("editsetup", new { id = activity.Uid });
-            }
-            else
-            {
-                return RedirectToAction("index", "activity", new { copyerror = true });
-            }
+                return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1 });
+
+            return RedirectToAction("index", "activity", new { copyerror = true });
         }
 
         [HttpGet]
