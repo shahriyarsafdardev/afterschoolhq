@@ -56,7 +56,7 @@
     var locationSearch;
     var isSearching = false;
     var listItemClass = "text-small padding-10";
-    var listItemStyle = "";
+    var listItemStyle = "background-color: #f0f0f0;";
     var listItemOnMouseOver = "locationMouseOver";
     var listItemOnMouseOut = "locationMouseOut";
     var listItemOnClick = "locationMouseClick";
@@ -163,7 +163,7 @@
                                 onmouseover="${listItemOnMouseOver}(0)" 
                                 onmouseout="${listItemOnMouseOut}(0)" 
                                 onclick="${listItemOnClick}(0)">
-                                <strong>Location not found. Add a new location?</strong>
+                                <strong>Location not found &raquo; Click here to a new location.</strong>
                             </div>`);
                         } else if (data.locations.length == 0) {
                             locationList.append(`

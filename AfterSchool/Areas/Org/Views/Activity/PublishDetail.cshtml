@@ -12,15 +12,27 @@
         publishUrl = Url.Action("publish", "activity", new { id = Model.Uid });
         btnDisabled = "";
     }
+
+    var fullscreen = Request["isnew"] == "1";
+    if (fullscreen)
+    {
+        Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    }
 }
 
-@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@if (!fullscreen)
+{
+    Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());
+}
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    @if (!fullscreen)
+    {
+        Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);
+    }
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -58,31 +70,31 @@
                 <div class="panel-body">
                     <div class="widget col-md-10 col-md-offset-1">
                         <div class="widget-head">
-                                @if (Model.IsPublishable)
+                            @if (Model.IsPublishable)
+                            {
+                                if (Model.IsPublished)
                                 {
-                                    if (Model.IsPublished)
-                                    {
 
-                                        <p class="text-success text-large">
-                                            <i class="s7-check-circle"></i>
-                                            Your @UILabel.ActivityLabel(Model.ActivityTypeId) is published :)
-                                        </p>
-                                    }
-                                    else
-                                    {
-                                        <p class="text-warning text-large">
-                                            <i class="s7-next-2"></i>
-                                            Your @UILabel.ActivityLabel(Model.ActivityTypeId) is ready to publish
-                                        </p>
-                                    }
+                                    <p class="text-success text-large">
+                                        <i class="s7-check-circle"></i>
+                                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is published :)
+                                    </p>
                                 }
                                 else
                                 {
-                                    <p class="text-danger text-large">
-                                        <i class="s7-close-circle"></i>
-                                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is <em>not</em> ready to publish
+                                    <p class="text-warning text-large">
+                                        <i class="s7-next-2"></i>
+                                        Your @UILabel.ActivityLabel(Model.ActivityTypeId) is ready to publish
                                     </p>
                                 }
+                            }
+                            else
+                            {
+                                <p class="text-danger text-large">
+                                    <i class="s7-close-circle"></i>
+                                    Your @UILabel.ActivityLabel(Model.ActivityTypeId) is <em>not</em> ready to publish
+                                </p>
+                            }
                         </div>
                         <div class="widget-tile">
                             @if (!Model.IsPublishable)
@@ -147,6 +159,9 @@
                                 </table>
                             }
                         </div>
+                        <div>
+                            <a href="@Url.Action("summary", "activity", new { id = Model.Uid })" class="btn btn-primary btn-lg center-block">Done</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -166,7 +181,7 @@
         <div class="modal-body form">
 
             <p>Are you sure you want to unpublish the @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()? This will make it inaccessible to potential @UILabel.RegistrantLabel(true).ToLower()</p>
-            
+
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>

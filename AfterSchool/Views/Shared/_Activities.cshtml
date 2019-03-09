@@ -7,7 +7,7 @@
     var groups = (List<ActivityGroup>)ViewData["Groups"];
     var needToUpgrade = (bool)ViewData["NeedToUpgrade"];
 
-    var addUrl = Url.Action("editsetup", "activity");
+    var addUrl = Url.Action("editsetup", "activity", new { isnew = 1 });
     var pagingController = "activity";
     var pagingAction = "index";
     var id = "";

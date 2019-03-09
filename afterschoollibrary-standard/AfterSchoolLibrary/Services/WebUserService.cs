@@ -439,29 +439,48 @@ namespace AfterSchoolLibrary.Services
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static SystemMessages CompleteSignUp(this WebUser user, Account account, string firstName, string lastName, string email, string password, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static void CompleteSignUp(this WebUser user, Account account, string firstName, string lastName, string email, string password, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            user.FirstName = firstName;
-            user.LastName = lastName;
-            user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, msgs, dc);
-            user.IsRegistered = true;
-            user.IsActive = true;
-            user.Password = WebUserService.EncryptPassword(password);
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    user.FirstName = firstName;
+                    user.LastName = lastName;
+                    user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
+                    user.IsRegistered = true;
+                    user.IsActive = true;
+                    user.Password = WebUserService.EncryptPassword(password);
 
-            if (user.Email.IsSameAs(email))
-                user.VerifiedAccount = true;
-            else
-                user.Email = email;
+                    if (user.Email.IsSameAs(email))
+                        user.VerifiedAccount = true;
+                    else
+                        user.Email = email;
 
-            user.LastModifiedDate = DateTime.UtcNow;
-            user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+                    user.LastModifiedDate = DateTime.UtcNow;
+                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
 
-            msgs.AddRange(user.Save(dc));
-            msgs.AddRange(user.ActivateForAccount(account, loggedInUser, msgs, dc));
+                    amsgs.AddRange(user.Save(adc));
 
-            return msgs;
+                    user.ActivateForAccount(account, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
+                },
+                dc: dc
+            );
+
         }
 
         /// <summary>
@@ -473,7 +492,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static SystemMessages ActivateForAccount(this WebUser user, Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static void ActivateForAccount(this WebUser user, Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -483,8 +502,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.AddRange(awu.Activate(loggedInUser, msgs, dc));
             else
                 msgs.Add("User not valid for account", MessageType.UserError);
-
-            return msgs;
+            
         }
     }
 }

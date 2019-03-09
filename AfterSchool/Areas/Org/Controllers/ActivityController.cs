@@ -829,7 +829,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return RedirectToAction("publish", new { id = activity.Uid });
+                        return RedirectToAction("publish", new { id = activity.Uid, isnew = 1 });
                 }
             }
 
