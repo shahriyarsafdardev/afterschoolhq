@@ -106,9 +106,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly)
+        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string contactname, string contactemail, string contactphone)
         {
             var msgs = new SystemMessages();
+            var inSessionDates = new List<DateRange>();
+            var outOfSessionDates = new List<DateTime>();
 
             var values = new Dictionary<string, object>()
             {
@@ -116,8 +118,31 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "description", description },
                 { "regmode", regmode },
                 { "form", form },
-                { "isinviteonly", isinviteonly }
+                { "isinviteonly", 0.ToString() },
+                { "genderrestrictions", genderrestrictions },
+                { "mingrade", mingrade },
+                { "maxgrade", maxgrade },
+                { "contactname", contactname },
+                { "contactemail", contactemail },
+                { "contactphone", contactphone }
             };
+
+            var filteredParams = Request.Params.Filter("schedulerepeat-");
+            var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+            outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
+
+            values.Add("scheduledetails", scheduledetails);
+            values.Add("days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList());
+            values.Add("repeatsweekly", repeatsweekly.IfBlank("0"));
+            values.Add("startdate", startdate);
+            values.Add("enddate", enddate);
+            values.Add("dailystarttime", dailystarttime);
+            values.Add("dailyendtime", dailyendtime);
+            values.Add("scheduledates", inSessionDates);
+            values.Add("scheduledatesclosed", outOfSessionDates);
+            values.Add("schedule", schedule);
+            values.Add("isongoing", isongoing);
 
             var group = ActivityGroupService.SaveSession(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
 

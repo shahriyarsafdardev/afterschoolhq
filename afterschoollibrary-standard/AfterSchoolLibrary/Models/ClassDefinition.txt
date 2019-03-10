@@ -97,6 +97,7 @@ joinproperty: Account.StripePublishableKey, string, NVarChar
 joinproperty: Account.TimeZone, string, NVarChar
 joinproperty: ActivityGroup.IsArchived, bool?, Bit
 joinproperty: ActivityGroup.Name, string, NVarChar
+joinproperty: ActivityGroup.Uid, Guid, UniqueIdentifier
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>

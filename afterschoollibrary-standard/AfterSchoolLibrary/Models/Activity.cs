@@ -67,6 +67,7 @@ namespace AfterSchoolLibrary.Models
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
 		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
+		public Guid ActivityGroupUid { get { return (Guid)MDV["ActivityGroupUid"].Value; } }
 		
 
         public Activity()
@@ -128,6 +129,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
 				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
+				_dp.Add(className, "ActivityGroupUid", typeof(ActivityGroup).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "ActivityGroup");
 				
                 return _dp;
             }

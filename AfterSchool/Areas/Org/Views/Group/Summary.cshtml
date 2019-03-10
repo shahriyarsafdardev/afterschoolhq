@@ -15,7 +15,7 @@
 
     var dates = registrations.OrderBy(x => x.CreateDate).Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
-    var addUrl = Url.Action("editsetup", "activity", new { group = Model.Uid });
+    var addUrl = Url.Action("editsetup", "activity", new { group = Model.Uid, isnew = 1 });
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}

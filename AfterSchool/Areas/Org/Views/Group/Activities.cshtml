@@ -20,7 +20,7 @@
 
                 @if (!needToUpgrade)
                 {
-                    <a href="@Url.Action("editsetup", "activity", new { group = Model.Uid })" class="btn btn-primary btn-space margin-r-10">
+                    <a href="@Url.Action("editsetup", "activity", new { group = Model.Uid, isnew = 1 })" class="btn btn-primary btn-space margin-r-10">
                         <i class="icon icon-left s7-plus"></i>
                         Add @UILabel.ActivityLabel(Model.ActivityGroupTypeId)
                     </a>

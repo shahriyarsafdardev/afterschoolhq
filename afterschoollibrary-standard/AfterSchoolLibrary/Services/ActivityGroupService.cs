@@ -176,6 +176,9 @@ namespace AfterSchoolLibrary.Services
             var scheduledatesClosed = values.GetValueOrDefault("scheduledatesclosed");
             var schedule = values.GetValueOrDefault("schedule");
             var isongoing = values.GetValueOrDefault("isongoing");
+            var contactname = values.GetValueOrDefault("contactname");
+            var contactemail = values.GetValueOrDefault("contactemail");
+            var contactphone = values.GetValueOrDefault("contactphone");
 
             if (name.IsEmpty())
                 msgs.Add("Label is required", MessageType.UserError);
@@ -211,22 +214,29 @@ namespace AfterSchoolLibrary.Services
 
             if (form.IsNumber())
                 group.FormId = form.ToString().ToInteger();
+            
+            if (maxgradeid.IsNumber())
+                group.MaxGradeLevelId = maxgradeid.ToString().ToInteger();
 
-            if (group.ActivityGroupTypeId == ActivityGroupType.League)
-            {
-                if (maxgradeid.IsNumber())
-                    group.MaxGradeLevelId = maxgradeid.ToString().ToInteger();
+            if (mingradeid.IsNumber())
+                group.MinGradeLevelId = mingradeid.ToString().ToInteger();
 
-                if (mingradeid.IsNumber())
-                    group.MinGradeLevelId = mingradeid.ToString().ToInteger();
-
-                if (genderrestrictions.IsNumber())
-                    group.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
-            }
+            if (genderrestrictions.IsNumber())
+                group.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
 
             group.IsInviteOnly = false;
             if (isinviteonly.IsNotEmpty())
                 group.IsInviteOnly = isinviteonly.ToString().ToBoolean();
+
+            if (contactname.IsNotEmpty())
+                group.ContactName = contactname.ToString();
+
+            if (contactemail.IsNotEmpty())
+                group.ContactEmail = contactemail.ToString();
+
+            if (contactphone.IsNotEmpty())
+                group.ContactPhone = contactphone.ToString();
+
 
             if (msgs.HasNoErrors())
             {

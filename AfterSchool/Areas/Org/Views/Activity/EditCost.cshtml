@@ -4,44 +4,28 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
 
-    var saveButtonCols = 7;
-    var saveButtonPrimary = "btn-primary";
-    if (!Model.ActivityGroupId.HasValue)
-    {
-        saveButtonCols = 5;
-        saveButtonPrimary = "btn-default";
-    }
-
-    var fullscreen = Request["isnew"] == "1" && !Model.IsPublished;
-    if (fullscreen)
+    var isFullScreen = (bool)ViewBag.IsFullScreen;
+    if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     }
 }
 
-@if (!fullscreen)
-{
-    Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());
-}
+@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @if (!fullscreen)
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);
-    }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
-            
-            @if (fullscreen)
+
+            @if (isFullScreen)
             {
-                <div class="pull-right">
-                    <a href="@Url.Action("index", "activity")" class="btn btn-default">X</a>
-                </div>
+                Html.RenderPartial("_ExitFullScreen", "");
             }
         </div>
         <div class="panel-body">
@@ -55,6 +39,10 @@
                         {
                             @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", true, true, Request))
                         }
+                        else
+                        {
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "publish", true, true, Request))
+                        }
                         @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
                         @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "prev", true, false, Request))
                     }
@@ -67,16 +55,19 @@
                             <div class="col-sm-2 col-sm-offset-3">
                                 @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "prev", false, false, Request))
                             </div>
-                            <div class="col-sm-@saveButtonCols">
-                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, Model.ActivityGroupId.HasValue))
+                            <div class="col-sm-5">
+                                @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                             </div>
-
-                            @if (!Model.ActivityGroupId.HasValue)
-                            {
-                                <div class="col-sm-2">
-                                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", false, true, Request))
-                                </div>
-                            }
+                            <div class="col-sm-2">
+                                @if (!Model.ActivityGroupId.HasValue)
+                                {
+                                    @:@Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "next", false, true, Request))
+                                }
+                                else
+                                {
+                                    @:@Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editcost", "publish", false, true, Request))
+                                }
+                            </div>
 
                         </div>
                     }

@@ -3,31 +3,29 @@
     ViewBag.Title = ((Account)ViewBag.Account).Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
-
-    var fullscreen = Request["isnew"] == "1" && !Model.IsPublished;
-    if (fullscreen)
+    var isFullScreen = (bool)ViewBag.IsFullScreen;
+    if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     }
 }
 
-@if (!fullscreen)
-{
-    Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());
-}
+@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-    
-    @if (!fullscreen)
-    {
-        Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);
-    }
+
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
+
+            @if (isFullScreen)
+            {
+                Html.RenderPartial("_ExitFullScreen", "");
+            }
         </div>
         <div class="panel-body">
 
