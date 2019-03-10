@@ -7,7 +7,6 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using Hangfire;
-using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -65,8 +64,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Summary(string id)
         {
-            var group = ActivityGroup.LoadByUid(id.ToGuid());
-            var registrations = group.GetRegistrations();
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var registrations = group.GetRegistrations(msgs: msgs);
             var actions = SessionAction.LoadByActivityGroupId(
                 group.ID.Value,
                 new List<SessionActionType>() {
@@ -75,7 +75,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     SessionActionType.ActivityGroupUnpublish,
                 },
                 0,
-                15);
+                15,
+                msgs);
             ViewBag.Messages = new SystemMessages();
             ViewBag.Actions = actions;
             ViewBag.Registrations = registrations;
@@ -85,20 +86,21 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Edit(string id)
         {
-            var group = new ActivityGroup();
+            var group = new ActivityGroup()
+            {
+                ID = new int?(),
+                RegistrationModeId = RegistrationMode.Register,
+                ActivityGroupTypeId = ActivityGroupType.Session
+            };
+
             if (id.IsGuid())
-            {
                 group = ActivityGroup.LoadByUid(id.ToGuid());
-            }
-            else
-            {
-                group.ID = new int?();
-                group.RegistrationModeId = RegistrationMode.Register;
-                group.ActivityGroupTypeId = ActivityGroupType.Session;
-            }
+
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
+            ViewBag.Grades = GradeLevel.Load();
+            LoadEditScheduleViewBag(group, group.ActivityScheduleId.ToString());
             return View(group);
         }
 
@@ -112,7 +114,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 { "name", name },
                 { "description", description },
-                { "regmode", ((int)RegistrationMode.Register).ToString() },
+                { "regmode", regmode },
                 { "form", form },
                 { "isinviteonly", isinviteonly }
             };
@@ -128,6 +130,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
+            ViewBag.Grades = GradeLevel.Load();
+            LoadEditScheduleViewBag(group, group.ActivityScheduleId.ToString());
             return View(group);
         }
 
@@ -447,31 +451,6 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(group);
         }
 
-        //[HttpGet]
-        //public ActionResult DownloadRegistrations(string id)
-        //{
-        //    var group = ActivityGroup.LoadByUid(id.ToGuid());
-        //    var registrations = group.GetRegistrations();
-        //    string csv = Registration.ExportCSV(
-        //        registrations, 
-        //        SessionVariables.CurrentAccount, 
-        //        RegistrationReportType.Detailed, 
-        //        RegistrationStatus.NotSet, 
-        //        RegistrationAssignmentType.NotSet, 
-        //        group.ID.Value.AsList());
-
-        //    Response.Clear();
-        //    Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
-        //    Response.AddHeader("Content-Disposition", "attachment; filename=registrations.csv");
-
-        //    byte[] filebytes = System.Text.UTF8Encoding.UTF8.GetBytes(csv);
-        //    Response.AddHeader("Content-Length", filebytes.Length.ToString());
-        //    Response.BinaryWrite(filebytes);
-        //    Response.End();
-
-        //    return RedirectToAction("registrations", new { id = id });
-        //}
-
         [HttpGet]
         public ActionResult Messages(string id)
         {
@@ -566,113 +545,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Registrants = group.GetRegistrants();
             return View(group);
-        }
-
-        //[HttpGet]
-        //public ActionResult Placement(string id, string step, string period)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var group = ActivityGroup.LoadByUid(id.ToGuid());
-        //    var nextStep = 1;
-
-        //    if (step.IsNumber())
-        //    {
-        //        nextStep = step.ToInteger();
-        //    }
-
-        //    switch (nextStep)
-        //    {
-        //        case 1:
-        //            var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) > 0).ToList();
-        //            ViewBag.Periods = periods;
-        //            break;
-        //        case 2:
-        //            var regperiod = period.IsNumber() ? RegistrationPeriod.Load(period.ToInteger()) : null;
-        //            var registrations = group.GetRegistrations();
-        //            var ras = group.GetRegistrantActivities(registrations);
-        //            var registrantAssignments = group.RandomizePlacementAttempt(regperiod, msgs);
-
-        //            var assignments = new List<int>();
-        //            var assignmentsWL = new List<int>();
-        //            registrantAssignments.ForEach(x => assignments.AddRange(x.Assignments));
-        //            registrantAssignments.ForEach(x => assignmentsWL.AddRange(x.WaitingListAssignments));
-
-        //            var assignedRegistrationActivities = ras.Where(x => assignments.Contains(x.ID.Value)).ToList();
-        //            var waitingListActivities = ras.Where(x => assignmentsWL.Contains(x.ID.Value)).ToList();
-
-        //            ViewBag.RegistrantAssignments = registrantAssignments;
-        //            ViewBag.RegistrantActivities = ras;
-        //            ViewBag.AssignedRegistrantActivities = assignedRegistrationActivities;
-        //            ViewBag.WaitingListActivities = waitingListActivities;
-        //            ViewBag.Activities = group.GetActivities(false, false, null, null, false).OrderBy(x => x.Name).ToList();
-        //            break;
-        //    }
-
-        //    ViewBag.Step = nextStep;
-        //    ViewBag.Messages = msgs;
-        //    return View(group);
-        //}
-
-        //[HttpGet]
-        //public ActionResult ResetPlacement(string id)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var group = ActivityGroup.LoadByUid(id.ToGuid());
-
-        //    if (group.RegistrationModeId == RegistrationMode.Apply)
-        //    {
-        //        msgs.AddRange(group.RandomizePlacementReset());
-
-        //        if (msgs.HasNoErrors())
-        //        {
-        //            msgs.Add("All Registration Placement has been reset", MessageType.Success);
-        //        }
-        //    }
-
-        //    var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) > 0).ToList();
-        //    ViewBag.Periods = periods;
-
-        //    ViewBag.Messages = msgs;
-        //    ViewBag.Step = 1;
-        //    return View("Placement", group);
-        //}
-
-        //[HttpPost]
-        //public ActionResult Placement(string id, string step, string period, string assignmentsJSON)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var group = ActivityGroup.LoadByUid(id.ToGuid());
-        //    var nextStep = 1;
-        //    if (step.IsNumber())
-        //    {
-        //        nextStep = step.ToInteger();
-        //    }
-
-        //    var regperiod = period.IsNumber() ? RegistrationPeriod.Load(period.ToInteger()) : null;
-        //    var registrantAssignments = new JavaScriptSerializer() { MaxJsonLength = 50000000 }.Deserialize<List<RegistrantAssignment>>(assignmentsJSON);
-
-        //    msgs.AddRange(group.RandomizePlacementApply(regperiod, registrantAssignments));
-
-        //    var registrations = group.GetRegistrations();
-        //    var ras = group.GetRegistrantActivities(registrations);
-        //    var assignments = new List<int>();
-        //    var assignmentsWL = new List<int>();
-        //    registrantAssignments.ForEach(x => assignments.AddRange(x.Assignments));
-        //    registrantAssignments.ForEach(x => assignmentsWL.AddRange(x.WaitingListAssignments));
-
-        //    var assignedRegistrationActivities = ras.Where(x => assignments.Contains(x.ID.Value)).ToList();
-        //    var waitingListActivities = ras.Where(x => assignmentsWL.Contains(x.ID.Value)).ToList();
-
-        //    ViewBag.RegistrantAssignments = registrantAssignments;
-        //    ViewBag.RegistrantActivities = ras;
-        //    ViewBag.AssignedRegistrantActivities = assignedRegistrationActivities;
-        //    ViewBag.WaitingListActivities = waitingListActivities;
-        //    ViewBag.Activities = group.GetActivities(false, false, null, null).OrderBy(x => x.Name).ToList();
-
-        //    ViewBag.Step = nextStep;
-        //    ViewBag.Messages = msgs;
-        //    return View(group);
-        //}
+        }        
 
         [HttpGet]
         public ActionResult PublishDetail(string id)
@@ -836,13 +709,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        private void LoadEditScheduleViewBag(Activity activity, string scheduleId)
+        private void LoadEditScheduleViewBag(ActivityGroup activityGroup, string scheduleId)
         {
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.ActivityId = activity.ID.Value.ToString();
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.ActiveMenu = "EditSchedule";
             ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
 
             ActivitySchedule schedule = null;
@@ -852,20 +720,17 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 schedule = ActivitySchedule.Load(scheduleId.ToInteger());
                 if (schedule.AccountId != SessionVariables.CurrentAccount.ID)
-                {
                     schedule = null;
-                }
-            }
-            if (schedule.IsEmpty())
-            {
-                schedule = activity.GetSchedule();
-            }
-            if (schedule.IsEmpty())
-            {
-                schedule = ActivitySchedule.GetNewDefaultSchedule();
             }
 
+            if (schedule.IsEmpty())
+                schedule = activityGroup.GetSchedule();
+
+            if (schedule.IsEmpty())
+                schedule = ActivitySchedule.GetNewDefaultSchedule();
+
             ViewBag.Schedule = schedule;
+            ViewBag.ActivityInstances = schedule.GetInstances();
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
         }
 

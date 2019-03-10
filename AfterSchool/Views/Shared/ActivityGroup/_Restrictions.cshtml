@@ -1,0 +1,214 @@
+﻿@model ActivityGroup
+@{
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var forms = (List<Form>)ViewBag.Forms;
+    var grades = (List<GradeLevel>)ViewBag.Grades;
+    var aag = (AccountActivityGroup)ViewBag.AccountActivityGroup;
+
+    var formId = aag.IsEmpty() ? Model.FormId : aag.FormId;
+}
+
+
+@if (aag.IsEmpty())
+{    
+    <div class="form-group">
+        <label class="col-sm-3 control-label">@UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) Name<span class="text-danger">*</span></label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="name" name="name" value="@Model.Name" onfocus="this.select()" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-md-3 control-label">
+            @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId) Details <span class="text-danger">*</span>
+        </label>
+        <div class="col-md-9">
+            @{ Html.RenderPartial(
+            "~/Views/Shared/_TextEditor.cshtml",
+            Model.Description,
+            new ViewDataDictionary() {
+                { "required", true },
+                { "name", "description" },
+                { "id", "description" }
+            }
+            ); }
+            <p class="text-muted">
+                <em>
+                    Describe your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId)
+                </em>
+            </p>
+        </div>
+    </div>
+}
+
+@if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.SchoolDistrict)
+{
+    <div class="form-group">
+        <label class="col-md-3 control-label">
+            Registration Form <span class="text-danger">*</span>
+        </label>
+        <div class="col-md-6">
+            <select name="form" id="form" class="form-control" required>
+                <option value="">Select Registration Form...</option>
+                <option value="0"> + New Registration Form</option>
+                @foreach (var form in forms)
+                {
+                    <option value="@form.ID" @(formId == form.ID ? " selected=\"selected\" " : "")>@form.Name</option>
+                }
+            </select>
+            <p class="text-muted">
+                <em>
+                    You can select "Standard Reg Form". This is the registration form your parents will use to register for your @UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId).ToLower(). 
+                </em>
+            </p>
+        </div>
+        <div class="col-md-3 hide">
+            <a class="btn btn-block btn-link" href="@Url.Action("edit","form", new { id = formId })" id="editForm" target="_blank">Edit Form</a>
+        </div>
+    </div>
+
+    <div class="form-group hide">
+        <label class="col-sm-3 control-label">Invite Only</label>
+        <div class="col-sm-9">
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/_SwitchButton.cshtml",
+                    Model.IsInviteOnly,
+                    new ViewDataDictionary()
+                    {
+                    { "checkboxname", "isinviteonly" },
+                    { "checkboxid", "isinviteonly" }
+                    }
+                );
+            }
+        </div>
+    </div>
+
+    if (Model.ActivityGroupTypeId != ActivityGroupType.League)
+    {
+        <div class="form-group">
+            <label class="col-sm-3 control-label">
+                Registration Mode <span class="text-danger">*</span>
+            </label>
+            <div class="col-sm-9">
+                <div class="am-radio inline">
+                    @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
+                    {
+                        <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int)item)" @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "") />
+                        <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString().SplitByUpperCase()</label>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <input type="hidden" name="regmode" value="@((int)RegistrationMode.Apply)" />
+    }
+}
+
+@if (Model.ActivityGroupTypeId == ActivityGroupType.League && SessionVariables.CurrentAccount.AccountTypeId == AccountType.SchoolDistrict)
+{
+    <div class="form-group">
+        <label class="col-md-3 control-label">
+            Gender Restrictions
+        </label>
+        <div class="col-md-9">
+            <div class="am-radio inline">
+                @foreach (GenderRestrictionType item in System.Enum.GetValues(typeof(GenderRestrictionType)))
+                {
+                    <input type="radio" name="genderrestrictions" id="genderrestrictions-@((int)item)" @(Model.GenderRestriction == item ? " checked=\"checked\" " : "") value="@((int)item)" />
+                    <label for="genderrestrictions-@((int)item)" class="margin-h-10">
+                        @item.ToString().SplitByUpperCase()
+                    </label>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-md-3 control-label">
+            Grade Restrictions
+        </label>
+        <div class="col-md-1">
+            @{Html.RenderPartial
+                          (
+                              "~/Views/Shared/_SwitchButton.cshtml",
+                              Model.MinGradeLevelId.HasValue,
+                              new ViewDataDictionary()
+                              {
+                        { "checkboxname", "graderestrictions" },
+                        { "checkboxid", "graderestrictions" },
+                        { "disabled", false }
+                              }
+                          );
+            }
+        </div>
+        <div class="col-md-5 hide" id="grade">
+            <select id="mingrade" name="mingrade" class="form-control">
+                @foreach (var grade in grades)
+                {
+                    <option value="@grade.ID" @(Model.MinGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+                }
+            </select>
+            <p class="margin-v-10">
+                To
+            </p>
+            <select id="maxgrade" name="maxgrade" class="form-control">
+                @foreach (var grade in grades)
+                {
+                    <option value="@grade.ID" @(Model.MaxGradeLevelId == grade.ID ? " selected=\"selected\" " : "")>@grade.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+}
+
+@if (Model.ActivityGroupTypeId == ActivityGroupType.League && SessionVariables.CurrentAccount.AccountTypeId != AccountType.SchoolDistrict)
+{
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Contact Name<span class="text-danger">*</span></label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="contactname" name="contactname" value="@aag.ContactName" onfocus="this.select()" required />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Contact Phone<span class="text-danger">*</span></label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="contactphone" name="contactphone" value="@aag.ContactPhone" onfocus="this.select()" required />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">Contact Email<span class="text-danger">*</span></label>
+        <div class="col-sm-6">
+            <input type="email" class="form-control" id="contactemail" name="contactemail" value="@aag.ContactEmail" onfocus="this.select()" required />
+        </div>
+    </div>
+}
+
+<script>
+    PageEvent.add(
+        PageEvent.AFTER_INIT,
+        function () {
+            $('#graderestrictions').click(function () {
+                gradeCheck();
+            });
+
+            $('#mingrade').change(function () {
+                if (parseInt($(this).val()) > parseInt($('#maxgrade').val())) {
+                    $('#maxgrade').val($(this).val());
+                }
+            });
+
+            gradeCheck();
+        }
+    );
+
+    function gradeCheck() {
+        if ($('#graderestrictions').is(':checked')) {
+            $('#grade').removeClass('hide');
+        } else {
+            $('#grade').addClass('hide');
+        }
+    }
+</script>

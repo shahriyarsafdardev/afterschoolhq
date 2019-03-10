@@ -2,7 +2,17 @@
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
     var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
 
-    string homeactive = "", activityactive = "", leagueactive = "", registrationactive = "", formactive = "", contactactive = "", teamactive = "", accountactive = "", profileactive = "", accountingactive = "";
+    string homeactive = "",
+        activityactive = "",
+        leagueactive = "",
+        sessionactive = "",
+        registrationactive = "",
+        formactive = "",
+        contactactive = "",
+        teamactive = "",
+        accountactive = "",
+        profileactive = "",
+        accountingactive = "";
 
     switch(controller)
     {
@@ -11,6 +21,9 @@
             break;
         case "activity":
             activityactive = "active";
+            break;
+        case "group":
+            sessionactive = "active";
             break;
         case "league":
             leagueactive = "active";
@@ -59,23 +72,27 @@
             {
                 <li class="@activityactive"><a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i> @UILabel.ActivityLabel(ActivityType.Activity, true)</a></li>
             }
-
+            
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.SessionsView))
             {
-                <li class="hide @leagueactive"><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
+                <li class="@sessionactive"><a href="@Url.Action("index", "group")"><i class="icon s7-date"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.Session, true)</a></li>
             }
+            
             @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider && SessionVariables.CurrentAccount.GetExternalLeagueCount() > 0 && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.LeaguesView))
             {
                 <li class="@leagueactive"><a href="@Url.Action("indexexternal", "league")"><i class="icon s7-ball"></i> @UILabel.ActivityGroupLabel(ActivityGroupType.League, true)</a></li>
             }
+            
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.StudentsView))
             {
                 <li class="@registrationactive"><a href="@Url.Action("index", "registration")"><i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)</a></li>
             }
+            
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.FormsView))
             {
                 <li class="@formactive hide"><a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a></li>
             }
+
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ContactsView))
             {
                 <li class="@contactactive"><a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a></li>

@@ -41,6 +41,9 @@ namespace AfterSchoolLibrary.Models
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
 		public decimal? Cost { get { return (decimal?)MDV["Cost"].Value; } set { MDV["Cost"].Value = value; } }
 		public CostUnitType CostUnitTypeId { get { return (CostUnitType)MDV["CostUnitTypeId"].Value; } set { MDV["CostUnitTypeId"].Value = value; } }
+		public string ContactName { get { return (string)MDV["ContactName"].Value; } set { MDV["ContactName"].Value = value; } }
+		public string ContactPhone { get { return (string)MDV["ContactPhone"].Value; } set { MDV["ContactPhone"].Value = value; } }
+		public string ContactEmail { get { return (string)MDV["ContactEmail"].Value; } set { MDV["ContactEmail"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -84,6 +87,9 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ActivityScheduleId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Cost", System.Data.SqlDbType.Money);
 				_dp.Add(className, "CostUnitTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ContactName", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "ContactPhone", System.Data.SqlDbType.NVarChar , "50");
+				_dp.Add(className, "ContactEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -231,6 +237,18 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["CostUnitTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactName"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactPhone"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ContactEmail"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -451,14 +469,14 @@ namespace AfterSchoolLibrary.Models
             return _RegistrationPeriods;
         }
 
-        public List<Registration> GetRegistrations(int? start = null, int? length = null, DatabaseConnection dc = null)
+        public List<Registration> GetRegistrations(int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadByActivityGroupId(this.ID.Value, start, length, dc: dc);
+            return Registration.LoadByActivityGroupId(this.ID.Value, start, length, msgs, dc);
         }
 
-        public int GetRegistrationCount(DatabaseConnection dc = null)
+        public int GetRegistrationCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.GetCount(criterias: new Hashtable() { { "ActivityGroupId", this.ID.Value } }, dc: dc);
+            return Registration.GetCount(new Hashtable() { { "ActivityGroupId", this.ID.Value } }, msgs, dc);
         }
 
         private List<Activity> _Activities = null;
@@ -528,48 +546,6 @@ namespace AfterSchoolLibrary.Models
         {
             return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: rat, activityGroupId: this.ID.Value, dc: dc);
         }
-
-        //public List<RegistrantAssignment> RandomizePlacementAttempt(RegistrationPeriod period, SystemMessages msgs, DatabaseConnection dc = null)
-        //{
-        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
-        //    var rr = new RegistrationRandomization(this);
-        //    rr.RegistrationPeriod = period;
-        //    return rr.AttemptLottery(msgs, dc: dc);
-        //}
-
-        //public SystemMessages RandomizePlacementApply(RegistrationPeriod period, List<RegistrantAssignment> assignments, DatabaseConnection dc = null)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var rr = new RegistrationRandomization(this);
-        //    rr.RegistrationPeriod = period;
-        //    msgs.AddRange(rr.ApplyLottery(assignments, dc: dc));
-        //    return msgs;
-        //}
-
-        //public SystemMessages RandomizePlacementReset(DatabaseConnection dc = null)
-        //{
-        //    var msgs = new SystemMessages();
-
-        //    Database.ExecuteTransaction(
-        //        action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
-        //        {
-        //            this.GetRegistrantActivities(dc: adc).ForEach(
-        //                ra => amsgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, adc))
-        //            );
-        //        },
-        //        onSuccess: (SystemMessages smsgs) =>
-        //        {
-        //            msgs.AddRange(smsgs);
-        //        },
-        //        onFailure: (SystemMessages fmsgs) =>
-        //        {
-        //            msgs.AddRange(fmsgs);
-        //        },
-        //        dc: dc
-        //    );
-
-        //    return msgs;
-        //}
 
         public int GetActivityCount(ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? isSubmitted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

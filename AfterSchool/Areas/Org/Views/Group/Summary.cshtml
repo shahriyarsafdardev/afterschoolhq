@@ -6,7 +6,7 @@
 
     decimal totalPaid = 0;
     int registrationCount = registrations.Count();
-    var activityCount = Model.GetActivityCount(Model.IsArchived, false);
+    var activityCount = Model.GetActivityCount(ActivityType.Activity, Model.IsArchived, false, null);
 
     if (registrations.Where(x => x.DatePaid.HasValue).Any())
     {
@@ -28,7 +28,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("_ActivityGroupTitle", Model.Name); }
+            @{Html.RenderPartial("~/Views/Shared/ActivityGroup/_Title.cshtml", Model.Name); }
         </div>
         <div class="panel-body">
 

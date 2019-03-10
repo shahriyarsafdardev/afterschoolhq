@@ -15,15 +15,15 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", Model.Name.IfBlank("New " + UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId))); }
+            @{Html.RenderPartial("~/Views/Shared/ActivityGroup/_Title.cshtml", Model.Name.IfBlank("New " + UILabel.ActivityGroupLabel(Model.ActivityGroupTypeId))); }
         </div>
         <div class="panel-body">
 
-            <div class="col-md-12 col-lg-12">
+            <div class="col-md-12">
 
                 <form id="form1" method="post" action="@Url.Action("edit", "group", new { id = Model.Uid })" class="form-horizontal">
                     
-                    @{ Html.RenderPartial("~/Views/Shared/_ActivityGroupEdit.cshtml", Model); }
+                    @{ Html.RenderPartial("~/Views/Shared/ActivityGroup/_Setup.cshtml", Model); }                                       
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>
@@ -36,6 +36,7 @@
                 </form>
 
             </div>
+
         </div>
     </div>
 
