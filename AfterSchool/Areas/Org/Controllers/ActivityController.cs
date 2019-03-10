@@ -829,7 +829,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return RedirectToAction("publish", new { id = activity.Uid, isnew = 1 });
+                        return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
                 }
             }
 
@@ -841,13 +841,15 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants)
         {
             var msgs = new SystemMessages();
+            var activityToCopy = Activity.LoadByUid(id.ToGuid());
+
             Activity activity = null;
 
             if (copywithregistrants.IsBoolean())
-                activity = Activity.LoadByUid(id.ToGuid())
+                activity = activityToCopy
                     .CopyWithRegistrants(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
             else
-                activity = Activity.LoadByUid(id.ToGuid())
+                activity = activityToCopy
                     .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
