@@ -504,16 +504,53 @@ namespace AfterSchoolLibrary.Models
 
         public override string ToString()
         {
+            // Temporarily commenting out code
+            //switch (this.SessionActionTypeId)
+            //{
+            //    case SessionActionType.RegistrationCompletedView:
+            //        return string.Format("{0} has registered for {1}", this.RegistrantName, this.ActivityName.IfEmpty("multiple activities"));
+            //    case SessionActionType.ActivityCreate:
+            //        return string.Format("{0} was created by {1}", this.ActivityName, this.CreatedByName);
+            //    case SessionActionType.ActivityPublish:
+            //        return string.Format("{0} was published by {1}", this.ActivityName, this.CreatedByName);
+            //    case SessionActionType.ActivityUnpublish:
+            //        return string.Format("{0} was unpublished by {1}", this.ActivityName, this.CreatedByName);
+            //    case SessionActionType.ActivityRegistrationCompleted:
+            //        return string.Format("{0} has registered for {1}", this.RegistrantName, this.ActivityName);
+            //    case SessionActionType.ActivityRegistrationUpdated:
+            //        return string.Format("The registration for {0} has been updated", this.RegistrantName);
+            //    case SessionActionType.RegistrationUpdated:
+            //        return string.Format("The registration for {0} has been updated", this.RegistrantName);
+            //    case SessionActionType.RegistrationAddActivity:
+            //        return string.Format("{0} was added to the registration for {1}", this.ActivityName, this.RegistrantName);
+            //    case SessionActionType.RegistrationRemoveActivity:
+            //        return string.Format("{0} was removed from the registration for {1}", this.ActivityName, this.RegistrantName);
+            //    case SessionActionType.ActivityMoveToApplication:
+            //        return string.Format("{0} was moved to an application seat for {1}", this.RegistrantName, this.ActivityName);
+            //    case SessionActionType.ActivityMoveToReserved:
+            //        return string.Format("{0} was moved to an reserved seat for {1}", this.RegistrantName, this.ActivityName);
+            //    case SessionActionType.ActivityMoveToWaitingList:
+            //        return string.Format("{0} was moved to an waiting list seat for {1}", this.RegistrantName, this.ActivityName);
+            //    case SessionActionType.ActivityGroupPublish:
+            //        return string.Format("{0} was published by {1}", this.ActivityGroupName, this.CreatedByName);
+            //    case SessionActionType.ActivityGroupUnpublish:
+            //        return string.Format("{0} was unpublished by {1}", this.ActivityGroupName, this.CreatedByName);
+            //    case SessionActionType.ActivityGroupCreate:
+            //        return string.Format("{0} was created by {1}", this.ActivityGroupName, this.CreatedByName);
+            //    default:
+            //        return "";
+            //}
+
             switch (this.SessionActionTypeId)
             {
                 case SessionActionType.RegistrationCompletedView:
                     return string.Format("{0} has registered for {1}", this.RegistrantName, this.ActivityName.IfEmpty("multiple activities"));
                 case SessionActionType.ActivityCreate:
-                    return string.Format("{0} was created by {1}", this.ActivityName, this.CreatedByName);
+                    return string.Format("{0} was created", this.ActivityName, this.CreatedByName);
                 case SessionActionType.ActivityPublish:
-                    return string.Format("{0} was published by {1}", this.ActivityName, this.CreatedByName);
+                    return string.Format("{0} was published", this.ActivityName, this.CreatedByName);
                 case SessionActionType.ActivityUnpublish:
-                    return string.Format("{0} was unpublished by {1}", this.ActivityName, this.CreatedByName);
+                    return string.Format("{0} was unpublished", this.ActivityName, this.CreatedByName);
                 case SessionActionType.ActivityRegistrationCompleted:
                     return string.Format("{0} has registered for {1}", this.RegistrantName, this.ActivityName);
                 case SessionActionType.ActivityRegistrationUpdated:
@@ -531,11 +568,11 @@ namespace AfterSchoolLibrary.Models
                 case SessionActionType.ActivityMoveToWaitingList:
                     return string.Format("{0} was moved to an waiting list seat for {1}", this.RegistrantName, this.ActivityName);
                 case SessionActionType.ActivityGroupPublish:
-                    return string.Format("{0} was published by {1}", this.ActivityGroupName, this.CreatedByName);
+                    return string.Format("{0} was published", this.ActivityGroupName, this.CreatedByName);
                 case SessionActionType.ActivityGroupUnpublish:
-                    return string.Format("{0} was unpublished by {1}", this.ActivityGroupName, this.CreatedByName);
+                    return string.Format("{0} was unpublished", this.ActivityGroupName, this.CreatedByName);
                 case SessionActionType.ActivityGroupCreate:
-                    return string.Format("{0} was created by {1}", this.ActivityGroupName, this.CreatedByName);
+                    return string.Format("{0} was created", this.ActivityGroupName, this.CreatedByName);
                 default:
                     return "";
             }

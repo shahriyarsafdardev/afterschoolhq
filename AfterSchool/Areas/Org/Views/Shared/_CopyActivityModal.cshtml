@@ -1,0 +1,48 @@
+﻿@model ActivityType
+@{ 
+    var showCopyWithStudents = true;
+
+    if (ViewData["ShowCopyWithStudents"].IsNotEmpty())
+    {
+        showCopyWithStudents = ViewData["ShowCopyWithStudents"].ToString().ToBoolean();
+    }
+}
+<div id="modal-copy-activity" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-copy" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Copy @UILabel.ActivityLabel(Model)</h3>
+            </div>
+            <div class="modal-body form">
+
+                <p>This is used to create an exact copy of the existing @UILabel.ActivityLabel(Model).ToLower(). Once copied you can make any modifications as needed.</p>
+
+                <div class="form-group">
+                    <label>@UILabel.ActivityLabel(Model) Name</label>
+                    <input type="text" placeholder="Your @UILabel.ActivityLabel(Model) Name" class="form-control" id="activitynamecopy" name="activitynamecopy" onfocus="this.select()">
+                </div>
+
+                @if (showCopyWithStudents)
+                {
+                    <div class="form-group">
+                        <div class="am-checkbox inline">
+                            <input type="checkbox" class="form-control" value="1" name="copywithregistrants" id="copywithregistrants" />
+                            <label for="copywithregistrants">
+                                Copy with @UILabel.RegistrantLabel(true).ToLower()?
+                            </label>
+                        </div>
+                        <p class="text-muted">
+                            <em>This will automatically register all @UILabel.RegistrantLabel(true).ToLower() in the current @UILabel.ActivityLabel(ActivityType.Activity, false) for the new copied @UILabel.ActivityLabel(ActivityType.Activity, false).</em>
+                        </p>
+                    </div>
+                }
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Copy &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>

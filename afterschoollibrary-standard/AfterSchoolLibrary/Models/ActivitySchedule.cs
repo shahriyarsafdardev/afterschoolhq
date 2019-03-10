@@ -357,6 +357,21 @@ namespace AfterSchoolLibrary.Models
             return schedule;
         }
 
+        public static ActivitySchedule GetNewDefaultSchedule(RegistrationPeriod period)
+        {
+            if (period.IsEmpty())
+                return GetNewDefaultSchedule();
+
+            return new ActivitySchedule
+            {
+                StartDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(1),
+                EndDate = period.EndDateTime.Value.Date.FirstDateOfWeek().AddWeeks(9),
+                DailyStartTime = DateTime.UtcNow.Date.AddHours(15),
+                DailyEndTime = DateTime.UtcNow.Date.AddHours(17),
+                RepeatsWeekly = true
+            };
+        }
+
         // TODO: Save? what about instances that get added but aren't saved?
         private void AddInstances(List<ActivityInstance> list)
         {

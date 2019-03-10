@@ -285,3 +285,22 @@ var Notifications = {
         });
     }
 }
+
+var ActivitySetup = {
+    showAdvancedSettings: function () {
+        if ($('.advanced-settings').attr('class').indexOf('hide') > -1) {
+            $('.advanced-settings').removeClass('hide');
+            $('#btn-advanced-settings').html('Hide Advanced Settings');
+        } else {
+            $('.advanced-settings').addClass('hide');
+            $('#btn-advanced-settings').html('Show Advanced Settings');
+        }
+    },
+    navigateActivity: function (url) {
+        $('#form1').attr('action', url);
+    },
+    setCopyActivity: function (name, url) {
+        $('#activitynamecopy').val(name + ' [copy]');
+        $('#form-copy').attr('action', url);
+    }
+}

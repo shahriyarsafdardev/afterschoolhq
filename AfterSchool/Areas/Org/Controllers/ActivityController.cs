@@ -43,6 +43,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 0,
                 15,
                 msgs);
+
+            ViewBag.ParticipationObject = activity.GetParticipationObject(msgs);
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Actions = actions;
@@ -140,19 +142,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 //this means a new activity is not being added to an existing enrollment group
                 if (!group.IsGuid())
-                {
                     activePeriod = SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
-                }
                 else
-                {
                     activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                }
+
             }
 
             LoadEditSetupViewBag(activity, activePeriod, new SystemMessages());
             ViewBag.ActiveMenu = "EditSetup";
             ViewBag.Group = activityGroup;
-
+            
             return View(activity);
         }
 
@@ -213,9 +212,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
 
                 if (msgs.HasNoErrors())
-                {
                     UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
-                }
             }
 
             if (group.IsGuid())
@@ -259,7 +256,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Periods = periods;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.ActivePeriod = activePeriod;
-            ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs);
+            ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultActivityForm(msgs);
         }
 
         [HttpGet]
@@ -481,36 +478,33 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private void LoadEditScheduleViewBag(Activity activity, string scheduleId)
         {
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.ActivityId = activity.Uid.ToString();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditSchedule";
-            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
+            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules(msgs);
 
             ActivitySchedule schedule = null;
 
             // changing schedule
             if (scheduleId.IsNumber())
             {
-                schedule = ActivitySchedule.Load(scheduleId.ToInteger());
+                schedule = ActivitySchedule.Load(scheduleId.ToInteger(), msgs);
                 if (schedule.AccountId != SessionVariables.CurrentAccount.ID)
-                {
                     schedule = null;
-                }
-            }
-            if (schedule.IsEmpty())
-            {
-                schedule = activity.GetSchedule();
-            }
-            if (schedule.IsEmpty())
-            {
-                schedule = ActivitySchedule.GetNewDefaultSchedule();
             }
 
+            if (schedule.IsEmpty())
+                schedule = activity.GetSchedule();
+
+            if (schedule.IsEmpty())
+                schedule = ActivitySchedule.GetNewDefaultSchedule(activity.GetActiveRegistrationPeriod(msgs));
+
             ViewBag.Schedule = schedule;
-            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
+            ViewBag.Messages = msgs;
         }
 
         [HttpGet]
@@ -677,9 +671,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "next":
                         if (SessionVariables.AccountPackage.HasFeature(FeatureType.AcceptPayments))
                         {
-                            ViewBag.ActiveMenu = "EditCost";
-                            ViewBag.PaymentPlan = activity.GetPaymentPlan();
-                            ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
+                            LoadEditCostViewBag(activity, msgs);
                             return View("EditCost", activity);
                         }
                         else
@@ -694,18 +686,29 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        [HttpGet]
-        public ActionResult EditCost(string id)
+        private void LoadEditCostViewBag(Activity activity, SystemMessages msgs)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var canProcessPayments = SessionVariables.CurrentAccount.CanProcessPayments(msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            if (!canProcessPayments)
+                activity.AllowToPayLater = true;
+
+            ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.CanProcessPayments = canProcessPayments;
             ViewBag.PaymentPlan = activity.GetPaymentPlan();
             ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
             ViewBag.ActiveMenu = "EditCost";
+        }
+
+        [HttpGet]
+        public ActionResult EditCost(string id)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+            LoadEditCostViewBag(activity, msgs);
             return View(activity);
         }
 
@@ -713,7 +716,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
         {
             var msgs = new SystemMessages();
-            Activity activity = Activity.LoadByUid(id.ToGuid());
+            var activity = Activity.LoadByUid(id.ToGuid());
 
             if (id.IsGuid())
             {
@@ -743,15 +746,11 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.PaymentPlan = activity.GetPaymentPlan();
-            ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
 
             if (msgs.HasNoErrors())
             {
@@ -766,7 +765,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            ViewBag.ActiveMenu = "EditCost";
+            LoadEditCostViewBag(activity, msgs);
             return View(activity);
         }
 
@@ -808,9 +807,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -823,9 +820,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "prev":
                         if (activity.CanAcceptPayments())
                         {
-                            ViewBag.ActiveMenu = "EditCost";
-                            ViewBag.PaymentPlan = activity.GetPaymentPlan();
-                            ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
+                            LoadEditCostViewBag(activity, msgs);
                             return View("EditCost", activity);
                         }
                         else
@@ -834,7 +829,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return RedirectToAction("publishdetail", new { id = activity.Uid });
+                        return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
                 }
             }
 
@@ -846,24 +841,23 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants)
         {
             var msgs = new SystemMessages();
+            var activityToCopy = Activity.LoadByUid(id.ToGuid());
+
             Activity activity = null;
 
             if (copywithregistrants.IsBoolean())
-                activity = Activity.LoadByUid(id.ToGuid())
+                activity = activityToCopy
                     .CopyWithRegistrants(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
             else
-                activity = Activity.LoadByUid(id.ToGuid())
+                activity = activityToCopy
                     .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
+
             if (msgs.HasNoErrors())
-            {
-                return RedirectToAction("editsetup", new { id = activity.Uid });
-            }
-            else
-            {
-                return RedirectToAction("index", "activity", new { copyerror = true });
-            }
+                return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1 });
+
+            return RedirectToAction("index", "activity", new { copyerror = true });
         }
 
         [HttpGet]

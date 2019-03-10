@@ -1,0 +1,38 @@
+﻿@model Account
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    ViewBag.Title = "Getting Started";
+}
+
+<div>
+    <div class="col-sm-12 col-md-8 col-lg-6 col-md-offset-2 col-lg-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <img src="@UILabel.ProductLogoInverseAfterSchoolHQ()" alt="logo" width="350px" class="logo-img center-block">
+            </div>
+            <div class="panel-body">
+                <h1>Welcome, @SessionVariables.LoggedInUser.DisplayName!</h1>
+                <div class="text-medium-small">
+                    <p class="padding-v-20">
+                        Our platform gives you a central location to showcase your programs online allowing parents to easily discover, register, and pay for afterschool @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
+
+                    </p>
+                    <p class="padding-v-20">
+                        Get started by creating your first activity. You are on your way to reducing clutter, increasing parent satisfaction, and increasing afterschool safety and awareness. 
+                    </p>
+                    <p class="padding-v-20">
+
+                        <div class="pull-right padding-v-10">
+                            <a href="@Url.Action("editsetup", "activity", new { isnew = 1 })" class="btn btn-primary btn-lg">Create Your First @UILabel.ActivityLabel(ActivityType.Activity) &raquo;</a>
+                        </div>
+
+                        <div class="pull-left padding-v-10">
+                            <a href="@Url.Action("index", "activity")" class="text-muted text-small">Explore on my own</a>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

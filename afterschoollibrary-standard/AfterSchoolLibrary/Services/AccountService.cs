@@ -218,12 +218,32 @@ namespace AfterSchoolLibrary.Services
 
         public static List<AccountPackageFeature> GetAccountPackageFeatures(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountPackageFeature.LoadByAccountPackageId(account.GetActiveAccountPackage(msgs, dc).ID.Value, msgs, dc);
+            var accountPackage = account.GetActiveAccountPackage(msgs, dc);
+
+            if (accountPackage.IsNotEmpty())
+                return AccountPackageFeature.LoadByAccountPackageId(accountPackage.ID.Value, msgs, dc);
+
+            return new List<AccountPackageFeature>();
         }
 
         public static AccountPackageFeature GetAccountPackageFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(account.GetActiveAccountPackage(msgs, dc).ID.Value, featureType, msgs, dc);
+            var accountPackage = account.GetActiveAccountPackage(msgs, dc);
+
+            if (accountPackage.IsNotEmpty())
+                return AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
+
+            return null;
+        }
+
+        public static bool HasAccountPackageFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountPackage = account.GetActiveAccountPackage(msgs, dc);
+
+            if (accountPackage.IsNotEmpty())
+                return AccountPackageFeature.HasAccountPackageIdByFeatureTypeId(accountPackage.ID.Value, featureType, msgs, dc);
+
+            return false;
         }
 
         #endregion
@@ -829,6 +849,16 @@ namespace AfterSchoolLibrary.Services
             return account.DefaultFormId.HasValue ? Form.Load(account.DefaultFormId.Value, msgs, dc) : null;
         }
 
+        public static ActivityForm GetDefaultActivityForm(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ActivityForm()
+            {
+                FormId = account.GetDefaultForm(msgs, dc).ID,
+                IsActive = true,
+                AccountId = account.ID
+            };
+        }
+
         public static Location GetDefaultLocation(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.DefaultLocationId.HasValue ? Location.Load(account.DefaultLocationId.Value, msgs, dc) : null;
@@ -1074,7 +1104,7 @@ namespace AfterSchoolLibrary.Services
                 CostPerRegistrant = 0,
                 AccountId = account.ID,
                 RegistrationModeId = RegistrationMode.Register,
-                AllowToPayLater = true
+                AllowToPayLater = true,               
             };
             return activity;
         }
@@ -1986,7 +2016,10 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return StripeAccount.CanProcessPayments(account.ID.Value, msgs, dc);
+            if (account.HasAccountPackageFeature(FeatureType.AcceptPayments, msgs, dc))
+                return StripeAccount.CanProcessPayments(account.ID.Value, msgs, dc);
+
+            return false;
         }
 
         #endregion

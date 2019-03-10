@@ -1,5 +1,6 @@
 ﻿@model Activity
 @{
+    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
     var msgs = (SystemMessages)ViewBag.Messages;
     var actions = (List<SessionAction>)ViewBag.Actions;
     var registrants = Model.GetRegistrantActivities();
@@ -29,11 +30,16 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Summary"); }            
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Summary"); }   
+            
+            <div class="pull-right">
+                <a href="@Url.Action("editsetup", "activity", new {id = Model.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;</a>
+            </div>
+
         </div>
         <div class="panel-body">
 
@@ -93,8 +99,8 @@
 
                     </div>
 
-                    @if (registrantCount > 0) 
-                    { 
+                    @if (registrantCount > 0)
+                    {
                         <div class="col-md-12">
 
                             <div class="panel panel-default">
@@ -113,11 +119,36 @@
 
                 <div class="col-md-4">
                     
+                    @if (!Model.IsFree)
+                    {
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Pricing
+                                <div class="pull-right">
+                                    <a href="@Url.Action("editcost", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                @if (!participationObject.PaymentPlans.Any())
+                                {
+                                    Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", participationObject);
+                                }
+                                else
+                                {
+                                    Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml", participationObject);
+                                }
+                            </div>
+                        </div>
+                    }
+
                     @if (schedule.IsNotEmpty())
                     {
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 Schedule
+                                <div class="pull-right">
+                                    <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                </div>
                             </div>
                             <div class="panel-body">
                                 @{

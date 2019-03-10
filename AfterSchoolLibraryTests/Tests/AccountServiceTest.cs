@@ -254,18 +254,42 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Theory]
-        [InlineData(StripeVerificationStatus.NotSet, false)]
-        [InlineData(StripeVerificationStatus.Pending, true)]
-        [InlineData(StripeVerificationStatus.Unverified, false)]
-        [InlineData(StripeVerificationStatus.Verified, true)]
-        public void CanProcessPaymentsTest(StripeVerificationStatus stripeVerificationStatus, bool expectedResult)
+        [InlineData(StripeVerificationStatus.NotSet, true, false)]
+        [InlineData(StripeVerificationStatus.Unverified, true, false)]
+        [InlineData(StripeVerificationStatus.Pending, true, true)]
+        [InlineData(StripeVerificationStatus.Verified, true, true)]
+        [InlineData(StripeVerificationStatus.Pending, false, false)]
+        [InlineData(StripeVerificationStatus.Verified, false, false)]
+        public void CanProcessPaymentsTest(StripeVerificationStatus stripeVerificationStatus, bool addPaymentFeatureToAccount, bool expectedResult)
         {
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
             var stripeAccount = StripeAccountFactory.Create(account, stripeVerificationStatus, msgs, dc);
 
+            if (addPaymentFeatureToAccount)
+            {
+                var package = PackageFactory.Create(msgs, dc);
+                var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+                var accountPackageFeature = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.AcceptPayments, 1, msgs, dc);
+            }
+
             Assert.Equal(account.CanProcessPayments(msgs, dc), expectedResult);
 
+        }
+
+        [Theory(DisplayName = "HasAccountPackageFeature")]
+        [InlineData(FeatureType.AcceptPayments, 10, true)]
+        [InlineData(FeatureType.AcceptPayments, 1, true)]
+        [InlineData(FeatureType.AcceptPayments, 0, false)]
+        public void HasAccountPackageFeature(FeatureType featureType, decimal value, bool expectedResult)
+        {
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var package = PackageFactory.Create(msgs, dc);
+            var accountPackage = AccountPackageFactory.Create(account, package, msgs, dc);
+            var accountPackageFeature = AccountPackageFeatureFactory.Create(accountPackage, featureType, value, msgs, dc);
+
+            Assert.Equal(expectedResult, account.HasAccountPackageFeature(featureType, msgs, dc));
         }
     }
 }

@@ -57,50 +57,17 @@
 
                 <div class="activity-detail-block">
                     <h3>
-                        Cost
-                        @if (Model.IsFree)
-                        {
-                            <span>- Free</span>
-                        }
+                        @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_FreeTuition.cshtml", Model); }
                     </h3>
                     @if (!Model.IsFree)
                     {
                         if (!Model.PaymentPlans.Any())
                         {
-                            <p>
-                                The tuition fee is <strong>@Model.Cost.ToCurrency()</strong>
-                                @if (Model.SubscriptionPlans.Any())
-                                {
-                                    <span>
-                                        plus <strong>@Model.SubscriptionPlans.First().CostPerPeriod.ToCurrency()</strong> each @Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
-                                    </span>
-                                }
-                            </p>
+                            Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", Model);
                         }
                         else
                         {
-                            <p>
-                                Tuition Fee payment options:
-                                <ul>
-                                    <li>
-                                        1 payment of @ParticipationObjectUI.PrintTuitionFee(Model)
-                                        @if(Model.PaymentPlans.Any())
-                                        {
-                                            <span>, or</span>
-                                        }
-                                    </li>
-                                    @foreach (var plan in Model.PaymentPlans)
-                                    {
-                                        <li>
-                                            @plan.TotalPeriods payments of @plan.CostPerPeriod.ToCurrency() each @plan.BillingPeriodTypeId.ToString()
-                                            @if (plan.ID != Model.PaymentPlans.Last().ID)
-                                            {
-                                                <span>, or</span>
-                                            }
-                                        </li>
-                                    }
-                                </ul>
-                            </p>      
+                            Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml", Model);
                         }
 
                         if (Model.CostDescription.IsNotEmpty())

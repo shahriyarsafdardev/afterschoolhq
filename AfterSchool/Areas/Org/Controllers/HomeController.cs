@@ -18,6 +18,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
+            if (SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, null, null, null) == 0)
+                return RedirectToAction("GetStarted");
+
             var account = SessionVariables.CurrentAccount;
             var actions = SessionAction.LoadByAccountId(
                 account.ID.Value, 
@@ -41,6 +44,12 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.HasOutstandingLeagueInvites = SessionVariables.CurrentAccount.GetExternalLeagueInviteCount() > 0;
             ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountPaidTo();
             return View(account);
+        }
+
+        [HttpGet]
+        public ActionResult GetStarted()
+        {
+            return View();
         }
     }
 }
