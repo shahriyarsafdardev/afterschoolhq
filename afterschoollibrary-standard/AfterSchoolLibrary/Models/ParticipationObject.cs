@@ -127,6 +127,9 @@ namespace AfterSchoolLibrary.Models
             RegistrationMode = activityGroup.RegistrationModeId;
             Form = activityGroup.GetForm(msgs, dc);
             OwnerAccount = activityGroup.GetAccount(msgs, dc);
+            ContactEmail = activityGroup.ContactEmail;
+            ContactName = activityGroup.ContactName;
+            ContactPhone = activityGroup.ContactPhone;
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             // TODO: PayLater = activityGroup.AllowToPayLater;

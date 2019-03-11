@@ -71,6 +71,7 @@ namespace AfterSchool.Controllers
 
                 participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.GetParticipationObject(msgs)));
                 sessions.AddRange(account.GetPublishedSessions(msgs));
+                participationObjects.AddRange(sessions.Select(x => x.GetParticipationObject(msgs)));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
             }
             else
@@ -93,17 +94,31 @@ namespace AfterSchool.Controllers
             RestartRegistrationSession();
 
             var msgs = new SystemMessages();
-
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
 
             SetRegistrationStartPage(account);
 
-            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
-            
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
 
             return View(activity.GetParticipationObject());
+        }
+
+        public ActionResult ActivitySession(string accountname, string sessionname)
+        {
+            RestartRegistrationSession();
+
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
+
+            SetRegistrationStartPage(account);
+
+            ViewBag.Messages = msgs;
+            ViewBag.Account = account;
+
+            return View("activity", session.GetParticipationObject());
         }
 
         public ActionResult League(string accountname, string districtname, string leaguename)
@@ -111,14 +126,12 @@ namespace AfterSchool.Controllers
             RestartRegistrationSession();
 
             var msgs = new SystemMessages();
-
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
-
-            SetRegistrationStartPage(account);
-
             var districtAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(districtname, msgs);
             var league = AfterSchoolLibrary.Models.ActivityGroup.LoadByAccountIdByUniqueName(districtAccount.ID.Value, leaguename, msgs);
             var aag = league.GetAccountActivityGroup(account, msgs);
+
+            SetRegistrationStartPage(account);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
@@ -133,6 +146,34 @@ namespace AfterSchool.Controllers
             var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
             var participationObject = activity.GetParticipationObject(msgs);
 
+            return RedirectToRegistration(account, participationObject, msgs);
+        }
+
+        public ActionResult RegisterSession(string accountname, string sessionname)
+        {
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
+            var participationObject = session.GetParticipationObject(msgs);
+
+            return RedirectToRegistration(account, participationObject, msgs);
+        }
+
+        public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group)
+        {
+            var msgs = new SystemMessages();
+            var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
+            var activityGroupType = activitygrouptype.ParseEnum<ActivityGroupType>();
+            var externalAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(externalaccountname, msgs);
+            var activityGroup = ActivityGroup.LoadByAccountIdByUniqueName(externalAccount.ID.Value, group, msgs);
+            var aag = activityGroup.GetAccountActivityGroup(account, msgs);
+            var participationObject = aag.GetParticipationObject(msgs);
+
+            return RedirectToRegistration(account, participationObject, msgs);
+        }
+
+        private ActionResult RedirectToRegistration(Account account, ParticipationObject participationObject, SystemMessages msgs)
+        {
             SetRegistrationStartPage(account);
 
             SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
@@ -142,27 +183,6 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("getstarted", "account", new { area = "", regaccount = account.Uid });
 
             return RedirectToAction("register", "account", new { area = "", regaccount = account.Uid });
-        }
-
-        public ActionResult RegisterLeague(string accountname, string activitygrouptype, string externalaccountname, string group)
-        {
-            var msgs = new SystemMessages();
-            var currentAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
-            var activityGroupType = activitygrouptype.ParseEnum<ActivityGroupType>();
-            var externalAccount = AfterSchoolLibrary.Models.Account.LoadByUniqueName(externalaccountname, msgs);
-            var activityGroup = ActivityGroup.LoadByAccountIdByUniqueName(externalAccount.ID.Value, group, msgs);
-            var aag = activityGroup.GetAccountActivityGroup(currentAccount, msgs);
-            var participationObject = aag.GetParticipationObject(msgs);
-
-            SetRegistrationStartPage(currentAccount);
-
-            SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
-            SessionVariables.Cart.AddCartItem(participationObject, msgs);
-
-            if (SessionVariables.CurrentRegistrant.IsEmpty())
-                return RedirectToAction("getstarted", "account", new { area = "", regaccount = currentAccount.Uid });
-
-            return RedirectToAction("register", "account", new { area = "", regaccount = currentAccount.Uid });
         }
     }
 }

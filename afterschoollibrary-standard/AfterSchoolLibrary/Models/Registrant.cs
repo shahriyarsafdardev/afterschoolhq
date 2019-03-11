@@ -491,8 +491,6 @@ namespace AfterSchoolLibrary.Models
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var changingAssignment = false;
-
             var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
                 participationObjectId, 
                 participationObjectType, 
@@ -501,7 +499,6 @@ namespace AfterSchoolLibrary.Models
                 dc);
 
             if (ra.IsEmpty())
-            {
                 ra = new RegistrantActivity
                 {
                     ParticipationObjectId = participationObjectId,
@@ -513,15 +510,7 @@ namespace AfterSchoolLibrary.Models
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId
                 };
-                changingAssignment = true;
-            }
-            else
-            {
-                if (assignmentType != ra.AssignmentTypeId)
-                    changingAssignment = true;
-            }
-
-            // ra.Day = day;
+            
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
             ra.PreferenceNumber = preferenceNumber;
