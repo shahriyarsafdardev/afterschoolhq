@@ -812,6 +812,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var questions = GetAddRegistrationQuestions(form, msgs).OrderBy(question => question.DisplayOrder).ToList();
 
             ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
+            ViewBag.Activities = session.GetActivities(ActivityType.Activity, false, false, null, null, false, msgs);
             ViewBag.Messages = msgs;
 
             return View(session);
@@ -824,6 +825,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var session = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
             var form = session.GetForm(msgs);
             var questions = GetAddRegistrationQuestions(form, msgs);
+            var activities = session.GetActivities(ActivityType.Activity, false, false, null, null, false, msgs);
 
             questions.ForEach(question => {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
@@ -845,6 +847,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
+            // get activity preferences
+            // NEED TO ADD / TEST multiple activities to a registration
+            // ENSURE THEY ARE APPLICATIONS TO EACH OF THESE ACTIVITIES
+            for (int i = 1; i <= activities.Count; i++)
+            {
+                //if (Request[$"activity-preference-{i}"].IsNotEmpty())
+
+            }
+
             if (msgs.HasNoErrors())
                 SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
                     participationObject: session.GetParticipationObject(msgs),
@@ -857,6 +868,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("registrations", new { id = session.Uid });
 
             ViewBag.Messages = msgs;
+            ViewBag.Activities = activities;
             ViewBag.QuestionViewModels = qvms;
 
             return View(session);
