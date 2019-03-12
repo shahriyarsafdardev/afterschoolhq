@@ -52,6 +52,10 @@
                         <p>
                             <a href="@Model.Location.GetGoogleMapsLink()" target="_blank">@ParticipationObjectUI.PrintLocation(Model)</a>
                         </p>
+                        @if (Model.LocationDetails.IsNotEmpty())
+                        {
+                            @:@Html.Raw(Model.LocationDetails)
+                        }
                     </div>
                 }
 

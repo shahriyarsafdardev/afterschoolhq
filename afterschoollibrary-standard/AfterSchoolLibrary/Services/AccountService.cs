@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenAndUpcomingRegistrationPeriods(msgs, dc);
+            var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
             var activities = new List<Activity>();
 
             periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
@@ -53,7 +53,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenAndUpcomingRegistrationPeriods(msgs, dc);
+            var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
             var activities = new List<Activity>();
 
             periods.ForEach(period => 
@@ -131,7 +131,16 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityGroup> GetPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
+            var groups = ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
+            var periods = RegistrationPeriod.LoadByActivityGroupIds(
+                    groups.Select(x => x.ID.Value).ToList(),
+                    msgs,
+                    dc
+                )
+                .Where(period => period.IsOpen() || period.WillOpen() || period.WillCloseIn().Days > -14)
+                .ToList();
+
+            return groups.Where(group => periods.Select(period => period.ActivityGroupId.Value).Contains(group.ID.Value)).ToList();
         }
 
         public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -188,10 +197,17 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static List<RegistrationPeriod> GetClosedRegistrationPeriods(this Account account, DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> GetClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.GetRegistrationPeriods()
                 .Where(x => x.EndDateTime.Value < account.ConvertToAccountTimeZone(DateTime.UtcNow))
+                .ToList();
+        }
+
+        public static List<RegistrationPeriod> GetRecentlyClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetRegistrationPeriods()
+                .Where(x => x.EndDateTime.Value.AddWeeks(2) < account.ConvertToAccountTimeZone(DateTime.UtcNow))
                 .ToList();
         }
 
@@ -199,6 +215,14 @@ namespace AfterSchoolLibrary.Services
         {
             var periods = account.GetOpenRegistrationPeriods(msgs, dc);
             periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
+            return periods;
+        }
+
+        public static List<RegistrationPeriod> GetOpenUpcomingRecentlyClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var periods = account.GetOpenRegistrationPeriods(msgs, dc);
+            periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
+            periods.AddRange(account.GetRecentlyClosedRegistrationPeriods(msgs, dc));
             return periods;
         }
 
@@ -2182,7 +2206,7 @@ namespace AfterSchoolLibrary.Services
                     msgs,
                     dc
                 )
-                .Where(period => period.IsOpen() || period.WillOpen())
+                .Where(period => period.IsOpen() || period.WillOpen() || period.WillCloseIn().Days > -14)
                 .ToList();
 
             return aags.Where(aag => periods.Select(period => period.AccountActivityGroupId.Value).Contains(aag.ID.Value)).ToList();

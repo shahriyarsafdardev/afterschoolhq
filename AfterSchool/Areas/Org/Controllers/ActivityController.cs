@@ -145,7 +145,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             }
 
-            LoadEditSetupViewBag(activity, activityGroup.Uid, msgs);
+            LoadEditSetupViewBag(activity, activityGroup?.Uid, msgs);
             ViewBag.ActiveMenu = "EditSetup";
             ViewBag.Group = activityGroup;
             
@@ -215,7 +215,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (group.IsGuid())
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
 
-            LoadEditSetupViewBag(activity, activityGroup.Uid, msgs);
+            LoadEditSetupViewBag(activity, activityGroup?.Uid, msgs);
             ViewBag.Group = activityGroup;
 
             if (msgs.HasNoErrors())
@@ -235,7 +235,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        private void LoadEditSetupViewBag(Activity activity, Guid groupUid, SystemMessages msgs)
+        private void LoadEditSetupViewBag(Activity activity, Guid? groupUid, SystemMessages msgs)
         {
             var periods = SessionVariables.CurrentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
             var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
@@ -252,7 +252,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.ActivePeriod = activePeriod;
             ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultActivityForm(msgs);
-            ViewBag.IsFullScreen = GetIsFullScreen(activity, groupUid.ToString());
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, groupUid?.ToString());
         }
 
         private bool GetIsFullScreen(Activity activity, string groupUid = "")

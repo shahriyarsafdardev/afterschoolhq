@@ -39,6 +39,7 @@ namespace AfterSchoolLibrary.Models
         public string ContactPhone { get; set; }
         public string ContactEmail { get; set; }
         public string CostDescription { get; set; }
+        public string LocationDetails { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -82,6 +83,7 @@ namespace AfterSchoolLibrary.Models
             ContactEmail = activity.ContactEmail;
             ContactPhone = activity.ContactPhone;
             CostDescription = activity.CostDescription;
+            LocationDetails = activity.LocationDetails;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -133,6 +135,8 @@ namespace AfterSchoolLibrary.Models
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             // TODO: PayLater = activityGroup.AllowToPayLater;
+            SeatsRemaining = activityGroup.GetSeatsRemaining(msgs, dc);
+            WaitingListSeatsRemaining = activityGroup.GetWaitingListSeatsRemaining(msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);

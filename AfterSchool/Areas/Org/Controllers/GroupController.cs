@@ -106,7 +106,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string contactname, string contactemail, string contactphone)
+        public ActionResult Edit(string id, string name, string description, string regmode, string form, string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing, string contactname, string contactemail, string contactphone, string seatsavailable, string waitinglistseats)
         {
             var msgs = new SystemMessages();
             var inSessionDates = new List<DateRange>();
@@ -124,7 +124,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 { "maxgrade", maxgrade },
                 { "contactname", contactname },
                 { "contactemail", contactemail },
-                { "contactphone", contactphone }
+                { "contactphone", contactphone },
+                { "seatsavailable", seatsavailable },
+                { "waitinglistseats", waitinglistseats }
             };
 
             var filteredParams = Request.Params.Filter("schedulerepeat-");
@@ -149,7 +151,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 msgs.Add($"{UILabel.ActivityGroupLabel(group.ActivityGroupTypeId)} Saved", MessageType.Success);
-                UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: group.ID);
+
+                if (id.IsEmpty())
+                    UpdateSession(sat: SessionActionType.ActivityGroupCreate, accountId: SessionVariables.CurrentAccount.ID, activityGroupId: group.ID);
             }
 
             ViewBag.Messages = msgs;

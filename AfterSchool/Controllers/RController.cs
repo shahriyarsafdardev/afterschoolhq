@@ -53,7 +53,6 @@ namespace AfterSchool.Controllers
             SetRegistrationStartPage(account, true);
 
             var participationObjects = new List<ParticipationObject>();
-            var sessions = new List<ActivityGroup>();
             var locations = new List<Location>();
 
             if (account.IsNotEmpty())
@@ -70,8 +69,7 @@ namespace AfterSchool.Controllers
                 });
 
                 participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.GetParticipationObject(msgs)));
-                sessions.AddRange(account.GetPublishedSessions(msgs));
-                participationObjects.AddRange(sessions.Select(x => x.GetParticipationObject(msgs)));
+                participationObjects.AddRange(account.GetPublishedSessions(msgs).Select(x => x.GetParticipationObject(msgs)));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
             }
             else
@@ -81,7 +79,6 @@ namespace AfterSchool.Controllers
 
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);
             ViewBag.ParticipationObjects = participationObjects;
-            ViewBag.Sessions = sessions;
             ViewBag.Messages = msgs;
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
