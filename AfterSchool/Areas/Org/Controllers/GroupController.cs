@@ -7,6 +7,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using Hangfire;
+using System.Collections;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -788,11 +789,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantGrade:
-                    case QuestionDataType.RegistrantEthnicity:
                     case QuestionDataType.RegistrantGender:
                     case QuestionDataType.RegistrantFirstName:
                     case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
                         question.IsRequired = true;
                         break;
                     default:
@@ -810,7 +809,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var session = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
             var form = session.GetForm(msgs);
-            var questions = GetAddRegistrationQuestions(form, msgs);
+            var questions = GetAddRegistrationQuestions(form, msgs).OrderBy(question => question.DisplayOrder).ToList();
 
             ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
             ViewBag.Messages = msgs;
@@ -849,7 +848,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
                     participationObject: session.GetParticipationObject(msgs),
-                    questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
+                    questionsAndAnswers: qvms.Select(qvm => Tuple.Create<FormQuestion, string>(qvm.Question, qvm.Value)).ToList(),
                     period: session.GetCurrentRegistrationPeriod(msgs),
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);

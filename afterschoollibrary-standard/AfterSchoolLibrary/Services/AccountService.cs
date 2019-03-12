@@ -831,7 +831,7 @@ namespace AfterSchoolLibrary.Services
             return Registration.SearchCount(searchText, account.ID.Value, questionId, participationObjectIds, participationObjectType, regStatus, rat, dc: dc);
         }
 
-        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<(FormQuestion Question, string Answer)> questionsAndAnswers, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<Tuple<FormQuestion, string>> questionsAndAnswers, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Registrant student = null;
 
@@ -882,12 +882,12 @@ namespace AfterSchoolLibrary.Services
                         msgs: amsgs,
                         dc: adc);
 
-                    // add answers
+                    // add answers                    
                     questionsAndAnswers.ForEach(questionAndAnswer =>
                     {
                         student.AddAnswer(
-                            answerText: questionAndAnswer.Answer.IfEmpty("").Trim(),
-                            question: questionAndAnswer.Question,
+                            answerText: questionAndAnswer.Item2.IfEmpty("").Trim(),
+                            question: questionAndAnswer.Item1,
                             registrationId: registration.ID,
                             loggedInUserId: loggedInUser.ID.Value,
                             msgs: amsgs,
