@@ -389,7 +389,7 @@ namespace AfterSchoolLibrary.Services
                         RegistrationModeId = activityGroup.RegistrationModeId,
                         UniqueName = ActivityGroup.GenerateUniqueName(newName, null, activityGroup.AccountId, amsgs, adc),
                         ActivityGroupTypeId = activityGroup.ActivityGroupTypeId,
-                        ActivityScheduleId = activityGroup.ActivityScheduleId,
+                        ActivityScheduleId = null,
                         GenderRestriction = activityGroup.GenderRestriction,
                         MaxGradeLevelId = activityGroup.MaxGradeLevelId,
                         MinGradeLevelId = activityGroup.MinGradeLevelId,
