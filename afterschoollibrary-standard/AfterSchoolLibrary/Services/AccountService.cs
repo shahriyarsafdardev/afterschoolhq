@@ -833,6 +833,18 @@ namespace AfterSchoolLibrary.Services
 
         public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<Tuple<FormQuestion, string>> questionsAndAnswers, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            account.CreateNewRegistrantAndRegistration(
+                participationObject,
+                questionsAndAnswers,
+                new List<Tuple<Activity, int>>(),
+                period,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<Tuple<FormQuestion, string>> questionsAndAnswers, List<Tuple<Activity, int>> activitiesAndPreferences, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             Registrant student = null;
 
             Database.ExecuteTransaction
@@ -905,6 +917,21 @@ namespace AfterSchoolLibrary.Services
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
                         dc: adc);
+                    
+                    activitiesAndPreferences.ForEach(activityAndPreference =>
+                    {
+                        Registration.ProcessRegistrationAssignment(
+                            registration: registration,
+                            participationObject: activityAndPreference.Item1.GetParticipationObject(amsgs, adc),
+                            registrant: student,
+                            seatsRequested: 1,       
+                            preferenceNumber: activityAndPreference.Item2,
+                            activityGroupId: groupId,
+                            periodId: period?.ID,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+                    });
 
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -1915,7 +1942,7 @@ namespace AfterSchoolLibrary.Services
                     dc);
 
                 if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
-                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser?.ID.IfEmpty(0), dc));
+                    ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
             }
         }
 

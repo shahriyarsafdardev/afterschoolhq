@@ -212,7 +212,9 @@ namespace AfterSchoolLibraryTests.Tests
             var registrantActivity = Factories.RegistrantActivityFactory.Create(activity, registrant, msgs, dc);
             var registration = Factories.RegistrationFactory.Create(account, registrant, msgs, dc);
 
-            Assert.True(registrantActivity.CancelRegistration(msgs, dc).HasNoErrors());
+            registrantActivity.CancelRegistration(msgs, dc);
+
+            Assert.True(msgs.HasNoErrors());
         }
 
 

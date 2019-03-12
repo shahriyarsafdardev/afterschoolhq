@@ -1085,10 +1085,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        msgs.AddRange(ra.ChangeSeatAssignment(
+                        ra.ChangeSeatAssignment(
                             newAssignmentType, 
-                            SessionVariables.LoggedInUser.ID.Value, 
-                            adc));
+                            SessionVariables.LoggedInUser,
+                            amsgs,
+                            adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1097,6 +1098,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     onFailure: (SystemMessages fmsgs) =>
                     {
                         msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
                     }
                 );                
             }

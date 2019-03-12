@@ -182,13 +182,13 @@
 
         function notify() {
             $('#confirmation-action').html('send an email to <strong>@Model.ToRegistrant().Name - @Model.ToRegistrant().Email</strong>');
-            $('#btnconfirm').attr('href', '@Url.Action("notify", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid, returnUrl = Request["returnurl"] })');
+            $('#btnconfirm').attr('href', '@Url.Action("notify", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid })&returnUrl=@listUrl');
         }
 
         function deleteReg() {
             $('#confirmation-action').html('<strong>delete</strong> the registration for <strong>@Model.ToRegistrant().Name</strong>');
             $('#confirmation-additional-text').html('This cannot be undone');
-            $('#btnconfirm').attr('href', '@Url.Action("delete", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid, returnUrl = Request["returnurl"] })');
+            $('#btnconfirm').attr('href', '@Url.Action("delete", "registration", new { id = Model.Uid.ToString(), r = selectedRegistration.Uid })&returnUrl=@listUrl');
         }
     </script>
 }

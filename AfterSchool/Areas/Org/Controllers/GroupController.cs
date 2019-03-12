@@ -8,6 +8,7 @@ using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using Hangfire;
 using System.Collections;
+using System.Web.Script.Serialization;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -850,9 +851,16 @@ namespace AfterSchool.Areas.Org.Controllers
             // get activity preferences
             // NEED TO ADD / TEST multiple activities to a registration
             // ENSURE THEY ARE APPLICATIONS TO EACH OF THESE ACTIVITIES
+            var activitiesAndPreferences = new List<Tuple<Activity, int>>();
+
             for (int i = 1; i <= activities.Count; i++)
             {
-                //if (Request[$"activity-preference-{i}"].IsNotEmpty())
+                var postedValue = Request[$"activity-preference-{i}"];
+                if (postedValue.IsGuid())
+                {
+                    var activity = Activity.LoadByUid(postedValue.ToGuid(), msgs);
+                    activitiesAndPreferences.Add(Tuple.Create<Activity, int>(activity, i));
+                }
 
             }
 
@@ -860,6 +868,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
                     participationObject: session.GetParticipationObject(msgs),
                     questionsAndAnswers: qvms.Select(qvm => Tuple.Create<FormQuestion, string>(qvm.Question, qvm.Value)).ToList(),
+                    activitiesAndPreferences: activitiesAndPreferences,
                     period: session.GetCurrentRegistrationPeriod(msgs),
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);
@@ -873,5 +882,109 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(session);
         }
+
+        [HttpGet]
+        public ActionResult Placement(string id, string step, string period)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var nextStep = 1;
+
+            if (step.IsNumber())
+            {
+                nextStep = step.ToInteger();
+            }
+
+            switch (nextStep)
+            {
+                case 1:
+                    var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) > 0).ToList();
+                    ViewBag.Periods = periods;
+                    break;
+                case 2:
+                    var registrations = group.GetRegistrations();
+                    var ras = group.GetRegistrantActivities(registrations);
+                    var registrantAssignments = group.RandomizePlacementAttempt(SessionVariables.LoggedInUser, msgs);
+
+                    var assignments = new List<int>();
+                    var assignmentsWL = new List<int>();
+                    registrantAssignments.ForEach(x => assignments.AddRange(x.Assignments));
+                    registrantAssignments.ForEach(x => assignmentsWL.AddRange(x.WaitingListAssignments));
+
+                    var assignedRegistrationActivities = ras.Where(x => assignments.Contains(x.ID.Value)).ToList();
+                    var waitingListActivities = ras.Where(x => assignmentsWL.Contains(x.ID.Value)).ToList();
+
+                    ViewBag.RegistrantAssignments = registrantAssignments;
+                    ViewBag.RegistrantActivities = ras;
+                    ViewBag.AssignedRegistrantActivities = assignedRegistrationActivities;
+                    ViewBag.WaitingListActivities = waitingListActivities;
+                    ViewBag.Activities = group.GetActivities(null, false, false, null, null, false).OrderBy(x => x.Name).ToList();
+                    break;
+            }
+
+            ViewBag.Step = nextStep;
+            ViewBag.Messages = msgs;
+            return View(group);
+        }
+
+        [HttpGet]
+        public ActionResult ResetPlacement(string id)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+
+            if (group.RegistrationModeId == RegistrationMode.Apply)
+            {
+                msgs.AddRange(group.RandomizePlacementReset(SessionVariables.LoggedInUser, msgs));
+
+                if (msgs.HasNoErrors())
+                    msgs.Add("All Registration Placement has been reset", MessageType.Success);
+            }
+
+            var periods = group.GetRegistrationPeriods().Where(x => x.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) > 0).ToList();
+            ViewBag.Periods = periods;
+
+            ViewBag.Messages = msgs;
+            ViewBag.Step = 1;
+            return View("Placement", group);
+        }
+
+        [HttpPost]
+        public ActionResult Placement(string id, string step, string period, string assignmentsJSON)
+        {
+            var msgs = new SystemMessages();
+            var group = ActivityGroup.LoadByUid(id.ToGuid());
+            var nextStep = 1;
+            if (step.IsNumber())
+            {
+                nextStep = step.ToInteger();
+            }
+
+            var regperiod = period.IsNumber() ? RegistrationPeriod.Load(period.ToInteger()) : null;
+            var registrantAssignments = new JavaScriptSerializer() { MaxJsonLength = 50000000 }.Deserialize<List<RegistrantAssignment>>(assignmentsJSON);
+
+            group.RandomizePlacementApply(registrantAssignments, SessionVariables.LoggedInUser, msgs);
+
+            var registrations = group.GetRegistrations();
+            var ras = group.GetRegistrantActivities(registrations);
+            var assignments = new List<int>();
+            var assignmentsWL = new List<int>();
+            registrantAssignments.ForEach(x => assignments.AddRange(x.Assignments));
+            registrantAssignments.ForEach(x => assignmentsWL.AddRange(x.WaitingListAssignments));
+
+            var assignedRegistrationActivities = ras.Where(x => assignments.Contains(x.ID.Value)).ToList();
+            var waitingListActivities = ras.Where(x => assignmentsWL.Contains(x.ID.Value)).ToList();
+
+            ViewBag.RegistrantAssignments = registrantAssignments;
+            ViewBag.RegistrantActivities = ras;
+            ViewBag.AssignedRegistrantActivities = assignedRegistrationActivities;
+            ViewBag.WaitingListActivities = waitingListActivities;
+            ViewBag.Activities = group.GetActivities(null, false, false, null, null, false, msgs).OrderBy(x => x.Name).ToList();
+
+            ViewBag.Step = nextStep;
+            ViewBag.Messages = msgs;
+            return View(group);
+        }
+
     }
 }

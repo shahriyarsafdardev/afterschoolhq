@@ -538,5 +538,50 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs,
                 dc: dc);
         }
+
+        public static List<RegistrantAssignment> RandomizePlacementAttempt(this ActivityGroup group, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var rr = new RegistrationRandomization(group);
+            rr.LoggedInUser = loggedInUser;
+            return rr.AttemptLottery(msgs, dc);
+        }
+
+        public static void RandomizePlacementApply(this ActivityGroup group, List<RegistrantAssignment> assignments, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var rr = new RegistrationRandomization(group);
+            rr.LoggedInUser = loggedInUser;
+            rr.ApplyLottery(assignments, msgs, dc);
+        }
+
+        public static SystemMessages RandomizePlacementReset(this ActivityGroup group, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
+                {
+                    group.GetRegistrantActivities(dc: adc).ForEach(
+                        ra => ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, loggedInUser, amsgs, adc)
+                    );
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Helpers.Utilities.SystemErrorLog(emsgs);  
+                },
+                dc: dc
+            );
+
+            return msgs;
+        }
     }
 }
