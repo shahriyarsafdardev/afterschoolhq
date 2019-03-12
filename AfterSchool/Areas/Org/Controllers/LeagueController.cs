@@ -675,13 +675,8 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("publishdetail", activityGroup);
         }
 
-        [HttpGet]
-        public ActionResult AddRegistration(string id)
+        private List<FormQuestion> GetAddRegistrationQuestions(Form form, SystemMessages msgs)
         {
-            var msgs = new SystemMessages();
-            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
-            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
-            var form = aag.IsEmpty() ? league.GetForm(msgs) : aag.GetForm(msgs);
             var questions = form.GetActiveQuestions(msgs);
 
             questions.ForEach(question => {
@@ -700,6 +695,18 @@ namespace AfterSchool.Areas.Org.Controllers
                         break;
                 }
             });
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult AddRegistration(string id)
+        {
+            var msgs = new SystemMessages();
+            var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var form = aag.IsEmpty() ? league.GetForm(msgs) : aag.GetForm(msgs);
+            var questions = GetAddRegistrationQuestions(form, msgs);
 
             ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
             ViewBag.Messages = msgs;
@@ -715,24 +722,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
             var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
             var form = aag.IsEmpty() ? league.GetForm(msgs) : aag.GetForm(msgs);
-            var questions = form.GetActiveQuestions(msgs);
-
-            questions.ForEach(question => {
-                switch (question.QuestionDataTypeId)
-                {
-                    case QuestionDataType.RegistrantGrade:
-                    case QuestionDataType.RegistrantEthnicity:
-                    case QuestionDataType.RegistrantGender:
-                    case QuestionDataType.RegistrantFirstName:
-                    case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
-                        question.IsRequired = true;
-                        break;
-                    default:
-                        question.IsRequired = false;
-                        break;
-                }
-            });
+            var questions = GetAddRegistrationQuestions(form, msgs);
 
             questions.ForEach(question => {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
@@ -755,79 +745,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
             if (msgs.HasNoErrors())
-            {
-                Registrant student = null;
-
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        var location = SessionVariables.CurrentAccount.GetDefaultLocation(amsgs, adc);
-                        var period = aag.GetCurrentRegistrationPeriod(amsgs, adc);
-
-                        // create student registrant record associated to this account
-                        student = SessionVariables.CurrentAccount.CreateRegistrant(
-                            associatedUser: null,
-                            registrantType: RegistrantType.Individual,
-                            isMaster: false,
-                            isParentOrGuardian: false,
-                            allowTextMessages: false,
-                            schoolLocationId: location?.ID,
-                            loggedInUser: SessionVariables.LoggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // create a registration
-                        var registration = student.AddRegistration(
-                            ownerAccountId: SessionVariables.CurrentAccount.ID.Value,
-                            activityGroupId: league.ID,
-                            accountActivityGroupId: aag?.ID,
-                            periodId: period?.ID,
-                            completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
-                            loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // add answers
-                        qvms.ForEach(qvm =>
-                        {
-                            student.AddAnswer(
-                                answerText: qvm.Value.IfEmpty("").Trim(),
-                                question: qvm.Question,
-                                registrationId: registration.ID,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                                msgs: amsgs,
-                                dc: adc);
-                        });
-
-                        // manages seats and create registrantactivity record
-                        Registration.ProcessRegistrationAssignment(
-                            registration: registration,
-                            participationObject: aag.GetParticipationObject(amsgs, adc),
-                            registrant: student,
-                            seatsRequested: 1,
-                            activityGroupId: league.ID,
-                            periodId: period?.ID,
-                            loggedInUser: SessionVariables.LoggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Your new registration has been added", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    },
-                    onException: (SystemMessages emsgs) =>
-                    {
-                        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
-                    }
-                );
-            }
+                SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
+                    participationObject: aag.GetParticipationObject(msgs),
+                    questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
+                    period: aag.GetCurrentRegistrationPeriod(msgs),
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("registrations", new { id = league.Uid });

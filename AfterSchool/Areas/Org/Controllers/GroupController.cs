@@ -779,5 +779,88 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("index", "group");
             }
         }
+
+        private List<FormQuestion> GetAddRegistrationQuestions(Form form, SystemMessages msgs)
+        {
+            var questions = form.GetActiveQuestions(msgs);
+
+            questions.ForEach(question => {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantGrade:
+                    case QuestionDataType.RegistrantEthnicity:
+                    case QuestionDataType.RegistrantGender:
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        question.IsRequired = true;
+                        break;
+                    default:
+                        question.IsRequired = false;
+                        break;
+                }
+            });
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult AddRegistration(string id)
+        {
+            var msgs = new SystemMessages();
+            var session = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var form = session.GetForm(msgs);
+            var questions = GetAddRegistrationQuestions(form, msgs);
+
+            ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
+            ViewBag.Messages = msgs;
+
+            return View(session);
+        }
+
+        [HttpPost]
+        public ActionResult AddRegistration(string id, string parentsig)
+        {
+            var msgs = new SystemMessages();
+            var session = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
+            var form = session.GetForm(msgs);
+            var questions = GetAddRegistrationQuestions(form, msgs);
+
+            questions.ForEach(question => {
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantHomePhone:
+                    case QuestionDataType.RegistrantWorkPhone:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+
+                }
+            });
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+                SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
+                    participationObject: session.GetParticipationObject(msgs),
+                    questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
+                    period: session.GetCurrentRegistrationPeriod(msgs),
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs);
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("registrations", new { id = session.Uid });
+
+            ViewBag.Messages = msgs;
+            ViewBag.QuestionViewModels = qvms;
+
+            return View(session);
+        }
     }
 }

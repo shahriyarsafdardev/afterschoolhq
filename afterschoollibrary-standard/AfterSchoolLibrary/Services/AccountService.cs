@@ -831,6 +831,99 @@ namespace AfterSchoolLibrary.Services
             return Registration.SearchCount(searchText, account.ID.Value, questionId, participationObjectIds, participationObjectType, regStatus, rat, dc: dc);
         }
 
+        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<(FormQuestion Question, string Answer)> questionsAndAnswers, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Registrant student = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var location = account.GetDefaultLocation(amsgs, adc);
+                    var groupId = new int?();
+                    var aagId = new int?();
+
+                    if (participationObject.IsAccountActivityGroup())
+                    {
+                        groupId = participationObject.GetAccountActivityGroup().ActivityGroupId;
+                        aagId = participationObject.GetAccountActivityGroupId();
+                    }
+                    else if (participationObject.IsActivityGroup())
+                    {
+                        groupId = participationObject.GetActivityGroupId();
+                    }
+                    else if (participationObject.IsActivity())
+                    {
+                        groupId = participationObject.GetActivity().ActivityGroupId;
+                        aagId = participationObject.GetActivity().AccountActivityGroupId;
+                    }
+
+
+                    // create student registrant record associated to this account
+                    student = account.CreateRegistrant(
+                        associatedUser: null,
+                        registrantType: RegistrantType.Individual,
+                        isMaster: false,
+                        isParentOrGuardian: false,
+                        allowTextMessages: false,
+                        schoolLocationId: location?.ID,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // create a registration
+                    var registration = student.AddRegistration(
+                        ownerAccountId: account.ID.Value,
+                        activityGroupId: groupId,
+                        accountActivityGroupId: aagId,
+                        periodId: period?.ID,
+                        completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                        loggedInUserId: loggedInUser.ID.Value,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // add answers
+                    questionsAndAnswers.ForEach(questionAndAnswer =>
+                    {
+                        student.AddAnswer(
+                            answerText: questionAndAnswer.Answer.IfEmpty("").Trim(),
+                            question: questionAndAnswer.Question,
+                            registrationId: registration.ID,
+                            loggedInUserId: loggedInUser.ID.Value,
+                            msgs: amsgs,
+                            dc: adc);
+                    });
+
+                    // manages seats and create registrantactivity record
+                    Registration.ProcessRegistrationAssignment(
+                        registration: registration,
+                        participationObject: participationObject,
+                        registrant: student,
+                        seatsRequested: 1,
+                        activityGroupId: groupId,
+                        periodId: period?.ID,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    msgs.Add("Your new registration has been added", MessageType.Success);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Helpers.Utilities.SystemErrorLog(emsgs);
+                },
+                dc: dc
+            );
+        }
+
         #endregion
 
         #region NewAccounSetup
