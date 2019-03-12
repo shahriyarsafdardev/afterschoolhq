@@ -556,10 +556,12 @@ baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|ActivityGroupTypeId, List<>
 loadmethod: AccountId|IsPublished, List<>
+loadmethod: AccountId|IsPublished|IsArchived, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
 loadmethod: AccountId|UniqueName
 loadmethod: Uid
 loadmethod: Uid|IsPublished
+loadmethod: Uid|IsPublished|IsArchived
 loadmethod: Uid|IsPublished|IsInviteOnly
 loadmethod: AdministratorAccountId, List<>
 join: Account.ID, ActivityGroup.AccountId, InnerJoin

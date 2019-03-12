@@ -131,7 +131,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityGroup> GetPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var groups = ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
+            var groups = ActivityGroup.LoadByAccountIdByIsPublishedByIsArchived(account.ID.Value, true, false, msgs, dc);
             var periods = RegistrationPeriod.LoadByActivityGroupIds(
                     groups.Select(x => x.ID.Value).ToList(),
                     msgs,

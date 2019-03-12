@@ -299,6 +299,16 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<ActivityGroup> LoadByAccountIdByIsPublishedByIsArchived(int AccountId, bool IsPublished, bool IsArchived, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
+			dq.Criterias.Add(ObjectMap["IsArchived"], IsArchived);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static List<ActivityGroup> LoadByAccountIdByIsPublishedByIsInviteOnly(int AccountId, bool IsPublished, bool IsInviteOnly, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -332,6 +342,16 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+		}
+
+		public static ActivityGroup LoadByUidByIsPublishedByIsArchived(Guid Uid, bool IsPublished, bool IsArchived, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["Uid"], Uid);
+			dq.Criterias.Add(ObjectMap["IsPublished"], IsPublished);
+			dq.Criterias.Add(ObjectMap["IsArchived"], IsArchived);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
