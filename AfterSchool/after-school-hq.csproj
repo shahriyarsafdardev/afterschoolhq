@@ -1443,6 +1443,7 @@
     <Content Include="Views\Shared\ActivityGroup\_Restrictions.cshtml" />
     <Content Include="Views\Shared\_ActivityGroupEdit.cshtml" />
     <Content Include="Views\Shared\_ActivityGroupTitle.cshtml" />
+    <Content Include="Views\Shared\Activity\_ActivityPreferences.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

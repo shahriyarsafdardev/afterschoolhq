@@ -392,7 +392,14 @@ namespace AfterSchoolLibrary.Services
                         ActivityScheduleId = activityGroup.ActivityScheduleId,
                         GenderRestriction = activityGroup.GenderRestriction,
                         MaxGradeLevelId = activityGroup.MaxGradeLevelId,
-                        MinGradeLevelId = activityGroup.MinGradeLevelId
+                        MinGradeLevelId = activityGroup.MinGradeLevelId,
+                        ContactEmail = activityGroup.ContactEmail,
+                        ContactName = activityGroup.ContactName,
+                        ContactPhone = activityGroup.ContactPhone,
+                        SeatsAvailable = activityGroup.SeatsAvailable,
+                        WaitingListSeats = activityGroup.WaitingListSeats,
+                        Cost = activityGroup.Cost,
+                        CostUnitTypeId = activityGroup.CostUnitTypeId,
                     };
                     msgs.AddRange(group.Save(adc));
 
@@ -415,6 +422,7 @@ namespace AfterSchoolLibrary.Services
                         newact.IsPublished = true;
                         msgs.AddRange(newact.Save(adc));
                     });
+                    
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -423,6 +431,10 @@ namespace AfterSchoolLibrary.Services
                 onFailure: (SystemMessages fmsgs) =>
                 {
                     msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );

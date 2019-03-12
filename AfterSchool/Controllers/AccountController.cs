@@ -1096,6 +1096,35 @@ namespace AfterSchool.Controllers
                                 dc: adc);
                         });
 
+                        // if there is a Session, then a person may set their preferences for activities in that session, 
+                        // also only if the session is set to Apply
+                        if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
+                        {
+                            var activitiesAndPreferences = new List<Tuple<Activity, int>>();
+                            var activities = participationObject.GetActivityGroup().GetActivities(null, false, false, null, null, false, amsgs, adc);
+
+                            for (int i = 1; i <= activities.Count; i++)
+                            {
+                                var postedValue = Request[$"activity-preference-{i}"];
+                                if (postedValue.IsGuid())
+                                {
+                                    var activity = Activity.LoadByUid(postedValue.ToGuid(), msgs);
+
+                                    Registration.ProcessRegistrationAssignment(
+                                        registration: registration,
+                                        participationObject: activity.GetParticipationObject(amsgs, adc),
+                                        registrant: accountRegistrantCopy,
+                                        seatsRequested: 1,
+                                        preferenceNumber: i,
+                                        activityGroupId: participationObject.GetActivityGroupId(),
+                                        periodId: period?.ID,
+                                        loggedInUser: SessionVariables.LoggedInUser,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                }
+                            }
+                        }
+
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1104,6 +1133,10 @@ namespace AfterSchool.Controllers
                     onFailure: (SystemMessages fmsgs) =>
                     {
                         msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
                     }
                 );
             }

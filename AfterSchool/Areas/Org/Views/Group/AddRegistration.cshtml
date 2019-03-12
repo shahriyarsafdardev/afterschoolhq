@@ -24,71 +24,7 @@
 
                 @{ Html.RenderPartial("_RegistrationForm", qvms); }
 
-                @if (activities.Count > 0)
-                {
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Activity and Preferences
-                        </div>
-                        <div class="panel-body">
-
-                            @for(int i = 1; i <= activities.Count; i++)
-                            {
-                                 <div class="form-group">
-                                    <div class="col-md-3 control-label">
-                                        <label for="activity-preference-@i">Preference #@i</label>
-                                    </div>
-                                     <div class="col-md-6">
-                                         <select name="activity-preference-@i" id="activity-preference-@i" class="activity-preference form-control">
-                                             <option value="">None Selected</option>
-                                             @foreach(var activity in activities)
-                                             {
-                                                 var selected = Request[$"activity-preference-{i}"] == activity.Uid.ToString();
-
-                                                 <option value="@activity.Uid" 
-                                                         @(selected ? " selected=\"selected\" " : "")>
-                                                     @activity.Name
-                                                 </option>
-                                             }
-                                         </select>
-                                     </div>
-                                </div>
-                            }
-
-                        </div>
-                    </div>
-
-                    <script>
-                        PageEvent.add(PageEvent.AFTER_INIT, function () {
-                            $('.activity-preference').change(function () {
-                                currentValue = $(this).val();
-                                currentId = $(this).attr('id');
-
-                                if (currentValue.length > 0) {
-                                    $('.activity-preference').each(function () {
-                                        var otherId = $(this).attr('id');
-
-                                        if (currentId != otherId) {
-                                            $(this).children('option[value="' + currentValue + '"]').remove();
-                                        } else {
-                                            $(this).children().first().html('Reset Choice List...');
-                                        }
-                                    });
-                                } else {
-                                    $('.activity-preference').each(function () {
-                                        $(this).html('');
-                                        $(this).append('<option value="">None Selected</option>');
-
-                                        @foreach(var item in activities)
-                                        {
-                                            @: $(this).append('<option value="@item.Uid">@item.Name</option>');
-                                        }
-                                    });
-                                }
-                            })
-                        });
-                    </script>
-                }
+                @{ Html.RenderPartial("~/Views/Shared/Activity/_ActivityPreferences.cshtml", activities); }
 
                 <div class="row">
                     <div class="col-md-3"></div>

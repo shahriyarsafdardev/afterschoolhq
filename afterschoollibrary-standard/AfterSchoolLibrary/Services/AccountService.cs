@@ -870,7 +870,6 @@ namespace AfterSchoolLibrary.Services
                         aagId = participationObject.GetActivity().AccountActivityGroupId;
                     }
 
-
                     // create student registrant record associated to this account
                     student = account.CreateRegistrant(
                         associatedUser: null,
