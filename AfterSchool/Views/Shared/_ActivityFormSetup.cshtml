@@ -194,6 +194,8 @@
         else 
         {
             <input type="hidden" name="group" value="@group.Uid" /> 
+            <input type="hidden" name="regmode" value="@((int)Model.RegistrationModeId)" />
+            <input type="hidden" name="form" value="@activeForm.FormId" />
         }
     </div>
 </div>

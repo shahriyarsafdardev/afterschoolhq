@@ -266,9 +266,7 @@ namespace AfterSchoolLibrary.Services
                                 group.FormId = newForm.ID;
                             }
                             else
-                            {
                                 group.FormId = form.ToString().ToInteger();
-                            }
                         }
 
                         group.AccountId = account.ID;
@@ -280,13 +278,27 @@ namespace AfterSchoolLibrary.Services
                         group.LastModifiedBy = loggedInUser.ID;
                         amsgs.AddRange(group.Save(adc));
 
+                        // keep activities up to date with groups
                         group.GetActivities(null, false, false, null, null, false, amsgs, adc)
                         .ForEach(activity => {
+
                             activity.RegistrationModeId = group.RegistrationModeId;
-                            activity.GenderRestriction = group.GenderRestriction;
-                            activity.GradeLevelStart = group.MinGradeLevelId;
-                            activity.GradeLevelEnd = group.MaxGradeLevelId;
+                            
+                            if (group.GenderRestriction == GenderRestrictionType.None)
+                                activity.GenderRestriction = group.GenderRestriction;
+
+                            if (activity.GradeLevelStart < group.MinGradeLevelId)
+                                activity.GradeLevelStart = group.MinGradeLevelId;
+
+                            if (activity.GradeLevelEnd > group.MaxGradeLevelId)
+                                activity.GradeLevelEnd = group.MaxGradeLevelId;
+
                             amsgs.AddRange(activity.Save(adc));
+
+                            // update form
+                            var activityForm = activity.GetActiveActivityForm(amsgs, adc);
+                            activityForm.FormId = group.FormId;
+                            amsgs.AddRange(activityForm.Save(adc));
                         });
 
                         if (isNew)
@@ -594,6 +606,16 @@ namespace AfterSchoolLibrary.Services
             );
 
             return msgs;
+        }
+
+        public static ActivityForm GetDefaultActivityForm(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ActivityForm()
+            {
+                FormId = group.GetForm(msgs, dc).ID,
+                IsActive = true,
+                AccountId = group.AccountId
+            };
         }
     }
 }

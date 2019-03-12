@@ -138,14 +138,18 @@ namespace AfterSchool.Areas.Org.Controllers
             else
             {
                 activity = SessionVariables.CurrentAccount.GetDefaultNewActivity();
+                activity.RegistrationModeId = RegistrationMode.Register;
 
                 //this means a new activity is  being added to an existing enrollment group
                 if (group.IsGuid())
+                {
                     activityGroup = ActivityGroup.LoadByUid(group.ToGuid(), msgs);
+                    activity.RegistrationModeId = activityGroup.RegistrationModeId;
+                }
 
             }
 
-            LoadEditSetupViewBag(activity, activityGroup?.Uid, msgs);
+            LoadEditSetupViewBag(activity, activityGroup, msgs);
             ViewBag.ActiveMenu = "EditSetup";
             ViewBag.Group = activityGroup;
             
@@ -215,7 +219,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (group.IsGuid())
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
 
-            LoadEditSetupViewBag(activity, activityGroup?.Uid, msgs);
+            LoadEditSetupViewBag(activity, activityGroup, msgs);
             ViewBag.Group = activityGroup;
 
             if (msgs.HasNoErrors())
@@ -235,13 +239,13 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        private void LoadEditSetupViewBag(Activity activity, Guid? groupUid, SystemMessages msgs)
+        private void LoadEditSetupViewBag(Activity activity, ActivityGroup activityGroup, SystemMessages msgs)
         {
+            var activeForm = activity.GetActiveActivityForm(msgs) ?? activityGroup?.GetDefaultActivityForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultActivityForm(msgs);
             var periods = SessionVariables.CurrentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
             var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
 
             periods.Add(activePeriod);
-
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
 
             ViewBag.Messages = msgs;
@@ -252,7 +256,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.ActivePeriod = activePeriod;
             ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultActivityForm(msgs);
-            ViewBag.IsFullScreen = GetIsFullScreen(activity, groupUid?.ToString());
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, activityGroup?.Uid.ToString());
         }
 
         private bool GetIsFullScreen(Activity activity, string groupUid = "")
@@ -335,7 +339,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditSetup";
-                        LoadEditSetupViewBag(activity, activity.ActivityGroupUid, msgs);
+                        LoadEditSetupViewBag(activity, activity.GetActivityGroup(msgs), msgs);
                         return View("EditSetup", activity);
                     case "next":
                         ViewBag.ActiveMenu = "EditSchedule";
@@ -2046,17 +2050,16 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid(), msgs);
-            var questions = activity.GetActiveForm(msgs).GetActiveQuestions(msgs);
+            var activeForm = activity.GetActiveForm(msgs);
+            var questions = activeForm.GetActiveQuestions(msgs);
 
             questions.ForEach(question => {
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantGrade:
-                    case QuestionDataType.RegistrantEthnicity:
                     case QuestionDataType.RegistrantGender:
                     case QuestionDataType.RegistrantFirstName:
                     case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
                         question.IsRequired = true;
                         break;
                     default:
@@ -2065,7 +2068,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             });
 
-            ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
+            ViewBag.QuestionViewModels = questions.OrderBy(question => question.DisplayOrder).Select(question => new FormQuestionViewModel(question)).ToList();
             ViewBag.Messages = msgs;
 
             return View(activity);
@@ -2082,11 +2085,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantGrade:
-                    case QuestionDataType.RegistrantEthnicity:
                     case QuestionDataType.RegistrantGender:
                     case QuestionDataType.RegistrantFirstName:
                     case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
                         question.IsRequired = true;
                         break;
                     default:
@@ -2113,78 +2114,15 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             });
 
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var qvms = questions.OrderBy(question => question.DisplayOrder).Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
             if (msgs.HasNoErrors())
-            {
-                Registrant student = null;
-
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        var location = activity.GetLocation(amsgs, adc);
-                        var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
-
-                        // create student registrant record associated to this account
-                        student = SessionVariables.CurrentAccount.CreateRegistrant(
-                            associatedUser: null,
-                            registrantType: RegistrantType.Individual,
-                            isMaster: false,
-                            isParentOrGuardian: false,
-                            allowTextMessages: false,
-                            schoolLocationId: location.LocationTypeId == LocationType.School ? location.ID : new int?(),
-                            loggedInUser: SessionVariables.LoggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // create a registration
-                        var registration = student.AddRegistration(
-                            SessionVariables.CurrentAccount.ID.Value,
-                            activity.ActivityGroupId,
-                            activity.AccountActivityGroupId,
-                            period?.ID,
-                            RegistrationCompletionStatus.RequiresParentSignature,
-                            SessionVariables.LoggedInUser.ID.Value,
-                            amsgs,
-                            adc);
-
-                        // add answers
-                        qvms.ForEach(qvm =>
-                        {
-                            student.AddAnswer(
-                                answerText: qvm.Value.IfEmpty("").Trim(),
-                                question: qvm.Question,
-                                registrationId: registration.ID,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                                msgs: amsgs,
-                                dc: adc);
-                        });             
-
-                        // manages seats and create registrantactivity record
-                        Registration.ProcessRegistrationAssignment(
-                            registration: registration,
-                            participationObject: activity.GetParticipationObject(amsgs, adc),
-                            registrant: student,
-                            seatsRequested: 1,
-                            activityGroupId: activity.ActivityGroupId,
-                            periodId: activity.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
-                            loggedInUser: SessionVariables.LoggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Your new registration has been added", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
-            }
+                SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
+                    participationObject: activity.GetParticipationObject(msgs),
+                    questionsAndAnswers: qvms.Select(qvm => Tuple.Create<FormQuestion, string>(qvm.Question, qvm.Value)).ToList(),
+                    period: activity.GetCurrentRegistrationPeriod(msgs),
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("registrants", new { id = activity.Uid });

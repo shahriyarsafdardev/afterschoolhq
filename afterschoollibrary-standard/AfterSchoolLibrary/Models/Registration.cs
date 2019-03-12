@@ -1277,14 +1277,26 @@ namespace AfterSchoolLibrary.Models
             var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
             var isPendingOrReserved = ra.IsNotEmpty() && (ra.AssignmentTypeId == RegistrationAssignmentType.Reserved || ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment);
 
-            // if they're paying for a registration they already completed
-            if (isPendingOrReserved)
-                return RegistrationAssignmentType.Reserved;
+            //if (participationObject.RegistrationMode == RegistrationMode.NotSet)
+            //{
+            //    if (participationObject.IsActivity())
+            //    {
+            //        if (participationObject.GetActivity().ActivityGroupId.HasValue)
+            //        {
+            //            participationObject.RegistrationMode
+            //        }
+            //    }
+            //}
 
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
+
+            // if they're paying for a registration they already completed
+            if (isPendingOrReserved)
+                return RegistrationAssignmentType.Reserved;
+            
             // if there is room
-            else if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
+            if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
                 // if the person didn't pay yet
                 if (!participationObject.IsFree && 
