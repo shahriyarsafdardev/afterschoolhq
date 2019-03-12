@@ -189,7 +189,7 @@
                                 </a>
                             </div>
                             <div class="col-md-4">
-                                <a onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(Model.Name)', '@Url.Action("copy", "activity", new { id = Model.Uid.ToString(), isnew = 1, group.Uid })')" class="btn btn-primary btn-lg center-block md-trigger" data-modal="modal-copy-activity">
+                                <a onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(Model.Name)', '@Url.Action("copy", "activity", new { id = Model.Uid.ToString(), isnew = 1, group?.Uid })')" class="btn btn-primary btn-lg center-block md-trigger" data-modal="modal-copy-activity">
                                     <i class="s7-copy-file"></i>
                                     Copy and Create New &raquo;
                                 </a>
