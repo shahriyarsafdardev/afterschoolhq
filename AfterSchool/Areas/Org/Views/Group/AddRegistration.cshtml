@@ -43,7 +43,10 @@
                                              <option value="">None Selected</option>
                                              @foreach(var activity in activities)
                                              {
-                                                 <option value="@activity.Uid">
+                                                 var selected = Request[$"activity-preference-{i}"] == activity.Uid.ToString();
+
+                                                 <option value="@activity.Uid" 
+                                                         @(selected ? " selected=\"selected\" " : "")>
                                                      @activity.Name
                                                  </option>
                                              }
