@@ -8,11 +8,6 @@
     var grades = (List<GradeLevel>)ViewBag.Grades;
     var cart = (Cart)ViewBag.Cart;
     var locations = (List<Location>)ViewBag.Locations;
-
-    objects = objects.OrderBy(po => po.RegistrationPeriod.IsClosed())
-        .ThenBy(po => po.RegistrationPeriod.WillOpen())
-        .ThenBy(po => po.RegistrationPeriod.IsOpen())
-        .ToList();
 }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml"); }

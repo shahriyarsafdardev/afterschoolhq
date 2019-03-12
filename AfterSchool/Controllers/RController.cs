@@ -78,10 +78,13 @@ namespace AfterSchool.Controllers
             }
 
             ViewBag.Grades = GradeLevel.Load(msgs: msgs);
-            ViewBag.ParticipationObjects = participationObjects;
             ViewBag.Messages = msgs;
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
+            ViewBag.ParticipationObjects = participationObjects.OrderBy(po => po.RegistrationPeriod.IsClosed())
+                                            .ThenBy(po => po.RegistrationPeriod.WillOpen())
+                                            .ThenBy(po => po.RegistrationPeriod.IsOpen())
+                                            .ToList();
 
             return View(account);
         }
