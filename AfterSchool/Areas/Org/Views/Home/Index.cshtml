@@ -21,7 +21,7 @@
         attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
     }
 
-    var addUrl = Url.Action("editsetup", "activity");
+    var addUrl = Url.Action("editsetup", "activity", new { isnew = 1 });
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -33,6 +33,12 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             Welcome @SessionVariables.LoggedInUser.FirstName!
+            <div class="pull-right">
+                <a href="@Url.Action("editsetup", "activity", new { isnew = 1 })" class="btn btn-primary">
+                    <i class="icon icon-left s7-plus"></i>
+                    Add @UILabel.ActivityLabel(ActivityType.Activity)
+                </a>
+            </div>
         </div>
         <div class="panel-body">            
 

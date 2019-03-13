@@ -39,6 +39,7 @@ namespace AfterSchoolLibrary.Models
         public string ContactPhone { get; set; }
         public string ContactEmail { get; set; }
         public string CostDescription { get; set; }
+        public string LocationDetails { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -69,7 +70,7 @@ namespace AfterSchoolLibrary.Models
             Uid = activity.Uid;
             Name = activity.Name;
             Details = activity.Details;
-            Schedule = activity.GetSchedule(false, msgs, dc);
+            Schedule = activity.GetSchedule(msgs, dc);
             Location = activity.GetLocation(msgs, dc);
             GenderRestriction = activity.GenderRestriction;
             ActivityType = activity.ActivityTypeId;
@@ -82,6 +83,7 @@ namespace AfterSchoolLibrary.Models
             ContactEmail = activity.ContactEmail;
             ContactPhone = activity.ContactPhone;
             CostDescription = activity.CostDescription;
+            LocationDetails = activity.LocationDetails;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -127,9 +129,14 @@ namespace AfterSchoolLibrary.Models
             RegistrationMode = activityGroup.RegistrationModeId;
             Form = activityGroup.GetForm(msgs, dc);
             OwnerAccount = activityGroup.GetAccount(msgs, dc);
+            ContactEmail = activityGroup.ContactEmail;
+            ContactName = activityGroup.ContactName;
+            ContactPhone = activityGroup.ContactPhone;
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             // TODO: PayLater = activityGroup.AllowToPayLater;
+            SeatsRemaining = activityGroup.GetSeatsRemaining(msgs, dc);
+            WaitingListSeatsRemaining = activityGroup.GetWaitingListSeatsRemaining(msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);

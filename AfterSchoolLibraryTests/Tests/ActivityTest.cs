@@ -843,7 +843,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activity = Factories.ActivityFactory.Create(account, schedule, msgs, dc);
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
 
-            Assert.NotNull(activity.GetSchedule(false, msgs, dc));
+            Assert.NotNull(activity.GetSchedule(msgs, dc));
         }
 
         [Fact]
@@ -987,7 +987,7 @@ namespace AfterSchoolLibraryTests.Tests
             activityInstance.StartDateTime = start;
             msgs.AddRange(activityInstance.Save(dc));
 
-            Assert.True(activity.WillBeInSession(dc));
+            Assert.True(activity.WillBeInSession(msgs, dc));
         }
         /// <summary>
         /// Tests that an activity is no longer session
@@ -1002,7 +1002,7 @@ namespace AfterSchoolLibraryTests.Tests
             var activityInstance = Factories.ActivityInstanceFactory.Create(activity, schedule, msgs, dc);
             
 
-            Assert.True(activity.IsOutOfSession(dc));
+            Assert.True(activity.IsOutOfSession(msgs, dc));
         }
 
         [Fact]

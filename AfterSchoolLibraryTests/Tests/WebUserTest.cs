@@ -497,7 +497,7 @@ namespace AfterSchoolLibraryTests.Tests
                            msgs: msgs,
                            dc: dc);
 
-            msgs.AddRange(accountOwner.CompleteSignUp(account, "jeff", "gordon", "jeff@gordon.com", "1234", null, dc));
+            accountOwner.CompleteSignUp(account, "jeff", "gordon", "jeff@gordon.com", "1234", null, msgs, dc);
 
             Assert.True(accountOwner.HasAccessTo(account, msgs, dc));
         }

@@ -46,91 +46,54 @@ namespace AfterSchool.Controllers
             Account account = null;
 
             if(!id.IsGuid())
-            {
                 msgs.Add("Invalid invitation code", MessageType.UserError);
-            }
             else
             {
                 user = WebUser.LoadByUid(id.ToGuid(), null);
                 if (user.IsEmpty())
-                {
                     msgs.Add("Invalid invitation code", MessageType.UserError);
-                }
                 else if (user.IsActive)
-                {
                     msgs.Add("Account has already been created. Please proceed to the login page", MessageType.UserError);
-                }
             }
 
             if (!a.IsGuid())
-            {
                 msgs.Add("Invalid invitation code", MessageType.UserError);
-            }
             else
             {
                 account = Account.LoadByUid(a.ToGuid());
                 if (account.IsEmpty())
-                {
                     msgs.Add("Invalid invitation code", MessageType.UserError);
-                }
             }
 
             if (firstname.IsEmpty())
-            {
                 msgs.Add("First Name is required", MessageType.UserError);
-            }
+
             if (lastname.IsEmpty())
-            {
                 msgs.Add("Last Name is required", MessageType.UserError);
-            }
+
             if(email.IsEmpty())
-            {
                 msgs.Add("Email is required", MessageType.UserError);
-            }
             else if(!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-            {
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            }
             else if(!user.CanEmailBeUsed(email))
-            {
                 msgs.Add("This email has already been registered", MessageType.UserError);
-            }
+
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
-            {
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
-            }
             else if (password1.Length < 8)
-            {
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
-            }           
 
             if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
-                    {
-                        msgs.AddRange(user.CompleteSignUp(account, firstname, lastname, email, password1, null, adc));
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                        if (!user.VerifiedAccount)
-                            msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
-            }
+                user.CompleteSignUp(account, firstname, lastname, email, password1, null, msgs);
+                
+            if (msgs.HasNoErrors() && !user.VerifiedAccount)
+                msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));     
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(LoadSessionInfo(user));
 
             if (msgs.HasNoErrors())
-            {
                 return LoginRedirect();
-            }
             else
             {
                 ViewBag.Messages = msgs;

@@ -560,7 +560,7 @@ namespace AfterSchoolLibrary.Services
                     // NOTE: copy schedule?
                     if (activity.ActivityScheduleId.HasValue)
                     {
-                        copy.ActivityScheduleId = activity.GetSchedule(false, amsgs, adc)
+                        copy.ActivityScheduleId = activity.GetSchedule(amsgs, adc)
                             .CopyAndSave(loggedInUserId, amsgs, adc)
                             .ID;
                         amsgs.AddRange(copy.Save(adc));
@@ -852,7 +852,6 @@ namespace AfterSchoolLibrary.Services
 
                 if (cost.IsBlank())
                     cost = "0";
-
             }
 
             Activity activity = null;
@@ -967,7 +966,12 @@ namespace AfterSchoolLibrary.Services
             //}
 
             if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
-                activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
+            {
+                if (account.CanProcessPayments(msgs, dc))
+                    activity.AllowToPayLater = allowtopaylater.ToString().ToBoolean();
+                else
+                    activity.AllowToPayLater = true;
+            }
 
             //if (alloworganization.IsNotEmpty() && alloworganization.ToString().IsBoolean())
             //{
@@ -1003,18 +1007,28 @@ namespace AfterSchoolLibrary.Services
                                 activity.ContactPhone = account.Phone;
                         }
 
+                        ActivityGroup activityGroup = null;
+
                         if (group.IsNotEmpty() && group.ToString().IsGuid())
-                            activity.ActivityGroupId = ActivityGroup.LoadByUid(group.ToString().ToGuid(), amsgs, adc).ID.Value;
+                            activityGroup = ActivityGroup.LoadByUid(group.ToString().ToGuid(), amsgs, adc);
+
+                        if (activityGroup.IsNotEmpty())
+                        {
+                            activity.ActivityGroupId = activityGroup.ID.Value;
+                            activity.GradeLevelStart = activityGroup.MinGradeLevelId;
+                            activity.GradeLevelEnd = activityGroup.MaxGradeLevelId;
+                            activity.GenderRestriction = activityGroup.GenderRestriction;
+                        }
 
                         amsgs.AddRange(activity.Save(adc));
+                        
+                        // create / associate form
+                        if (amsgs.HasNoErrors() && form.IsNumber())
+                            amsgs.AddRange(activity.SetupNewForm(form.ToString().ToInteger(), account, loggedInUserId, adc));
 
                         // skip if it is attached to a activity group
                         if (!activity.ActivityGroupId.HasValue)
                         {
-                            // create / associate form
-                            if (amsgs.HasNoErrors() && form.IsNumber())
-                                amsgs.AddRange(activity.SetupNewForm(form.ToString().ToInteger(), account, loggedInUserId, adc));
-
                             //create registration period if not created yet and there is no activitygroup (activity groups have their own registration period)
                             if (amsgs.HasNoErrors() && registrationperiod.IsNumber())
                             {
@@ -1574,28 +1588,30 @@ namespace AfterSchoolLibrary.Services
         {
             var account = activity.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activity.GetSchedule(msgs: msgs, dc: dc).GetInstances(msgs: msgs, dc: dc);
+            var instances = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
             return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
         }
 
-        public static bool WillBeInSession(this Activity activity, DatabaseConnection dc = null)
+        public static bool WillBeInSession(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = activity.GetAccount(dc: dc);
+            var account = activity.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activity.GetSchedule(dc: dc).GetInstances(dc: dc);
+            var instances = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
             return now < instances.First().StartDateTime;
         }
 
-        public static bool IsOutOfSession(this Activity activity, DatabaseConnection dc = null)
+        public static bool IsOutOfSession(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var now = activity.GetAccount(dc: dc).ConvertToAccountTimeZone(DateTime.UtcNow);
-            var instances = activity.GetSchedule(dc: dc).GetInstances(dc: dc);
+            var now = activity.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var instances = activity.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
             return now > instances.Last().StartDateTime;
         }
 
-        public static bool CanAcceptPayments(this Activity activity)
+        public static bool CanAcceptPayments(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetAccount().GetActiveAccountPackage().HasFeature(FeatureType.AcceptPayments);
+            return activity.GetAccount(msgs, dc)
+                .GetActiveAccountPackage(msgs, dc)
+                .HasFeature(FeatureType.AcceptPayments, msgs, dc);
         }
 
         public static PurchaseableObject GetPurchaseableObject(this Activity activity)
@@ -1605,12 +1621,12 @@ namespace AfterSchoolLibrary.Services
 
         public static bool HasTeamMatches(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Models.Match.LoadByTeamId(activity.ID.Value).IsNotEmpty();
+            return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsNotEmpty();
         }
 
         public static bool HasNoTeamMatches(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Models.Match.LoadByTeamId(activity.ID.Value).IsEmpty();
+            return Models.Match.LoadByTeamId(activity.ID.Value, msgs, dc).IsEmpty();
         }
 
         public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1716,21 +1732,27 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetRegistrantCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByParticipationObject(
-                activity.ID.Value,
-                ParticipationObjectType.Activity,
-                msgs,
-                dc);
+            if (activity.ID.HasValue)
+                return RegistrantActivity.GetSeatCountByParticipationObject(
+                    activity.ID.Value,
+                    ParticipationObjectType.Activity,
+                    msgs,
+                    dc);
+
+            return 0;
         }
 
         public static int GetRegistrantCountByAssignmentType(this Activity activity, RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(
-                assignmentType: assignmentType,
-                participationObjectId: activity.ID,
-                participationObjectType: ParticipationObjectType.Activity,
-                msgs: msgs,
-                dc: dc);
+            if (activity.ID.HasValue)
+                return RegistrantActivity.GetSeatCountByAssignmentType(
+                    assignmentType: assignmentType,
+                    participationObjectId: activity.ID,
+                    participationObjectType: ParticipationObjectType.Activity,
+                    msgs: msgs,
+                    dc: dc);
+
+            return 0;
         }
 
         public static List<Registrant> GetRegistrants(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2043,7 +2065,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static ActivitySchedule GetSchedule(this Activity activity, bool reload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static ActivitySchedule GetSchedule(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (activity.ActivityScheduleId.HasValue)
                 return ActivitySchedule.LoadWithInstances(activity.ActivityScheduleId.Value, msgs, dc);

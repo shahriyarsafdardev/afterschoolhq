@@ -387,7 +387,7 @@ namespace AfterSchoolLibrary.Models
                         // delete previous registration
                         if (amsgs.HasNoErrors())
                         {
-                            amsgs.AddRange(mergedFrom.DeleteWithRelatedRecords(adc));
+                            mergedFrom.DeleteWithRelatedRecords(amsgs, adc);
                         }
 
                         this.LastModifiedBy = loggedInUserId;
@@ -724,7 +724,7 @@ namespace AfterSchoolLibrary.Models
                 dc);
 
             if (ra.IsNotEmpty())
-                msgs.AddRange(ra.CancelRegistration(dc: dc));
+                ra.CancelRegistration(msgs, dc);
 
             return msgs;
         }
@@ -969,9 +969,9 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs);
         }
 
-        public SystemMessages CancelAll(DatabaseConnection dc = null)
+        public void CancelAll(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.DeleteWithRelatedRecords(dc: dc);
+            this.DeleteWithRelatedRecords(msgs, dc);
         }
 
         public static List<Registration> LoadByRegistrationPeriodId(int RegistrationPeriodId, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -1116,10 +1116,8 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public SystemMessages DeleteWithRelatedRecords(DatabaseConnection dc = null)
+        public void DeleteWithRelatedRecords(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -1142,10 +1140,12 @@ namespace AfterSchoolLibrary.Models
                 {
                     msgs.AddRange(fmsgs);
                 },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Helpers.Utilities.SystemErrorLog(emsgs);
+                },
                 dc: dc
             );
-
-            return msgs;
         }
 
         internal SystemMessages DeleteSessionActions(DatabaseConnection dc = null)
@@ -1277,14 +1277,26 @@ namespace AfterSchoolLibrary.Models
             var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
             var isPendingOrReserved = ra.IsNotEmpty() && (ra.AssignmentTypeId == RegistrationAssignmentType.Reserved || ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment);
 
-            // if they're paying for a registration they already completed
-            if (isPendingOrReserved)
-                return RegistrationAssignmentType.Reserved;
+            //if (participationObject.RegistrationMode == RegistrationMode.NotSet)
+            //{
+            //    if (participationObject.IsActivity())
+            //    {
+            //        if (participationObject.GetActivity().ActivityGroupId.HasValue)
+            //        {
+            //            participationObject.RegistrationMode
+            //        }
+            //    }
+            //}
 
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
+
+            // if they're paying for a registration they already completed
+            if (isPendingOrReserved)
+                return RegistrationAssignmentType.Reserved;
+            
             // if there is room
-            else if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
+            if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
                 // if the person didn't pay yet
                 if (!participationObject.IsFree && 
@@ -1320,6 +1332,21 @@ namespace AfterSchoolLibrary.Models
 
         public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            ProcessRegistrationAssignment(
+                registration,
+                participationObject,
+                registrant,
+                seatsRequested,
+                1,
+                activityGroupId,
+                periodId,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
             var ra = registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
@@ -1334,6 +1361,7 @@ namespace AfterSchoolLibrary.Models
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 assignmentType: assignmentType,
+                preferenceNumber: preferenceNumber,
                 registrationPeriodId: periodId,
                 activityGroupId: activityGroupId,
                 loggedInUserId: loggedInUser.ID.Value,

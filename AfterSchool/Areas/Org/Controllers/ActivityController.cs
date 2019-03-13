@@ -43,6 +43,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 0,
                 15,
                 msgs);
+
+            ViewBag.ParticipationObject = activity.GetParticipationObject(msgs);
             ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.Actions = actions;
@@ -122,37 +124,35 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditSetup(string id, string group)
         {
+            var msgs = new SystemMessages();
             var activity = new Activity();
             var isLeader = true;
-            var activePeriod = new RegistrationPeriod();
             ActivityGroup activityGroup = null;
 
             if (id.IsGuid())
             {
-                activity = Activity.LoadByUid(id.ToGuid());
+                activity = Activity.LoadByUid(id.ToGuid(), msgs);
                 isLeader = IsActivityLeader(activity);
-                activePeriod = activity.GetActiveRegistrationPeriod();
-                activityGroup = activity.GetActivityGroup();
+                activityGroup = activity.GetActivityGroup(msgs);
             }
             else
             {
                 activity = SessionVariables.CurrentAccount.GetDefaultNewActivity();
+                activity.RegistrationModeId = RegistrationMode.Register;
 
-                //this means a new activity is not being added to an existing enrollment group
-                if (!group.IsGuid())
+                //this means a new activity is  being added to an existing enrollment group
+                if (group.IsGuid())
                 {
-                    activePeriod = SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid(), msgs);
+                    activity.RegistrationModeId = activityGroup.RegistrationModeId;
                 }
-                else
-                {
-                    activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
-                }
+
             }
 
-            LoadEditSetupViewBag(activity, activePeriod, new SystemMessages());
+            LoadEditSetupViewBag(activity, activityGroup, msgs);
             ViewBag.ActiveMenu = "EditSetup";
             ViewBag.Group = activityGroup;
-
+            
             return View(activity);
         }
 
@@ -213,15 +213,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
 
                 if (msgs.HasNoErrors())
-                {
                     UpdateSession(SessionActionType.ActivityCreate, SessionVariables.CurrentAccount.ID, activity.ID);
-                }
             }
 
             if (group.IsGuid())
                 activityGroup = ActivityGroup.LoadByUid(group.ToGuid());
 
-            LoadEditSetupViewBag(activity, null, msgs);
+            LoadEditSetupViewBag(activity, activityGroup, msgs);
             ViewBag.Group = activityGroup;
 
             if (msgs.HasNoErrors())
@@ -241,15 +239,13 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        private void LoadEditSetupViewBag(Activity activity, RegistrationPeriod activePeriod, SystemMessages msgs)
+        private void LoadEditSetupViewBag(Activity activity, ActivityGroup activityGroup, SystemMessages msgs)
         {
+            var activeForm = activity.GetActiveActivityForm(msgs) ?? activityGroup?.GetDefaultActivityForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultActivityForm(msgs);
             var periods = SessionVariables.CurrentAccount.GetOpenAndUpcomingRegistrationPeriods(msgs);
-
-            if (activePeriod.IsEmpty())
-                activePeriod = activity.GetActiveRegistrationPeriod(msgs) ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
+            var activePeriod = activity.GetActiveRegistrationPeriod(msgs) ?? SessionVariables.CurrentAccount.GetDefaultNewRegistrationPeriod();
 
             periods.Add(activePeriod);
-
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
 
             ViewBag.Messages = msgs;
@@ -259,7 +255,20 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Periods = periods;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.ActivePeriod = activePeriod;
-            ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs);
+            ViewBag.ActiveForm = activeForm;
+            ViewBag.IsFullScreen = GetIsFullScreen(activity, activityGroup?.Uid.ToString());
+        }
+
+        private bool GetIsFullScreen(Activity activity, string groupUid = "")
+        {
+            ViewBag.FullScreenExitUrl = Url.Action("index", "activity");
+
+            if (groupUid.IsNotEmpty())
+                ViewBag.FullScreenExitUrl = Url.Action("activities", "group", new { id = groupUid });
+            else if (activity.ActivityGroupId.HasValue)
+                ViewBag.FullScreenExitUrl = Url.Action("activities", "group", new { id = activity.ActivityGroupUid });
+
+            return Request["isnew"] == "1" && !activity.IsPublished;
         }
 
         [HttpGet]
@@ -271,6 +280,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditRestrictions";
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
             return View(activity);
         }
 
@@ -329,7 +339,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditSetup";
-                        LoadEditSetupViewBag(activity, null, msgs);
+                        LoadEditSetupViewBag(activity, activity.GetActivityGroup(msgs), msgs);
                         return View("EditSetup", activity);
                     case "next":
                         ViewBag.ActiveMenu = "EditSchedule";
@@ -339,6 +349,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
             ViewBag.ActiveMenu = "EditRestrictions";
             return View(activity);
         }
@@ -354,6 +365,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
             ViewBag.ActiveMenu = "EditContact";
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
             return View(activity);
         }
 
@@ -394,6 +406,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -422,6 +435,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditDetails";
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
             return View(activity);
         }
 
@@ -471,6 +485,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "next":
                         ViewBag.ActiveMenu = "EditContact";
                         ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+                        ViewBag.IsFullScreen = GetIsFullScreen(activity);
                         return View("EditContact", activity);
                 }
             }
@@ -481,36 +496,34 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private void LoadEditScheduleViewBag(Activity activity, string scheduleId)
         {
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.ActivityId = activity.Uid.ToString();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditSchedule";
-            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
+            ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules(msgs);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             ActivitySchedule schedule = null;
 
             // changing schedule
             if (scheduleId.IsNumber())
             {
-                schedule = ActivitySchedule.Load(scheduleId.ToInteger());
+                schedule = ActivitySchedule.Load(scheduleId.ToInteger(), msgs);
                 if (schedule.AccountId != SessionVariables.CurrentAccount.ID)
-                {
                     schedule = null;
-                }
-            }
-            if (schedule.IsEmpty())
-            {
-                schedule = activity.GetSchedule();
-            }
-            if (schedule.IsEmpty())
-            {
-                schedule = ActivitySchedule.GetNewDefaultSchedule();
             }
 
+            if (schedule.IsEmpty())
+                schedule = activity.GetSchedule();
+
+            if (schedule.IsEmpty())
+                schedule = ActivitySchedule.GetNewDefaultSchedule(activity.GetActiveRegistrationPeriod(msgs));
+
             ViewBag.Schedule = schedule;
-            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+            ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups, msgs);
+            ViewBag.Messages = msgs;
         }
 
         [HttpGet]
@@ -588,6 +601,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Schedule = sched;
             ViewBag.Schedules = SessionVariables.CurrentAccount.GetActivitySchedules();
             ViewBag.ShowScheduleList = SessionVariables.AccountPackage.HasFeature(FeatureType.ManageActivityGroups);
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -601,7 +615,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         return View("EditDetails", activity);
                 }
             }
-
+            
             ViewBag.ActiveMenu = "EditSchedule";
             return View(activity);
         }
@@ -616,6 +630,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditLocation";
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             return View(activity);
         }
@@ -665,6 +680,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -677,9 +693,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "next":
                         if (SessionVariables.AccountPackage.HasFeature(FeatureType.AcceptPayments))
                         {
-                            ViewBag.ActiveMenu = "EditCost";
-                            ViewBag.PaymentPlan = activity.GetPaymentPlan();
-                            ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
+                            LoadEditCostViewBag(activity, msgs);
                             return View("EditCost", activity);
                         }
                         else
@@ -694,18 +708,30 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
-        [HttpGet]
-        public ActionResult EditCost(string id)
+        private void LoadEditCostViewBag(Activity activity, SystemMessages msgs)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
+            var canProcessPayments = SessionVariables.CurrentAccount.CanProcessPayments(msgs);
 
-            ViewBag.Messages = new SystemMessages();
+            if (!canProcessPayments)
+                activity.AllowToPayLater = true;
+
+            ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.CanProcessPayments = canProcessPayments;
             ViewBag.PaymentPlan = activity.GetPaymentPlan();
             ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
             ViewBag.ActiveMenu = "EditCost";
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
+        }
+
+        [HttpGet]
+        public ActionResult EditCost(string id)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+            LoadEditCostViewBag(activity, msgs);
             return View(activity);
         }
 
@@ -713,7 +739,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
         {
             var msgs = new SystemMessages();
-            Activity activity = Activity.LoadByUid(id.ToGuid());
+            var activity = Activity.LoadByUid(id.ToGuid());
 
             if (id.IsGuid())
             {
@@ -743,15 +769,12 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.PaymentPlan = activity.GetPaymentPlan();
-            ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -763,10 +786,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "next":
                         ViewBag.ActiveMenu = "EditConfirmation";
                         return View("EditConfirmation", activity);
+                    case "done":
+                        return RedirectToAction("activities", "group", new { id = activity.ActivityGroupUid });
+                    case "publish":
+                        return RedirectToAction("publish", "activity", new { id = activity.Uid, isnew = Request["isnew"] });
                 }
             }
 
-            ViewBag.ActiveMenu = "EditCost";
+            LoadEditCostViewBag(activity, msgs);
             return View(activity);
         }
 
@@ -780,6 +807,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditConfirmation";
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
             return View(activity);
         }
 
@@ -808,13 +836,12 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -823,9 +850,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "prev":
                         if (activity.CanAcceptPayments())
                         {
-                            ViewBag.ActiveMenu = "EditCost";
-                            ViewBag.PaymentPlan = activity.GetPaymentPlan();
-                            ViewBag.SubscriptionPlan = activity.GetSubscriptionPlan();
+                            LoadEditCostViewBag(activity, msgs);
                             return View("EditCost", activity);
                         }
                         else
@@ -834,7 +859,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return RedirectToAction("publishdetail", new { id = activity.Uid });
+                        return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
                 }
             }
 
@@ -846,24 +871,23 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants)
         {
             var msgs = new SystemMessages();
+            var activityToCopy = Activity.LoadByUid(id.ToGuid());
+
             Activity activity = null;
 
             if (copywithregistrants.IsBoolean())
-                activity = Activity.LoadByUid(id.ToGuid())
+                activity = activityToCopy
                     .CopyWithRegistrants(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
             else
-                activity = Activity.LoadByUid(id.ToGuid())
+                activity = activityToCopy
                     .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
+
             if (msgs.HasNoErrors())
-            {
-                return RedirectToAction("editsetup", new { id = activity.Uid });
-            }
-            else
-            {
-                return RedirectToAction("index", "activity", new { copyerror = true });
-            }
+                return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1 });
+
+            return RedirectToAction("index", "activity", new { copyerror = true });
         }
 
         [HttpGet]
@@ -1065,10 +1089,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        msgs.AddRange(ra.ChangeSeatAssignment(
+                        ra.ChangeSeatAssignment(
                             newAssignmentType, 
-                            SessionVariables.LoggedInUser.ID.Value, 
-                            adc));
+                            SessionVariables.LoggedInUser,
+                            amsgs,
+                            adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1077,6 +1102,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     onFailure: (SystemMessages fmsgs) =>
                     {
                         msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
                     }
                 );                
             }
@@ -1689,6 +1718,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.IsFullScreen = Request["isnew"] == "1";
             return View("publishdetail", activity);
         }
 
@@ -2020,17 +2050,16 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid(), msgs);
-            var questions = activity.GetActiveForm(msgs).GetActiveQuestions(msgs);
+            var activeForm = activity.GetActiveForm(msgs);
+            var questions = activeForm.GetActiveQuestions(msgs);
 
             questions.ForEach(question => {
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantGrade:
-                    case QuestionDataType.RegistrantEthnicity:
                     case QuestionDataType.RegistrantGender:
                     case QuestionDataType.RegistrantFirstName:
                     case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
                         question.IsRequired = true;
                         break;
                     default:
@@ -2039,7 +2068,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             });
 
-            ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
+            ViewBag.QuestionViewModels = questions.OrderBy(question => question.DisplayOrder).Select(question => new FormQuestionViewModel(question)).ToList();
             ViewBag.Messages = msgs;
 
             return View(activity);
@@ -2056,11 +2085,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantGrade:
-                    case QuestionDataType.RegistrantEthnicity:
                     case QuestionDataType.RegistrantGender:
                     case QuestionDataType.RegistrantFirstName:
                     case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
                         question.IsRequired = true;
                         break;
                     default:
@@ -2087,78 +2114,15 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             });
 
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var qvms = questions.OrderBy(question => question.DisplayOrder).Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
             if (msgs.HasNoErrors())
-            {
-                Registrant student = null;
-
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        var location = activity.GetLocation(amsgs, adc);
-                        var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
-
-                        // create student registrant record associated to this account
-                        student = SessionVariables.CurrentAccount.CreateRegistrant(
-                            associatedUser: null,
-                            registrantType: RegistrantType.Individual,
-                            isMaster: false,
-                            isParentOrGuardian: false,
-                            allowTextMessages: false,
-                            schoolLocationId: location.LocationTypeId == LocationType.School ? location.ID : new int?(),
-                            loggedInUser: SessionVariables.LoggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                        // create a registration
-                        var registration = student.AddRegistration(
-                            SessionVariables.CurrentAccount.ID.Value,
-                            activity.ActivityGroupId,
-                            activity.AccountActivityGroupId,
-                            period?.ID,
-                            RegistrationCompletionStatus.RequiresParentSignature,
-                            SessionVariables.LoggedInUser.ID.Value,
-                            amsgs,
-                            adc);
-
-                        // add answers
-                        qvms.ForEach(qvm =>
-                        {
-                            student.AddAnswer(
-                                answerText: qvm.Value.IfEmpty("").Trim(),
-                                question: qvm.Question,
-                                registrationId: registration.ID,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                                msgs: amsgs,
-                                dc: adc);
-                        });             
-
-                        // manages seats and create registrantactivity record
-                        Registration.ProcessRegistrationAssignment(
-                            registration: registration,
-                            participationObject: activity.GetParticipationObject(amsgs, adc),
-                            registrant: student,
-                            seatsRequested: 1,
-                            activityGroupId: activity.ActivityGroupId,
-                            periodId: activity.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
-                            loggedInUser: SessionVariables.LoggedInUser,
-                            msgs: amsgs,
-                            dc: adc);
-
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Your new registration has been added", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
-            }
+                SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
+                    participationObject: activity.GetParticipationObject(msgs),
+                    questionsAndAnswers: qvms.Select(qvm => Tuple.Create<FormQuestion, string>(qvm.Question, qvm.Value)).ToList(),
+                    period: activity.GetCurrentRegistrationPeriod(msgs),
+                    loggedInUser: SessionVariables.LoggedInUser,
+                    msgs: msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("registrants", new { id = activity.Uid });

@@ -4,40 +4,51 @@
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var activityId = (string)ViewBag.ActivityId;
+
+    var fullscreen = Request["isnew"] == "1" && !Model.IsPublished;
+    if (fullscreen)
+    {
+        Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    }
 }
 
-@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+@{ Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-    @{Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model);}
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", Model); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name); }
+
+            @if (fullscreen)
+            {
+                Html.RenderPartial("_ExitFullScreen", "");
+            }
         </div>
         <div class="panel-body">
 
             <div class="col-md-8 col-lg-9">
-                <form id="form1" method="post" action="@Url.Action("editschedule", "activity", new { id = Model.Uid })" class="form-horizontal">
+                <form id="form1" method="post" action="@Url.Action("editschedule", "activity", new { id = Model.Uid, isnew = Request["isnew"] })" class="form-horizontal">
 
-                    <button type="submit" class="btn btn-primary pull-right btn-space" onclick="navigateActivity('@Url.Action("editschedule", "activity", new { id = Model.Uid, cmd = "next" })')">&raquo;</button>
-                    <button type="submit" class="btn btn-default pull-right btn-space"><i class="s7-diskette"></i> Save</button>
-                    <button type="submit" class="btn btn-default pull-right btn-space" onclick="navigateActivity('@Url.Action("editschedule", "activity", new { id = Model.Uid, cmd = "prev" })')">&laquo;</button>
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "next", true, true, Request))
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "prev", true, false, Request))
 
                     @{Html.RenderPartial("~/Views/Shared/_ActivityFormSchedule.cshtml", (ActivitySchedule)ViewBag.Schedule);}
 
                     <div class="form-group">
                         <div class="col-sm-2 col-sm-offset-3">
-                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editschedule", "activity", new { id = Model.Uid, cmd = "prev" })')">&laquo; Previous</button>
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "prev", false, false, Request))
                         </div>
                         <div class="col-sm-5">
-                            <button type="submit" class="btn btn-default btn-space btn-lg btn-block"><i class="s7-diskette"></i> Save</button>
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
                         </div>
                         <div class="col-sm-2">
-                            <button type="submit" class="btn btn-primary btn-space btn-lg btn-block" onclick="navigateActivity('@Url.Action("editschedule", "activity", new { id = Model.Uid, cmd = "next" })')">Next &raquo;</button>
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model, "editschedule", "next", false, true, Request))
                         </div>
                     </div>
 
@@ -51,11 +62,3 @@
         </div>
     </div>
 </div>
-
-<script>
-
-    function navigateActivity(url) {
-        $('#form1').attr('action', url);
-    }
-
-</script>

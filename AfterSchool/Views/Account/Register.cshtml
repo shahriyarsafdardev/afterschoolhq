@@ -39,6 +39,15 @@
                             new ViewDataDictionary() { { "QuestionViewModels", qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID).ToList() } });
                     }
 
+                    @if (Model.IsActivityGroup() && Model.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
+                    {
+                        var group = Model.GetActivityGroup();
+
+                        Html.RenderPartial(
+                            "~/Views/Shared/Activity/_ActivityPreferences.cshtml",
+                            group.GetActivities(null, false, false, null, null, false));
+                    }
+
                     <div class="form-group">
                         <label for="signature" class="col-md-3 control-label">
                             Parent E-Signature

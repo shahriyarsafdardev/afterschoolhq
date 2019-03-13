@@ -176,6 +176,11 @@ namespace AfterSchoolLibrary.Services
             var scheduledatesClosed = values.GetValueOrDefault("scheduledatesclosed");
             var schedule = values.GetValueOrDefault("schedule");
             var isongoing = values.GetValueOrDefault("isongoing");
+            var contactname = values.GetValueOrDefault("contactname");
+            var contactemail = values.GetValueOrDefault("contactemail");
+            var contactphone = values.GetValueOrDefault("contactphone");
+            var numberofseats = values.GetValueOrDefault("seatsavailable");
+            var numberofwaitinglistseats = values.GetValueOrDefault("waitinglistseats");
 
             if (name.IsEmpty())
                 msgs.Add("Label is required", MessageType.UserError);
@@ -211,22 +216,35 @@ namespace AfterSchoolLibrary.Services
 
             if (form.IsNumber())
                 group.FormId = form.ToString().ToInteger();
+            
+            if (maxgradeid.IsNumber())
+                group.MaxGradeLevelId = maxgradeid.ToString().ToInteger();
 
-            if (group.ActivityGroupTypeId == ActivityGroupType.League)
-            {
-                if (maxgradeid.IsNumber())
-                    group.MaxGradeLevelId = maxgradeid.ToString().ToInteger();
+            if (mingradeid.IsNumber())
+                group.MinGradeLevelId = mingradeid.ToString().ToInteger();
 
-                if (mingradeid.IsNumber())
-                    group.MinGradeLevelId = mingradeid.ToString().ToInteger();
-
-                if (genderrestrictions.IsNumber())
-                    group.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
-            }
+            if (genderrestrictions.IsNumber())
+                group.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
 
             group.IsInviteOnly = false;
             if (isinviteonly.IsNotEmpty())
                 group.IsInviteOnly = isinviteonly.ToString().ToBoolean();
+
+            if (contactname.IsNotEmpty())
+                group.ContactName = contactname.ToString();
+
+            if (contactemail.IsNotEmpty())
+                group.ContactEmail = contactemail.ToString();
+
+            if (contactphone.IsNotEmpty())
+                group.ContactPhone = contactphone.ToString();
+
+            if (numberofseats.IsNumber())
+                group.SeatsAvailable = numberofseats.ToString().ToInteger();
+
+            if (numberofwaitinglistseats.IsNumber())
+                group.WaitingListSeats = numberofwaitinglistseats.ToString().ToInteger();
+
 
             if (msgs.HasNoErrors())
             {
@@ -248,9 +266,7 @@ namespace AfterSchoolLibrary.Services
                                 group.FormId = newForm.ID;
                             }
                             else
-                            {
                                 group.FormId = form.ToString().ToInteger();
-                            }
                         }
 
                         group.AccountId = account.ID;
@@ -262,13 +278,27 @@ namespace AfterSchoolLibrary.Services
                         group.LastModifiedBy = loggedInUser.ID;
                         amsgs.AddRange(group.Save(adc));
 
+                        // keep activities up to date with groups
                         group.GetActivities(null, false, false, null, null, false, amsgs, adc)
                         .ForEach(activity => {
+
                             activity.RegistrationModeId = group.RegistrationModeId;
-                            activity.GenderRestriction = group.GenderRestriction;
-                            activity.GradeLevelStart = group.MinGradeLevelId;
-                            activity.GradeLevelEnd = group.MaxGradeLevelId;
+                            
+                            if (group.GenderRestriction == GenderRestrictionType.None)
+                                activity.GenderRestriction = group.GenderRestriction;
+
+                            if (activity.GradeLevelStart < group.MinGradeLevelId)
+                                activity.GradeLevelStart = group.MinGradeLevelId;
+
+                            if (activity.GradeLevelEnd > group.MaxGradeLevelId)
+                                activity.GradeLevelEnd = group.MaxGradeLevelId;
+
                             amsgs.AddRange(activity.Save(adc));
+
+                            // update form
+                            var activityForm = activity.GetActiveActivityForm(amsgs, adc);
+                            activityForm.FormId = group.FormId;
+                            amsgs.AddRange(activityForm.Save(adc));
                         });
 
                         if (isNew)
@@ -371,10 +401,17 @@ namespace AfterSchoolLibrary.Services
                         RegistrationModeId = activityGroup.RegistrationModeId,
                         UniqueName = ActivityGroup.GenerateUniqueName(newName, null, activityGroup.AccountId, amsgs, adc),
                         ActivityGroupTypeId = activityGroup.ActivityGroupTypeId,
-                        ActivityScheduleId = activityGroup.ActivityScheduleId,
+                        ActivityScheduleId = null,
                         GenderRestriction = activityGroup.GenderRestriction,
                         MaxGradeLevelId = activityGroup.MaxGradeLevelId,
-                        MinGradeLevelId = activityGroup.MinGradeLevelId
+                        MinGradeLevelId = activityGroup.MinGradeLevelId,
+                        ContactEmail = activityGroup.ContactEmail,
+                        ContactName = activityGroup.ContactName,
+                        ContactPhone = activityGroup.ContactPhone,
+                        SeatsAvailable = activityGroup.SeatsAvailable,
+                        WaitingListSeats = activityGroup.WaitingListSeats,
+                        Cost = activityGroup.Cost,
+                        CostUnitTypeId = activityGroup.CostUnitTypeId,
                     };
                     msgs.AddRange(group.Save(adc));
 
@@ -397,6 +434,7 @@ namespace AfterSchoolLibrary.Services
                         newact.IsPublished = true;
                         msgs.AddRange(newact.Save(adc));
                     });
+                    
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -405,6 +443,10 @@ namespace AfterSchoolLibrary.Services
                 onFailure: (SystemMessages fmsgs) =>
                 {
                     msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Helpers.Utilities.SystemErrorLog(emsgs);
                 },
                 dc: dc
             );
@@ -491,6 +533,89 @@ namespace AfterSchoolLibrary.Services
             }
 
             return msgs;
+        }
+
+        public static int GetSeatsRemaining(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var rtn = 0;
+            if (group.SeatsAvailable.HasValue)
+                rtn = group.SeatsAvailable.Value - group.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc);
+
+            return Math.Max(0, rtn);
+        }
+
+        public static int GetWaitingListSeatsRemaining(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var rtn = 0;
+            if (group.WaitingListSeats.HasValue)
+                rtn = group.WaitingListSeats.Value - group.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, msgs, dc);
+
+            return Math.Max(0, rtn);
+        }
+
+        public static int GetRegistrantCountByAssignmentType(this ActivityGroup group, RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentType(
+                assignmentType: assignmentType,
+                participationObjectId: group.ID,
+                participationObjectType: ParticipationObjectType.ActivityGroup,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static List<RegistrantAssignment> RandomizePlacementAttempt(this ActivityGroup group, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var rr = new RegistrationRandomization(group);
+            rr.LoggedInUser = loggedInUser;
+            return rr.AttemptLottery(msgs, dc);
+        }
+
+        public static void RandomizePlacementApply(this ActivityGroup group, List<RegistrantAssignment> assignments, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var rr = new RegistrationRandomization(group);
+            rr.LoggedInUser = loggedInUser;
+            rr.ApplyLottery(assignments, msgs, dc);
+        }
+
+        public static SystemMessages RandomizePlacementReset(this ActivityGroup group, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
+                {
+                    group.GetRegistrantActivities(dc: adc).ForEach(
+                        ra => ra.ChangeSeatAssignment(RegistrationAssignmentType.Applied, loggedInUser, amsgs, adc)
+                    );
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Helpers.Utilities.SystemErrorLog(emsgs);  
+                },
+                dc: dc
+            );
+
+            return msgs;
+        }
+
+        public static ActivityForm GetDefaultActivityForm(this ActivityGroup group, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new ActivityForm()
+            {
+                FormId = group.GetForm(msgs, dc).ID,
+                IsActive = true,
+                AccountId = group.AccountId
+            };
         }
     }
 }

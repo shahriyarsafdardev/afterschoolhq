@@ -20,6 +20,11 @@
             activityMeetingLabel = "Game";
             activityMeetingVerbLabel = "play";
         }
+        else
+        {
+            activityMeetingLabel = "Session";
+            activityMeetingVerbLabel = "meet";
+        }
     }
 
     if (ViewData["ActivityType"].IsNotEmpty())
@@ -120,7 +125,7 @@
                     
                     <div class="form-group">
                         <label class="col-md-3 control-label">
-                            Day of the week
+                            Day of the week <span class="text-danger">*</span>
                         </label>
                         <div class="col-md-7">
                             <div class="am-checkbox inline">
@@ -135,30 +140,39 @@
                    
                 </div>
 
-
                 @if (!activityGroupType.HasValue && activityType != ActivityType.Team)
                 {
-                    <div class="form-group" id="ongoing-div">
-                        <label class="col-md-3 control-label">
-                            Is this an ongoing @UILabel.ActivityLabel(ActivityType.Activity).ToLower()?
-                        </label>
-                        <div class="col-md-9">
-                            @{Html.RenderPartial
-                            (
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.IsOngoing,
-                                new ViewDataDictionary()
-                                {
-                                    { "checkboxname", "isongoing" },
-                                    { "checkboxid", "isongoing" },
-                                    { "disabled", false }
-                                }
-                            );
-                            }
+                    <div class="col-md-offset-3 col-md-9 padding-v-20">
+                        <span>
+                            <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">
+                                Show Advanced Settings
+                            </a>
+                        </span>
+                    </div>
 
-                            <p class="text-muted padding-v-10">
-                                Ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() do not have an end date and allow parents to sign up their children for ongoing subscriptions.
-                            </p>
+                    <div class="hide advanced-settings">
+                        <div class="form-group" id="ongoing-div">
+                            <label class="col-md-3 control-label">
+                                Is this an ongoing @UILabel.ActivityLabel(ActivityType.Activity).ToLower()?
+                            </label>
+                            <div class="col-md-9">
+                                @{Html.RenderPartial
+                                (
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.IsOngoing,
+                                    new ViewDataDictionary()
+                                    {
+                                        { "checkboxname", "isongoing" },
+                                        { "checkboxid", "isongoing" },
+                                        { "disabled", false }
+                                    }
+                                );
+                                }
+
+                                <p class="text-muted padding-v-10">
+                                    Ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() do not have an end date and allow parents to sign up their children for ongoing subscriptions.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 }
@@ -177,7 +191,7 @@
         <div id="repeating-schedule" class="hide">
             <div class="form-group">
                 <label class="col-md-3 control-label">
-                    Start Date
+                    Start Date <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
                     <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
@@ -189,7 +203,7 @@
 
             <div class="form-group repeating-end-date">
                 <label class="col-md-3 control-label">
-                    End Date
+                    End Date <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
                     <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
@@ -201,7 +215,7 @@
 
             <div class="form-group">
                 <label class="col-md-3 control-label">
-                    @activityMeetingLabel Start Time
+                    @activityMeetingLabel Start Time <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
                     @{Html.RenderPartial(
@@ -220,7 +234,7 @@
 
             <div class="form-group">
                 <label class="col-md-3 control-label">
-                    @activityMeetingLabel End Time
+                    @activityMeetingLabel End Time <span class="text-danger">*</span>
                 </label>
                 <div class="col-md-7">
                     @{Html.RenderPartial(

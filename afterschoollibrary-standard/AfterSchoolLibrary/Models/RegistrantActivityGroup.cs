@@ -303,10 +303,11 @@ namespace AfterSchoolLibrary.Models
                     
                     RegistrantActivity.LoadByRegistrantId(this.RegistrantId.Value, amsgs, adc)
                         .ForEach(ra => {
-                            amsgs.AddRange(ra.ChangeSeatAssignment(
+                            ra.ChangeSeatAssignment(
                                 RegistrationAssignmentType.Declined,
-                                loggedInUserId,
-                                adc));
+                                new WebUser() { ID = loggedInUserId },
+                                amsgs,
+                                adc);
                         });
                 },
                 onSuccess: (SystemMessages smsgs) =>

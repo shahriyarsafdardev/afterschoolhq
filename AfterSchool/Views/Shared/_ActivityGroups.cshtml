@@ -99,7 +99,7 @@ else
                     <th class="text-center">
                         @UILabel.ActivityLabel(activityGroupType, true)
                     </th>
-                    <th>
+                    <th class="text-center">
                         Registrations
                     </th>
                     <th>
@@ -117,7 +117,7 @@ else
                     {
                         var aag = group.GetAccountActivityGroup(SessionVariables.CurrentAccount);
                         var regCount = aag.IsEmpty() ? group.GetRegistrationCount() : aag.GetRegistrationCount();
-                        var activityCount = aag.IsEmpty() ? group.GetActivityCount(null, isArchive, false, true) : aag.GetActivityCount(null, isArchive, false);
+                        var activityCount = aag.IsEmpty() ? group.GetActivityCount(null, isArchive, false, null) : aag.GetActivityCount(null, isArchive, false);
                         var period = group.GetLatestRegistrationPeriod();
 
                         <tr>
@@ -130,7 +130,7 @@ else
                             
                             <td class="text-center">@activityCount</td>
                             
-                            <td>@regCount</td>
+                            <td class="text-center">@regCount</td>
 
                             @if (!isExternalGroupsView)
                             {

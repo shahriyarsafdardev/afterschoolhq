@@ -99,6 +99,28 @@ namespace AfterSchool
                 });
 
             routes.MapRoute(
+                "SessionHome",
+                "{accountname}/session/{sessionname}",
+                new
+                {
+                    controller = "r",
+                    action = "activitysession",
+                    accountname = UrlParameter.Optional,
+                    sessionname = UrlParameter.Optional,
+                });
+
+            routes.MapRoute(
+                "SessionRegister",
+                "{accountname}/session/{sessionname}/register",
+                new
+                {
+                    controller = "r",
+                    action = "registersession",
+                    accountname = UrlParameter.Optional,
+                    sessionname = UrlParameter.Optional
+                });
+
+            routes.MapRoute(
                 "ActivityRegister",
                 "{accountname}/{activitytype}/{activityname}/register",
                 new
