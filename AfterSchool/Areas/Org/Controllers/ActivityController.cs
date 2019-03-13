@@ -255,7 +255,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Periods = periods;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.ActivePeriod = activePeriod;
-            ViewBag.ActiveForm = activity.GetActiveActivityForm(msgs) ?? SessionVariables.CurrentAccount.GetDefaultActivityForm(msgs);
+            ViewBag.ActiveForm = activeForm;
             ViewBag.IsFullScreen = GetIsFullScreen(activity, activityGroup?.Uid.ToString());
         }
 

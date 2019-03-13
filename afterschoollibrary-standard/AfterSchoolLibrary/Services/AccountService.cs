@@ -1241,7 +1241,6 @@ namespace AfterSchoolLibrary.Services
         {
             var activity = new Activity
             {
-                ID = 0,
                 WaitingListSeats = 0,
                 SeatsAvailable = Math.Min(20, account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
                 CostPerRegistrant = 0,
