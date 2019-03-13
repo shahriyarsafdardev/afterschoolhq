@@ -47,11 +47,14 @@
                                 <i class="s7-date"></i> Schedules
                             </a>
                         </li>
-                        <li>
-                            <a href="@Url.Action("invited", "group", new {id = Model.Uid})"> <!-- class="btn btn-alt6@(actionName == "invited" ? "-active" : "")"-->
-                                <i class="s7-user"></i> Invitations
-                            </a>
-                        </li>
+                        @if (SessionVariables.CurrentAccount.HasAccountPackageFeature(FeatureType.ManageContacts))
+                        {
+                            <li>
+                                <a href="@Url.Action("invited", "group", new {id = Model.Uid})"> <!-- class="btn btn-alt6@(actionName == "invited" ? "-active" : "")"-->
+                                    <i class="s7-user"></i> Invitations
+                                </a>
+                            </li>
+                        }
                         <li>
                             <a href="@Url.Action("messages", "group", new {id = Model.Uid})"> <!-- class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"-->
                                 <i class="s7-mail"></i> Messaging

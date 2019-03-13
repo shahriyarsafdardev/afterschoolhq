@@ -519,7 +519,7 @@ namespace AfterSchoolLibrary.Models
         public List<Activity> GetActivities(ActivityType? activityType, bool? isArchived, bool? isDeleted, int? start, int? length, bool forceReload = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (_Activities.IsEmpty() || forceReload)
-                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, activityType, IsArchived, isDeleted, start, length, msgs, dc);
+                _Activities = Activity.LoadByAccountId(this.AccountId.Value, this.ID.Value, null, activityType, isArchived, isDeleted, start, length, msgs, dc);
 
             return _Activities;
         }

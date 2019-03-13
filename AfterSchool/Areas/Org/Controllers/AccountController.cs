@@ -625,7 +625,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 accountFeature.FeatureTypeId = type;
                             }
 
-                            accountFeature.Max = Request[type.ToString()].ToInteger();
+                            accountFeature.Max = Request[type.ToString()].ToDecimal();
                             accountFeature.LastModifiedBy = SessionVariables.LoggedInUser.ID;
                             accountFeature.LastModifiedDate = DateTime.UtcNow;
                             msgs.AddRange(accountFeature.Save(adc));
