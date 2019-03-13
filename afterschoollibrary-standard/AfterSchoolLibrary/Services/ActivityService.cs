@@ -1732,21 +1732,27 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetRegistrantCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByParticipationObject(
-                activity.ID.Value,
-                ParticipationObjectType.Activity,
-                msgs,
-                dc);
+            if (activity.ID.HasValue)
+                return RegistrantActivity.GetSeatCountByParticipationObject(
+                    activity.ID.Value,
+                    ParticipationObjectType.Activity,
+                    msgs,
+                    dc);
+
+            return 0;
         }
 
         public static int GetRegistrantCountByAssignmentType(this Activity activity, RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(
-                assignmentType: assignmentType,
-                participationObjectId: activity.ID,
-                participationObjectType: ParticipationObjectType.Activity,
-                msgs: msgs,
-                dc: dc);
+            if (activity.ID.HasValue)
+                return RegistrantActivity.GetSeatCountByAssignmentType(
+                    assignmentType: assignmentType,
+                    participationObjectId: activity.ID,
+                    participationObjectType: ParticipationObjectType.Activity,
+                    msgs: msgs,
+                    dc: dc);
+
+            return 0;
         }
 
         public static List<Registrant> GetRegistrants(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
