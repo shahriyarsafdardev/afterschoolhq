@@ -289,7 +289,8 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    
+                    amsgs.AddRange(AddManageLeaguesFeatureType(adc));
+
                     // amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
                     // amsgs.AddRange(UpdateSeatIndexes(adc));
                     // amsgs.AddRange(UpdatePaymentSourceType(adc));
@@ -346,6 +347,31 @@ namespace AfterSchoolLibrary.Helpers
 
             return msgs;
         }        
+
+        public static SystemMessages AddManageLeaguesFeatureType(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var aps = AccountPackage.Load(msgs: msgs, dc: dc);
+
+            aps.ForEach(ap => {
+                var apf = ap.GetFeature(FeatureType.ManageLeagues, msgs, dc);
+                if (apf.IsEmpty())
+                {
+                    msgs.AddRange(new AccountPackageFeature()
+                    {
+                        AccountPackageId = ap.ID,
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = 0,
+                        FeatureTypeId = FeatureType.ManageLeagues,
+                        LastModifiedBy = 0,
+                        LastModifiedDate = DateTime.UtcNow,
+                        Max = 0
+                    }.Save(dc));
+                }
+            });
+
+            return msgs;
+        }
 
         public static SystemMessages UpdatePaymentSourceType(DatabaseConnection dc = null)
         {
