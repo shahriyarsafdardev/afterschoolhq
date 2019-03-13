@@ -231,7 +231,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ratTo = (RegistrationAssignmentType)to.ToInteger();
 
             if(ratTo != RegistrationAssignmentType.NotSet)
-                msgs.AddRange(registrantActivity.ChangeSeatAssignment(ratTo, SessionVariables.LoggedInUser.ID.Value));
+                registrantActivity.ChangeSeatAssignment(ratTo, SessionVariables.LoggedInUser, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -276,15 +276,7 @@ namespace AfterSchool.Areas.Org.Controllers
             msgs.AddRange(selectedRegistration.RemoveParticipation(registrantActivity.ParticipationObjectId.Value, registrantActivity.ParticipationObjectTypeId));
 
             if (msgs.HasNoErrors())
-            {
-                var act = RegistrantActivity.Load(ra.ToInteger());
-
-                msgs.AddRange(selectedRegistration.WasUpdated());
-
-                UpdateSession(SessionActionType.RegistrationRemoveActivity, SessionVariables.CurrentAccount.ID, act.ID, null, selectedRegistration.RegistrantId, selectedRegistration.ID, selectedRegistration.RegistrationPeriodId);
-
                 msgs.Add($"Removed {UILabel.ActivityLabel(activity.ActivityTypeId)}: {activity.Name}", MessageType.Success);
-            }
 
             LoadRegistrationViewBag(registration, r);
             ViewBag.Messages = msgs;
@@ -367,24 +359,25 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Delete(string id, string r)
+        public ActionResult Delete(string id, string r, string returnurl)
         {
             var registration = Registration.LoadByUid(id.ToGuid());
             var selectedRegistration = Registration.LoadByUid(r.ToGuid());
             var msgs = new SystemMessages();
 
-            msgs = selectedRegistration.CancelAll();
+            selectedRegistration.CancelAll(msgs);
 
             if (msgs.HasNoErrors())
             {
+                if (returnurl.IsNotEmpty())
+                    return Redirect(returnurl);
+
                 return RedirectToAction("index");
             }
-            else
-            {
-                ViewBag.Messages = msgs;
-                LoadRegistrationViewBag(registration, r);
-                return View("Edit", registration);
-            }
+
+            ViewBag.Messages = msgs;
+            LoadRegistrationViewBag(registration, r);
+            return View("Edit", registration);
         }
 
         [HttpGet]

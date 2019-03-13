@@ -10,17 +10,28 @@
         publishClass = "btn-success";
     }
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
-    var activityCount = Model.GetActivityCount(null, false);
+    var activityCount = Model.GetActivityCount(ActivityType.Activity, null, false, null);
 }
 @if (Model.IsNotEmpty() && Model.ID.HasValue && Model.ID.Value > 0)
 {
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
-            <a href="@Url.Action("summary", "group", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")"><i class="s7-graph2"></i>  Summary</a>
-            <a href="@Url.Action("edit", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")"><i class="s7-edit"></i> Setup</a>
-            <a href="@Url.Action("emailcontent", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "emailcontent" ? "-active" : "")"><i class="s7-note2"></i> Content</a>
-            <a href="@Url.Action("periods", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")"><i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)</a>
-            <a href="@Url.Action("activities", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")"><i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)</a>
+            <a href="@Url.Action("summary", "group", new { id = Model.Uid })" class="btn btn-alt6@(actionName == "summary" ? "-active" : "")">
+                <i class="s7-graph2"></i>  Summary
+            </a>
+            <a href="@Url.Action("edit", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">
+                <i class="s7-edit"></i> Setup
+            </a>
+            <a href="@Url.Action("emailcontent", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "emailcontent" ? "-active" : "")">
+                <i class="s7-note2"></i> Content
+            </a>
+            <a href="@Url.Action("periods", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
+                <i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)
+            </a>
+            <a href="@Url.Action("activities", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "activities" ? "-active" : "")">
+                <i class="s7-gleam"></i> @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true)
+            </a>
+            
             @if (activityCount > 0 || Model.IsPublished)
             {
                 <a href="@Url.Action("registrations", "group", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "registrations" ? "-active" : "")">
@@ -36,11 +47,14 @@
                                 <i class="s7-date"></i> Schedules
                             </a>
                         </li>
-                        <li>
-                            <a href="@Url.Action("invited", "group", new {id = Model.Uid})"> <!-- class="btn btn-alt6@(actionName == "invited" ? "-active" : "")"-->
-                                <i class="s7-user"></i> Invitations
-                            </a>
-                        </li>
+                        @if (SessionVariables.CurrentAccount.HasAccountPackageFeature(FeatureType.ManageContacts))
+                        {
+                            <li>
+                                <a href="@Url.Action("invited", "group", new {id = Model.Uid})"> <!-- class="btn btn-alt6@(actionName == "invited" ? "-active" : "")"-->
+                                    <i class="s7-user"></i> Invitations
+                                </a>
+                            </li>
+                        }
                         <li>
                             <a href="@Url.Action("messages", "group", new {id = Model.Uid})"> <!-- class="btn btn-alt6@(actionName == "messages" ? "-active" : "")"-->
                                 <i class="s7-mail"></i> Messaging

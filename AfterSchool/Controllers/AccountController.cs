@@ -108,7 +108,6 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-
                 var firstName = qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).First();
                 var lastName = qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).First();
                 var email = qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).First();
@@ -1031,10 +1030,6 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        // add standardized questions that the student just now answered back to the main profile
-                        // that means no registration id
-                        msgs.Add($"Current Registrant IsEmpty: {SessionVariables.CurrentRegistrant.IsEmpty()}", MessageType.Notice);
-
                         qvms.Where(qvm => qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
                         .ToList()
                         .ForEach(qvm =>
@@ -1045,12 +1040,7 @@ namespace AfterSchool.Controllers
                                 loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
-                        });
-
-                        msgs.Add($"Current Registrant IsEmpty: {SessionVariables.CurrentRegistrant.IsEmpty()}", MessageType.Notice);
-                        msgs.Add($"participationObject IsEmpty: {participationObject.IsEmpty()}", MessageType.Notice);
-                        msgs.Add($"participationObject.OwnerAccount IsEmpty: {participationObject.OwnerAccount.IsEmpty()}", MessageType.Notice);
-                        msgs.Add($"SessionVariables.LoggedInUser IsEmpty: {SessionVariables.LoggedInUser.IsEmpty()}", MessageType.Notice);
+                        });                        
 
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
@@ -1062,11 +1052,12 @@ namespace AfterSchool.Controllers
                             );
 
                         // create registration
-
                         var activityGroupId = new int?();
 
                         if (participationObject.IsAccountActivityGroup())
                             activityGroupId = participationObject.GetAccountActivityGroup().ActivityGroupId;
+                        else if (participationObject.IsActivityGroup())
+                            activityGroupId = participationObject.GetActivityGroupId();
                         else if (participationObject.IsActivity())
                             activityGroupId = participationObject.GetActivity().ActivityGroupId;
 
@@ -1105,6 +1096,35 @@ namespace AfterSchool.Controllers
                                 dc: adc);
                         });
 
+                        // if there is a Session, then a person may set their preferences for activities in that session, 
+                        // also only if the session is set to Apply
+                        if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
+                        {
+                            var activitiesAndPreferences = new List<Tuple<Activity, int>>();
+                            var activities = participationObject.GetActivityGroup().GetActivities(null, false, false, null, null, false, amsgs, adc);
+
+                            for (int i = 1; i <= activities.Count; i++)
+                            {
+                                var postedValue = Request[$"activity-preference-{i}"];
+                                if (postedValue.IsGuid())
+                                {
+                                    var activity = Activity.LoadByUid(postedValue.ToGuid(), msgs);
+
+                                    Registration.ProcessRegistrationAssignment(
+                                        registration: registration,
+                                        participationObject: activity.GetParticipationObject(amsgs, adc),
+                                        registrant: accountRegistrantCopy,
+                                        seatsRequested: 1,
+                                        preferenceNumber: i,
+                                        activityGroupId: participationObject.GetActivityGroupId(),
+                                        periodId: period?.ID,
+                                        loggedInUser: SessionVariables.LoggedInUser,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                }
+                            }
+                        }
+
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1113,6 +1133,10 @@ namespace AfterSchool.Controllers
                     onFailure: (SystemMessages fmsgs) =>
                     {
                         msgs.AddRange(fmsgs);
+                    },
+                    onException: (SystemMessages emsgs) =>
+                    {
+                        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
                     }
                 );
             }

@@ -237,9 +237,13 @@ namespace AfterSchool.Models
             var msgs = new SystemMessages();
 
             if (group.IsArchived)
-            {
                 msgs.Add($"<a href=\"/org/group/restore/{group.Uid}\">Restore {group.Name}</a>. It is currently archived", MessageType.Error);
-            }
+
+            if (!group.GetRegistrationPeriods().Any())
+                msgs.Add($"Please <a href=\"/org/group/periods/{group.Uid}\">add a Sign Up Period</a>", MessageType.Error);
+
+            if (group.GetActivities().Where(x => !x.ActivityScheduleId.HasValue).Any())
+                msgs.Add($"Please ensure all of your {UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()} <a href=\"/org/group/schedules/{group.Uid}\">have schedules</a>", MessageType.Error);
 
             return msgs;
         }

@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AfterSchoolLibrary.Services;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {    
     [Serializable]
     public class RegistrantAssignment
@@ -65,8 +66,8 @@ namespace AfterSchoolLibrary
 
     public class RegistrationRandomization
     {
-        public RegistrationPeriod RegistrationPeriod { get; set; }
         public ActivityGroup ActivityGroup { get; set; }
+        public WebUser LoggedInUser { get; set; }
 
         private List<Registration> Registrations { get; set; }
         private List<RegistrantActivity> RegistrantActivities { get; set; }
@@ -103,13 +104,6 @@ namespace AfterSchoolLibrary
 
         public RegistrationRandomization()
         {
-            RoundNumber = 0;
-            ActivityAndSeatCounts = new List<ActivityAndSeatCount>();
-        }
-
-        public RegistrationRandomization(RegistrationPeriod period)
-        {
-            RegistrationPeriod = period;
             RoundNumber = 0;
             ActivityAndSeatCounts = new List<ActivityAndSeatCount>();
         }
@@ -160,11 +154,12 @@ namespace AfterSchoolLibrary
                 foreach(var ra in registrantActivitiesNotRegisteredYet)
                 {
                     // make sure activity is not full
-                    var activity = this.Activities.Find(x => x.ID == ra.ActivityId);
-                    var activityAssignment = ActivityAssignments.Find(x => x.ActivityId == ra.ActivityId.Value);
+                    var activity = this.Activities.Find(x => x.ID == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+                    var activityAssignment = ActivityAssignments.Find(x => x.ActivityId == ra.ParticipationObjectId.Value && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+
                     if (activityAssignment.IsEmpty())
                     {
-                        activityAssignment = new ActivityAssignment() { ActivityId = ra.ActivityId.Value };
+                        activityAssignment = new ActivityAssignment() { ActivityId = ra.ParticipationObjectId.Value };
                         this.ActivityAssignments.Add(activityAssignment);
                     }
 
@@ -219,19 +214,13 @@ namespace AfterSchoolLibrary
             return allFull;
         }
 
-        private void LoadData(DatabaseConnection dc = null)
+        private void LoadData(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (this.RegistrationPeriod.IsNotEmpty())
-            {
-                this.Registrations = this.RegistrationPeriod.GetRegistrations(dc: dc);
-                this.RegistrantActivities = this.RegistrationPeriod.GetRegistrantActivities(this.Registrations, dc: dc);
-                this.Activities = this.RegistrationPeriod.GetActivities(dc: dc);
-            }
-            else if (this.ActivityGroup.IsNotEmpty())
+            if (this.ActivityGroup.IsNotEmpty())
             {
                 this.Registrations = this.ActivityGroup.GetRegistrations(dc: dc);
-                this.RegistrantActivities = this.ActivityGroup.GetRegistrantActivities(this.Registrations, dc: dc);
-                this.Activities = this.ActivityGroup.GetActivities(false, false, null, null, dc: dc);
+                this.RegistrantActivities = this.ActivityGroup.GetRegistrantActivities(this.Registrations, msgs, dc: dc);
+                this.Activities = this.ActivityGroup.GetActivities(null, false, false, null, null, false, msgs, dc);
             }
             
             foreach(var activity in this.Activities)
@@ -267,12 +256,12 @@ namespace AfterSchoolLibrary
                     }
 
                     // only add date ranges of activities that are reserved
-                    foreach(var ra in existingRas.Where(x => x.NumberOfSeats > 0))
+                    foreach(var ra in existingRas.Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Reserved))
                     {
                         assignment.AssignmentDateRanges.AddRange(
-                            ra.ToActivity(dc: dc)
-                                .GetSchedule(dc: dc)
-                                .GetInstances(dc: dc)
+                            ra.GetActivity(msgs, dc)
+                                .GetSchedule(msgs, dc)
+                                .GetInstances(false, msgs, dc)
                                 .Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value))
                         );
                     }
@@ -280,36 +269,35 @@ namespace AfterSchoolLibrary
             }
         }
 
-        private SystemMessages DoAssignments(DatabaseConnection dc)
-        {
-            var msgs = new SystemMessages();
+        private SystemMessages DoAssignments(SystemMessages msgs, DatabaseConnection dc)
+        {            
             foreach (var registrantAssignment in this.RegistrantAssignments)
             {
                 foreach (var assignment in registrantAssignment.Assignments)
                 {
                     var ra = this.RegistrantActivities.Find(x => x.ID.Value == assignment);
-                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, dc: dc));
+                    ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, this.LoggedInUser, msgs, dc);
                 }
                 foreach (var assignment in registrantAssignment.WaitingListAssignments)
                 {
                     var ra = this.RegistrantActivities.Find(x => x.ID.Value == assignment);
-                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.WaitingList, dc: dc));
+                    ra.ChangeSeatAssignment(RegistrationAssignmentType.WaitingList, this.LoggedInUser, msgs, dc);
                 }
             }
             return msgs;
         }
 
-        public SystemMessages ApplyLottery(List<RegistrantAssignment> registrantAssignments, DatabaseConnection dc = null)
+        public SystemMessages ApplyLottery(List<RegistrantAssignment> registrantAssignments, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     _RegistrantAssignments = registrantAssignments;
-                    LoadData(adc);
-                    amsgs.AddRange(DoAssignments(adc));
+                    LoadData(amsgs, adc);
+                    amsgs.AddRange(DoAssignments(amsgs, adc));
 
                     if(amsgs.HasNoErrors() && this.ActivityGroup.IsNotEmpty())
                     {
@@ -325,6 +313,10 @@ namespace AfterSchoolLibrary
                 {
                     msgs.AddRange(fmsgs);
                 },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Helpers.Utilities.SystemErrorLog(emsgs);
+                },
                 dc: dc
             );            
 
@@ -335,7 +327,7 @@ namespace AfterSchoolLibrary
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
-            LoadData();
+            LoadData(msgs, dc);
             while (!RunLottery(msgs));
 
             return this.RegistrantAssignments;
@@ -373,7 +365,7 @@ namespace AfterSchoolLibrary
             }
 
             // store all dates/times this registrant is enrolled for
-            var activity = this.Activities.Find(x => x.ID == ra.ActivityId);
+            var activity = this.Activities.Find(x => x.ID == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
             var dateRanges = activity.GetSchedule(dc: dc).GetInstances(dc: dc).Select(x => new DateRange(x.StartDateTime.Value, x.EndDateTime.Value));
             switch (type)
             {
@@ -389,14 +381,14 @@ namespace AfterSchoolLibrary
             }
 
             // activity view
-            var actassignment = ActivityAssignments.Find(x => x.ActivityId == ra.ActivityId.Value);
+            var actassignment = ActivityAssignments.Find(x => x.ActivityId == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
             if (actassignment.IsEmpty())
             {
                 actassignment = new ActivityAssignment();
-                actassignment.ActivityId = ra.ActivityId.Value;
+                actassignment.ActivityId = ra.ParticipationObjectId.Value;
             }
 
-            if (!actassignment.RegistrantActivities.Where(x => x == ra.ActivityId).Any())
+            if (!actassignment.RegistrantActivities.Where(x => x == ra.ParticipationObjectId && ra.ParticipationObjectTypeId == ParticipationObjectType.Activity).Any())
             {
                 actassignment.RegistrantActivities.Add(ra.ID.Value);
 

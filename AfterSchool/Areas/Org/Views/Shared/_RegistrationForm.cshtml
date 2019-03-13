@@ -1,0 +1,16 @@
+﻿@model List<FormQuestionViewModel>
+
+@foreach (var group in Model.Select(qvm => qvm.Question.GetFormQuestionGroup()).DistinctBy(group => group.ID).OrderBy(group => group.DisplayOrder))
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @group.Name
+        </div>
+        <div class="panel-body">
+            @foreach (var qvm in Model.Where(qvm => qvm.Question.GetFormQuestionGroup().ID == group.ID))
+            {
+                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+            }
+        </div>
+    </div>
+}

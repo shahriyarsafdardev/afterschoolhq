@@ -852,7 +852,6 @@ namespace AfterSchoolLibrary.Services
 
                 if (cost.IsBlank())
                     cost = "0";
-
             }
 
             Activity activity = null;
@@ -1008,18 +1007,28 @@ namespace AfterSchoolLibrary.Services
                                 activity.ContactPhone = account.Phone;
                         }
 
+                        ActivityGroup activityGroup = null;
+
                         if (group.IsNotEmpty() && group.ToString().IsGuid())
-                            activity.ActivityGroupId = ActivityGroup.LoadByUid(group.ToString().ToGuid(), amsgs, adc).ID.Value;
+                            activityGroup = ActivityGroup.LoadByUid(group.ToString().ToGuid(), amsgs, adc);
+
+                        if (activityGroup.IsNotEmpty())
+                        {
+                            activity.ActivityGroupId = activityGroup.ID.Value;
+                            activity.GradeLevelStart = activityGroup.MinGradeLevelId;
+                            activity.GradeLevelEnd = activityGroup.MaxGradeLevelId;
+                            activity.GenderRestriction = activityGroup.GenderRestriction;
+                        }
 
                         amsgs.AddRange(activity.Save(adc));
+                        
+                        // create / associate form
+                        if (amsgs.HasNoErrors() && form.IsNumber())
+                            amsgs.AddRange(activity.SetupNewForm(form.ToString().ToInteger(), account, loggedInUserId, adc));
 
                         // skip if it is attached to a activity group
                         if (!activity.ActivityGroupId.HasValue)
                         {
-                            // create / associate form
-                            if (amsgs.HasNoErrors() && form.IsNumber())
-                                amsgs.AddRange(activity.SetupNewForm(form.ToString().ToInteger(), account, loggedInUserId, adc));
-
                             //create registration period if not created yet and there is no activitygroup (activity groups have their own registration period)
                             if (amsgs.HasNoErrors() && registrationperiod.IsNumber())
                             {
@@ -1723,21 +1732,27 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetRegistrantCount(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByParticipationObject(
-                activity.ID.Value,
-                ParticipationObjectType.Activity,
-                msgs,
-                dc);
+            if (activity.ID.HasValue)
+                return RegistrantActivity.GetSeatCountByParticipationObject(
+                    activity.ID.Value,
+                    ParticipationObjectType.Activity,
+                    msgs,
+                    dc);
+
+            return 0;
         }
 
         public static int GetRegistrantCountByAssignmentType(this Activity activity, RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(
-                assignmentType: assignmentType,
-                participationObjectId: activity.ID,
-                participationObjectType: ParticipationObjectType.Activity,
-                msgs: msgs,
-                dc: dc);
+            if (activity.ID.HasValue)
+                return RegistrantActivity.GetSeatCountByAssignmentType(
+                    assignmentType: assignmentType,
+                    participationObjectId: activity.ID,
+                    participationObjectType: ParticipationObjectType.Activity,
+                    msgs: msgs,
+                    dc: dc);
+
+            return 0;
         }
 
         public static List<Registrant> GetRegistrants(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)

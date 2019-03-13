@@ -43,7 +43,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenAndUpcomingRegistrationPeriods(msgs, dc);
+            var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
             var activities = new List<Activity>();
 
             periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
@@ -53,7 +53,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Activity> GetPublishedActivitiesInLocations(this Account account, List<int> locationIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var periods = account.GetOpenAndUpcomingRegistrationPeriods(msgs, dc);
+            var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
             var activities = new List<Activity>();
 
             periods.ForEach(period => 
@@ -131,7 +131,16 @@ namespace AfterSchoolLibrary.Services
 
         public static List<ActivityGroup> GetPublishedSessions(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return ActivityGroup.LoadByAccountIdByIsPublished(account.ID.Value, true, msgs, dc);
+            var groups = ActivityGroup.LoadByAccountIdByIsPublishedByIsArchived(account.ID.Value, true, false, msgs, dc);
+            var periods = RegistrationPeriod.LoadByActivityGroupIds(
+                    groups.Select(x => x.ID.Value).ToList(),
+                    msgs,
+                    dc
+                )
+                .Where(period => period.IsOpen() || period.WillOpen() || period.WillCloseIn().Days > -14)
+                .ToList();
+
+            return groups.Where(group => periods.Select(period => period.ActivityGroupId.Value).Contains(group.ID.Value)).ToList();
         }
 
         public static List<ActivityGroup> GetSessions(this Account account, bool IsArchived, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -188,10 +197,17 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static List<RegistrationPeriod> GetClosedRegistrationPeriods(this Account account, DatabaseConnection dc = null)
+        public static List<RegistrationPeriod> GetClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.GetRegistrationPeriods()
                 .Where(x => x.EndDateTime.Value < account.ConvertToAccountTimeZone(DateTime.UtcNow))
+                .ToList();
+        }
+
+        public static List<RegistrationPeriod> GetRecentlyClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetRegistrationPeriods()
+                .Where(x => x.EndDateTime.Value.AddWeeks(2) < account.ConvertToAccountTimeZone(DateTime.UtcNow))
                 .ToList();
         }
 
@@ -199,6 +215,14 @@ namespace AfterSchoolLibrary.Services
         {
             var periods = account.GetOpenRegistrationPeriods(msgs, dc);
             periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
+            return periods;
+        }
+
+        public static List<RegistrationPeriod> GetOpenUpcomingRecentlyClosedRegistrationPeriods(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var periods = account.GetOpenRegistrationPeriods(msgs, dc);
+            periods.AddRange(account.GetUpcomingRegistrationPeriods(msgs, dc));
+            periods.AddRange(account.GetRecentlyClosedRegistrationPeriods(msgs, dc));
             return periods;
         }
 
@@ -807,6 +831,125 @@ namespace AfterSchoolLibrary.Services
             return Registration.SearchCount(searchText, account.ID.Value, questionId, participationObjectIds, participationObjectType, regStatus, rat, dc: dc);
         }
 
+        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<Tuple<FormQuestion, string>> questionsAndAnswers, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            account.CreateNewRegistrantAndRegistration(
+                participationObject,
+                questionsAndAnswers,
+                new List<Tuple<Activity, int>>(),
+                period,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<Tuple<FormQuestion, string>> questionsAndAnswers, List<Tuple<Activity, int>> activitiesAndPreferences, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Registrant student = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var location = account.GetDefaultLocation(amsgs, adc);
+                    var groupId = new int?();
+                    var aagId = new int?();
+
+                    if (participationObject.IsAccountActivityGroup())
+                    {
+                        groupId = participationObject.GetAccountActivityGroup().ActivityGroupId;
+                        aagId = participationObject.GetAccountActivityGroupId();
+                    }
+                    else if (participationObject.IsActivityGroup())
+                    {
+                        groupId = participationObject.GetActivityGroupId();
+                    }
+                    else if (participationObject.IsActivity())
+                    {
+                        groupId = participationObject.GetActivity().ActivityGroupId;
+                        aagId = participationObject.GetActivity().AccountActivityGroupId;
+                    }
+
+                    // create student registrant record associated to this account
+                    student = account.CreateRegistrant(
+                        associatedUser: null,
+                        registrantType: RegistrantType.Individual,
+                        isMaster: false,
+                        isParentOrGuardian: false,
+                        allowTextMessages: false,
+                        schoolLocationId: location?.ID,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // create a registration
+                    var registration = student.AddRegistration(
+                        ownerAccountId: account.ID.Value,
+                        activityGroupId: groupId,
+                        accountActivityGroupId: aagId,
+                        periodId: period?.ID,
+                        completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                        loggedInUserId: loggedInUser.ID.Value,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // add answers                    
+                    questionsAndAnswers.ForEach(questionAndAnswer =>
+                    {
+                        student.AddAnswer(
+                            answerText: questionAndAnswer.Item2.IfEmpty("").Trim(),
+                            question: questionAndAnswer.Item1,
+                            registrationId: registration.ID,
+                            loggedInUserId: loggedInUser.ID.Value,
+                            msgs: amsgs,
+                            dc: adc);
+                    });
+
+                    // manages seats and create registrantactivity record
+                    Registration.ProcessRegistrationAssignment(
+                        registration: registration,
+                        participationObject: participationObject,
+                        registrant: student,
+                        seatsRequested: 1,
+                        activityGroupId: groupId,
+                        periodId: period?.ID,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+                    
+                    activitiesAndPreferences.ForEach(activityAndPreference =>
+                    {
+                        Registration.ProcessRegistrationAssignment(
+                            registration: registration,
+                            participationObject: activityAndPreference.Item1.GetParticipationObject(amsgs, adc),
+                            registrant: student,
+                            seatsRequested: 1,       
+                            preferenceNumber: activityAndPreference.Item2,
+                            activityGroupId: groupId,
+                            periodId: period?.ID,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+                    });
+
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    msgs.Add("Your new registration has been added", MessageType.Success);
+                },
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                },
+                onException: (SystemMessages emsgs) =>
+                {
+                    Helpers.Utilities.SystemErrorLog(emsgs);
+                },
+                dc: dc
+            );
+        }
+
         #endregion
 
         #region NewAccounSetup
@@ -1098,7 +1241,6 @@ namespace AfterSchoolLibrary.Services
         {
             var activity = new Activity
             {
-                ID = 0,
                 WaitingListSeats = 0,
                 SeatsAvailable = Math.Min(20, account.GetActiveAccountPackage().GetFeature(FeatureType.Participants).Max.Value.ToInteger()),
                 CostPerRegistrant = 0,
@@ -1798,7 +1940,7 @@ namespace AfterSchoolLibrary.Services
                     dc);
 
                 if (ra.IsNotEmpty() && ra.AssignmentTypeId != RegistrationAssignmentType.Reserved)
-                    msgs.AddRange(ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser?.ID.IfEmpty(0), dc));
+                    ra.ChangeSeatAssignment(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
             }
         }
 
@@ -2182,7 +2324,7 @@ namespace AfterSchoolLibrary.Services
                     msgs,
                     dc
                 )
-                .Where(period => period.IsOpen() || period.WillOpen())
+                .Where(period => period.IsOpen() || period.WillOpen() || period.WillCloseIn().Days > -14)
                 .ToList();
 
             return aags.Where(aag => periods.Select(period => period.AccountActivityGroupId.Value).Contains(aag.ID.Value)).ToList();

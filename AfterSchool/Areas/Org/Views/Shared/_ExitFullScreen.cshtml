@@ -1,0 +1,12 @@
+﻿@model string
+@{
+    var fullscreenExitUrl = Model;
+    if (fullscreenExitUrl.IsBlank())
+    {
+        fullscreenExitUrl = (string)ViewBag.FullScreenExitUrl;
+    }
+}
+
+<div class="pull-right">
+    <a href="@fullscreenExitUrl" class="btn btn-default">X</a>
+</div>
