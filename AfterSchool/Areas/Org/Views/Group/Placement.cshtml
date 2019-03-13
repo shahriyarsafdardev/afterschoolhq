@@ -25,7 +25,7 @@
                         Step 1 - Get Started
                     </div>
                     <div class="panel-body">
-                        <div class="row margin-b-20">
+                        <div class="row margin-b-20 hide">
                             <div class="col-md-4">
                                 <select class="form-control" name="period" id="period">
                                     <option value="">All @UILabel.RegistrationPeriodLabel(true)</option>
@@ -132,8 +132,8 @@
                                     <tbody>
                                         @foreach (var activity in activities)
                                         {
-                                            var assignedCount = assignedRegistrantActivities.Where(x => x.ActivityId == activity.ID).Sum(x => x.NumberOfApplicationSeats.Value);
-                                            var waitingListCount = waitingListActivities.Where(x => x.ActivityId == activity.ID).Sum(x => x.NumberOfApplicationSeats.Value);
+                                            var assignedCount = assignedRegistrantActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied);
+                                            var waitingListCount = waitingListActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
 
                                             totalSeats += activity.SeatsAvailable.Value;
                                             totalLeft += (activity.SeatsAvailable.Value - assignedCount);
@@ -147,9 +147,9 @@
                                                         @: - @activity.GetDaysOfTheWeek().Select(x=>x.ToString().MaxChars(2)).ToStringList(", ")
                                                     }
 
-                                                    @if (activity.GetGradeLevels().Count > 0)
+                                                    @if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
                                                     {
-                                                        @: - @activity.GetGradeLevels().Select(x => x.Abbreviation).ToStringList(", ")
+                                                        @: - Grades @activity.GetStartingGradeLevel().Abbreviation to @activity.GetEndingGradeLevel().Abbreviation
                                                     }
 
                                                     @if (activity.AgeStart.HasValue && activity.AgeEnd.HasValue)
@@ -193,10 +193,10 @@
                                             <tr>
                                                 <td class="text-nowrap">@registrant.Name</td>
                                                 <td>
-                                                    @Html.Raw(assignedRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
+                                                    @Html.Raw(assignedRas.Select(x => x.GetActivity().Name).ToStringList(", "))
                                                 </td>
                                                 <td>
-                                                    @Html.Raw(waitingListRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
+                                                    @Html.Raw(waitingListRas.Select(x => x.GetActivity().Name).ToStringList(", "))
                                                 </td>
                                             </tr>
                                         }
@@ -256,10 +256,10 @@
                                             <tr>
                                                 <td class="text-nowrap">@registrant.Name</td>
                                                 <td>
-                                                    @Html.Raw(assignedRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
+                                                    @Html.Raw(assignedRas.Select(x => x.GetActivity().Name).ToStringList(", "))
                                                 </td>
                                                 <td>
-                                                    @Html.Raw(waitingListRas.OrderBy(x => x.Day).Select(x => (x.Day != DayOfWeekASL.NotSet ? "<strong>" + x.Day.ToString().MaxChars(2) + "</strong>: " : "") + x.ActivityName).ToStringList(", "))
+                                                    @Html.Raw(waitingListRas.Select(x => x.GetActivity().Name).ToStringList(", "))
                                                 </td>
                                             </tr>
                                         }

@@ -1,0 +1,43 @@
+﻿@model ActivityGroup
+@{
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
+    var activities = (List<Activity>)ViewBag.Activities;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{Html.RenderPartial("_ActivityGroupHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", $"{Model.Name} - Add {UILabel.RegistrantLabel()}"); }
+        </div>
+        <div class="panel-body">
+
+            <form id="form-add-reg" action="@Url.Action("addregistration", "group", new { id = Model.Uid })" class="form-horizontal" method="post">
+
+                @{ Html.RenderPartial("_RegistrationForm", qvms); }
+
+                @{ Html.RenderPartial("~/Views/Shared/Activity/_ActivityPreferences.cshtml", activities); }
+
+                <div class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-6">
+                        <div class="pull-left">
+                            <a href="@Url.Action("registrations", "group", new { id = Model.Uid })" class="text-muted">&laquo; Back</a>
+                        </div>
+                        <div class="btn-group pull-right">
+                            <button type="submit" class="btn btn-primary btn-lg">Register @UILabel.RegistrantLabel() &raquo;</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

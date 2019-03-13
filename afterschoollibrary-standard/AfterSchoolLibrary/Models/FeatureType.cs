@@ -18,5 +18,6 @@ public enum FeatureType
 	ManageContacts,
 	ViewInsights,
 	PaymentsPercentageFee,
-	PaymentsPercentageFlatFee
+	PaymentsPercentageFlatFee,
+	ManageLeagues
 }

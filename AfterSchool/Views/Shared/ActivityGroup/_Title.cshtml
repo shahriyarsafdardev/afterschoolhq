@@ -1,0 +1,9 @@
+﻿@model string
+@if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.SchoolDistrict)
+{
+    <i class="s7-date"></i> @Model
+}
+else
+{
+    <i class="s7-ball"></i> @Model
+}

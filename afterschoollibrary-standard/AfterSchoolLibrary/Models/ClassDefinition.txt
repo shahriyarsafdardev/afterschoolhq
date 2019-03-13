@@ -97,6 +97,7 @@ joinproperty: Account.StripePublishableKey, string, NVarChar
 joinproperty: Account.TimeZone, string, NVarChar
 joinproperty: ActivityGroup.IsArchived, bool?, Bit
 joinproperty: ActivityGroup.Name, string, NVarChar
+joinproperty: ActivityGroup.Uid, Guid, UniqueIdentifier
 loadmethod: AccountId, List<>
 loadmethod: AccountId|IsPublished, List<>
 loadmethod: LocationId, List<>
@@ -546,14 +547,21 @@ property: AdministratorAccountId, int?, Int
 property: ActivityScheduleId, int?, Int
 property: Cost, decimal?, Money
 property: CostUnitTypeId, CostUnitType, Int 
+property: ContactName, string, NVarChar "50"
+property: ContactPhone, string, NVarChar "50"
+property: ContactEmail, string, NVarChar "100"
+property: SeatsAvailable, int?, Int
+property: WaitingListSeats, int?, Int
 baseproperty: Name, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|ActivityGroupTypeId, List<>
 loadmethod: AccountId|IsPublished, List<>
+loadmethod: AccountId|IsPublished|IsArchived, List<>
 loadmethod: AccountId|IsPublished|IsInviteOnly, List<>
 loadmethod: AccountId|UniqueName
 loadmethod: Uid
 loadmethod: Uid|IsPublished
+loadmethod: Uid|IsPublished|IsArchived
 loadmethod: Uid|IsPublished|IsInviteOnly
 loadmethod: AdministratorAccountId, List<>
 join: Account.ID, ActivityGroup.AccountId, InnerJoin
@@ -1499,7 +1507,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageLeagues
 [end]
 
 [begin]

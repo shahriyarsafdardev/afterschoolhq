@@ -23,28 +23,8 @@
 
                 <form id="form1" method="post" action="@Url.Action("emailcontent", "group", new { id = Model.Uid })" class="form-horizontal">
 
-                    @foreach (var item in properties.Select(x => x.AccountPropertyTypeId))
-                    {
-                        <div class="form-group">
-                            <label class="col-md-3 control-label">
-                                @item.ToString().SplitByUpperCase()                                
-                            </label>
-                            <div class="col-md-9">
-                                <div class="text-editor-container">
-                                    @{ Html.RenderPartial(
-                                         "~/Views/Shared/_TextEditor.cshtml",
-                                         properties.Find(x => x.AccountPropertyTypeId == item).Value,
-                                         new ViewDataDictionary()
-                                         {
-                                            { "id",  @item.ToString().ToLower() },
-                                            { "name",  @item.ToString().ToLower() },
-                                            { "required",  true }
-                                         }
-                                         ); }                                    
-                                </div>
-                            </div>
-                        </div>
-                    }                    
+                    @RenderAccountProperty(AccountPropertyType.RegistrationThankYouEmail, properties)
+                    @RenderAccountProperty(AccountPropertyType.ApplicationThankYouEmail, properties)                   
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label"></label>
@@ -61,3 +41,26 @@
     </div>
 
 </div>
+
+@helper RenderAccountProperty(AccountPropertyType item, List<AccountProperty> properties)
+{
+    <div class="form-group">
+        <label class="col-md-3 control-label">
+            @item.ToString().SplitByUpperCase()
+        </label>
+        <div class="col-md-9">
+            <div class="text-editor-container">
+                @{ Html.RenderPartial(
+                    "~/Views/Shared/_TextEditor.cshtml",
+                    properties.Find(x => x.AccountPropertyTypeId == item).Value,
+                    new ViewDataDictionary()
+                    {
+                        { "id",  @item.ToString().ToLower() },
+                        { "name",  @item.ToString().ToLower() },
+                        { "required",  true }
+                    }
+                 ); }
+            </div>
+        </div>
+    </div>
+}

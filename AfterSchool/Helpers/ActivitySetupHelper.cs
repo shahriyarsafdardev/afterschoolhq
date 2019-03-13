@@ -30,16 +30,21 @@ namespace AfterSchool.Helpers
 
                 return "&laquo; Previous";
             }
-
-            if (cmd == "next")
+            else if (cmd == "next")
             {
                 if (isTop)
                     return "&raquo;";
 
                 return "Next &raquo;";
             }
+            else if (cmd == "done")
+            {
+                if (isTop)
+                    return "&raquo;";
 
-            if (cmd == "publish")
+                return "Done &raquo;";
+            }
+            else if (cmd == "publish")
                 return "Publish &raquo;";
 
             return "";

@@ -491,8 +491,6 @@ namespace AfterSchoolLibrary.Models
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var changingAssignment = false;
-
             var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
                 participationObjectId, 
                 participationObjectType, 
@@ -501,7 +499,6 @@ namespace AfterSchoolLibrary.Models
                 dc);
 
             if (ra.IsEmpty())
-            {
                 ra = new RegistrantActivity
                 {
                     ParticipationObjectId = participationObjectId,
@@ -513,21 +510,14 @@ namespace AfterSchoolLibrary.Models
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId
                 };
-                changingAssignment = true;
-            }
-            else
-            {
-                if (assignmentType != ra.AssignmentTypeId)
-                    changingAssignment = true;
-            }
-
-            // ra.Day = day;
+            
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
             ra.PreferenceNumber = preferenceNumber;
 
             msgs.AddRange(ra.Save(dc));
-            msgs.AddRange(ra.ChangeSeatAssignment(assignmentType, loggedInUserId, dc));
+
+            ra.ChangeSeatAssignment(assignmentType, new WebUser { ID = loggedInUserId }, msgs, dc);
 
             return ra;
         }
@@ -926,8 +916,8 @@ namespace AfterSchoolLibrary.Models
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    amsgs.AddRange(this.DeleteSessionActions(adc));
-                    amsgs.AddRange(this.DeleteRegistrantActivities(adc));
+                    this.DeleteSessionActions(amsgs, adc);
+                    this.DeleteRegistrantActivities(amsgs, adc);
                     amsgs.AddRange(this.Delete(adc));
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -938,53 +928,40 @@ namespace AfterSchoolLibrary.Models
                 {
                     msgs.AddRange(fmsgs);
                 },
+                onException: (SystemMessages emsgs) =>
+                {
+                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
+                },
                 dc: dc
             );
 
             return msgs;
         }
 
-        internal SystemMessages DeleteSessionActions(DatabaseConnection dc = null)
+        /// <summary>
+        /// Delete session related actions
+        /// </summary>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        internal void DeleteSessionActions(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
-            // delete related session actions
-            var sas = SessionAction.LoadByRegistrantId(this.ID.Value, dc: dc);
-            foreach (var sa in sas)
-            {
-                msgs.AddRange(sa.Delete(dc: dc));
-            }
-
-            return msgs;
+            SessionAction.LoadByRegistrantId(this.ID.Value, msgs, dc).ForEach(sa => msgs.AddRange(sa.Delete(dc)));
         }
 
-        internal SystemMessages DeleteRegistrantActivities(DatabaseConnection dc = null)
+        internal void DeleteRegistrantActivities(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
-            // delete related activities
-            var ras = this.GetRegistrantActivities(dc: dc);
-            foreach (var ra in ras)
-            {
-                msgs.AddRange(ra.CancelRegistration(dc: dc));
-            }
-
-            return msgs;
+            this.GetRegistrantActivities(msgs, dc).ForEach(ra => ra.CancelRegistration(msgs, dc));
         }        
 
-        public Registrant GetParentOrGuardian(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Registrant GetParentOrGuardian(SystemMessages msgs, DatabaseConnection dc = null)
         {
             return Registrant.LoadByAccountId(this.AccountId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).FirstOrDefault();
         }
 
-        public SystemMessages DeleteRegistrantActivity(int activityId, DatabaseConnection dc = null)
+        public void DeleteRegistrantActivity(int activityId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             var registrantAcitivity = RegistrantActivity.LoadByParticipationObjectByRegistrant(activityId, ParticipationObjectType.Activity, this.ID.Value, msgs, dc);
-
             msgs.AddRange(registrantAcitivity.Delete(dc));
-
-            return msgs;
         }
         
         public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -61,14 +61,17 @@
                                     <td class="text-center">@period.GetRegistrationCount()</td>
                                     <td>
                                         <div class="btn-group">
-                                            @if (period.EndDateTime.Value > account.NowInAccountTimeZone() && !Model.IsArchived)
+                                            @if (SessionVariables.CurrentAccount.HasAccountPackageFeature(FeatureType.ManageContacts))
                                             {
-                                                <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="modal-send" onclick="sendPeriod(@period.ID)">
-                                                    Invite All @UILabel.RegistrantLabel(true)
-                                                </button>
-                                                <a class="btn btn-default btn-sm" href="@Url.Action("inviteto", "contact", new { id = period.Uid, type = "period" })">
-                                                    Invite Contact List
-                                                </a>
+                                                if (period.EndDateTime.Value > account.NowInAccountTimeZone() && !Model.IsArchived)
+                                                {
+                                                    <button type="button" class="btn btn-default btn-sm md-trigger" data-modal="modal-send" onclick="sendPeriod(@period.ID)">
+                                                        Invite All @UILabel.RegistrantLabel(true)
+                                                    </button>
+                                                    <a class="btn btn-default btn-sm" href="@Url.Action("inviteto", "contact", new { id = period.Uid, type = "period" })">
+                                                        Invite Contact List
+                                                    </a>
+                                                }
                                             }
                                         </div>
                                     </td>
@@ -98,7 +101,7 @@
         {
             { "DefaultOpenDateTime", ViewBag.DefaultOpenDateTime },
             { "DefaultCloseDateTime", ViewBag.DefaultCloseDateTime },
-            { "PostController", "league" }
+            { "PostController", "group" }
         }
         );
 }

@@ -5,6 +5,7 @@
     var ras = (List<RegistrantActivity>)ViewBag.Registrants;
     var account = SessionVariables.CurrentAccount;
     var totalPaid = Model.GetTotalPaid();
+    var activeRegistrationPeriod = Model.GetActiveRegistrationPeriod();
     int registrantCount = ras
         .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Reserved || x.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
         .Count();
@@ -134,9 +135,12 @@
                             Send Registration Report
                         </a>
 
-                        <a href="@Url.Action("inviteto", "contact", new { id = Model.GetActiveRegistrationPeriod().Uid, type = "period" })" class="btn btn-default btn-space">
-                            Invite Contacts
-                        </a>
+                        @if (SessionVariables.CurrentAccount.HasAccountPackageFeature(FeatureType.ManageContacts) && activeRegistrationPeriod.IsNotEmpty())
+                        {
+                            <a href="@Url.Action("inviteto", "contact", new { id = activeRegistrationPeriod.Uid, type = "period" })" class="btn btn-default btn-space">
+                                Invite Contacts
+                            </a>
+                        }
                     </div>
 
                     <a href="@Url.Action("registrantdownload", "activity", new { id = Model.Uid })" class="btn btn-primary btn-space hide">

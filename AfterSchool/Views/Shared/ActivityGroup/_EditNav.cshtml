@@ -1,0 +1,78 @@
+﻿@model ActivityGroup
+@{ 
+    var isActive = Model.ID.HasValue && Model.ID.Value > 0;
+    var isScheduleActive = Model.ID.HasValue && Model.ID.Value > 0;
+    var activeMenu = ViewBag.ActiveMenu.ToString().ToLower();
+
+    var editsetupactive = activeMenu == "editsetup" ? "active" : "";
+    var editrestrictionsactive = activeMenu == "editrestrictions" ? "active" : "";
+    var editscheduleactive = activeMenu == "editschedule" ? "active" : "";
+    var editcostactive = activeMenu == "editcost" ? "active" : "";
+    var editconfirmationactive = activeMenu == "editconfirmation" ? "active" : "";
+}
+<div id="list1" class="dd">
+    <ol class="dd-list">
+        <li data-id="1" class="dd-item">
+            <div class="dd-handle @editsetupactive">
+                <a href="@Url.Action("edit", "group", new { id = Model.ID.HasValue && Model.ID > 0 ? Model.Uid.ToString() : "" })">Settings</a>
+            </div>
+        </li>
+        <li data-id="4" class="dd-item">
+            <div class="dd-handle @editrestrictionsactive">
+                @{Html.RenderPartial(
+                      "~/Views/Shared/_ActiveLink.cshtml",
+                      new ViewDataDictionary {
+                                { "Url", Url.Action("editrestrictions", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                                { "Text", "Restrictions" },
+                                { "IsActive", isScheduleActive },
+                      }
+                  );
+                }
+            </div>
+        </li>
+        <li data-id="4" class="dd-item">
+            <div class="dd-handle @editscheduleactive">
+                @{Html.RenderPartial(
+                      "~/Views/Shared/_ActiveLink.cshtml",
+                      new ViewDataDictionary {
+                                { "Url", Url.Action("editschedule", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                                { "Text", "Schedule" },
+                                { "IsActive", isScheduleActive },
+                      }
+                  );
+                }
+            </div>
+        </li>
+
+        @*
+        <li data-id="5" class="dd-item">
+            <div class="dd-handle @editcostactive">
+                @{Html.RenderPartial(
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                            { "Url", Url.Action("editcost", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                            { "Text", "Pricing & Payment" },
+                            { "IsActive", isActive && Model.CanAcceptPayments() },
+                        }
+                    );
+                }
+            </div>
+        </li>
+        *@
+
+        <li data-id="6" class="dd-item">
+            <div class="dd-handle @editconfirmationactive">
+                @{Html.RenderPartial(
+                      "~/Views/Shared/_ActiveLink.cshtml",
+                      new ViewDataDictionary {
+                        { "Url", Url.Action("editconfirmation", "group", new { id = Model.Uid.ToString(), isnew = Request["isnew"] }) },
+                        { "Text", "Email Content" },
+                        { "IsActive", isActive },
+                      }
+                  );
+                }
+            </div>
+        </li>
+
+    </ol>
+</div>   

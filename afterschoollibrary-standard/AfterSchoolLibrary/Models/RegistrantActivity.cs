@@ -449,7 +449,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public SystemMessages CancelRegistration(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public void CancelRegistration(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -457,8 +457,8 @@ namespace AfterSchoolLibrary.Models
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    amsgs.AddRange(this.AdjustPreferencesDuringRemoval(dc: adc));
-                    amsgs.AddRange(this.AdjustSeatIndexesDuringRemoval(dc: adc));
+                    this.AdjustPreferencesDuringRemoval(null, amsgs, adc);
+                    this.AdjustSeatIndexesDuringRemoval(amsgs, adc);
                     amsgs.AddRange(this.Delete(adc));
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -471,20 +471,16 @@ namespace AfterSchoolLibrary.Models
                 },
                 dc: dc
             );
-
-            return msgs;
         }        
 
-        public SystemMessages ChangeSeatAssignment(RegistrationAssignmentType to, int? loggedInUserId, DatabaseConnection dc = null)
+        public void ChangeSeatAssignment(RegistrationAssignmentType to, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
             if(this.AssignmentTypeId == to)
-                return msgs;
+                return;
 
             //if you move it before the change is made it will adjust everyone correctly. Has to be done before the change is saved.
             //need a better function that can allow setting which seat index parameter needs to be handled
-            msgs.AddRange(this.AdjustSeatIndexesDuringRemoval(dc: dc));
+            this.AdjustSeatIndexesDuringRemoval(msgs, dc);
 
             this.SeatIndex = RegistrantActivity.GetSeatCountByAssignmentType(
                 assignmentType: to, 
@@ -494,24 +490,20 @@ namespace AfterSchoolLibrary.Models
                 dc: dc) + 1;
 
             this.AssignmentTypeId = to;
-            this.LastModifiedBy = loggedInUserId;
+            this.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             this.LastModifiedDate = DateTime.UtcNow;
 
             msgs.AddRange(this.Save(dc));
-
-            return msgs;
         }
 
-        public SystemMessages AdjustSeatIndexesDuringRemoval(DatabaseConnection dc = null)
+        public void AdjustSeatIndexesDuringRemoval(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // get all all registrant activities where the activity id is the same, 
-            // the day is the same, and ony update people with the same assignment type, 
+            // the day is the same, and only update people with the same assignment type, 
             // UPDATE: No longer the same day because registration is now according to a schedule, not a day
             // I think they need to be in the same registration period if it exists   
             // TODO: Review if I need to check the same registration period, probably more related to the activity group if anything?
             
-            var msgs = new SystemMessages();
-
             var otherPeoplesActivities = RegistrantActivity.LoadByParticipationObject(
                     this.ParticipationObjectId.Value, 
                     this.ParticipationObjectTypeId, 
@@ -521,41 +513,29 @@ namespace AfterSchoolLibrary.Models
                 .Where(registrantActivity => registrantActivity.RegistrantId != this.RegistrantId)
                 .ToList();
 
-            msgs.AddRange(AdjustSeatIndexes(otherPeoplesActivities, -1, dc: dc));
-
-            return msgs;
+            AdjustSeatIndexes(otherPeoplesActivities, -1, msgs, dc);
         }
 
-        public SystemMessages AdjustSeatIndexes(List<RegistrantActivity> ras, int factor, DatabaseConnection dc = null)
+        public void AdjustSeatIndexes(List<RegistrantActivity> ras, int factor, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
             ras.Where(x => x.AssignmentTypeId == this.AssignmentTypeId && x.SeatIndex > this.SeatIndex)
                 .ToList()
-                .ForEach(item => item.AdjustSeatIndex(1 * factor, dc));
-
-            return msgs;
+                .ForEach(item => item.AdjustSeatIndex(1 * factor, msgs, dc));
         }
 
-        public SystemMessages AdjustSeatIndex(int amount, DatabaseConnection dc = null)
+        public void AdjustSeatIndex(int amount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
             this.SeatIndex += amount;
-            msgs.AddRange(this.Save(dc: dc));
-
-            return msgs;
+            msgs.AddRange(this.Save(dc));
         }
 
-        public SystemMessages AdjustPreferenceNumber(int amount, DatabaseConnection dc = null)
+        public void AdjustPreferenceNumber(int amount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             this.PreferenceNumber -= 1;
-            msgs.AddRange(this.Save(dc: dc));
-            return msgs;
+            msgs.AddRange(this.Save(dc));
         }
 
-        public SystemMessages AdjustPreferencesDuringRemoval(List<RegistrantActivity> registrantActivities = null, DatabaseConnection dc = null)
+        public void AdjustPreferencesDuringRemoval(List<RegistrantActivity> registrantActivities = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (registrantActivities.IsEmpty())
             {
@@ -570,14 +550,10 @@ namespace AfterSchoolLibrary.Models
             // lower choices really mean higher preference numbers. 
             // Like choice #1 is a higher choice than choice #3, 
             // but of course in math we know that 1 is lower than 3.
-            var msgs = new SystemMessages();
-
             registrantActivities
                 .Where(x => x.PreferenceNumber.HasValue && x.PreferenceNumber.Value > this.PreferenceNumber.Value)
                 .ToList()
-                .ForEach(ra => ra.AdjustPreferenceNumber(-1, dc: dc));
-
-            return msgs;
+                .ForEach(ra => ra.AdjustPreferenceNumber(-1, msgs, dc));
         }
 
         public SystemMessages SendNewRegistrationNotice(ParticipationObject participationObject, DatabaseConnection dc = null)
