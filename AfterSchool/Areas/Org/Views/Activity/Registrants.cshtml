@@ -135,7 +135,7 @@
                             Send Registration Report
                         </a>
 
-                        @if (activeRegistrationPeriod.IsNotEmpty())
+                        @if (SessionVariables.CurrentAccount.HasAccountPackageFeature(FeatureType.ManageContacts) && activeRegistrationPeriod.IsNotEmpty())
                         {
                             <a href="@Url.Action("inviteto", "contact", new { id = activeRegistrationPeriod.Uid, type = "period" })" class="btn btn-default btn-space">
                                 Invite Contacts
