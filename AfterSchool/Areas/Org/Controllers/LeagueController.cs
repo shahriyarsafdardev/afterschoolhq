@@ -683,11 +683,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantGrade:
-                    case QuestionDataType.RegistrantEthnicity:
                     case QuestionDataType.RegistrantGender:
                     case QuestionDataType.RegistrantFirstName:
                     case QuestionDataType.RegistrantLastName:
-                    case QuestionDataType.RegistrantEmail:
                         question.IsRequired = true;
                         break;
                     default:
@@ -708,7 +706,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var form = aag.IsEmpty() ? league.GetForm(msgs) : aag.GetForm(msgs);
             var questions = GetAddRegistrationQuestions(form, msgs);
 
-            ViewBag.QuestionViewModels = questions.Select(question => new FormQuestionViewModel(question)).ToList();
+            ViewBag.QuestionViewModels = questions.OrderBy(question => question.DisplayOrder).Select(question => new FormQuestionViewModel(question)).ToList();
             ViewBag.Messages = msgs;
             ViewBag.AccountActivityGroup = aag;
 
@@ -742,7 +740,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             });
 
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var qvms = questions.OrderBy(question => question.DisplayOrder).Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
             if (msgs.HasNoErrors())
                 SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
