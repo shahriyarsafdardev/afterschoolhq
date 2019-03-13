@@ -387,6 +387,11 @@ namespace AfterSchoolLibrary.Models
 
         public static int GetSeatCountByAssignmentType(RegistrationAssignmentType assignmentType, int? accountId = null, int? activityGroupId = null, int? participationObjectId = null, ParticipationObjectType? participationObjectType = null, int? registrationPeriodId = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            return GetSeatCountByAssignmentTypes(assignmentType.AsList(), accountId, activityGroupId, participationObjectId, participationObjectType, registrationPeriodId, msgs, dc);
+        }
+
+        public static int GetSeatCountByAssignmentTypes(List<RegistrationAssignmentType> assignmentTypes, int? accountId = null, int? activityGroupId = null, int? participationObjectId = null, ParticipationObjectType? participationObjectType = null, int? registrationPeriodId = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
@@ -397,7 +402,7 @@ namespace AfterSchoolLibrary.Models
                 dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
             }
 
-            dq.Criterias.Add(ObjectMap["AssignmentTypeId"], (int)assignmentType);
+            dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x), DatabaseCriteriaOperatorEnum.In);
 
             if (accountId.HasValue)
                 dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId.Value);
@@ -571,7 +576,7 @@ namespace AfterSchoolLibrary.Models
                 $"<p><strong>{this.RegistrantName}</strong> has registered for <strong>{participationObject.Name}</strong> at <strong>{account.Name}</strong>.</p> " +
                 $"<p>You currently have a total of: " +
                 $"<ul>" +
-                $"<li><strong>{participationObject.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, dc: dc)}</strong> reserved</li>" +
+                $"<li><strong>{participationObject.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses, dc: dc)}</strong> reserved</li>" +
                 $"<li><strong>{participationObject.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.WaitingList, dc: dc)}</strong> on the waiting list</li>" +
                 $"<li><strong>{participationObject.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Applied, dc: dc)}</strong> applications</li>" +
                 $"</ul>" +

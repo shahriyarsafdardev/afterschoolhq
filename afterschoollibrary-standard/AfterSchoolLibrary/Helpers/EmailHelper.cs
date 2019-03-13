@@ -106,6 +106,7 @@ namespace AfterSchoolLibrary.Helpers
             switch(registrantActivity.AssignmentTypeId)
             {
                 case RegistrationAssignmentType.Reserved:
+                case RegistrationAssignmentType.ReservedPendingPayment:
                     regStatus = "Reserved";
                     break;
                 case RegistrationAssignmentType.WaitingList:

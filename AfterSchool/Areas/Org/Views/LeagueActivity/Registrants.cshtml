@@ -6,7 +6,7 @@
     var account = SessionVariables.CurrentAccount;
     var totalPaid = Model.GetTotalPaid();
     int registrantCount = ras
-        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Reserved || x.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
+        .Where(x => x.AssignmentTypeId.In(Registration.ReservedStatuses))
         .Count();
     int waitingListCount = ras
         .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList)

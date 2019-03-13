@@ -131,7 +131,10 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetSeatsTaken(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc);
+            return activity.GetRegistrantCountByAssignmentTypes(
+                Registration.ReservedStatuses, 
+                msgs, 
+                dc);
         }
 
         public static int GetWaitingListSeatsTaken(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -143,7 +146,10 @@ namespace AfterSchoolLibrary.Services
         {
             var rtn = 0;
             if (activity.SeatsAvailable.HasValue)
-                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc);
+                rtn = activity.SeatsAvailable.Value - activity.GetRegistrantCountByAssignmentTypes(
+                    Registration.ReservedStatuses, 
+                    msgs, 
+                    dc);
 
             return Math.Max(0, rtn);
         }
@@ -860,7 +866,7 @@ namespace AfterSchoolLibrary.Services
             {
                 activity = Activity.Load(activityId.ToInteger(), msgs, dc);
                 if (seatsavailable.IsNumber() &&
-                    activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc) <= seatsavailable.ToString().ToInteger())
+                    activity.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses, msgs, dc) <= seatsavailable.ToString().ToInteger())
                 {
                     activity.SeatsAvailable = seatsavailable.ToString().ToInteger();
                 }
@@ -1755,6 +1761,19 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
+        public static int GetRegistrantCountByAssignmentTypes(this Activity activity, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (activity.ID.HasValue)
+                return RegistrantActivity.GetSeatCountByAssignmentTypes(
+                    assignmentTypes: assignmentTypes,
+                    participationObjectId: activity.ID,
+                    participationObjectType: ParticipationObjectType.Activity,
+                    msgs: msgs,
+                    dc: dc);
+
+            return 0;
+        }
+
         public static List<Registrant> GetRegistrants(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return activity.GetRegistrantActivities(msgs, dc).Select(x => x.ToRegistrant()).ToList();
@@ -2040,7 +2059,7 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectType.Activity,
                 "registrations",
                 RegistrationReportType.SingleActivity,
-                RegistrationAssignmentType.NotSet,
+                null,
                 uiActivityLabel,
                 activity.ContactEmail,
                 subject,
