@@ -312,6 +312,16 @@ namespace AfterSchoolLibrary.Models
                 dc: dc);
         }
 
+        public int GetRegistrantCountByAssignmentTypes(List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentTypes(
+                assignmentTypes: assignmentTypes,
+                participationObjectId: this.ObjectID,
+                participationObjectType: this.ObjectType,
+                msgs: msgs,
+                dc: dc);
+        }
+
         public RegistrationPeriod GetCurrentRegistrationPeriod(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (IsActivity())

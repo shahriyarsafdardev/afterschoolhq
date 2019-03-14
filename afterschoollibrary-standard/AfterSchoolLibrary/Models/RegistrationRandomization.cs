@@ -256,7 +256,7 @@ namespace AfterSchoolLibrary.Models
                     }
 
                     // only add date ranges of activities that are reserved
-                    foreach(var ra in existingRas.Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Reserved))
+                    foreach(var ra in existingRas.Where(x => x.AssignmentTypeId.In(Registration.ReservedStatuses)))
                     {
                         assignment.AssignmentDateRanges.AddRange(
                             ra.GetActivity(msgs, dc)

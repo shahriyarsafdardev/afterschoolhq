@@ -8,7 +8,7 @@
     decimal totalPaid = 0;
 
     int registrantCount = registrants
-        .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Reserved || x.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
+        .Where(x => x.AssignmentTypeId.In(Registration.ReservedStatuses))
         .Count();
     int waitingListCount = registrants
         .Where(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList)

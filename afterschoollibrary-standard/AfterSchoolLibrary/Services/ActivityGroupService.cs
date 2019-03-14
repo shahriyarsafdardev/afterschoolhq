@@ -539,7 +539,7 @@ namespace AfterSchoolLibrary.Services
         {
             var rtn = 0;
             if (group.SeatsAvailable.HasValue)
-                rtn = group.SeatsAvailable.Value - group.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved, msgs, dc);
+                rtn = group.SeatsAvailable.Value - group.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses, msgs, dc);
 
             return Math.Max(0, rtn);
         }
@@ -557,6 +557,16 @@ namespace AfterSchoolLibrary.Services
         {
             return RegistrantActivity.GetSeatCountByAssignmentType(
                 assignmentType: assignmentType,
+                participationObjectId: group.ID,
+                participationObjectType: ParticipationObjectType.ActivityGroup,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static int GetRegistrantCountByAssignmentTypes(this ActivityGroup group, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentTypes(
+                assignmentTypes: assignmentTypes,
                 participationObjectId: group.ID,
                 participationObjectType: ParticipationObjectType.ActivityGroup,
                 msgs: msgs,

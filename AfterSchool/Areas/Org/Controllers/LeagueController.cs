@@ -326,7 +326,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Registrations = registrations;
             ViewBag.RegistrantActivities = group.GetRegistrantActivities(registrations);
-            ViewBag.ReservedSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
+            ViewBag.ReservedSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentTypes(Registration.ReservedStatuses) : aag.GetSeatCountByAssignmentTypes(Registration.ReservedStatuses);
             ViewBag.WaitingListSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
             ViewBag.ApplicationSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
             ViewBag.ReturnUrl = Url.Action("registrations", "league", new { id = group.Uid });

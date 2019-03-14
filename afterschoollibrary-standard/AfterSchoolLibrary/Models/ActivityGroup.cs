@@ -569,14 +569,19 @@ namespace AfterSchoolLibrary.Models
             return GetRegistrantActivities(registrations, msgs, dc: dc).Select(x => x.ToRegistrant()).DistinctBy(x => x.ID.Value).ToList();
         }
 
-        public int GetTotalSeatsLeft(DatabaseConnection dc = null)
+        public int GetTotalSeatsLeft(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return this.GetActivities(null, false, false, null, null, false, dc: dc).Sum(x => x.SeatsAvailable.Value) - this.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved, dc: dc);
+            return this.GetActivities(null, false, false, null, null, false, msgs: msgs, dc: dc).Sum(x => x.SeatsAvailable.Value) - this.GetSeatCountByAssignmentTypes(Registration.ReservedStatuses, msgs: msgs, dc: dc);
         }
 
-        public int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, DatabaseConnection dc = null)
+        public int GetSeatCountByAssignmentType(RegistrationAssignmentType rat, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: rat, activityGroupId: this.ID.Value, dc: dc);
+            return RegistrantActivity.GetSeatCountByAssignmentType(assignmentType: rat, activityGroupId: this.ID.Value, msgs: msgs, dc: dc);
+        }
+
+        public int GetSeatCountByAssignmentTypes(List<RegistrationAssignmentType> rats, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentTypes(assignmentTypes: rats, activityGroupId: this.ID.Value, msgs: msgs, dc: dc);
         }
 
         public int GetActivityCount(ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? isSubmitted, SystemMessages msgs = null, DatabaseConnection dc = null)

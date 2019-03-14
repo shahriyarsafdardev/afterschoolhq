@@ -140,7 +140,7 @@ else
                                 }
                             </td>
                             <td class="text-center @reservedTextClass">
-                                @activity.GetRegistrantCountByAssignmentType(RegistrationAssignmentType.Reserved) / @activity.SeatsAvailable
+                                @activity.GetRegistrantCountByAssignmentTypes(Registration.ReservedStatuses) / @activity.SeatsAvailable
                             </td>
 
                             @if (account.HasFeature(FeatureType.WaitingList))
