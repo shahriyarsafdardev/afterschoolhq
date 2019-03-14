@@ -42,7 +42,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityIds = new List<int>();
             var groupIds = new List<int>();
             var questionId = new int?();
-            var rat = RegistrationAssignmentType.NotSet;
+            var rats = new List<RegistrationAssignmentType>();
             var registrationStatus = RegistrationStatus.NotSet;
 
             if (activity.IsNotEmpty())
@@ -58,7 +58,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (at.IsNumber())
-                rat = (RegistrationAssignmentType)at.ToInteger();
+                rats.Add((RegistrationAssignmentType)at.ToInteger());
 
             if (regstatus.IsNumber())
                 registrationStatus = (RegistrationStatus)regstatus.ToInteger();
@@ -71,18 +71,20 @@ namespace AfterSchool.Areas.Org.Controllers
                 questionId, 
                 activityIds,
                 ParticipationObjectType.Activity,
-                registrationStatus, 
-                rat.AsList(), 
+                registrationStatus,
+                rats, 
                 start, 
-                length);
+                length,
+                msgs);
 
             totalCount = SessionVariables.CurrentAccount.SearchRegistrationCount(
                 q, 
                 questionId,
                 activityIds,
                 ParticipationObjectType.Activity,
-                registrationStatus, 
-                rat.AsList());                 
+                registrationStatus,
+                rats,
+                msgs);                 
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             activities = SessionVariables.CurrentAccount.GetActivities(
