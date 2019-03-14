@@ -384,7 +384,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Registrations = registrations;
             ViewBag.RegistrantActivities = group.GetRegistrantActivities(registrations);
-            ViewBag.ReservedSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Reserved);
+            ViewBag.ReservedSeats = group.GetSeatCountByAssignmentTypes(Registration.ReservedStatuses);
             ViewBag.WaitingListSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
             ViewBag.ApplicationSeats = group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);
             ViewBag.ReturnUrl = Url.Action("registrations", "group", new { id = group.Uid });
@@ -430,7 +430,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     participationObjectType,
                     filename, 
                     (RegistrationReportType)reporttype.ToInteger(),
-                    RegistrationAssignmentType.Reserved,
+                    Registration.ReservedStatuses,
                     UILabel.ActivityLabel(group.ActivityGroupTypeId, false), 
                     emails,
                     null,

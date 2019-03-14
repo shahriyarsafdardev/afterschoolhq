@@ -72,7 +72,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 activityIds,
                 ParticipationObjectType.Activity,
                 registrationStatus, 
-                rat, 
+                rat.AsList(), 
                 start, 
                 length);
 
@@ -82,7 +82,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 activityIds,
                 ParticipationObjectType.Activity,
                 registrationStatus, 
-                rat);                 
+                rat.AsList());                 
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             activities = SessionVariables.CurrentAccount.GetActivities(
@@ -171,7 +171,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     ParticipationObjectType.Activity,
                     filename,
                     (RegistrationReportType)reporttype.ToInteger(),
-                    RegistrationAssignmentType.Reserved,
+                    Registration.ReservedStatuses,
                     UILabel.ActivityLabel(ActivityType.Activity, false),
                     emails,
                     null,

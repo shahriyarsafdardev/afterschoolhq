@@ -12,7 +12,7 @@ namespace AfterSchoolLibrary.Services
     {
         #region CSVReport
 
-        public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, RegistrationAssignmentType rat, string uiActivityLabel, string emails, string subject, string body)
+        public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats, string uiActivityLabel, string emails, string subject, string body)
         {
             var msgs = new SystemMessages();
             var account = Account.Load(accountId);
@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary.Services
                 participationObjectIds,
                 participationObjectType,
                 RegistrationStatus.NotSet,
-                rat,
+                rats,
                 null,
                 null);
 

@@ -5,14 +5,14 @@
 }
 
 
-@if (Model.Any(x => x.AssignmentTypeId.In(new RegistrationAssignmentType[] { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment })))
+@if (Model.Any(x => x.AssignmentTypeId.In(Registration.ReservedStatuses)))
 {
     <div class="panel panel-alt4">
         <div class="panel-heading">
             @title 
         </div>
         <div class="panel-body">
-            @foreach (var ra in Model.Where(x => x.AssignmentTypeId.In(new RegistrationAssignmentType[] { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment })))
+            @foreach (var ra in Model.Where(x => x.AssignmentTypeId.In(Registration.ReservedStatuses)))
             {
                 var po = ra.GetParticipationObject();
                 var registration = ra.GetRegistration();

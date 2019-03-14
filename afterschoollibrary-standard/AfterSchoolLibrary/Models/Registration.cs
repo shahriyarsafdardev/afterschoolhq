@@ -417,6 +417,14 @@ namespace AfterSchoolLibrary.Models
             }
         } 
 
+        public static List<RegistrationAssignmentType> ReservedStatuses
+        {
+            get
+            {
+                return new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment };
+            }
+        }
+
         public static List<Registration> LoadFirstRegistrations(int accountId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var completionStatus = new List<int>() { (int)RegistrationCompletionStatus.Completed, (int)RegistrationCompletionStatus.RequiresParentSignature };
@@ -744,7 +752,7 @@ namespace AfterSchoolLibrary.Models
             return Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, sendBcc);
         }       
 
-        private static DatabaseQuery GetSearchQuery(string searchText, int accountId, int? questionId, RegistrationStatus regStatus, List<int> participationObjectIds = null, ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet, RegistrationAssignmentType rat = RegistrationAssignmentType.NotSet, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static DatabaseQuery GetSearchQuery(string searchText, int accountId, int? questionId, RegistrationStatus regStatus, List<int> participationObjectIds = null, ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet, List<RegistrationAssignmentType> rats = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -767,7 +775,7 @@ namespace AfterSchoolLibrary.Models
             regQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
 
             // getting only registered seats
-            if (rat != RegistrationAssignmentType.NotSet || (participationObjectIds.IsNotEmpty() && participationObjectIds.Any()))
+            if ((rats.IsNotEmpty() && rats.Count > 0) || (participationObjectIds.IsNotEmpty() && participationObjectIds.Any()))
             {
                 var raQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantActivity).Name);
                 raQuery.UseParameterizedQuery = false;
@@ -781,8 +789,8 @@ namespace AfterSchoolLibrary.Models
                     raQuery.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectTypeId"], (int)participationObjectType);
                 }
 
-                if (rat != RegistrationAssignmentType.NotSet)
-                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                if (rats.IsNotEmpty() && rats.Count > 0)
+                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x =>(int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                 regQuery.Criterias.Add(ObjectMap["Id"], raQuery, DatabaseCriteriaOperatorEnum.In);
             }
@@ -803,8 +811,8 @@ namespace AfterSchoolLibrary.Models
                     // has start dates that are less than or equal to now
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-                    if (rat != RegistrationAssignmentType.NotSet)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rats.IsNotEmpty() && rats.Count > 0)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.In);
 
@@ -820,8 +828,8 @@ namespace AfterSchoolLibrary.Models
                     // has end dates that are greater than or equal to now
                     bQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
-                    if (rat != RegistrationAssignmentType.NotSet)
-                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rats.IsNotEmpty() && rats.Count > 0)
+                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], bQuery, DatabaseCriteriaOperatorEnum.In);
                 }
@@ -839,8 +847,8 @@ namespace AfterSchoolLibrary.Models
                     aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-                    if (rat != RegistrationAssignmentType.NotSet)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rats.IsNotEmpty() && rats.Count > 0)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     var parameter = Registrant.ObjectMap["id"];
                     parameter.TableAlias = "Registrant1";
@@ -858,8 +866,8 @@ namespace AfterSchoolLibrary.Models
                     bQuery.Joins.Add(ActivityInstance.ObjectMap["ActivityScheduleId"], Activity.ObjectMap["ActivityScheduleId"], DatabaseJoinTypeEnum.InnerJoin);
                     bQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
 
-                    if (rat != RegistrationAssignmentType.NotSet)
-                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rats.IsNotEmpty() && rats.Count > 0)
+                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     bQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
 
@@ -879,8 +887,8 @@ namespace AfterSchoolLibrary.Models
                     aQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
-                    if (rat != RegistrationAssignmentType.NotSet)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], (int)rat);
+                    if (rats.IsNotEmpty() && rats.Count > 0)
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     var parameter = Registrant.ObjectMap["id"];
                     parameter.TableAlias = "Registrant1";
@@ -953,9 +961,9 @@ namespace AfterSchoolLibrary.Models
             return dq;
         }
 
-        public static List<Registration> Search(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, RegistrationAssignmentType rat, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registration> Search(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rat, msgs, dc);
+            var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
             dq.UseParameterizedQuery = false;
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
@@ -963,9 +971,9 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int SearchCount(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, RegistrationAssignmentType rat, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int SearchCount(string searchText, int accountId, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rat, msgs, dc);
+            var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
             return dq.GetCount(msgs);
         }
 
@@ -1275,18 +1283,7 @@ namespace AfterSchoolLibrary.Models
         {
             var seatsAvailable = participationObject.SeatsRemaining;
             var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
-            var isPendingOrReserved = ra.IsNotEmpty() && (ra.AssignmentTypeId == RegistrationAssignmentType.Reserved || ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment);
-
-            //if (participationObject.RegistrationMode == RegistrationMode.NotSet)
-            //{
-            //    if (participationObject.IsActivity())
-            //    {
-            //        if (participationObject.GetActivity().ActivityGroupId.HasValue)
-            //        {
-            //            participationObject.RegistrationMode
-            //        }
-            //    }
-            //}
+            var isPendingOrReserved = ra.IsNotEmpty() && ra.AssignmentTypeId.In(Registration.ReservedStatuses);
 
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;

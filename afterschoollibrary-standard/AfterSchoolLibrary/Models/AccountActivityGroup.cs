@@ -349,13 +349,23 @@ namespace AfterSchoolLibrary.Models
             return Activity.GetCountByAccountActivityGroupId(this.ID.Value, activityType, isArchived, isDeleted, msgs, dc);
         }
 
+        public int GetSeatCountByAssignmentTypes(List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantActivity.GetSeatCountByAssignmentTypes(
+                assignmentTypes: assignmentTypes,
+                participationObjectId: this.ID.Value,
+                participationObjectType: ParticipationObjectType.AccountActivityGroup,
+                msgs: msgs,
+                dc: dc);
+        }
+
         public int GetSeatCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivity.GetSeatCountByAssignmentType(
-                assignmentType: assignmentType, 
-                participationObjectId: this.ID.Value, 
-                participationObjectType: ParticipationObjectType.AccountActivityGroup, 
-                msgs: msgs, 
+                assignmentType: assignmentType,
+                participationObjectId: this.ID.Value,
+                participationObjectType: ParticipationObjectType.AccountActivityGroup,
+                msgs: msgs,
                 dc: dc);
         }
 

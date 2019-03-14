@@ -36,13 +36,8 @@ namespace AfterSchoolLibrary.Services
         private static void InitAttendanceRegistrants(this Attendance attendance, Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var registrantActivities = activity.GetRegistrantActivities(msgs, dc);
-            var assignmentTypes = new RegistrationAssignmentType[]
-            {
-                RegistrationAssignmentType.Reserved,
-                RegistrationAssignmentType.ReservedPendingPayment
-            };
 
-            registrantActivities.Where(registrant => registrant.AssignmentTypeId.In(assignmentTypes))
+            registrantActivities.Where(registrant => registrant.AssignmentTypeId.In(Registration.ReservedStatuses))
                 .ToList()
                 .ForEach(registrantActivity => {
                     AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, loggedInUser, msgs, dc);
