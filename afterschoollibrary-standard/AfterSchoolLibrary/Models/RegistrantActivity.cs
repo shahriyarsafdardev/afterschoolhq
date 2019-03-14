@@ -402,7 +402,7 @@ namespace AfterSchoolLibrary.Models
                 dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
             }
 
-            dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
             if (accountId.HasValue)
                 dq.Criterias.Add(ObjectMap["ActivityAccountId"], accountId.Value);

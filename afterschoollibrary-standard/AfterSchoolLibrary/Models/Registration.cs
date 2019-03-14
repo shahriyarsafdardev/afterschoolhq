@@ -790,7 +790,7 @@ namespace AfterSchoolLibrary.Models
                 }
 
                 if (rats.IsNotEmpty() && rats.Count > 0)
-                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x =>(int)x), DatabaseCriteriaOperatorEnum.In);
+                    raQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x =>(int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                 regQuery.Criterias.Add(ObjectMap["Id"], raQuery, DatabaseCriteriaOperatorEnum.In);
             }
@@ -812,7 +812,7 @@ namespace AfterSchoolLibrary.Models
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
                     if (rats.IsNotEmpty() && rats.Count > 0)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x), DatabaseCriteriaOperatorEnum.In);
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], aQuery, DatabaseCriteriaOperatorEnum.In);
 
@@ -829,7 +829,7 @@ namespace AfterSchoolLibrary.Models
                     bQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
                     if (rats.IsNotEmpty() && rats.Count > 0)
-                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x), DatabaseCriteriaOperatorEnum.In);
+                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     regQuery.Criterias.Add(ObjectMap["Id"], bQuery, DatabaseCriteriaOperatorEnum.In);
                 }
@@ -848,7 +848,7 @@ namespace AfterSchoolLibrary.Models
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["EndDateTime"], DateTime.UtcNow.LastDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
                     if (rats.IsNotEmpty() && rats.Count > 0)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x), DatabaseCriteriaOperatorEnum.In);
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     var parameter = Registrant.ObjectMap["id"];
                     parameter.TableAlias = "Registrant1";
@@ -867,7 +867,7 @@ namespace AfterSchoolLibrary.Models
                     bQuery.Criterias.Add(ObjectMap["AccountId"], accountId);
 
                     if (rats.IsNotEmpty() && rats.Count > 0)
-                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x), DatabaseCriteriaOperatorEnum.In);
+                        bQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     bQuery.Criterias.Add(RegistrantActivity.ObjectMap["RegistrantId"], parameter);
 
@@ -888,7 +888,7 @@ namespace AfterSchoolLibrary.Models
                     aQuery.Criterias.Add(ActivityInstance.ObjectMap["StartDateTime"], DateTime.UtcNow.FirstDateOfWeek(), DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
 
                     if (rats.IsNotEmpty() && rats.Count > 0)
-                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x), DatabaseCriteriaOperatorEnum.In);
+                        aQuery.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], rats.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
 
                     var parameter = Registrant.ObjectMap["id"];
                     parameter.TableAlias = "Registrant1";
