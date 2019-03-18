@@ -30,6 +30,8 @@
                 <h4 class="text-center reg-instructions"><strong>Checkout</strong></h4>
 
                 <span id="payment-plan-cost-0" class="hide">@participationObject.Cost</span>
+                <span id="payment-plan-asf-0" class="hide">@participationObject.GetConvenienceFee()</span>
+                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee()</span>
 
                 @if (participationObject.PaymentPlans.Any())
                 {
@@ -48,17 +50,20 @@
                                 <div class="am-radio">
                                     <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
                                     <label for="paymentoption-@plan.ID">
-                                        Pay @plan.CostPerPeriod.ToCurrency() Today
+                                        Pay <strong>@plan.CostPerPeriod.ToCurrency()</strong> Today
                                         @if (plan.TotalPeriods > 1)
                                         {
                                             <span>
                                                 and
-                                                @(plan.TotalPeriods - 1) more payments of @plan.CostPerPeriod.ToCurrency()
-                                                each @plan.BillingPeriodTypeId.ToString().ToLower()
+                                                <strong>@(plan.TotalPeriods - 1)</strong> more payments of 
+                                                <strong>@plan.CostPerPeriod.ToCurrency()</strong> each 
+                                                <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
                                             </span>
                                         }
                                     </label>
                                     <span id="payment-plan-cost-@plan.ID" class="hide">@plan.CostPerPeriod</span>
+                                    <span id="payment-plan-asf-@plan.ID" class="hide">@plan.GetConvenienceFee()</span>
+                                    <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee()</span>
                                 </div>
                             }
                         </div>
@@ -68,7 +73,7 @@
                 <div class="row padding-30">
                     <div class="col-md-6 col-md-offset-3">
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table class="table">
                                 <thead>
                                     <tr>
                                         <th class="text-center">Item</th>
@@ -84,33 +89,24 @@
                                                 <span id="fee-total-value" class="hide">@participationObject.Cost</span>
                                                 @participationObject.Cost.ToCurrency()
                                             </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Credit Card Transaction Fee</td>
-                                            <td class="text-right">
-                                                <span id="fee-credit-card" class="hide">@participationObject.GetCreditCardFee()</span>
-                                                @participationObject.GetCreditCardFee().ToCurrency()
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Afterschool Support Fee</td>
-                                            <td class="text-right">                                                
-                                                <span id="fee-asf" class="hide">@participationObject.GetConvenienceFee()</span>
-                                                @participationObject.GetConvenienceFee().ToCurrency()
-                                            </td>
+                                            <td></td>
                                         </tr>
                                     }
+
                                     @if (participationObject.PaymentPlans.Any())
                                     { 
                                         foreach (var plan in participationObject.PaymentPlans)
-                                        {
-                                        
+                                        {                                        
                                             <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
                                                 <td>Payment Plan</td>
+                                                <td class="text-right">
+                                                    @plan.CostPerPeriod.ToCurrency() 
+                                                </td>
                                                 <td>
-                                                    @plan.CostPerPeriod.ToCurrency() /
-                                                    @plan.BillingPeriodTypeId.ToString().ToLower() for
-                                                    @plan.TotalPeriods @plan.BillingPeriodTypeId.ToString().ToLower()s
+                                                    per
+                                                    <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong> for
+                                                    <strong>@plan.TotalPeriods</strong> 
+                                                    <strong>@plan.BillingPeriodTypeId.ToString().ToLower()s</strong>
                                                 </td>
                                             </tr>
                                         }
@@ -118,19 +114,45 @@
 
                                     @if (participationObject.SubscriptionPlans.Any())
                                     {
+                                        var plan = participationObject.SubscriptionPlans.First();
                                         <tr>
                                             <td>Ongoing Subscription</td>
+                                            <td class="text-right">
+                                                <span id="subscription-total-value" class="hide">@plan.CostPerPeriod</span>
+                                                <span id="subscription-asf-value" class="hide">@plan.GetConvenienceFee()</span>
+                                                <span id="subscription-ccf-value" class="hide">@plan.GetCreditCardFee()</span>
+                                                @participationObject.SubscriptionPlans.First().CostPerPeriod.ToCurrency()
+                                            </td>
                                             <td>
-                                                <span id="subscription-total-value" class="hide">@participationObject.SubscriptionPlans.First().CostPerPeriod</span>
-                                                @participationObject.SubscriptionPlans.First().CostPerPeriod.ToCurrency() /
-                                                @participationObject.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
+                                                per
+                                                <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
                                             </td>
                                         </tr>
                                     }
                                     else
                                     {
                                         <span id="subscription-total-value" class="hide">0</span>
+                                        <span id="subscription-asf-value" class="hide">0</span>
+                                        <span id="subscription-ccf-value" class="hide">0</span>
                                     }
+                                    
+                                    <tr id="credit-card-transaction-fee-row">
+                                        <td>Credit Card Transaction Fee</td>
+                                        <td class="text-right">
+                                            <span id="fee-ccf" class="hide">0</span>
+                                            <span id="fee-ccf-text">$0</span>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr id="afterschool-support-fee-row">
+                                        <td>Afterschool Support Fee</td>
+                                        <td class="text-right">
+                                            <span id="fee-asf" class="hide">0</span>
+                                            <span id="fee-asf-text">$0</span>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+
                                     @*<tr>
                                         <td>
                                             Coupon
@@ -153,6 +175,7 @@
                                                 <span id="dollar-prefix">$</span><span id="total-due-today"></span>
                                             </p>
                                         </td>
+                                        <td></td>
                                     </tr>
                                 </tfoot>
                             </table>                    
@@ -351,13 +374,13 @@
 
     function getSubscriptionTotalValue() {
         if (!isNaN($('#subscription-total-value').html())) {
-            return parseFloat($('#subscription-total-value').html())
+            return parseFloat($('#subscription-total-value').html()) + parseFloat($('#subscription-asf-value').html()) + parseFloat($('#subscription-ccf-value').html());
         }
         return 0;
     }
 
     function updatePaymentOptionCost(paymentPlanId) {
-        let regTotalToday = parseFloat($('#payment-plan-cost-' + paymentPlanId).html());
+        let regTotalToday = parseFloat($('#payment-plan-cost-' + paymentPlanId).html()) + parseFloat($('#payment-plan-asf-' + paymentPlanId).html()) + parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
         
         $('#registration-fee-row').addClass('hide');
         $('.paymentplan-fee-row').addClass('hide');
@@ -373,7 +396,7 @@
 
     function getRegFee() {
         if (!isNaN($('#fee-total-value').html())) {
-            return parseFloat($('#fee-total-value').html()) + parseFloat($('#fee-credit-card').html()) + parseFloat($('#fee-asf').html());
+            return parseFloat($('#fee-total-value').html()) + parseFloat($('#fee-ccf').html()) + parseFloat($('#fee-asf').html());
         } else {
             return 0;
         }
@@ -388,6 +411,28 @@
             'opacity': .95,
             'background-color': '#333'
         });
+    }
+
+    function unapplyCoupon() {
+        $("#total-due-today").removeAttr("style");
+        $("#dollar-prefix").removeAttr("style");
+        $("#coupon-code").val('');
+        $(".coupon").val('');
+    }
+
+    function updatePaymentFees(paymentPlanId) {
+        var newccf = parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
+        var newasf = parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
+
+        if (!isNaN($('#subscription-total-value').html())) {
+            newccf += parseFloat($('#subscription-ccf-value').html());
+            newasf += parseFloat($('#subscription-asf-value').html());
+        }
+
+        $('#fee-ccf').html(newccf);
+        $('#fee-asf').html(newasf);
+        $('#fee-ccf-text').html('$' + newccf);
+        $('#fee-asf-text').html('$' + newasf);
     }
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -405,13 +450,14 @@
             $('.payment-option').val($(this).val());
 
             let paymentPlanId = $(this).attr('id').split('-')[1];
+
+            updatePaymentFees(paymentPlanId);
             updatePaymentOptionCost(paymentPlanId);
-            // unapply coupon
-            $("#total-due-today").removeAttr("style");
-            $("#dollar-prefix").removeAttr("style");
-            $("#coupon-code").val('');
-            $(".coupon").val('');
+            unapplyCoupon();
+            
         });
+        
+        updatePaymentFees(0);
 
         @if (participationObject.PaymentPlans.Any())
         { 
