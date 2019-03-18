@@ -100,11 +100,14 @@ namespace AfterSchoolLibrary.Helpers
             var receiptRows = "";
             var regStatus = "";
             var registeredOrApplied = "registered";
-            var cost = "";
             var registrantActivity = checkoutObject.Registration.GetRegistrantActivities().First();
             var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs);
+            var cost = "";
+            var ccFee = "";
+            var asFee = "";
+            var additionalDetails = "";
 
-            switch(registrantActivity.AssignmentTypeId)
+            switch (registrantActivity.AssignmentTypeId)
             {
                 case RegistrationAssignmentType.Reserved:
                 case RegistrationAssignmentType.ReservedPendingPayment:
@@ -135,18 +138,33 @@ namespace AfterSchoolLibrary.Helpers
             if (checkoutObject.IsFree || participationObject.Cost > 0.ToDecimal() || paymentPlan.IsNotEmpty())
             {
                 if (checkoutObject.IsFree)
+                {
                     cost = "FREE";
+                    ccFee = "$0";
+                    asFee = "$0";
+                }
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
-                    cost = $"{checkoutObject.PaymentPlanCostToday.ToCurrency()} today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                {
+                    cost = checkoutObject.PaymentPlanCostToday.ToCurrency();
+                    additionalDetails = $"today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                    ccFee = checkoutObject.PaymentPlanCostTodayCreditCardFees.ToCurrency();
+                    asFee = checkoutObject.PaymentPlanCostTodayConvenienceFees.ToCurrency();
+                }
                 else
-                    cost = $"{participationObject.Cost.ToCurrency()} - tuition fee";
+                {
+                    cost = checkoutObject.TuitionCost.ToCurrency();
+                    additionalDetails = "tuition fee";
+                    ccFee = checkoutObject.TuitionCostTodayCreditCardFees.ToCurrency();
+                    asFee = checkoutObject.TuitionCostTodayConvenienceFees.ToCurrency();
+                }
 
                 // add tuition fee row
                 var tuitionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
                     { "Quantity",  "1"},
-                    { "Cost", cost }
+                    { "Cost", cost },
+                    { "AdditionalDetails", additionalDetails }
                 };
 
                 receiptRows += ProcessTemplate(
@@ -160,14 +178,18 @@ namespace AfterSchoolLibrary.Helpers
             if (subscription.IsNotEmpty())
             {
                 description = $"Subscription for {participationObject.Name}";
-                cost = $"{subscription.CostPerPeriod.ToCurrency()} per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
+                cost = subscription.CostPerPeriod.ToCurrency();
+                additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
+                ccFee = checkoutObject.SubscriptionCostTodayCreditCardFees.ToCurrency();
+                asFee = checkoutObject.SubscriptionCostTodayConvenienceFees.ToCurrency();
 
                 // add tuition fee row
                 var subscriptionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
                     { "Quantity",  "1"},
-                    { "Cost", cost }
+                    { "Cost", cost },
+                    { "CostDescription", additionalDetails }
                 };
 
                 receiptRows += ProcessTemplate(
@@ -188,9 +210,11 @@ namespace AfterSchoolLibrary.Helpers
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
                 { "AmountDueOrPaid", amountDueOrPaid },
-                { "TotalCost", checkoutObject.TotalCostToPurchaseToday.ToCurrency() },
+                { "TotalCost", checkoutObject.TotalCostToPurchaseTodayWithFees.ToCurrency() },
                 { "BodyRows", receiptRows },
-                { "CustomMessage", registrationThankYou }
+                { "CustomMessage", registrationThankYou },
+                { "CreditCardFee", ccFee },
+                { "ConvenienceFee", asFee }
             };
 
             var subject = $"{registrant.FirstName} has {registeredOrApplied} for {participationObject.Name}!";

@@ -72,6 +72,17 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public decimal TotalCostToPurchaseTodayWithFees
+        {
+            get
+            {
+                if (PaymentPlan.IsNotEmpty())
+                    return PaymentPlanCostTodayWithFees + SubscriptionCostTodayWithFees;
+
+                return TuitionCostWithFees + SubscriptionCostTodayWithFees;
+            }
+        }
+
         public decimal TuitionCost
         {
             get
@@ -95,11 +106,29 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public decimal TuitionCostWithConvenienceFees
+        public decimal TuitionCostWithFees
         {
             get
             {
-                return Billing.Platform.GetConvenienceFee(TuitionCost) + Billing.Platform.GetPlatformCreditCardFee(TuitionCost);
+                return TuitionCost + 
+                    Billing.Platform.GetConvenienceFee(TuitionCost) + 
+                    Billing.Platform.GetPlatformCreditCardFee(TuitionCost);
+            }
+        }
+
+        public decimal TuitionCostTodayCreditCardFees
+        {
+            get
+            {
+                return Billing.Platform.GetPlatformCreditCardFee(TuitionCost);
+            }
+        }
+
+        public decimal TuitionCostTodayConvenienceFees
+        {
+            get
+            {
+                return Billing.Platform.GetConvenienceFee(TuitionCost);
             }
         }
 
@@ -111,11 +140,64 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
+        public decimal SubscriptionCostTodayCreditCardFees
+        {
+            get
+            {
+                return Billing.Platform.GetPlatformCreditCardFee(SubscriptionCostToday);
+            }
+        }
+
+        public decimal SubscriptionCostTodayConvenienceFees
+        {
+            get
+            {
+                return Billing.Platform.GetConvenienceFee(SubscriptionCostToday);
+            }
+        }
+
+        public decimal SubscriptionCostTodayWithFees
+        {
+            get
+            {
+                return SubscriptionCostToday +
+                    SubscriptionCostTodayCreditCardFees +
+                    SubscriptionCostTodayConvenienceFees;
+            }
+        }
+
         public decimal PaymentPlanCostToday
         {
             get
             {
                 return PaymentPlan.IsNotEmpty() ? PaymentPlan.CostPerPeriod.Value * NumberOfSeats : 0;
+            }
+        }
+
+        public decimal PaymentPlanCostTodayCreditCardFees
+        {
+            get
+            {
+                return Billing.Platform.GetPlatformCreditCardFee(PaymentPlanCostToday);
+            }
+        }
+
+        public decimal PaymentPlanCostTodayConvenienceFees
+        {
+            get
+            {
+                return Billing.Platform.GetConvenienceFee(PaymentPlanCostToday);
+            }
+        }
+
+        public decimal PaymentPlanCostTodayWithFees
+        {
+            get
+            {
+                return PaymentPlanCostToday +
+                    PaymentPlanCostTodayCreditCardFees +
+                    PaymentPlanCostTodayConvenienceFees;
+
             }
         }
 

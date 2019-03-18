@@ -1764,7 +1764,7 @@ namespace AfterSchoolLibrary.Services
                 destinationAccountId: null, // don't send money to connected account because we're paying using another service 
                                             // destinationAccountId: checkoutObject.BillingAccount.StripeUserId,
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
-                totalAmount: checkoutObject.TuitionCostWithConvenienceFees,
+                totalAmount: checkoutObject.TuitionCostWithFees,
                 platformFee: null, // don't charge a platform fee because we're taking all the money anyway, no destination account
                                 // checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionFee, msgs, dc),
                 description: $"{checkoutObject.ParticipationObject.ObjectType.ToString()} {checkoutObject.ParticipationObject.GetId()} Registration",

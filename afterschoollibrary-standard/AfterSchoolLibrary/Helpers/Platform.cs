@@ -6,12 +6,18 @@ namespace AfterSchoolLibrary.Billing
     {
         public static decimal GetPlatformCreditCardFee(decimal cost)
         {
-            return Math.Ceiling(StripeHelper.GetStripeFee(cost)) - .01M;
+            if (cost > 0)
+                return Math.Ceiling(StripeHelper.GetStripeFee(cost)) - .01M;
+
+            return 0;
         }
 
         public static decimal GetConvenienceFee(decimal cost)
         {
-            return Math.Ceiling(cost * .05M) - .01M;
+            if (cost > 0)
+                return Math.Ceiling(cost * .05M) - .01M;
+
+            return 0;
         }
     }
 }
