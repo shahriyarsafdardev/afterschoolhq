@@ -212,7 +212,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 var emails = new List<string>() { billingAccountOwner.Email };
 
-                if (participationObject.ContactEmail.IsEmail())
+                if (participationObject.ContactEmail.IsEmail() && !participationObject.ContactEmail.IsSameAs(billingAccount.Email))
                     emails.Add(participationObject.ContactEmail);
 
                 emails.ForEach(email =>
