@@ -209,14 +209,20 @@ namespace AfterSchoolLibrary.Helpers
 
             // send bcc
             if (sendBcc)
-                (new List<string>() { billingAccountOwner.Email, participationObject.ContactEmail }).ForEach(email => {
+            {
+                var emails = new List<string>() { billingAccountOwner.Email };
+
+                if (participationObject.ContactEmail.IsEmail())
+                    emails.Add(participationObject.ContactEmail);
+
+                emails.ForEach(email =>
                     SendGridHelper.SendMail(
-                    fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
-                    subject: $"New Registration CC: {subject}",
-                    body: body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool));
-                });
+                        fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                        toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                        subject: $"New Registration CC: {subject}",
+                        body: body,
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+            }
 
             msgs.AddRange(mailMsgs);
 
