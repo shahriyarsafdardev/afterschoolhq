@@ -71,8 +71,8 @@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>Item</th>
-                                        <th>Cost</th>
+                                        <th class="text-center">Item</th>
+                                        <th class="text-center">Cost</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -80,9 +80,23 @@
                                     {
                                         <tr id="registration-fee-row">
                                             <td>Tuition Fee</td>
-                                            <td>
+                                            <td class="text-right">
                                                 <span id="fee-total-value" class="hide">@participationObject.Cost</span>
                                                 @participationObject.Cost.ToCurrency()
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Credit Card Transaction Fee</td>
+                                            <td class="text-right">
+                                                <span id="fee-credit-card" class="hide">@participationObject.GetCreditCardFee()</span>
+                                                @participationObject.GetCreditCardFee().ToCurrency()
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Afterschool Support Fee</td>
+                                            <td class="text-right">                                                
+                                                <span id="fee-asf" class="hide">@participationObject.GetConvenienceFee()</span>
+                                                @participationObject.GetConvenienceFee().ToCurrency()
                                             </td>
                                         </tr>
                                     }
@@ -135,7 +149,7 @@
                                             </p>
                                         </td>
                                         <td>
-                                            <p class="text-medium">
+                                            <p class="text-medium text-right">
                                                 <span id="dollar-prefix">$</span><span id="total-due-today"></span>
                                             </p>
                                         </td>
@@ -359,7 +373,7 @@
 
     function getRegFee() {
         if (!isNaN($('#fee-total-value').html())) {
-            return parseFloat($('#fee-total-value').html());
+            return parseFloat($('#fee-total-value').html()) + parseFloat($('#fee-credit-card').html()) + parseFloat($('#fee-asf').html());
         } else {
             return 0;
         }

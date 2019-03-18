@@ -447,6 +447,30 @@ namespace AfterSchoolLibrary.Models
             return payment;
         }
 
+        public decimal GetCheckoutTotalCost()
+        {
+            if (this.Cost.HasValue)
+                return this.Cost.Value + Billing.Platform.GetPlatformCreditCardFee(this.Cost.Value) + Billing.Platform.GetConvenienceFee(this.Cost.Value);
+
+            return 0;
+        }
+
+        public decimal GetCreditCardFee()
+        {
+            if (this.Cost.HasValue)
+                return Billing.Platform.GetPlatformCreditCardFee(this.Cost.Value);
+
+            return 0;
+        }
+
+        public decimal GetConvenienceFee()
+        {
+            if (this.Cost.HasValue)
+                return Billing.Platform.GetConvenienceFee(this.Cost.Value);
+
+            return 0;
+        }
+
         private static List<ParticipationObject> GetDemoActivities(List<GradeLevel> grades)
         {
             var activities = new List<ParticipationObject>();
@@ -490,7 +514,7 @@ namespace AfterSchoolLibrary.Models
                 IsActive = true,
                 Uid = Guid.NewGuid()
             };
-            
+
             var schedule = ActivitySchedule.GetNewDefaultSchedule(generateDates: true);
             var currentAccount = account;
 

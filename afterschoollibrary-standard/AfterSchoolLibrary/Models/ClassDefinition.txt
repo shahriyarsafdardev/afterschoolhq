@@ -1554,6 +1554,12 @@ values: NotSet, Month, Year, Week, Day
 
 [begin]
 type: Enum
+name: BillingType
+values: NotSet, ConvenienceFee, 
+[end]
+
+[begin]
+type: Enum
 name: RegistrationStatus
 values: NotSet, Past, Current, Future
 [end]
