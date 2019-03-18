@@ -450,7 +450,9 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCheckoutTotalCost()
         {
             if (this.Cost.HasValue)
-                return this.Cost.Value + Billing.Platform.GetPlatformCreditCardFee(this.Cost.Value) + Billing.Platform.GetConvenienceFee(this.Cost.Value);
+                return this.Cost.Value + 
+                    Billing.Platform.GetPlatformCreditCardFee(this.Cost.Value) + 
+                    Billing.Platform.GetConvenienceFee(this.Cost.Value);
 
             return 0;
         }

@@ -216,5 +216,31 @@ namespace AfterSchoolLibrary.Services
                     billingAccount.StripeUserId
                 ));
         }
+
+        public static decimal GetCheckoutTotalCost(this SubscriptionPlan subscriptionPlan)
+        {
+            if (subscriptionPlan.CostPerPeriod.HasValue)
+                return subscriptionPlan.CostPerPeriod.Value + 
+                    Billing.Platform.GetPlatformCreditCardFee(subscriptionPlan.CostPerPeriod.Value) + 
+                    Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value);
+
+            return 0;
+        }
+
+        public static decimal GetCreditCardFee(this SubscriptionPlan subscriptionPlan)
+        {
+            if (subscriptionPlan.CostPerPeriod.HasValue)
+                return Billing.Platform.GetPlatformCreditCardFee(subscriptionPlan.CostPerPeriod.Value);
+
+            return 0;
+        }
+
+        public static decimal GetConvenienceFee(this SubscriptionPlan subscriptionPlan)
+        {
+            if (subscriptionPlan.CostPerPeriod.HasValue)
+                return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value);
+
+            return 0;
+        }
     }
 }
