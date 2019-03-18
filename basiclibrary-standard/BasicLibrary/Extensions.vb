@@ -10,6 +10,11 @@ Imports System.Data
 Public Module Extensions
 
     <Extension>
+    Public Function IsEmail(ByVal aString As String) As Boolean
+        Return aString.IsNotEmpty() AndAlso aString.IsRegExMatch(Utilities.EmailRegEx)
+    End Function
+
+    <Extension>
     Public Function [In](Of T)(ByVal aObject As T, ByVal list As IEnumerable(Of T)) As Boolean
         Return list.Contains(aObject)
     End Function
