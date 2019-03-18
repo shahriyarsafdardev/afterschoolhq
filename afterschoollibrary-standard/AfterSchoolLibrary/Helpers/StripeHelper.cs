@@ -1134,7 +1134,12 @@ namespace AfterSchoolLibrary.Billing
             return new StripeChargeService(StripeAccessToken);
         }        
 
-        public static StripeCharge CreateCharge(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal platformFee, string description, string statementDescriptor, SystemMessages msgs)
+        public static StripeCharge CreateCharge(string fromCustomerId, string tokenOrSourceId, decimal totalAmount, string description, string statementDescriptor, SystemMessages msgs)
+        {
+            return CreateCharge(fromCustomerId, null, tokenOrSourceId, totalAmount, null, description, statementDescriptor, msgs);
+        }
+
+        public static StripeCharge CreateCharge(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal? platformFee, string description, string statementDescriptor, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1145,11 +1150,14 @@ namespace AfterSchoolLibrary.Billing
                 Description = description,
                 SourceTokenOrExistingSourceId = tokenOrSourceId,
                 StatementDescriptor = statementDescriptor.MaxChars(22),
-                CustomerId = fromCustomerId,
-                // ApplicationFee = (platformFee * 100).ToInteger(),
-                Destination = destinationAccountId,
-                DestinationAmount = (totalAmount * 100).ToInteger() - (platformFee * 100).ToInteger()
+                CustomerId = fromCustomerId
             };
+
+            if (platformFee.HasValue)
+            {
+                options.Destination = destinationAccountId;
+                options.DestinationAmount = (totalAmount * 100).ToInteger() - (platformFee.Value * 100).ToInteger();
+            }
 
             StripeCharge charge = null;
 

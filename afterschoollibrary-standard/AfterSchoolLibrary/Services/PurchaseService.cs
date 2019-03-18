@@ -11,7 +11,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var totalCost = checkoutObject.TuitionFee;
+            var totalCost = checkoutObject.TuitionCost;
 
             if (checkoutObject.PaymentPlan.IsNotEmpty())
                 totalCost = checkoutObject.PaymentPlanTotalCost;

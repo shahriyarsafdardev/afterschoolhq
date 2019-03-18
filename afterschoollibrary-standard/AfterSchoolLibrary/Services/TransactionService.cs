@@ -61,7 +61,7 @@ namespace AfterSchoolLibrary.Services
             return CreateNew(
                 checkoutObject.PurchasingAccount, 
                 checkoutObject.BillingAccount, 
-                checkoutObject.OverrideAmount ?? checkoutObject.TuitionFee, 
+                checkoutObject.OverrideAmount ?? checkoutObject.TuitionCost, 
                 checkoutObject.ParticipationObject.Name, 
                 checkoutObject.Purchase?.ID, 
                 transactionType, 

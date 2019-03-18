@@ -1761,11 +1761,13 @@ namespace AfterSchoolLibrary.Services
 
             var charge = StripeHelper.CreateCharge(
                 fromCustomerId: customerId,
-                destinationAccountId: checkoutObject.BillingAccount.StripeUserId,
+                destinationAccountId: null, // don't send money to connected account because we're paying using another service 
+                                            // destinationAccountId: checkoutObject.BillingAccount.StripeUserId,
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
-                totalAmount: checkoutObject.TuitionFee,
-                platformFee: checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionFee, msgs, dc),
-                description: $"{checkoutObject.ParticipationObject.Name} registration",
+                totalAmount: checkoutObject.TuitionCostWithConvenienceFees,
+                platformFee: null, // don't charge a platform fee because we're taking all the money anyway, no destination account
+                                // checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionFee, msgs, dc),
+                description: $"{checkoutObject.ParticipationObject.ObjectType.ToString()} {checkoutObject.ParticipationObject.GetId()} Registration",
                 statementDescriptor: $"AFTRSCHL/{checkoutObject.BillingAccount.Name}",
                 msgs: msgs
                 );
@@ -1913,7 +1915,7 @@ namespace AfterSchoolLibrary.Services
 
             // TODO: this is problematic, but a little better now
             // you really don't know this is the amount paid, but it works for now
-            var amountPaid = checkoutObject.TuitionFee;
+            var amountPaid = checkoutObject.TuitionCost;
 
             if (checkoutObject.OverrideAmount.HasValue)
                 amountPaid = checkoutObject.OverrideAmount.Value;
@@ -1984,7 +1986,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessTuitionFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.TuitionFee > 0)
+            if (checkoutObject.TuitionCost > 0)
               AccountService.ProcessTuitionWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure

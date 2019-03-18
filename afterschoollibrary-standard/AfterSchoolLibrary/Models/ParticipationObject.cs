@@ -415,6 +415,11 @@ namespace AfterSchoolLibrary.Models
             return IsActivity() ? ObjectID : null;
         }
 
+        public int? GetId()
+        {
+            return GetActivityId() ?? GetActivityGroupId() ?? GetAccountActivityGroupId();
+        }
+
         public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(

@@ -68,11 +68,11 @@ namespace AfterSchoolLibrary.Models
                 if (PaymentPlan.IsNotEmpty())
                     return PaymentPlanCostToday + SubscriptionCostToday;
 
-                return TuitionFee + SubscriptionCostToday;
+                return TuitionCost + SubscriptionCostToday;
             }
         }
 
-        public decimal TuitionFee
+        public decimal TuitionCost
         {
             get
             {
@@ -92,6 +92,14 @@ namespace AfterSchoolLibrary.Models
                     return total;
                 }
                 return 0;
+            }
+        }
+
+        public decimal TuitionCostWithConvenienceFees
+        {
+            get
+            {
+                return Billing.Platform.GetConvenienceFee(TuitionCost) + Billing.Platform.GetPlatformCreditCardFee(TuitionCost);
             }
         }
 
