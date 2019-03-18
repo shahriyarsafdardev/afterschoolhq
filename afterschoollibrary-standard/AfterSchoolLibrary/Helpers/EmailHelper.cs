@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -208,12 +209,14 @@ namespace AfterSchoolLibrary.Helpers
 
             // send bcc
             if (sendBcc)
-                SendGridHelper.SendMail(
+                (new List<string>() { billingAccountOwner.Email, participationObject.ContactEmail }).ForEach(email => {
+                    SendGridHelper.SendMail(
                     fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(billingAccountOwner.Email),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
                     subject: $"New Registration CC: {subject}",
                     body: body,
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool));
+                });
 
             msgs.AddRange(mailMsgs);
 
