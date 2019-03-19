@@ -210,10 +210,13 @@ namespace AfterSchoolLibrary.Helpers
             // send bcc
             if (sendBcc)
             {
-                var emails = new List<string>() { billingAccountOwner.Email };
+                var emails = new List<string>();
 
-                if (participationObject.ContactEmail.IsEmail() && !participationObject.ContactEmail.IsSameAs(billingAccount.Email))
-                    emails.Add(participationObject.ContactEmail);
+                if (billingAccountOwner.Email.IsEmail())
+                    emails.Add(billingAccountOwner.Email.ToLower());
+
+                if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
+                    emails.Add(participationObject.ContactEmail.ToLower());
 
                 emails.ForEach(email =>
                     SendGridHelper.SendMail(
