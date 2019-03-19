@@ -212,8 +212,8 @@ namespace AfterSchoolLibrary.Helpers
             {
                 var emails = new List<string>();
 
-                if (billingAccount.Email.IsEmail())
-                    emails.Add(billingAccount.Email.ToLower());
+                if (billingAccountOwner.Email.IsEmail())
+                    emails.Add(billingAccountOwner.Email.ToLower());
 
                 if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
                     emails.Add(participationObject.ContactEmail.ToLower());
