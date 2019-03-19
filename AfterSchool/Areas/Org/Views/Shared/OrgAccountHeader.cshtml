@@ -33,13 +33,6 @@
         </div>
     }
 
-    if ((new UserType[] { UserType.Owner, UserType.Administrator }).Contains(SessionVariables.AccountUserType) && !SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser).IsVerified)
-    {
-        <div class="trial-header text-center text-white bg-danger">
-            Finish setting up your account in order to accept payments. <a href="@Url.Action("paymentsentity", "account")" class="white">Setup Payments &raquo;</a>
-        </div>
-    }
-
     <div class="page-head">
         <div class="row">
             <div class="col-md-5">
