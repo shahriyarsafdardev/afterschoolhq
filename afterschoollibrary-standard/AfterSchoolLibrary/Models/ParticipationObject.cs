@@ -124,7 +124,7 @@ namespace AfterSchoolLibrary.Models
             Cost = activityGroup.Cost;
             CostUnitType = activityGroup.CostUnitTypeId;
             ActivityGroupType = activityGroup.ActivityGroupTypeId;
-            RegistrationPeriod = activityGroup.GetCurrentOrNextRegistrationPeriod(msgs, dc);
+            RegistrationPeriod = activityGroup.GetLatestRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;
             RegistrationMode = activityGroup.RegistrationModeId;
             Form = activityGroup.GetForm(msgs, dc);

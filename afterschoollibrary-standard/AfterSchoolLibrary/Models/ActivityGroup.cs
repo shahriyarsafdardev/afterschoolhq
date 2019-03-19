@@ -613,7 +613,7 @@ namespace AfterSchoolLibrary.Models
         {
             var period = this.GetCurrentOrNextRegistrationPeriod(msgs, dc: dc);
             if (period.IsEmpty())
-                period = GetRegistrationPeriods(msgs, dc: dc).OrderByDescending(p => p.EndDateTime).FirstOrDefault();
+                period = GetRegistrationPeriods(msgs, dc).OrderByDescending(p => p.EndDateTime).FirstOrDefault();
 
             return period;
         }
