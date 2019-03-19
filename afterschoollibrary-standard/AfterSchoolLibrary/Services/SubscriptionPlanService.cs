@@ -122,13 +122,24 @@ namespace AfterSchoolLibrary.Services
             var product = Billing.StripeHelper.GetProduct(uid, null, msgs); // account.StripeUserId
 
             if (product.IsEmpty())
+            {
+                var metaData = new System.Collections.Generic.Dictionary<string, string>();
+                metaData.Add("AccountUid", account.Uid.ToString());
+                metaData.Add("AccountName", account.Name);
+                metaData.Add("AccountId", account.ID.ToString());
+                metaData.Add("ActivityType", subscriptionPlan.ParticipationObjectTypeId.ToString());
+                metaData.Add("ActivityUid", uid);
+                metaData.Add("ActivityName", name);
+
                 product = Billing.StripeHelper.CreateProduct(
                     uid,
                     name,
                     uniqueName,
                     subscriptionPlan.IsActive,
                     null, // account.StripeUserId
+                    metaData,
                     msgs);
+            }
 
             if (msgs.HasErrors())
                 return msgs;
@@ -142,6 +153,14 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
+                var metaData = new System.Collections.Generic.Dictionary<string, string>();
+                metaData.Add("AccountUid", account.Uid.ToString());
+                metaData.Add("AccountName", account.Name);
+                metaData.Add("AccountId", account.ID.ToString());
+                metaData.Add("ActivityType", subscriptionPlan.ParticipationObjectTypeId.ToString());
+                metaData.Add("ActivityUid", uid);
+                metaData.Add("ActivityName", name);
+
                 plan = Billing.StripeHelper.CreatePlan(
                     product,
                     null,
@@ -149,6 +168,7 @@ namespace AfterSchoolLibrary.Services
                     subscriptionPlan.BillingPeriodTypeId,
                     subscriptionPlan.GetNickName(name),
                     null, // account.StripeUserId
+                    metaData,
                     msgs
                     );
             }

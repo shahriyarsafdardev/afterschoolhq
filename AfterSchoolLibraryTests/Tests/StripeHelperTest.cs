@@ -17,10 +17,20 @@ namespace AfterSchoolLibraryTests.Tests
         {
         }
 
+        private Stripe.StripeProduct CreateStripeProduct(string id)
+        {
+            return StripeHelper.CreateProduct(id, "my product name", "this is the best product ever", true, null, null, msgs);
+        }
+
+        private Stripe.StripePlan CreateStripePlan(Stripe.StripeProduct product, string id)
+        {
+            return StripeHelper.CreatePlan(product, id, 35, BillingPeriodType.Month, "my plan nickname", null, null, msgs);
+        }
+
         [Fact]
         public void CreateProductTest()
         {
-            var product = StripeHelper.CreateProduct(Guid.NewGuid().ToString(), "my product name", "this is the best product ever", true, null, msgs);
+            var product = CreateStripeProduct(Guid.NewGuid().ToString());
             Assert.NotNull(product);
             msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
         }
@@ -28,7 +38,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetProductTest()
         {
-            var product = StripeHelper.CreateProduct(Guid.NewGuid().ToString(), "my product name", "this is the best product ever", true, null, msgs);
+            var product = CreateStripeProduct(Guid.NewGuid().ToString());
             Assert.NotNull(StripeHelper.GetProduct(product.Id, null, msgs));
             msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
         }
@@ -37,7 +47,7 @@ namespace AfterSchoolLibraryTests.Tests
         public void DeleteProductTest()
         {
             var productId = Guid.NewGuid().ToString();
-            var product = StripeHelper.CreateProduct(productId, "my product name", "this is the best product ever", true, null, msgs);
+            var product = CreateStripeProduct(productId);
             msgs.AddRange(StripeHelper.DeleteProduct(productId, null));
 
             Assert.Null(StripeHelper.GetProduct(productId, null, msgs));
@@ -46,7 +56,7 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void UpdateProduct()
         {
-            var product = StripeHelper.CreateProduct(Guid.NewGuid().ToString(), "my product name", "this is the best product ever", true, null, msgs);
+            var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var newName = "my product name 2";
             var product2 = StripeHelper.UpdateProduct(product.Id, newName, "this is the 2nd best product ever", false, null, msgs);
 
@@ -58,8 +68,8 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CreatePlanTest()
         {
-            var product = StripeHelper.CreateProduct(Guid.NewGuid().ToString(), "my product name", "this is the best product ever", true, null, msgs);
-            var plan = StripeHelper.CreatePlan(product, Guid.NewGuid().ToString(), 35, BillingPeriodType.Month, "my plan nickname", null, msgs);
+            var product = CreateStripeProduct(Guid.NewGuid().ToString());
+            var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
             Assert.NotNull(plan);
             msgs.AddRange(StripeHelper.DeletePlan(plan.Id, null));
             msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
@@ -68,8 +78,8 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void GetPlanTest()
         {
-            var product = StripeHelper.CreateProduct(Guid.NewGuid().ToString(), "my product name", "this is the best product ever", true, null, msgs);
-            var plan = StripeHelper.CreatePlan(product, Guid.NewGuid().ToString(), 35, BillingPeriodType.Month, "my plan nickname", null, msgs);
+            var product = CreateStripeProduct(Guid.NewGuid().ToString());
+            var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
             Assert.NotNull(StripeHelper.GetPlan(plan.Id, null, msgs));
             msgs.AddRange(StripeHelper.DeletePlan(plan.Id, null));
             msgs.AddRange(StripeHelper.DeleteProduct(product.Id, null));
@@ -78,8 +88,8 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void UpdatePlanTest()
         {
-            var product = StripeHelper.CreateProduct(Guid.NewGuid().ToString(), "my product name", "this is the best product ever", true, null, msgs);
-            var plan = StripeHelper.CreatePlan(product, Guid.NewGuid().ToString(), 35, BillingPeriodType.Month, "my plan nickname", null, msgs);
+            var product = CreateStripeProduct(Guid.NewGuid().ToString());
+            var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
             var updatedNickname = "my plan nickname 2";
 
             var plan2 = StripeHelper.UpdatePlan(plan.Id, updatedNickname, false, null, msgs);
@@ -94,8 +104,8 @@ namespace AfterSchoolLibraryTests.Tests
         public void DeletePlanTest()
         {
             var planId = "myplanid";
-            var product = StripeHelper.CreateProduct(Guid.NewGuid().ToString(), "my product name", "this is the best product ever", true, null, msgs);
-            var plan = StripeHelper.CreatePlan(product, planId, 35, BillingPeriodType.Month, "my plan nickname", null, msgs);
+            var product = CreateStripeProduct(Guid.NewGuid().ToString());
+            var plan = CreateStripePlan(product, planId);
 
             msgs.AddRange(StripeHelper.DeletePlan(planId, null));
 

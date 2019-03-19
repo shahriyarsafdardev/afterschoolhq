@@ -294,9 +294,9 @@ namespace AfterSchoolLibrary.Billing
         private static StripeProductService GetProductService()
         {
             return new StripeProductService(StripeAccessToken);
-        }
+        }        
 
-        public static StripeProduct CreateProduct(string productId, string productName, string statementDescriptor, bool active, string stripeAccountId, SystemMessages msgs)
+        public static StripeProduct CreateProduct(string productId, string productName, string statementDescriptor, bool active, string stripeAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -314,6 +314,9 @@ namespace AfterSchoolLibrary.Billing
             var requestOptions = new Stripe.StripeRequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
+
+            if (metaData.IsNotEmpty())
+                options.Metadata = metaData;
 
             try
             {
@@ -425,7 +428,7 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="stripeAccountId">optional, the account id of the connect account, if platform should be null</param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static StripePlan CreatePlan(StripeProduct stripeProduct, string planId, decimal price, BillingPeriodType billingPeriodType, string planNickName, string stripeAccountId, SystemMessages msgs)
+        public static StripePlan CreatePlan(StripeProduct stripeProduct, string planId, decimal price, BillingPeriodType billingPeriodType, string planNickName, string stripeAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -443,6 +446,9 @@ namespace AfterSchoolLibrary.Billing
             var requestOptions = new Stripe.StripeRequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
+
+            if (metaData.IsNotEmpty())
+                options.Metadata = metaData;
 
             // you can set your own id or just save it and get the plan id back
             if (planId.IsNotEmpty())

@@ -274,6 +274,7 @@ namespace AfterSchoolLibrary.Models
                     $"{Helpers.Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
                     true,
                     null,
+                    null,
                     msgs);
             }
             else
@@ -304,6 +305,7 @@ namespace AfterSchoolLibrary.Models
                     price,
                     billingPeriodType,
                     this.GetStripePlanName(billingPeriodType),
+                    null,
                     null,
                     msgs);
             }
