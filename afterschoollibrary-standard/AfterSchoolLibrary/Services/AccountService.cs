@@ -1820,12 +1820,22 @@ namespace AfterSchoolLibrary.Services
                     dc);
         }
 
-        internal static string CopyStripeSourceToAccount(this Account fromAccount, Account toAccount, string stripeToken, SystemMessages msgs)
+        /// <summary>
+        /// returns stripe source id
+        /// </summary>
+        /// <param name="fromAccount"></param>
+        /// <param name="toAccount"></param>
+        /// <param name="stripeToken"></param>
+        /// <param name="msgs"></param>
+        /// <returns></returns>
+        internal static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.StripeCustomer customer, SystemMessages msgs)
         {
             // stripe stuff
             // create payment source if not already existent on the user
             var sourceId = "";
-            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+
+            if (customer.IsEmpty())
+                customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
 
             if (customer.DefaultSourceId.IsEmpty())
             {
@@ -1838,10 +1848,25 @@ namespace AfterSchoolLibrary.Services
                 sourceId = customer.DefaultSourceId;
             }
 
+            return sourceId;
+        }
+
+        /// <summary>
+        /// returns stripe source id
+        /// </summary>
+        /// <param name="fromAccount"></param>
+        /// <param name="toAccount"></param>
+        /// <param name="stripeToken"></param>
+        /// <param name="msgs"></param>
+        /// <returns></returns>
+        internal static string CopyStripeSourceToAccount(this Account fromAccount, Account toAccount, string stripeToken, SystemMessages msgs)
+        {
             // what happens if the same registrant gets another payment plan?
             // Create a new customer? For now YES, it doesn't really matter I don't think
 
             // get shared source
+            var customer = Billing.StripeHelper.GetCustomer(fromAccount.StripeCustomerId, null, msgs);
+            var sourceId = fromAccount.CreateStripeSourceFromToken(stripeToken, customer, msgs);
             var copiedSource = Billing.StripeHelper.CreateSourceFromOriginal(customer.Id, sourceId, toAccount.StripeUserId, msgs);
 
             return copiedSource.Id;

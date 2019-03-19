@@ -145,7 +145,7 @@ namespace AfterSchoolLibrary.Services
                 plan = Billing.StripeHelper.CreatePlan(
                     product,
                     null,
-                    subscriptionPlan.CostPerPeriod.Value,
+                    subscriptionPlan.GetTotalCostWithFees(),
                     subscriptionPlan.BillingPeriodTypeId,
                     subscriptionPlan.GetNickName(name),
                     null, // account.StripeUserId
@@ -222,7 +222,7 @@ namespace AfterSchoolLibrary.Services
                 ));
         }
 
-        public static decimal GetCheckoutTotalCost(this SubscriptionPlan subscriptionPlan)
+        public static decimal GetTotalCostWithFees(this SubscriptionPlan subscriptionPlan)
         {
             if (subscriptionPlan.CostPerPeriod.HasValue)
                 return subscriptionPlan.CostPerPeriod.Value + 

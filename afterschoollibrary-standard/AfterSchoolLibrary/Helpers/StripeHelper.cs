@@ -752,15 +752,18 @@ namespace AfterSchoolLibrary.Billing
                 CustomerId = customerId,
                 Billing = StripeBilling.ChargeAutomatically,
                 TrialEnd = trialEndDate,
-                ApplicationFeePercent = platformFeePercent * 100, // convert to integer
+                // ApplicationFeePercent = platformFeePercent * 100, // convert to integer
                 Source = sourceId,
-                CouponId = stripeCouponId,
+                CouponId = stripeCouponId                 
                 
             };
 
             var requestOptions = new Stripe.StripeRequestOptions();
             if (stripeAccountId.IsNotEmpty())
+            {
                 requestOptions.StripeConnectAccountId = stripeAccountId;
+                options.ApplicationFeePercent = platformFeePercent * 100;
+            }
 
             try
             {

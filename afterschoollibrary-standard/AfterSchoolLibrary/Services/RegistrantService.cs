@@ -132,20 +132,24 @@ namespace AfterSchoolLibrary.Services
 
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PurchasingAccount;
+            var customer = purchasingAccount.GetStripeCustomer(msgs);
 
             // have to copy the source from the platform to be able to move it to the stripe connected account
-            var copiedSourceId = purchasingAccount.CopyStripeSourceToAccount(
-                billingAccount, 
-                checkoutObject.StripeToken, 
-                msgs);
+            // unless you're not using connected accounts for subscriptions
+            var sourceId = purchasingAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+
+            //purchasingAccount.CopyStripeSourceToAccount(
+            //    billingAccount,
+            //    checkoutObject.StripeToken,
+            //    msgs);
 
             // create the customer on the connected account
-            var accountCustomer = Billing.StripeHelper.CreateCustomer(
-                description: purchasingAccount.Name,
-                email: purchasingAccount.Email,         
-                sourceId: copiedSourceId,
-                stripeAccountId: billingAccount.StripeUserId,
-                msgs: msgs);
+            //var accountCustomer = Billing.StripeHelper.CreateCustomer(
+            //    description: purchasingAccount.Name,
+            //    email: purchasingAccount.Email,         
+            //    sourceId: sourceId,
+            //    stripeAccountId: null, // billingAccount.StripeUserId,
+            //    msgs: msgs);
 
             SubscriptionPlan plan = null;
             var applyCoupon = false;
@@ -166,12 +170,12 @@ namespace AfterSchoolLibrary.Services
 
             // create the subscription on the connected account
             var subscription = Billing.StripeHelper.CreateSubscription(
-                customerId: accountCustomer.Id,
+                customerId: customer.Id,
                 planId: plan.StripePlanId,
-                sourceId: copiedSourceId,
-                platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan),
+                sourceId: sourceId,
+                platformFeePercent: null, // billingAccount.GetSubscriptionPlatformFeePercent(plan),
                 trialEndDate: null,
-                stripeAccountId: billingAccount.StripeUserId,
+                stripeAccountId: null, // billingAccount.StripeUserId,
                 stripeCouponId: stripeCouponId,
                 msgs: msgs);
 
