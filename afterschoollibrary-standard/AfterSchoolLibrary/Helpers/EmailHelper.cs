@@ -216,7 +216,7 @@ namespace AfterSchoolLibrary.Helpers
                     emails.Add(billingAccount.Email.ToLower());
 
                 if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
-                    emails.Add(participationObject.ContactEmail);
+                    emails.Add(participationObject.ContactEmail.ToLower());
 
                 emails.ForEach(email =>
                     SendGridHelper.SendMail(
