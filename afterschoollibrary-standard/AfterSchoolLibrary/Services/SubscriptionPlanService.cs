@@ -119,7 +119,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             // do stripe
-            var product = Billing.StripeHelper.GetProduct(uid, account.StripeUserId, msgs);
+            var product = Billing.StripeHelper.GetProduct(uid, null, msgs); // account.StripeUserId
 
             if (product.IsEmpty())
                 product = Billing.StripeHelper.CreateProduct(
@@ -127,7 +127,7 @@ namespace AfterSchoolLibrary.Services
                     name,
                     uniqueName,
                     subscriptionPlan.IsActive,
-                    account.StripeUserId,
+                    null, // account.StripeUserId
                     msgs);
 
             if (msgs.HasErrors())
@@ -137,8 +137,8 @@ namespace AfterSchoolLibrary.Services
 
             if (subscriptionPlan.StripePlanId.IsNotEmpty())
             {
-                plan = Billing.StripeHelper.GetPlan(subscriptionPlan.StripePlanId, account.StripeUserId, msgs);
-                Billing.StripeHelper.UpdatePlan(subscriptionPlan.StripePlanId, plan.Nickname, plan.Active, account.StripeUserId, msgs);
+                plan = Billing.StripeHelper.GetPlan(subscriptionPlan.StripePlanId, null, msgs); // account.StripeUserId
+                Billing.StripeHelper.UpdatePlan(subscriptionPlan.StripePlanId, plan.Nickname, plan.Active, null, msgs); // account.StripeUserId
             }
             else
             {
@@ -148,7 +148,7 @@ namespace AfterSchoolLibrary.Services
                     subscriptionPlan.CostPerPeriod.Value,
                     subscriptionPlan.BillingPeriodTypeId,
                     subscriptionPlan.GetNickName(name),
-                    account.StripeUserId,
+                    null, // account.StripeUserId
                     msgs
                     );
             }
@@ -166,7 +166,8 @@ namespace AfterSchoolLibrary.Services
 
             SubscriptionPlan copy = null;
 
-            Database.ExecuteTransaction(
+            Database.ExecuteTransaction
+            (
                action: (SystemMessages amsgs, DatabaseConnection adc) =>
                {
                    copy = subscriptionPlan.CopyFields();
@@ -184,6 +185,10 @@ namespace AfterSchoolLibrary.Services
                onFailure: (SystemMessages fmsgs) =>
                {
                    msgs.AddRange(fmsgs);
+               },
+               onException: (SystemMessages emsgs) =>
+               {
+                   Helpers.Utilities.SystemErrorLog(emsgs);
                },
                dc: dc
            );
@@ -213,7 +218,7 @@ namespace AfterSchoolLibrary.Services
             if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && totalPayments >= plan.TotalPeriods.Value)
                 msgs.AddRange(Billing.StripeHelper.CancelSubscription(
                     registrantSubscriptionPlan.StripeSubscriptionId, 
-                    billingAccount.StripeUserId
+                    null // billingAccount.StripeUserId
                 ));
         }
 
