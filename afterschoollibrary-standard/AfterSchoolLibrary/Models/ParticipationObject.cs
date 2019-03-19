@@ -161,7 +161,7 @@ namespace AfterSchoolLibrary.Models
             CostUnitType = aag.CostUnitTypeId;
             // TODO: PayLater = activityGroup.AllowToPayLater;
             ActivityGroupType = activityGroup.ActivityGroupTypeId;
-            RegistrationPeriod = aag.GetCurrentOrNextRegistrationPeriod(msgs, dc);
+            RegistrationPeriod = aag.GetLatestRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;
             Form = aag.GetForm(msgs, dc);
             OwnerAccount = aag.GetAccount(msgs, dc);
