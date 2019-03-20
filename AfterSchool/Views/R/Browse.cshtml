@@ -137,7 +137,7 @@
                         {
                             <strong>
                                 <em>
-                                    @if (!item.RegistrationPeriod.IsClosed())
+                                    @if (!item.RegistrationPeriod.IsClosed(item.OwnerAccount))
                                     {
                                         @:@item.SeatsRemaining.ToString() Seats @(item.RegistrationMode == RegistrationMode.Register ? "Left" : "")
                                     }

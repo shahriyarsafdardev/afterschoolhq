@@ -6,6 +6,8 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
+using System;
+using System.Text.RegularExpressions;
 
 namespace AfterSchool.Controllers
 {
@@ -54,6 +56,7 @@ namespace AfterSchool.Controllers
 
             var participationObjects = new List<ParticipationObject>();
             var locations = new List<Location>();
+            var grades = GradeLevel.Load(msgs: msgs);
 
             if (account.IsNotEmpty())
             {
@@ -74,16 +77,88 @@ namespace AfterSchool.Controllers
             }
             else
             {
-                // 404
+                var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                var accountUniqueName = reg.Replace(accountname.GetMaxWords(25), "");
+
+                account = new Account()
+                {
+                    Name = accountname.SplitByUpperCase(),
+                    UniqueName = accountUniqueName,
+                    IsActive = true,
+                    Uid = Guid.NewGuid()
+                };
+
+                var activityNames = new List<string>() { "Chess Club", "Robotics", "Theater Club", "Movie Making" };
+                var contactNames = new List<string>() { "Geraldine Fisher", "Robert Henderson", "James Boyce" };
+                var locationDetails = new List<string>() { "Room 105", "Meet in the Cafeteria", "Gym", "Football Field" };
+                var costs = new List<decimal>() { 100, 50, 27.50M, 0, 10 };
+                var genderRestrictions = new List<GenderRestrictionType>() { GenderRestrictionType.None, GenderRestrictionType.MaleOnly, GenderRestrictionType.FemaleOnly };
+                var gradeRestrictions = grades.OrderBy(x => x.ID).Take(9);
+
+                locations.Add(new Location()
+                {
+                    Address1 = "12175 Visionary Way",
+                    Address2 = "#710",
+                    City = "Indianapolis",
+                    State = "IN",
+                    PostalCode = "46038",
+                    Country = "US"
+                });
+
+                var registrationPeriod = new RegistrationPeriod()
+                {
+                    StartDateTime = DateTime.UtcNow.Date,
+                    EndDateTime = DateTime.UtcNow.Date.AddDays(2).AddMinutes(-1)                     
+                };
+
+                var minGradeId = grades.Shuffle().First().ID;
+                var maxGradeId = minGradeId + 3;
+
+                // load demo account
+                activityNames.ForEach(activityName => 
+                {                    
+                    var uniqueName = reg.Replace(activityName.GetMaxWords(25), "");
+                    var cost = costs.Shuffle().First();
+
+                    participationObjects.Add(new ParticipationObject()
+                    {
+                        OwnerAccount = account,
+                        Schedule = ActivitySchedule.GetNewDefaultSchedule(),
+                        SeatsRemaining = 20,
+                        Description = "",
+                        UniqueName = uniqueName,
+                        Name = activityName,
+                        AllowToPayLater = true,
+                        ContactName = contactNames.Shuffle().First(),
+                        ContactEmail = $"info@{accountUniqueName}.com",
+                        ContactPhone = "888-123-1234",
+                        Cost = cost,
+                        CostUnitType = CostUnitType.PerRegistrant,
+                        Details = "",
+                        Location = locations.First(),
+                        PaymentPlans = new List<SubscriptionPlan>(),
+                        SubscriptionPlans = new List<SubscriptionPlan>(),
+                        WaitingListSeatsRemaining = 10,
+                        RegistrationMode = RegistrationMode.Register,
+                        RegistrationPeriod = registrationPeriod,
+                        Uid = Guid.NewGuid(),
+                        LocationDetails = $"<p>{locationDetails.Shuffle().First()}</p>",
+                        IsFree = cost == 0,
+                        IsTuitionFree = cost == 0,
+                        GenderRestriction = genderRestrictions.Shuffle().First(),
+                        MinGradeId = minGradeId,
+                        MaxGradeId = maxGradeId                        
+                    });
+                });
             }
 
-            ViewBag.Grades = GradeLevel.Load(msgs: msgs);
+            ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
-            ViewBag.ParticipationObjects = participationObjects.OrderBy(po => po.RegistrationPeriod.IsClosed())
-                                            .ThenBy(po => po.RegistrationPeriod.WillOpen())
-                                            .ThenBy(po => po.RegistrationPeriod.IsOpen())
+            ViewBag.ParticipationObjects = participationObjects.OrderBy(po => po.RegistrationPeriod.IsClosed(account))
+                                            .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
+                                            .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
                                             .ToList();
 
             return View(account);

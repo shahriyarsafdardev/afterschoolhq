@@ -194,6 +194,11 @@ namespace AfterSchoolLibrary.Models
             InitAccountActivityGroup(aag, msgs, dc);
         }
 
+        public ParticipationObject()
+        {
+
+        }
+
         public bool IsNotFreeAndCanAcceptPayments
         {
             get

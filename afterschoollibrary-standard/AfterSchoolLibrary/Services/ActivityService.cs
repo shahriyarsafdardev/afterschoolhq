@@ -417,9 +417,9 @@ namespace AfterSchoolLibrary.Services
                 var regOpenText = "";
                 if (period.IsNotEmpty())
                 {
-                    if (period.IsOpen(msgs, dc))
+                    if (period.IsOpen(account, msgs, dc))
                         regOpenText = "Registration is open now.";
-                    else if (period.WillOpen(msgs, dc))
+                    else if (period.WillOpen(account, msgs, dc))
                         regOpenText = "Registration will open " + period.StartDateTime.ToShortDateString() + ".";
                 }
 
