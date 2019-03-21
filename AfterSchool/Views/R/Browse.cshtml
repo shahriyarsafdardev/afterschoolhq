@@ -58,7 +58,9 @@
                 <option value="">Any Day</option>
                 @foreach (var item in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
                 {
-                    <option value="@item.ToString().MaxChars(2)">@item.ToString()</option>
+                    <option value="@item.ToString().MaxChars(2)">
+                        @item.ToString()
+                    </option>
                 }
             </select>
         </div>      
@@ -68,7 +70,9 @@
                 <option value="">Any Gender</option>
                 @foreach (var item in Enum.GetValues(typeof(GenderType)).Cast<GenderType>().Where(x => x != GenderType.NotSet))
                 {
-                    <option value="@((int)item)" @(SessionVariables.Cart?.Gender == item ? "selected=\"selected\"" : "")>@item.ToString().SplitByUpperCase()</option>
+                    <option value="@((int)item)" @(SessionVariables.Cart?.Gender == item ? "selected=\"selected\"" : "")>
+                        @item.ToString().SplitByUpperCase()
+                    </option>
                 }
             </select>
         </div>
@@ -210,9 +214,10 @@
             });
         }
 
+        console.log(gender);
         if (gender != null && gender.length > 0) {
             $('.participation-object').each(function () {
-                var genderRestriction = parseInt($(this).attr('genderrestriction'));
+                var genderRestriction = parseInt($(this).attr('gender'));
                 if (genderRestriction > 0 && genderRestriction != gender && !$(this).hasClass('hide')) {
                     $(this).addClass('hide');
                     hiddenDivs++;
