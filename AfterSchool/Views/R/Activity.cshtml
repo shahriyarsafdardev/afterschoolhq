@@ -9,7 +9,13 @@
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account); }
 
 <div class="reg-header text-center">
-    <h1 class="activity-title">@Model.Name</h1>
+    <h1 class="activity-title">
+        @Model.Name
+        @if (!Model.OwnerAccount.ID.HasValue)
+        {
+            <span class="badge badge-danger">DEMO</span>
+        }
+    </h1>
     <div class="activity-headline">
         @Model.Description
     </div>

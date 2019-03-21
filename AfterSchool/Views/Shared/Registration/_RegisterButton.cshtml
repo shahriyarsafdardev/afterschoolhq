@@ -11,7 +11,16 @@
 
 @if (!Model.OwnerAccount.ID.HasValue)
 {
-    <button type="button" class="btn btn-register">Claim Your Account &raquo;</button>
+    <button type="button" class="btn btn-register">
+        @if (condensed)
+        {
+            @:Create Account &raquo;
+        }
+        else
+        {
+            @: Create your free Account &raquo;
+        }
+    </button>
 }
 else
 {

@@ -471,7 +471,9 @@ namespace AfterSchoolLibrary.Models
 
             activities.Add(new Tuple<string, string>("Art Club", "<p>In Art Club we make bowls, mugs, plaques, and other sculptures all of which are glazed and fired in the kiln.  All grades are welcome.  You do not have to be in art to join the art club.  Come down and see what it is all about! </p>"));
 
-            activities.Add(new Tuple<string, string>("Vocal Music Club", "<p>Vocal Music Club is an after-school club for all students that enjoy singing.  Whether you sign up for Chorus, Band, Orchestra or Exploring Music, being in this club will give you the opportunity to sing many different styles of music, either alone or as part of an ensemble, on a weekly basis.</p>"));
+            activities.Add(new Tuple<string, string>("Spikeball Club", "<p>Students in this club love the game of Spikeball.  Spikeball is a modified version of 2v2 volleyball. Like volleyball, the net and ball is replaced with a small trampoline-like object with string netting and a small bouncing ball (usually yellow) with a 12-inch circumference.  Games are played to 11, 15 or 21. Spikeball is also great for any age group and very easy to learn!  There will be pickup games and tournaments when the club meets.  Basic rules and strategies will be taught to all beginners that join the club.</p>"));
+
+            activities.Add(new Tuple<string, string>("Career Club", "<p>Members explore their interests to discover careers that may match them. Students research the academic, technical, and experiential requirements for those careers, so they can prepare for life after school. The club provides many resources to help students become career ready.</p>"));
 
             return activities;
         }
@@ -488,15 +490,14 @@ namespace AfterSchoolLibrary.Models
                 IsActive = true,
                 Uid = Guid.NewGuid()
             };
-
-            var activityNames = new List<string>() { "Chess Club", "Robotics", "Theater Club", "Movie Making" };
+            
             var contactNames = new List<string>() { "Geraldine Fisher", "Robert Henderson", "James Boyce" };
             var locationDetails = new List<string>() { "Room 105", "Meet in the Cafeteria", "Gym", "Football Field", "Room 200", "The Library", "Media Center" };
             var costs = new List<decimal>() { 100, 50, 27.50M, 0, 10 };
             var genderRestrictions = Enum.GetValues(typeof(GenderRestrictionType)).Cast<GenderRestrictionType>().ToList();
             var gradeRestrictions = grades.OrderBy(x => x.ID).Take(11).ToList();
             var schedule = ActivitySchedule.GetNewDefaultSchedule(generateDates: true);
-            var numberOfSeats = new List<int>() { 16, 20, 37, 30, 25, 13, 1, 6 };
+            var numberOfSeats = new List<int>() { 16, 20, 37, 30, 25, 13, 1, 6, 3, 10, 22, 0 };
             var currentAccount = account;
 
             locations.Add(new Location()
