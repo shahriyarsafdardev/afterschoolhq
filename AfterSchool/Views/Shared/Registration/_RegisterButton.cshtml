@@ -11,16 +11,16 @@
 
 @if (!Model.OwnerAccount.ID.HasValue)
 {
-    <button type="button" class="btn btn-register">
+    <a href="mailto:sales@afterschoolhq.com?subject=RE: @Model.OwnerAccount.Name - Get Started with @UILabel.ProductName()&body=%0D%0A%0D%0A%0D%0A @Model.OwnerAccount.HomePageUrl" class="btn btn-register">
         @if (condensed)
         {
-            @:Create Account &raquo;
+            @: Get Started &raquo;
         }
         else
         {
-            @: Create your free Account &raquo;
+            @: Get Started with @UILabel.ProductName()  &raquo;
         }
-    </button>
+    </a>
 }
 else
 {
