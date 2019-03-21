@@ -353,7 +353,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return $"{Helpers.Utilities.BaseUrl(true)}/{this.UniqueName.ToLower()}";
+                return $"{Helpers.Utilities.BaseUrl(true)}/{this.UniqueName}";
             }
 
         }

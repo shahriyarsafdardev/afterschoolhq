@@ -9,36 +9,43 @@
     }
 }
 
-@if (Model.RegistrationPeriod.IsOpen())
+@if (!Model.OwnerAccount.ID.HasValue)
 {
-    <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
-        @Model.RegistrationMode.ToString() &raquo;
-    </a>
+    <button type="button" class="btn btn-register">Claim Your Account &raquo;</button>
 }
-else if (Model.RegistrationPeriod.WillOpen())
+else
 {
-    <button type="button" class="btn btn-register">
-        @if (condensed)
-        {
-            @:Will open soon
-        }
-        else
-        {
-            @:Registration will open in @Model.RegistrationPeriod.WillOpenIn().Days days @Model.RegistrationPeriod.WillOpenIn().Hours hrs
-        }
-    </button>
-}
-else if (Model.RegistrationPeriod.IsClosed())
-{
-    <button type="button" class="btn btn-register">
-        @if (condensed)
-        {
-            @:Registration Closed
-        }
-        else
-        {
-            @:Registration is now closed
-        }
+    if (Model.RegistrationPeriod.IsOpen(Model.OwnerAccount))
+    {
+        <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register">
+            @Model.RegistrationMode.ToString() &raquo;
+        </a>
+    }
+    else if (Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
+    {
+        <button type="button" class="btn btn-register">
+            @if (condensed)
+            {
+                @:Will open soon
+            }
+            else
+            {
+                @:Registration will open in @Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount).Days days @Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount).Hours hrs
+            }
+        </button>
+    }
+    else if (Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
+    {
+        <button type="button" class="btn btn-register">
+            @if (condensed)
+            {
+                @:Registration Closed
+            }
+            else
+            {
+                @:Registration is now closed
+            }
         
-    </button>
+        </button>
+    }
 }

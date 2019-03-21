@@ -98,14 +98,30 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
-            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+            ParticipationObject participationObject = null;
+
+            if (account.IsNotEmpty())
+            {
+                var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+                participationObject = activity.GetParticipationObject(msgs);
+            }
+            else
+            {
+                var participationObjects = new List<ParticipationObject>();
+                var locations = new List<Location>();
+                var grades = GradeLevel.Load(msgs: msgs);
+
+                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, grades);
+
+                participationObject = participationObjects.Find(x => x.UniqueName.ToLower() == activityname);
+            }
 
             SetRegistrationStartPage(account);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
 
-            return View(activity.GetParticipationObject());
+            return View(participationObject);
         }
 
         public ActionResult ActivitySession(string accountname, string sessionname)

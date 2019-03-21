@@ -50,8 +50,7 @@ namespace AfterSchool.Models
                     SessionHelper.RemoveFromSession("OriginalLoggedInUser");
             }
         }
-
-        private static Account _CurrentAccount;
+        
         public static Account CurrentAccount
         {
             get
@@ -66,8 +65,7 @@ namespace AfterSchool.Models
                     SessionHelper.RemoveFromSession("CurrentAccount");
             }
         }
-
-        private static Account _RegistrationStartPageAccount;
+        
         public static Account RegistrationStartPageAccount
         {
             get
@@ -76,7 +74,7 @@ namespace AfterSchool.Models
             }
             set
             {
-                if (value.IsNotEmpty())
+                if (value.IsNotEmpty() && value.ID.HasValue)
                     SessionHelper.AddToSession("RegistrationStartPageAccount", value.ID.Value.ToString());
                 else
                     SessionHelper.RemoveFromSession("RegistrationStartPageAccount");
@@ -94,8 +92,7 @@ namespace AfterSchool.Models
                 HttpContext.Current.Session["AccountUserType"] = value;
             }
         }
-
-        private static AccountPackage _AccountPackage;
+        
         public static AccountPackage AccountPackage
         {
             get
@@ -110,8 +107,7 @@ namespace AfterSchool.Models
                     SessionHelper.RemoveFromSession("AccountPackage");
             }
         }
-
-        private static Session _VisitorSession;
+        
         public static Session VisitorSession
         {
             get
@@ -126,13 +122,12 @@ namespace AfterSchool.Models
                     SessionHelper.RemoveFromSession("VisitorSession");
             }
         }
-
-        private static Cart _Cart;
+        
         public static Cart Cart
         {
             get
             {
-                return SessionHelper.GetCart(); ;
+                return SessionHelper.GetCart();
             }
             set
             {
