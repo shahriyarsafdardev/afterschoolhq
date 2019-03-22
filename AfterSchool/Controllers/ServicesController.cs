@@ -14,6 +14,41 @@ namespace AfterSchool.Controllers
     {
         // GET: Services
 
+        public ActionResult LeadForm(string org, string name, string email, string phone, string comments)
+        {
+            var msgs = new SystemMessages();
+
+            if (org.IsEmpty())
+                msgs.Add("Invalid Request", MessageType.UserError);
+
+            if (name.IsEmpty())
+                msgs.Add("Name is required", MessageType.UserError);
+
+            if (!email.IsEmail())
+                msgs.Add("Email is required", MessageType.UserError);
+
+            if (!phone.IsPhone())
+                msgs.Add("Valid phone is required", MessageType.UserError);
+           
+
+            Response.Clear();
+
+            if (msgs.HasNoErrors())
+            {
+                EmailHelper.SendEmail(
+                    "sales@afterschoolhq.com",
+                    $"AHQ Lead Form - {org}",
+                    $"<p>Organization: {org}<br />Name: {name}<br />Email: {email}<br />Phone: {phone}<br />Best time to contact: {comments}</p>",
+                    true);
+
+                WriteOutput(new { status = "ok" }, ResponseType.JSON);
+            }
+
+            Response.End();
+
+            return View();
+        }
+
         public ActionResult SearchLocations(string search)
         {
             Response.Clear();
