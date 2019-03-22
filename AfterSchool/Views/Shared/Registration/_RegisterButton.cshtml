@@ -18,7 +18,12 @@
         }
         else
         {
-            @: Get Started with @UILabel.ProductName()  &raquo;
+            <div class="hidden-xs">
+                Get Started with @UILabel.ProductName()  &raquo;
+            </div>
+            <div class="hidden-sm hidden-md hidden-lg">
+                Get Started &raquo;
+            </div>
         }
     </button>
 
@@ -28,17 +33,24 @@
             <div class="md-content">
                 <div class="modal-header">
                     <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                    <h2 class="modal-title">Request your free account today</h2>
+                    <div class="hidden-xs">
+                        <h2 class="modal-title">Request your free account today</h2>
+                    </div>
+                    <div class="hidden-sm hidden-md hidden-lg">
+                        <h2 class="modal-title">Free account</h2>
+                    </div>
                 </div>
                 <div class="modal-body">
                     <div id="lead-form">
-                        <p class="text-small">
-                            <ul>
-                                <li>Replace paper flyers and sign-up forms</li>
-                                <li>Reduce your time managing your programs</li>
-                                <li>Enable parents to easily find, register, and pay online</li>
-                            </ul>
-                        </p>
+                        <div class="hidden-xs">
+                            <p class="text-small">
+                                <ul>
+                                    <li>Replace paper flyers and sign-up forms</li>
+                                    <li>Reduce your time managing your programs</li>
+                                    <li>Enable parents to easily find, register, and pay online</li>
+                                </ul>
+                            </p>
+                        </div>
                         <div class="padding-20">
                             <form class="form">
                                 <div class="form-group">
@@ -62,7 +74,16 @@
                 </div>
                 <div class="modal-footer" id="lead-form-footer">
                     <button type="button" data-dismiss="modal" class="btn btn-default btn-lg md-close hide">Close</button>
-                    <button class="btn btn-primary btn-xl btn-block" id="btn-create-account"><span class="text-medium">Get My Free Account &raquo;</span></button>
+                    <div class="hidden-xs">
+                        <button class="btn btn-primary btn-xl btn-block" id="btn-create-account">
+                            <span class="text-medium">Get My Free Account &raquo;</span>
+                        </button>
+                    </div>
+                    <div class="hidden-sm hidden-md hidden-lg">
+                        <button class="btn btn-primary btn-xl btn-block" id="btn-create-account">
+                            <span class="text-medium">Get Started &raquo;</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
