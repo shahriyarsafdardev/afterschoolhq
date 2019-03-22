@@ -14,8 +14,26 @@ namespace AfterSchool.Controllers
     {
         // GET: Services
 
+        private bool IsRequestFromApp()
+        {
+            var origin = Request.Headers["Origin"].ToLower();
+            if (origin.StartsWith("https://afterschoolhq.com") ||
+                origin.StartsWith("https://qa.afterschoolhq.com") ||
+                origin.StartsWith("https://ci.afterschoolhq.com") ||
+                origin.StartsWith("https://stating.afterschoolhq.com") ||
+                origin.StartsWith("http://localhost:54849"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public ActionResult LeadForm(string org, string name, string email, string phone, string comments)
         {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
             var msgs = new SystemMessages();
 
             if (org.IsEmpty())
@@ -29,10 +47,7 @@ namespace AfterSchool.Controllers
 
             if (!phone.IsPhone())
                 msgs.Add("Valid phone is required", MessageType.UserError);
-           
-
-            Response.Clear();
-
+            
             if (msgs.HasNoErrors())
             {
                 EmailHelper.SendEmail(
@@ -41,56 +56,46 @@ namespace AfterSchool.Controllers
                     $"<p>Organization: {org}<br />Name: {name}<br />Email: {email}<br />Phone: {phone}<br />Best time to contact: {comments}</p>",
                     true);
 
-                WriteOutput(new { status = "ok" }, ResponseType.JSON);
+                return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
             }
 
-            Response.End();
-
-            return View();
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult SearchLocations(string search)
         {
-            Response.Clear();
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
-            if (Request.UserHostAddress == "::1" || true)
-            {
-                var msgs = new SystemMessages();
-                var locations = Location.Search(search.Trim(), 0, 10, msgs);
+            var msgs = new SystemMessages();
+            var locations = Location.Search(search.Trim(), 0, 10, msgs);
 
-                WriteOutput(new
+            return Json(new { 
+                status = "ok",
+                locations = locations.Select(location => new
                 {
-                    status = "ok",
-                    locations = locations.Select(location => new
-                    {
-                        location.ID,
-                        location.Name,
-                        location.Address1,
-                        location.Address2,
-                        location.City,
-                        location.State,
-                        location.PostalCode,
-                        FullAddress = location.FormatAddress(useLineBreaks: false),
-                        location.HostAccountId,
-                        LocationType = location.LocationTypeId.ToString()
-                    })
-                },
-                ResponseType.JSON);
-            }
-            else
-            {
-                WriteOutput(new { status = "ok" }, ResponseType.JSON);
-            }
-            Response.End();
-
-            return View();
+                    location.ID,
+                    location.Name,
+                    location.Address1,
+                    location.Address2,
+                    location.City,
+                    location.State,
+                    location.PostalCode,
+                    FullAddress = location.FormatAddress(useLineBreaks: false),
+                    location.HostAccountId,
+                    LocationType = location.LocationTypeId.ToString()
+                })
+            });            
         }
 
         public ActionResult ValidateCoupon(string couponcode, string paymentoption)
         {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
             var msgs = new SystemMessages();
             SubscriptionPlan paymentPlan = null;
-            
+
             var participationObject = SessionVariables.Cart.GetCartItems(msgs)
                 .FirstOrDefault()?
                 .GetParticipationObject(msgs);
@@ -115,43 +120,41 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
                 return Json(new { status = "ok", coupon, amount, numberInMonths, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
-            else
-                return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status = "error", messages = msgs, amount, subscriptionPlanAmount }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult SubmitContactForm(string email, string subject, string message, string g_recaptcha_response)
         {
-            if (Request.UserHostAddress == "::1" || true)
-            {
-                var msgs = new SystemMessages();
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
 
-                var status = "";
+            var msgs = new SystemMessages();
 
-                if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-                    msgs.Add("Please enter an email", MessageType.UserError);
+            var status = "";
 
-                if (subject.IsBlank())
-                    msgs.Add("Please enter a subject", MessageType.UserError);
+            if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Please enter an email", MessageType.UserError);
 
-                if (message.IsBlank())
-                    msgs.Add("Please enter a message", MessageType.UserError);
+            if (subject.IsBlank())
+                msgs.Add("Please enter a subject", MessageType.UserError);
 
-                msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
+            if (message.IsBlank())
+                msgs.Add("Please enter a message", MessageType.UserError);
 
-                if (msgs.HasNoErrors())
-                    msgs.AddRange(EmailHelper.SendEmail(
-                        toEmail: "sales@afterschoolhq.com",
-                        subject: string.Format("WEBSITE FORM: {0}", subject),
-                        body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message),
-                        isAfterSchool: true
-                        ));   
+            msgs.AddRange(RecaptchaHelper.Validate(g_recaptcha_response));
 
-                status = msgs.HasNoErrors() ? "ok" : "error";
+            if (msgs.HasNoErrors())
+                msgs.AddRange(EmailHelper.SendEmail(
+                    toEmail: "sales@afterschoolhq.com",
+                    subject: string.Format("WEBSITE FORM: {0}", subject),
+                    body: string.Format("<p>from: <a href=\"mailto:{0}\">{0}</a></p><p>{1}</p>", email, message),
+                    isAfterSchool: true
+                    ));
 
-                return new JsonResult { Data = new { status, messages = msgs } };
-            }
+            status = msgs.HasNoErrors() ? "ok" : "error";
 
-            return new JsonResult { Data = new { status = "ok" } };
-        }   
+            return Json(new { status, messages = msgs }, JsonRequestBehavior.AllowGet);
+        }    
     }
 }

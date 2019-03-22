@@ -75,12 +75,12 @@
                 <div class="modal-footer" id="lead-form-footer">
                     <button type="button" data-dismiss="modal" class="btn btn-default btn-lg md-close hide">Close</button>
                     <div class="hidden-xs">
-                        <button class="btn btn-primary btn-xl btn-block" id="btn-create-account">
+                        <button class="btn btn-primary btn-xl btn-block btn-create-account">
                             <span class="text-medium">Get My Free Account &raquo;</span>
                         </button>
                     </div>
                     <div class="hidden-sm hidden-md hidden-lg">
-                        <button class="btn btn-primary btn-xl btn-block" id="btn-create-account">
+                        <button class="btn btn-primary btn-xl btn-block btn-create-account">
                             <span class="text-medium">Get Started &raquo;</span>
                         </button>
                     </div>
@@ -90,8 +90,8 @@
 
         <script>
             PageEvent.add(PageEvent.AFTER_INIT, function() {
-
-                $('#btn-create-account').click(function () {
+              
+                $('.btn-create-account').click(function () {
                     var params = 'org=@Model.OwnerAccount.Name&name=' + $('#name').val() + '&email=' + $('#email').val() + '&phone=' + $('#phone').val() + '&comments=' + $('#comments').val();
 
                     $('#btn-create-account').prop('disabled', true);
@@ -108,7 +108,11 @@
                                 $('#lead-form-footer').addClass('hide');
                                 $('#lead-form-thanks').removeClass('hide');
                             } else {
-                                console.log('Error');
+                                Notifications.showBar({
+                                    title: 'Error',
+                                    message: 'Please fill in all required fields',
+                                    success: false
+                                });
                             }
                         }
                     );
