@@ -7,7 +7,7 @@
             @if (SessionVariables.LoggedInUser.IsNotEmpty())
             {
                 <span class="reg-login-bar-title">@SessionVariables.CurrentAccount.Name</span>
-            }            
+            }                               
 
         </div>
         <div class="col-md-6 col-sm-6 col-xs-12">
@@ -26,6 +26,11 @@
                 else if (Model.ID.HasValue)
                 {
                     <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Family Account</button>
+                }
+
+                @if (!Model.ID.HasValue)
+                {
+                    <button type="button" class="btn btn-alt7 btn-xl md-trigger pull-right" data-modal="modal-lead-form">Sign Up for Your Free Account &raquo;</button>
                 }
             </div>
         </div>

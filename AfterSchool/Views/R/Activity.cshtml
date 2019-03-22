@@ -39,7 +39,7 @@
                 </div>
             </div>
             <div class="panel-body">
-                
+
                 <div class="activity-detail-block">
                     @Html.Raw(Model.Details)
                 </div>
@@ -111,3 +111,5 @@
         </div>
     </div>
 </div>
+
+@{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model.OwnerAccount);}

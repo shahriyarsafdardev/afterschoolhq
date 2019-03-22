@@ -29,8 +29,8 @@
     <div class="reg-container">
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.Activity) Name" id="search-name" class="form-control search-field" />
-        </div>    
-               
+        </div>
+
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-location" name="search-location">
                 <option value="">Any Location</option>
@@ -39,7 +39,7 @@
                     <option value="@(location.ID)">@location.FormatAddress(false)</option>
                 }
             </select>
-        </div>     
+        </div>
 
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-grade" name="search-grade">
@@ -57,7 +57,7 @@
                 <option value="1">Has Seats Available</option>
                 <option value="2">Has Waiting List Available</option>
             </select>
-        </div>    
+        </div>
 
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-dayofweek" name="search-dayofweek">
@@ -69,8 +69,8 @@
                     </option>
                 }
             </select>
-        </div>      
-       
+        </div>
+
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-gender" name="search-gender">
                 <option value="">Any Gender</option>
@@ -82,20 +82,20 @@
                 }
             </select>
         </div>
-        
+
     </div>
 </div>
 
 <div class="margin-10">
-    @foreach(var item in objects)
+    @foreach (var item in objects)
     {
-        <div class="col-sm-12 col-md-6 col-lg-4 participation-object" 
-             id="@item.Uid" 
-             mingrade="@item.MinGradeId" 
-             maxgrade="@item.MaxGradeId" 
-             hasseatsremaining="@item.HasSeatsAvailable().ToString().ToLower()" 
+        <div class="col-sm-12 col-md-6 col-lg-4 participation-object"
+             id="@item.Uid"
+             mingrade="@item.MinGradeId"
+             maxgrade="@item.MaxGradeId"
+             hasseatsremaining="@item.HasSeatsAvailable().ToString().ToLower()"
              haswaitinglistremaining="@item.HasWaitingListSeatsAvailable().ToString().ToLower()"
-             days="@ParticipationObjectUI.PrintDaysOfWeek(item)" 
+             days="@ParticipationObjectUI.PrintDaysOfWeek(item)"
              location="@(item.Location?.ID)"
              gender="@((int)item.GenderRestriction)"
              name="@item.Name">
@@ -155,7 +155,7 @@
                                     {
                                         @:Closed
                                     }
-                                    
+
                                 </em>
                             </strong>
                         }
@@ -268,7 +268,7 @@
                 }
             });
         }
-        
+
         if (hiddenDivs == totalDivs) {
             $('#search-noresults').removeClass('hide');
         } else {
@@ -277,3 +277,5 @@
 
     }
 </script>
+
+@{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model);}
