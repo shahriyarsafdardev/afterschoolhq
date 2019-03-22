@@ -16,7 +16,7 @@ namespace AfterSchool.Controllers
 
         private bool IsRequestFromApp()
         {
-            var origin = Request.Headers["Origin"].ToLower();
+            var origin = (Request.Headers["Origin"] ?? Request.Headers["Referer"]).ToLower();
             if (origin.StartsWith("https://afterschoolhq.com") ||
                 origin.StartsWith("https://qa.afterschoolhq.com") ||
                 origin.StartsWith("https://ci.afterschoolhq.com") ||
@@ -85,7 +85,7 @@ namespace AfterSchool.Controllers
                     location.HostAccountId,
                     LocationType = location.LocationTypeId.ToString()
                 })
-            });            
+            }, JsonRequestBehavior.AllowGet);            
         }
 
         public ActionResult ValidateCoupon(string couponcode, string paymentoption)
