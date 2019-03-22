@@ -1,0 +1,93 @@
+﻿@model Account
+
+<div id="modal-lead-form" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <div class="hidden-xs">
+                <h2 class="modal-title">Request your free account today</h2>
+            </div>
+            <div class="hidden-sm hidden-md hidden-lg">
+                <h2 class="modal-title">Free account</h2>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div id="lead-form">
+                <div class="hidden-xs">
+                    <p class="text-small">
+                        <ul>
+                            <li>Replace paper flyers and sign-up forms</li>
+                            <li>Reduce your time managing your programs</li>
+                            <li>Enable parents to easily find, register, and pay online</li>
+                        </ul>
+                    </p>
+                </div>
+                <div class="padding-20">
+                    <form class="form">
+                        <div class="form-group">
+                            <input type="text" id="name" class="form-control" placeholder="Your Name (required)" required="required" />
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" class="form-control" placeholder="Your Email (required)" required="required" />
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="phone" class="form-control" placeholder="Best Phone Number (required)" required="required" />
+                        </div>
+                        <div class="form-group">
+                            <textarea type="text" id="comments" class="form-control" placeholder="Best time to contact you (required)" required="required"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="hide text-center" id="lead-form-thanks">
+                Thanks! Our team will reach out to you to confirm a time to meet.
+            </div>
+        </div>
+        <div class="modal-footer" id="lead-form-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default btn-lg md-close hide">Close</button>
+            <div class="hidden-xs">
+                <button class="btn btn-primary btn-xl btn-block btn-create-account">
+                    <span class="text-medium">Get My Free Account &raquo;</span>
+                </button>
+            </div>
+            <div class="hidden-sm hidden-md hidden-lg">
+                <button class="btn btn-primary btn-xl btn-block btn-create-account">
+                    <span class="text-medium">Get Started &raquo;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function() {
+
+        $('.btn-create-account').click(function () {
+            var params = 'org=@Model.Name&name=' + $('#name').val() + '&email=' + $('#email').val() + '&phone=' + $('#phone').val() + '&comments=' + $('#comments').val();
+
+            $('#btn-create-account').prop('disabled', true);
+
+            $.post(
+                '/services/leadform/',
+                params,
+                function (data) {
+
+                    $('#btn-create-account').prop('disabled', false);
+
+                    if (data && data.status == 'ok') {
+                        $('#lead-form').addClass('hide');
+                        $('#lead-form-footer').addClass('hide');
+                        $('#lead-form-thanks').removeClass('hide');
+                    } else {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Please fill in all required fields',
+                            success: false
+                        });
+                    }
+                }
+            );
+        });
+
+    });
+</script>

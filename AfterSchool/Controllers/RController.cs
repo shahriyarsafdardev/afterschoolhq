@@ -6,6 +6,8 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
+using System;
+using System.Text.RegularExpressions;
 
 namespace AfterSchool.Controllers
 {
@@ -54,6 +56,7 @@ namespace AfterSchool.Controllers
 
             var participationObjects = new List<ParticipationObject>();
             var locations = new List<Location>();
+            var grades = GradeLevel.Load(msgs: msgs);
 
             if (account.IsNotEmpty())
             {
@@ -74,16 +77,16 @@ namespace AfterSchool.Controllers
             }
             else
             {
-                // 404
+                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, grades);
             }
 
-            ViewBag.Grades = GradeLevel.Load(msgs: msgs);
+            ViewBag.Grades = grades;
             ViewBag.Messages = msgs;
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.Locations = locations;
-            ViewBag.ParticipationObjects = participationObjects.OrderBy(po => po.RegistrationPeriod.IsClosed())
-                                            .ThenBy(po => po.RegistrationPeriod.WillOpen())
-                                            .ThenBy(po => po.RegistrationPeriod.IsOpen())
+            ViewBag.ParticipationObjects = participationObjects.OrderBy(po => po.RegistrationPeriod.IsClosed(account))
+                                            .ThenBy(po => po.RegistrationPeriod.WillOpen(account))
+                                            .ThenBy(po => po.RegistrationPeriod.IsOpen(account))
                                             .ToList();
 
             return View(account);
@@ -95,14 +98,30 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
-            var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+            ParticipationObject participationObject = null;
+
+            if (account.IsNotEmpty())
+            {
+                var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
+                participationObject = activity.GetParticipationObject(msgs);
+            }
+            else
+            {
+                var participationObjects = new List<ParticipationObject>();
+                var locations = new List<Location>();
+                var grades = GradeLevel.Load(msgs: msgs);
+
+                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, grades);
+
+                participationObject = participationObjects.Find(x => x.UniqueName.ToLower() == activityname);
+            }
 
             SetRegistrationStartPage(account);
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
 
-            return View(activity.GetParticipationObject());
+            return View(participationObject);
         }
 
         public ActionResult ActivitySession(string accountname, string sessionname)

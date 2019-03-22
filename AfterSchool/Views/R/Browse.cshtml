@@ -10,11 +10,17 @@
     var locations = (List<Location>)ViewBag.Locations;
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml"); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", null); }
 
 <div class="reg-header">
     <div class="reg-header-overlay">
-        <h1 class="activity-title"><strong>@Model.Name</strong></h1>
+        <h1 class="activity-title">
+            <strong>@Model.Name</strong>
+            @if (!Model.ID.HasValue)
+            {
+                <span class="badge badge-danger">DEMO</span>
+            }
+        </h1>
         <p>@Model.LandingPageText</p>
     </div>
 </div>
@@ -23,8 +29,8 @@
     <div class="reg-container">
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <input type="text" placeholder="Search @UILabel.ActivityLabel(ActivityType.Activity) Name" id="search-name" class="form-control search-field" />
-        </div>    
-               
+        </div>
+
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-location" name="search-location">
                 <option value="">Any Location</option>
@@ -33,7 +39,7 @@
                     <option value="@(location.ID)">@location.FormatAddress(false)</option>
                 }
             </select>
-        </div>     
+        </div>
 
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-grade" name="search-grade">
@@ -51,41 +57,45 @@
                 <option value="1">Has Seats Available</option>
                 <option value="2">Has Waiting List Available</option>
             </select>
-        </div>    
+        </div>
 
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-dayofweek" name="search-dayofweek">
                 <option value="">Any Day</option>
                 @foreach (var item in Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Where(x => x != DayOfWeekASL.NotSet))
                 {
-                    <option value="@item.ToString().MaxChars(2)">@item.ToString()</option>
+                    <option value="@item.ToString().MaxChars(2)">
+                        @item.ToString()
+                    </option>
                 }
             </select>
-        </div>      
-       
+        </div>
+
         <div class="col-md-@filterCols col-sm-@filterColsSm">
             <select class="form-control reg-form-control" id="search-gender" name="search-gender">
                 <option value="">Any Gender</option>
                 @foreach (var item in Enum.GetValues(typeof(GenderType)).Cast<GenderType>().Where(x => x != GenderType.NotSet))
                 {
-                    <option value="@((int)item)" @(SessionVariables.Cart?.Gender == item ? "selected=\"selected\"" : "")>@item.ToString().SplitByUpperCase()</option>
+                    <option value="@((int)item)" @(SessionVariables.Cart?.Gender == item ? "selected=\"selected\"" : "")>
+                        @item.ToString().SplitByUpperCase()
+                    </option>
                 }
             </select>
         </div>
-        
+
     </div>
 </div>
 
 <div class="margin-10">
-    @foreach(var item in objects)
+    @foreach (var item in objects)
     {
-        <div class="col-sm-12 col-md-6 col-lg-4 participation-object" 
-             id="@item.Uid" 
-             mingrade="@item.MinGradeId" 
-             maxgrade="@item.MaxGradeId" 
-             hasseatsremaining="@item.HasSeatsAvailable().ToString().ToLower()" 
+        <div class="col-sm-12 col-md-6 col-lg-4 participation-object"
+             id="@item.Uid"
+             mingrade="@item.MinGradeId"
+             maxgrade="@item.MaxGradeId"
+             hasseatsremaining="@item.HasSeatsAvailable().ToString().ToLower()"
              haswaitinglistremaining="@item.HasWaitingListSeatsAvailable().ToString().ToLower()"
-             days="@ParticipationObjectUI.PrintDaysOfWeek(item)" 
+             days="@ParticipationObjectUI.PrintDaysOfWeek(item)"
              location="@(item.Location?.ID)"
              gender="@((int)item.GenderRestriction)"
              name="@item.Name">
@@ -137,7 +147,7 @@
                         {
                             <strong>
                                 <em>
-                                    @if (!item.RegistrationPeriod.IsClosed())
+                                    @if (!item.RegistrationPeriod.IsClosed(item.OwnerAccount))
                                     {
                                         @:@item.SeatsRemaining.ToString() Seats @(item.RegistrationMode == RegistrationMode.Register ? "Left" : "")
                                     }
@@ -145,7 +155,7 @@
                                     {
                                         @:Closed
                                     }
-                                    
+
                                 </em>
                             </strong>
                         }
@@ -210,9 +220,10 @@
             });
         }
 
+        console.log(gender);
         if (gender != null && gender.length > 0) {
             $('.participation-object').each(function () {
-                var genderRestriction = parseInt($(this).attr('genderrestriction'));
+                var genderRestriction = parseInt($(this).attr('gender'));
                 if (genderRestriction > 0 && genderRestriction != gender && !$(this).hasClass('hide')) {
                     $(this).addClass('hide');
                     hiddenDivs++;
@@ -257,7 +268,7 @@
                 }
             });
         }
-        
+
         if (hiddenDivs == totalDivs) {
             $('#search-noresults').removeClass('hide');
         } else {
@@ -266,3 +277,5 @@
 
     }
 </script>
+
+@{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model);}

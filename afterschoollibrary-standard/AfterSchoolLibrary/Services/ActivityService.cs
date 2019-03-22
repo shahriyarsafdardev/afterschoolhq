@@ -85,7 +85,12 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetHomePageUrl(this Activity activity, bool isAfterSchool = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return $"{Helpers.Utilities.BaseUrl(isAfterSchool)}/{activity.GetAccount(msgs, dc).UniqueName.ToLower()}/{activity.ActivityTypeId.ToString().ToLower()}/{activity.UniqueName.ToLower()}";
+            return BuildHomePageUrl(activity.GetAccount(msgs, dc).UniqueName, activity.ActivityTypeId, activity.UniqueName);
+        }
+
+        public static string BuildHomePageUrl(string accountUniqueName, ActivityType activityType, string activityUniqueName)
+        {
+            return $"{Helpers.Utilities.BaseUrl(true)}/{accountUniqueName}/{activityType.ToString().ToLower()}/{activityUniqueName.ToLower()}";
         }
 
         public static bool IsFull(this Activity activity, DatabaseConnection dc = null)
@@ -417,9 +422,9 @@ namespace AfterSchoolLibrary.Services
                 var regOpenText = "";
                 if (period.IsNotEmpty())
                 {
-                    if (period.IsOpen(msgs, dc))
+                    if (period.IsOpen(account, msgs, dc))
                         regOpenText = "Registration is open now.";
-                    else if (period.WillOpen(msgs, dc))
+                    else if (period.WillOpen(account, msgs, dc))
                         regOpenText = "Registration will open " + period.StartDateTime.ToShortDateString() + ".";
                 }
 
