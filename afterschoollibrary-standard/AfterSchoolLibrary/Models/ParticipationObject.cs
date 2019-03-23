@@ -498,7 +498,7 @@ namespace AfterSchoolLibrary.Models
             {
                 Address1 = "12175 Visionary Way",
                 Address2 = "#710",
-                City = "Indianapolis",
+                City = "Fishers",
                 State = "IN",
                 PostalCode = "46038",
                 Country = "US"
