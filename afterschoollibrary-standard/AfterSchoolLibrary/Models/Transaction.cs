@@ -40,8 +40,18 @@ namespace AfterSchoolLibrary.Models
 		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public int? PurchaseId { get { return (int?)MDV["PurchaseId"].Value; } set { MDV["PurchaseId"].Value = value; } }
-		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
-		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
+		public decimal? PaymentTypePercentFee { get { return (decimal?)MDV["PaymentTypePercentFee"].Value; } set { MDV["PaymentTypePercentFee"].Value = value; } }
+		public decimal? PaymentTypeFlatFee { get { return (decimal?)MDV["PaymentTypeFlatFee"].Value; } set { MDV["PaymentTypeFlatFee"].Value = value; } }
+		public decimal? ConveniencePercentFee { get { return (decimal?)MDV["ConveniencePercentFee"].Value; } set { MDV["ConveniencePercentFee"].Value = value; } }
+		public decimal? ConvenienceFlatFee { get { return (decimal?)MDV["ConvenienceFlatFee"].Value; } set { MDV["ConvenienceFlatFee"].Value = value; } }
+		/// <summary>
+		/// which account is paying the payment type (stripe
+		/// </summary>
+		public int? PaymentTypeFeePayerAccountId { get { return (int?)MDV["PaymentTypeFeePayerAccountId"].Value; } set { MDV["PaymentTypeFeePayerAccountId"].Value = value; } }
+		/// <summary>
+		/// which account is paying the convenience fee
+		/// </summary>
+		public int? ConvenienceFeePayerAccountId { get { return (int?)MDV["ConvenienceFeePayerAccountId"].Value; } set { MDV["ConvenienceFeePayerAccountId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -49,6 +59,8 @@ namespace AfterSchoolLibrary.Models
 		public string StripeChargeOrRefundId { get { return (string)MDV["StripeChargeOrRefundId"].Value; } set { MDV["StripeChargeOrRefundId"].Value = value; } }
 		public PaymentSourceType PaymentSourceTypeId { get { return (PaymentSourceType)MDV["PaymentSourceTypeId"].Value; } set { MDV["PaymentSourceTypeId"].Value = value; } }
 		public int? OriginalTransactionId { get { return (int?)MDV["OriginalTransactionId"].Value; } set { MDV["OriginalTransactionId"].Value = value; } }
+		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
+		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
 		
 
         public Transaction()
@@ -76,12 +88,18 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "PurchaseId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
-				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PaymentTypePercentFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PaymentTypeFlatFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "ConveniencePercentFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "ConvenienceFlatFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PaymentTypeFeePayerAccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ConvenienceFeePayerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeChargeOrRefundId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PaymentSourceTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "OriginalTransactionId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
 				
                 return _dp;
             }
@@ -196,11 +214,27 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PlatformPercentFee"]);
+			dps.Add(ObjectMap["PaymentTypePercentFee"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PlatformFlatFee"]);
+			dps.Add(ObjectMap["PaymentTypeFlatFee"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ConveniencePercentFee"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ConvenienceFlatFee"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PaymentTypeFeePayerAccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ConvenienceFeePayerAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -217,6 +251,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["OriginalTransactionId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PlatformPercentFee"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PlatformFlatFee"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

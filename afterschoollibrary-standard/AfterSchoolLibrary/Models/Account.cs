@@ -46,6 +46,8 @@ namespace AfterSchoolLibrary.Models
 		public int? MinGradeLevelOffered { get { return (int?)MDV["MinGradeLevelOffered"].Value; } set { MDV["MinGradeLevelOffered"].Value = value; } }
 		public int? MaxGradeLevelOffered { get { return (int?)MDV["MaxGradeLevelOffered"].Value; } set { MDV["MaxGradeLevelOffered"].Value = value; } }
 		public Guid InviteCodeToShare { get { return (Guid)MDV["InviteCodeToShare"].Value; } set { MDV["InviteCodeToShare"].Value = value; } }
+		public FeesPaidByType CreditCardFeesPaidBy { get { return (FeesPaidByType)MDV["CreditCardFeesPaidBy"].Value; } set { MDV["CreditCardFeesPaidBy"].Value = value; } }
+		public FeesPaidByType ConvenienceFeesPaidBy { get { return (FeesPaidByType)MDV["ConvenienceFeesPaidBy"].Value; } set { MDV["ConvenienceFeesPaidBy"].Value = value; } }
 		
 
         public Account()
@@ -58,6 +60,8 @@ namespace AfterSchoolLibrary.Models
 			this.IsAfterSchool = false;
 			this.AccountTypeId = AccountType.NotSet;
 			this.InviteCodeToShare = Guid.NewGuid();
+			this.CreditCardFeesPaidBy = FeesPaidByType.NotSet;
+			this.ConvenienceFeesPaidBy = FeesPaidByType.NotSet;
 			
         }
 
@@ -90,6 +94,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "MinGradeLevelOffered", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MaxGradeLevelOffered", System.Data.SqlDbType.Int);
 				_dp.Add(className, "InviteCodeToShare", System.Data.SqlDbType.UniqueIdentifier);
+				_dp.Add(className, "CreditCardFeesPaidBy", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -253,6 +259,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["InviteCodeToShare"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["CreditCardFeesPaidBy"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ConvenienceFeesPaidBy"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

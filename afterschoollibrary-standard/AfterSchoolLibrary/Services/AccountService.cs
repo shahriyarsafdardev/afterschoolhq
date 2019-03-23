@@ -1285,7 +1285,9 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = loggedInUser.ID,
                 IsAfterSchool = isAfterSchool,
                 AccountTypeId = accountType,
-                UniqueName = uniqueName
+                UniqueName = uniqueName,
+                ConvenienceFeesPaidBy = FeesPaidByType.Parent,
+                CreditCardFeesPaidBy = FeesPaidByType.Parent
             };
 
             if (createWithStripe)
@@ -1759,14 +1761,16 @@ namespace AfterSchoolLibrary.Services
             if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
                 customerId = checkoutObject.PurchasingAccount.StripeCustomerId;
 
+            // if can charge fees we bill it directly from our AHQ account
+            var useStripeConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var platformFeeAmount = checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionCost, msgs, dc);
+
             var charge = StripeHelper.CreateCharge(
                 fromCustomerId: customerId,
-                destinationAccountId: null, // don't send money to connected account because we're paying using another service 
-                                            // destinationAccountId: checkoutObject.BillingAccount.StripeUserId,
+                destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
+                platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
                 totalAmount: checkoutObject.TuitionCostWithFees,
-                platformFee: null, // don't charge a platform fee because we're taking all the money anyway, no destination account
-                                // checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionFee, msgs, dc),
                 description: $"{checkoutObject.ParticipationObject.ObjectType.ToString()} {checkoutObject.ParticipationObject.GetId()} Registration",
                 statementDescriptor: $"AFTRSCHL/{checkoutObject.BillingAccount.Name}",
                 msgs: msgs

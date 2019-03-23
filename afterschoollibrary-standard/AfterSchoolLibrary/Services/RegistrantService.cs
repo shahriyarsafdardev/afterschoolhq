@@ -133,23 +133,28 @@ namespace AfterSchoolLibrary.Services
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PurchasingAccount;
             var customer = purchasingAccount.GetStripeCustomer(msgs);
+            var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             // have to copy the source from the platform to be able to move it to the stripe connected account
             // unless you're not using connected accounts for subscriptions
-            var sourceId = purchasingAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+            string sourceId = null;
 
-            //purchasingAccount.CopyStripeSourceToAccount(
-            //    billingAccount,
-            //    checkoutObject.StripeToken,
-            //    msgs);
+            if (!useStripeConnectedAccount)
+                sourceId = purchasingAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+            else
+            {
+                // if running the billing through stripe connected account
 
-            // create the customer on the connected account
-            //var accountCustomer = Billing.StripeHelper.CreateCustomer(
-            //    description: purchasingAccount.Name,
-            //    email: purchasingAccount.Email,         
-            //    sourceId: sourceId,
-            //    stripeAccountId: null, // billingAccount.StripeUserId,
-            //    msgs: msgs);
+                sourceId = purchasingAccount.CopyStripeSourceToAccount(checkoutObject.BillingAccount, checkoutObject.StripeToken, msgs);
+
+                // create the customer on the connected account
+                customer = Billing.StripeHelper.CreateCustomer(
+                    description: purchasingAccount.Name,
+                    email: purchasingAccount.Email,
+                    sourceId: sourceId,
+                    stripeAccountId: billingAccount.StripeUserId,
+                    msgs: msgs);
+            }
 
             SubscriptionPlan plan = null;
             var applyCoupon = false;
@@ -173,9 +178,9 @@ namespace AfterSchoolLibrary.Services
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
                 sourceId: sourceId,
-                platformFeePercent: null, // billingAccount.GetSubscriptionPlatformFeePercent(plan),
+                platformFeePercent: useStripeConnectedAccount ? billingAccount.GetSubscriptionPlatformFeePercent(plan) : new decimal?(),
+                stripeAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId: null,
                 trialEndDate: null,
-                stripeAccountId: null, // billingAccount.StripeUserId,
                 stripeCouponId: stripeCouponId,
                 msgs: msgs);
 

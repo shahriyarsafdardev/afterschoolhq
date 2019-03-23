@@ -289,7 +289,11 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(AddManageLeaguesFeatureType(adc));
+
+                    amsgs.AddRange(UpdateAccountPaidByTypes(adc));
+                    amsgs.AddRange(AddChargeConvenienceFeesFeatureType(adc));
+
+                    // amsgs.AddRange(AddManageLeaguesFeatureType(adc));
 
                     // amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
                     // amsgs.AddRange(UpdateSeatIndexes(adc));
@@ -347,6 +351,50 @@ namespace AfterSchoolLibrary.Helpers
 
             return msgs;
         }        
+
+        public static SystemMessages UpdateAccountPaidByTypes(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            msgs.AddRange(Account.Update(
+                updateValues: new Hashtable() { { "ConvenienceFeesPaidBy", (int)FeesPaidByType.Parent } },
+                criterias: new Hashtable() { { "ConvenienceFeesPaidBy", 0 } },
+                ObjectMap: Account.ObjectMap,
+                dc: dc));
+
+            msgs.AddRange(Account.Update(
+                updateValues: new Hashtable() { { "CreditCardFeesPaidBy", (int)FeesPaidByType.Parent } },
+                criterias: new Hashtable() { { "CreditCardFeesPaidBy", 0 } },
+                ObjectMap: Account.ObjectMap,
+                dc: dc));
+
+            return msgs;
+        }
+
+        public static SystemMessages AddChargeConvenienceFeesFeatureType(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var aps = AccountPackage.Load(msgs: msgs, dc: dc);
+
+            aps.ForEach(ap => {
+                var apf = ap.GetFeature(FeatureType.ChargeConvenienceFees, msgs, dc);
+                if (apf.IsEmpty())
+                {
+                    msgs.AddRange(new AccountPackageFeature()
+                    {
+                        AccountPackageId = ap.ID,
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = 0,
+                        FeatureTypeId = FeatureType.ChargeConvenienceFees,
+                        LastModifiedBy = 0,
+                        LastModifiedDate = DateTime.UtcNow,
+                        Max = 0
+                    }.Save(dc));
+                }
+            });
+
+            return msgs;
+        }
 
         public static SystemMessages AddManageLeaguesFeatureType(DatabaseConnection dc = null)
         {

@@ -19,5 +19,6 @@ public enum FeatureType
 	ViewInsights,
 	PaymentsPercentageFee,
 	PaymentsPercentageFlatFee,
-	ManageLeagues
+	ManageLeagues,
+	UseStripeConnectedAccount
 }

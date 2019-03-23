@@ -332,6 +332,8 @@ property: DefaultLocationId, int?, Int
 property: MinGradeLevelOffered, int?, Int
 property: MaxGradeLevelOffered, int?, Int
 property: InviteCodeToShare, Guid, UniqueIdentifier
+property: CreditCardFeesPaidBy, FeesPaidByType, Int
+property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
@@ -1513,7 +1515,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageLeagues
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageLeagues, UseStripeConnectedAccount
 [end]
 
 [begin]
@@ -1676,4 +1678,10 @@ values: NotSet, Subscription, PaymentPlan
 type: Enum
 name: PermissionType
 values: NotSet, AccountingView, AccountingEdit, AccountingManage, TeamView, TeamEdit, TeamManage, AccountSettingsView, AccountSettingsEdit, AccountSettingsManage, ContactsView, ContactsEdit, ContactsManage, FormsView, FormsEdit, FormsManage, StudentsView, StudentsEdit, StudentsManage, ActivitiesView, ActivitiesEdit, ActivitiesManage, SessionsView, SessionsEdit, SessionsManage, LeaguesView, LeaguesEdit, LeaguesManage
+[end]
+
+[begin]
+type: Enum
+name: FeesPaidByType
+values: NotSet, Account, Parent
 [end]
