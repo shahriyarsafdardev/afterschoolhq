@@ -68,6 +68,17 @@
     </div>
 </div>
 
+<div id="search-noresults" class="hide margin-t-20 padding-30">
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <h1 class="text-center">Sorry, there are no activities matching your search</h1>
+</div>
+
+<div id="no-activities" class="hide margin-t-20 padding-30">
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <h1 class="text-center">Sorry, there are currently no activities</h1>
+</div>
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -87,7 +98,6 @@
         var gender = $('#search-gender').val();
         var dayofweek = $('#search-dayofweek').val();
         var location = $('#search-location').val();
-
         var totalDivs = 0;
         var hiddenDivs = 0;
 
@@ -113,8 +123,7 @@
                 }
             });
         }
-
-        console.log(gender);
+        
         if (gender != null && gender.length > 0) {
             $('.participation-object').each(function () {
                 var genderRestriction = parseInt($(this).attr('gender'));
@@ -163,10 +172,15 @@
             });
         }
 
-        if (hiddenDivs == totalDivs) {
+        if (totalDivs == 0) {
+            $('#no-activities').removeClass('hide');
+            $('#search-noresults').addClass('hide');
+        } else if (hiddenDivs == totalDivs) {
             $('#search-noresults').removeClass('hide');
+            $('#no-activities').addClass('hide');
         } else {
             $('#search-noresults').addClass('hide');
+            $('#no-activities').addClass('hide');
         }
 
     }
