@@ -672,19 +672,6 @@ Public Module Extensions
                 Else
                     rtn &= aString.Chars(i).ToString
                 End If
-
-                'If i > 0 AndAlso
-                '    ((Char.IsUpper(aString.Chars(i)) = True Or Char.IsNumber(aString.Chars(i))) AndAlso
-                '    (
-                '        (Char.IsLower(aString.Chars(i - 1)) = True) Or
-                '            (i < aString.Length - 1 AndAlso
-                '            (Char.IsLower(aString.Chars(i + 1)) = True Or Char.IsNumber(aString.Chars(i + 1)))))) Then
-
-                '    rtn &= " " & aString.Chars(i).ToString
-
-                'Else
-                '    rtn &= aString.Chars(i).ToString
-                'End If
             Next
 
         End If
