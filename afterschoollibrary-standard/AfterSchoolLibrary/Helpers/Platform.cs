@@ -4,20 +4,32 @@ namespace AfterSchoolLibrary.Billing
 {
     public class Platform
     {
-        public static decimal GetPlatformCreditCardFee(decimal cost)
-        {
-            if (cost > 0)
-                return Math.Ceiling(StripeHelper.GetStripeFee(cost)) - .01M;
+        public const decimal ConveniencePercentFee = .05M;
+        public const decimal ConvenienceFlatFee = .99M;
 
-            return 0;
+        public static decimal GetPlatformCreditCardFee(decimal cost, bool feeTakenOutOfCost = false)
+        {
+            if (cost <= 0)
+                return 0;
+
+            return Math.Ceiling(StripeHelper.GetStripeFee(cost, feeTakenOutOfCost)) - .01M;
         }
 
-        public static decimal GetConvenienceFee(decimal cost)
+        public static decimal GetConvenienceFee(decimal cost, bool feeTakenOutOfCost = false)
         {
-            if (cost > 0)
-                return Math.Ceiling(cost * .05M) - .01M;
+            var fee = 0M;
 
-            return 0;
+            if (cost <= 0)
+                return 0;
+
+            if (feeTakenOutOfCost)
+                fee = (cost * ConveniencePercentFee) + ConvenienceFlatFee;
+            else
+                fee = ((cost + ConvenienceFlatFee) / (1 - ConveniencePercentFee)) - cost;
+
+            // always round up to nearest dollar, then subtract a penny, 
+            // result should always be 3.99 or 2.99, etc.
+            return Math.Ceiling(fee) - .01M;
         }
     }
 }

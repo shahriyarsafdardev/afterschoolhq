@@ -1316,12 +1316,18 @@ property: PaymentTypeId, PaymentType, Int, required
 property: Description, string, NVarChar "400", required
 property: Uid, Guid, UniqueIdentifier
 property: PurchaseId, int?, Int
-property: PlatformPercentFee, decimal?, Decimal "10,2"
-property: PlatformFlatFee, decimal?, Decimal "10,2"
+property: PaymentTypePercentFee, decimal?, Decimal "10,2", , Stores the percent fee for a given payment type - such as ACH vs Stripe
+property: PaymentTypeFlatFee, decimal?, Decimal "10,2", , Stores the flat fee for a given payment type - such as ACH vs Stripe
+property: ConveniencePercentFee, decimal?, Decimal "10,2"
+property: ConvenienceFlatFee, decimal?, Decimal "10,2"
+property: PaymentTypeFeePayerAccountId, int?, Int, , which account is paying the payment type (stripe, ach) fee
+property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the convenience fee
 property: TransactionTypeId, TransactionType, Int, required
 property: StripeChargeOrRefundId, string, NVarChar "50"
 property: PaymentSourceTypeId, PaymentSourceType, Int
 property: OriginalTransactionId, int?, Int
+property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
+property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid
