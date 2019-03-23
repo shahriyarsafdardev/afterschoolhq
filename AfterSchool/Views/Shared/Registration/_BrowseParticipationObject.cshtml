@@ -1,0 +1,87 @@
+﻿@model ParticipationObject
+@{
+    var objects = (List<ParticipationObject>)ViewBag.ParticipationObjects;
+    var grades = (List<GradeLevel>)ViewBag.Grades;
+    var cart = (Cart)ViewBag.Cart;
+    var locations = (List<Location>)ViewBag.Locations;
+}
+
+<div class="col-sm-12 col-md-6 col-lg-4 participation-object"
+     id="@Model.Uid"
+     mingrade="@Model.MinGradeId"
+     maxgrade="@Model.MaxGradeId"
+     hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
+     haswaitinglistremaining="@Model.HasWaitingListSeatsAvailable().ToString().ToLower()"
+     days="@ParticipationObjectUI.PrintDaysOfWeek(Model)"
+     location="@(Model.Location?.FormatAddress(false))"
+     gender="@((int)Model.GenderRestriction)"
+     name="@Model.Name">
+
+    <div class="panel">
+        <div class="heading panel-h3">
+            <h3><strong>@Model.Name</strong></h3>
+        </div>
+        <div class="panel-body">
+            <div>
+                <p class="text-medium-small">
+                    <span>
+                        @Model.OwnerAccount.Name
+                    </span>
+                    @if (Model.Location.IsNotEmpty() && Model.Location.ID != Model.OwnerAccount.DefaultLocationId)
+                    {
+                        <span>
+                            @@
+                            @Model.Location.Name
+                        </span>
+                    }
+                </p>
+            </div>
+            <div>
+                <span class="reg-info">
+                    @ParticipationObjectUI.PrintDaysOfWeek(Model)
+                </span>
+                &bull;
+                <span class="reg-info">
+                    @ParticipationObjectUI.PrintGradeLevels(Model) Grade
+                </span>
+                &bull;
+                <span class="reg-info">
+                    @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                </span>
+            </div>
+
+            <p class="activity-description text-muted">
+                @Html.Raw(Model.Description.MaxChars(80, "...").IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(Model.Details).MaxChars(80, "...")))
+            </p>
+
+            <div class="margin-t-20">
+                <a href="@Model.GetHomePageUrl(SessionVariables.IsAfterSchool.Value)" class="btn btn-primary btn-register btn-block">
+                    Learn More &raquo;
+                </a>
+            </div>
+            <div class="seats-remaining text-center">
+                @if (Model.SeatsRemaining.HasValue)
+                {
+                    <strong>
+                        <em>
+                            @if (!Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
+                            {
+                                @:@Model.SeatsRemaining.ToString() Seats @(Model.RegistrationMode == RegistrationMode.Register ? "Left" : "")
+                            }
+                            else
+                            {
+                                @:Closed
+                            }
+
+                        </em>
+                    </strong>
+                }
+            </div>
+        </div>
+        <div class="panel-footer">
+            <p>
+                @ParticipationObjectUI.PrintRegistrationPeriod(Model)
+            </p>
+        </div>
+    </div>
+</div>
