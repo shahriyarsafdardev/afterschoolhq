@@ -31,5 +31,10 @@ namespace AfterSchoolLibrary.Billing
             // result should always be 3.99 or 2.99, etc.
             return Math.Ceiling(fee) - .01M;
         }
+
+        public static decimal GetTotalFees(decimal cost, bool feeTakenOutOfCost)
+        {
+            return GetConvenienceFee(cost, feeTakenOutOfCost) + GetCreditCardFee(cost, feeTakenOutOfCost);
+        }
     }
 }

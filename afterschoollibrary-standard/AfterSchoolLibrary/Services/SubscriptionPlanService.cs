@@ -258,8 +258,7 @@ namespace AfterSchoolLibrary.Services
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
                 return subscriptionPlan.CostPerPeriod.Value + 
-                    Billing.Platform.GetCreditCardFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount.IsFeeTakenOutOfCost) + 
-                    Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount.IsFeeTakenOutOfCost);
+                    Billing.Platform.GetTotalFees(subscriptionPlan.CostPerPeriod.Value, ownerAccount.IsFeeTakenOutOfCost);
 
             return 0;
         }

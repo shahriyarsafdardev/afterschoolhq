@@ -157,7 +157,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                     {
                         PurchasingAccount = purchasingAccount,
                         BillingAccount = billingAccount,
-                        // OverrideAmount = totalAmountInCents / 100,
+                        // OverrideAmount = totalAmountInCents / 100, // should be able to pull from the plan
                         ParticipationObject = participationObject,
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                         PaymentType = PaymentType.CreditCard,
