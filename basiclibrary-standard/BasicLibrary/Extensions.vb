@@ -653,15 +653,27 @@ Public Module Extensions
     <Extension()>
     Public Function SplitByUpperCase(ByVal aString As String) As String
         Dim rtn As String = ""
+
         If aString IsNot Nothing AndAlso aString <> String.Empty Then
             aString = aString.Replace(" ", "")
+
             For i As Integer = 0 To aString.Length - 1
-                If i > 0 AndAlso ((Char.IsUpper(aString.Chars(i)) = True Or Char.IsNumber(aString.Chars(i))) AndAlso ((Char.IsLower(aString.Chars(i - 1)) = True) Or (i < aString.Length - 1 AndAlso (Char.IsLower(aString.Chars(i + 1)) = True Or Char.IsNumber(aString.Chars(i + 1)))))) Then
+
+                Dim isNotFirstChar = i > 0
+                Dim isCharUpperCase = isNotFirstChar AndAlso Char.IsUpper(aString.Chars(i))
+                Dim isCharNumber = isNotFirstChar AndAlso Char.IsNumber(aString.Chars(i))
+                Dim isPrevCharLowerCase = isNotFirstChar AndAlso Char.IsLower(aString.Chars(i - 1))
+                Dim isNotLastChar = isNotFirstChar AndAlso i < aString.Length - 1
+                Dim isNextCharLowerCase = isNotFirstChar AndAlso isNotLastChar AndAlso Char.IsLower(aString.Chars(i + 1))
+                Dim isNextCharNumber = isNotFirstChar AndAlso isNotLastChar AndAlso Char.IsNumber(aString.Chars(i + 1))
+
+                If (isCharUpperCase Or isCharNumber) AndAlso (isPrevCharLowerCase Or isNextCharLowerCase) Then
                     rtn &= " " & aString.Chars(i).ToString
                 Else
                     rtn &= aString.Chars(i).ToString
                 End If
             Next
+
         End If
 
         Return rtn
