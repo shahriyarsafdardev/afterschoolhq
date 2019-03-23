@@ -1,0 +1,13 @@
+﻿@model Account
+<div class="reg-header">
+    <div class="reg-header-overlay">
+        <h1 class="activity-title">
+            <strong>@Model.Name</strong>
+            @if (!Model.ID.HasValue)
+            {
+                <span class="badge badge-danger">DEMO</span>
+            }
+        </h1>
+        <p>@Model.LandingPageText</p>
+    </div>
+</div>
