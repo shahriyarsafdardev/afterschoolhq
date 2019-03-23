@@ -118,8 +118,13 @@ namespace AfterSchoolLibrary.Services
                 return msgs;
             }
 
+            string stripeUserId = null;
+
+            if (account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                stripeUserId = account.StripeUserId;
+
             // do stripe
-            var product = Billing.StripeHelper.GetProduct(uid, null, msgs); // account.StripeUserId
+            var product = Billing.StripeHelper.GetProduct(uid, stripeUserId, msgs);
 
             if (product.IsEmpty())
             {
@@ -136,7 +141,7 @@ namespace AfterSchoolLibrary.Services
                     name,
                     uniqueName,
                     subscriptionPlan.IsActive,
-                    null, // account.StripeUserId
+                    stripeUserId,
                     metaData,
                     msgs);
             }
@@ -148,8 +153,8 @@ namespace AfterSchoolLibrary.Services
 
             if (subscriptionPlan.StripePlanId.IsNotEmpty())
             {
-                plan = Billing.StripeHelper.GetPlan(subscriptionPlan.StripePlanId, null, msgs); // account.StripeUserId
-                Billing.StripeHelper.UpdatePlan(subscriptionPlan.StripePlanId, plan.Nickname, plan.Active, null, msgs); // account.StripeUserId
+                plan = Billing.StripeHelper.GetPlan(subscriptionPlan.StripePlanId, stripeUserId, msgs);
+                Billing.StripeHelper.UpdatePlan(subscriptionPlan.StripePlanId, plan.Nickname, plan.Active, stripeUserId, msgs);
             }
             else
             {
@@ -164,10 +169,10 @@ namespace AfterSchoolLibrary.Services
                 plan = Billing.StripeHelper.CreatePlan(
                     product,
                     null,
-                    subscriptionPlan.GetTotalCostWithFees(),
+                    subscriptionPlan.GetTotalCostWithFees(account),
                     subscriptionPlan.BillingPeriodTypeId,
                     subscriptionPlan.GetNickName(name),
-                    null, // account.StripeUserId
+                    stripeUserId,
                     metaData,
                     msgs
                     );
@@ -234,36 +239,49 @@ namespace AfterSchoolLibrary.Services
         public static void CheckAndCancelPaymentPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan registrantSubscriptionPlan, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var totalPayments = registrantSubscriptionPlan.GetPaymentCount(msgs, dc);
+            string stripeUserId = null;
+
+            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                stripeUserId = billingAccount.StripeUserId;
 
             if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && totalPayments >= plan.TotalPeriods.Value)
                 msgs.AddRange(Billing.StripeHelper.CancelSubscription(
-                    registrantSubscriptionPlan.StripeSubscriptionId, 
-                    null // billingAccount.StripeUserId
+                    registrantSubscriptionPlan.StripeSubscriptionId,
+                    stripeUserId
                 ));
         }
 
-        public static decimal GetTotalCostWithFees(this SubscriptionPlan subscriptionPlan)
+        public static decimal GetTotalCostWithFees(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (ownerAccount.IsEmpty())
+                ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
+
             if (subscriptionPlan.CostPerPeriod.HasValue)
                 return subscriptionPlan.CostPerPeriod.Value + 
-                    Billing.Platform.GetPlatformCreditCardFee(subscriptionPlan.CostPerPeriod.Value) + 
-                    Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value);
+                    Billing.Platform.GetCreditCardFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount.IsFeeTakenOutOfCost) + 
+                    Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount.IsFeeTakenOutOfCost);
 
             return 0;
         }
 
-        public static decimal GetCreditCardFee(this SubscriptionPlan subscriptionPlan)
+        public static decimal GetCreditCardFee(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (ownerAccount.IsEmpty())
+                ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
+
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return Billing.Platform.GetPlatformCreditCardFee(subscriptionPlan.CostPerPeriod.Value);
+                return Billing.Platform.GetCreditCardFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount.IsFeeTakenOutOfCost);
 
             return 0;
         }
 
-        public static decimal GetConvenienceFee(this SubscriptionPlan subscriptionPlan)
+        public static decimal GetConvenienceFee(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (ownerAccount.IsEmpty())
+                ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
+
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value);
+                return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount.IsFeeTakenOutOfCost);
 
             return 0;
         }

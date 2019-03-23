@@ -145,17 +145,19 @@ namespace AfterSchoolLibrary.Helpers
                 }
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
                 {
-                    cost = checkoutObject.PaymentPlanCostToday.ToCurrency();
+                    cost = checkoutObject.PaymentPlanCostTodayNoFees.ToCurrency();
+                    ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs).ToCurrency();
+                    asFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs).ToCurrency();
+
                     additionalDetails = $"today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
-                    ccFee = checkoutObject.PaymentPlanCostTodayCreditCardFees.ToCurrency();
-                    asFee = checkoutObject.PaymentPlanCostTodayConvenienceFees.ToCurrency();
                 }
                 else
                 {
-                    cost = checkoutObject.TuitionCost.ToCurrency();
+                    cost = checkoutObject.TuitionCostNoFees.ToCurrency();
+                    ccFee = checkoutObject.GetTuitionCreditCardFee(msgs).ToCurrency();
+                    asFee = checkoutObject.GetTuitionConvenienceFee(msgs).ToCurrency();
+
                     additionalDetails = "tuition fee";
-                    ccFee = checkoutObject.TuitionCostTodayCreditCardFees.ToCurrency();
-                    asFee = checkoutObject.TuitionCostTodayConvenienceFees.ToCurrency();
                 }
 
                 // add tuition fee row
@@ -178,10 +180,10 @@ namespace AfterSchoolLibrary.Helpers
             if (subscription.IsNotEmpty())
             {
                 description = $"Subscription for {participationObject.Name}";
-                cost = subscription.CostPerPeriod.ToCurrency();
+                cost = checkoutObject.SubscriptionCostTodayNoFees.ToCurrency();
                 additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
-                ccFee = checkoutObject.SubscriptionCostTodayCreditCardFees.ToCurrency();
-                asFee = checkoutObject.SubscriptionCostTodayConvenienceFees.ToCurrency();
+                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs).ToCurrency();
+                asFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs).ToCurrency();
 
                 // add tuition fee row
                 var subscriptionFeeModel = new NameValueCollection()
@@ -210,7 +212,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
                 { "AmountDueOrPaid", amountDueOrPaid },
-                { "TotalCost", checkoutObject.TotalCostToPurchaseTodayWithFees.ToCurrency() },
+                { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs).ToCurrency() },
                 { "BodyRows", receiptRows },
                 { "CustomMessage", registrationThankYou },
                 { "CreditCardFee", ccFee },

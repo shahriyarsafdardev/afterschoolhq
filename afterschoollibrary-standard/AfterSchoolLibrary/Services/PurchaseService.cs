@@ -11,12 +11,12 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var totalCost = checkoutObject.TuitionCost;
+            var totalCost = checkoutObject.TuitionCostNoFees;
 
             if (checkoutObject.PaymentPlan.IsNotEmpty())
-                totalCost = checkoutObject.PaymentPlanTotalCost;
+                totalCost = checkoutObject.PaymentPlanCostTodayNoFees;
             else if (checkoutObject.SubscriptionPlan.IsNotEmpty())
-                totalCost += checkoutObject.SubscriptionCostToday;
+                totalCost += checkoutObject.SubscriptionCostTodayNoFees;
 
             if (checkoutObject.OverrideAmount.HasValue)
                 totalCost = checkoutObject.OverrideAmount.Value;

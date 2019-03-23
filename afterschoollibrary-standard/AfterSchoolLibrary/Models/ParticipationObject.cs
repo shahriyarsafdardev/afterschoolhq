@@ -41,6 +41,7 @@ namespace AfterSchoolLibrary.Models
         public string ContactEmail { get; set; }
         public string CostDescription { get; set; }
         public string LocationDetails { get; set; }
+        public bool UseStripeConnectedAccount { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -85,6 +86,7 @@ namespace AfterSchoolLibrary.Models
             ContactPhone = activity.ContactPhone;
             CostDescription = activity.CostDescription;
             LocationDetails = activity.LocationDetails;
+            UseStripeConnectedAccount = OwnerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -138,6 +140,7 @@ namespace AfterSchoolLibrary.Models
             // TODO: PayLater = activityGroup.AllowToPayLater;
             SeatsRemaining = activityGroup.GetSeatsRemaining(msgs, dc);
             WaitingListSeatsRemaining = activityGroup.GetWaitingListSeatsRemaining(msgs, dc);
+            UseStripeConnectedAccount = OwnerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -172,6 +175,7 @@ namespace AfterSchoolLibrary.Models
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
+            UseStripeConnectedAccount = OwnerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -455,9 +459,9 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCheckoutTotalCost()
         {
             if (this.Cost.HasValue)
-                return this.Cost.Value + 
-                    Billing.Platform.GetPlatformCreditCardFee(this.Cost.Value) + 
-                    Billing.Platform.GetConvenienceFee(this.Cost.Value);
+                return this.Cost.Value +
+                    Billing.Platform.GetCreditCardFee(this.Cost.Value, OwnerAccount.IsFeeTakenOutOfCost) +
+                    Billing.Platform.GetConvenienceFee(this.Cost.Value, OwnerAccount.IsFeeTakenOutOfCost);
 
             return 0;
         }
@@ -465,7 +469,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCreditCardFee()
         {
             if (this.Cost.HasValue)
-                return Billing.Platform.GetPlatformCreditCardFee(this.Cost.Value);
+                return Billing.Platform.GetCreditCardFee(this.Cost.Value, OwnerAccount.IsFeeTakenOutOfCost);
 
             return 0;
         }
@@ -473,7 +477,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetConvenienceFee()
         {
             if (this.Cost.HasValue)
-                return Billing.Platform.GetConvenienceFee(this.Cost.Value);
+                return Billing.Platform.GetConvenienceFee(this.Cost.Value, OwnerAccount.IsFeeTakenOutOfCost);
 
             return 0;
         }

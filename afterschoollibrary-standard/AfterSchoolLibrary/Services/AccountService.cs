@@ -1728,22 +1728,28 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetCountByPayerAccountId(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
-        public static decimal CalculatePlatformFeeAmount(this Account toAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
+        public static decimal CalculatePlatformFeeAmount(this Account billingAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var percentageFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
-            var flatFee = toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
+            var percentageFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+            var flatFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
 
             return (totalAmountToCharge * percentageFee) + flatFee;
         }
 
-        public static decimal GetPlatformPercentFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+        public static decimal GetPlatformPercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {            
+            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+
+            return 0;
         }
 
-        public static decimal GetPlatformFlatFee(this Account toAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetPlatformFlatFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return toAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
+            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+                return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
+
+            return 0;
         }
 
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
@@ -1763,14 +1769,15 @@ namespace AfterSchoolLibrary.Services
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-            var platformFeeAmount = checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionCost, msgs, dc);
+            var platformFeeAmount = checkoutObject.BillingAccount.CalculatePlatformFeeAmount(checkoutObject.TuitionCostNoFees, msgs, dc);
 
+            // only charge tuition during checkout, because subscriptions are billed through stripe
             var charge = StripeHelper.CreateCharge(
                 fromCustomerId: customerId,
                 destinationAccountId: useStripeConnectedAccount ? checkoutObject.BillingAccount.StripeUserId : null,
                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
-                totalAmount: checkoutObject.TuitionCostWithFees,
+                totalAmount: checkoutObject.GetTuitionCostWithFees(msgs, dc), 
                 description: $"{checkoutObject.ParticipationObject.ObjectType.ToString()} {checkoutObject.ParticipationObject.GetId()} Registration",
                 statementDescriptor: $"AFTRSCHL/{checkoutObject.BillingAccount.Name}",
                 msgs: msgs
@@ -1812,7 +1819,7 @@ namespace AfterSchoolLibrary.Services
 
         internal static Transaction AddTransaction(Transaction orginalTransaction, string stripeRefundId, decimal amount, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return TransactionService.CreateNew(
+            return TransactionService.CreateNewRefund(
                     orginalTransaction,
                     amount,
                     stripeRefundId,
@@ -1944,7 +1951,10 @@ namespace AfterSchoolLibrary.Services
 
             // TODO: this is problematic, but a little better now
             // you really don't know this is the amount paid, but it works for now
-            var amountPaid = checkoutObject.TuitionCost;
+            // var amountPaid = checkoutObject.TuitionCostNoFees;
+
+            // -- should be fixed now
+            var amountPaid = checkoutObject.TotalCostToPurchaseTodayNoFees;
 
             if (checkoutObject.OverrideAmount.HasValue)
                 amountPaid = checkoutObject.OverrideAmount.Value;
@@ -2015,7 +2025,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void ProcessTuitionFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (checkoutObject.TuitionCost > 0)
+            if (checkoutObject.TuitionCostNoFees > 0)
               AccountService.ProcessTuitionWithStripe(checkoutObject, msgs, dc);
 
             // must wait until after charges happen to know what card id is charged for sure

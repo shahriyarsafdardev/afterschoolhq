@@ -7,7 +7,7 @@ namespace AfterSchoolLibrary.Billing
         public const decimal ConveniencePercentFee = .05M;
         public const decimal ConvenienceFlatFee = .99M;
 
-        public static decimal GetPlatformCreditCardFee(decimal cost, bool feeTakenOutOfCost = false)
+        public static decimal GetCreditCardFee(decimal cost, bool feeTakenOutOfCost)
         {
             if (cost <= 0)
                 return 0;
@@ -15,7 +15,7 @@ namespace AfterSchoolLibrary.Billing
             return Math.Ceiling(StripeHelper.GetStripeFee(cost, feeTakenOutOfCost)) - .01M;
         }
 
-        public static decimal GetConvenienceFee(decimal cost, bool feeTakenOutOfCost = false)
+        public static decimal GetConvenienceFee(decimal cost, bool feeTakenOutOfCost)
         {
             var fee = 0M;
 

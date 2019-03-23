@@ -291,7 +291,7 @@ namespace AfterSchoolLibrary.Helpers
                     amsgs.AddRange(AdditionalData(adc));
 
                     amsgs.AddRange(UpdateAccountPaidByTypes(adc));
-                    amsgs.AddRange(AddChargeConvenienceFeesFeatureType(adc));
+                    amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
 
                     // amsgs.AddRange(AddManageLeaguesFeatureType(adc));
 
@@ -371,13 +371,13 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages AddChargeConvenienceFeesFeatureType(DatabaseConnection dc = null)
+        public static SystemMessages AddUseStripeConnectedAccountFeatureType(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var aps = AccountPackage.Load(msgs: msgs, dc: dc);
 
             aps.ForEach(ap => {
-                var apf = ap.GetFeature(FeatureType.ChargeConvenienceFees, msgs, dc);
+                var apf = ap.GetFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
                 if (apf.IsEmpty())
                 {
                     msgs.AddRange(new AccountPackageFeature()
@@ -385,10 +385,10 @@ namespace AfterSchoolLibrary.Helpers
                         AccountPackageId = ap.ID,
                         CreateDate = DateTime.UtcNow,
                         CreatedBy = 0,
-                        FeatureTypeId = FeatureType.ChargeConvenienceFees,
+                        FeatureTypeId = FeatureType.UseStripeConnectedAccount,
                         LastModifiedBy = 0,
                         LastModifiedDate = DateTime.UtcNow,
-                        Max = 0
+                        Max = 1
                     }.Save(dc));
                 }
             });

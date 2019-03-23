@@ -61,7 +61,9 @@ namespace AfterSchoolLibrary.Services
             return CreateNew(
                 checkoutObject.PurchasingAccount, 
                 checkoutObject.BillingAccount, 
-                checkoutObject.OverrideAmount ?? checkoutObject.TuitionCost, 
+                checkoutObject.ConvenienceFeePayer,
+                checkoutObject.CreditCardFeePayer,
+                checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc), 
                 checkoutObject.ParticipationObject.Name, 
                 checkoutObject.Purchase?.ID, 
                 transactionType, 
@@ -69,14 +71,49 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.PaymentSourceType,
                 checkoutObject.GetPlatformFlatFee(msgs, dc),
                 checkoutObject.GetPlatformPercentFee(msgs, dc),
+                checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
+                checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
                 checkoutObject.StripeChargeId,
                 loggedInUser, 
                 msgs, 
                 dc);
         }
 
-        public static Transaction CreateNew(Transaction originalTransaction, decimal amount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal platformFee, decimal platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();            
+
+            var transaction = new Transaction()
+            {
+                Amount = amount,
+                BillerAccountId = billingAccount.ID.Value,
+                Description = $"{participationObjectName} registration",
+                PayerAccountId = payingAccount?.ID,
+                PaymentTypeId = paymentType,
+                PurchaseId = purchaseId,
+                CreateDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedDate = DateTime.UtcNow,
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                PlatformFlatFee = platformFee,
+                PlatformPercentFee = platformPercentFee,
+                StripeChargeOrRefundId = stripeChargeOrRefundId,
+                TransactionTypeId = transactionType,
+                PaymentSourceTypeId = paymentSourceType,
+                ConvenienceFeePayerAccountId = ConvenienceFeePayer?.ID,
+                PaymentTypeFeePayerAccountId = PaymentTypeFeePayer?.ID,
+                ConvenienceFeeCharged = convenienceFee,
+                PaymentTypeFeeCharged = paymentTypeFee,
+            };
+            msgs.AddRange(transaction.Save(dc));
+
+            return transaction;
+        }
+
+
+        public static Transaction CreateNewRefund(Transaction originalTransaction, decimal amount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            // inverse billing and paying for refund
             return CreateNew(
                 originalTransaction.GetBillerAccount(),
                 originalTransaction.GetPayerAccount(),
@@ -91,33 +128,6 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
-        }
-
-        public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal platformFee, decimal platformPercentFee, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();            
-
-            var transaction = new Transaction()
-            {
-                Amount = amount,
-                BillerAccountId = billingAccount.ID.Value,
-                Description = $"{participationObjectName} registration",
-                PayerAccountId = purchasingAccount?.ID,
-                PaymentTypeId = paymentType,
-                PurchaseId = purchaseId,
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                PlatformFlatFee = platformFee,
-                PlatformPercentFee = platformPercentFee,
-                StripeChargeOrRefundId = stripeChargeOrRefundId,
-                TransactionTypeId = transactionType,
-                PaymentSourceTypeId = paymentSourceType
-            };
-            msgs.AddRange(transaction.Save(dc));
-
-            return transaction;
         }
 
         public static Transaction CreateNew(Account purchasingAccount, Account billingAccount, decimal amount, Purchase purchase, string participationObjectName, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, string stripeChargeOrRefundId, Transaction originalTransaction , WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

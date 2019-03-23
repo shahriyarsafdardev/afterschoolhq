@@ -343,11 +343,20 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
+
+        public bool IsFeeTakenOutOfCost
+        {
+            get
+            {
+                return CreditCardFeesPaidBy == FeesPaidByType.Account;
+            }
+        }
+
         public string AccountNumber
         {
             get
