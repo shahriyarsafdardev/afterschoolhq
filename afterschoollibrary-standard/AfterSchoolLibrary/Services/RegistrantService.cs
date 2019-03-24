@@ -155,8 +155,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
-            var applyCoupon = plan.DoesCouponApply(checkoutObject.Coupon);
-            var stripeCouponId = applyCoupon ? checkoutObject.Coupon.StripeCouponId : null;
+            var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
 
             // create the subscription on the connected account
             var subscription = Billing.StripeHelper.CreateSubscription(
