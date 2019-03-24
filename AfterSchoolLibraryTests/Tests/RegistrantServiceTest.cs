@@ -31,9 +31,11 @@ namespace AfterSchoolLibraryTests.Tests
             var accountPackageFeature1 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFee, .05M, msgs, dc);
             var accountPackageFeature2 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFlatFee, .99M, msgs, dc);
             var accountPackageFeature3 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.UseStripeConnectedAccount, 1, msgs, dc);
-            var paymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(billingAccount, activity, 100, 3, msgs, dc);
 
             billingAccount.CreateStripeCustomAccount(msgs, dc);
+
+            var paymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(billingAccount, activity, 100, 3, msgs, dc);
+
             purchasingAccount.CreateStripeCustomer(msgs, dc);
 
             var checkoutObject = new CheckoutObject()
@@ -52,7 +54,13 @@ namespace AfterSchoolLibraryTests.Tests
                 StripeToken = AfterSchoolLibrary.Billing.StripeHelper.GetTestSourceToken()
             };
 
-            masterRegistrant.StartSubscriptionPlan(checkoutObject, SubscriptionPlanType.PaymentPlan, DateTime.UtcNow, purchasingAccountOwner, msgs, dc);
+            masterRegistrant.StartSubscriptionPlan(
+                checkoutObject, 
+                SubscriptionPlanType.PaymentPlan, 
+                DateTime.UtcNow, 
+                purchasingAccountOwner, 
+                msgs, 
+                dc);
 
             Assert.True(msgs.HasNoErrors());
         }

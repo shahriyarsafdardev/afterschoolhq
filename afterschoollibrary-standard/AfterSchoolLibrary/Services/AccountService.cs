@@ -13,7 +13,7 @@ namespace AfterSchoolLibrary.Services
     {
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.GetActiveAccountPackage(msgs, dc).HasFeature(featureType);
+            return account.GetActiveAccountPackage(msgs, dc).HasFeature(featureType, msgs, dc);
         }
 
         public static WebUser GetAccountOwner(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
