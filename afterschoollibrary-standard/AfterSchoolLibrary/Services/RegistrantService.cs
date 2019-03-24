@@ -125,21 +125,21 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
-        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static Tuple<Stripe.StripeCustomer, string> GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, bool useStripeConnectedAccount)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var billingAccount = checkoutObject.BillingAccount;
-            var purchasingAccount = checkoutObject.PurchasingAccount;
-            var customer = purchasingAccount.GetStripeCustomer(msgs);
-            var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-
             // have to copy the source from the platform to be able to move it to the stripe connected account
             // unless you're not using connected accounts for subscriptions
+            var msgs = new SystemMessages();
+            var billingAccount = checkoutObject.BillingAccount;
+            var purchasingAccount = checkoutObject.PurchasingAccount;
             string sourceId = null;
+            Stripe.StripeCustomer customer = null;
 
             if (!useStripeConnectedAccount)
+            {
+                customer = purchasingAccount.GetStripeCustomer(msgs);
                 sourceId = purchasingAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+            }
             else
             {
                 // if running the billing through stripe connected account
@@ -154,15 +154,26 @@ namespace AfterSchoolLibrary.Services
                     msgs: msgs);
             }
 
+            return new Tuple<Stripe.StripeCustomer, string>(customer, sourceId);
+        }
+
+        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var billingAccount = checkoutObject.BillingAccount;
+            var purchasingAccount = checkoutObject.PurchasingAccount;            
+            var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, useStripeConnectedAccount);
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
 
-            // create the subscription on the connected account
+            // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = Billing.StripeHelper.CreateSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
                 sourceId: sourceId,
-                platformFeePercent: useStripeConnectedAccount ? billingAccount.GetSubscriptionPlatformFeePercent(plan) : new decimal?(),
+                platformFeePercent: useStripeConnectedAccount ? billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc) : new decimal?(),
                 stripeAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId: null,
                 trialEndDate: null,
                 stripeCouponId: stripeCouponId,
@@ -170,11 +181,13 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasErrors())
                 return;
-            
+
+            var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+
             checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                 registrant,
                 startDateTime,
-                checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc),
+                purchase,
                 subscription.Id,
                 loggedInUser,
                 msgs,

@@ -2,6 +2,7 @@
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using System.Collections.Generic;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -82,17 +83,10 @@ namespace AfterSchoolLibrary.Services
             return new ParticipationObject(plan.ParticipationObjectId.Value, plan.ParticipationObjectTypeId, msgs, dc);
         }
 
-        public static SystemMessages SaveWithStripe(this SubscriptionPlan subscriptionPlan, DatabaseConnection dc = null)
+        private static (Account account, Guid uid, string name, string uniqueName) GetActivityInfoDuringSave(this SubscriptionPlan subscriptionPlan, SystemMessages msgs, DatabaseConnection dc)
         {
-            var msgs = new SystemMessages();
-
-            msgs.AddRange(subscriptionPlan.Save(dc));
-
-            if (msgs.HasErrors())
-                return msgs;
-
             Account account = null;
-            string uid = "";
+            Guid uid;
             string name = "";
             string uniqueName = "";
 
@@ -100,7 +94,7 @@ namespace AfterSchoolLibrary.Services
             {
                 var activity = subscriptionPlan.GetActivity(msgs, dc);
                 account = activity.GetAccount(msgs, dc);
-                uid = activity.Uid.ToString();
+                uid = activity.Uid;
                 name = activity.Name;
                 uniqueName = activity.UniqueName;
             }
@@ -108,47 +102,20 @@ namespace AfterSchoolLibrary.Services
             {
                 var activityGroup = subscriptionPlan.GetActivityGroup(msgs, dc);
                 account = activityGroup.GetAccount(msgs, dc);
-                uid = activityGroup.Uid.ToString();
+                uid = activityGroup.Uid;
                 name = activityGroup.Name;
                 uniqueName = activityGroup.UniqueName;
             }
             else
             {
                 msgs.Add("Invalid Object Type", MessageType.Error);
-                return msgs;
             }
 
-            string stripeUserId = null;
+            return (account, uid, name, uniqueName);
+        }
 
-            if (account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                stripeUserId = account.StripeUserId;
-
-            // do stripe
-            var product = Billing.StripeHelper.GetProduct(uid, stripeUserId, msgs);
-
-            if (product.IsEmpty())
-            {
-                var metaData = new System.Collections.Generic.Dictionary<string, string>();
-                metaData.Add("AccountUid", account.Uid.ToString());
-                metaData.Add("AccountName", account.Name);
-                metaData.Add("AccountId", account.ID.ToString());
-                metaData.Add("ActivityType", subscriptionPlan.ParticipationObjectTypeId.ToString());
-                metaData.Add("ActivityUid", uid);
-                metaData.Add("ActivityName", name);
-
-                product = Billing.StripeHelper.CreateProduct(
-                    uid,
-                    name,
-                    uniqueName,
-                    subscriptionPlan.IsActive,
-                    stripeUserId,
-                    metaData,
-                    msgs);
-            }
-
-            if (msgs.HasErrors())
-                return msgs;
-
+        private static Stripe.StripePlan CreateOrUpdateStripePlan(this SubscriptionPlan subscriptionPlan, Stripe.StripeProduct product, Account account, Guid uid, string name, string stripeUserId, SystemMessages msgs, DatabaseConnection dc)
+        {
             Stripe.StripePlan plan = null;
 
             if (subscriptionPlan.StripePlanId.IsNotEmpty())
@@ -157,15 +124,6 @@ namespace AfterSchoolLibrary.Services
                 Billing.StripeHelper.UpdatePlan(subscriptionPlan.StripePlanId, plan.Nickname, plan.Active, stripeUserId, msgs);
             }
             else
-            {
-                var metaData = new System.Collections.Generic.Dictionary<string, string>();
-                metaData.Add("AccountUid", account.Uid.ToString());
-                metaData.Add("AccountName", account.Name);
-                metaData.Add("AccountId", account.ID.ToString());
-                metaData.Add("ActivityType", subscriptionPlan.ParticipationObjectTypeId.ToString());
-                metaData.Add("ActivityUid", uid);
-                metaData.Add("ActivityName", name);
-
                 plan = Billing.StripeHelper.CreatePlan(
                     product,
                     null,
@@ -173,14 +131,68 @@ namespace AfterSchoolLibrary.Services
                     subscriptionPlan.BillingPeriodTypeId,
                     subscriptionPlan.GetNickName(name),
                     stripeUserId,
-                    metaData,
+                    subscriptionPlan.GetStripeMetaData(account, uid, name),
                     msgs
                     );
+
+            if (plan.IsNotEmpty())
+            {
+                subscriptionPlan.StripePlanId = plan.Id;
+                msgs.AddRange(subscriptionPlan.Save(dc));
             }
 
-            // update stripe plan id
-            subscriptionPlan.StripePlanId = plan.Id;
+            return plan;
+        }
+
+        private static Stripe.StripeProduct GetStripeProduct(this SubscriptionPlan subscriptionPlan, Account account, Guid uid, string name, string uniqueName, string stripeUserId, SystemMessages msgs)
+        {
+            var product = Billing.StripeHelper.GetProduct(uid.ToString(), stripeUserId, msgs);
+
+            if (product.IsEmpty())
+                product = Billing.StripeHelper.CreateProduct(
+                    uid.ToString(),
+                    name,
+                    uniqueName,
+                    subscriptionPlan.IsActive,
+                    stripeUserId,
+                    subscriptionPlan.GetStripeMetaData(account, uid, name),
+                    msgs);
+
+            return product;
+        }
+
+        private static Dictionary<string, string> GetStripeMetaData(this SubscriptionPlan subscriptionPlan, Account account, Guid uid, string name)
+        {
+            return new Dictionary<string, string>
+            {
+                { "AccountUid", account.Uid.ToString() },
+                { "AccountName", account.Name },
+                { "AccountId", account.ID.ToString() },
+                { "ActivityType", subscriptionPlan.ParticipationObjectTypeId.ToString() },
+                { "ActivityUid", uid.ToString() },
+                { "ActivityName", name }
+            };
+        }
+
+        public static SystemMessages SaveWithStripe(this SubscriptionPlan subscriptionPlan, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
             msgs.AddRange(subscriptionPlan.Save(dc));
+
+            if (msgs.HasErrors())
+                return msgs;
+            
+            var (account, uid, name, uniqueName) = subscriptionPlan.GetActivityInfoDuringSave(msgs, dc);
+            string stripeUserId = account.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc) ? account.StripeUserId : null;
+
+            // do stripe
+            var product = subscriptionPlan.GetStripeProduct(account, uid, name, uniqueName, stripeUserId, msgs);
+
+            if (msgs.HasErrors())
+                return msgs;
+
+            subscriptionPlan.CreateOrUpdateStripePlan(product, account, uid, name, stripeUserId, msgs, dc);
 
             return msgs;
         }

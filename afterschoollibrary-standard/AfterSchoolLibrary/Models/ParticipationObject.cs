@@ -86,7 +86,6 @@ namespace AfterSchoolLibrary.Models
             ContactPhone = activity.ContactPhone;
             CostDescription = activity.CostDescription;
             LocationDetails = activity.LocationDetails;
-            UseStripeConnectedAccount = OwnerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -103,8 +102,9 @@ namespace AfterSchoolLibrary.Models
             CostUnitType = global::CostUnitType.PerRegistrant;
             AllowToPayLater = activity.AllowToPayLater;
             RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
-            Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm();
+            Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);
             OwnerAccount = activity.GetAccount(msgs, dc);
+            UseStripeConnectedAccount = OwnerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
             SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);

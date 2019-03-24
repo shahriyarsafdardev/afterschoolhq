@@ -25,12 +25,13 @@ namespace AfterSchoolLibraryTests.Tests
             var purchasingAccount = AccountFactory.Create(purchasingAccountOwner, msgs, dc);
             var masterRegistrant = RegistrantFactory.Create(purchasingAccount, msgs, dc);
             var activity = ActivityFactory.Create(billingAccount, msgs, dc);
-            var paymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(billingAccount, activity, 100, 3, msgs, dc);
             var registration = RegistrationFactory.Create(billingAccount, masterRegistrant, msgs, dc);
             var package = PackageFactory.Create(msgs, dc);
             var accountPackage = AccountPackageFactory.Create(billingAccount, package, msgs, dc);
             var accountPackageFeature1 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFee, .05M, msgs, dc);
             var accountPackageFeature2 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFlatFee, .99M, msgs, dc);
+            var accountPackageFeature3 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.UseStripeConnectedAccount, 1, msgs, dc);
+            var paymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(billingAccount, activity, 100, 3, msgs, dc);
 
             billingAccount.CreateStripeCustomAccount(msgs, dc);
             purchasingAccount.CreateStripeCustomer(msgs, dc);
