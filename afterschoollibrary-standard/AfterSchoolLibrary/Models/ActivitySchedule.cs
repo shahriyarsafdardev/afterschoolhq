@@ -336,14 +336,27 @@ namespace AfterSchoolLibrary.Models
             return schedule;
         }
 
-        public static ActivitySchedule GetNewDefaultSchedule(List<DateRange> scheduleDates = null)
+        public static ActivitySchedule GetNewDefaultSchedule(List<DateRange> scheduleDates = null, bool generateDates = false)
         {
             var schedule = new ActivitySchedule();
-            schedule.StartDate = DateTime.UtcNow;
-            schedule.EndDate = DateTime.UtcNow.AddWeeks(1);
+            schedule.StartDate = DateTime.UtcNow.AddWeeks(1).FirstDateOfWeek();
+            schedule.EndDate = schedule.StartDate.Value.AddWeeks(9).AddDays(-1);
             schedule.DailyStartTime = DateTime.UtcNow.Date.AddHours(15);
-            schedule.DailyEndTime = DateTime.UtcNow.Date.AddHours(17);
+            schedule.DailyEndTime = DateTime.UtcNow.Date.AddHours(16);
             schedule.RepeatsWeekly = true;
+
+            if (generateDates)
+            {
+                scheduleDates = new List<DateRange>();
+
+                for (int i = 0; i < 8; i++)
+                {
+                    var date = schedule.StartDate.Value.AddDays((int)DayOfWeek.Monday);
+                    scheduleDates.Add(
+                        new DateRange(date.Date.AddHours(schedule.DailyStartTime.Value.Hour), date.Date.AddHours(schedule.DailyEndTime.Value.Hour))
+                    );
+                }
+            }
 
             if (scheduleDates.IsNotEmpty())
                 schedule.AddInstances(
@@ -351,7 +364,9 @@ namespace AfterSchoolLibrary.Models
                         new ActivityInstance()
                         {
                             StartDateTime = dateRange.StartDate,
-                            EndDateTime = dateRange.EndDate
+                            EndDateTime = dateRange.EndDate,
+                            InstanceTypeId = InstanceType.InSession,
+                            Day = dateRange.StartDate.DayOfWeek.ToDayOfWeekASL()
                         }).ToList());
 
             return schedule;
@@ -395,15 +410,19 @@ namespace AfterSchoolLibrary.Models
         {
             msgs = msgs ?? new SystemMessages();
 
-            var instance = new ActivityInstance();
-            instance.ActivityScheduleId = this.ID;
-            instance.StartDateTime = startDateTime;
-            instance.EndDateTime = endDateTime;
-            instance.InstanceTypeId = instanceType;
-            instance.CreateDate = instance.LastModifiedDate = DateTime.UtcNow;
-            instance.CreatedBy = instance.LastModifiedBy = loggedInUserId;
+            var instance = new ActivityInstance
+            {
+                ActivityScheduleId = this.ID,
+                StartDateTime = startDateTime,
+                EndDateTime = endDateTime,
+                InstanceTypeId = instanceType,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUserId,
+                LastModifiedBy = loggedInUserId
+            };
             instance.Day = instance.StartDateTime.Value.DayOfWeek.ToDayOfWeekASL();
-            msgs.AddRange(instance.Save(dc: dc));
+            msgs.AddRange(instance.Save(dc));
 
             return instance;
         }

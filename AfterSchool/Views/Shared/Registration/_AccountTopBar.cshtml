@@ -1,33 +1,58 @@
-﻿<div class="reg-login-bar">
-    <div class="row">
-        <div class="col-md-6 col-sm-6 col-xs-12">
+﻿@model Account
 
-            @if (SessionVariables.LoggedInUser.IsNotEmpty())
-            {
-                <span class="reg-login-bar-title">@SessionVariables.CurrentAccount.Name</span>
-            }
+@helper RenderReturnToHomeUrl()
+{
+    if (Model.IsNotEmpty() && !($"{Model.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
+    {
+        <a href="@Model.HomePageUrl" class="btn btn-link">
+            &laquo; Return to @Model.Name Home
+        </a>
+    }
+}
 
-        </div>
-        <div class="col-md-6 col-sm-6 col-xs-12">
-            <div class="btn-group pull-right">
-                @if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty() && !($"{SessionVariables.RegistrationStartPageAccount.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
-                {
-                    <a href="@SessionVariables.RegistrationStartPageAccount.HomePageUrl" class="btn btn-link">
-                        &laquo; Return to @SessionVariables.RegistrationStartPageAccount.Name Home
-                    </a>
-                }
+<div class="reg-login-bar">
+    @if (Model.ID.HasValue)
+    {
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-12">
+
                 @if (SessionVariables.LoggedInUser.IsNotEmpty())
                 {
-                    <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View Account</a>
-                    <a href="@Url.Action("index", "logout", new { returnurl = Request.Url.AbsolutePath })" class="btn btn-link">Logout</a>
+                    <span class="reg-login-bar-title">@SessionVariables.CurrentAccount.Name</span>
                 }
-                else
-                {
-                    <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Family Account</button>
-                }
+
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-12">
+                <div class="btn-group">
+                    <div class="pull-right">
+                        
+                        @RenderReturnToHomeUrl()
+
+                        @if (SessionVariables.LoggedInUser.IsNotEmpty())
+                        {
+                            <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View Account</a>
+                            <a href="@Url.Action("index", "logout", new { returnurl = Request.Url.AbsolutePath })" class="btn btn-link">Logout</a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-link md-trigger" data-modal="modal-login">Login to Family Account</button>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="pull-right">
+            @RenderReturnToHomeUrl()
+        </div>
+        <div>
+            <button type="button" class="btn btn-alt7 btn-block btn-xl md-trigger" data-modal="modal-lead-form">
+                Sign Up for Your Free Account &raquo;
+            </button>
+        </div>
+    }
 </div>
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml"); }

@@ -1444,6 +1444,10 @@
     <Content Include="Views\Shared\_ActivityGroupEdit.cshtml" />
     <Content Include="Views\Shared\_ActivityGroupTitle.cshtml" />
     <Content Include="Views\Shared\Activity\_ActivityPreferences.cshtml" />
+    <Content Include="Views\Shared\Modals\_LeadForm.cshtml" />
+    <Content Include="Views\Shared\Registration\_BrowseFilterBar.cshtml" />
+    <Content Include="Views\Shared\Registration\_BrowseRegistrationHeader.cshtml" />
+    <Content Include="Views\Shared\Registration\_BrowseParticipationObject.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

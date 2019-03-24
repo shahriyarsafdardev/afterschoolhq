@@ -90,7 +90,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(-1);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.False(period.IsOpen(msgs, dc));
+            Assert.False(period.IsOpen(PeriodOwnerAccount, msgs, dc));
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(1);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.True(period.IsOpen(msgs, dc));
+            Assert.True(period.IsOpen(PeriodOwnerAccount, msgs, dc));
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(2);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.False(period.IsOpen(msgs, dc));
+            Assert.False(period.IsOpen(PeriodOwnerAccount, msgs, dc));
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(-1);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.True(period.IsClosed(msgs, dc));
+            Assert.True(period.IsClosed(PeriodOwnerAccount, msgs, dc));
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(1);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.False(period.IsClosed(msgs, dc));
+            Assert.False(period.IsClosed(PeriodOwnerAccount, msgs, dc));
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(2);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.True(period.IsClosed(msgs, dc));
+            Assert.True(period.IsClosed(PeriodOwnerAccount, msgs, dc));
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(-1);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.False(period.WillOpen(msgs, dc));
+            Assert.False(period.WillOpen(PeriodOwnerAccount, msgs, dc));
         }
 
         [Fact]
@@ -160,7 +160,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(1);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.False(period.WillOpen(msgs, dc));
+            Assert.False(period.WillOpen(PeriodOwnerAccount, msgs, dc));
         }
 
         [Fact]
@@ -170,7 +170,7 @@ namespace AfterSchoolLibraryTests.Tests
             var endDate = DateTime.UtcNow.AddWeeks(2);
             var period = RegistrationPeriodFactory.Create(PeriodOwnerAccount, startDate, endDate, msgs, dc);
 
-            Assert.True(period.WillOpen(msgs, dc));
+            Assert.True(period.WillOpen(PeriodOwnerAccount, msgs, dc));
         }
 
     }
