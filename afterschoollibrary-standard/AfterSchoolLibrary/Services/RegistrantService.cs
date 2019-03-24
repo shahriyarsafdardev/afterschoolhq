@@ -154,22 +154,9 @@ namespace AfterSchoolLibrary.Services
                     msgs: msgs);
             }
 
-            SubscriptionPlan plan = null;
-            var applyCoupon = false;
-            var coupon = checkoutObject.Coupon;
-
-            if (subscriptionPlanType == SubscriptionPlanType.PaymentPlan)
-            {
-                plan = checkoutObject.PaymentPlan;
-                applyCoupon = coupon.ID.IsNotEmpty() && coupon.DoesApplyToTuitionFee();
-            }
-            else
-            {
-                plan = checkoutObject.SubscriptionPlan;
-                applyCoupon = coupon.ID.IsNotEmpty() && coupon.DoesApplyToSubscriptionPlan();
-            }
-
-            var stripeCouponId = applyCoupon ? coupon.StripeCouponId : null;
+            var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
+            var applyCoupon = plan.DoesCouponApply(checkoutObject.Coupon);
+            var stripeCouponId = applyCoupon ? checkoutObject.Coupon.StripeCouponId : null;
 
             // create the subscription on the connected account
             var subscription = Billing.StripeHelper.CreateSubscription(
