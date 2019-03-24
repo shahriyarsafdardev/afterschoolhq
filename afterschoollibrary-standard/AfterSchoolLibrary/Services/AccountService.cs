@@ -270,6 +270,16 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
+        public static bool HasAccountPackageFeatures(this Account account, List<FeatureType> featureTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountPackage = account.GetActiveAccountPackage(msgs, dc);
+
+            if (accountPackage.IsNotEmpty())
+                return AccountPackageFeature.HasAccountPackageIdByFeatureTypeIds(accountPackage.ID.Value, featureTypes, msgs, dc);
+
+            return false;
+        }
+
         #endregion
 
         #region Users
@@ -1729,10 +1739,14 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal CalculatePlatformFeeAmount(this Account billingAccount, decimal totalAmountToCharge, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var percentageFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
-            var flatFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
+            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+            {
+                var percentageFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
+                var flatFee = billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();   
+                return (totalAmountToCharge * percentageFee) + flatFee;
+            }
 
-            return (totalAmountToCharge * percentageFee) + flatFee;
+            return Platform.GetConvenienceFee(totalAmountToCharge, billingAccount.IsFeeTakenOutOfCost);
         }
 
         public static decimal GetPlatformPercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1740,7 +1754,7 @@ namespace AfterSchoolLibrary.Services
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFee, msgs, dc).GetMaxValue();
 
-            return 0;
+            return Platform.ConveniencePercentFee;
         }
 
         public static decimal GetPlatformFlatFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1748,13 +1762,13 @@ namespace AfterSchoolLibrary.Services
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 return billingAccount.GetAccountPackageFeature(FeatureType.PaymentsPercentageFlatFee, msgs, dc).GetMaxValue();
 
-            return 0;
+            return Platform.ConvenienceFlatFee;
         }
 
         internal static string GetStripeSourceFromToken(this Account fromAccount, string stripeToken, SystemMessages msgs = null)
         {
-            var source = Billing.StripeHelper.CreateSource(stripeToken, msgs);
-            msgs.AddRange(Billing.StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
+            var source = StripeHelper.CreateSource(stripeToken, msgs);
+            msgs.AddRange(StripeHelper.AddSourceToCustomer(fromAccount.StripeCustomerId, source.Id, null));
             return source.Id;
         }
 
@@ -2198,10 +2212,12 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (account.HasAccountPackageFeature(FeatureType.AcceptPayments, msgs, dc))
+            var oldPaymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
+
+            if (account.HasAccountPackageFeatures(oldPaymentFeatures, msgs, dc))
                 return StripeAccount.CanProcessPayments(account.ID.Value, msgs, dc);
 
-            return false;
+            return true;
         }
 
         public static Stripe.StripeCustomer AddCustomerToConnectedAccount(this Account billingAccount, Account purchasingAccount, string stripeBillToSourceId, SystemMessages msgs)
@@ -2478,16 +2494,36 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
-        public static decimal GetSubscriptionPlatformFeePercent(this Account account, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var platformFeeAmount = account.CalculatePlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
-            var stripeFeeAmount = plan.GetStripeFeeAmount();
-            
-            if (platformFeeAmount > stripeFeeAmount)
-                return Math.Round((platformFeeAmount - stripeFeeAmount) / plan.CostPerPeriod.Value, 4);
+            if (plan.CostPerPeriod <= 0)
+                return 0;
 
-            return 0;
+            decimal feeAmount = 0;
+            decimal costPerPeriod = plan.CostPerPeriod.Value;
+
+            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+            {
+                var platformFeeAmount = billingAccount.CalculatePlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
+                var stripeFeeAmount = plan.GetStripeFeeAmountWithConnectedAccount();
+
+                if (platformFeeAmount > stripeFeeAmount)
+                    feeAmount = platformFeeAmount - stripeFeeAmount;
+                else
+                    feeAmount = 0;
+            }
+            else
+            {
+                feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount.IsFeeTakenOutOfCost);
+
+                if (!billingAccount.IsFeeTakenOutOfCost)
+                    costPerPeriod += feeAmount;
+
+            }
+
+            return Math.Round(feeAmount / costPerPeriod, 4);
         }
+
         #endregion
     }
 }

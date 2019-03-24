@@ -95,7 +95,7 @@ namespace AfterSchoolLibrary.Helpers
             var registrant = checkoutObject.MasterRegistrant;
             var parentOrGuardian = registrant.GetParentOrGuardian(msgs);
             var stripeAccount = billingAccount.GetStripeAccount(msgs);
-            var canAccountAcceptPayments = stripeAccount.IsNotEmpty() && stripeAccount.IsVerified;
+            var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs);
 
             var receiptRows = "";
             var regStatus = "";

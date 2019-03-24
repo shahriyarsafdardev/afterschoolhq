@@ -22,7 +22,7 @@ namespace AfterSchoolLibrary.Billing
         public const decimal StripePercentFee = .029M;
         public const decimal StripeFlatFee = .3M;
 
-        public static decimal GetStripeFee(decimal cost, bool feeTakenOutOfCost = false)
+        public static decimal GetStripeFee(decimal cost, bool feeTakenOutOfCost)
         {
             if (feeTakenOutOfCost)
                 return (cost * StripePercentFee) + StripeFlatFee;

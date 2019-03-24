@@ -158,11 +158,11 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         public static bool HasAccountPackageIdByFeatureTypeId(int AccountPackageId, FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
@@ -172,6 +172,16 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["FeatureTypeId"], FeatureTypeId);
             dq.Criterias.Add(ObjectMap["Max"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
             return dq.GetCount(msgs) > 0;
+        }
+
+        public static bool HasAccountPackageIdByFeatureTypeIds(int AccountPackageId, List<FeatureType> FeatureTypeIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountPackageId"], AccountPackageId);
+            dq.Criterias.Add(ObjectMap["FeatureTypeId"], FeatureTypeIds.Select(x=> (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["Max"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
+            return dq.GetCount(msgs) == FeatureTypeIds.Count;
         }
 
         public decimal GetMaxValue()

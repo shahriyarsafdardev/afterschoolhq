@@ -12,7 +12,12 @@ namespace AfterSchoolLibrary.Billing
             if (cost <= 0)
                 return 0;
 
-            return Math.Ceiling(StripeHelper.GetStripeFee(cost, feeTakenOutOfCost)) - .01M;
+            // Because stripe will take their charge out of the total charge with the convenience fee
+            var costWithConvenienceFee = cost + GetConvenienceFee(cost, feeTakenOutOfCost);
+
+            // always round up to nearest dollar, then subtract a penny, 
+            // result should always be 3.49 or 3.99 or 2.49 or 2.99, etc.
+            return (Math.Ceiling(StripeHelper.GetStripeFee(costWithConvenienceFee, feeTakenOutOfCost) * 2) / 2) - .01M;
         }
 
         public static decimal GetConvenienceFee(decimal cost, bool feeTakenOutOfCost)
@@ -28,8 +33,8 @@ namespace AfterSchoolLibrary.Billing
                 fee = ((cost + ConvenienceFlatFee) / (1 - ConveniencePercentFee)) - cost;
 
             // always round up to nearest dollar, then subtract a penny, 
-            // result should always be 3.99 or 2.99, etc.
-            return Math.Ceiling(fee) - .01M;
+            // result should always be 3.49 or 3.99 or 2.49 or 2.99, etc.
+            return (Math.Ceiling(fee * 2) / 2) - .01M;
         }
 
         public static decimal GetTotalFees(decimal cost, bool feeTakenOutOfCost)

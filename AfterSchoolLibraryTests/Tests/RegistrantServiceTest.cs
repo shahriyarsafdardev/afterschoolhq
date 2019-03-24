@@ -16,8 +16,10 @@ namespace AfterSchoolLibraryTests.Tests
         {
         }
 
-        [Fact(DisplayName = "StartSubscriptionPlanTest")]
-        public void StartSubscriptionPlanTest()
+        [Theory(DisplayName = "StartSubscriptionPlanTest")]
+        [InlineData(1)]
+        [InlineData(0)]
+        public void StartSubscriptionPlanTest(int stripeConnectedAccountValue)
         {
             var billingAccountOwner = WebUserFactory.Create(msgs, dc);
             var purchasingAccountOwner = WebUserFactory.Create(msgs, dc);
@@ -30,7 +32,7 @@ namespace AfterSchoolLibraryTests.Tests
             var accountPackage = AccountPackageFactory.Create(billingAccount, package, msgs, dc);
             var accountPackageFeature1 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFee, .05M, msgs, dc);
             var accountPackageFeature2 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFlatFee, .99M, msgs, dc);
-            var accountPackageFeature3 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.UseStripeConnectedAccount, 1, msgs, dc);
+            var accountPackageFeature3 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.UseStripeConnectedAccount, stripeConnectedAccountValue, msgs, dc);
 
             billingAccount.CreateStripeCustomAccount(msgs, dc);
 

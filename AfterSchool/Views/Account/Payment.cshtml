@@ -9,6 +9,7 @@
     var registration = (Registration)ViewBag.Registration;
     var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
+    var ownerAccount = participationObject.OwnerAccount;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -62,8 +63,8 @@
                                         }
                                     </label>
                                     <span id="payment-plan-cost-@plan.ID" class="hide">@plan.CostPerPeriod</span>
-                                    <span id="payment-plan-asf-@plan.ID" class="hide">@plan.GetConvenienceFee()</span>
-                                    <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee()</span>
+                                    <span id="payment-plan-asf-@plan.ID" class="hide">@plan.GetConvenienceFee(ownerAccount)</span>
+                                    <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee(ownerAccount)</span>
                                 </div>
                             }
                         </div>
@@ -119,8 +120,8 @@
                                             <td>Ongoing Subscription</td>
                                             <td class="text-right">
                                                 <span id="subscription-total-value" class="hide">@plan.CostPerPeriod</span>
-                                                <span id="subscription-asf-value" class="hide">@plan.GetConvenienceFee()</span>
-                                                <span id="subscription-ccf-value" class="hide">@plan.GetCreditCardFee()</span>
+                                                <span id="subscription-asf-value" class="hide">@plan.GetConvenienceFee(ownerAccount)</span>
+                                                <span id="subscription-ccf-value" class="hide">@plan.GetCreditCardFee(ownerAccount)</span>
                                                 @participationObject.SubscriptionPlans.First().CostPerPeriod.ToCurrency()
                                             </td>
                                             <td>
