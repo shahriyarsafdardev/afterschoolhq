@@ -429,6 +429,7 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="billingPeriodType"></param>
         /// <param name="planNickName"></param>
         /// <param name="stripeAccountId">optional, the account id of the connect account, if platform should be null</param>
+        /// <param name="metaData">A dictionary to send whatever information we want to store about the plan, for easier referencing between systems</param>
         /// <param name="msgs"></param>
         /// <returns></returns>
         public static StripePlan CreatePlan(StripeProduct stripeProduct, string planId, decimal price, BillingPeriodType billingPeriodType, string planNickName, string stripeAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
