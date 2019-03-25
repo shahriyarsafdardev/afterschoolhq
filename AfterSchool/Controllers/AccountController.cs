@@ -1100,7 +1100,7 @@ namespace AfterSchool.Controllers
                         // also only if the session is set to Apply
                         if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
                         {
-                            var activitiesAndPreferences = new List<Tuple<Activity, int>>();
+                            var activitiesAndPreferences = new List<(Activity activity, int preferenceNumber)>();
                             var activities = participationObject.GetActivityGroup().GetActivities(null, false, false, null, null, false, amsgs, adc);
 
                             for (int i = 1; i <= activities.Count; i++)

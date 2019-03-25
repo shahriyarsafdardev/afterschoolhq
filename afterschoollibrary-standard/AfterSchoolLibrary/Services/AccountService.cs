@@ -840,19 +840,19 @@ namespace AfterSchoolLibrary.Services
             return Registration.SearchCount(searchText, account.ID.Value, questionId, participationObjectIds, participationObjectType, regStatus, rats, msgs: msgs, dc: dc);
         }
 
-        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<Tuple<FormQuestion, string>> questionsAndAnswers, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<(FormQuestion question, string answer)> questionsAndAnswers, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             account.CreateNewRegistrantAndRegistration(
                 participationObject,
                 questionsAndAnswers,
-                new List<Tuple<Activity, int>>(),
+                new List<(Activity activity, int preferenceNumber)>(),
                 period,
                 loggedInUser,
                 msgs,
                 dc);
         }
 
-        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<Tuple<FormQuestion, string>> questionsAndAnswers, List<Tuple<Activity, int>> activitiesAndPreferences, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CreateNewRegistrantAndRegistration(this Account account, ParticipationObject participationObject, List<(FormQuestion question, string answer)> questionsAndAnswers, List<(Activity activity, int preferenceNumber)> activitiesAndPreferences, RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Registrant student = null;
 
@@ -906,8 +906,8 @@ namespace AfterSchoolLibrary.Services
                     questionsAndAnswers.ForEach(questionAndAnswer =>
                     {
                         student.AddAnswer(
-                            answerText: questionAndAnswer.Item2.IfEmpty("").Trim(),
-                            question: questionAndAnswer.Item1,
+                            answerText: questionAndAnswer.answer.IfEmpty("").Trim(),
+                            question: questionAndAnswer.question,
                             registrationId: registration.ID,
                             loggedInUserId: loggedInUser.ID.Value,
                             msgs: amsgs,
@@ -930,10 +930,10 @@ namespace AfterSchoolLibrary.Services
                     {
                         Registration.ProcessRegistrationAssignment(
                             registration: registration,
-                            participationObject: activityAndPreference.Item1.GetParticipationObject(amsgs, adc),
+                            participationObject: activityAndPreference.activity.GetParticipationObject(amsgs, adc),
                             registrant: student,
                             seatsRequested: 1,       
-                            preferenceNumber: activityAndPreference.Item2,
+                            preferenceNumber: activityAndPreference.preferenceNumber,
                             activityGroupId: groupId,
                             periodId: period?.ID,
                             loggedInUser: loggedInUser,

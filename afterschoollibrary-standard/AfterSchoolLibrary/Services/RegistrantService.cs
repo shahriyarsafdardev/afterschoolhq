@@ -125,7 +125,7 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
-        private static Tuple<Stripe.StripeCustomer, string> GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, bool useStripeConnectedAccount)
+        private static (Stripe.StripeCustomer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, bool useStripeConnectedAccount)
         {
             // have to copy the source from the platform to be able to move it to the stripe connected account
             // unless you're not using connected accounts for subscriptions
@@ -154,7 +154,7 @@ namespace AfterSchoolLibrary.Services
                     msgs: msgs);
             }
 
-            return new Tuple<Stripe.StripeCustomer, string>(customer, sourceId);
+            return (customer, sourceId);
         }
 
         public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -851,7 +851,7 @@ namespace AfterSchool.Areas.Org.Controllers
             // get activity preferences
             // NEED TO ADD / TEST multiple activities to a registration
             // ENSURE THEY ARE APPLICATIONS TO EACH OF THESE ACTIVITIES
-            var activitiesAndPreferences = new List<Tuple<Activity, int>>();
+            var activitiesAndPreferences = new List<(Activity activity, int preferenceNumber)>();
 
             for (int i = 1; i <= activities.Count; i++)
             {
@@ -859,7 +859,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (postedValue.IsGuid())
                 {
                     var activity = Activity.LoadByUid(postedValue.ToGuid(), msgs);
-                    activitiesAndPreferences.Add(Tuple.Create<Activity, int>(activity, i));
+                    activitiesAndPreferences.Add((activity, i));
                 }
 
             }
@@ -867,7 +867,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
                     participationObject: session.GetParticipationObject(msgs),
-                    questionsAndAnswers: qvms.Select(qvm => Tuple.Create<FormQuestion, string>(qvm.Question, qvm.Value)).ToList(),
+                    questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     activitiesAndPreferences: activitiesAndPreferences,
                     period: session.GetCurrentRegistrationPeriod(msgs),
                     loggedInUser: SessionVariables.LoggedInUser,

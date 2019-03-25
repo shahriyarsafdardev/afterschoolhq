@@ -239,12 +239,12 @@ namespace AfterSchoolLibrary.Models
             return this.ActivityGroupType == global::ActivityGroupType.League;
         }
 
-        public Tuple<GradeLevel, GradeLevel> GetMinAndMaxGradeLevels(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public (GradeLevel minGradeLevel, GradeLevel maxGradeLevel) GetMinAndMaxGradeLevels(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (MinGradeId.HasValue && MaxGradeId.HasValue)
-                return Tuple.Create(GetMinGradeLevel(msgs, dc), GetMaxGradeLevel(msgs, dc));
+                return (GetMinGradeLevel(msgs, dc), GetMaxGradeLevel(msgs, dc));
 
-            return null;
+            return (null, null);
         }            
 
         public GradeLevel GetMinGradeLevel(SystemMessages msgs = null, DatabaseConnection dc = null)
