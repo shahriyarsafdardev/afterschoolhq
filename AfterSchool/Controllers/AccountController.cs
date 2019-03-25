@@ -1303,8 +1303,8 @@ namespace AfterSchool.Controllers
                         MasterRegistrant = SessionVariables.CurrentRegistrant,
                         PaymentType = PaymentType.CreditCard,
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                        ConvenienceFeePayer = billingAccount.IsFeeTakenOutOfCost ? billingAccount : payingAccount,
-                        CreditCardFeePayer = billingAccount.IsFeeTakenOutOfCost ? billingAccount : payingAccount
+                        ConvenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount,
+                        CreditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount
                     },
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);

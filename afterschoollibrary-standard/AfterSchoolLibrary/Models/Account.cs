@@ -349,11 +349,19 @@ namespace AfterSchoolLibrary.Models
 
         #region "UserDefined"
 
-        public bool IsFeeTakenOutOfCost
+        public bool IsCreditCardFeeTakenOutOfCost
         {
             get
             {
                 return CreditCardFeesPaidBy == FeesPaidByType.Account;
+            }
+        }
+
+        public bool IsConvenienceFeeTakenOutOfCost
+        {
+            get
+            {
+                return ConvenienceFeesPaidBy == FeesPaidByType.Account;
             }
         }
 

@@ -31,8 +31,8 @@
                 <h4 class="text-center reg-instructions"><strong>Checkout</strong></h4>
 
                 <span id="payment-plan-cost-0" class="hide">@participationObject.Cost</span>
-                <span id="payment-plan-asf-0" class="hide">@participationObject.GetConvenienceFee()</span>
-                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee()</span>
+                <span id="payment-plan-asf-0" class="hide">@participationObject.GetConvenienceFee(FeesPaidByType.Parent)</span>
+                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(FeesPaidByType.Parent)</span>
 
                 @if (participationObject.PaymentPlans.Any())
                 {

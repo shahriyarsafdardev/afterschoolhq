@@ -137,7 +137,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetTuitionCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!IsTuitionFree && !GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetCreditCardFee(TuitionCostNoFees, BillingAccount.IsFeeTakenOutOfCost);
+                return Billing.Platform.GetCreditCardFee(TuitionCostNoFees, BillingAccount);
 
             return 0;
         }
@@ -145,7 +145,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetTuitionConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!IsTuitionFree && !GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetConvenienceFee(TuitionCostNoFees, BillingAccount.IsFeeTakenOutOfCost);
+                return Billing.Platform.GetConvenienceFee(TuitionCostNoFees, BillingAccount);
 
             return 0;
         }
@@ -173,7 +173,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetCreditCardFee(SubscriptionCostTodayNoFees, BillingAccount.IsFeeTakenOutOfCost);
+                return Billing.Platform.GetCreditCardFee(SubscriptionCostTodayNoFees, BillingAccount);
 
             return 0;
         }
@@ -181,7 +181,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetSubscriptionCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetConvenienceFee(SubscriptionCostTodayNoFees, BillingAccount.IsFeeTakenOutOfCost);
+                return Billing.Platform.GetConvenienceFee(SubscriptionCostTodayNoFees, BillingAccount);
 
             return 0;
         }
@@ -209,7 +209,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetPaymentPlanCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetCreditCardFee(PaymentPlanCostTodayNoFees, BillingAccount.IsFeeTakenOutOfCost);
+                return Billing.Platform.GetCreditCardFee(PaymentPlanCostTodayNoFees, BillingAccount);
 
             return 0;
         }
@@ -217,7 +217,7 @@ namespace AfterSchoolLibrary.Models
         public decimal GetPaymentPlanCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!GetUseStripeConnectedAccount(msgs, dc))
-                return Billing.Platform.GetConvenienceFee(PaymentPlanCostTodayNoFees, BillingAccount.IsFeeTakenOutOfCost);
+                return Billing.Platform.GetConvenienceFee(PaymentPlanCostTodayNoFees, BillingAccount);
 
             return 0;
         }

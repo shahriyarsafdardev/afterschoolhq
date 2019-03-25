@@ -1746,7 +1746,7 @@ namespace AfterSchoolLibrary.Services
                 return (totalAmountToCharge * percentageFee) + flatFee;
             }
 
-            return Platform.GetConvenienceFee(totalAmountToCharge, billingAccount.IsFeeTakenOutOfCost);
+            return Platform.GetConvenienceFee(totalAmountToCharge, billingAccount);
         }
 
         public static decimal GetPlatformPercentFee(this Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2500,7 +2500,7 @@ namespace AfterSchoolLibrary.Services
                 return 0;
 
             decimal feeAmount = 0;
-            decimal costPerPeriod = plan.CostPerPeriod.Value;
+            decimal billedCostPerPeriod = plan.CostPerPeriod.Value;
 
             if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
             {
@@ -2514,14 +2514,17 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount.IsFeeTakenOutOfCost);
+                feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
 
-                if (!billingAccount.IsFeeTakenOutOfCost)
-                    costPerPeriod += feeAmount;
+                if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
+                    billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod, billingAccount);
+
+                if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
+                    billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);
 
             }
 
-            return Math.Round(feeAmount / costPerPeriod, 4);
+            return Math.Round(feeAmount / billedCostPerPeriod, 4);
         }
 
         #endregion

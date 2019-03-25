@@ -459,25 +459,25 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCheckoutTotalCost()
         {
             if (this.Cost.HasValue)
-                return this.Cost.Value +
-                    Billing.Platform.GetCreditCardFee(this.Cost.Value, OwnerAccount.IsFeeTakenOutOfCost) +
-                    Billing.Platform.GetConvenienceFee(this.Cost.Value, OwnerAccount.IsFeeTakenOutOfCost);
+                return Cost.Value +
+                    GetCreditCardFee(FeesPaidByType.Parent) +
+                    GetConvenienceFee(FeesPaidByType.Parent);
 
             return 0;
         }
 
-        public decimal GetCreditCardFee()
+        public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
         {
-            if (this.Cost.HasValue)
-                return Billing.Platform.GetCreditCardFee(this.Cost.Value, OwnerAccount.IsFeeTakenOutOfCost);
+            if (Cost.HasValue && OwnerAccount.CreditCardFeesPaidBy == feesPaidByType)
+                return Billing.Platform.GetCreditCardFee(Cost.Value, OwnerAccount);
 
             return 0;
         }
 
-        public decimal GetConvenienceFee()
+        public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
         {
-            if (this.Cost.HasValue)
-                return Billing.Platform.GetConvenienceFee(this.Cost.Value, OwnerAccount.IsFeeTakenOutOfCost);
+            if (Cost.HasValue && OwnerAccount.ConvenienceFeesPaidBy == feesPaidByType)
+                return Billing.Platform.GetConvenienceFee(Cost.Value, OwnerAccount);
 
             return 0;
         }
