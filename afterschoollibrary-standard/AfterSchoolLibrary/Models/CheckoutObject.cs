@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Models
         public string StripeToken { get; set; }
         public string SourceId { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
-        public Account PurchasingAccount { get; set; }
+        public Account PayingAccount { get; set; }
         public Account BillingAccount { get; set; }
         public int NumberOfSeats { get; set; }
         public List<Product> Products { get; set; }

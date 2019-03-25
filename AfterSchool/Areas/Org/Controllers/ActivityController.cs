@@ -1246,7 +1246,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     checkoutObject: new CheckoutObject()
                     {
                         BillingAccount = SessionVariables.CurrentAccount,
-                        PurchasingAccount = purchaserAccount,
+                        PayingAccount = purchaserAccount,
                         NumberOfSeats = 1,
                         ParticipationObject = registrantActivity.GetParticipationObject(msgs),
                         Registration = registrantActivity.GetRegistration(msgs),

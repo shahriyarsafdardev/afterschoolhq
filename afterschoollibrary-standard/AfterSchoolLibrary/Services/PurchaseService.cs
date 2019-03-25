@@ -31,7 +31,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
                 NumberOfSeats = checkoutObject.NumberOfSeats,
-                PurchaserAccountId = checkoutObject.PurchasingAccount?.ID,
+                PurchaserAccountId = checkoutObject.PayingAccount?.ID,
                 RegistrantId = checkoutObject.MasterRegistrant?.ID,
                 RegistrationId = checkoutObject.Registration.ID,
                 StripeToken = checkoutObject.StripeToken,

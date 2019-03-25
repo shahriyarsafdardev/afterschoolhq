@@ -131,7 +131,7 @@ namespace AfterSchoolLibrary.Services
             // unless you're not using connected accounts for subscriptions
             var msgs = new SystemMessages();
             var billingAccount = checkoutObject.BillingAccount;
-            var purchasingAccount = checkoutObject.PurchasingAccount;
+            var purchasingAccount = checkoutObject.PayingAccount;
             string sourceId = null;
             Stripe.StripeCustomer customer = null;
 
@@ -162,7 +162,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var billingAccount = checkoutObject.BillingAccount;
-            var purchasingAccount = checkoutObject.PurchasingAccount;            
+            var purchasingAccount = checkoutObject.PayingAccount;            
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, useStripeConnectedAccount);
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;

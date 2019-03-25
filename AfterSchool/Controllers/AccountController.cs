@@ -1194,7 +1194,7 @@ namespace AfterSchool.Controllers
                     checkoutObject: new CheckoutObject()
                     {
                         BillingAccount = participationObject.OwnerAccount,
-                        PurchasingAccount = SessionVariables.CurrentAccount,
+                        PayingAccount = SessionVariables.CurrentAccount,
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         Registration = registration,
@@ -1279,9 +1279,11 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 SubscriptionPlan paymentPlan = null;
+                var billingAccount = participationObject.OwnerAccount;
+                var payingAccount = SessionVariables.CurrentAccount;
 
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
-                    paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);                
+                    paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);                                
 
                 AccountService.ProcessRegistrationWithPayment(
                     checkoutObject: new CheckoutObject()
@@ -1292,8 +1294,8 @@ namespace AfterSchool.Controllers
                         PaymentPlan = paymentPlan,
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         Products = new List<Product>(),
-                        PurchasingAccount = SessionVariables.CurrentAccount,
-                        BillingAccount = participationObject.OwnerAccount,
+                        PayingAccount = payingAccount,
+                        BillingAccount = billingAccount,
                         Registration = registration,
                         StripeToken = stripetoken,
                         SourceId = sourceId,
@@ -1301,6 +1303,8 @@ namespace AfterSchool.Controllers
                         MasterRegistrant = SessionVariables.CurrentRegistrant,
                         PaymentType = PaymentType.CreditCard,
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                        ConvenienceFeePayer = billingAccount.IsFeeTakenOutOfCost ? billingAccount : payingAccount,
+                        CreditCardFeePayer = billingAccount.IsFeeTakenOutOfCost ? billingAccount : payingAccount
                     },
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);

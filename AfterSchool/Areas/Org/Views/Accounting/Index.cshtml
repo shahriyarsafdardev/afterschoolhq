@@ -6,6 +6,7 @@
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalTransactionAmount - totalFees;
+    var useStripeConnectedAccount = false; //(bool)ViewBag.UseStripeConnectedAccount;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -98,9 +99,9 @@
                 </div>
 
                 <script>
-            function search() {
-                window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
-            }
+                    function search() {
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                    }
                 </script>
             </div>
 
@@ -113,9 +114,9 @@
                             <th>Payer</th>
                             <th>For</th>
                             <th>Item Description</th>
-                            <th>Total Paid</th>
-                            <th>Platform Fee</th>
-                            <th>Payout</th>
+                            <th class="text-center">Total Paid</th>                            
+                            <th class="text-center">Platform Fee</th>
+                            <th class="text-center">Payout</th>
                             @*<th>Refund</th>*@
                         </tr>
                     </thead>
@@ -127,52 +128,51 @@
                                 var purchase = transaction.GetPurchase();
                                 var registrant = Registrant.Load(purchase.RegistrantId.Value);
                                 var participationObjects = transaction.GetParticipationObjects();
-                                var platformFee = transaction.GetPlatformFee();
-                                var payout = transaction.Amount.Value - platformFee;
-                        <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
-                            <td>
-                                @transaction.GetTransactionNumber()
-                            </td>
-                            <td>
-                                @transaction.CreateDate.ToShortDateTimeString()
-                            </td>
-                            <td>
-                                @transaction.GetPayerAccount().Name
-                            </td>
-                            <td>
 
-                                @if (transaction.IsCharge())
-                                {
-                                    @registrant.DisplayName
-                                }
-                                else
-                                {
-                                    @transaction.GetBillerAccount().Name
-                                }
-                            </td>
-                            <td>
-                                @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
-                            </td>
-                            <td>
-                                @transaction.Amount.ToCurrency()
-                            </td>
-                            <td>
-                                @platformFee.ToCurrency()
-                            </td>
-                            <td>
-                                @transaction.GetPayout().ToCurrency()
-                            </td>
-                            @*<td>
-                                @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
-                                {
-                                    <button onclick="openDialog('@transaction.Uid')"
-                                            class="md-trigger"
-                                            data-modal="modal-refund">
-                                        Refund
-                                    </button>
-                                }
-                            </td>*@
-                        </tr>
+                                <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                    <td>
+                                        @transaction.GetTransactionNumber()
+                                    </td>
+                                    <td>
+                                        @transaction.CreateDate.ToShortDateTimeString()
+                                    </td>
+                                    <td>
+                                        @transaction.GetPayerAccount().Name
+                                    </td>
+                                    <td>
+                                        @if (transaction.IsCharge())
+                                        {
+                                            @registrant.DisplayName
+                                        }
+                                        else
+                                        {
+                                            @transaction.GetBillerAccount().Name
+                                        }
+                                    </td>
+                                    <td>
+                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetBillerAmount().ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetTotalFeesChargedToBiller().ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetPayout().ToCurrency()
+                                    </td>
+
+                                    @*<td>
+                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                        {
+                                            <button onclick="openDialog('@transaction.Uid')"
+                                                    class="md-trigger"
+                                                    data-modal="modal-refund">
+                                                Refund
+                                            </button>
+                                        }
+                                    </td>*@
+                                </tr>
                             }
                         }
                         else

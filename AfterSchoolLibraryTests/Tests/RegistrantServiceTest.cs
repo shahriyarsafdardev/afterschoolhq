@@ -50,7 +50,7 @@ namespace AfterSchoolLibraryTests.Tests
                 PaymentPlan = paymentPlan,
                 PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                 PaymentType = PaymentType.CreditCard,
-                PurchasingAccount = purchasingAccount,
+                PayingAccount = purchasingAccount,
                 SavePaymentInfo = true,
                 Registration = registration,
                 StripeToken = AfterSchoolLibrary.Billing.StripeHelper.GetTestSourceToken()

@@ -155,7 +155,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                     // save transaction info and track payment to the activity as well.
                     var checkoutObject = new CheckoutObject()
                     {
-                        PurchasingAccount = purchasingAccount,
+                        PayingAccount = purchasingAccount,
                         BillingAccount = billingAccount,
                         // OverrideAmount = totalAmountInCents / 100, // should be able to pull from the plan
                         ParticipationObject = participationObject,

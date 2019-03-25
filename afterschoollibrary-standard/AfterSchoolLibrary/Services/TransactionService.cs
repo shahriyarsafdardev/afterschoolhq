@@ -9,9 +9,49 @@ namespace AfterSchoolLibrary.Services
 {
     public static class TransactionService
     {
-        public static decimal GetPlatformFee(this Transaction transaction)
+
+        public static decimal GetTotalFeesChargedToBiller(this Transaction transaction)
         {
-            return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
+            if (transaction.PlatformFlatFee.HasValue || transaction.PlatformPercentFee.HasValue)
+                return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
+
+            var total = 0M;
+
+            if (transaction.ConvenienceFeePayerAccountId == transaction.BillerAccountId)
+                total += transaction.ConvenienceFeeCharged.Value;
+
+            if (transaction.PaymentTypeFeePayerAccountId == transaction.BillerAccountId)
+                total += transaction.PaymentTypeFeeCharged.Value;
+
+            return total;
+        }
+
+        public static decimal GetTotalFeesChargedToPayer(this Transaction transaction)
+        {           
+            var total = 0M;
+
+            if (transaction.ConvenienceFeePayerAccountId == transaction.PayerAccountId)
+                total += transaction.ConvenienceFeeCharged.Value;
+
+            if (transaction.PaymentTypeFeePayerAccountId == transaction.PayerAccountId)
+                total += transaction.PaymentTypeFeeCharged.Value;
+
+            return total;
+        }
+
+        public static decimal GetBillerAmount(this Transaction transaction)
+        {
+            return transaction.Amount.Value - transaction.GetTotalFeesChargedToPayer();
+        }
+
+        public static decimal GetPayerAmount(this Transaction transaction)
+        {
+            return transaction.Amount.Value;
+        }
+
+        public static decimal GetPayout(this Transaction transaction)
+        {
+            return transaction.GetBillerAmount() - transaction.GetTotalFeesChargedToBiller();
         }
 
         public static Purchase GetPurchase(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -20,11 +60,6 @@ namespace AfterSchoolLibrary.Services
                 return Purchase.Load(transaction.PurchaseId.Value, msgs, dc);
 
             return null;
-        }
-
-        public static decimal GetPayout(this Transaction transaction)
-        {
-            return transaction.Amount.Value - transaction.GetPlatformFee();
         }
 
         public static string GetTransactionNumber(this Transaction transaction)
@@ -58,19 +93,21 @@ namespace AfterSchoolLibrary.Services
 
         public static Transaction CreateNew(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            var useConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+
             return CreateNew(
-                checkoutObject.PurchasingAccount, 
-                checkoutObject.BillingAccount, 
+                checkoutObject.PayingAccount,
+                checkoutObject.BillingAccount,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
-                checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc), 
-                checkoutObject.ParticipationObject.Name, 
-                checkoutObject.Purchase?.ID, 
-                transactionType, 
+                checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc),
+                checkoutObject.ParticipationObject.Name,
+                checkoutObject.Purchase?.ID,
+                transactionType,
                 checkoutObject.PaymentType,
                 checkoutObject.PaymentSourceType,
-                checkoutObject.GetPlatformFlatFee(msgs, dc),
-                checkoutObject.GetPlatformPercentFee(msgs, dc),
+                useConnectedAccount ? checkoutObject.GetPlatformFlatFee(msgs, dc) : new decimal?(), // deprecated property
+                useConnectedAccount ? checkoutObject.GetPlatformPercentFee(msgs, dc) : new decimal?(), // deprecated property
                 checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
                 checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
                 checkoutObject.StripeChargeId,
@@ -79,7 +116,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal platformFee, decimal platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();            
 

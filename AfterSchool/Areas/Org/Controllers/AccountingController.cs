@@ -74,58 +74,58 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(allTransactions);
         }
 
-        [HttpPost]
-        public ActionResult Refund(string uid, string amount)
-        {
-            var msgs = new SystemMessages();
-            var originalTransaction = Transaction.LoadByUid(uid.ToGuid());
-            var loggedInUser = SessionVariables.LoggedInUser;
+        //[HttpPost]
+        //public ActionResult Refund(string uid, string amount)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var originalTransaction = Transaction.LoadByUid(uid.ToGuid());
+        //    var loggedInUser = SessionVariables.LoggedInUser;
 
-            if (originalTransaction == null)
-                msgs.Add("Invalid transaction", MessageType.UserError);
-            else
-            {
-                var totalRefund = Transaction.GetTotalRefundByOriginalTransaction(originalTransaction.ID.Value);
-                var maximumRefund = originalTransaction.Amount + totalRefund;
+        //    if (originalTransaction == null)
+        //        msgs.Add("Invalid transaction", MessageType.UserError);
+        //    else
+        //    {
+        //        var totalRefund = Transaction.GetTotalRefundByOriginalTransaction(originalTransaction.ID.Value);
+        //        var maximumRefund = originalTransaction.Amount + totalRefund;
 
-                if (amount.ToDecimal() > maximumRefund)
-                    msgs.Add($"The maximum amount to refund is {maximumRefund.ToCurrency()}", MessageType.UserError);
-            }
+        //        if (amount.ToDecimal() > maximumRefund)
+        //            msgs.Add($"The maximum amount to refund is {maximumRefund.ToCurrency()}", MessageType.UserError);
+        //    }
 
-            if (amount.ToDouble() < 0.1)
-                msgs.Add("The minimum amount to refund is $0.10", MessageType.UserError);
+        //    if (amount.ToDouble() < 0.1)
+        //        msgs.Add("The minimum amount to refund is $0.10", MessageType.UserError);
 
-            if (msgs.HasNoErrors())
-            {
-                var newTransaction = AccountService.CreateRefundTransactionPayment(
-                    originalTransaction,
-                    amount.ToDecimal(),
-                    loggedInUser,
-                    msgs
-                );
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        var newTransaction = AccountService.CreateRefundTransactionPayment(
+        //            originalTransaction,
+        //            amount.ToDecimal(),
+        //            loggedInUser,
+        //            msgs
+        //        );
 
-                if (newTransaction != null)
-                {
-                    var transaction = new
-                    {
-                        id = newTransaction.GetTransactionNumber(),
-                        originalTransactionUid = originalTransaction.Uid,
-                        createdOn = newTransaction.CreateDate.ToShortDateTimeString(),
-                        payer = newTransaction.GetPayerAccount().Name,
-                        refundFor = newTransaction.GetBillerAccount().Name,
-                        itemDescription = newTransaction.GetParticipationObjects().DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "),
-                        totalPaid = newTransaction.Amount,
-                        platformFee = newTransaction.GetPlatformFee(),
-                        payout = newTransaction.GetPayout(),
-                    };
+        //        if (newTransaction != null)
+        //        {
+        //            var transaction = new
+        //            {
+        //                id = newTransaction.GetTransactionNumber(),
+        //                originalTransactionUid = originalTransaction.Uid,
+        //                createdOn = newTransaction.CreateDate.ToShortDateTimeString(),
+        //                payer = newTransaction.GetPayerAccount().Name,
+        //                refundFor = newTransaction.GetBillerAccount().Name,
+        //                itemDescription = newTransaction.GetParticipationObjects().DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "),
+        //                totalPaid = newTransaction.Amount,
+        //                platformFee = newTransaction.GetPlatformFee(),
+        //                payout = newTransaction.GetPayout(),
+        //            };
 
-                    return new JsonResult { Data = new { status = "ok", transaction, refundedAmount = originalTransaction.GetRefundedAmount() } };
-                }
-                else
-                    msgs.Add("Error when processing the refund", MessageType.Error);
-            }
+        //            return new JsonResult { Data = new { status = "ok", transaction, refundedAmount = originalTransaction.GetRefundedAmount() } };
+        //        }
+        //        else
+        //            msgs.Add("Error when processing the refund", MessageType.Error);
+        //    }
 
-            return new JsonResult { Data = new { status = "error", messages = msgs } };
-        }
+        //    return new JsonResult { Data = new { status = "error", messages = msgs } };
+        //}
     }
 }

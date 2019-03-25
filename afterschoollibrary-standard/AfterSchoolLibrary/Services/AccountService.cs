@@ -1778,7 +1778,7 @@ namespace AfterSchoolLibrary.Services
             string customerId = null;
 
             if (checkoutObject.SavePaymentInfo || checkoutObject.SourceId.IsNotEmpty())
-                customerId = checkoutObject.PurchasingAccount.StripeCustomerId;
+                customerId = checkoutObject.PayingAccount.StripeCustomerId;
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = checkoutObject.BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
@@ -1901,7 +1901,7 @@ namespace AfterSchoolLibrary.Services
             // if user wants to save payment info, do it before you charge the card
             // can't use a token twice
             if (msgs.HasNoErrors() && checkoutObject.SavePaymentInfo)
-                checkoutObject.SourceId = checkoutObject.PurchasingAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
+                checkoutObject.SourceId = checkoutObject.PayingAccount.GetStripeSourceFromToken(checkoutObject.StripeToken, msgs);
 
             // if everything goes right then bill the person, 
             // if any errors it'll just rollback the transaction anyway :)
@@ -2155,7 +2155,7 @@ namespace AfterSchoolLibrary.Services
 
                     // invalidate coupon
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
-                        checkoutObject.PurchasingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
+                        checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
 
                     Registration.SendConfirmation(checkoutObject, true);
                 },

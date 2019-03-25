@@ -84,9 +84,9 @@ namespace AfterSchoolLibrary.Helpers
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, bool sendBcc)
         {
             var msgs = new SystemMessages();
-            var isAfterSchool = checkoutObject.PurchasingAccount.IsAfterSchool;
-            var purchaserAccount = checkoutObject.PurchasingAccount;
-            var purchaser = checkoutObject.PurchasingAccount.GetAccountOwner(msgs);
+            var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
+            var purchaserAccount = checkoutObject.PayingAccount;
+            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs);
             var participationObject = checkoutObject.ParticipationObject;
             var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
             var billingAccountOwner = billingAccount.GetAccountOwner(msgs);
