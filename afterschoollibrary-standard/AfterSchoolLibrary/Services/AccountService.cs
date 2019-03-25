@@ -2479,12 +2479,12 @@ namespace AfterSchoolLibrary.Services
             return accountActivityGroups;
         }
 
-        public static decimal GetTotalAmountPaidTo(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalAmountBilledOut(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Transaction.GetTotalAmountPaidToBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
+            return Transaction.GetTotalAmountBilledByBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
-        public static decimal GetTotalFeesPaidBy(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetTotalFeesPaidAsBiller(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
         }

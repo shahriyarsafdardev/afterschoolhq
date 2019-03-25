@@ -143,7 +143,7 @@ namespace AfterSchoolLibraryTests.Tests
                 var transaction = Factories.TransactionFactory.Create(BillerAccount, PayerAccount, PaymentType.ACH, amount, msgs, dc);
             }
 
-            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountPaidToBillerAccount(BillerAccount.ID.Value, null, null, msgs, dc));
+            Assert.Equal(amounts.Sum(), Transaction.GetTotalAmountBilledByBillerAccount(BillerAccount.ID.Value, null, null, msgs, dc));
         }
 
         [Fact]

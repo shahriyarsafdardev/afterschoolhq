@@ -6,7 +6,6 @@
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalTransactionAmount - totalFees;
-    var useStripeConnectedAccount = false; //(bool)ViewBag.UseStripeConnectedAccount;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -156,10 +155,10 @@
                                         @transaction.GetBillerAmount().ToCurrency()
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetTotalFeesChargedToBiller().ToCurrency()
+                                        @transaction.GetFeesChargedToBiller().ToCurrency()
                                     </td>
                                     <td class="text-center">
-                                        @transaction.GetPayout().ToCurrency()
+                                        @transaction.GetBillerPayout().ToCurrency()
                                     </td>
 
                                     @*<td>

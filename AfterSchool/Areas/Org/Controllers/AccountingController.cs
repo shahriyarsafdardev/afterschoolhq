@@ -60,9 +60,9 @@ namespace AfterSchool.Areas.Org.Controllers
             // sort transactions
             allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
 
-            ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountPaidTo(startDate, endDate, msgs);
+            ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefundedTo(startDate, endDate, msgs);
-            ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidBy(startDate, endDate, msgs);
+            ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {

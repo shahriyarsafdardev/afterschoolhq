@@ -10,7 +10,7 @@ namespace AfterSchoolLibrary.Services
     public static class TransactionService
     {
 
-        public static decimal GetTotalFeesChargedToBiller(this Transaction transaction)
+        public static decimal GetFeesChargedToBiller(this Transaction transaction)
         {
             if (transaction.PlatformFlatFee.HasValue || transaction.PlatformPercentFee.HasValue)
                 return (transaction.Amount.Value * transaction.PlatformPercentFee.Value) + transaction.PlatformFlatFee.Value;
@@ -26,7 +26,7 @@ namespace AfterSchoolLibrary.Services
             return total;
         }
 
-        public static decimal GetTotalFeesChargedToPayer(this Transaction transaction)
+        public static decimal GetFeesChargedToPayer(this Transaction transaction)
         {           
             var total = 0M;
 
@@ -41,7 +41,7 @@ namespace AfterSchoolLibrary.Services
 
         public static decimal GetBillerAmount(this Transaction transaction)
         {
-            return transaction.Amount.Value - transaction.GetTotalFeesChargedToPayer();
+            return transaction.Amount.Value - transaction.GetFeesChargedToPayer();
         }
 
         public static decimal GetPayerAmount(this Transaction transaction)
@@ -49,9 +49,9 @@ namespace AfterSchoolLibrary.Services
             return transaction.Amount.Value;
         }
 
-        public static decimal GetPayout(this Transaction transaction)
+        public static decimal GetBillerPayout(this Transaction transaction)
         {
-            return transaction.GetBillerAmount() - transaction.GetTotalFeesChargedToBiller();
+            return transaction.GetBillerAmount() - transaction.GetFeesChargedToBiller();
         }
 
         public static Purchase GetPurchase(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
