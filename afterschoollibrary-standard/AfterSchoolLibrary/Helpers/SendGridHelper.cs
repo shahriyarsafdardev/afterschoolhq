@@ -11,9 +11,9 @@ namespace AfterSchoolLibrary
 {
     public class SendGridHelper
     {
-        public static string SendGridApiKey { get { return "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"; } }
-        public static string EnrollHQGenericTemplateId { get { return "c672e668-1b54-4721-84be-50fe3cde7cb2"; } }
-        public static string AfterSchoolHQGenericTemplateId { get { return "70362a81-6361-4140-9d5b-25b28e97ceca"; } }
+        public const string SendGridApiKey = "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";
+        public const string EnrollHQGenericTemplateId = "c672e668-1b54-4721-84be-50fe3cde7cb2";
+        public const string AfterSchoolHQGenericTemplateId = "70362a81-6361-4140-9d5b-25b28e97ceca";
 
         public static string GetGenericTemplateId(bool isAfterSchool)
         {
