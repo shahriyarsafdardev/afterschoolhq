@@ -137,7 +137,7 @@
                                         <span id="subscription-ccf-value" class="hide">0</span>
                                     }
                                     
-                                    <tr id="credit-card-transaction-fee-row">
+                                    <tr id="credit-card-transaction-fee-row" class="@(participationObject.UseStripeConnectedAccount ? "hide" : "")">
                                         <td>Credit Card Transaction Fee</td>
                                         <td class="text-right">
                                             <span id="fee-ccf" class="hide">0</span>
@@ -145,7 +145,7 @@
                                         </td>
                                         <td></td>
                                     </tr>
-                                    <tr id="afterschool-support-fee-row">
+                                    <tr id="afterschool-support-fee-row" class="@(participationObject.UseStripeConnectedAccount ? "hide" : "")">
                                         <td>Afterschool Support Fee</td>
                                         <td class="text-right">
                                             <span id="fee-asf" class="hide">0</span>

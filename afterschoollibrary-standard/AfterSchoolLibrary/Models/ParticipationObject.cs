@@ -468,7 +468,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
         {
-            if (Cost.HasValue && OwnerAccount.CreditCardFeesPaidBy == feesPaidByType)
+            if (Cost.HasValue && OwnerAccount.CreditCardFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
                 return Billing.Platform.GetCreditCardFee(Cost.Value, OwnerAccount);
 
             return 0;
@@ -476,7 +476,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
         {
-            if (Cost.HasValue && OwnerAccount.ConvenienceFeesPaidBy == feesPaidByType)
+            if (Cost.HasValue && OwnerAccount.ConvenienceFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
                 return Billing.Platform.GetConvenienceFee(Cost.Value, OwnerAccount);
 
             return 0;
