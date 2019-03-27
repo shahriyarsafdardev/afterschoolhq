@@ -37,9 +37,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var length = recordsPerPage;
 
             var startDate = sdate.IsDateTime() ? 
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) : new DateTime?();
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) : 
+                new DateTime?();
             var endDate = edate.IsDateTime() ? 
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) : new DateTime?();
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) : 
+                new DateTime?();
 
             // transaction count
             var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate);
