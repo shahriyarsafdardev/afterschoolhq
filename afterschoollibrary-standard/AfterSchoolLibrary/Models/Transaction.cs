@@ -474,6 +474,7 @@ namespace AfterSchoolLibrary.Models
             sp.Function = $"ISNULL(SUM({ObjectMap["ConvenienceFeeCharged"].ParameterFullName}), 0)";
             dq.SelectParameters.Add(sp);
 
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
             dq.Criterias.Add(ObjectMap["ConvenienceFeePayerAccountId"], BillerAccountId, DatabaseCriteriaOperatorEnum.NotEqualTo);
 
             if (startDate.HasValue)
@@ -500,6 +501,7 @@ namespace AfterSchoolLibrary.Models
             sp.Function = $"ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName}), 0)";
             dq.SelectParameters.Add(sp);
 
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
             dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], BillerAccountId, DatabaseCriteriaOperatorEnum.NotEqualTo);
 
             if (startDate.HasValue)
