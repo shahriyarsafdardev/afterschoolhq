@@ -218,10 +218,11 @@ namespace AfterSchoolLibrary.Helpers
         
         public static string AppNameEnrollHQ { get; set; }
         public static string AppNameAfterSchoolHQ { get; set;  }
-        public static string AppName(bool isAfterSchool)
+        public static string AppName(bool isAfterSchool = true)
         {
             if (isAfterSchool)
                 return AppNameAfterSchoolHQ;
+
             return AppNameEnrollHQ;
         }
 
