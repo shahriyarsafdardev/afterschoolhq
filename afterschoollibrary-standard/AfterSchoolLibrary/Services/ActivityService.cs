@@ -1153,14 +1153,9 @@ namespace AfterSchoolLibrary.Services
                             ));
                         }
                     },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                     dc: dc
                 );
             }
@@ -1333,7 +1328,7 @@ namespace AfterSchoolLibrary.Services
                 // let's create a new one
                 if (!activity.HasPaymentPlan(msgs, dc))
                 {
-                    var paymentPlan = Services.SubscriptionPlanService.CreateNewPaymentPlan(
+                    var paymentPlan = SubscriptionPlanService.CreateNewPaymentPlan(
                         account,
                         ParticipationObjectType.Activity,
                         activity.ID.Value,
