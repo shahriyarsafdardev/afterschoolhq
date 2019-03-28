@@ -70,11 +70,11 @@ namespace AfterSchoolLibrary.Billing
             return new StripeAccountService(StripeAccessToken);
         }
 
-        public static Stripe.StripeAccount GetCustomAccount(string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Account GetCustomAccount(string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();            
 
-            Stripe.StripeAccount account = null;
+            Stripe.Account account = null;
 
             try
             {
@@ -89,11 +89,11 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static Stripe.StripeAccount CreateCustomAccount(string businessName, string email, SystemMessages msgs)
+        public static Stripe.Account CreateCustomAccount(string businessName, string email, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeAccountCreateOptions()
+            var options = new AccountCreateOptions()
             {
                 Type = "custom",
                 Country = "US",
