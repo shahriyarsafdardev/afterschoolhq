@@ -114,9 +114,9 @@ namespace AfterSchoolLibrary.Services
             return (account, uid, name, uniqueName);
         }
 
-        private static Stripe.StripePlan CreateOrUpdateStripePlan(this SubscriptionPlan subscriptionPlan, Stripe.StripeProduct product, Account account, Guid uid, string name, string stripeUserId, SystemMessages msgs, DatabaseConnection dc)
+        private static Stripe.Plan CreateOrUpdateStripePlan(this SubscriptionPlan subscriptionPlan, Stripe.Product product, Account account, Guid uid, string name, string stripeUserId, SystemMessages msgs, DatabaseConnection dc)
         {
-            Stripe.StripePlan plan = null;
+            Stripe.Plan plan = null;
 
             if (subscriptionPlan.StripePlanId.IsNotEmpty())
             {
@@ -144,7 +144,7 @@ namespace AfterSchoolLibrary.Services
             return plan;
         }
 
-        private static Stripe.StripeProduct GetStripeProduct(this SubscriptionPlan subscriptionPlan, Account account, Guid uid, string name, string uniqueName, string stripeUserId, SystemMessages msgs)
+        private static Stripe.Product GetStripeProduct(this SubscriptionPlan subscriptionPlan, Account account, Guid uid, string name, string uniqueName, string stripeUserId, SystemMessages msgs)
         {
             var product = Billing.StripeHelper.GetProduct(uid.ToString(), stripeUserId, msgs);
 

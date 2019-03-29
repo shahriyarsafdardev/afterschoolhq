@@ -91,7 +91,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static void ParseAndUpdateStripeCustomAccount(this StripeAccount stripeAccount, string json, Stripe.StripeFileUpload stripeFileUpload, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ParseAndUpdateStripeCustomAccount(this StripeAccount stripeAccount, string json, Stripe.File stripeFileUpload, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var results = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(json);
             var fieldsRequired = results.verification.fields_needed;

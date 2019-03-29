@@ -527,7 +527,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static Stripe.StripeCustomer CreateStripeCustomer(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Stripe.Customer CreateStripeCustomer(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -551,11 +551,11 @@ namespace AfterSchoolLibrary.Services
             return customer;
         }
 
-        public static Stripe.StripeSource GetStripeSource(this Account account, string sourceId, SystemMessages msgs = null)
+        public static Stripe.Source GetStripeSource(this Account account, string sourceId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            Stripe.StripeSource source = null;
+            Stripe.Source source = null;
             var customer = account.GetStripeCustomer(msgs);
 
             if (customer.IsNotEmpty())
@@ -566,11 +566,11 @@ namespace AfterSchoolLibrary.Services
             return source;
         }
 
-        public static List<Stripe.StripeSource> GetStripeSources(this Account account, SystemMessages msgs = null)
+        public static List<Stripe.Source> GetStripeSources(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var sources = new List<Stripe.StripeSource>();
+            var sources = new List<Stripe.Source>();
             var customer = account.GetStripeCustomer(msgs);
 
             if (customer.IsNotEmpty())
@@ -581,69 +581,40 @@ namespace AfterSchoolLibrary.Services
             return sources;
         }
 
-        public static List<Stripe.StripeCharge> GetStripeBillingHistory(this Account account, SystemMessages msgs = null)
+        public static List<Stripe.Charge> GetStripeBillingHistory(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var charges = new List<Stripe.StripeCharge>();
+            var charges = new List<Stripe.Charge>();
             var customer = account.GetStripeCustomer(msgs);
 
             if (customer.IsNotEmpty())
-            {
                 charges = Billing.StripeHelper.GetCharges(customer.Id, msgs);
-
-                //try
-                //{
-                //    Stripe.StripeChargeService service = new Stripe.StripeChargeService(StripeHelper.SecretKey);
-                //    Stripe.StripeChargeListOptions options = new Stripe.StripeChargeListOptions();
-                //    options.CustomerId = customer.Id;
-                //    options.Limit = 10;
-                //    charges.AddRange(service.List(options).ToList());
-                //}
-                //catch (Stripe.StripeException ex)
-                //{
-                //    //error storing card
-                //    msgs.Add("Error retrieving billing history", MessageType.Error, ex);
-                //}
-            }
 
             return charges;
         }
 
-        public static List<Stripe.StripeRefund> GetStripeRefundHistory(this Account account, SystemMessages msgs = null)
+        public static List<Stripe.Refund> GetStripeRefundHistory(this Account account, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var refunds = new List<Stripe.StripeRefund>();
+            var refunds = new List<Stripe.Refund>();
             var customer = account.GetStripeCustomer(msgs);
 
             if (!customer.IsEmpty())
             {
                 var charges = account.GetStripeBillingHistory(msgs);
-                foreach(var item in charges)
-                {
-                    refunds.AddRange(Billing.StripeHelper.GetRefunds(item.Id, msgs));
-                }
-
-                //try
-                //{
-                //    var service = new Stripe.StripeRefundService(StripeHelper.SecretKey);
-                //    refunds.AddRange(service.List(null).ToList());
-                //}
-                //catch (Stripe.StripeException ex)
-                //{
-                //    msgs.Add("Error retrieving refund history", MessageType.Error, ex);
-                //}
+                charges.ForEach(charge => refunds.AddRange(Billing.StripeHelper.GetRefunds(charge.Id, msgs)));
             }
 
             return refunds;
         }
 
-        public static Stripe.StripeCustomer GetStripeCustomer(this Account account, SystemMessages msgs)
+        public static Stripe.Customer GetStripeCustomer(this Account account, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            Stripe.StripeCustomer customer = null;
+            Stripe.Customer customer = null;
 
             if (!account.StripeCustomerId.IsEmpty())
             {
@@ -1772,7 +1743,7 @@ namespace AfterSchoolLibrary.Services
             return source.Id;
         }
 
-        internal static Stripe.StripeCharge CreateStripeChargeDuringCheckout(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
+        internal static Stripe.Charge CreateStripeChargeDuringCheckout(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // if stripe token then don't send customer id
             string customerId = null;
@@ -1799,7 +1770,7 @@ namespace AfterSchoolLibrary.Services
             return charge;
         }
 
-        public static Stripe.StripeRefund ProcessRefund(string chargeId, decimal totalAmount, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Stripe.Refund ProcessRefund(string chargeId, decimal totalAmount, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var refund = Billing.StripeHelper.CreateRefund(
                 chargeId: chargeId,
@@ -1852,7 +1823,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="stripeToken"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        internal static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.StripeCustomer customer, SystemMessages msgs)
+        internal static string CreateStripeSourceFromToken(this Account fromAccount, string stripeToken, Stripe.Customer customer, SystemMessages msgs)
         {
             // stripe stuff
             // create payment source if not already existent on the user
@@ -2220,7 +2191,7 @@ namespace AfterSchoolLibrary.Services
             return true;
         }
 
-        public static Stripe.StripeCustomer AddCustomerToConnectedAccount(this Account billingAccount, Account purchasingAccount, string stripeBillToSourceId, SystemMessages msgs)
+        public static Stripe.Customer AddCustomerToConnectedAccount(this Account billingAccount, Account purchasingAccount, string stripeBillToSourceId, SystemMessages msgs)
         {
             // create the customer on the connected account
            return StripeHelper.CreateCustomer(
@@ -2231,7 +2202,7 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs);
         }
 
-        public static Stripe.StripeSubscription CreateStripeSubscription(this Account billingAccount, string stripeCustomerId, SubscriptionPlan plan, string stripeBillToSourceId, string stripeCouponId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Stripe.Subscription CreateStripeSubscription(this Account billingAccount, string stripeCustomerId, SubscriptionPlan plan, string stripeBillToSourceId, string stripeCouponId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return StripeHelper.CreateSubscription(
                 customerId: stripeCustomerId,

@@ -125,7 +125,7 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
-        private static (Stripe.StripeCustomer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, bool useStripeConnectedAccount)
+        private static (Stripe.Customer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, bool useStripeConnectedAccount)
         {
             // have to copy the source from the platform to be able to move it to the stripe connected account
             // unless you're not using connected accounts for subscriptions
@@ -133,7 +133,7 @@ namespace AfterSchoolLibrary.Services
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
             string sourceId = null;
-            Stripe.StripeCustomer customer = null;
+            Stripe.Customer customer = null;
 
             if (!useStripeConnectedAccount)
             {
