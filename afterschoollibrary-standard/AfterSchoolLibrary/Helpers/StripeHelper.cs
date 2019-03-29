@@ -89,7 +89,7 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static Stripe.Account CreateCustomAccount(string businessName, string email, SystemMessages msgs)
+        public static Stripe.Account CreateCustomAccount(string businessName, string email, LegalEntityType entityType, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -100,21 +100,23 @@ namespace AfterSchoolLibrary.Billing
                 DefaultCurrency = "usd",
                 Company = new AccountCompanyOptions()
                 {
-                    Name = businessName,                    
+                    Name = businessName,
                 },
                 Email = email,
-                 Settings = new AccountSettingsOptions()
-                 {
-                      Payouts = new AccountSettingsPayoutsOptions()
-                      {
-                           DebitNegativeBalances = true,
-                           StatementDescriptor = "AHQ transfer".MaxChars(22),
-                           Schedule = new AccountSettingsPayoutsScheduleOptions()
-                           {
-                                Interval = "manual",
-                           }
-                      }
-                 }
+                Settings = new AccountSettingsOptions()
+                {
+                    Payouts = new AccountSettingsPayoutsOptions()
+                    {
+                        DebitNegativeBalances = true,
+                        StatementDescriptor = "AHQ transfer".MaxChars(22),
+                        Schedule = new AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = "manual",
+                        }
+                    }
+                },
+                BusinessType = entityType.ToString().ToLower(),
+                RequestedCapabilities = new List<string>() { "platform_payments" }
             };
 
             Stripe.Account account = null;
@@ -132,34 +134,39 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static Stripe.Account UpdateCustomAccountBankInfo(string stripeAccountId, string routingNumber, string accountNumber, SystemMessages msgs)
+        public static ExternalAccountService GetExternalAccountService()
+        {
+            return new ExternalAccountService(StripeAccessToken);
+        }
+
+        public static Stripe.BankAccount CreateCustomBankAccount(string stripeAccountId, string routingNumber, string accountNumber, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new AccountUpdateOptions()
-            {
-                ExternalBankAccount = new AccountBankAccountOptions()
+            var options = new ExternalAccountCreateOptions()
+            {                
+                ExternalAccountBankAccount = new AccountBankAccountOptions()
                 {
-                     RoutingNumber = routingNumber,
-                     AccountNumber = accountNumber,
-                     Country = "US",
-                     Currency = "usd",
-                } 
+                    RoutingNumber = routingNumber,
+                    AccountNumber = accountNumber,
+                    Country = "US",
+                    Currency = "usd"
+                }
             };
 
-            Stripe.Account account = null;
+            BankAccount bankAccount = null;
 
             try
             {
-                account = GetAccountService().Update(stripeAccountId, options);
+                bankAccount = (BankAccount)GetExternalAccountService().Create(stripeAccountId, options);
             }
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Error updating payment account", MessageType.UserError);
+                msgs.Add("Error creating bank account", MessageType.UserError);
             }
 
-            return account;
+            return bankAccount;
         }
 
         public static Stripe.Account UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
@@ -1084,7 +1091,7 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeSource
 
-        private const string TestSourceToken = "tok_visa";
+        public const string TestSourceToken = "tok_visa";
 
         private static Stripe.SourceService GetSourceService()
         {

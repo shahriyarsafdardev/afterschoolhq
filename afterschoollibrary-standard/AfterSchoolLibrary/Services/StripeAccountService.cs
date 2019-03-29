@@ -13,18 +13,15 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var account = stripeAccount.GetAccount(msgs, dc);
-
-            var stripeStripeAccount = StripeHelper.UpdateCustomAccountBankInfo(
-                stripeAccountId: account.StripeUserId,
-                routingNumber: routingNumber,
-                accountNumber: accountNumber,
-                msgs: msgs
-                );
-
+            var bankAccount = StripeHelper.CreateCustomBankAccount(
+                    stripeAccountId: account.StripeUserId,
+                    routingNumber: routingNumber,
+                    accountNumber: accountNumber,
+                    msgs: msgs
+                    );
 
             if (msgs.HasNoErrors())
-            {
-                var bankAccount = stripeStripeAccount.ExternalAccounts.Data[0].BankAccount;
+            {                
                 stripeAccount.BankAccountId = bankAccount.Id;
                 stripeAccount.BankLast4 = bankAccount.Last4;
                 stripeAccount.BankName = bankAccount.BankName;
@@ -52,7 +49,7 @@ namespace AfterSchoolLibrary.Services
 
             var account = stripeAccount.GetAccount(msgs, dc);
 
-            Stripe.StripeFileUpload stripeFileUpload = null;
+            Stripe.File stripeFileUpload = null;
 
             if (stripeAccount.RequiresDocument)
                 stripeFileUpload = StripeHelper.UploadFile(document, msgs);

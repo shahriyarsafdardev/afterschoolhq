@@ -17,12 +17,12 @@ namespace AfterSchoolLibraryTests.Tests
         {
         }
 
-        private Stripe.StripeProduct CreateStripeProduct(string id)
+        private Stripe.Product CreateStripeProduct(string id)
         {
             return StripeHelper.CreateProduct(id, "my product name", "this is the best product ever", true, null, null, msgs);
         }
 
-        private Stripe.StripePlan CreateStripePlan(Stripe.StripeProduct product, string id)
+        private Stripe.Plan CreateStripePlan(Stripe.Product product, string id)
         {
             return StripeHelper.CreatePlan(product, id, 35, BillingPeriodType.Month, "my plan nickname", null, null, msgs);
         }

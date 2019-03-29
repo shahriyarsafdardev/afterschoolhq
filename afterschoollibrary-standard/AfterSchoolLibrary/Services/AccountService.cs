@@ -516,12 +516,13 @@ namespace AfterSchoolLibrary.Services
 
         public static void CreateStripeCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var stripeAccount = StripeHelper.CreateCustomAccount(account.Name, account.Email, msgs);
+            var stripeAccount = StripeHelper.CreateCustomAccount(account.Name, account.Email, LegalEntityType.Company, msgs);
 
             if(stripeAccount.IsNotEmpty())
             {
-                account.StripePublishableKey = stripeAccount.CustomAccountKeys.Publishable;
-                account.StripeSecretKey = stripeAccount.CustomAccountKeys.Secret;
+                dynamic results = stripeAccount.StripeResponse.ResponseJson.FromJSON();
+                account.StripePublishableKey = (string)results["keys"]["publishable"];
+                account.StripeSecretKey = (string)results["keys"]["secret"];
                 account.StripeUserId = stripeAccount.Id;
                 msgs.AddRange(account.Save(dc));
             }

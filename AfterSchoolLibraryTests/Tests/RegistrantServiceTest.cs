@@ -53,7 +53,7 @@ namespace AfterSchoolLibraryTests.Tests
                 PayingAccount = purchasingAccount,
                 SavePaymentInfo = true,
                 Registration = registration,
-                StripeToken = AfterSchoolLibrary.Billing.StripeHelper.GetTestSourceToken()
+                StripeToken = AfterSchoolLibrary.Billing.StripeHelper.TestSourceToken
             };
 
             masterRegistrant.StartSubscriptionPlan(
