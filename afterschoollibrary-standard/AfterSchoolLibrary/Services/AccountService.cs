@@ -520,12 +520,15 @@ namespace AfterSchoolLibrary.Services
 
             if(stripeAccount.IsNotEmpty())
             {
-                dynamic results = stripeAccount.StripeResponse.ResponseJson.FromJSON();
-                account.StripePublishableKey = (string)results["keys"]["publishable"];
-                account.StripeSecretKey = (string)results["keys"]["secret"];
                 account.StripeUserId = stripeAccount.Id;
                 msgs.AddRange(account.Save(dc));
             }
+        }
+
+        private static void SetStripeCustomer(this Account account, Stripe.Customer customer, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            account.StripeCustomerId = customer.Id;
+            msgs.AddRange(account.Save(dc: dc));
         }
 
         public static Stripe.Customer CreateStripeCustomer(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -535,19 +538,10 @@ namespace AfterSchoolLibrary.Services
             var customer = account.GetStripeCustomer(msgs);
 
             if (customer.IsNotEmpty())
-            {
-                customer = Billing.StripeHelper.UpdateCustomer(customer.Id, account.Name, account.Email, null, msgs);
-            }
-            else
-            {
-                customer = Billing.StripeHelper.CreateCustomer(account.Name, account.Email, null, msgs);
+                return StripeHelper.UpdateCustomer(customer.Id, account.Name, account.Email, null, msgs);
 
-                if (customer.IsNotEmpty())
-                {
-                    account.StripeCustomerId = customer.Id;
-                    msgs.AddRange(account.Save(dc: dc));
-                }
-            }
+            customer = StripeHelper.CreateCustomer(account.Name, account.Email, null, msgs);
+            account.SetStripeCustomer(customer, msgs, dc);
 
             return customer;
         }
@@ -560,9 +554,7 @@ namespace AfterSchoolLibrary.Services
             var customer = account.GetStripeCustomer(msgs);
 
             if (customer.IsNotEmpty())
-            {
                 source = Billing.StripeHelper.GetSource(sourceId, msgs);
-            }
 
             return source;
         }
@@ -575,9 +567,7 @@ namespace AfterSchoolLibrary.Services
             var customer = account.GetStripeCustomer(msgs);
 
             if (customer.IsNotEmpty())
-            {
                 sources.AddRange(Billing.StripeHelper.GetSources(customer.Id, msgs));
-            }
 
             return sources;
         }
@@ -613,28 +603,10 @@ namespace AfterSchoolLibrary.Services
 
         public static Stripe.Customer GetStripeCustomer(this Account account, SystemMessages msgs)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            Stripe.Customer customer = null;
-
             if (!account.StripeCustomerId.IsEmpty())
-            {
-                customer = Billing.StripeHelper.GetCustomer(account.StripeCustomerId, null, msgs);
-            }
-            return customer;
-        }
+                return StripeHelper.GetCustomer(account.StripeCustomerId, null, msgs);
 
-        public static void CreateStripeCoupon(Coupon coupon, string stripeAccountId, StripeCouponDuration couponDuration, int? durationInMonths, decimal discountValue, SystemMessages msgs,  DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var StripeCoupon = Billing.StripeHelper.CreateCoupon(discountValue, stripeAccountId, coupon.AmountTypeId, couponDuration, durationInMonths, msgs);
-
-            if (StripeCoupon.IsNotEmpty())
-            {
-                coupon.StripeCouponId = StripeCoupon.Id;
-                msgs.AddRange(coupon.Save(dc: dc));
-            }
+            return null;
         }
 
         #endregion
@@ -2100,8 +2072,7 @@ namespace AfterSchoolLibrary.Services
                             if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
                                 discountValue = (checkoutObject.ParticipationObject.Cost - coupon.Amount) / checkoutObject.PaymentPlan.TotalPeriods;
 
-                            AccountService.CreateStripeCoupon(
-                                coupon,
+                            coupon.CreateStripeCoupon(
                                 checkoutObject.BillingAccount.StripeUserId,
                                 StripeCouponDuration.Repeating,
                                 checkoutObject.PaymentPlan.TotalPeriods,
@@ -2249,22 +2220,22 @@ namespace AfterSchoolLibrary.Services
         public static Coupon CreateCoupon(this Account account, decimal amount, DateTime? expirationDate, CouponAmountType amountType, CouponApplyType applyType, StripeCouponDuration couponDuration, int? durationInMonths, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var coupon = CouponService.CreateNew(
-                            accountId: account.ID.Value,
-                            amount: amount,
-                            expirationDate: expirationDate,
-                            couponAmountType: amountType,
-                            couponApplyType: applyType,
-                            maxUsesAll: 1,
-                            maxUsesPerPerson: 1,
-                            couponCode: CouponService.GenerateCouponCode(account.ID.Value, null),
-                            label: $"Coupon - {account.NowInAccountTimeZone()}",
-                            description: "",
-                            loggedInUser: loggedInUser,
-                            msgs: msgs,
-                            dc: dc);
+                accountId: account.ID.Value,
+                amount: amount,
+                expirationDate: expirationDate,
+                couponAmountType: amountType,
+                couponApplyType: applyType,
+                maxUsesAll: 1,
+                maxUsesPerPerson: 1,
+                couponCode: CouponService.GenerateCouponCode(account.ID.Value, msgs, dc),
+                label: $"Coupon - {account.NowInAccountTimeZone()}",
+                description: "",
+                loggedInUser: loggedInUser,
+                msgs: msgs,
+                dc: dc);
+
             if (coupon.DoesApplyToSubscriptionPlan())
-                AccountService.CreateStripeCoupon(
-                    coupon,
+                coupon.CreateStripeCoupon(
                     account.StripeUserId,
                     couponDuration,
                     durationInMonths,
@@ -2295,6 +2266,7 @@ namespace AfterSchoolLibrary.Services
                     account.ID.Value,
                     false
                 );
+
                 var purchaseableObjectCoupon = PurchaseableObjectCoupon.LoadByCouponByPurchaseableObject(
                     coupon.ID.Value,
                     participationObject.ObjectID.Value,
@@ -2308,7 +2280,7 @@ namespace AfterSchoolLibrary.Services
                     if (DateTime.UtcNow > coupon.ExpirationDate)
                         msgs.Add("Coupon is Expired", MessageType.UserError);
 
-                    if (coupon.AppliesTo == CouponApplyType.SubscriptionPlan && participationObject.SubscriptionPlans.FirstOrDefault() == null)
+                    if (coupon.DoesApplyToSubscriptionPlan() && !participationObject.SubscriptionPlans.Any())
                         msgs.Add("Coupon can only be applied to a subscription", MessageType.UserError);
                 }
             }
