@@ -44,14 +44,7 @@ namespace AfterSchool.Models
                     PostalCode = location.PostalCode
                 };
 
-            return new AddressViewModel()
-            {
-                Address1 = activity.Address1,
-                Address2 = activity.Address2,
-                City = activity.City,
-                State = activity.State,
-                PostalCode = activity.PostalCode
-            };
+            return new AddressViewModel();
         }
 
         public static AddressViewModel ToAddressViewModel(this Location location)

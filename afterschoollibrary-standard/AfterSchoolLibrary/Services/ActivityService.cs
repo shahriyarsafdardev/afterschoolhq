@@ -645,21 +645,13 @@ namespace AfterSchoolLibrary.Services
             return new Activity()
             {
                 AccountId = activity.AccountId,
-                Address1 = activity.Address1,
-                Address2 = activity.Address2,
-                City = activity.City,
                 ContactEmail = activity.ContactEmail,
                 ContactPhone = activity.ContactPhone,
                 ContactName = activity.ContactName,
-                Country = activity.Country,
                 Description = activity.Description,
                 Details = activity.Details,
-                Email = activity.Email,
                 LocationDetails = activity.LocationDetails,
-                Phone = activity.Phone,
-                PostalCode = activity.PostalCode,
                 SeatsAvailable = activity.SeatsAvailable,
-                State = activity.State,
                 Uid = Guid.NewGuid(),
                 WaitingListSeats = activity.WaitingListSeats,
                 //AcceptPayPal = this.AcceptPayPal,
@@ -673,7 +665,6 @@ namespace AfterSchoolLibrary.Services
                 AgeEnd = activity.AgeEnd,
                 //AllowOrganizationRegistration = this.AllowOrganizationRegistration,
                 AllowToPayLater = activity.AllowToPayLater,
-                Website = activity.Website,
                 RegistrationModeId = activity.RegistrationModeId,
                 ActivityGroupId = activity.ActivityGroupId,
                 ActivityTypeId = activity.ActivityTypeId,
@@ -754,6 +745,7 @@ namespace AfterSchoolLibrary.Services
             var registrationopentime = values.GetValueOrDefault("registrationopentime");
             var registrationclosedate = values.GetValueOrDefault("registrationclosedate");
             var registrationclosetime = values.GetValueOrDefault("registrationclosetime");
+            var leadertype = values.GetValueOrDefault("leadertype");
             var timezone = values.GetValueOrDefault("timezone");
             var contactname = values.GetValueOrDefault("contactname");
             var contactphone = values.GetValueOrDefault("contactphone");
@@ -813,7 +805,7 @@ namespace AfterSchoolLibrary.Services
             var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
             var accountactivitygroup = values.GetValueOrDefault("accountactivitygroup");
 
-            if (activityId.IsNumber() == false || activityId.ToInteger() == 0)
+            if (!activityId.IsNumber() || activityId.ToInteger() == 0)
             {
                 if (name.IsEmpty())
                     msgs.Add("Activity Name is required", MessageType.UserError);
@@ -845,21 +837,6 @@ namespace AfterSchoolLibrary.Services
                 //pre-load account info
                 if (contactphone.IsBlank())
                     contactphone = account.Phone;
-
-                if (address1.IsBlank())
-                    address1 = account.Address1;
-
-                if (address2.IsBlank())
-                    address2 = account.Address2;
-
-                if (city.IsBlank())
-                    city = account.City;
-
-                if (state.IsBlank())
-                    state = account.State;
-
-                if (postalcode.IsBlank())
-                    postalcode = account.PostalCode;
 
                 if (cost.IsBlank())
                     cost = "0";
@@ -991,6 +968,9 @@ namespace AfterSchoolLibrary.Services
 
             if (regmode.IsNumber())
                 activity.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
+
+            if (leadertype.IsNumber())
+                activity.LeaderTypeId = (ActivityLeaderType)leadertype.ToString().ToInteger();
 
             if (accountactivitygroup.IsNotEmpty())
                 activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();

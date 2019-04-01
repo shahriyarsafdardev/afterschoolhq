@@ -47,7 +47,7 @@ property:
 type: Class
 name: Activity
 description: The after school activity/team that a registrant/student is registering for
-inherits: BaseEventWithAddress
+inherits: BasicLookUpObject
 property: SeatsAvailable, int?, Int, required
 property: ProgramId, int?, Int
 property: AccountId, int?, Int, required
@@ -85,10 +85,11 @@ property: ActivityScheduleId, int?, Int
 -property: ScheduleRequiresAllDays, bool, Bit
 property: UniqueName, string, NVarChar "100"
 -property: IsTemplate, bool, Bit
-property: ActivitySectionId, int?, Int
+property: ActivitySectionId, int?, Int, , For tracking which section or grouping a team is in
 property: ActivityTypeId, ActivityType, Int, required
-property: DateSubmittedToActivityGroup, DateTime?, DateTime
-property: AccountActivityGroupId, int?, Int
+property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track when a team has been submitted to a league
+property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
+property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
@@ -1682,4 +1683,10 @@ values: NotSet, AccountingView, AccountingEdit, AccountingManage, TeamView, Team
 type: Enum
 name: FeesPaidByType
 values: NotSet, Account, Parent
+[end]
+
+[begin]
+type: Enum
+name: ActivityLeaderType
+values: NotSet, StaffMember, Student, ExternalProvider
 [end]

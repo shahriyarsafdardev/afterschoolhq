@@ -85,7 +85,32 @@ namespace AfterSchool.Controllers
                     location.HostAccountId,
                     LocationType = location.LocationTypeId.ToString()
                 })
-            }, JsonRequestBehavior.AllowGet);            
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult SearchProviders(string search)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            var accounts = Account.FullTextSearch(search.Trim(), 0, 10, msgs);
+
+            return Json(new
+            {
+                status = "ok",
+                providers = accounts.Select(account => new
+                {
+                    account.ID,
+                    account.Name,
+                    account.Address1,
+                    account.Address2,
+                    account.City,
+                    account.State,
+                    account.PostalCode,
+                    FullLabel = account.FormatAddress(useLineBreaks: false)
+                })
+            }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult ValidateCoupon(string couponcode, string paymentoption)

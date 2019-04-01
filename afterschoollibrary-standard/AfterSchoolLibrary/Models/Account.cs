@@ -343,11 +343,11 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-
+		
 
         #endregion
 
-        #region "UserDefined"
+		#region "UserDefined"
 
         public bool IsCreditCardFeeTakenOutOfCost
         {
@@ -459,7 +459,22 @@ namespace AfterSchoolLibrary.Models
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-        
+
+        public static List<Account> FullTextSearch(string query, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+                    select * from Account
+                    where 
+                        AccountTypeId = {(int)AccountType.ActivityProvider} and
+                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
+                ";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }

@@ -125,14 +125,12 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditSetup(string id, string group)
         {
             var msgs = new SystemMessages();
-            var activity = new Activity();
-            var isLeader = true;
             ActivityGroup activityGroup = null;
+            Activity activity = null;
 
             if (id.IsGuid())
             {
                 activity = Activity.LoadByUid(id.ToGuid(), msgs);
-                isLeader = IsActivityLeader(activity);
                 activityGroup = activity.GetActivityGroup(msgs);
             }
             else
@@ -146,7 +144,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     activityGroup = ActivityGroup.LoadByUid(group.ToGuid(), msgs);
                     activity.RegistrationModeId = activityGroup.RegistrationModeId;
                 }
-
             }
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
@@ -157,7 +154,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
+        public ActionResult EditSetup(string id, string name, string leadertype, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -166,6 +163,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var values = new Dictionary<string, object>()
             {
                 { "name", name },
+                { "leadertype", leadertype },
                 { "seatsavailable", seatsavailable },
                 { "waitinglistseats", waitinglistseats },
                 { "registrationperiod", registrationperiod },
