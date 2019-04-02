@@ -734,7 +734,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -754,7 +754,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
-                    { "paymentplanperiodnumber", paymentplanperiodnumber }
+                    { "paymentplanperiodnumber", paymentplanperiodnumber },
+                    { "provider", provider },
+                    { "providername", providername },
+                    { "providerfirstname", providerfirstname },
+                    { "providerlastname", providerlastname },
+                    { "provideremail", provideremail },
+                    { "providerphone", providerphone }
                 };
 
                 activity = ActivityService.EditExisting(

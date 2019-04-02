@@ -804,6 +804,12 @@ namespace AfterSchoolLibrary.Services
             var paymentplanperiod = values.GetValueOrDefault("paymentplanperiod");
             var paymentplanperiodnumber = values.GetValueOrDefault("paymentplanperiodnumber");
             var accountactivitygroup = values.GetValueOrDefault("accountactivitygroup");
+            var provider = values.GetValueOrDefault("provider");
+            var providername = values.GetValueOrDefault("providername");
+            var providerfirstname = values.GetValueOrDefault("providerfirstname");
+            var providerlastname = values.GetValueOrDefault("providerlastname");
+            var provideremail = values.GetValueOrDefault("provideremail");
+            var providerphone = values.GetValueOrDefault("providerphone");
 
             if (!activityId.IsNumber() || activityId.ToInteger() == 0)
             {
@@ -1106,6 +1112,22 @@ namespace AfterSchoolLibrary.Services
                                 msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
                         }
 
+                        //setup provider
+                        if (amsgs.HasNoErrors() && (provider.IsNotEmpty() || providername.IsNotEmpty()))
+                        {
+                            amsgs.AddRange(activity.SetupProvider(
+                                account,
+                                provider.IfEmpty(""),
+                                providername.IfEmpty(""),
+                                providerfirstname.IfEmpty(""),
+                                providerlastname.IfEmpty(""),
+                                provideremail.IfEmpty(""),
+                                providerphone.IfEmpty(""),
+                                loggedInUserId,
+                                adc
+                                ));
+                        }
+
                         //setup SubscriptionPlan
                         if (amsgs.HasNoErrors() && hassubscriptionplan != null && hassubscriptionplan.ToString().IsBoolean())
                         {
@@ -1360,6 +1382,46 @@ namespace AfterSchoolLibrary.Services
                 var paymentPlan = activity.GetPaymentPlan(msgs, dc);
                 msgs.AddRange(paymentPlan.Deactivate(loggedInUserId, dc));
             }
+
+            return msgs;
+        }
+
+        private static SystemMessages SetupProvider(this Activity activity, Account activityAccount, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var loggedInUser = new WebUser { ID = loggedInUserId };
+
+            Account providerAccount = null;
+
+            // provider already exists
+            if (provider.IsNumber())
+                providerAccount = Account.Load(provider.ToInteger(), msgs, dc);
+            else
+                providerAccount = AccountService.CreateNew(
+                     orgName: providername,
+                     email: provideremail,
+                     phone: providerphone,
+                     isActive: false,
+                     accountType: AccountType.ActivityProvider,
+                     accountOwner: null,
+                     packageId: null,
+                     packageBillingPeriod: null,
+                     loggedInUser: loggedInUser,
+                     isAfterSchool: true,
+                     createWithStripe: false,
+                     msgs: msgs,
+                     dc: dc);
+
+            // connect the accounts
+            msgs.AddRange(activityAccount.AddVisitorAccount(
+                    visitorAccount: providerAccount,
+                    hostPermissionType: HostPermissionType.ApproveOnly,
+                    approvalStatus: ApprovalStatus.Approved,
+                    loggedInUser: loggedInUser,
+                    dc: dc));
+
+            activity.ProviderAccountId = providerAccount.ID;
+            msgs.AddRange(activity.Save(dc));
 
             return msgs;
         }

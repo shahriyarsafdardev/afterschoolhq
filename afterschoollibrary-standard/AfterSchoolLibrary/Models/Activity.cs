@@ -22,11 +22,18 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public int? SeatsAvailable { get { return (int?)MDV["SeatsAvailable"].Value; } set { MDV["SeatsAvailable"].Value = value; } }
+		/// <summary>
+		/// Refers to the related parent program
+		/// </summary>
 		public int? ProgramId { get { return (int?)MDV["ProgramId"].Value; } set { MDV["ProgramId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		/// <summary>
+		/// the actual provider account who financially is responsible
+		/// </summary>
+		public int? ProviderAccountId { get { return (int?)MDV["ProviderAccountId"].Value; } set { MDV["ProviderAccountId"].Value = value; } }
 		public int? AgeStart { get { return (int?)MDV["AgeStart"].Value; } set { MDV["AgeStart"].Value = value; } }
 		public int? AgeEnd { get { return (int?)MDV["AgeEnd"].Value; } set { MDV["AgeEnd"].Value = value; } }
 		public int? GradeLevelStart { get { return (int?)MDV["GradeLevelStart"].Value; } set { MDV["GradeLevelStart"].Value = value; } }
@@ -108,6 +115,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "SeatsAvailable", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ProgramId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ProviderAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AgeStart", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AgeEnd", System.Data.SqlDbType.Int);
 				_dp.Add(className, "GradeLevelStart", System.Data.SqlDbType.Int);
@@ -236,6 +244,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ProviderAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

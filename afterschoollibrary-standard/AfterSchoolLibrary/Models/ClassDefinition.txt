@@ -49,31 +49,25 @@ name: Activity
 description: The after school activity/team that a registrant/student is registering for
 inherits: BasicLookUpObject
 property: SeatsAvailable, int?, Int, required
-property: ProgramId, int?, Int
+property: ProgramId, int?, Int, , Refers to the related parent program
 property: AccountId, int?, Int, required
+property: ProviderAccountId, int?, Int, , the actual provider account who financially is responsible
 property: AgeStart, int?, Int
 property: AgeEnd, int?, Int
 property: GradeLevelStart, int?, Int
 property: GradeLevelEnd, int?, Int
 property: CostPerRegistrant, decimal?, Money
 property: CostDescription, string, NVarChar "1000"
--property: AllowPreRegistration, bool, Bit
 property: Uid, Guid, UniqueIdentifier, required
 property: Details, string, NVarChar "4000"
 property: LocationDetails, string, NVarChar "4000"
 property: ScheduleDetails, string, NVarChar "4000"
--property: RegistrationTimeZone, string, NVarChar "30"
 property: InstructorId, int?, Int
 property: ContactName, string, NVarChar "50"
 property: ContactPhone, string, NVarChar "50"
 property: ContactEmail, string, NVarChar "100"
 property: WaitingListSeats, int?, Int
--property: AcceptPayPal, bool, Bit
--property: AcceptCreditCard, bool, Bit
--property: ParentActivityId, int?, Int
 property: AllowToPayLater, bool, Bit
--property: AllowToRequestDiscount, bool, Bit
--property: AllowOrganizationRegistration, bool, Bit
 property: GenderRestriction, GenderRestrictionType, Int
 property: RegistrationModeId, RegistrationMode, Int
 property: LocationId, int?, Int
@@ -82,14 +76,21 @@ property: IsPublished, bool, Bit
 property: IsArchived, bool, Bit
 property: ActivityGroupId, int?, Int
 property: ActivityScheduleId, int?, Int
--property: ScheduleRequiresAllDays, bool, Bit
 property: UniqueName, string, NVarChar "100"
--property: IsTemplate, bool, Bit
 property: ActivitySectionId, int?, Int, , For tracking which section or grouping a team is in
 property: ActivityTypeId, ActivityType, Int, required
 property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track when a team has been submitted to a league
 property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
 property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
+-property: AllowPreRegistration, bool, Bit
+-property: RegistrationTimeZone, string, NVarChar "30"
+-property: AcceptPayPal, bool, Bit
+-property: AcceptCreditCard, bool, Bit
+-property: ParentActivityId, int?, Int
+-property: AllowToRequestDiscount, bool, Bit
+-property: AllowOrganizationRegistration, bool, Bit
+-property: ScheduleRequiresAllDays, bool, Bit
+-property: IsTemplate, bool, Bit
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar

@@ -1,6 +1,6 @@
 ﻿@{
-    var providerId = (int?)ViewData["ProviderId"];
-    var provider = Account.Load(providerId.Value) ?? new Account();
+    var providerAccountId = (int?)ViewData["ProviderAccountId"];
+    var provider = Account.Load(providerAccountId.Value) ?? new Account();
 }
 
 @{

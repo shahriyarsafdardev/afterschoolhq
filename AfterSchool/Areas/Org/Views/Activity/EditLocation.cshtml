@@ -2,7 +2,7 @@
 @{
     var account = (Account)ViewBag.Account;
     ViewBag.Title = account.Name;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var acceptPayments = accountPackage.HasFeature(FeatureType.AcceptPayments);
     var isFullScreen = (bool)ViewBag.IsFullScreen;

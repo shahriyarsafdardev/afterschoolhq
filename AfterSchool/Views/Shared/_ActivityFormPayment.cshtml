@@ -1,20 +1,12 @@
 ﻿@model Activity
 
 @{
-    var stripe = Model.AccountStripePublishableKey;
     var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
     var paymentPlan = (SubscriptionPlan)ViewBag.PaymentPlan;
     var canProcessPayments = (bool)ViewBag.CanProcessPayments;
-
-    if (!Model.ID.HasValue)
-    {
-        var a = Model.GetAccount();
-        stripe = a.StripePublishableKey;
-    }
-
     var accountPackage = (AccountPackage)ViewData["AccountPackage"];
-
     var paymentdisabled = "";
+
     if (!accountPackage.HasFeature(FeatureType.AcceptPayments))
     {
         paymentdisabled = " disabled=\"disabled\" ";
@@ -106,7 +98,7 @@
                 External Provider Information
             </div>
             <div class="panel-body">
-                @{ Html.RenderPartial("~/Views/Shared/Components/_ProviderAddOrEdit.cshtml", null, new ViewDataDictionary() { { "ProviderId", 0 } }); }
+                @{ Html.RenderPartial("~/Views/Shared/Components/_ProviderAddOrEdit.cshtml", null, new ViewDataDictionary() { { "ProviderAccountId", Model.ProviderAccountId } }); }
             </div>
         </div>
     }
