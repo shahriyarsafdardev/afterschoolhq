@@ -1,0 +1,37 @@
+﻿<div>
+  <p>Congrats @Model.FirstName,</p>
+  
+  <p>
+    @Model.HostAccountName is using @Model.ProductName to manage activities. This means parents at @Model.HostAccountName will go to @Model.HomePageUrl to find, register, and pay for @Model.ActivityName.
+  </p>
+  <p>
+    This results in:
+    <ul>
+      <li>Spending less time dealing with flyers and paper forms</li>
+      <li>Your activity being promoted to all parents and students @Model.HostAccountName</li>
+      <li>Money collected and deposited into your account faster than ever</li>
+    </ul>
+    The amount you charge per registration for your activity (@Model.AmountCharged) will be deposited (or mailed) in full to you based on your preferences.
+  </p>
+
+  <p>
+    <strong>Next Steps</strong>
+  </p>
+  
+  <p>
+    <ol>
+      <li>Check to make sure you activity shows properly here:  @Model.HomePageUrl</li>
+      <li>View your detailed listing here: @Model.ActivityHomePageUrl</li>
+      <li>If you haven't setup your payment preferences do so here: @Model.GetStartedLink</li>
+    </ol>
+  </p>
+
+  <p>
+    If you have any questions please contact our support team @Model.SupportEmail
+  </p>
+  
+  <p>
+      Thanks!<br />
+      @Model.ProductName
+  </p>
+</div>

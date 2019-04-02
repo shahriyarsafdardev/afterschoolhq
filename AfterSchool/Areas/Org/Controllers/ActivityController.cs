@@ -1713,7 +1713,7 @@ namespace AfterSchool.Areas.Org.Controllers
             SystemMessages msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            msgs.AddRange(activity.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+            activity.Publish(SessionVariables.LoggedInUser, msgs);
 
             if (msgs.HasNoErrors())
             {

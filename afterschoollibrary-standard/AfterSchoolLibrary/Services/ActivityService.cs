@@ -1399,6 +1399,7 @@ namespace AfterSchoolLibrary.Services
             if (provider.IsNumber())
                 providerAccount = Account.Load(provider.ToInteger(), msgs, dc);
             else
+            {
                 providerAccount = AccountService.CreateNew(
                      orgName: providername,
                      email: provideremail,
@@ -1413,6 +1414,17 @@ namespace AfterSchoolLibrary.Services
                      createWithStripe: false,
                      msgs: msgs,
                      dc: dc);
+
+                providerAccount.AddUser(
+                    firstName: providerfirstname,
+                    lastName: providerlastname, 
+                    email: provideremail, 
+                    phone: providerphone,
+                    userType: UserType.Owner, 
+                    loggedInUserId: loggedInUser.ID.Value, 
+                    msgs: msgs, 
+                    dc: dc);
+            }
 
             // connect the accounts
             msgs.AddRange(activityAccount.AddVisitorAccount(
@@ -2110,6 +2122,47 @@ namespace AfterSchoolLibrary.Services
                 body));
 
             return msgs;
+        }
+
+        public static Account GetProvider(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (activity.ProviderAccountId.HasValue)
+                return Account.Load(activity.ProviderAccountId.Value, msgs, dc);
+
+            return null;
+        }
+
+        private static void NotifyProvider(this Activity activity, Account hostAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var provider = activity.GetProvider(msgs, dc);
+            var providerOwner = provider.GetAccountOwner(msgs, dc);
+
+            if (hostAccount.IsEmpty())
+                hostAccount = activity.GetAccount(msgs, dc);
+
+            if (provider.IsNotEmpty())
+                msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(hostAccount, provider, providerOwner, activity));
+        }
+
+        public static void Publish(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    activity.NotifyProvider(null, msgs, dc);
+                    msgs.AddRange(activity.SetIsPublished(true, loggedInUser.ID.Value, dc));
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(msgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
+        public static void Unpublish(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs.AddRange(activity.SetIsPublished(false, loggedInUser.ID.Value, dc));
         }
 
         public static SystemMessages SetIsPublished(this Activity activity, bool isPublished, int loggedInUserId, DatabaseConnection dc = null)

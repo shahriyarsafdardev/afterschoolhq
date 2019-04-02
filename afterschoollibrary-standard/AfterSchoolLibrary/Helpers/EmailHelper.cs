@@ -839,6 +839,50 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendProviderNewActivityNotification(Account hostAccount, Account visitorAccount, WebUser visitorAccountOwner, Activity activity)
+        {
+            var msgs = new SystemMessages();
+            var getStartedLink = $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login";
+            var getStartedText = "Login to view your account";
+
+            if (!visitorAccount.IsActive)
+            {
+                getStartedLink = $"{visitorAccountOwner.GetInviteUrl(visitorAccount)}";
+                getStartedText = "Let us know how to pay you";
+            }
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", visitorAccountOwner.DisplayName },
+                { "HostAccountName", hostAccount.Name},
+                { "AmountCharged", activity.CostPerRegistrant.ToCurrency() },
+                { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
+                { "GetStartedLink", getStartedLink },
+                { "GetStartedText", getStartedText },
+                { "HomePageUrl", hostAccount.HomePageUrl },
+                { "ActivityHomePageUrl", activity.HomePageUrl },
+                { "ActivityName", activity.Name }
+            };
+
+            var subject = $"You have been designated as the activity provider for {activity.Name} at {hostAccount.Name}";
+            var body = ProcessTemplate(
+               EmailTemplates.ProviderAccount_Added,
+               model,
+               "provideraccountadded",
+               msgs
+               );
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
 
         private static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
