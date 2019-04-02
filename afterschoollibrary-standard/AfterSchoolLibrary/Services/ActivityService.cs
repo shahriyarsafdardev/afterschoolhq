@@ -645,6 +645,8 @@ namespace AfterSchoolLibrary.Services
             return new Activity()
             {
                 AccountId = activity.AccountId,
+                ProviderAccountId = activity.ProviderAccountId,
+                LeaderTypeId = activity.LeaderTypeId,
                 ContactEmail = activity.ContactEmail,
                 ContactPhone = activity.ContactPhone,
                 ContactName = activity.ContactName,
