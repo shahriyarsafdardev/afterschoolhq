@@ -18,9 +18,6 @@ namespace AfterSchoolLibrary.Models
     {
 		#region "ClassGenerator"
 
-		public string StripeAccessToken { get { return (string)MDV["StripeAccessToken"].Value; } set { MDV["StripeAccessToken"].Value = value; } }
-		public string StripePublishableKey { get { return (string)MDV["StripePublishableKey"].Value; } set { MDV["StripePublishableKey"].Value = value; } }
-		public string StripeSecretKey { get { return (string)MDV["StripeSecretKey"].Value; } set { MDV["StripeSecretKey"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -34,13 +31,10 @@ namespace AfterSchoolLibrary.Models
 		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
 		public bool IsAfterSchool { get { return (bool)MDV["IsAfterSchool"].Value; } set { MDV["IsAfterSchool"].Value = value; } }
 		public string StripeCustomerId { get { return (string)MDV["StripeCustomerId"].Value; } set { MDV["StripeCustomerId"].Value = value; } }
-		public string StripeDefaultCardId { get { return (string)MDV["StripeDefaultCardId"].Value; } set { MDV["StripeDefaultCardId"].Value = value; } }
 		public int? DefaultFormId { get { return (int?)MDV["DefaultFormId"].Value; } set { MDV["DefaultFormId"].Value = value; } }
-		public string StripeRefreshToken { get { return (string)MDV["StripeRefreshToken"].Value; } set { MDV["StripeRefreshToken"].Value = value; } }
 		public string StripeUserId { get { return (string)MDV["StripeUserId"].Value; } set { MDV["StripeUserId"].Value = value; } }
 		public string TimeZone { get { return (string)MDV["TimeZone"].Value; } set { MDV["TimeZone"].Value = value; } }
 		public string LogoUrl { get { return (string)MDV["LogoUrl"].Value; } set { MDV["LogoUrl"].Value = value; } }
-		public string LandingPageText { get { return (string)MDV["LandingPageText"].Value; } set { MDV["LandingPageText"].Value = value; } }
 		public AccountType AccountTypeId { get { return (AccountType)MDV["AccountTypeId"].Value; } set { MDV["AccountTypeId"].Value = value; } }
 		public int? DefaultLocationId { get { return (int?)MDV["DefaultLocationId"].Value; } set { MDV["DefaultLocationId"].Value = value; } }
 		public int? MinGradeLevelOffered { get { return (int?)MDV["MinGradeLevelOffered"].Value; } set { MDV["MinGradeLevelOffered"].Value = value; } }
@@ -72,9 +66,6 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Account).Name;
                 _dp = BaseCompany.get_BaseObjectMap(className);
-				_dp.Add(className, "StripeAccessToken", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "StripePublishableKey", System.Data.SqlDbType.NVarChar , "100");
-				_dp.Add(className, "StripeSecretKey", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "UniqueName", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "OwnerId", System.Data.SqlDbType.Int);
@@ -82,13 +73,10 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "IsAfterSchool", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StripeCustomerId", System.Data.SqlDbType.NVarChar , "50");
-				_dp.Add(className, "StripeDefaultCardId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "DefaultFormId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "StripeRefreshToken", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "StripeUserId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "TimeZone", System.Data.SqlDbType.NVarChar , "30");
 				_dp.Add(className, "LogoUrl", System.Data.SqlDbType.NVarChar , "400");
-				_dp.Add(className, "LandingPageText", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "AccountTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DefaultLocationId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "MinGradeLevelOffered", System.Data.SqlDbType.Int);
@@ -174,18 +162,6 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripeAccessToken"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripePublishableKey"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripeSecretKey"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -214,15 +190,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripeDefaultCardId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["DefaultFormId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["StripeRefreshToken"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -235,10 +203,6 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["LogoUrl"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["LandingPageText"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -401,7 +365,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return this.StripeDefaultCardId.IsNotEmpty();
+                return false; // this.StripeDefaultCardId.IsNotEmpty();
             }
         }
 

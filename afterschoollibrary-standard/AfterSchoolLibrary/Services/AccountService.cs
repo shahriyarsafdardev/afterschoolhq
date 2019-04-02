@@ -995,30 +995,30 @@ namespace AfterSchoolLibrary.Services
             var signupType = SignUpType.NotSet;
 
             // has payment info
-            if (account.StripeDefaultCardId.IsNotEmpty())
-            {
-                // paying as soon as they sign up
-                if (activePackage.IsEmpty())
-                {
-                    signupType = SignUpType.NewAccountSignUp;
-                }
-                // changing packages but have already paid, force those upgrading from trials to upgrade on current plan
-                else if (activePackage.PackageId != p.ID)
-                {
-                    signupType = SignUpType.ChangePackage;
-                }
-                // if same package but the billing period is changing
-                else if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
-                {
-                    signupType = SignUpType.ChangeBillingPeriodType;
-                }
-                // simply converting from the same package from trial
-                else if (activePackage.TrialEndDate.HasValue)
-                {
-                    signupType = SignUpType.ConvertingFromTrial;
-                }
-            }
-            else if (p.IsFree(billingPeriodType) || (activePackage.IsNotEmpty() && activePackage.IsFree))
+            //if (account.StripeDefaultCardId.IsNotEmpty())
+            //{
+            //    // paying as soon as they sign up
+            //    if (activePackage.IsEmpty())
+            //    {
+            //        signupType = SignUpType.NewAccountSignUp;
+            //    }
+            //    // changing packages but have already paid, force those upgrading from trials to upgrade on current plan
+            //    else if (activePackage.PackageId != p.ID)
+            //    {
+            //        signupType = SignUpType.ChangePackage;
+            //    }
+            //    // if same package but the billing period is changing
+            //    else if (activePackage.PackageId == p.ID && activePackage.BillingPeriodTypeId != billingPeriodType)
+            //    {
+            //        signupType = SignUpType.ChangeBillingPeriodType;
+            //    }
+            //    // simply converting from the same package from trial
+            //    else if (activePackage.TrialEndDate.HasValue)
+            //    {
+            //        signupType = SignUpType.ConvertingFromTrial;
+            //    }
+            //}
+            if (p.IsFree(billingPeriodType) || (activePackage.IsNotEmpty() && activePackage.IsFree))
             {
                 // new sign up
                 if (activePackage.IsEmpty())

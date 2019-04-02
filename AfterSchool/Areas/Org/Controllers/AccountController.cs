@@ -651,70 +651,70 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(a);
         }
 
-        public ActionResult OAuthStripe()
-        {
-            var msgs = new SystemMessages();
+        //public ActionResult OAuthStripe()
+        //{
+        //    var msgs = new SystemMessages();
 
-            if (Request["error"].IsEmpty())
-            {
-                try
-                {
-                    string scope = Request["scope"];
-                    string code = Request["code"];
-                    string state = Request["state"];
+        //    if (Request["error"].IsEmpty())
+        //    {
+        //        try
+        //        {
+        //            string scope = Request["scope"];
+        //            string code = Request["code"];
+        //            string state = Request["state"];
 
-                    RestClient rc = new RestClient("https://connect.stripe.com/oauth/token");
-                    rc.RequestMethod = RestClientRequestMethod.POST;
-                    rc.Parameters.Add("client_secret", AfterSchoolLibrary.Billing.StripeHelper.SecretKey);
-                    rc.Parameters.Add("code", code);
-                    rc.Parameters.Add("grant_type", "authorization_code");
-                    rc.Parameters.Add("client_id", AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId);
-                    rc.ContentType = RestClientContentTypeEnum.URLEncoded;
-                    string responseFromServer = rc.DoRequest();
+        //            RestClient rc = new RestClient("https://connect.stripe.com/oauth/token");
+        //            rc.RequestMethod = RestClientRequestMethod.POST;
+        //            rc.Parameters.Add("client_secret", AfterSchoolLibrary.Billing.StripeHelper.SecretKey);
+        //            rc.Parameters.Add("code", code);
+        //            rc.Parameters.Add("grant_type", "authorization_code");
+        //            rc.Parameters.Add("client_id", AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId);
+        //            rc.ContentType = RestClientContentTypeEnum.URLEncoded;
+        //            string responseFromServer = rc.DoRequest();
 
-                    dynamic results = responseFromServer.FromJSON();
+        //            dynamic results = responseFromServer.FromJSON();
 
-                    string token_type = results["token_type"];
-                    string stripe_publishable_key = results["stripe_publishable_key"];
-                    bool livemode = results["livemode"];
-                    string stripe_user_id = results["stripe_user_id"];
-                    string refresh_token = results["refresh_token"];
-                    string access_token = results["access_token"];
-                    scope = results["scope"];
+        //            string token_type = results["token_type"];
+        //            string stripe_publishable_key = results["stripe_publishable_key"];
+        //            bool livemode = results["livemode"];
+        //            string stripe_user_id = results["stripe_user_id"];
+        //            string refresh_token = results["refresh_token"];
+        //            string access_token = results["access_token"];
+        //            scope = results["scope"];
 
-                    SessionVariables.CurrentAccount.StripePublishableKey = stripe_publishable_key;
-                    SessionVariables.CurrentAccount.StripeAccessToken = access_token;
-                    SessionVariables.CurrentAccount.StripeRefreshToken = refresh_token;
-                    SessionVariables.CurrentAccount.StripeUserId = stripe_user_id;
-                    msgs.AddRange(SessionVariables.CurrentAccount.Save());
+        //            SessionVariables.CurrentAccount.StripePublishableKey = stripe_publishable_key;
+        //            SessionVariables.CurrentAccount.StripeAccessToken = access_token;
+        //            SessionVariables.CurrentAccount.StripeRefreshToken = refresh_token;
+        //            SessionVariables.CurrentAccount.StripeUserId = stripe_user_id;
+        //            msgs.AddRange(SessionVariables.CurrentAccount.Save());
 
-                    if(msgs.HasNoErrors())
-                    {
-                        msgs.Add("Your account has been connected to Stripe", MessageType.Success);
-                    }
-                    else
-                    {
-                        SessionVariables.CurrentAccount.StripePublishableKey = "";
-                        SessionVariables.CurrentAccount.StripeAccessToken = "";
-                        SessionVariables.CurrentAccount.StripeRefreshToken = "";
-                        SessionVariables.CurrentAccount.StripeUserId = "";
-                    }
+        //            if(msgs.HasNoErrors())
+        //            {
+        //                msgs.Add("Your account has been connected to Stripe", MessageType.Success);
+        //            }
+        //            else
+        //            {
+        //                SessionVariables.CurrentAccount.StripePublishableKey = "";
+        //                SessionVariables.CurrentAccount.StripeAccessToken = "";
+        //                SessionVariables.CurrentAccount.StripeRefreshToken = "";
+        //                SessionVariables.CurrentAccount.StripeUserId = "";
+        //            }
 
-                }
-                catch (Exception ex)
-                {
-                    msgs.Add("An error occurred while connecting your Stripe account.", MessageType.Error, ex);
-                }
-            }
-            else
-            {
-                msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
-            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            msgs.Add("An error occurred while connecting your Stripe account.", MessageType.Error, ex);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
+        //    }
 
-            ViewBag.Messages = msgs;
+        //    ViewBag.Messages = msgs;
 
-            return View("Payments", SessionVariables.CurrentAccount);
-        }
+        //    return View("Payments", SessionVariables.CurrentAccount);
+        //}
 
         [HttpGet]
         public ActionResult Team(string id)

@@ -1,9 +1,8 @@
 ﻿@model Account
 
 @{
-    var accountId = 0;
     var searchOnly = false;
-    var label = "Enter a provider";
+    var label = $"Who is providing this {UILabel.ActivityLabel(ActivityType.Activity).ToLower()}?";
     var placeholderText = "Search Providers...";
     var providerIsRequired = false;
 
@@ -21,11 +20,6 @@
     {
         placeholderText = ViewData["placeholderText"].ToString();
     }
-
-    //if (!searchOnly)
-    //{
-    //    accountId = (int)ViewData["accountId"];
-    //}
 
     if (ViewData["providerIsRequired"].IsNotEmpty() && ViewData["providerIsRequired"].IsNotEmpty().ToString().ToBoolean())
     {

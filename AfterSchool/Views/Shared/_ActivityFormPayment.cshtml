@@ -93,141 +93,155 @@
                     </p>
                 </div>
             </div>
+                        
+        </div>
+    </div>
+</div>
 
-            @{ Html.RenderPartial("~/Views/Shared/Components/_ProviderAddOrEdit.cshtml", null, new ViewDataDictionary() { { "ProviderId", 0 } }); }
+<div id="provider-info" class="hide">
+    @if (Model.LeaderTypeId == ActivityLeaderType.ExternalProvider)
+    {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                External Provider Information
+            </div>
+            <div class="panel-body">
+                @{ Html.RenderPartial("~/Views/Shared/Components/_ProviderAddOrEdit.cshtml", null, new ViewDataDictionary() { { "ProviderId", 0 } }); }
+            </div>
+        </div>
+    }
+</div>
 
+<div id="advanced-settings-container" class="hide">
+
+    <div class="col-md-offset-3 col-md-9 padding-v-30">
+        <span><a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a></span>
+    </div>
+
+    <div class="panel panel-default hide advanced-settings">
+
+        <div class="panel-heading">
+            Payment Options
         </div>
 
-    </div>
+        <div class="panel-body">
 
-</div>
-
-<div class="col-md-offset-3 col-md-9 padding-v-30">
-    <span><a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a></span>
-</div>
-
-<div class="panel panel-default hide advanced-settings">
-
-    <div class="panel-heading">
-        Payment Options
-    </div>
-
-    <div class="panel-body">
-
-        <div class="form-group">
-            <div class="row">
-                <label class="col-sm-3 control-label">Tuition Payment Plan</label>
-                <div class="col-sm-1">
-                    @{Html.RenderPartial
-                    (
-                        "~/Views/Shared/_SwitchButton.cshtml",
-                        Model.HasPaymentPlan(),
-                        new ViewDataDictionary()
-                        {
-                            { "checkboxname", "haspaymentplan" },
-                            { "checkboxid", "haspaymentplan" }
+            <div class="form-group">
+                <div class="row">
+                    <label class="col-sm-3 control-label">Tuition Payment Plan</label>
+                    <div class="col-sm-1">
+                        @{Html.RenderPartial
+                        (
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.HasPaymentPlan(),
+                            new ViewDataDictionary()
+                            {
+                                { "checkboxname", "haspaymentplan" },
+                                { "checkboxid", "haspaymentplan" }
+                            }
+                        );
                         }
-                    );
-                    }
-                </div>
-            </div>
-            <div id="paymentplansection" class="row">
-                <div class="col-md-3"></div>
-                <div class="col-sm-6 col-md-9">
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon">Payment Amt $</span>
-                        <input type="number" class="form-control" id="paymentplancost"
-                               name="paymentplancost" onfocus="this.select()"
-                               value="@(paymentPlan.IsNotEmpty() ? paymentPlan.CostPerPeriod.ToCurrency().Replace("$", "") : "0")"
-                               required min="0.00" step=".01" @paymentdisabled />
                     </div>
                 </div>
-                <div class="col-md-3"></div>
-                <div class="col-sm-6 col-md-9">
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon">Every</span>
-                        <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
-                            @BillingPeriodOptions(paymentPlan)
-                        </select>
+                <div id="paymentplansection" class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Payment Amt $</span>
+                            <input type="number" class="form-control" id="paymentplancost"
+                                   name="paymentplancost" onfocus="this.select()"
+                                   value="@(paymentPlan.IsNotEmpty() ? paymentPlan.CostPerPeriod.ToCurrency().Replace("$", "") : "0")"
+                                   required min="0.00" step=".01" @paymentdisabled />
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Every</span>
+                            <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
+                                @BillingPeriodOptions(paymentPlan)
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon"># of Payments</span>
+                            <input type="number" class="form-control" id="paymentplanperiodnumber"
+                                   name="paymentplanperiodnumber" onfocus="this.select()"
+                                   value="@(paymentPlan.IsNotEmpty() ? paymentPlan.TotalPeriods.ToString() : "0")"
+                                   required min="0" step="1" @paymentdisabled />
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3"></div>
-                <div class="col-sm-6 col-md-9">
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon"># of Payments</span>
-                        <input type="number" class="form-control" id="paymentplanperiodnumber"
-                               name="paymentplanperiodnumber" onfocus="this.select()"
-                               value="@(paymentPlan.IsNotEmpty() ? paymentPlan.TotalPeriods.ToString() : "0")"
-                               required min="0" step="1" @paymentdisabled />
-                    </div>
-                </div>
-            </div>
-            <div class="row">
+                <div class="row">
 
-                <div class="col-sm-3"></div>
-                <div class="col-sm-9">
-                    <p class="text-muted padding-v-10">Payment plans are used to break up the tuition fee into monthly payments.</p>
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-9">
+                        <p class="text-muted padding-v-10">Payment plans are used to break up the tuition fee into monthly payments.</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="panel-heading">
+            Subscription Options
+        </div>
+
+        <div class="panel-body">
+
+            <div class="form-group">
+                <div class="row">
+                    <label class="col-sm-3 control-label">Subscription</label>
+                    <div class="col-sm-1">
+                        @{Html.RenderPartial
+                                (
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.HasSubscriptionPlan(),
+                                    new ViewDataDictionary()
+                                    {
+                                                                        { "checkboxname", "hassubscriptionplan" },
+                                                                        { "checkboxid", "hassubscriptionplan" }
+                                    }
+                                );
+                        }
+                    </div>
+                </div>
+                <div id="subscriptionplansection" class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Payment Amt $</span>
+                            <input type="number" class="form-control" id="subscriptionplancost"
+                                   name="subscriptionplancost" placeholder="Amount" onfocus="this.select()"
+                                   value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.CostPerPeriod.ToCurrency().Replace("$", "") : "0")"
+                                   required min="0.00" step=".01" @paymentdisabled />
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                    <div class="col-sm-6 col-md-9">
+                        <div class="input-group input-group-lg xs-mb-15">
+                            <span class="input-group-addon">Every</span>
+                            <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
+                                @BillingPeriodOptions(subscriptionPlan)
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-9">
+                        <p class="text-muted padding-v-10">Subscriptions are used to bill users monthly for ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower(). You can make your @UILabel.ActivityLabel(ActivityType.Activity).ToLower() ongoing by <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })">editing the schedule</a></p>
+                    </div>
                 </div>
 
             </div>
         </div>
 
-    </div>
-
-    <div class="panel-heading">
-        Subscription Options
-    </div>
-
-    <div class="panel-body">
-
-        <div class="form-group">
-            <div class="row">
-                <label class="col-sm-3 control-label">Subscription</label>
-                <div class="col-sm-1">
-                    @{Html.RenderPartial
-                            (
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.HasSubscriptionPlan(),
-                                new ViewDataDictionary()
-                                {
-                                                                    { "checkboxname", "hassubscriptionplan" },
-                                                                    { "checkboxid", "hassubscriptionplan" }
-                                }
-                            );
-                    }
-                </div>
-            </div>
-            <div id="subscriptionplansection" class="row">
-                <div class="col-md-3"></div>
-                <div class="col-sm-6 col-md-9">
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon">Payment Amt $</span>
-                        <input type="number" class="form-control" id="subscriptionplancost"
-                               name="subscriptionplancost" placeholder="Amount" onfocus="this.select()"
-                               value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.CostPerPeriod.ToCurrency().Replace("$", "") : "0")"
-                               required min="0.00" step=".01" @paymentdisabled />
-                    </div>
-                </div>
-                <div class="col-md-3"></div>
-                <div class="col-sm-6 col-md-9">
-                    <div class="input-group input-group-lg xs-mb-15">
-                        <span class="input-group-addon">Every</span>
-                        <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
-                            @BillingPeriodOptions(subscriptionPlan)
-                        </select>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-3"></div>
-                <div class="col-sm-9">
-                    <p class="text-muted padding-v-10">Subscriptions are used to bill users monthly for ongoing @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower(). You can make your @UILabel.ActivityLabel(ActivityType.Activity).ToLower() ongoing by <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })">editing the schedule</a></p>
-                </div>
-            </div>
-
-        </div>
     </div>
 
 </div>
@@ -261,11 +275,13 @@
 
     function showTuitionCosts() {
         if ($('#do-parents-pay-yes').is(':checked')) {
-            console.log('checked');
             $('#tuition-costs').removeClass('hide');
+            $('#provider-info').removeClass('hide');
+            $('#advanced-settings-container').removeClass('hide');
         } else {
-            console.log('not checked');
             $('#tuition-costs').addClass('hide');
+            $('#provider-info').addClass('hide');
+            $('#advanced-settings-container').addClass('hide');
         }
     }
 
@@ -291,19 +307,19 @@
 </script>
 
 @helper BillingPeriodOptions(SubscriptionPlan plan)
+{
+    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x != BillingPeriodType.NotSet))
     {
-        foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x != BillingPeriodType.NotSet))
+        var selected = "";
+        if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
         {
-            var selected = "";
-            if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
-            {
-                selected = " selected=\"selected\" ";
-            }
-            else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
-            {
-                selected = " selected=\"selected\" ";
-            }
-
-            <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString()</option>
+            selected = " selected=\"selected\" ";
         }
+        else if (plan.IsNotEmpty() && billingPeriodType == plan.BillingPeriodTypeId)
+        {
+            selected = " selected=\"selected\" ";
+        }
+
+        <option value="@((int)billingPeriodType)" @selected>@billingPeriodType.ToString()</option>
+    }
 }

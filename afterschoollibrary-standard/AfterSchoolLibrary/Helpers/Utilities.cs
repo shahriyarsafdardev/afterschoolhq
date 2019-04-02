@@ -1008,26 +1008,26 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages UpdateAccountProperties(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var accounts = Account.Load(dc: dc);
-            foreach (var account in accounts)
-            {
-                var properties = AccountProperty.LoadByAccountId(account.ID.Value, dc: dc);
-                if (properties.Count == 0 && account.LandingPageText.IsNotBlank())
-                {
-                    var property = new AccountProperty();
-                    property.AccountId = account.ID;
-                    property.AccountPropertyTypeId = AccountPropertyType.LandingPageText;
-                    property.Value = account.LandingPageText;
-                    property.CreateDate = property.LastModifiedDate = DateTime.UtcNow;
-                    property.CreatedBy = property.LastModifiedBy = 0;
-                    msgs.AddRange(property.Save(dc: dc));
-                }
-            }
-            return msgs;
-        }
+        //public static SystemMessages UpdateAccountProperties(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var accounts = Account.Load(dc: dc);
+        //    foreach (var account in accounts)
+        //    {
+        //        var properties = AccountProperty.LoadByAccountId(account.ID.Value, dc: dc);
+        //        if (properties.Count == 0 && account.LandingPageText.IsNotBlank())
+        //        {
+        //            var property = new AccountProperty();
+        //            property.AccountId = account.ID;
+        //            property.AccountPropertyTypeId = AccountPropertyType.LandingPageText;
+        //            property.Value = account.LandingPageText;
+        //            property.CreateDate = property.LastModifiedDate = DateTime.UtcNow;
+        //            property.CreatedBy = property.LastModifiedBy = 0;
+        //            msgs.AddRange(property.Save(dc: dc));
+        //        }
+        //    }
+        //    return msgs;
+        //}
 
         public static SystemMessages UpdateRegistrationModes(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
