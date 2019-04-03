@@ -1070,6 +1070,8 @@
     <Content Include="Areas\Org\Views\Shared\_CopyActivityModal.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_ExitFullScreen.cshtml" />
     <Content Include="Areas\Org\Views\Group\AddRegistration.cshtml" />
+    <Content Include="Areas\Org\Views\Account\GetStartedPayments.cshtml" />
+    <Content Include="Areas\Org\Views\Account\PaymentsDone.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

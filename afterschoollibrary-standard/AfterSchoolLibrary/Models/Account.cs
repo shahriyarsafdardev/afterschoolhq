@@ -307,11 +307,27 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
+
+        public bool IsSchool
+        {
+            get
+            {
+                return AccountTypeId == AccountType.School;
+            }
+        }
+
+        public bool IsActivityProvider
+        {
+            get
+            {
+                return AccountTypeId == AccountType.ActivityProvider;
+            }
+        }
 
         public bool IsCreditCardFeeTakenOutOfCost
         {

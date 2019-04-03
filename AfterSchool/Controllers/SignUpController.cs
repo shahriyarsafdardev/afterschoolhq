@@ -50,6 +50,7 @@ namespace AfterSchool.Controllers
             else
             {
                 user = WebUser.LoadByUid(id.ToGuid(), null);
+
                 if (user.IsEmpty())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
                 else if (user.IsActive)
@@ -84,8 +85,8 @@ namespace AfterSchool.Controllers
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                user.CompleteSignUp(account, firstname, lastname, email, password1, null, msgs);
-                
+                user.CompleteSignUp(account, firstname, lastname, email, password1, null, msgs);                
+
             if (msgs.HasNoErrors() && !user.VerifiedAccount)
                 msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));     
 
@@ -143,51 +144,37 @@ namespace AfterSchool.Controllers
             WebUser wu = null;
 
             if (Request.Form["firstname"].IsEmpty())
-            {
                 msgs.Add("First Name is required", MessageType.UserError);
-            }
+
             if (Request.Form["lastname"].IsEmpty())
-            {
                 msgs.Add("Last Name is required", MessageType.UserError);
-            }
+
             if (Request.Form["email"].IsEmpty())
-            {
                 msgs.Add("Email is required", MessageType.UserError);
-            }
-            else if (Request.Form["email"].IsMatch(BasicLibrary.Utilities.EmailRegEx) == false)
-            {
+            else if (!Request.Form["email"].IsEmail())
                 msgs.Add("Email is invalid", MessageType.UserError);
-            }
+
             if (Request.Form["username"].IsEmpty())
-            {
                 msgs.Add("Username is required", MessageType.UserError);
-            }
-            else if(Request.QueryString["i"].IsGuid() == false)
+            else if(!Request.QueryString["i"].IsGuid())
             {
                 wu = WebUser.LoadByUsername(Request.Form["username"], null);
-                if (wu.IsEmpty() == false)
-                {
+                if (wu.IsNotEmpty())
                     msgs.Add("Username is already in use", MessageType.UserError);
-                }
 
                 wu = WebUser.LoadByEmail(Request.Form["email"], null);
-                if (wu.IsEmpty() == false)
-                {
+                if (wu.IsNotEmpty())
                     msgs.Add("Email is already in use", MessageType.UserError);
-                }
             }
+
             if (Request.Form["password"].IsEmpty())
-            {
                 msgs.Add("Password is required", MessageType.UserError);
-            }
+
             if (Request.Form["password2"].IsEmpty())
-            {
                 msgs.Add("Verify Password is required", MessageType.UserError);
-            }
-            if (Request.Form["password"].IsEmpty() == false && Request.Form["password"] != Request.Form["password2"])
-            {
+
+            if (Request.Form["password"].IsNotEmpty() && Request.Form["password"] != Request.Form["password2"])
                 msgs.Add("Passwords do not match", MessageType.UserError);
-            }
 
 
             if (msgs.HasNoErrors())
@@ -196,13 +183,10 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
                         if (Request.QueryString["i"].IsGuid())
-                        {
                             wu = WebUser.LoadByUidByIsActive(Request.QueryString["i"].ToGuid(), false, dc: adc);
-                        }
                         else
-                        {
                             wu = new WebUser();
-                        }
+
                         wu.FirstName = Request.Form["firstname"];
                         wu.LastName = Request.Form["lastname"];
                         wu.Email = Request.Form["email"];
@@ -418,24 +402,11 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
-                    {
-                        // create a new user, then take then to create a real provider account
-                        user = WebUserService.CreateNew(firstname, lastname, email, phone, password1, true, true, false, false, null, amsgs, adc);
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
+                // create a new user, then take then to create a real provider account
+                user = WebUserService.CreateNew(firstname, lastname, email, phone, password1, true, true, false, false, null);
 
-                        if (!user.VerifiedAccount)
-                            msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
+                if (msgs.HasNoErrors() && !user.VerifiedAccount)
+                    msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));
             }
 
             if (msgs.HasNoErrors())

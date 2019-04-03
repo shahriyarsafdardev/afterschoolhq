@@ -239,7 +239,7 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetInviteUrl(this WebUser user, Account account)
         {
-            return Helpers.Email.BaseUrl(account.IsAfterSchool) + $"signup/new/{user.Uid.ToString()}?a={account.Uid}";
+            return $"{Helpers.Email.BaseUrl(account.IsAfterSchool)}signup/new/{user.Uid.ToString()}?a={account.Uid}";
         }
 
         public static WebUser InviteNew(string firstName, string lastName, string email, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -465,19 +465,16 @@ namespace AfterSchoolLibrary.Services
                     amsgs.AddRange(user.Save(adc));
 
                     user.ActivateForAccount(account, loggedInUser, amsgs, adc);
+
+                    if (!account.HasAccountPackage(amsgs, adc))
+                        account.SetDefaultAccountPackage(loggedInUser, amsgs, adc);
+
+                    if (account.StripeCustomerId.IsEmpty())
+                        amsgs.AddRange(account.SaveWithStripe(dc));
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 

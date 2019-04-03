@@ -1400,42 +1400,65 @@ namespace AfterSchoolLibrary.Services
                 providerAccount = Account.Load(provider.ToInteger(), msgs, dc);
             else
             {
-                providerAccount = AccountService.CreateNew(
-                     orgName: providername,
-                     email: provideremail,
-                     phone: providerphone,
-                     isActive: false,
-                     accountType: AccountType.ActivityProvider,
-                     accountOwner: null,
-                     packageId: null,
-                     packageBillingPeriod: null,
-                     loggedInUser: loggedInUser,
-                     isAfterSchool: true,
-                     createWithStripe: false,
-                     msgs: msgs,
-                     dc: dc);
+                if (providername.IsEmpty())
+                    msgs.Add("Provider Organization or Program is required", MessageType.UserError);
 
-                providerAccount.AddUser(
-                    firstName: providerfirstname,
-                    lastName: providerlastname, 
-                    email: provideremail, 
-                    phone: providerphone,
-                    userType: UserType.Owner, 
-                    loggedInUserId: loggedInUser.ID.Value, 
-                    msgs: msgs, 
-                    dc: dc);
+                if (providerfirstname.IsEmpty())
+                    msgs.Add("Provider First Name is required", MessageType.UserError);
+
+                if (providerlastname.IsEmpty())
+                    msgs.Add("Provider Last Name is required", MessageType.UserError);
+
+                if (!provideremail.IsEmail())
+                    msgs.Add("Provider Email is required", MessageType.UserError);
+
+                if (providerphone.IsNotEmpty() && !providerphone.IsPhone())
+                    msgs.Add("Please enter a valid phone number", MessageType.UserError);
+
+                if (msgs.HasNoErrors())
+                {
+                    providerAccount = AccountService.CreateNew(
+                         orgName: providername,
+                         email: provideremail,
+                         phone: providerphone,
+                         isActive: false,
+                         accountType: AccountType.ActivityProvider,
+                         accountOwner: null,
+                         packageId: null,
+                         packageBillingPeriod: null,
+                         loggedInUser: loggedInUser,
+                         isAfterSchool: true,
+                         createWithStripe: false,
+                         msgs: msgs,
+                         dc: dc);
+
+                    providerAccount.AddUser(
+                        firstName: providerfirstname,
+                        lastName: providerlastname,
+                        email: provideremail,
+                        phone: providerphone,
+                        userType: UserType.Owner,
+                        loggedInUserId: loggedInUser.ID.Value,
+                        msgs: msgs,
+                        dc: dc);
+
+                    providerAccount.SetDefaultAccountPackage(loggedInUser, msgs, dc);
+                }
             }
 
-            // connect the accounts
-            msgs.AddRange(activityAccount.AddVisitorAccount(
-                    visitorAccount: providerAccount,
-                    hostPermissionType: HostPermissionType.ApproveOnly,
-                    approvalStatus: ApprovalStatus.Approved,
-                    loggedInUser: loggedInUser,
-                    dc: dc));
+            if (msgs.HasNoErrors())
+            {
+                // connect the accounts
+                msgs.AddRange(activityAccount.AddVisitorAccount(
+                        visitorAccount: providerAccount,
+                        hostPermissionType: HostPermissionType.ApproveOnly,
+                        approvalStatus: ApprovalStatus.Approved,
+                        loggedInUser: loggedInUser,
+                        dc: dc));
 
-            activity.ProviderAccountId = providerAccount.ID;
-            msgs.AddRange(activity.Save(dc));
+                activity.ProviderAccountId = providerAccount.ID;
+                msgs.AddRange(activity.Save(dc));
+            }
 
             return msgs;
         }
@@ -2135,6 +2158,10 @@ namespace AfterSchoolLibrary.Services
         private static void NotifyProvider(this Activity activity, Account hostAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var provider = activity.GetProvider(msgs, dc);
+
+            if (provider.IsEmpty())
+                return;
+
             var providerOwner = provider.GetAccountOwner(msgs, dc);
 
             if (hostAccount.IsEmpty())

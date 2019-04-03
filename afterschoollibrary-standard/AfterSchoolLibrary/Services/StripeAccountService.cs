@@ -40,117 +40,105 @@ namespace AfterSchoolLibrary.Services
 
             var stripeStripeAccount = StripeHelper.GetCustomAccount(account.StripeUserId, msgs);
 
-            stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount.StripeResponse.ObjectJson, null, msgs, dc);
+            stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount, null, msgs, dc);
         }
 
-        public static void SaveAndSendLegalEntityToStripe(this StripeAccount stripeAccount, string fullSSN, StripeUploadFile document, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void SaveAndSendLegalEntityToStripe(this StripeAccount ahqStripeAccount, string fullSSN, StripeUploadFile document, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var account = stripeAccount.GetAccount(msgs, dc);
+            var account = ahqStripeAccount.GetAccount(msgs, dc);
 
             Stripe.File stripeFileUpload = null;
 
-            if (stripeAccount.RequiresDocument)
+            if (ahqStripeAccount.RequiresDocument)
                 stripeFileUpload = StripeHelper.UploadFile(document, msgs);
 
             if (msgs.HasErrors())
                 return;
 
-            var stripeStripeAccount = StripeHelper.UpdateCustomAccountLegalEntity(
+            if (account.StripeUserId.IsEmpty())
+                account.CreateStripeCustomAccount(msgs, dc);
+
+            var stripeAccount = StripeHelper.UpdateCustomAccountLegalEntity(
                 stripeAccountId: account.StripeUserId,
-                entityType: stripeAccount.LegalEntityTypeId,
-                firstName: stripeAccount.LegalEntityFirstName,
-                lastName: stripeAccount.LegalEntityLastName,
-                ssnLast4: stripeAccount.LegalEntitySSNLast4,
+                entityType: ahqStripeAccount.LegalEntityTypeId,
+                firstName: ahqStripeAccount.LegalEntityFirstName,
+                lastName: ahqStripeAccount.LegalEntityLastName,
+                ssnLast4: ahqStripeAccount.LegalEntitySSNLast4,
                 fullSSN: fullSSN,
-                dateOfBirth: stripeAccount.LegalEntityDOB.Value,
-                address1: stripeAccount.LegalEntityAddress1,
-                address2: stripeAccount.LegalEntityAddress2,
-                city: stripeAccount.LegalEntityCity,
-                state: stripeAccount.LegalEntityState,
-                postalCode: stripeAccount.LegalEntityPostalCode,
-                supportPhone: stripeAccount.SupportPhone,
-                supportEmail: stripeAccount.SupportEmail,
-                businessName: stripeAccount.LegalEntityBusinessName,
-                ein: stripeAccount.LegalEntityEIN,
-                businessUrl: stripeAccount.BusinessUrl,
-                businessPhone: stripeAccount.BusinessPhone,
+                dateOfBirth: ahqStripeAccount.LegalEntityDOB.Value,
+                address1: ahqStripeAccount.LegalEntityAddress1,
+                address2: ahqStripeAccount.LegalEntityAddress2,
+                city: ahqStripeAccount.LegalEntityCity,
+                state: ahqStripeAccount.LegalEntityState,
+                postalCode: ahqStripeAccount.LegalEntityPostalCode,
+                supportPhone: ahqStripeAccount.SupportPhone,
+                supportEmail: ahqStripeAccount.SupportEmail,
+                businessName: ahqStripeAccount.LegalEntityBusinessName,
+                ein: ahqStripeAccount.LegalEntityEIN,
+                businessUrl: ahqStripeAccount.BusinessUrl,
+                businessPhone: ahqStripeAccount.BusinessPhone,
                 documentFileId: stripeFileUpload?.Id,
-                tosAcceptanceDate: stripeAccount.TOSAcceptanceDate.Value,
-                tosIPAddress: stripeAccount.TOSAcceptanceIP,
-                tosUserAgent: stripeAccount.TOSAcceptanceUserAgent,
+                tosAcceptanceDate: ahqStripeAccount.TOSAcceptanceDate.Value,
+                tosIPAddress: ahqStripeAccount.TOSAcceptanceIP,
+                tosUserAgent: ahqStripeAccount.TOSAcceptanceUserAgent,
                 msgs: msgs);
 
             if (msgs.HasNoErrors())
-            {
-                stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount.StripeResponse.ObjectJson, stripeFileUpload, msgs, dc);
-            }
+                ahqStripeAccount.ParseAndUpdateStripeCustomAccount(stripeAccount, stripeFileUpload, msgs, dc);
         }
 
-        public static void ParseAndUpdateStripeCustomAccount(this StripeAccount stripeAccount, string json, Stripe.File stripeFileUpload, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ParseAndUpdateStripeCustomAccount(this StripeAccount ahqStripeAccount, Stripe.Account stripeAccount, Stripe.File stripeFileUpload, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var results = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(json);
-            var fieldsRequired = results.verification.fields_needed;
-            var verificationDueBy = results.verification.due_by;
-            var verificationStatus = results.legal_entity.verification.status;
-            var disabledReason = results.verification.disabled_reason;
-            var detailsCode = results.legal_entity.verification.details_code;
-            var payoutsEnabled = results.payouts_enabled;
-            var chargesEnabled = results.charges_enabled;            
+            var json = stripeAccount.StripeResponse.ObjectJson;
 
-            stripeAccount.RequiresFullSSN = false;
-            stripeAccount.RequiresDocument = false;
+            ahqStripeAccount.RequiresFullSSN = false;
+            ahqStripeAccount.RequiresDocument = false;
 
-            foreach (var field in fieldsRequired)
+            foreach (var field in stripeAccount.Requirements.CurrentlyDue)
             {
                 switch ((string)field)
                 {
                     case "legal_entity.personal_id_number":
-                        stripeAccount.RequiresFullSSN = true;
+                        ahqStripeAccount.RequiresFullSSN = true;
                         msgs.Add("It has been determined your Full SSN required in order to process payments. Please update your information.", MessageType.Warning);
                         break;
                     case "legal_entity.verification.document":
-                        stripeAccount.RequiresDocument = true;
+                        ahqStripeAccount.RequiresDocument = true;
                         msgs.Add("It has been determined that a scan of a Valid Driver's license or Passport is required to be uploaded in order to process payments. Please update your information.", MessageType.Warning);
                         break;
                 }
                 
             }
+            
+            ahqStripeAccount.VerificationDueBy = stripeAccount.Requirements.CurrentDeadline;
+            ahqStripeAccount.PayoutsEnabled = stripeAccount.PayoutsEnabled;
+            ahqStripeAccount.ChargesEnabled = stripeAccount.ChargesEnabled;
 
-            if (verificationDueBy != null && ((string)verificationDueBy).IsDateTime())
-                stripeAccount.VerificationDueBy = ((DateTime)verificationDueBy);
-
-            if (disabledReason != null)
-                stripeAccount.ChargesDisabledReason = (string)disabledReason;
-
-            if (payoutsEnabled != null && ((string)payoutsEnabled).IsBoolean())
-                stripeAccount.PayoutsEnabled = ((string)payoutsEnabled).ToBoolean();
-
-            if (chargesEnabled != null && ((string)chargesEnabled).IsBoolean())
-                stripeAccount.ChargesEnabled = ((string)chargesEnabled).ToBoolean();
-                
-
-
-            if (detailsCode != null)
-            {
-                msgs.Add(stripeAccount.FailedDetailsCode.GetDescription(), MessageType.Warning);
-                stripeAccount.FailedDetailsCode = ((string)detailsCode).Replace("_", " ")
+            if (stripeAccount.Requirements.DisabledReason.IsNotEmpty())
+                ahqStripeAccount.ChargesDisabledReason = stripeAccount.Requirements.DisabledReason;
+                            
+            if (stripeAccount.Individual.Verification.DetailsCode != null)
+            {   
+                ahqStripeAccount.FailedDetailsCode = stripeAccount.Individual.Verification.DetailsCode.Replace("_", " ")
                                                     .ToProperCase()
                                                     .Replace(" ", "")
                                                     .ParseEnum<StripeVerificationFailedCode>();
+
+                msgs.Add(ahqStripeAccount.FailedDetailsCode.GetDescription(), MessageType.Warning);
             }
 
-            if (verificationStatus != null)
-                stripeAccount.VerificationStatusId = ((string)verificationStatus).ParseEnum<StripeVerificationStatus>();
+            if (stripeAccount.Individual.Verification.Status != null)
+                ahqStripeAccount.VerificationStatusId = stripeAccount.Individual.Verification.Status.ParseEnum<StripeVerificationStatus>();
 
-            if (stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+            if (ahqStripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
                 msgs.Add("Your account is now verified", MessageType.Notice);
 
             if (stripeFileUpload.IsNotEmpty())
-                stripeAccount.DocumentFileId = stripeFileUpload.Id;
+                ahqStripeAccount.DocumentFileId = stripeFileUpload.Id;
 
-            msgs.AddRange(stripeAccount.Save(dc));
+            msgs.AddRange(ahqStripeAccount.Save(dc));
         }
 
         public static Account GetAccount(this StripeAccount stripeAccount, SystemMessages msgs = null, DatabaseConnection dc = null)

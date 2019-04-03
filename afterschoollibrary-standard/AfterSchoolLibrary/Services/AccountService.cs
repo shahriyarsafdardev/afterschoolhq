@@ -86,6 +86,11 @@ namespace AfterSchoolLibrary.Services
             return account.GetActivities(userType, user, activityType, isArchived, isDeleted, null, null, msgs, dc).Count();
         }
 
+        public static int GetActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
+        }
+
         #endregion
 
         #region Contacts
@@ -238,6 +243,11 @@ namespace AfterSchoolLibrary.Services
         public static List<AccountPackage> GetAccountPackages(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AccountPackage.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static bool HasAccountPackage(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountPackage.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc) > 0;
         }
 
         public static List<AccountPackageFeature> GetAccountPackageFeatures(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -955,6 +965,12 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
+        public static AccountPackage SetDefaultAccountPackage(this Account account, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var package = Package.Load(start: 0, length: 1, msgs: msgs, dc: dc).First();
+            return account.AddPackage(package.ID.Value, BillingPeriodType.Month, loggedInUser, msgs, dc);
+        }
+
         public static Location GetDefaultLocation(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return account.DefaultLocationId.HasValue ? Location.Load(account.DefaultLocationId.Value, msgs, dc) : null;
@@ -1067,6 +1083,7 @@ namespace AfterSchoolLibrary.Services
             Package package = null;
             AccountPackage currentPackage = null;
             var newap = new AccountPackage();
+            var loggedInUserId = loggedInUser.IsNotEmpty() ? loggedInUser.ID.Value : 0;
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
@@ -1104,9 +1121,9 @@ namespace AfterSchoolLibrary.Services
                                 newap.PackageId = packageId;
                                 newap.BillingPeriodTypeId = billingPeriodType;
                                 newap.CreateDate = DateTime.UtcNow;
-                                newap.CreatedBy = loggedInUser.ID;
+                                newap.CreatedBy = loggedInUserId;
                                 newap.LastModifiedDate = DateTime.UtcNow;
-                                newap.LastModifiedBy = loggedInUser.ID;
+                                newap.LastModifiedBy = loggedInUserId;
                                 newap.IsActive = true;
                                 newap.Price = billingPeriodType == BillingPeriodType.Month ? package.Price : package.PricePerYear;
                                 newap.StripeSubscriptionId = currentPackage?.StripeSubscriptionId ?? null;
@@ -1129,7 +1146,7 @@ namespace AfterSchoolLibrary.Services
                             {
                                 currentPackage.TrialEndDate = DateTime.UtcNow;
                                 currentPackage.LastModifiedDate = DateTime.UtcNow;
-                                currentPackage.LastModifiedBy = loggedInUser.ID;
+                                currentPackage.LastModifiedBy = loggedInUserId;
 
                                 amsgs.AddRange(currentPackage.SaveWithStripe(account.StripeCustomerId, true, null, adc));
 
@@ -1139,14 +1156,12 @@ namespace AfterSchoolLibrary.Services
                         }
 
                         if (amsgs.HasNoErrors() && newap.ID.HasValue)
-                        {
-                            amsgs.AddRange(package.CopyFeaturesToAccountPackage(newap, loggedInUser.ID.Value, adc));
-                        }
+                            amsgs.AddRange(package.CopyFeaturesToAccountPackage(newap, loggedInUserId, adc));
 
                         // make sure the account package is set to the real trial days passed in
                         if (amsgs.HasNoErrors())
                         {
-                            var apf = newap.GetFeature(FeatureType.TrialDays, dc: adc);
+                            var apf = newap.GetFeature(FeatureType.TrialDays, amsgs, adc);
                             if (apf.IsNotEmpty())
                             {
                                 apf.Max = trialDayCount;
@@ -1159,19 +1174,9 @@ namespace AfterSchoolLibrary.Services
                         amsgs.Add($"Credit Card is required to sign up for {package.Name} Package", MessageType.UserError);
                     }
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                    // msgs.Add($"{package.Name} Package has been activated", MessageType.Success);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 
@@ -2469,6 +2474,17 @@ namespace AfterSchoolLibrary.Services
             }
 
             return Math.Round(feeAmount / billedCostPerPeriod, 4);
+        }
+
+        public static bool IsProviderForOtherAccounts(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Activity.GetCount(new Hashtable() { { "ProviderAccountId", account.ID.Value } }, msgs, dc) > 0;
+        }
+
+        public static bool IsNewProviderForOtherAccounts(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.IsProviderForOtherAccounts(msgs, dc) && 
+                account.StripeUserId.IsEmpty();
         }
 
         #endregion

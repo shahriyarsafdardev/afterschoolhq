@@ -1,0 +1,32 @@
+﻿@model Account
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    ViewBag.Title = "Getting Started";
+}
+
+<div>
+    <div class="col-sm-12 col-md-8 col-lg-6 col-md-offset-2 col-lg-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <img src="@UILabel.ProductLogoInverseAfterSchoolHQ()" alt="logo" width="350px" class="logo-img center-block">
+            </div>
+            <div class="panel-body">
+                <h1>Welcome, @SessionVariables.LoggedInUser.DisplayName!</h1>
+                <div class="text-medium-small">
+                    <p class="padding-v-10">
+                        Our platform gives you a central location to showcase your programs online allowing parents to easily discover, register, and pay for afterschool @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
+                    </p>
+                    <p class="padding-v-10">
+                        To get started, we just need a little information so we can know how to pay you. Once you're done and approved, we'll deposit registration fees into your account 2 days after a parent pays. To get started click "Setup your payment account" below.
+                    </p>
+                    <p class="padding-v-20">
+                        <div>
+                            <a href="@Url.Action("paymentsentity", "account", new { isnew = 1 })" class="btn btn-primary btn-xl btn-block">Setup your payment account &raquo;</a>
+                        </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

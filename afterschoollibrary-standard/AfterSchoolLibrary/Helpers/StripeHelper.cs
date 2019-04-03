@@ -224,14 +224,10 @@ namespace AfterSchoolLibrary.Billing
             }
 
             if (fullSSN.IsNotEmpty())
-            {
                 options.Individual.PersonalIdNumber = fullSSN;
-            }
 
             if (documentFileId.IsNotEmpty())
-            {
                 options.Individual.Verification.Document.FrontFileId = documentFileId;
-            }
 
             Stripe.Account account = null;
 

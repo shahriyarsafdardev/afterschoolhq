@@ -1,12 +1,17 @@
 ﻿@{
     var currentAccountId = (int?)ViewData["AccountId"];
     var locationId = (int?)ViewData["LocationId"];
-    var location = Location.Load(locationId.Value) ?? new Location();
+    var location = new Location();
     var isMyLocation = currentAccountId == location?.HostAccountId;
     var addressViewModel = isMyLocation ? location.ToAddressViewModel() : new AddressViewModel();
 
     var hideRelationship = "";
     var hideType = "";
+
+    if (locationId.HasValue)
+    {
+        location = Location.Load(locationId.Value);
+    }
 
     if (!isMyLocation && location.ID.HasValue)
     {

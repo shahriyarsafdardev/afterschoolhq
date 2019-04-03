@@ -95,24 +95,25 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             }
 
             msgs.Add("Getting stripeAccount", MessageType.Notice);
-            var stripeAccount = account.GetStripeAccount(msgs);
+            var ahqStripeAccount = account.GetStripeAccount(msgs);
 
-            if (stripeAccount.IsEmpty())
+            if (ahqStripeAccount.IsEmpty())
             {
                 msgs.Add("No stripe account yet", MessageType.Notice);
                 return ReturnOK(msgs);
-            }
+            }            
 
             msgs.Add("Getting serializedAccountJson", MessageType.Notice);
             var serializedAccountJson = JsonConvert.SerializeObject(stripeEvent.Data.Object);
+            var stripeAccount = Stripe.EventUtility.ParseEventDataItem<Stripe.Account>(serializedAccountJson);
             msgs.Add("Getting startingStatus", MessageType.Notice);
-            var startingStatus = stripeAccount.VerificationStatusId;
+            var startingStatus = ahqStripeAccount.VerificationStatusId;
 
             msgs.Add("Getting ParseAndUpdateStripeCustomAccount", MessageType.Notice);
-            stripeAccount.ParseAndUpdateStripeCustomAccount(serializedAccountJson, null, msgs);
+            ahqStripeAccount.ParseAndUpdateStripeCustomAccount(stripeAccount, null, msgs);
 
             msgs.Add("Getting SendStripeAccountVerified", MessageType.Notice);
-            if (msgs.HasNoErrors() && startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+            if (msgs.HasNoErrors() && startingStatus != ahqStripeAccount.VerificationStatusId && ahqStripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
                 account.SendStripeAccountVerified(null);
 
             if (msgs.HasErrors())

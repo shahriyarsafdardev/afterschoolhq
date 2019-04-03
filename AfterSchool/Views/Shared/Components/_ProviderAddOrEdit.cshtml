@@ -1,6 +1,11 @@
 ﻿@{
     var providerAccountId = (int?)ViewData["ProviderAccountId"];
-    var provider = Account.Load(providerAccountId.Value) ?? new Account();
+    Account provider = new Account();
+
+    if (providerAccountId.HasValue)
+    {
+        provider = Account.Load(providerAccountId.Value);
+    }
 }
 
 @{

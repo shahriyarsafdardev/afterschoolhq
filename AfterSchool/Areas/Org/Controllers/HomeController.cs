@@ -18,8 +18,11 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
+            if (SessionVariables.CurrentAccount.IsNewProviderForOtherAccounts())
+                return RedirectToAction("getstartedpayments", "account");
+
             if (SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, null, null, null) == 0)
-                return RedirectToAction("GetStarted");
+                return RedirectToAction("getstarted");
 
             var account = SessionVariables.CurrentAccount;
             var actions = SessionAction.LoadByAccountId(

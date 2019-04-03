@@ -11,13 +11,13 @@
         <li data-id="1" class="dd-item">
             <div class="dd-handle @paymentsentity">
                 @{Html.RenderPartial(
-                      "~/Views/Shared/_ActiveLink.cshtml",
-                      new ViewDataDictionary {
-                                { "Url", Url.Action("paymentsentity", "account") },
+                        "~/Views/Shared/_ActiveLink.cshtml",
+                        new ViewDataDictionary {
+                                { "Url", Url.Action("paymentsentity", "account", new { isnew = Request["isnew"] }) },
                                 { "Text", "Legal Entity Information" },
                                 { "IsActive", true },
-                      }
-                  );
+                        }
+                    );
                 }
             </div>
         </li>
@@ -26,7 +26,7 @@
                 @{Html.RenderPartial(
                 "~/Views/Shared/_ActiveLink.cshtml",
                 new ViewDataDictionary {
-                { "Url", Url.Action("paymentsbank", "account") },
+                { "Url", Url.Action("paymentsbank", "account", new { isnew = Request["isnew"] }) },
                 { "Text", "Bank information" },
                 { "IsActive", true },
                 }

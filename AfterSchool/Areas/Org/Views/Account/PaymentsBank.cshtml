@@ -2,15 +2,25 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var account = (Account)ViewBag.Account;
+    var isFullScreen = (bool)ViewBag.IsFullScreen;
 
     ViewBag.Title = account.Name;
+
+    if (isFullScreen)
+    {
+        Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    }
 }
 
-@{Html.RenderPartial("OrgAccountHeader", account.ID.ToString());}
+@if (!isFullScreen)
+{
+    Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());
+}
 
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
     @{Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", account);}
 
     <div class="panel panel-default">
@@ -19,11 +29,16 @@
         </div>
         <div class="panel-body">
 
-            <div class="col-md-8 col-lg-9">      
+            @if (isFullScreen)
+            {
+                <div class="col-md-1"></div>
+            }
+
+            <div class="col-md-8 col-lg-9">
 
                 @if (Model.BankAccountId.IsNotEmpty())
                 {
-                     <div role="alert" class="alert alert-success alert-icon">
+                    <div role="alert" class="alert alert-success alert-icon">
                         <div class="icon">
                             <span class="s7-info"></span>
                         </div>
@@ -48,7 +63,7 @@
                     <hr />
                 }
 
-                <form method="post" action="@Url.Action("paymentsbank", "account")" class="form-horizontal">
+                <form method="post" action="@Url.Action("paymentsbank", "account", new { isnew = Request["isnew"] })" class="form-horizontal">
                     <div class="form-group">
                         <label class="col-sm-4 control-label"></label>
                         <div class="col-sm-8">
@@ -99,9 +114,12 @@
 
             </div>
 
-            <div class="col-md-4 col-lg-3">
-                @{Html.RenderPartial("~/Views/Shared/_AccountPaymentEditNav.cshtml", account); }
-            </div>
+            @if (!isFullScreen)
+            {                
+                <div class="col-md-4 col-lg-3">
+                    @{Html.RenderPartial("~/Views/Shared/_AccountPaymentEditNav.cshtml", account); }
+                </div>
+            }
         </div>
 
     </div>
