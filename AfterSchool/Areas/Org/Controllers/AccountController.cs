@@ -169,10 +169,29 @@ namespace AfterSchool.Areas.Org.Controllers
             var startingStatus = stripeAccount.VerificationStatusId;
             var entityTypeId = (LegalEntityType)entityType.ToInteger();
 
-            if (firstName.IsEmpty())
-                msgs.Add("First Name is required", MessageType.UserError);
-            if (lastName.IsEmpty())
-                msgs.Add("Last Name is required", MessageType.UserError);
+            if (entityTypeId == LegalEntityType.Company)
+            {
+                if (legalbusinessname.IsEmpty())
+                    msgs.Add("Legal Business Name is required", MessageType.UserError);
+                if (ein.IsEmpty())
+                    msgs.Add("Employer Identification Number is required", MessageType.UserError);
+            }
+            else
+            {
+                if (firstName.IsEmpty())
+                    msgs.Add("First Name is required", MessageType.UserError);
+                if (lastName.IsEmpty())
+                    msgs.Add("Last Name is required", MessageType.UserError);
+                if (dateOfBirth.IsEmpty() || !dateOfBirth.IsDate())
+                    msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
+                if (ssnLast4.IsEmpty() || !ssnLast4.IsNumber())
+                    msgs.Add("SSN(last 4) is required", MessageType.UserError);
+            }
+
+            if (supportemail.IsEmpty())
+                msgs.Add("Support Email is required", MessageType.UserError);
+            if (supportphone.IsEmpty())
+                msgs.Add("Support Phone is required", MessageType.UserError);
             if (address1.IsEmpty())
                 msgs.Add("Address 1 is required", MessageType.UserError);
             if (city.IsEmpty())
@@ -181,23 +200,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("State is required", MessageType.UserError);
             if (postalCode.IsEmpty())
                 msgs.Add("Postal Code is required", MessageType.UserError);
-            if (dateOfBirth.IsEmpty() || !dateOfBirth.IsDate())
-                msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
-            if (ssnLast4.IsEmpty() || !ssnLast4.IsNumber())
-                msgs.Add("SSN(last 4) is required", MessageType.UserError);
-            if (supportemail.IsEmpty())
-                msgs.Add("Support Email is required", MessageType.UserError);
-            if (supportphone.IsEmpty())
-                msgs.Add("Support Phone is required", MessageType.UserError);
-
-
-            if (entityTypeId == LegalEntityType.Company)
-            {
-                if (legalbusinessname.IsEmpty())
-                    msgs.Add("Legal Business Name is required", MessageType.UserError);
-                if (ein.IsEmpty())
-                    msgs.Add("Employer Identification Number is required", MessageType.UserError);
-            }
 
             if (!tosagree.IsBoolean() || !tosagree.ToBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
@@ -228,10 +230,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 stripeAccount.LegalEntityCity = city;
                 stripeAccount.LegalEntityState = state;
                 stripeAccount.LegalEntityPostalCode = postalCode;
-                stripeAccount.LegalEntityDOB = dateOfBirth.ToDateTime();
-                stripeAccount.LegalEntityFirstName = firstName;
-                stripeAccount.LegalEntityLastName = lastName;
-                stripeAccount.LegalEntitySSNLast4 = ssnLast4;
                 stripeAccount.LegalEntityTypeId = entityTypeId;
                 stripeAccount.SupportPhone = supportphone;
                 stripeAccount.SupportEmail = supportemail;
@@ -242,6 +240,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     stripeAccount.LegalEntityBusinessName = legalbusinessname;
                     stripeAccount.LegalEntityEIN = ein;
+                }
+                else
+                {
+                    stripeAccount.LegalEntityDOB = dateOfBirth.ToDateTime();
+                    stripeAccount.LegalEntityFirstName = firstName;
+                    stripeAccount.LegalEntityLastName = lastName;
+                    stripeAccount.LegalEntitySSNLast4 = ssnLast4;
                 }
 
                 if (tosagree.IsBoolean())

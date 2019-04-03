@@ -478,6 +478,7 @@ loadmethod: AccountId|WebUserId
 loadmethod: WebUserId|IsDefault
 loadmethod: WebUserId|IsActive, List<>
 loadmethod: AccountId|IsActive, List<>
+loadmethod: AccountId|UserTypeId, List<>
 [end]
 
 [begin]
@@ -1491,7 +1492,7 @@ values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, Regist
 [begin]
 type: Enum
 name: UserType
-values: NotSet, SuperAdmin, Owner, Administrator, Student, Instructor, Staff, Parent, ProgramDirector
+values: NotSet, SuperAdmin, Owner, Administrator, Student, Instructor, Staff, Parent, ProgramDirector, Treasurer
 [end]
 
 [begin]

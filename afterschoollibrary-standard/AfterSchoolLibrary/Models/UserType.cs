@@ -8,5 +8,6 @@ public enum UserType
 	Instructor,
 	Staff,
 	Parent,
-	ProgramDirector
+	ProgramDirector,
+	Treasurer
 }

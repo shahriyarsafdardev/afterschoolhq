@@ -17,6 +17,33 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
+        [HttpPost]
+        public ActionResult InviteTreasurer(string firstname, string lastname, string email)
+        {
+            var msgs = new SystemMessages();
+
+            if (firstname.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (lastname.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!email.IsEmail())
+                msgs.Add("Email is required", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var emailText = $"{ SessionVariables.LoggedInUser.FirstName} has invited you to setup the payment account for {SessionVariables.CurrentAccount.Name} in {UILabel.ProductName()}. This will enable us to send registration money to your account.";
+
+                SessionVariables.CurrentAccount.InviteUser(firstname, lastname, email, null, emailText, UserType.Treasurer, SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public ActionResult MoveRegistrantAssignment(string id, string registrant, string assignmenttype)
         {

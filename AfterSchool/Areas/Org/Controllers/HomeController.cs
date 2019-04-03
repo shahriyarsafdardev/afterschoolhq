@@ -18,6 +18,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Index()
         {
+            if (!SessionVariables.CurrentAccount.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
+                return RedirectToAction("getstartedpayments", "account");
+
             if (SessionVariables.CurrentAccount.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
 

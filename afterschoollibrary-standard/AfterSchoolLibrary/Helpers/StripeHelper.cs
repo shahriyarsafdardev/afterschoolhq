@@ -169,7 +169,7 @@ namespace AfterSchoolLibrary.Billing
             return bankAccount;
         }
 
-        public static Stripe.Account UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
+        public static Stripe.Account UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime? dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -189,26 +189,13 @@ namespace AfterSchoolLibrary.Billing
                 {
                     SupportEmail = supportEmail,
                     SupportPhone = supportPhone,
-                    SupportUrl = businessUrl
+                    SupportUrl = businessUrl,                    
                 },
                 BusinessType = entityType.ToString().ToLower(),
                 TosAcceptance = new AccountTosAcceptanceOptions()
                 {
                     Date = tosAcceptanceDate,
                     Ip = tosIPAddress
-                },
-                Individual = new PersonUpdateOptions()
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    Dob = new DobOptions()
-                    {
-                        Day = dateOfBirth.Day,
-                        Month = dateOfBirth.Month,
-                        Year = dateOfBirth.Year,
-                    },
-                    SSNLast4 = ssnLast4,
-                    Address = address
                 },
             };
 
@@ -219,9 +206,23 @@ namespace AfterSchoolLibrary.Billing
                 {
                     Address = address,
                     TaxId = ein,
-                    Phone = businessPhone
+                    Phone = businessPhone,                   
                 };
             }
+            else
+                options.Individual = new PersonUpdateOptions()
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Dob = new DobOptions()
+                    {
+                        Day = dateOfBirth.Value.Day,
+                        Month = dateOfBirth.Value.Month,
+                        Year = dateOfBirth.Value.Year,
+                    },
+                    SSNLast4 = ssnLast4,
+                    Address = address
+                };
 
             if (fullSSN.IsNotEmpty())
                 options.Individual.PersonalIdNumber = fullSSN;
@@ -244,7 +245,7 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static void UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string businessName, string ein, SystemMessages msgs)
+        public static void UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, DateTime? dateOfBirth, string address1, string address2, string city, string state, string postalCode, string businessName, string ein, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -259,31 +260,30 @@ namespace AfterSchoolLibrary.Billing
             };
 
             var options = new AccountUpdateOptions()
-            {
-                Individual = new PersonUpdateOptions()
-                {
-                    Address = address,
-                    Dob = new DobOptions()
-                    {
-                        Day = dateOfBirth.Day,
-                        Month = dateOfBirth.Month,
-                        Year = dateOfBirth.Year
-                    },
-                    FirstName = firstName,
-                    LastName = lastName
-                },
+            {                
                 BusinessType = entityType.ToString(),
             };
 
             if (entityType == LegalEntityType.Company)
-            {
                 options.Company = new AccountCompanyOptions()
                 {
                     Name = businessName,
                     TaxId = ein,
                     Address = address
                 };
-            }
+            else
+                options.Individual = new PersonUpdateOptions()
+                {
+                    Address = address,
+                    Dob = new DobOptions()
+                    {
+                        Day = dateOfBirth.Value.Day,
+                        Month = dateOfBirth.Value.Month,
+                        Year = dateOfBirth.Value.Year
+                    },
+                    FirstName = firstName,
+                    LastName = lastName
+                };
 
             Stripe.Account account = null;
 

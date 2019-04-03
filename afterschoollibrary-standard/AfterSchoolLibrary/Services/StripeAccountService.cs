@@ -67,7 +67,7 @@ namespace AfterSchoolLibrary.Services
                 lastName: ahqStripeAccount.LegalEntityLastName,
                 ssnLast4: ahqStripeAccount.LegalEntitySSNLast4,
                 fullSSN: fullSSN,
-                dateOfBirth: ahqStripeAccount.LegalEntityDOB.Value,
+                dateOfBirth: ahqStripeAccount.LegalEntityDOB,
                 address1: ahqStripeAccount.LegalEntityAddress1,
                 address2: ahqStripeAccount.LegalEntityAddress2,
                 city: ahqStripeAccount.LegalEntityCity,
@@ -118,19 +118,23 @@ namespace AfterSchoolLibrary.Services
 
             if (stripeAccount.Requirements.DisabledReason.IsNotEmpty())
                 ahqStripeAccount.ChargesDisabledReason = stripeAccount.Requirements.DisabledReason;
-                            
-            if (stripeAccount.Individual.Verification.DetailsCode != null)
-            {   
-                ahqStripeAccount.FailedDetailsCode = stripeAccount.Individual.Verification.DetailsCode.Replace("_", " ")
-                                                    .ToProperCase()
-                                                    .Replace(" ", "")
-                                                    .ParseEnum<StripeVerificationFailedCode>();
 
-                msgs.Add(ahqStripeAccount.FailedDetailsCode.GetDescription(), MessageType.Warning);
+            if (stripeAccount.Individual.IsNotEmpty())
+            {
+                if (stripeAccount.Individual.Verification.DetailsCode != null)
+                {
+                    ahqStripeAccount.FailedDetailsCode = stripeAccount.Individual.Verification.DetailsCode.Replace("_", " ")
+                                                        .ToProperCase()
+                                                        .Replace(" ", "")
+                                                        .ParseEnum<StripeVerificationFailedCode>();
+
+                    msgs.Add(ahqStripeAccount.FailedDetailsCode.GetDescription(), MessageType.Warning);
+                }
+
+                if (stripeAccount.Individual.Verification.Status != null)
+                    ahqStripeAccount.VerificationStatusId = stripeAccount.Individual.Verification.Status.ParseEnum<StripeVerificationStatus>();
             }
-
-            if (stripeAccount.Individual.Verification.Status != null)
-                ahqStripeAccount.VerificationStatusId = stripeAccount.Individual.Verification.Status.ParseEnum<StripeVerificationStatus>();
+            
 
             if (ahqStripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
                 msgs.Add("Your account is now verified", MessageType.Notice);

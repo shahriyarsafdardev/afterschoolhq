@@ -154,7 +154,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditSetup(string id, string name, string leadertype, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
+        public ActionResult EditSetup(string id, string name, string seatsavailable, string waitinglistseats, string registrationperiod, string registrationopendate, string registrationopentime, string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode, string group, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -163,7 +163,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var values = new Dictionary<string, object>()
             {
                 { "name", name },
-                { "leadertype", leadertype },
                 { "seatsavailable", seatsavailable },
                 { "waitinglistseats", waitinglistseats },
                 { "registrationperiod", registrationperiod },
@@ -368,13 +367,14 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditContact(string id, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd)
+        public ActionResult EditContact(string id, string leadertype, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
 
             var values = new Dictionary<string, object>()
             {
+                { "leadertype", leadertype },
                 { "contactname", contactname},
                 { "contactphone", contactphone},
                 { "contactemail", contactemail},

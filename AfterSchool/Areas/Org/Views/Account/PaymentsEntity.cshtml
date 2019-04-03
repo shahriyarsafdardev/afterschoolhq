@@ -228,7 +228,8 @@
                         }
 
                         <div id="all-info" class="hide">
-                            <div class="panel">
+
+                            <div id="individual-info" class="panel">
                                 <div class="panel-heading">
                                     <span id="personal-info">Personal Information</span>
                                 </div>
@@ -237,20 +238,20 @@
                                     <div class="form-group">
                                         <label class="col-sm-4 control-label">First Name <span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="firstname" name="firstname" value="@Model.LegalEntityFirstName" onfocus="this.select()" required @disabled />
+                                            <input type="text" class="form-control individual-input" id="firstname" name="firstname" value="@Model.LegalEntityFirstName" onfocus="this.select()" required @disabled />
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="col-sm-4 control-label">Last Name <span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="lastname" name="lastname" value="@Model.LegalEntityLastName" onfocus="this.select()" required @disabled />
+                                            <input type="text" class="form-control individual-input" id="lastname" name="lastname" value="@Model.LegalEntityLastName" onfocus="this.select()" required @disabled />
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="col-sm-4 control-label">Date of Birth <span class="text-danger">*</span></label>
                                         <div class="col-sm-8">
                                             <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                                <input type="text" class="form-control" id="dateofbirth" name="dateofbirth" onfocus="this.select()" data-type="date" value="@Model.LegalEntityDOB.ToShortDateString()" @disabled />
+                                                <input type="text" class="form-control individual-input" id="dateofbirth" name="dateofbirth" onfocus="this.select()" data-type="date" value="@Model.LegalEntityDOB.ToShortDateString()" @disabled />
                                                 <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
                                             </div>
                                         </div>
@@ -261,10 +262,33 @@
                                         <div class="form-group">
                                             <label class="col-sm-4 control-label">SSN(last 4) <span class="text-danger">*</span></label>
                                             <div class="col-sm-8">
-                                                <input type="text" class="form-control" id="ssnlast4" name="ssnlast4" value="@Model.LegalEntitySSNLast4" onfocus="this.select()" maxlength="4" required @disabled />
+                                                <input type="text" class="form-control individual-input" id="ssnlast4" name="ssnlast4" value="@Model.LegalEntitySSNLast4" onfocus="this.select()" maxlength="4" required @disabled />
                                             </div>
                                         </div>
                                     }
+                                </div>
+                            </div>
+                            
+                            <div id="company-info">
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <span>Company Information</span>
+                                    </div>
+                                    <div class="panel-body">
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Legal Business Name <span class="text-danger">*</span></label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control business-input" id="legalbusinessname" name="legalbusinessname" value="@Model.LegalEntityBusinessName" onfocus="this.select()" @disabled />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Employer Identification Number (EIN) <span class="text-danger">*</span></label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control business-input" id="ein" name="ein" value="@Model.LegalEntityEIN" onfocus="this.select()" @disabled />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -296,29 +320,6 @@
                                             </div>
                                         </div>
 
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="company-info">
-                                <div class="panel">
-                                    <div class="panel-heading">
-                                        <span>Company Information</span>
-                                    </div>
-                                    <div class="panel-body">
-
-                                        <div class="form-group">
-                                            <label class="col-sm-4 control-label">Legal Business Name <span class="text-danger">*</span></label>
-                                            <div class="col-sm-8">
-                                                <input type="text" class="form-control business-input" id="legalbusinessname" name="legalbusinessname" value="@Model.LegalEntityBusinessName" onfocus="this.select()" @disabled />
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-4 control-label">Employer Identification Number (EIN) <span class="text-danger">*</span></label>
-                                            <div class="col-sm-8">
-                                                <input type="text" class="form-control business-input" id="ein" name="ein" value="@Model.LegalEntityEIN" onfocus="this.select()" @disabled />
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -410,24 +411,28 @@
     function showIndividual() {
         if ($('#entitytype-individual').is(':checked')) {
             $('#all-info').removeClass('hide');
+            $('#individual-info').removeClass('hide');
             $('#company-info').addClass('hide');
 
             $('#address-header').html('Personal Address');
             $('#personal-info').html('Personal Information');
 
             $('.business-input').removeAttr('required');
+            $('.individual-input').attr('required', 'required');
         }
     }
 
     function showCompany() {
         if ($('#entitytype-company').is(':checked')) {
             $('#all-info').removeClass('hide');
+            $('#individual-info').addClass('hide');
             $('#company-info').removeClass('hide');
 
             $('#address-header').html('Company Legal Address');
             $('#personal-info').html('Legal Company Representative');
 
             $('.business-input').attr('required', 'required');
+            $('.individual-input').removeAttr('required');
         }
     }
 

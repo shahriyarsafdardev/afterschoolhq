@@ -65,7 +65,7 @@
         $('.btn-create-account').click(function () {
             var params = 'org=@Model.Name&name=' + $('#name').val() + '&email=' + $('#email').val() + '&phone=' + $('#phone').val() + '&comments=' + $('#comments').val();
 
-            $('#btn-create-account').prop('disabled', true);
+            $('.btn-create-account').prop('disabled', true);
 
             $.post(
                 '/services/leadform/',

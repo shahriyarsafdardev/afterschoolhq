@@ -412,7 +412,7 @@ namespace AfterSchoolLibrary.Services
                         user.FirstName = firstName.Trim();
                         user.LastName = lastName.Trim();
                         user.Email = email.Trim();
-                        user.Phone = phone.Trim();
+                        user.Phone = phone.IfBlank("").Trim();
                         user.Username = WebUserService.GenerateUsername(firstName, lastName, amsgs, adc);
 
                         if (!password.IsEmpty())
@@ -456,6 +456,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var user = account.AddUser(firstName, lastName, email, phone, userType, loggedInUser.ID.Value, msgs, dc);
+
             if (msgs.HasNoErrors())
                 msgs.AddRange(account.SendInvitedEmail(user, loggedInUser, message, dc));
 
@@ -463,6 +464,16 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add($"An invitation was not sent to {email.Trim()}, a system error has occurred", MessageType.UserError);
 
             return user;
+        }
+
+        public static bool HasTreasurer(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.HasUserType(UserType.Treasurer, msgs, dc);
+        }
+
+        public static bool HasUserType(this Account account, UserType userType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return AccountWebUser.GetCount(new Hashtable() { { "AccountId", account.ID.Value }, { "UserTypeId", (int)userType } }, msgs, dc) > 0;
         }
 
         #endregion
@@ -2166,6 +2177,16 @@ namespace AfterSchoolLibrary.Services
                 return StripeAccount.CanProcessPayments(account.ID.Value, msgs, dc);
 
             return true;
+        }
+
+        public static bool CanReceivePaymentDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var stripeAccount = account.GetStripeAccount(msgs, dc);
+
+            if (stripeAccount.IsNotEmpty())
+                return stripeAccount.IsVerified && stripeAccount.BankAccountId.IsNotEmpty();
+
+            return false;
         }
 
         public static Stripe.Customer AddCustomerToConnectedAccount(this Account billingAccount, Account purchasingAccount, string stripeBillToSourceId, SystemMessages msgs)
