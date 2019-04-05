@@ -861,7 +861,8 @@ namespace AfterSchoolLibrary.Helpers
                 { "GetStartedText", getStartedText },
                 { "HomePageUrl", hostAccount.HomePageUrl },
                 { "ActivityHomePageUrl", activity.HomePageUrl },
-                { "ActivityName", activity.Name }
+                { "ActivityName", activity.Name },
+                { "SupportEmail", Email.AppSupportEmailAddress() }
             };
 
             var subject = $"You have been designated as the activity provider for {activity.Name} at {hostAccount.Name}";
