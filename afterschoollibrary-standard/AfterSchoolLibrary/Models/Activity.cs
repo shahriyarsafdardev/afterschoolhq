@@ -437,6 +437,14 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<Activity> LoadByProviderAccountId(int ProviderAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ProviderAccountId"], ProviderAccountId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static Activity LoadByUniqueNameByAccountId(string UniqueName, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -528,24 +536,32 @@ namespace AfterSchoolLibrary.Models
 
             if (accountId.HasValue)
             {
-                dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+                var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                dcs.Add(ObjectMap["AccountId"], accountId);
+                dcs.Add(ObjectMap["ProviderAccountId"], accountId);
+                
+                var locationQuery = BaseObject.get_DatabaseQuery(Location.ObjectMap, typeof(Location).Name);
+                locationQuery.UseParameterizedQuery = false;
+                locationQuery.SelectParameters.Clear();
+                locationQuery.SelectParameters.Add(Location.ObjectMap["ID"]);
+                locationQuery.Criterias.Add(Location.ObjectMap["HostAccountId"], accountId);
+                dcs.Add(ObjectMap["LocationId"], locationQuery, DatabaseCriteriaOperatorEnum.In);
+
+                dq.Criterias.Add(dcs);
             }
+
             if (activityGroupId.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["activityGroupId"], activityGroupId.Value);
-            }
+
             if (accountActivityGroupId.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["accountActivityGroupId"], accountActivityGroupId.Value);
-            }
+
             if (activityType.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["ActivityTypeId"], (int)activityType.Value);
-            }
+
             if (isSubmitted.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["DateSubmittedToActivityGroup"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
-            }
+
             if (isArchived.HasValue)
             {
                 if (!isArchived.Value)
@@ -572,13 +588,11 @@ namespace AfterSchoolLibrary.Models
 
                     dq.Criterias.Add(dcs);
                 }
-
-
             }
+
             if (isDeleted.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted.Value);
-            }
+
             return dq;
         }
 

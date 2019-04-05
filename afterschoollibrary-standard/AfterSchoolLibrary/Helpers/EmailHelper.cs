@@ -238,8 +238,8 @@ namespace AfterSchoolLibrary.Helpers
             {
                 var emails = new List<string>();
 
-                if (billingAccountOwner.Email.IsEmail())
-                    emails.Add(billingAccountOwner.Email.ToLower());
+                //if (billingAccountOwner.Email.IsEmail())
+                //    emails.Add(billingAccountOwner.Email.ToLower());
 
                 if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
                     emails.Add(participationObject.ContactEmail.ToLower());

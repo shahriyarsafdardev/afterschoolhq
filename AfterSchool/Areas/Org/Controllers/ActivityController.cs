@@ -73,7 +73,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var activities = new List<Activity>();
+            List<Activity> activities = null;
             var totalActivityCount = 0;
             var hasArchivedActivities = false;
 

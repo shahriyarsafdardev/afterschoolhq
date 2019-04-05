@@ -108,6 +108,7 @@ loadmethod: Uid
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
+loadmethod: ProviderAccountId, List<>
 loadmethod: UniqueName|AccountId
 [end]
 
