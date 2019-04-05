@@ -189,7 +189,7 @@ namespace AfterSchoolLibrary.Billing
                 {
                     SupportEmail = supportEmail,
                     SupportPhone = supportPhone,
-                    SupportUrl = businessUrl,                    
+                    Url = businessUrl
                 },
                 BusinessType = entityType.ToString().ToLower(),
                 TosAcceptance = new AccountTosAcceptanceOptions()
@@ -206,7 +206,7 @@ namespace AfterSchoolLibrary.Billing
                 {
                     Address = address,
                     TaxId = ein,
-                    Phone = businessPhone,                   
+                    Phone = businessPhone,     
                 };
             }
             else
@@ -234,7 +234,7 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                account = GetAccountService().Update(stripeAccountId, options);
+                account = GetAccountService().Update(stripeAccountId, options);               
             }
             catch (StripeException ex)
             {
@@ -243,59 +243,6 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return account;
-        }
-
-        public static void UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, DateTime? dateOfBirth, string address1, string address2, string city, string state, string postalCode, string businessName, string ein, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var address = new AddressOptions()
-            {
-                City = city,
-                State = state,
-                PostalCode = postalCode,
-                Country = "US",
-                Line1 = address1,
-                Line2 = address2,
-            };
-
-            var options = new AccountUpdateOptions()
-            {                
-                BusinessType = entityType.ToString(),
-            };
-
-            if (entityType == LegalEntityType.Company)
-                options.Company = new AccountCompanyOptions()
-                {
-                    Name = businessName,
-                    TaxId = ein,
-                    Address = address
-                };
-            else
-                options.Individual = new PersonUpdateOptions()
-                {
-                    Address = address,
-                    Dob = new DobOptions()
-                    {
-                        Day = dateOfBirth.Value.Day,
-                        Month = dateOfBirth.Value.Month,
-                        Year = dateOfBirth.Value.Year
-                    },
-                    FirstName = firstName,
-                    LastName = lastName
-                };
-
-            Stripe.Account account = null;
-
-            try
-            {
-                account = GetAccountService().Update(stripeAccountId, options);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Error updating payment account", MessageType.UserError);
-            }
         }
 
         #endregion

@@ -70,7 +70,7 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (user.IsEmpty() || userType.In(new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }))
+            if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
                 return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, start, length, msgs, dc).ToList();
 
             return Activity.LoadByAccountId(account.ID.Value, null, null, activityType, isArchived, isDeleted, start, length, msgs, dc)
@@ -80,7 +80,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetActivityCount(this Account account, UserType userType, WebUser user, ActivityType? activityType, bool? isArchived, bool? isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (user.IsEmpty() || userType.In(new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin }))
+            if (user.IsEmpty() || userType.In(AccountService.AdminUserTypes))
                 return Activity.GetCountByAccountId(account.ID.Value, null, activityType, isArchived, isDeleted, msgs, dc);
 
             return account.GetActivities(userType, user, activityType, isArchived, isDeleted, null, null, msgs, dc).Count();
@@ -89,6 +89,14 @@ namespace AfterSchoolLibrary.Services
         public static int GetActivityCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Activity.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
+        }
+
+        public static UserType[] AdminUserTypes
+        {
+            get
+            {
+                return new UserType[] { UserType.Administrator, UserType.Owner, UserType.SuperAdmin, UserType.Treasurer };
+            }
         }
 
         #endregion
@@ -2184,7 +2192,7 @@ namespace AfterSchoolLibrary.Services
             var stripeAccount = account.GetStripeAccount(msgs, dc);
 
             if (stripeAccount.IsNotEmpty())
-                return stripeAccount.IsVerified && stripeAccount.BankAccountId.IsNotEmpty();
+                return stripeAccount.CanReceivePaymentDeposits();
 
             return false;
         }

@@ -8,11 +8,16 @@ namespace AfterSchoolLibrary.Services
 {
     public static class StripeAccountService
     {
-        public static void SaveAndSendBankInfoToStripe(this StripeAccount stripeAccount, string routingNumber, string accountNumber, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool CanReceivePaymentDeposits(this StripeAccount stripeAccount)
+        {
+            return stripeAccount.ChargesEnabled && stripeAccount.PayoutsEnabled;
+        }
+
+        public static void SaveAndSendBankInfoToStripe(this StripeAccount ahqStripeAccount, string routingNumber, string accountNumber, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var account = stripeAccount.GetAccount(msgs, dc);
+            var account = ahqStripeAccount.GetAccount(msgs, dc);
             var bankAccount = StripeHelper.CreateCustomBankAccount(
                     stripeAccountId: account.StripeUserId,
                     routingNumber: routingNumber,
@@ -21,16 +26,18 @@ namespace AfterSchoolLibrary.Services
                     );
 
             if (msgs.HasNoErrors())
-            {                
-                stripeAccount.BankAccountId = bankAccount.Id;
-                stripeAccount.BankLast4 = bankAccount.Last4;
-                stripeAccount.BankName = bankAccount.BankName;
-                msgs.AddRange(stripeAccount.Save(dc));
+            {
+                ahqStripeAccount.BankAccountId = bankAccount.Id;
+                ahqStripeAccount.BankLast4 = bankAccount.Last4;
+                ahqStripeAccount.BankName = bankAccount.BankName;
+                msgs.AddRange(ahqStripeAccount.Save(dc));
+
+                var stripeAccount = StripeHelper.GetCustomAccount(ahqStripeAccount.GetAccount(msgs, dc).StripeUserId, msgs);
+                ParseAndUpdateStripeCustomAccount(ahqStripeAccount, stripeAccount, null, msgs, dc);
             }
 
             if (msgs.HasNoErrors())
                 msgs.Add("Your bank account info has been saved", MessageType.Success);
-
         }
 
         public static void GetLatestStripeAccountDetails(this StripeAccount stripeAccount, Account account = null, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -42,7 +42,7 @@
 
             <div class="col-md-8 col-lg-9">
 
-                @if (Model.IsVerified)
+                @if (Model.IsVerified || (Model.LegalEntityTypeId == LegalEntityType.Company && Model.ChargesEnabled))
                 {
                     <div role="alert" class="alert alert-success alert-icon">
                         <div class="icon">
@@ -52,7 +52,7 @@
                             <p class="text-center">
                                 Your account has been verified. You can now receive payments.                                
                             </p>
-                            @if (Model.BankAccountId.IsBlank())
+                            @if (Model.BankAccountId.IsBlank() || !Model.PayoutsEnabled)
                             {
                                 <p class="text-center">
                                     Enter your bank account information so we can make deposits directly to your account.
@@ -97,7 +97,6 @@
                 }
                 else if(Model.VerificationStatusId == StripeVerificationStatus.Pending)
                 {
-
                      <div role="alert" class="alert alert-info alert-icon">
                         <div class="icon">
                             <span class="s7-info"></span>
@@ -154,13 +153,17 @@
                     </div>
                 }
 
-                @if (Model.VerificationStatusId.NotIn(new List<StripeVerificationStatus>() { StripeVerificationStatus.Unverified, StripeVerificationStatus.NotSet }))
+                @if (!Model.PayoutsEnabled && Model.ChargesEnabled)
                 {
-                     <div class="pull-right">
-                         <a href="@Url.Action("paymentsbank", "account", new { isnew = Request["isnew"] })" class="btn btn-primary btn-lg">Enter your bank account info &raquo;</a>
+                     <div class="row">
+                         <div class="pull-right">
+                             <a href="@Url.Action("paymentsbank", "account", new { isnew = Request["isnew"] })" class="btn btn-primary btn-lg">Enter your bank account info &raquo;</a>
+                         </div>
                      </div>
                 }
-                else
+                
+
+                @if (!Model.PayoutsEnabled && Model.VerificationStatusId != StripeVerificationStatus.Pending)
                 { 
                     <form method="post" action="@Url.Action("paymentsentity", "account", new { isnew = Request["isnew"] })" class="form-horizontal" enctype="multipart/form-data">
 

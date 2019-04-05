@@ -265,10 +265,16 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
                 msgs.Add("Your update information has been submitted.", MessageType.Success);
 
-            if (msgs.HasNoErrors() && startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
-                BackgroundJob.Enqueue(() => SessionVariables.CurrentAccount.SendStripeAccountVerified(null));
+                if (startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+                    BackgroundJob.Enqueue(() => SessionVariables.CurrentAccount.SendStripeAccountVerified(null));
+
+                if (stripeAccount.LegalEntityTypeId == LegalEntityType.Company && stripeAccount.ChargesEnabled)
+                    return RedirectToAction("paymentsbank", "account", new { isnew = Request["isnew"] });
+            }
+           
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
