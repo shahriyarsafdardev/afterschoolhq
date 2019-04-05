@@ -17,6 +17,7 @@ namespace AfterSchoolLibrary.Models
         public string Details { get; set; }
         public ActivitySchedule Schedule { get; set; }
         public Location Location { get; set; }
+        public Account Provider { get; set; }
         public GenderRestrictionType GenderRestriction { get; set; }
         public int? MinGradeId { get; set; }
         public int? MaxGradeId { get; set; }
@@ -103,8 +104,11 @@ namespace AfterSchoolLibrary.Models
             AllowToPayLater = activity.AllowToPayLater;
             RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
             Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);
+
             OwnerAccount = activity.GetAccount(msgs, dc);
-            UseStripeConnectedAccount = OwnerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            Provider = activity.GetProvider(msgs, dc);
+
+            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
             SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
@@ -140,7 +144,7 @@ namespace AfterSchoolLibrary.Models
             // TODO: PayLater = activityGroup.AllowToPayLater;
             SeatsRemaining = activityGroup.GetSeatsRemaining(msgs, dc);
             WaitingListSeatsRemaining = activityGroup.GetWaitingListSeatsRemaining(msgs, dc);
-            UseStripeConnectedAccount = OwnerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -175,7 +179,7 @@ namespace AfterSchoolLibrary.Models
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
-            UseStripeConnectedAccount = OwnerAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -208,8 +212,17 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return !IsFree && OwnerAccount.CanProcessPayments();
+                return !IsFree && PaymentAccount.CanProcessPayments();
             } 
+        }
+
+        public Account PaymentAccount
+        {
+            get
+            {
+                return Provider ?? OwnerAccount;
+            }
+            
         }
 
         public string GetHomePageUrl(bool isAfterSchool = true)
@@ -442,7 +455,7 @@ namespace AfterSchoolLibrary.Models
                 ParticipationObjectTypeId = this.ObjectType,
                 Amount = amount,
                 RegistrantId = registrant.ID,
-                AccountId = this.OwnerAccount.ID,
+                AccountId = this.PaymentAccount.ID,
                 TransactionId = transaction.ID,
                 RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
                 CreateDate = DateTime.UtcNow,
@@ -468,16 +481,16 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
         {
-            if (Cost.HasValue && OwnerAccount.CreditCardFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
-                return Billing.Platform.GetCreditCardFee(Cost.Value, OwnerAccount);
+            if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
+                return Billing.Platform.GetCreditCardFee(Cost.Value, PaymentAccount);
 
             return 0;
         }
 
         public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
         {
-            if (Cost.HasValue && OwnerAccount.ConvenienceFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
-                return Billing.Platform.GetConvenienceFee(Cost.Value, OwnerAccount);
+            if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
+                return Billing.Platform.GetConvenienceFee(Cost.Value, PaymentAccount);
 
             return 0;
         }

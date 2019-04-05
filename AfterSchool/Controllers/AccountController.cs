@@ -1231,7 +1231,7 @@ namespace AfterSchool.Controllers
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;            
-            ViewBag.AccountCanAcceptPayments = participationObject.OwnerAccount.CanProcessPayments(msgs);
+            ViewBag.AccountCanAcceptPayments = participationObject.PaymentAccount.CanProcessPayments(msgs);
 
             return registration;
         }
@@ -1279,7 +1279,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 SubscriptionPlan paymentPlan = null;
-                var billingAccount = participationObject.OwnerAccount;
+                var billingAccount = participationObject.PaymentAccount;
                 var payingAccount = SessionVariables.CurrentAccount;
 
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())

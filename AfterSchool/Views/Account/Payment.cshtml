@@ -9,7 +9,7 @@
     var registration = (Registration)ViewBag.Registration;
     var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
     var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
-    var ownerAccount = participationObject.OwnerAccount;
+    var paymentAccount = participationObject.PaymentAccount;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -63,8 +63,8 @@
                                         }
                                     </label>
                                     <span id="payment-plan-cost-@plan.ID" class="hide">@plan.CostPerPeriod</span>
-                                    <span id="payment-plan-asf-@plan.ID" class="hide">@plan.GetConvenienceFee(ownerAccount)</span>
-                                    <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee(ownerAccount)</span>
+                                    <span id="payment-plan-asf-@plan.ID" class="hide">@plan.GetConvenienceFee(paymentAccount)</span>
+                                    <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
                                 </div>
                             }
                         </div>
@@ -120,8 +120,8 @@
                                             <td>Ongoing Subscription</td>
                                             <td class="text-right">
                                                 <span id="subscription-total-value" class="hide">@plan.CostPerPeriod</span>
-                                                <span id="subscription-asf-value" class="hide">@plan.GetConvenienceFee(ownerAccount)</span>
-                                                <span id="subscription-ccf-value" class="hide">@plan.GetCreditCardFee(ownerAccount)</span>
+                                                <span id="subscription-asf-value" class="hide">@plan.GetConvenienceFee(paymentAccount)</span>
+                                                <span id="subscription-ccf-value" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
                                                 @participationObject.SubscriptionPlans.First().CostPerPeriod.ToCurrency()
                                             </td>
                                             <td>
@@ -276,7 +276,7 @@
 
                     <div id="block-payment-info" style="position:absolute; top: 0px; left: 0px;" class="text-center padding-20 hide">
                         <span style="vertical-align: middle; display: inline-block; line-height: 40px;" class="text-white text-medium">
-                            @participationObject.OwnerAccount.Name is not setup to accept online payments at this time. <br />
+                            @paymentAccount.Name is not setup to accept online payments at this time. <br />
                             Please pay in person via check or cash at your earliest convenience.<br /><br />
                             <div class="am-checkbox text-medium-small">
                                 <input type="checkbox" id="payinperson" onclick="allowContinue()" />
@@ -432,8 +432,8 @@
 
         $('#fee-ccf').html(newccf);
         $('#fee-asf').html(newasf);
-        $('#fee-ccf-text').html('$' + newccf);
-        $('#fee-asf-text').html('$' + newasf);
+        $('#fee-ccf-text').html('$' + newccf.toFixed(2));
+        $('#fee-asf-text').html('$' + newasf.toFixed(2));
     }
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {

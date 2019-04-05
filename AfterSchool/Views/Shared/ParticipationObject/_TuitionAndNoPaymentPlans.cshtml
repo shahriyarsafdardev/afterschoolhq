@@ -1,7 +1,7 @@
 ﻿@model ParticipationObject
 
 <p>
-    The tuition fee is <strong>@Model.Cost.ToCurrency()</strong>
+    The tuition fee is <strong>@Model.GetCheckoutTotalCost().ToCurrency()</strong>
     @if (Model.SubscriptionPlans.Any())
     {
         <span>
