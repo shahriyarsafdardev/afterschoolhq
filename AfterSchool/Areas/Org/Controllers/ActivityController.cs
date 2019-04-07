@@ -1710,13 +1710,18 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Publish(string id)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
 
             activity.Publish(SessionVariables.LoggedInUser, msgs);
 
             if (msgs.HasNoErrors())
             {
+                var activityId = activity.ID.Value;
+                var loggedInUserId = SessionVariables.LoggedInUser.ID.Value;
+
+                Hangfire.BackgroundJob.Enqueue(() => ActivityService.NotifyProviderOfNewActivity(activityId, loggedInUserId));
+
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
                 UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
             }
@@ -1729,10 +1734,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Unpublish(string id)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            msgs.AddRange(activity.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+            activity.Unpublish(SessionVariables.LoggedInUser, msgs);
 
             if (msgs.HasNoErrors())
             {

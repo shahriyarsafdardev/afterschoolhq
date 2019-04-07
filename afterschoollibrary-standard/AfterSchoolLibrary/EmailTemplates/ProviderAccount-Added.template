@@ -2,7 +2,7 @@
   <p>Congrats @Model.FirstName,</p>
   
   <p>
-    @Model.HostAccountName is using @Model.ProductName to manage activities. This means parents at @Model.HostAccountName will go to @Model.HomePageUrl to find, register, and pay for @Model.ActivityName.
+    @Model.InviterFirstName at @Model.HostAccountName is using @Model.ProductName to manage afterschool activities. This means parents at @Model.HostAccountName will go to @Model.HomePageUrl to find, register, and pay for @Model.ActivityName.
   </p>
   <p>
     This will result in:
@@ -11,7 +11,7 @@
       <li>Your activity being promoted to all parents and students at @Model.HostAccountName</li>
       <li>Money is collected and deposited into your account faster than ever and you don't need to lift a finger</li>
     </ul>
-    The amount you charge per registration for your activity (@Model.AmountCharged) will be deposited (or mailed) in full to you based on your preferences.
+    <strong>The amount you charge per registration for your activity (@Model.AmountCharged) will be deposited (or mailed) in full to you based on your preferences.</strong>
   </p>
 
   <p>
@@ -24,7 +24,7 @@
   </p>
 
   <p>
-    If you have any questions please contact our support team at <a href="mailto:@Model.SupporEmail">@Model.SupportEmail</a>
+    If you have any questions or concerns please contact our support team at <a href="mailto:@Model.SupporEmail">@Model.SupportEmail</a>
   </p>
   
   <p>

@@ -839,7 +839,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendProviderNewActivityNotification(Account hostAccount, Account visitorAccount, WebUser visitorAccountOwner, Activity activity)
+        public static SystemMessages SendProviderNewActivityNotification(Account hostAccount, Account visitorAccount, WebUser visitorAccountOwner, Activity activity, WebUser loggedInUser)
         {
             var msgs = new SystemMessages();
             var getStartedLink = $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login";
@@ -862,10 +862,11 @@ namespace AfterSchoolLibrary.Helpers
                 { "HomePageUrl", hostAccount.HomePageUrl },
                 { "ActivityHomePageUrl", activity.HomePageUrl },
                 { "ActivityName", activity.Name },
-                { "SupportEmail", Email.AppSupportEmailAddress() }
+                { "SupportEmail", Email.AppSupportEmailAddress() },
+                { "InviterFirstName", loggedInUser.FirstName }
             };
 
-            var subject = $"You have been designated as the activity provider for {activity.Name} at {hostAccount.Name}";
+            var subject = $"You have been designated as the provider for {activity.Name} at {hostAccount.Name}";
             var body = ProcessTemplate(
                EmailTemplates.ProviderAccount_Added,
                model,

@@ -2155,36 +2155,26 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static void NotifyProvider(this Activity activity, Account hostAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void NotifyProviderOfNewActivity(int activityId, int loggedInUserId)
         {
-            var provider = activity.GetProvider(msgs, dc);
+            var msgs = new SystemMessages();
+            var activity = Activity.Load(activityId, msgs);
 
-            if (provider.IsEmpty())
+            if (!activity.ProviderAccountId.HasValue)
                 return;
 
-            var providerOwner = provider.GetAccountOwner(msgs, dc);
-
-            if (hostAccount.IsEmpty())
-                hostAccount = activity.GetAccount(msgs, dc);
+            var provider = activity.GetProvider(msgs);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs);            
+            var hostAccount = activity.GetAccount(msgs);
+            var providerOwner = provider.GetAccountOwner(msgs);
 
             if (provider.IsNotEmpty())
-                msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(hostAccount, provider, providerOwner, activity));
+                msgs.AddRange(Helpers.EmailHelper.SendProviderNewActivityNotification(hostAccount, provider, providerOwner, activity, loggedInUser));
         }
 
         public static void Publish(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    activity.NotifyProvider(null, msgs, dc);
-                    msgs.AddRange(activity.SetIsPublished(true, loggedInUser.ID.Value, dc));
-                },
-                onSuccess: (SystemMessages smsgs) => msgs.AddRange(msgs),
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs),
-                dc: dc
-            );
+            msgs.AddRange(activity.SetIsPublished(true, loggedInUser.ID.Value, dc));
         }
 
         public static void Unpublish(this Activity activity, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
