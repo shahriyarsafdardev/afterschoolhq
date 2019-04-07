@@ -552,11 +552,11 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
 
-            // send copy to enroll hq team
+            // send copy to afterschool hq team
             SendGridHelper.SendMail(
                 fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
                 toEmail: Email.SendGridAppAdminEmailAddress,
-                subject: $"CC: {Utilities.AppName(account.IsAfterSchool)} PURCHASE - {subject}",
+                subject: $"CC: {Utilities.AppName(account.IsAfterSchool)} SIGNUP - {subject}",
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );

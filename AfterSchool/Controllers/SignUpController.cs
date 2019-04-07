@@ -7,11 +7,110 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
+using Hangfire;
 
 namespace AfterSchool.Controllers
 {
     public class SignUpController : BaseController
     {
+        [HttpGet]
+        public ActionResult Index()
+        {
+            ViewBag.Messages = new SystemMessages();
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Index(string orgname, string orgtype, string phone, string firstname, string lastname, string email, string password1, string password2)
+        {
+            var msgs = new SystemMessages();
+
+            if (orgname.IsEmpty())
+                msgs.Add("Organization / Program Name is required", MessageType.UserError);
+
+            if (!orgtype.IsNumber())
+                msgs.Add("Organization Type is required", MessageType.UserError);
+
+            if (!orgtype.IsNumber())
+                msgs.Add("Organization Phone is required", MessageType.UserError);
+
+            if (firstname.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (lastname.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (email.IsEmpty())
+                msgs.Add("Email is required", MessageType.UserError);
+            else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+            else if (!WebUser.ExistsByEmail(email, msgs))
+                msgs.Add("This email has already been registered", MessageType.UserError);
+
+            if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
+                msgs.Add("Passwords are required and must match", MessageType.UserError);
+            else if (password1.Length < 8)
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                WebUser user = null;
+                Account account = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.CreateNew(
+                            firstName: firstname,
+                            lastName: lastname,
+                            email: email,
+                            phone: phone,
+                            password: password1,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            allowTextMessages: false,
+                            loggedInUser: null,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        if (user.IsNotEmpty())
+                            account = user.AddNewAccount(
+                                orgName: orgname,
+                                phone: phone,
+                                isActive: true,
+                                accountType: (AccountType)orgtype.ToInteger(),
+                                addDefaultPackage: true,
+                                isAfterSchool: true,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        msgs.AddRange(LoadSessionInfo(user, account));
+
+                        var userId = user.ID.Value;
+                        var accountId = account.ID.Value;
+
+                        BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return LoginRedirect();
+
+            ViewBag.Messages = msgs;
+
+            return View();
+        }
+
         [HttpGet]
         public ActionResult New(string id, string a)
         {
@@ -62,6 +161,7 @@ namespace AfterSchool.Controllers
             else
             {
                 account = Account.LoadByUid(a.ToGuid());
+
                 if (account.IsEmpty())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
             }
@@ -85,10 +185,13 @@ namespace AfterSchool.Controllers
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                user.CompleteSignUp(account, firstname, lastname, email, password1, null, msgs);                
+                user.CompleteSignUp(account, firstname, lastname, email, password1, null, msgs);
 
             if (msgs.HasNoErrors() && !user.VerifiedAccount)
-                msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));     
+            {
+                var userId = user.ID.Value;
+                Hangfire.BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+            }
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(LoadSessionInfo(user));

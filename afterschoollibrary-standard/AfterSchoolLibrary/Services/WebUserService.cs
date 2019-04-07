@@ -167,7 +167,15 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
-        public static SystemMessages SendVerificationEmail(this WebUser user, bool isAfterSchool)
+        public static SystemMessages SendVerificationEmail(int userId)
+        {
+            var msgs = new SystemMessages();
+            var user = WebUser.Load(userId, msgs);
+
+            return user.SendVerificationEmail();
+        }
+
+        public static SystemMessages SendVerificationEmail(this WebUser user, bool isAfterSchool = true)
         {
             return Helpers.EmailHelper.SendEmailVerification(user, isAfterSchool);
         }
@@ -375,22 +383,16 @@ namespace AfterSchoolLibrary.Services
             return AddNewRegistrantAccount(accountOwner, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
         }
 
-        /// <summary>
-        /// typically used when sending an invite to an email, 
-        /// but in general gives a user a newly created account attached to their webuser account
-        /// </summary>
-        /// <param name="accountOwner"></param>
-        /// <param name="orgName"></param>
-        /// <param name="phone"></param>
-        /// <param name="isActive"></param>
-        /// <param name="accountType"></param>
-        /// <param name="packageId"></param>
-        /// <param name="packageBillingPeriod"></param>
-        /// <param name="isAfterSchool"></param>
-        /// <param name="loggedInUser"></param>
-        /// <param name="msgs"></param>
-        /// <param name="dc"></param>
-        /// <returns></returns>
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, bool addDefaultPackage, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = AddNewAccount(accountOwner, orgName, phone, isActive, accountType, null, null, true, loggedInUser, msgs, dc);
+
+            if (account.IsNotEmpty())
+                account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
+
+            return account;
+        }
+
         public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
@@ -453,14 +455,13 @@ namespace AfterSchoolLibrary.Services
                     user.IsRegistered = true;
                     user.IsActive = true;
                     user.Password = WebUserService.EncryptPassword(password);
+                    user.LastModifiedDate = DateTime.UtcNow;
+                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
 
                     if (user.Email.IsSameAs(email))
                         user.VerifiedAccount = true;
                     else
                         user.Email = email;
-
-                    user.LastModifiedDate = DateTime.UtcNow;
-                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
 
                     amsgs.AddRange(user.Save(adc));
 

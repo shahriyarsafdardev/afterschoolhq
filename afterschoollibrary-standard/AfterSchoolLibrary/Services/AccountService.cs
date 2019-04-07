@@ -517,9 +517,18 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static SystemMessages SendWelcomeEmailPurchase(this Account account, DatabaseConnection dc = null)
+        public static SystemMessages SendWelcomeEmailPurchase(int accountId)
         {
-            return Helpers.EmailHelper.SendWelcomePurchase(account.GetAccountOwner(dc: dc), account);
+            var msgs = new SystemMessages();
+            var account = Account.Load(accountId, msgs);
+            var owner = account.GetAccountOwner(msgs);
+
+            return account.SendWelcomeEmailPurchase(owner);
+        }
+
+        public static SystemMessages SendWelcomeEmailPurchase(this Account account, WebUser accountOwner)
+        {
+            return Helpers.EmailHelper.SendWelcomePurchase(accountOwner, account);
         }
 
         public static SystemMessages SendInvitedEmail(this Account invitedAccount, WebUser invitedUser, WebUser loggedInUser, string customMessage = null, DatabaseConnection dc = null)

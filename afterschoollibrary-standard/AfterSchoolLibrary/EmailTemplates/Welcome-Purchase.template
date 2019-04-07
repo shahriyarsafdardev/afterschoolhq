@@ -13,6 +13,7 @@
   </p>
   <p>
       Darye Henry<br />
-      Founder &amp; CEO
+      Founder &amp; CEO<br />
+      @Model.ProductName
   </p>
 </div>

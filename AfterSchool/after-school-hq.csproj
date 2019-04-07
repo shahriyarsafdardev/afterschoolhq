@@ -1522,6 +1522,8 @@
     <Content Include="Views\Shared\Components\_LocationAddOrEdit.cshtml" />
     <Content Include="Views\Shared\Components\_ProviderAddOrEdit.cshtml" />
     <Content Include="Views\Shared\Components\_ProviderEdit.cshtml" />
+    <Content Include="Views\SignUp\Index.cshtml" />
+    <Content Include="Views\Shared\Login\_SignUpForm-NewAccount.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
