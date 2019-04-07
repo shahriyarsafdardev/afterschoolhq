@@ -1720,7 +1720,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var activityId = activity.ID.Value;
                 var loggedInUserId = SessionVariables.LoggedInUser.ID.Value;
 
-                Hangfire.BackgroundJob.Enqueue(() => ActivityService.NotifyProviderOfNewActivity(activityId, loggedInUserId));
+                BackgroundJob.Enqueue(() => ActivityService.NotifyProviderOfNewActivity(activityId, loggedInUserId));
 
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
                 UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
