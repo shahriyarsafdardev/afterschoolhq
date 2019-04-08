@@ -313,7 +313,7 @@ var ActivitySetup = {
 
 var AccountSetup = {
       
-    sendVerificationEmail = function() {
+    sendVerificationEmail: function() {
         $.get(
             '/org/services/sendverificationemail/',
             function (data) {
