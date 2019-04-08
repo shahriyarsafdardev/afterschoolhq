@@ -594,6 +594,17 @@ div.filter-full-width > span {
     }
 }
 
+.participation-object > .panel {
+    min-height: 350px;
+    position: relative;
+}
+
+.participation-object > .panel > .panel-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
 .registration-titlebar .org-logo-container {
     max-width: 900px;
     max-height: 200px;
