@@ -1,5 +1,14 @@
 ﻿@model Account
 
+@{ 
+    var accountOrDashboard = "Account";
+
+    if (Model.AccountTypeId != AccountType.Registrant)
+    {
+        accountOrDashboard = "Dashboard";
+    }
+}
+
 @helper RenderReturnToHomeUrl()
 {
     if (Model.IsNotEmpty() && !($"{Model.HomePageUrl}/browse".ToLower().Contains(Request.Url.AbsolutePath.ToLower())))
@@ -30,7 +39,7 @@
 
                         @if (SessionVariables.LoggedInUser.IsNotEmpty())
                         {
-                            <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View Account</a>
+                            <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View @accountOrDashboard</a>
                             <a href="@Url.Action("index", "logout", new { returnurl = Request.Url.AbsolutePath })" class="btn btn-link">Logout</a>
                         }
                         else
