@@ -44,11 +44,16 @@
     }
     else
     {
-        <div class="pull-right">
-            @RenderReturnToHomeUrl()
+        <div class="row">
+            <div class="pull-right">
+                @RenderReturnToHomeUrl()
+            </div>
         </div>
         <div>
-            <button type="button" class="btn btn-alt7 btn-block btn-xl md-trigger" data-modal="modal-lead-form">
+            <a href="@Url.Action("index", "signup", new {orgname = Model.Name })" class="btn btn-alt7 btn-block btn-xl">
+                Sign Up for Your Free Account &raquo;
+            </a>
+            <button type="button" class="btn btn-alt7 btn-block btn-xl md-trigger hide" data-modal="modal-lead-form">
                 Sign Up for Your Free Account &raquo;
             </button>
         </div>

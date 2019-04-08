@@ -78,9 +78,9 @@ namespace AfterSchool.Models
                 var account = participationObject.OwnerAccount;
 
                 if (participationObject.RegistrationPeriod.WillOpen(account))
-                    return $"Registration will open {participationObject.RegistrationPeriod.StartDateTime.ToLongDateTimeString()}";
+                    return $"Registration will open {participationObject.RegistrationPeriod.StartDateTime.Value.ToLongDateString()} {participationObject.RegistrationPeriod.StartDateTime.Value.ToShortTimeString()}";
                 else if (participationObject.RegistrationPeriod.IsOpen(account))
-                    return $"Registration will close {participationObject.RegistrationPeriod.EndDateTime.ToLongDateTimeString()}";
+                    return $"Registration will close {participationObject.RegistrationPeriod.EndDateTime.Value.ToLongDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}";
             }
             return "Registration is closed";
         }

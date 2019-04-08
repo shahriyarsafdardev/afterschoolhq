@@ -1,4 +1,12 @@
-﻿body.am-box-layout{
+﻿body {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.page-head h2 {
+    font-family: inherit;
+}
+
+body.am-box-layout{
     background-color: #f0f0f0;
 }
 

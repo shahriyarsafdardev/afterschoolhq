@@ -1,6 +1,6 @@
 ﻿@model ParticipationObject
 
-@{ 
+@{
     var condensed = false;
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
@@ -11,7 +11,23 @@
 
 @if (!Model.OwnerAccount.ID.HasValue)
 {
-    <button class="btn btn-register md-trigger" data-modal="modal-lead-form">
+    <a href="@Url.Action("index", "signup", new {orgname = Model.OwnerAccount.Name })" class="btn btn-register">
+        @if (condensed)
+        {
+            @: Get Started &raquo;
+        }
+        else
+        {
+            <div class="hidden-xs">
+                Get Started with @UILabel.ProductName()  &raquo;
+            </div>
+            <div class="hidden-sm hidden-md hidden-lg">
+                Get Started &raquo;
+            </div>
+        }
+    </a>
+
+    <button class="btn btn-register md-trigger hide" data-modal="modal-lead-form">
         @if (condensed)
         {
             @: Get Started &raquo;
@@ -59,7 +75,7 @@ else
             {
                 @:Registration is now closed
             }
-        
+
         </button>
     }
 }
