@@ -310,3 +310,25 @@ var ActivitySetup = {
         $('#form-copy').attr('action', url);
     }
 }
+
+var AccountSetup = {
+      
+    sendVerificationEmail = function() {
+        $.get(
+            '/org/services/sendverificationemail/',
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: 'A verification email has been sent. Please check your email.'
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Error sending verification email. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress()" class="white">contact support</a>.'
+                    });
+                }
+            }
+        );
+    }
+}

@@ -550,31 +550,38 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 var filteredParams = Request.Params.Filter("schedulerepeat-");
                 var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-                inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-                outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                values = new Dictionary<string, object>()
+                if (days.Count == 0 && repeatsweekly == "1")
+                    msgs.Add("Please select at least one day", MessageType.UserError);
+
+                if (msgs.HasNoErrors())
                 {
-                    { "scheduledetails", scheduledetails},
-                    { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
-                    { "repeatsweekly", repeatsweekly.IfBlank("0") },
-                    { "startdate", startdate },
-                    { "enddate", enddate },
-                    { "dailystarttime", dailystarttime },
-                    { "dailyendtime", dailyendtime },
-                    { "scheduledates", inSessionDates },
-                    { "scheduledatesclosed", outOfSessionDates },
-                    { "schedule", schedule },
-                    { "isongoing", isongoing }
-                };
+                    inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                    outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
-                    activityId: activity.ID.Value.ToString(),
-                    values: values,
-                    msgs: msgs
-                );
+                    values = new Dictionary<string, object>()
+                    {
+                        { "scheduledetails", scheduledetails},
+                        { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
+                        { "repeatsweekly", repeatsweekly.IfBlank("0") },
+                        { "startdate", startdate },
+                        { "enddate", enddate },
+                        { "dailystarttime", dailystarttime },
+                        { "dailyendtime", dailyendtime },
+                        { "scheduledates", inSessionDates },
+                        { "scheduledatesclosed", outOfSessionDates },
+                        { "schedule", schedule },
+                        { "isongoing", isongoing }
+                    };
+
+                    activity = ActivityService.EditExisting(
+                        loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                        account: SessionVariables.CurrentAccount,
+                        activityId: activity.ID.Value.ToString(),
+                        values: values,
+                        msgs: msgs
+                    );
+                }
             }
 
             if (msgs.HasNoErrors())

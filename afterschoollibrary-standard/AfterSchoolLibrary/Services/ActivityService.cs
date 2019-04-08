@@ -1228,7 +1228,7 @@ namespace AfterSchoolLibrary.Services
 
             // this.ScheduleRequiresAllDays = true;
 
-            var newSchedule = Services.ActivityScheduleService.SetupSchedule(
+            var newSchedule = ActivityScheduleService.SetupSchedule(
                 activity.AccountId.Value,
                 schedule.IfEmpty("0").ToInteger(),
                 $"{activity.Name} - Schedule",
@@ -1245,7 +1245,7 @@ namespace AfterSchoolLibrary.Services
                 activity.ActivityGroupId,
                 loggedInUserId,
                 msgs,
-                dc);
+                dc);            
 
             activity.ActivityScheduleId = newSchedule.ID;
 

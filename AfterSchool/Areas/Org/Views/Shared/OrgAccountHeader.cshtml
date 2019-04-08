@@ -29,7 +29,7 @@
     if (!SessionVariables.LoggedInUser.VerifiedAccount)
     {
         <div class="trial-header text-center text-white bg-danger">
-            Please verify your email address in order to publish activities. <a href="javascript:sendVerificationEmail()" class="white">Resend Email Verification Email &raquo;</a>
+            Please verify your email address in order to publish activities. <a href="javascript:AccountSetup.sendVerificationEmail()" class="white">Resend Email Verification Email &raquo;</a>
         </div>
     }
 
@@ -52,25 +52,4 @@
             </div>
         </div>    
     </div>
-
-    <script>
-        function sendVerificationEmail() {
-            $.get(
-                '@Url.Action("SendVerificationEmail", "Services")',
-                function (data) {
-                    if (data && data.status == 'ok') {
-                        Notifications.showBar({
-                            title: 'Success',
-                            message: 'A verification email has been sent. Please check your email.'
-                        });
-                    } else {
-                        Notifications.showBar({
-                            title: 'Error',
-                            message: 'Error sending verification email. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress()" class="white">contact support</a>.'
-                        });
-                    }
-                }
-                );
-        }
-    </script>
 }
