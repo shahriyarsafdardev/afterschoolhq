@@ -44,7 +44,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (!WebUser.ExistsByEmail(email, msgs))
+            else if (WebUser.ExistsByEmail(email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);
 
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
