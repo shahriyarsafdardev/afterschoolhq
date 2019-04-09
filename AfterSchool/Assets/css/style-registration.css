@@ -267,17 +267,17 @@ body.registration {
     width: 90%;
 }
 
-    .registration-titlebar .org-title-area .org-title {
-        position: relative;
-        margin-bottom: 15px;
-        color: #fff;
-        font-size: 3em;
-    }
+.registration-titlebar .org-title-area .org-title {
+    position: relative;
+    margin-bottom: 15px;
+    color: #fff;
+    font-size: 3em;
+}
 
-    .registration-titlebar .org-title-area .org-description {
-        position: relative;
-        color: #ededed;
-    }
+.registration-titlebar .org-title-area .org-description {
+    position: relative;
+    color: #ededed;
+}
 
 .registration-titlebar .orghome-filters {
     padding: 10px;
@@ -296,6 +296,16 @@ body.registration {
 .participation-object-detail > .panel {
     border-radius: 10px;
     overflow: hidden;
+}
+
+.firsttime-information {
+    background-color: #505050; /*#212a2d;*/
+    color: #fff;
+    padding: 20px;
+}
+
+.firsttime-information h2{
+    font-weight: bold;
 }
 
 /* montserrat-regular - latin */
