@@ -1578,6 +1578,18 @@ namespace AfterSchoolLibrary.Services
         {
             var msgs = new SystemMessages();
 
+            if (!registrationopendate.IsDate())
+                msgs.Add("Open Date must be a valid date", MessageType.UserError);
+
+            if (!registrationclosedate.IsDate())
+                msgs.Add("Close Date must be a valid date", MessageType.UserError);
+
+            if (registrationopendate.ToDateTime() > registrationclosedate.ToDateTime())
+                msgs.Add("Open date must be before the Close date", MessageType.UserError);
+
+            if (msgs.HasErrors())
+                return msgs;
+
             if (registrationperiod.ToInteger() == 0)
             {
                 var periodname = RegistrationPeriod.GenerateUniqueName(account.ID.Value, $"{activity.Name} - Reg Window", dc: dc).MaxChars(50);
@@ -1606,6 +1618,7 @@ namespace AfterSchoolLibrary.Services
                 }
                 msgs.AddRange(period.AddActivity(activity, true, loggedInUserId, dc: dc));
             }
+
             return msgs;
         }
 

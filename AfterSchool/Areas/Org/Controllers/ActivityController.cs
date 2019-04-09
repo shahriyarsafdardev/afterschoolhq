@@ -444,6 +444,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = null;
 
+            if (details.IsEmpty())
+                msgs.Add($"{UILabel.ActivityLabel()} Details is required", MessageType.UserError);
+
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
@@ -463,9 +466,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -539,15 +540,14 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
         {
             var msgs = new SystemMessages();
-            Activity activity = null;
             var inSessionDates = new List<DateRange>();
-            var outOfSessionDates = new List<DateTime>();
+            Activity activity = null;
+            List<DateTime> outOfSessionDates = null;
+            Dictionary<string, object> values = null;
 
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
-                var values = new Dictionary<string, object>();
-
                 var filteredParams = Request.Params.Filter("schedulerepeat-");
                 var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
 
@@ -559,6 +559,15 @@ namespace AfterSchool.Areas.Org.Controllers
                     inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
                     outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
+                    inSessionDates.ForEach(dateRange =>
+                    {
+                        if (dateRange.StartDate > dateRange.EndDate)
+                            msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
+                    });
+                }
+
+                if (msgs.HasNoErrors())
+                {
                     values = new Dictionary<string, object>()
                     {
                         { "scheduledetails", scheduledetails},
@@ -585,20 +594,14 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
-
-            var instances = new List<ActivityInstance>();
+            
             ActivitySchedule sched = null;
+
             if (msgs.HasNoErrors())
-            {
                 sched = activity.GetSchedule();
-            }
             else
-            {
                 sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
-            }
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
