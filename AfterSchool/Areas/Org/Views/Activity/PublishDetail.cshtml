@@ -51,7 +51,7 @@
                     <div class="btn-group pull-right">
                         @if (Model.IsPublishable)
                         {
-                            if (SessionVariables.LoggedInUser.VerifiedAccount)
+                            if (SessionVariables.LoggedInUser.VerifiedAccount || true)
                             {
                                 if (!Model.IsPublished)
                                 {
@@ -88,7 +88,7 @@
                                             <p>Parents can now pay for your activity online, but we don't have a way to send you money. </p>
                                         </div>
                                         <div class="padding-v-20">
-                                            <a href="@Url.Action(" paymentsentity", "account" , new { isnew=1 })" class="btn btn-lg btn-primary btn-block">Setup your payments account &raquo;</a>
+                                            <a href="@Url.Action("paymentsentity", "account" , new { isnew = 1 })" class="btn btn-lg btn-primary btn-block">Setup your payments account &raquo;</a>
                                         </div>
                                         <div class="text-medium-small padding-v-20">
                                             <p>Not the person who manages finances for your organization or program?</p>

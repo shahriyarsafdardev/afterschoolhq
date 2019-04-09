@@ -17,6 +17,27 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
+        [HttpGet]
+        public ActionResult CalculateFinalPrice(string cost)
+        {
+            var msgs = new SystemMessages();
+
+            if (!cost.IsNumber() || cost.ToDecimal() <= 0)
+                msgs.Add("Total cost must be a number greater than 0", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                return Json(new
+                {
+                    status = "ok",
+                    price = AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(cost.ToDecimal(), SessionVariables.CurrentAccount),
+                    messages = msgs
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpPost]
         public ActionResult InviteTreasurer(string firstname, string lastname, string email)
         {

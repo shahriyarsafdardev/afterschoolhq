@@ -33,15 +33,20 @@ namespace AfterSchoolLibrary.Billing
                 fee = (cost * ConveniencePercentFee) + ConvenienceFlatFee;
             else
                 fee = ((cost + ConvenienceFlatFee) / (1 - ConveniencePercentFee)) - cost;
-
+            
             // always round up to nearest dollar or .5
-            // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc.
-            return (Math.Ceiling(fee * 2) / 2);
+            // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc. Max of $10
+            return Math.Min(Math.Ceiling(fee * 2) / 2, 10M);
         }
 
         public static decimal GetTotalFees(decimal cost, Account billingAccount)
         {
             return GetConvenienceFee(cost, billingAccount) + GetCreditCardFee(cost, billingAccount);
+        }
+
+        public static decimal GetFinalTotalCost(decimal cost, Account billingAccount)
+        {
+            return cost + GetTotalFees(cost, billingAccount);
         }
     }
 }

@@ -45,6 +45,9 @@
                         <span class="input-group-addon">$</span>
                         <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@Model.CostPerRegistrant.ToCurrency().Replace("$", "")" required min="0.00" step=".01" @paymentdisabled />
                     </div>
+                    <p class="text-muted">
+                        <em>The parent will be charged $<span id="finaltuitioncost">0.00</span> upon checkout</em>
+                    </p>
                 </div>
             </div>
 
@@ -145,6 +148,9 @@
                                    value="@(paymentPlan.IsNotEmpty() ? paymentPlan.CostPerPeriod.ToCurrency().Replace("$", "") : "0")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
+                        <p class="text-muted">
+                            <em>The parent will be charged $<span id="finalpaymentplancost">0.00</span> upon checkout</em>
+                        </p>
                     </div>
                     <div class="col-md-3"></div>
                     <div class="col-sm-6 col-md-9">
@@ -189,15 +195,15 @@
                     <label class="col-sm-3 control-label">Subscription</label>
                     <div class="col-sm-1">
                         @{Html.RenderPartial
-                                (
-                                    "~/Views/Shared/_SwitchButton.cshtml",
-                                    Model.HasSubscriptionPlan(),
-                                    new ViewDataDictionary()
-                                    {
-                                                                        { "checkboxname", "hassubscriptionplan" },
-                                                                        { "checkboxid", "hassubscriptionplan" }
-                                    }
-                                );
+                            (
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                Model.HasSubscriptionPlan(),
+                                new ViewDataDictionary()
+                                {
+                                    { "checkboxname", "hassubscriptionplan" },
+                                    { "checkboxid", "hassubscriptionplan" }
+                                }
+                            );
                         }
                     </div>
                 </div>
@@ -211,6 +217,9 @@
                                    value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.CostPerPeriod.ToCurrency().Replace("$", "") : "0")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
+                        <p class="text-muted">
+                            <em>The parent will be charged $<span id="finalsubscriptionplancost">0.00</span> upon checkout</em>
+                        </p>
                     </div>
                     <div class="col-md-3"></div>
                     <div class="col-sm-6 col-md-9">
@@ -239,6 +248,10 @@
 </div>
 
 <script>
+    var costTimeOut = null;
+    var paymentplanTimeOut = null;
+    var subscriptionTimeOut = null;
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         setSubscriptionPlanSection();
         setPaymentPlanSection();
@@ -263,7 +276,49 @@
             $('#do-parents-pay-yes').prop('checked', true);
             $('#do-parents-pay-yes').trigger('click');
         }
+       
+        $('#cost').keyup(function () {
+            costTimeOut = null;
+            costTimeOut = setTimeout(function () {
+                calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
+            }, 200);
+        });
+
+        $('#paymentplancost').keyup(function () {
+            paymentplanTimeOut = null;
+            paymentplanTimeOut = setTimeout(function () {
+                calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
+            }, 200);
+        });
+
+        $('#subscriptionplancost').keyup(function () {
+            subscriptionTimeOut = null;
+            subscriptionTimeOut = setTimeout(function () {
+                calculateFinalPrice($('#subscriptionplancost').val(), $('#finalsubscriptionplancost'));
+            }, 200);
+        });
+
+        calculateFinalPrice($('#cost').val(), $('#finaltuitioncost'));
+        calculateFinalPrice($('#paymentplancost').val(), $('#finalpaymentplancost'));
+        calculateFinalPrice($('#subscriptionplancost').val(), $('#finalsubscriptionplancost'));
     });
+
+    function calculateFinalPrice(cost, span) {
+
+        if (isNaN(cost))
+            return;
+
+        $.get(
+            '@Url.Action("calculatefinalprice", "services")?cost=' + cost,
+            function (data) {
+                if (data && data.status == 'ok' && !isNaN(data.price)) {
+                    span.html(parseFloat(data.price).toFixed(2));
+                } else {
+                    span.html('0.00');
+                }
+            }
+        );
+    }
 
     function showTuitionCosts() {
         if ($('#do-parents-pay-yes').is(':checked')) {
