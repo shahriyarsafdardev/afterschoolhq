@@ -5,6 +5,8 @@
         SessionVariables.AccountUserType.NotIn(new List<UserType>() { UserType.Parent, UserType.Student }));
 
     var addActivityUrl = "";
+    var addText = $"Add {UILabel.ActivityLabel()}";
+    var footerText = "Create a new {UILabel.ActivityLabel()}";
 
     if (showAdd)
     {
@@ -13,24 +15,28 @@
         if (!Model.ID.HasValue)
         {
             addActivityUrl = Url.Action("index", "signup", new { orgname = Model.Name });
+            footerText = $"Customize this page by creating your first {UILabel.ActivityLabel().ToLower()}";
         }
     }
 }
 
-@if (showAdd && false)
+@if (showAdd)
 {
-    <div class="col-sm-12 col-md-6 col-lg-4 participation-object pointer" onclick="location.href='@addActivityUrl'">
+    <div class="col-sm-12 col-md-6 col-lg-4 participation-object participation-object-add pointer" onclick="location.href='@addActivityUrl'">
         <div class="panel">
             <div class="panel-body">
-                <div class="padding-v-30 margin-t-20">
+                <div class="padding-v-20 margin-t-10">
                     <p class="text-center">
                         <i class="s7-plus icon-xxlarge text-success"></i>
                     </p>
                     <p>&nbsp;</p>
                     <p class="text-center text-xlarge text-success">
-                        Add Activity
+                        @addText
                     </p>
                 </div>
+            </div>
+            <div class="panel-footer">
+                <p class="text-center">@footerText</p>
             </div>
         </div>
     </div>

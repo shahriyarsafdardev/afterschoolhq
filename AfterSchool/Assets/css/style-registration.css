@@ -198,12 +198,17 @@ body.registration {
     min-height: 350px;
     position: relative;
     border-radius: 10px;
+    overflow: hidden;
 }
 
 .participation-object > .panel > .panel-footer {
     position: absolute;
     bottom: 0;
     width: 100%;
+}
+
+.participation-object-add > .panel {
+    background-color: #264770; /* #212a2d;*/
 }
 
 .registration-titlebar .org-logo-container {
@@ -299,7 +304,7 @@ body.registration {
 }
 
 .firsttime-information {
-    background-color: #505050; /*#212a2d;*/
+    background-color: #264770; /*#212a2d;*/
     color: #fff;
     padding: 20px;
 }
