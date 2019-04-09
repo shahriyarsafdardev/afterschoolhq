@@ -544,6 +544,7 @@ namespace AfterSchoolLibrary.Models
 
             locations.Add(new Location()
             {
+                Name = "Launch Fishers",
                 Address1 = "12175 Visionary Way",
                 Address2 = "#710",
                 City = "Fishers",

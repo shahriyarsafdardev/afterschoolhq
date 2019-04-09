@@ -135,9 +135,19 @@ div.border-light-gray {
     margin-right: 30px;
 }
 
-.margin-v-10{
+.margin-v-10 {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.margin-v-20 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.margin-v-30 {
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 .margin-t-10{
