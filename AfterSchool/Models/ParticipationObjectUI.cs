@@ -25,12 +25,25 @@ namespace AfterSchool.Models
             return "No Location Available";
         }
 
-        public static string PrintTuitionFee(ParticipationObject participationObject)
+        public static string PrintTuitionFee(ParticipationObject participationObject, bool displayCheckoutPrice)
         {
             if (participationObject.Cost.HasValue)
+            {
+                if (displayCheckoutPrice)
+                    return participationObject.GetCheckoutTotalCost().ToCurrency();
+
                 return participationObject.Cost.ToCurrency();
+            }
 
             return "Free";
+        }
+
+        public static string PrintPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
+        {
+            if (displayCheckoutPrice)
+                return AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(plan.CostPerPeriod.Value, ownerAccount).ToCurrency();
+
+            return plan.CostPerPeriod.ToCurrency();
         }
 
         public static List<string> PrintSubscriptions(ParticipationObject participationObject)

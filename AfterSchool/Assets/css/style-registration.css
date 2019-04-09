@@ -1,9 +1,13 @@
 ﻿
 /* Registration Browse*/
 
+body.registration {
+    background-color: #f7f7f7;
+}
+
 .panel {
     margin: 20px;
-    border: 1px solid #e7e4e4;
+    border: 1px solid #f9f9f9;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12);
     padding: 0px;
 }
@@ -38,7 +42,7 @@
 
 .filter-bar {
     background: #fff;
-    border: 1px solid #979797;
+    border: 1px solid #fff;
     padding-top: 45px;
 }
 
@@ -51,8 +55,8 @@
 .search-field {
     background: #fff;
     border-radius: 26px;
-    color: #00ae85;
-    border: 1px solid #9b9b9b;
+    color: #777777;
+    border: 2px solid #eaeaea;
 }
 
 .search-field:hover {
@@ -187,6 +191,111 @@
 
 .reg-ul {
     list-style-position: inside;
+}
+
+
+.participation-object > .panel {
+    min-height: 350px;
+    position: relative;
+    border-radius: 10px;
+}
+
+.participation-object > .panel > .panel-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.registration-titlebar .org-logo-container {
+    max-width: 900px;
+    max-height: 200px;
+    margin: auto;
+    /*overflow: hidden;*/
+    text-align: center;
+    border-radius: 5px;
+    border-color: #f5f5f5;
+    border-width: 1px;
+    border-style: solid;
+    /*
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position:relative;
+        */
+    /*box-shadow: 1px 1px 10px rgba(0, 0, 0, .1) inset;*/
+    margin: 20px auto;
+    position: relative;
+}
+
+.registration-titlebar .org-logo {
+    max-height: inherit;
+    max-width: inherit;
+    /* IE 8 */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=1)";
+    /* IE 5-7 */
+    filter: alpha(opacity=1);
+    /* modern browsers */
+    opacity: 1;
+    /*
+    margin: auto;
+    position:absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    padding: 20px 0px;*/
+}
+
+.registration-titlebar .org-logo-icon-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: auto;
+    border-radius: 50%;
+    border-color: #f9f9f9;
+    border-width: 1px;
+    border-style: solid;
+    background-color: #fff;
+    padding-top: 20px;
+    color: #444;
+}
+
+.registration-titlebar a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.registration-titlebar .org-title-area {
+    margin: 10px 10px 0px;
+    width: 90%;
+}
+
+    .registration-titlebar .org-title-area .org-title {
+        position: relative;
+        margin-bottom: 15px;
+        color: #fff;
+        font-size: 3em;
+    }
+
+    .registration-titlebar .org-title-area .org-description {
+        position: relative;
+        color: #ededed;
+    }
+
+.registration-titlebar .orghome-filters {
+    padding: 10px;
+    background-color: #fff;
+    position: relative;
+    top: 50px;
+    box-shadow: rgba(150,150,150,.4) 0px 3px 10px;
+}
+
+.activity-seats-left {
+    position: absolute;
+    right: 0;
+    top: -13px;
+}
+
+.participation-object-detail > .panel {
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 /* montserrat-regular - latin */

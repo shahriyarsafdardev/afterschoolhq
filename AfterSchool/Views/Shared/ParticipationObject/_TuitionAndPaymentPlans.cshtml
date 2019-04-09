@@ -1,16 +1,27 @@
 ﻿@model ParticipationObject
 
+@{
+    var displayCheckoutPrice = false;
+
+    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
+    {
+        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
+    }
+}
+
 <p>
     Tuition Fee payment options:
     <ul>
         <li>
-            1 payment of @ParticipationObjectUI.PrintTuitionFee(Model)@(Model.PaymentPlans.Any() ? ", or " : "")
+            1 payment of
+            @ParticipationObjectUI.PrintTuitionFee(Model, displayCheckoutPrice)@(Model.PaymentPlans.Any() ? ", or " : "")
         </li>
         @foreach (var plan in Model.PaymentPlans)
         {
             <li>
                 @plan.TotalPeriods payments of
-                @plan.CostPerPeriod.ToCurrency() each
+                @ParticipationObjectUI.PrintPlanFee(plan, Model.OwnerAccount, displayCheckoutPrice) 
+                each
                 @plan.BillingPeriodTypeId.ToString().ToLower()@(plan.ID != Model.PaymentPlans.Last().ID ? ", or " : "")
             </li>
         }

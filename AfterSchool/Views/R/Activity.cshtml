@@ -22,7 +22,7 @@
 </div>
 
 <div>
-    <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-6 col-md-offset-3 participation-object-detail">
         <div class="panel panel-alt6">
             <div class="panel-heading">
                 <div class="row">
@@ -73,11 +73,17 @@
                     {
                         if (!Model.PaymentPlans.Any())
                         {
-                            Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", Model);
+                            Html.RenderPartial(
+                                "~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", 
+                                Model, 
+                                new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
                         }
                         else
                         {
-                            Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml", Model);
+                            Html.RenderPartial(
+                                "~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml", 
+                                Model,
+                                new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
                         }
 
                         if (Model.CostDescription.IsNotEmpty())
