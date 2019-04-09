@@ -523,6 +523,7 @@
     <Compile Include="Models\RegistrantImportField.cs" />
     <Compile Include="Models\RollbarExceptionFilter.cs" />
     <Compile Include="Models\SessionHelper.cs" />
+    <Compile Include="Models\CookieVariables.cs" />
     <Compile Include="Models\SessionVariables.cs" />
     <Compile Include="Models\UI.cs" />
     <Compile Include="Models\UILabel.cs" />
@@ -616,6 +617,17 @@
     <Content Include="Assets\lib\jquery.nanoscroller\javascripts\main.js" />
     <Content Include="Assets\lib\jquery.nanoscroller\javascripts\overthrow.min.js" />
     <Content Include="Assets\lib\jquery.nanoscroller\readme.html" />
+    <Content Include="Assets\lib\jquery.niftymodals\css\component.css" />
+    <Content Include="Assets\lib\jquery.niftymodals\css\default.css" />
+    <Content Include="Assets\lib\jquery.niftymodals\fonts\codropsicons\codropsicons.svg" />
+    <Content Include="Assets\lib\jquery.niftymodals\fonts\codropsicons\license.txt" />
+    <Content Include="Assets\lib\jquery.niftymodals\index.html" />
+    <Content Include="Assets\lib\jquery.niftymodals\js\classie.js" />
+    <Content Include="Assets\lib\jquery.niftymodals\js\css-filters-polyfill.js" />
+    <Content Include="Assets\lib\jquery.niftymodals\js\cssParser.js" />
+    <Content Include="Assets\lib\jquery.niftymodals\js\jquery.modalEffects.js" />
+    <Content Include="Assets\lib\jquery.niftymodals\js\modalEffects.js" />
+    <Content Include="Assets\lib\jquery.niftymodals\js\modernizr.custom.js" />
     <Content Include="Assets\lib\jquery\jquery.min.js" />
     <Content Include="Assets\lib\open-sans\bold-italic\opensans-bold-italic-webfont.svg" />
     <Content Include="Assets\lib\open-sans\bold\opensans-bold-webfont.svg" />
@@ -1073,6 +1085,11 @@
     <Content Include="Areas\Org\Views\Account\GetStartedPayments.cshtml" />
     <Content Include="Areas\Org\Views\Account\PaymentsDone.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_ModalInviteTreasurer.cshtml" />
+    <Content Include="Assets\lib\jquery.niftymodals\bower.json" />
+    <Content Include="Assets\lib\jquery.niftymodals\fonts\codropsicons\codropsicons.eot" />
+    <Content Include="Assets\lib\jquery.niftymodals\fonts\codropsicons\codropsicons.ttf" />
+    <Content Include="Assets\lib\jquery.niftymodals\fonts\codropsicons\codropsicons.woff" />
+    <Content Include="Assets\lib\jquery.niftymodals\README.md" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1525,6 +1542,8 @@
     <Content Include="Views\SignUp\Index.cshtml" />
     <Content Include="Views\Shared\Login\_SignUpForm-NewAccount.cshtml" />
     <Content Include="Views\Shared\Registration\_AddActivity.cshtml" />
+    <Content Include="Views\Shared\Registration\_FirstTimeInformation.cshtml" />
+    <Content Include="Views\Shared\Modals\_FirstTimeDemoOrgName.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

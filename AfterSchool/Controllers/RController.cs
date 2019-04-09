@@ -77,7 +77,11 @@ namespace AfterSchool.Controllers
             }
             else
             {
+                if (CookieVariables.DemoUniqueOrgName.IsNotEmpty() && accountname != CookieVariables.DemoUniqueOrgName)
+                    return Redirect($"/{CookieVariables.DemoUniqueOrgName}");
+
                 ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, grades);
+                participationObjects = participationObjects.Take(11).ToList();
             }
 
             ViewBag.Grades = grades;

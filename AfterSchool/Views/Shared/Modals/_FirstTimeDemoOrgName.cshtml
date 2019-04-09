@@ -1,0 +1,100 @@
+﻿@model Account
+
+<div id="modal-demoorgname-form" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header hide">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <div class="hidden-xs">
+                <h2 class="modal-title">Get Started</h2>
+            </div>
+            <div class="hidden-sm hidden-md hidden-lg">
+                <h2 class="modal-title">Get Started</h2>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div id="demo-form">
+                <div>
+                    <h2>Welcome!</h2>
+                    <p>
+                        Let us know your organization or program name to get started.
+                    </p>
+                </div>
+                <div class="padding-20">
+                    <form class="form">
+                        <div class="form-group">
+                            <input type="text" id="orgname" class="form-control" placeholder="Your Organization or Program Name (required)" required="required" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="hide text-center" id="demo-form-thanks">
+                We're setting up your page
+            </div>
+        </div>
+        <div class="modal-footer" id="demo-form-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default btn-lg md-close hide">Close</button>
+            <div class="hidden-xs">
+                <button class="btn btn-primary btn-xl btn-block btn-submit-orgname">
+                    <span class="text-medium">Go &raquo;</span>
+                </button>
+            </div>
+            <div class="hidden-sm hidden-md hidden-lg">
+                <button class="btn btn-primary btn-xl btn-block btn-submit-orgname">
+                    <span class="text-medium">Go &raquo;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function() {
+
+        $('#orgname').keypress(function (e) {
+            if (e.which == 13) {
+                $('.btn-submit-orgname').trigger('click');
+            }
+        });
+
+        $('.btn-submit-orgname').click(function () {
+            var params = 'orgname=' + $('#orgname').val();
+
+            $('.btn-submit-orgname').prop('disabled', true);
+
+            $.post(
+                '/services/setdemoorgname/',
+                params,
+                function (data) {
+
+                    $('.btn-submit-orgname').prop('disabled', false);
+
+                    if (data && data.status == 'ok') {
+                        $('#demo-form').addClass('hide');
+                        $('#demo-form-footer').addClass('hide');
+                        $('#demo-form-thanks').removeClass('hide');
+
+                        location.href = data.demoUrl;
+                    } else {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Please fill in all required fields',
+                            success: false
+                        });
+                    }
+                }
+            );
+        });
+
+        $.get(
+            '/services/hasdemoorgname',
+            function (data) {
+                if (data && data.status == 'ok' && data.hasDemoOrgName == false) {
+                    $('body').append('<div class="md-overlay"></div>');
+                    $('#modal-demoorgname-form').addClass('md-show');
+                    $('#orgname').focus();
+                }
+            }
+        )
+
+    });
+</script>

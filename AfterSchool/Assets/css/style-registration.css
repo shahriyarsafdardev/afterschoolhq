@@ -208,7 +208,7 @@ body.registration {
 }
 
 .participation-object-add > .panel {
-    background-color: #264770; /* #212a2d;*/
+    background-color: #2f3c40; /*#264770; /* #212a2d;*/
 }
 
 .registration-titlebar .org-logo-container {
@@ -304,7 +304,7 @@ body.registration {
 }
 
 .firsttime-information {
-    background-color: #264770; /*#212a2d;*/
+    background-color: #2f3c40; /*#264770; /*#212a2d;*/
     color: #fff;
     padding: 20px;
 }

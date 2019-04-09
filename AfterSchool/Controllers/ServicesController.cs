@@ -29,6 +29,26 @@ namespace AfterSchool.Controllers
             return false;
         }
 
+        public ActionResult SetDemoOrgName(string orgname)
+        {
+            var msgs = new SystemMessages();
+
+            if (orgname.IsNotBlank())
+            {
+                var uniqueName = AccountService.GenerateUniqueName(orgname, null, msgs);
+                CookieVariables.DemoOrgName = orgname;
+                CookieVariables.DemoUniqueOrgName = uniqueName;
+                return Json(new { status = "ok", demoUrl = $"/{uniqueName}" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult HasDemoOrgName()
+        {
+            return Json(new { status = "ok", hasDemoOrgName = CookieVariables.DemoOrgName.IsNotBlank() }, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult LeadForm(string org, string name, string email, string phone, string comments)
         {
             if (!IsRequestFromApp())
