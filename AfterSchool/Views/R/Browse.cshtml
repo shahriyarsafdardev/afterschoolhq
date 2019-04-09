@@ -6,9 +6,9 @@
     var grades = (List<GradeLevel>)ViewBag.Grades;
     var cart = (Cart)ViewBag.Cart;
     var locations = (List<Location>)ViewBag.Locations;
-    var showAdd = !Model.ID.HasValue || (Model.AccountTypeId.In(new List<AccountType>() { AccountType.ActivityProvider, AccountType.School }) &&
+    var showAdd = !Model.ID.HasValue || (
         SessionVariables.LoggedInUser.IsNotEmpty() &&
-        SessionVariables.AccountUserType.NotIn(UserType.Parent.AsList()));
+        SessionVariables.AccountUserType.NotIn(new List<UserType>() { UserType.Parent, UserType.Student }));
 
     var addActivityUrl = "";
 

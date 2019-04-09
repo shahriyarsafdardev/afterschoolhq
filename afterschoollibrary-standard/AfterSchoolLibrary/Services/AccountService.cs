@@ -48,6 +48,8 @@ namespace AfterSchoolLibrary.Services
 
             periods.ForEach(period => activities.AddRange(period.GetActivities(msgs, dc).Where(x => x.IsPubliclyViewable)));
 
+            activities.AddRange(Activity.LoadByProviderAccountId(account.ID.Value, msgs, dc).Where(activity => activity.IsOpenUpcomingOrRecentlyClosed(msgs, dc)));
+
             return activities;
         }
 

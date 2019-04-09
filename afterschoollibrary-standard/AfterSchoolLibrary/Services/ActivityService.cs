@@ -2231,5 +2231,26 @@ namespace AfterSchoolLibrary.Services
         {
             return ActivityMessage.LoadByActivityId(activity.ID.Value, msgs, dc);
         }
+
+        public static bool IsOpenUpcomingOrRecentlyClosed(this Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var regPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
+
+            if (regPeriod.IsEmpty())
+                return false;
+
+            var account = activity.GetAccount(msgs, dc);
+            var now = DateTime.UtcNow;
+
+            // currently open or upcoming
+            if (regPeriod.EndDateTime.Value >= account.ConvertFromAccountTimeZone(now))
+                return true;
+
+            // recently closed
+            if (regPeriod.EndDateTime.Value.AddWeeks(2) >= account.ConvertFromAccountTimeZone(now))
+                return true;
+
+            return false;
+        }
     }
 }
