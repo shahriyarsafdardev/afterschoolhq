@@ -10,6 +10,11 @@ body.am-box-layout{
     background-color: #f0f0f0;
 }
 
+hr {
+    border: solid 1px #f0f0f0;
+    width: 80%;
+}
+
 .am-top-header-darkgray{
     background-color: #555;
 }

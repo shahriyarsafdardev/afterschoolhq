@@ -80,7 +80,10 @@ namespace AfterSchool.Controllers
                 if (CookieVariables.DemoUniqueOrgName.IsNotEmpty() && accountname != CookieVariables.DemoUniqueOrgName)
                     return Redirect($"/{CookieVariables.DemoUniqueOrgName}");
 
-                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, grades);
+                var accountUniqueName = "";
+                (accountname, accountUniqueName) = GetDemoAccountDetails(accountname);
+
+                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, accountUniqueName, grades);
                 participationObjects = participationObjects.Take(11).ToList();
             }
 
@@ -94,6 +97,25 @@ namespace AfterSchool.Controllers
                                             .ToList();
 
             return View(account);
+        }
+
+        private (string AccountName, string AccountUniqueName) GetDemoAccountDetails(string accountName)
+        {
+            var accountUniqueName = "";
+
+            if (CookieVariables.DemoOrgName.IsNotEmpty())
+            {
+                accountName = CookieVariables.DemoOrgName;
+                accountUniqueName = CookieVariables.DemoUniqueOrgName;
+            }
+            else
+            {
+                var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                accountName = accountName.SplitByUpperCase();
+                accountUniqueName = reg.Replace(accountName.GetMaxWords(25), "");
+            }
+
+            return (accountName, accountUniqueName);
         }
 
         public ActionResult Activity(string accountname, string activitytype, string activityname)
@@ -115,7 +137,9 @@ namespace AfterSchool.Controllers
                 var locations = new List<Location>();
                 var grades = GradeLevel.Load(msgs: msgs);
 
-                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, grades);
+                var accountUniqueName = "";
+                (accountname, accountUniqueName) = GetDemoAccountDetails(accountname);
+                ParticipationObject.GenerateDemoObjects(ref account, participationObjects, locations, accountname, accountUniqueName, grades);
 
                 participationObject = participationObjects.Find(x => x.UniqueName.ToLower() == activityname);
             }

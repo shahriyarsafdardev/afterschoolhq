@@ -125,6 +125,12 @@ body.registration {
     font-size: 1.15em;
 }
 
+.activity-detail-block h3{
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
 .seats-remaining {
     color: #d0021b;
     font-size: 14px;
@@ -198,7 +204,6 @@ body.registration {
     min-height: 350px;
     position: relative;
     border-radius: 10px;
-    overflow: hidden;
 }
 
 .participation-object > .panel > .panel-footer {
@@ -209,6 +214,10 @@ body.registration {
 
 .participation-object-add > .panel {
     background-color: #2f3c40; /*#264770; /* #212a2d;*/
+}
+
+.participation-object-add > .panel > .panel-body {
+
 }
 
 .registration-titlebar .org-logo-container {

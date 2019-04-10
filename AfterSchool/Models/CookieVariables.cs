@@ -19,6 +19,18 @@ namespace AfterSchool.Models
 
             }
         }
+        public static string DemoFirstName
+        {
+            get
+            {
+                return GetCookie("DemoFirstName");
+            }
+            set
+            {
+                SetCookie("DemoFirstName", value);
+
+            }
+        }
 
         public static string DemoUniqueOrgName
         {

@@ -24,7 +24,13 @@
                     <div class="padding-20">
                         <form class="form">
                             <div class="form-group">
-                                <input type="text" id="orgname" class="form-control" placeholder="Your Organization or Program Name (required)" required="required" />
+                                <input type="text" id="orgname" class="form-control" placeholder="Organization or Program Name (required)" required="required" />
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="firstname" class="form-control" placeholder="Your First Name (required)" required="required" />
+                            </div>
+                            <div class="form-group hide">
+                                <input type="text" id="email" class="form-control" placeholder="Your Email (required)" required="required" />
                             </div>
                         </form>
                     </div>
@@ -52,14 +58,16 @@
     <script>
         PageEvent.add(PageEvent.AFTER_INIT, function() {
 
+            /*
             $('#orgname').keypress(function (e) {
-                if (e.which == 13) {
+                if (e.which == 13 || e.which == 10) {
                     $('.btn-submit-orgname').trigger('click');
                 }
             });
+            */
 
             $('.btn-submit-orgname').click(function () {
-                var params = 'orgname=' + $('#orgname').val();
+                var params = 'orgname=' + $('#orgname').val() + '&firstname=' + $('#firstname').val() + '&email=' + encodeURIComponent($('#email').val());
 
                 $('.btn-submit-orgname').prop('disabled', true);
 

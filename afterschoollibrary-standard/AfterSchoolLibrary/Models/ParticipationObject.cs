@@ -526,19 +526,17 @@ namespace AfterSchoolLibrary.Models
             return activities;
         }
 
-        public static void GenerateDemoObjects(ref Account account, List<ParticipationObject> participationObjects, List<Location> locations, string accountName, List<GradeLevel> grades)
+        public static void GenerateDemoObjects(ref Account account, List<ParticipationObject> participationObjects, List<Location> locations, string accountName, string accountUniqueName, List<GradeLevel> grades)
         {
-            var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            var accountUniqueName = reg.Replace(accountName.GetMaxWords(25), "");
-
             account = new Account()
             {
-                Name = accountName.SplitByUpperCase(),
+                Name = accountName,
                 UniqueName = accountUniqueName,
                 IsActive = true,
                 Uid = Guid.NewGuid()
             };
 
+            var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
             var schedule = ActivitySchedule.GetNewDefaultSchedule(generateDates: true);
             var currentAccount = account;
 

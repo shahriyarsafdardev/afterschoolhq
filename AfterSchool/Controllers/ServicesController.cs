@@ -29,19 +29,30 @@ namespace AfterSchool.Controllers
             return false;
         }
 
-        public ActionResult SetDemoOrgName(string orgname)
+        public ActionResult SetDemoOrgName(string orgname, string firstname, string email)
         {
             var msgs = new SystemMessages();
 
-            if (orgname.IsNotBlank())
+            if (orgname.IsBlank())
+                msgs.Add("Organization / Program name is required", MessageType.UserError);
+
+            if (firstname.IsBlank())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (email.IsBlank() && false)
+                msgs.Add("Email is required", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
             {
                 var uniqueName = AccountService.GenerateUniqueName(orgname, null, msgs);
                 CookieVariables.DemoOrgName = orgname;
                 CookieVariables.DemoUniqueOrgName = uniqueName;
+                CookieVariables.DemoFirstName = firstname;
+
                 return Json(new { status = "ok", demoUrl = $"/{uniqueName}" }, JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { status = "error" }, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult HasDemoOrgName()
