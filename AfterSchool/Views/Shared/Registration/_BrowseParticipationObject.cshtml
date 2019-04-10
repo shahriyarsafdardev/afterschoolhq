@@ -19,7 +19,13 @@
 
     <div class="panel">
         <div class="heading panel-h3">
-            <h3><strong>@Model.Name</strong></h3>
+            <h3>
+                <strong>@Model.Name</strong>
+                @if (!Model.ObjectID.HasValue)
+                {
+                    <span class="badge badge-danger">DEMO</span>
+                }
+            </h3>
         </div>
         <div class="panel-body">
             <div>
