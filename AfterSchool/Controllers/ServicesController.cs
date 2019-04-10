@@ -39,7 +39,7 @@ namespace AfterSchool.Controllers
             if (firstname.IsBlank())
                 msgs.Add("First Name is required", MessageType.UserError);
 
-            if (email.IsBlank() && false)
+            if (!email.IsEmail())
                 msgs.Add("Email is required", MessageType.UserError);
 
             if (msgs.HasNoErrors())
@@ -48,6 +48,7 @@ namespace AfterSchool.Controllers
                 CookieVariables.DemoOrgName = orgname;
                 CookieVariables.DemoUniqueOrgName = uniqueName;
                 CookieVariables.DemoFirstName = firstname;
+                CookieVariables.DemoEmailAddress = email;
 
                 return Json(new { status = "ok", demoUrl = $"/{uniqueName}" }, JsonRequestBehavior.AllowGet);
             }

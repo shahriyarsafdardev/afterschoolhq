@@ -14,7 +14,7 @@
 
         if (!Model.ID.HasValue)
         {
-            addActivityUrl = Url.Action("index", "signup", new { orgname = Model.Name });
+            addActivityUrl = Url.Action("index", "signup");
             footerText = $"Customize this page by creating your first {UILabel.ActivityLabel().ToLower()}";
         }
     }

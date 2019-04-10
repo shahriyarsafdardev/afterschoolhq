@@ -16,40 +16,45 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult Index()
         {
+            var signupIndexVM = new SignUpIndexViewModel()
+            {
+                FirstName = CookieVariables.DemoFirstName,
+                Email = CookieVariables.DemoEmailAddress,
+                OrgName = CookieVariables.DemoOrgName
+            };
+
             ViewBag.Messages = new SystemMessages();
-            return View();
+            return View(signupIndexVM);
         }
 
         [HttpPost]
-        public ActionResult Index(string orgname, string orgtype, string phone, string firstname, string lastname, string email, string password1, string password2)
+        public ActionResult Index(SignUpIndexViewModel model)
         {
             var msgs = new SystemMessages();
 
-            if (orgname.IsEmpty())
+            if (model.OrgName.IsEmpty())
                 msgs.Add("Organization / Program Name is required", MessageType.UserError);
 
-            if (!orgtype.IsNumber())
+            if (!model.OrgType.HasValue)
                 msgs.Add("Organization Type is required", MessageType.UserError);
 
-            if (!orgtype.IsNumber())
+            if (!model.OrgPhone.IsNumber())
                 msgs.Add("Organization Phone is required", MessageType.UserError);
 
-            if (firstname.IsEmpty())
+            if (model.FirstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
 
-            if (lastname.IsEmpty())
+            if (model.LastName.IsEmpty())
                 msgs.Add("Last Name is required", MessageType.UserError);
 
-            if (email.IsEmpty())
-                msgs.Add("Email is required", MessageType.UserError);
-            else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+            if (!model.Email.IsEmail())
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (WebUser.ExistsByEmail(email, msgs))
+            else if (WebUser.ExistsByEmail(model.Email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);
 
-            if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
+            if (model.Password1.IsEmpty() || model.Password2.IsEmpty() || (model.Password1 != model.Password2))
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
-            else if (password1.Length < 8)
+            else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
             if (msgs.HasNoErrors())
@@ -62,11 +67,11 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         user = WebUserService.CreateNew(
-                            firstName: firstname,
-                            lastName: lastname,
-                            email: email,
-                            phone: phone,
-                            password: password1,
+                            firstName: model.FirstName,
+                            lastName: model.LastName,
+                            email: model.Email,
+                            phone: model.OrgPhone,
+                            password: model.Password2,
                             isActive: true,
                             isRegistered: true,
                             isVerified: false,
@@ -77,10 +82,10 @@ namespace AfterSchool.Controllers
 
                         if (user.IsNotEmpty())
                             account = user.AddNewAccount(
-                                orgName: orgname,
-                                phone: phone,
+                                orgName: model.OrgName,
+                                phone: model.OrgPhone,
                                 isActive: true,
-                                accountType: (AccountType)orgtype.ToInteger(),
+                                accountType: model.OrgType.Value,
                                 addDefaultPackage: true,
                                 isAfterSchool: true,
                                 loggedInUser: user,
@@ -108,7 +113,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
 
-            return View();
+            return View(model);
         }
 
         [HttpGet]

@@ -4,8 +4,8 @@
 {
     <div id="modal-demoorgname-form" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
         <div class="md-content">
-            <div class="modal-header hide">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close" id="modal-demoorgname-form-close"></i></button>
                 <div class="hidden-xs">
                     <h2 class="modal-title">Get Started</h2>
                 </div>
@@ -24,13 +24,13 @@
                     <div class="padding-20">
                         <form class="form">
                             <div class="form-group">
-                                <input type="text" id="orgname" class="form-control" placeholder="Organization or Program Name (required)" required="required" />
+                                <input type="text" id="demo-orgname" class="form-control" placeholder="Organization or Program Name (required)" required="required" />
                             </div>
                             <div class="form-group">
-                                <input type="text" id="firstname" class="form-control" placeholder="Your First Name (required)" required="required" />
+                                <input type="text" id="demo-firstname" class="form-control" placeholder="Your First Name (required)" required="required" />
                             </div>
-                            <div class="form-group hide">
-                                <input type="text" id="email" class="form-control" placeholder="Your Email (required)" required="required" />
+                            <div class="form-group">
+                                <input type="text" id="demo-email" class="form-control" placeholder="Your Email (required)" required="required" />
                             </div>
                         </form>
                     </div>
@@ -67,7 +67,7 @@
             */
 
             $('.btn-submit-orgname').click(function () {
-                var params = 'orgname=' + $('#orgname').val() + '&firstname=' + $('#firstname').val() + '&email=' + encodeURIComponent($('#email').val());
+                var params = 'orgname=' + $('#demo-orgname').val() + '&firstname=' + $('#demo-firstname').val() + '&email=' + encodeURIComponent($('#demo-email').val());
 
                 $('.btn-submit-orgname').prop('disabled', true);
 
@@ -105,6 +105,11 @@
                     }
                 }
             )
+
+            $('#modal-demoorgname-form-close').click(function () {
+                $('#modal-demoorgname-form').removeClass('md-show');
+                $('.md-overlay').remove();
+            });
 
         });
     </script>

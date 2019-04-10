@@ -2,6 +2,7 @@
 
 @{
     var condensed = false;
+    var accountOwner = Model.OwnerAccount.ID.HasValue ? Model.OwnerAccount.GetAccountOwner() : null;
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
@@ -11,7 +12,7 @@
 
 @if (!Model.OwnerAccount.ID.HasValue)
 {
-    <a href="@Url.Action("index", "signup", new {orgname = Model.OwnerAccount.Name })" class="btn btn-register">
+    <a href="@Url.Action("index", "signup")" class="btn btn-register">
         @if (condensed)
         {
             @: Customize &raquo;
@@ -26,22 +27,45 @@
             </div>
         }
     </a>
-
-    <button class="btn btn-register md-trigger hide" data-modal="modal-lead-form">
-        @if (condensed)
-        {
-            @: Get Started &raquo;
-        }
-        else
-        {
-            <div class="hidden-xs">
-                Get Started with @UILabel.ProductName()  &raquo;
-            </div>
-            <div class="hidden-sm hidden-md hidden-lg">
-                Get Started &raquo;
-            </div>
-        }
-    </button>
+}
+else if (accountOwner.IsNotEmpty() && !accountOwner.VerifiedAccount)
+{
+    if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.LoggedInUser.HasAccessTo(Model.OwnerAccount))
+    {
+        <button class="btn btn-register" onclick="AccountSetup.sendVerificationEmail()">
+            @if (condensed)
+            {
+                @: Verify Email
+            }
+            else
+            {
+                <div class="hidden-xs">
+                    Registration Not Enabled &raquo; Verify your email
+                </div>
+                <div class="hidden-sm hidden-md hidden-lg">
+                    Verify Email &raquo;
+                </div>
+            }
+        </button>
+    }
+    else
+    {
+        <button class="btn btn-register" disabled title="The account owner has not verified their account">
+            @if (condensed)
+            {
+                @: Registration Disabled
+            }
+            else
+            {
+                <div class="hidden-xs">
+                    Registration Not Enabled &raquo;
+                </div>
+                <div class="hidden-sm hidden-md hidden-lg">
+                    Registration Disabled &raquo;
+                </div>
+            }
+        </button>
+    }
 }
 else
 {

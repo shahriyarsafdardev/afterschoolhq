@@ -525,6 +525,7 @@
     <Compile Include="Models\SessionHelper.cs" />
     <Compile Include="Models\CookieVariables.cs" />
     <Compile Include="Models\SessionVariables.cs" />
+    <Compile Include="Models\SignUpIndexViewModel.cs" />
     <Compile Include="Models\UI.cs" />
     <Compile Include="Models\UILabel.cs" />
     <Compile Include="Models\Utilities.cs" />
