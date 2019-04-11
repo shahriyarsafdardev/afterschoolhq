@@ -2,14 +2,14 @@
   <p>Hey @Model.FirstName,</p>
 
   <p>
-      We're glad to have you as a customer of @Model.ProductName! We want to make this experience the best you've had ever when enrolling students for your programs and activities. 
+    We're excited to have you on board as a part of the @Model.ProductName community! We hope to make this your smoothest and most efficient experience enrolling students for your afterschool programs and activities.    
   </p>
 
   <p>
-      Don't worry about anything, we'll be here to help you along the way. If you have any questions please <a href="mailto:@Model.SupportEmail">contact our support team</a>.
+    We're here to help, so if you have any questions along the way, please contact our friendly <a href="mailto:@Model.SupportEmail">support team</a>.
   </p>
   <p>
-      We're excited to help you succeed and watch your students grow!
+    We're excited to help you succeed and watch your students grow!
   </p>
   <p>
       Darye Henry<br />
