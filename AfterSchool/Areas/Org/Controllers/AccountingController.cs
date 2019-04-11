@@ -21,6 +21,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         // GET: Org/Accounting
+        [HttpGet]
         public ActionResult Index(string pn, string rpp, string sdate, string edate)
         {
             var msgs = new SystemMessages();
@@ -74,6 +75,72 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalPages = totalPages
             };
             return View(allTransactions);
+        }
+
+        [HttpGet]
+        public ActionResult Payouts(string pn, string rpp, string sdate, string edate)
+        {
+            var msgs = new SystemMessages();
+            int pageNumber = 1;
+            int recordsPerPage = 25;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var startDate = sdate.IsDateTime() ?
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
+                new DateTime?();
+            var endDate = edate.IsDateTime() ?
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
+                new DateTime?();
+            
+            var totalPayoutAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.Completed, startDate, endDate, msgs);
+            var totalPayoutCount = SessionVariables.CurrentAccount.GetPayoutCount(null, startDate, endDate);            
+            var payouts = SessionVariables.CurrentAccount.GetPayouts(null, startDate, endDate, start, length);
+            var totalPages = Math.Ceiling(totalPayoutCount.ToDouble() / recordsPerPage).ToInteger();
+
+            payouts.ForEach(payout =>
+                payout.DateRequested = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(payout.DateRequested.Value)
+            );
+
+            // sort transactions
+            payouts = payouts.OrderByDescending(x => x.ID).ToList();            
+
+            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs); 
+            ViewBag.LastPayout = SessionVariables.CurrentAccount.GetLastPayout(msgs);
+            ViewBag.TotalPayoutAmount = totalPayoutAmount;
+            ViewBag.TotalPendingAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.InProgress, msgs: msgs);
+            ViewBag.Messages = msgs;
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalPayoutCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+            return View(payouts);
+        }
+
+        [HttpPost]
+        public ActionResult RequestPayout(string payoutamount)
+        {
+            var msgs = new SystemMessages();
+            var maxAmountAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
+
+            if (!payoutamount.IsNumber() || payoutamount.ToDecimal() < 0 || payoutamount.ToDecimal() > maxAmountAvailable)
+                msgs.Add($"Amount must be a number greater than $0 and less than {maxAmountAvailable.ToCurrency()}", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+                SessionVariables.CurrentAccount.RequestNewPayout(payoutamount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
+
+            return RedirectToAction("payouts");
+
         }
 
         //[HttpPost]

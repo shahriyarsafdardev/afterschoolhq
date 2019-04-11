@@ -3,6 +3,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using AfterSchoolLibrary.Models;
+using System.Collections.Generic;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -156,6 +157,23 @@ namespace AfterSchoolLibrary.Services
         public static Account GetAccount(this StripeAccount stripeAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Account.Load(stripeAccount.AccountId.Value, msgs, dc);
+        }
+
+        public static void SendPayout(this StripeAccount stripeAccount, Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var requestor = payout.GetRequestor(msgs, dc);
+
+            StripeHelper.CreatePayout(
+                amount: payout.Amount.Value, 
+                destinationId: account.StripeUserId, 
+                metaData: new Dictionary<string, string>()
+                {
+                    { "AccountUid", account.Uid.ToString() },
+                    { "RequestedBy", requestor.Uid.ToString() },
+                    { "ApprovedBy", loggedInUser.Uid.ToString() },
+                    { "DateRequested", payout.DateRequested.ToShortDateTimeString() }
+                }, 
+                msgs);
         }
     }
 }

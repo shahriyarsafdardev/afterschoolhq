@@ -247,6 +247,44 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
 
+        #region StripePayouts
+
+        private static PayoutService GetPayoutService()
+        {
+            return new PayoutService(StripeAccessToken);
+        }
+
+        public static Stripe.Payout CreatePayout(decimal amount, string destinationId, Dictionary<string, string> metaData, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new PayoutCreateOptions()
+            {
+                Amount = (long)(amount * 100),
+                Currency = "usd",
+                Destination = destinationId,
+                Metadata = metaData,
+                Method = "standard",
+                StatementDescriptor = "AHQ Payout"
+            };
+
+            Stripe.Payout stripePayout = null;
+
+            try
+            {
+                stripePayout = GetPayoutService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Payout was not created", MessageType.UserError);
+            }
+
+            return stripePayout;
+        }
+
+        #endregion
+
         #region StripeFiles
 
         private static FileService GetFileUploadService()

@@ -12,6 +12,8 @@
 
 <div class="main-content">
 
+    @{ Html.RenderPartial("_AccountingHeader"); }
+
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
     <div class="panel panel-default">
@@ -113,9 +115,9 @@
                             <th>Payer</th>
                             <th>For</th>
                             <th>Item Description</th>
-                            <th class="text-center">Total Paid</th>                            
+                            <th class="text-center">Total Amt Paid</th>                            
                             <th class="text-center">Platform Fee</th>
-                            <th class="text-center">Payout</th>
+                            <th class="text-center">Your Amount</th>
                             @*<th>Refund</th>*@
                         </tr>
                     </thead>

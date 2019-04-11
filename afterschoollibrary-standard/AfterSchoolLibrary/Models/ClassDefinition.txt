@@ -350,6 +350,17 @@ loadmethod: InviteCodeToShare
 
 [begin]
 type: Class
+name: CheckPaymentAccount
+description: Where legal details and other info is stored for the account holder, specifically for sending checks
+inherits: BaseLocation
+property: AccountId, int?, Int, required
+property: IsVerified, bool, Bit, required, If the address is a real US address
+property: LegalEntityTypeId, LegalEntityType, Int, required
+loadmethod: AccountId
+[end]
+
+[begin]
+type: Class
 name: StripeAccount
 description: Where legal details and other info is stored for the stripe account holder
 inherits: BasicObjectWithModified
@@ -1344,6 +1355,23 @@ loadmethod: OriginalTransactionId, List<>
 
 [begin]
 type: Class
+name: Payout
+description: Used to transfer money from the AHQ Platform to the provider
+inherits: BasicObjectWithModified
+property: AccountId, int?, Int, required
+property: Uid, Guid, UniqueIdentifier
+property: Amount, decimal?, Money, required
+property: PayoutStatusId, PayoutStatus, Int, required
+property: PaymentTypeId, PaymentType, Int, required
+property: DateRequested, DateTime?, DateTime, required
+property: RequestedBy, int?, Int, required
+loadmethod: AccountId, List<>
+loadmethod: AccountId|PayoutStatusId, List<>
+loadmethod: Uid
+[end]
+
+[begin]
+type: Class
 name: Product
 description: Used to create a product for a particular account. Products can be T-shirts, etc.
 serializable: true
@@ -1573,6 +1601,12 @@ values: NotSet, Past, Current, Future
 type: Enum
 name: HostPermissionType
 values: NotSet, ApproveOnly, Edit, Admin
+[end]
+
+[begin]
+type: Enum
+name: PayoutStatus
+values: NotSet, Requested, Approved, Denied, InProgress, Error, Completed
 [end]
 
 [begin]

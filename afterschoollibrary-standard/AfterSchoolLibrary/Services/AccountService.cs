@@ -1701,6 +1701,49 @@ namespace AfterSchoolLibrary.Services
 
         #region Finance
 
+        public static Payout RequestNewPayout(this Account account, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var stripeAccount = account.GetStripeAccount(msgs, dc);
+            var paymentType = PaymentType.NotSet;
+
+            if (stripeAccount.PayoutsEnabled)
+                paymentType = PaymentType.ACH;
+            else if (account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty())
+                paymentType = PaymentType.Check;
+            else
+                msgs.Add("No payment account defined", MessageType.UserError);
+
+            if (paymentType == PaymentType.NotSet)
+                return null;
+
+            return PayoutService.CreateNew(account, PayoutStatus.Requested, amount, paymentType, loggedInUser, msgs, dc);
+        }
+
+        public static List<Payout> GetPayouts(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Payout.LoadPayouts(account.ID.Value, payoutStatus, startDate, endDate, start, length, msgs, dc);
+        }
+
+        public static Payout GetLastPayout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Payout.GetLastPayout(account.ID.Value, msgs, dc);
+        }
+
+        public static decimal GetMaxAmountAvailableForPayout(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var totalPayoutAmount = account.GetTotalPayoutAmount(null, msgs: msgs, dc: dc);
+            var totalAmountPaid = account.GetTotalAmountBilledOut(msgs: msgs, dc: dc);
+            // var totalAmountRefunded = account.GetTotalAmountRefundedTo(startDate, endDate, msgs);
+            var totalFeesPaid = account.GetTotalFeesPaidAsBiller(null, null, msgs);
+
+            return totalAmountPaid - totalFeesPaid - totalPayoutAmount;
+        }
+
+        public static int GetPayoutCount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Payout.GetCountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
+        }
+
         public static List<Transaction> GetBilledTransactions(this Account account, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByBillerAccountId(account.ID.Value, startDate, endDate, start, length, msgs, dc);
@@ -2193,6 +2236,11 @@ namespace AfterSchoolLibrary.Services
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static CheckPaymentAccount GetCheckPaymentAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return CheckPaymentAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var oldPaymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
@@ -2471,6 +2519,11 @@ namespace AfterSchoolLibrary.Services
             );
 
             return accountActivityGroups;
+        }
+
+        public static decimal GetTotalPayoutAmount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Payout.GetTotalAmountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
         }
 
         public static decimal GetTotalAmountBilledOut(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)

@@ -1091,6 +1091,8 @@
     <Content Include="Assets\lib\jquery.niftymodals\fonts\codropsicons\codropsicons.ttf" />
     <Content Include="Assets\lib\jquery.niftymodals\fonts\codropsicons\codropsicons.woff" />
     <Content Include="Assets\lib\jquery.niftymodals\README.md" />
+    <Content Include="Areas\Org\Views\Accounting\Payouts.cshtml" />
+    <Content Include="Areas\Org\Views\Shared\_AccountingHeader.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

@@ -31,6 +31,7 @@ namespace AfterSchoolLibraryTests.Tests
                 bankAccountId: "bank_a9ca0ac762c4040",
                 amount: 300,
                 memo: "Heres your paycheck",
+                metaData: new { },
                 msgs: msgs);
         }
 

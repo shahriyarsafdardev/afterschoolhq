@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Helpers
             return new Lob.Services.CheckService(SecretKey);
         }
 
-        public static Lob.Models.Check CreateCheck(string description, Lob.Models.AccountType accountType, string toName, string toAddress1, string toAddress2, string toCity, string toState, string toPostalCode, string fromAddressId, string bankAccountId, decimal amount, string memo, SystemMessages msgs)
+        public static Lob.Models.Check CreateCheck(string description, Lob.Models.AccountType accountType, string toName, string toAddress1, string toAddress2, string toCity, string toState, string toPostalCode, string fromAddressId, string bankAccountId, decimal amount, string memo, dynamic metaData, SystemMessages msgs)
         {
             var toAddress = new Lob.Models.AddressCreateOptions()
             {
@@ -68,7 +68,8 @@ namespace AfterSchoolLibrary.Helpers
                 FromAddressId = fromAddressId,
                 BankAccountId = bankAccountId,
                 Amount = amount,
-                Memo = memo
+                Memo = memo,
+                MetaData = metaData
             };
 
             Lob.Models.Check check = null;
