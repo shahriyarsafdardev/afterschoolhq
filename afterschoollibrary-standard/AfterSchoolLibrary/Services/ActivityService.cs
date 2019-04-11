@@ -1114,6 +1114,9 @@ namespace AfterSchoolLibrary.Services
                                 msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
                         }
 
+                        if (activity.LeaderTypeId == ActivityLeaderType.ExternalProvider && provider.IsEmpty() && providername.IsEmpty())
+                            amsgs.Add("External provider information is required", MessageType.UserError);
+
                         //setup provider
                         if (amsgs.HasNoErrors() && (provider.IsNotEmpty() || providername.IsNotEmpty()))
                         {
