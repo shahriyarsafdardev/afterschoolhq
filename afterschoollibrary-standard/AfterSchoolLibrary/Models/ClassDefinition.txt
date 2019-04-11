@@ -373,6 +373,7 @@ property: BusinessPhone, string, NVarChar "20"
 property: SupportPhone, string, NVarChar "50"
 property: SupportEmail, string, NVarChar "100"
 property: BusinessUrl, string, NVarChar "100"
+property: ProductDescription, string, NVarChar "400"
 property: RequiresFullSSN, bool, Bit
 property: VerificationStatusId, StripeVerificationStatus, Int
 property: ChargesEnabled, bool, Bit

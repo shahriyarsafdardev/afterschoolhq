@@ -86,6 +86,7 @@ namespace AfterSchoolLibrary.Services
                 ein: ahqStripeAccount.LegalEntityEIN,
                 businessUrl: ahqStripeAccount.BusinessUrl,
                 businessPhone: ahqStripeAccount.BusinessPhone,
+                productDescription: ahqStripeAccount.ProductDescription,
                 documentFileId: stripeFileUpload?.Id,
                 tosAcceptanceDate: ahqStripeAccount.TOSAcceptanceDate.Value,
                 tosIPAddress: ahqStripeAccount.TOSAcceptanceIP,

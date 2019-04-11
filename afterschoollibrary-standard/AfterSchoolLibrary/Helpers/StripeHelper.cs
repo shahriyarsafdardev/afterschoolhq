@@ -169,7 +169,7 @@ namespace AfterSchoolLibrary.Billing
             return bankAccount;
         }
 
-        public static Stripe.Account UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime? dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
+        public static Stripe.Account UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime? dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string productDescription, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -189,7 +189,8 @@ namespace AfterSchoolLibrary.Billing
                 {
                     SupportEmail = supportEmail,
                     SupportPhone = supportPhone,
-                    Url = businessUrl
+                    Url = businessUrl,
+                    ProductDescription = productDescription
                 },
                 BusinessType = entityType.ToString().ToLower(),
                 TosAcceptance = new AccountTosAcceptanceOptions()

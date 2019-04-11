@@ -162,7 +162,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult PaymentsEntity(string entityType, string firstName, string lastName, string address1, string address2, string city, string state, string postalCode, string dateOfBirth, string ssn, string ssnLast4, string legalbusinessname, string businessUrl, string supportphone, string supportemail, string businessPhone, string ein, string tosagree)
+        public ActionResult PaymentsEntity(string entityType, string firstName, string lastName, string address1, string address2, string city, string state, string postalCode, string dateOfBirth, string ssn, string ssnLast4, string legalbusinessname, string businessUrl, string supportphone, string supportemail, string businessPhone, string productDescription, string ein, string tosagree)
         {
             var msgs = new SystemMessages();
             var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
@@ -204,6 +204,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!tosagree.IsBoolean() || !tosagree.ToBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
 
+            if (businessUrl.IsEmpty() && productDescription.IsEmpty())
+                msgs.Add("You must enter either a website or a Service Description", MessageType.UserError);
+
             if (stripeAccount.RequiresFullSSN)
             {
                 if (ssn.IsEmpty())
@@ -235,6 +238,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 stripeAccount.SupportEmail = supportemail;
                 stripeAccount.BusinessUrl = businessUrl;
                 stripeAccount.BusinessPhone = businessPhone;
+                stripeAccount.ProductDescription = productDescription;
 
                 if (entityTypeId == LegalEntityType.Company)
                 {
