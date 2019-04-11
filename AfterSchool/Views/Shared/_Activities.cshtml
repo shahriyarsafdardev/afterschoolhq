@@ -85,17 +85,17 @@ else
         <p></p>
     }
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="pull-right">
-                <a href="@currentListUrl" class="@currentClass">Current</a> |
-                @if (hasArchivedActivities)
-                {
-                    <a href="@archivedListUrl" class="@archiveClass">Archived</a>
-                }
+    @if (hasArchivedActivities)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pull-right">
+                    <a href="@currentListUrl" class="@currentClass">Current</a> |                
+                    <a href="@archivedListUrl" class="@archiveClass">Archived</a>                
+                </div>
             </div>
         </div>
-    </div>
+    }
 
     <div class="table-responsive">
         <table class="table table-hover">
