@@ -1113,10 +1113,7 @@ namespace AfterSchoolLibrary.Services
                             if (!account.DefaultLocationId.HasValue)
                                 msgs.AddRange(account.SetDefaultLocation(activity.LocationId.Value, loggedInUserId, dc));
                         }
-
-                        if (activity.LeaderTypeId == ActivityLeaderType.ExternalProvider && provider.IsEmpty() && providername.IsEmpty())
-                            amsgs.Add("External provider information is required", MessageType.UserError);
-
+                       
                         //setup provider
                         if (amsgs.HasNoErrors() && (provider.IsNotEmpty() || providername.IsNotEmpty()))
                         {
@@ -1399,7 +1396,7 @@ namespace AfterSchoolLibrary.Services
             Account providerAccount = null;
 
             // provider already exists
-            if (provider.IsNumber())
+            if (provider.IsNumber() && provider.ToInteger() > 0)
                 providerAccount = Account.Load(provider.ToInteger(), msgs, dc);
             else
             {
