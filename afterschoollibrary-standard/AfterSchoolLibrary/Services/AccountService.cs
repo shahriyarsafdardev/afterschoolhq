@@ -93,6 +93,11 @@ namespace AfterSchoolLibrary.Services
             return Activity.GetCount(new Hashtable() { { "AccountId", account.ID.Value } }, msgs, dc);
         }
 
+        public static bool HasActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.GetActivityCount(msgs, dc) > 0;
+        }
+
         public static UserType[] AdminUserTypes
         {
             get

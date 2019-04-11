@@ -2,6 +2,7 @@
 @{
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
     ViewBag.Title = "Getting Started";
+    var hasActivities = (bool)ViewBag.HasActivities;
 }
 
 <div>
@@ -16,21 +17,34 @@
                     <p class="padding-v-10">
                         You've setup your payments account on the best platform for afterschool @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower(). When a parent registers for your activity you will receive a payment within 2 days in your bank account.
                     </p>
-                    <p class="padding-v-10">
-                        <strong>@SessionVariables.LoggedInUser.FirstName, did you know you can use @UILabel.ProductName() totally free?</strong><br /><br /> We help you promote your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() to parents to get more seats filled, quicker.
-                    </p>
-                    <p class="padding-v-10">
-                        Get started by creating your first activity. You are on your way to reducing clutter, increasing parent satisfaction, and increasing afterschool safety and awareness.
-                    </p>
-                    <p class="padding-v-10">
-                        <div class="pull-right padding-v-10">
-                            <a href="@Url.Action("editsetup", "activity", new { isnew = 1 })" class="btn btn-primary btn-lg">Create your first activity &raquo;</a>
-                        </div>
 
-                        <div class="pull-left padding-v-10">
-                            <a href="@Url.Action("index", "activity")" class="text-muted text-small">Explore on my own</a>
-                        </div>
-                    </p>
+                    @if (!hasActivities)
+                    {
+                         <p class="padding-v-10">
+                            <strong>@SessionVariables.LoggedInUser.FirstName, did you know you can use @UILabel.ProductName() totally free?</strong><br /><br /> We help you promote your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() to parents to get more seats filled, quicker.
+                        </p>
+                        <p class="padding-v-10">
+                            Get started by creating your first activity. You are on your way to reducing clutter, increasing parent satisfaction, and increasing afterschool safety and awareness.
+                        </p>
+                        <p class="padding-v-10">
+                            <div class="pull-right padding-v-10">
+                                <a href="@Url.Action("editsetup", "activity", new { isnew = 1 })" class="btn btn-primary btn-lg">Create your first activity &raquo;</a>
+                            </div>
+
+                            <div class="pull-left padding-v-10">
+                                <a href="@Url.Action("index", "activity")" class="text-muted text-small">Explore on my own</a>
+                            </div>
+                        </p>
+                    }
+                    else
+                    {
+                         <p class="padding-v-10">
+                            <div class="pull-left padding-v-10">
+                                <a href="@Url.Action("index", "home")" class="text-muted text-small">Continue to Dashboard &raquo;</a>
+                            </div>
+                        </p>
+                    }
+
                 </div>
             </div>
         </div>

@@ -331,6 +331,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
 
+            ViewBag.HasActivities = SessionVariables.CurrentAccount.HasActivities(msgs);
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
