@@ -4,20 +4,19 @@ using Stripe;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using AfterSchoolLibrary.Helpers;
-using AfterSchoolLibrary.Models;
+using System.Configuration;
 
 namespace AfterSchoolLibrary.Billing
 {
     public class StripeHelper
     {
-        private const string TestSecretKey = "sk_test_gfeMjl5rgl16L1HHITh3YT5s";
-        private const string TestPublishableKey = "pk_test_wuL50O8i1mAzrmV2xDAXuClJ";
-        private const string LiveSecretKey = "sk_live_SDa559erkpDCJ9BkrPS58GrC";
-        private const string LivePublishableKey = "pk_live_4q5JuU2JIxsjWfQauJ7bNISK";
+        private static string TestSecretKey { get { return "sk_test_gfeMjl5rgl16L1HHITh3YT5s"; } }
+        private static string TestPublishableKey { get { return "pk_test_wuL50O8i1mAzrmV2xDAXuClJ"; } }
+        private static string LiveSecretKey { get { return ConfigurationManager.AppSettings["Stripe.LiveSecretKey"]; } }
+        private static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Stripe.LivePublishableKey"]; } }
 
-        private const string DevPlatformClientId = "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv";
-        private const string LivePlatformClientId = "ca_7kmNqL4oMYfH5z7tY2N9riALjFpkMJAQ";
+        private static string DevPlatformClientId { get { return "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv"; } }
+        private static string LivePlatformClientId { get { return ConfigurationManager.AppSettings["Stripe.LivePlatformClientId"]; } }
 
         public const decimal StripePercentFee = .029M;
         public const decimal StripeFlatFee = .3M;

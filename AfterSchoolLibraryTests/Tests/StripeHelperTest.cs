@@ -11,8 +11,6 @@ namespace AfterSchoolLibraryTests.Tests
 {
     public class StripeHelperTest : BaseTest
     {
-        private StripeHelper StripeHelper;
-
         public StripeHelperTest(ITestOutputHelper output) : base(output)
         {
         }
