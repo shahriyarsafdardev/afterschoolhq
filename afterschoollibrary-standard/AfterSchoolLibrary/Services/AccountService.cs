@@ -1708,15 +1708,24 @@ namespace AfterSchoolLibrary.Services
 
             if (stripeAccount.PayoutsEnabled)
                 paymentType = PaymentType.ACH;
-            else if (account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty())
-                paymentType = PaymentType.Check;
             else
-                msgs.Add("No payment account defined", MessageType.UserError);
+            {
+                var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
+                if (checkAccount.IsNotEmpty())
+                {
+                    if (!checkAccount.IsVerified)
+                        msgs.Add("Your payment address is not verified. Please correct in Settings > Accept Payments", MessageType.UserError);
+                    else
+                        paymentType = PaymentType.Check;
+                }
+            }
 
-            if (paymentType == PaymentType.NotSet)
-                return null;
+            if (paymentType != PaymentType.NotSet)
+                return PayoutService.CreateNew(account, PayoutStatus.Requested, amount, paymentType, loggedInUser, msgs, dc);
+            
+            msgs.Add("No payment account defined", MessageType.UserError);
 
-            return PayoutService.CreateNew(account, PayoutStatus.Requested, amount, paymentType, loggedInUser, msgs, dc);
+            return null;
         }
 
         public static List<Payout> GetPayouts(this Account account, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -2238,28 +2247,46 @@ namespace AfterSchoolLibrary.Services
 
         public static CheckPaymentAccount CreateOrUpdateCheckPaymentAccount(this Account account, LegalEntityType legalEntityType, string name, string address1, string address2, string city, string state, string postalCode, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
+            CheckPaymentAccount checkAccount = null;
 
-            if (checkAccount.IsEmpty())
-                checkAccount = new CheckPaymentAccount
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUser.ID,
-                    AccountId = account.ID
-                };
+                    checkAccount = account.GetCheckPaymentAccount(amsgs, adc);
 
-            checkAccount.LegalEntityTypeId = legalEntityType;
-            checkAccount.Name = name;
-            checkAccount.Address1 = address1;
-            checkAccount.Address2 = address2;
-            checkAccount.City = city;
-            checkAccount.State = state;
-            checkAccount.PostalCode = postalCode;
-            checkAccount.LastModifiedDate = DateTime.UtcNow;
-            checkAccount.LastModifiedBy = loggedInUser.ID;
-            checkAccount.Country = "US";
-            msgs.AddRange(checkAccount.Save());
+                    if (checkAccount.IsEmpty())
+                        checkAccount = new CheckPaymentAccount
+                        {
+                            CreateDate = DateTime.UtcNow,
+                            CreatedBy = loggedInUser.ID,
+                            AccountId = account.ID
+                        };
 
+                    checkAccount.LegalEntityTypeId = legalEntityType;
+                    checkAccount.Name = name;
+                    checkAccount.Address1 = address1;
+                    checkAccount.Address2 = address2;
+                    checkAccount.City = city;
+                    checkAccount.State = state;
+                    checkAccount.PostalCode = postalCode;
+                    checkAccount.LastModifiedDate = DateTime.UtcNow;
+                    checkAccount.LastModifiedBy = loggedInUser.ID;
+                    checkAccount.Country = "US";
+                    amsgs.AddRange(checkAccount.Save(adc));
+
+                    if (msgs.HasNoErrors())
+                    {
+                        if (!checkAccount.IsDeliverable(amsgs, adc))
+                            msgs.Add("Your address is invalid and not deliverable. Please update your address to a valid address", MessageType.UserError);
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+            
             return checkAccount;
         }
 

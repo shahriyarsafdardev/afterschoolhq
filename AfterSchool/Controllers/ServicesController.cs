@@ -7,6 +7,7 @@ using BasicLibrary;
 using AfterSchool.Models;
 using AfterSchool.Helpers;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary;
 
 namespace AfterSchool.Controllers
 {
@@ -49,6 +50,12 @@ namespace AfterSchool.Controllers
                 CookieVariables.DemoUniqueOrgName = uniqueName;
                 CookieVariables.DemoFirstName = firstname;
                 CookieVariables.DemoEmailAddress = email;
+
+                SendGridHelper.AddContactFromDemo(
+                    orgname,
+                    firstname,
+                    email,
+                    msgs);
 
                 return Json(new { status = "ok", demoUrl = $"/{uniqueName}" }, JsonRequestBehavior.AllowGet);
             }

@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary
             mail.ReplyTo = replyTo;
             mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
             
-            var task = System.Threading.Tasks.Task.Run(async () =>
+            var task = Task.Run(async () =>
             {
                 return await sg.SendEmailAsync(mail);
             });
@@ -55,6 +55,37 @@ namespace AfterSchoolLibrary
             }
 
             return msgs;
+        }
+
+        public static void AddContactFromDemo(string orgname, string firstName, string email, SystemMessages msgs)
+        {
+            var sg = new SendGridClient(SendGridApiKey);
+
+            var contact = new List<object>()
+            {
+                new
+                {
+                    first_name = firstName,
+                    org_name = orgname,
+                    email,
+                    web_demo = 1
+                }
+            };
+
+            var task = Task.Run(async () =>
+            {
+                return await sg.RequestAsync(
+                    method: SendGridClient.Method.POST,
+                    urlPath: "contactdb/recipients",
+                    requestBody: contact.ToJSON());
+            });
+            task.Wait();
+
+            dynamic response = task.Result;
+            if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
+            {
+                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+            }
         }
     }
 }

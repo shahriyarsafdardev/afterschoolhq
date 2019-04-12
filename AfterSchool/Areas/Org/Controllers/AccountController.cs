@@ -188,7 +188,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Postal Code is required", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-            {
                 SessionVariables.CurrentAccount.CreateOrUpdateCheckPaymentAccount(
                     entitytype.ToEnum<LegalEntityType>(),
                     name,
@@ -199,7 +198,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     postalcode,
                     SessionVariables.LoggedInUser,
                     msgs);
-            }
 
             if (Request["isnew"] == "1")
                 return RedirectToAction("paymentsdone", new { isnew = 1 });

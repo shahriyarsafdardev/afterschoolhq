@@ -40,6 +40,35 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
+        private static Lob.Services.AddressVerificationService GetVerificationService()
+        {
+            return new Lob.Services.AddressVerificationService(SecretKey);
+        }
+
+        public static bool IsDeliverableAddress(string address1, string city, string state, string postalCode, SystemMessages msgs)
+        {
+            var options = new Lob.Models.AddressVerificationOptions()
+            {
+                AddressLine1 = address1,
+                City = city,
+                State = state,
+                Zip = postalCode
+            };
+
+            Lob.Models.AddressVerification addressVerification = null;
+
+            try
+            {
+                addressVerification = GetVerificationService().Verify(options);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add("Error creating check", MessageType.Error);
+            }
+
+            return addressVerification.Deliverability != Lob.Models.Deliverability.Undeliverable;
+        }
+
         private static Lob.Services.CheckService GetCheckService()
         {
             return new Lob.Services.CheckService(SecretKey);
@@ -188,6 +217,24 @@ namespace Lob
             }
         }
 
+        public class AddressVerificationService: LobService
+        {
+            private const string Url = "/v1/us_verifications";
+            private const string CreateMethod = "POST";
+
+            public AddressVerificationService(string secretKey) : base(secretKey)
+            {
+
+            }
+
+            public Models.AddressVerification Verify(Models.AddressVerificationOptions options)
+            {
+                dynamic result = SendRequest(Url, CreateMethod, null, options.ToDynamicObject());
+                return Models.AddressVerification.FromDynamicObject(result);
+            }
+
+        }
+
         public class CheckService : LobService
         {
             private const string Url = "/v1/checks";
@@ -250,7 +297,7 @@ namespace Lob
 
             internal static Address FromDynamicObject(dynamic result)
             {
-                var address =  new Models.Address()
+                var address = new Models.Address()
                 {
                     Id = (string)result["id"],
                     Description = (string)result["description"],
@@ -266,7 +313,7 @@ namespace Lob
                     Country = (string)result["address_country"],
                     // MetaData = result["metadata"],
                     DateCreated = (DateTime)result["date_created"],
-                    DateModified = (DateTime)result["date_modified"],                    
+                    DateModified = (DateTime)result["date_modified"],
                     Object = (string)result["object"]
                 };
 
@@ -331,6 +378,21 @@ namespace Lob
             public TrackingEvent()
             {
 
+            }
+        }
+
+        public class AddressVerification
+        {
+            public string Id { get; set; }
+            public Deliverability Deliverability { get; set; }
+
+            internal static AddressVerification FromDynamicObject(dynamic result)
+            {
+                return new AddressVerification()
+                {
+                    Id = (string)result["id"],
+                    Deliverability = ((string)result["deliverability"]).Replace("_", " ").ToProperCase().Replace(" ", "").ParseEnum<Deliverability>(),
+                };
             }
         }
 
@@ -427,6 +489,25 @@ namespace Lob
             }
         }
 
+        public class AddressVerificationOptions
+        {
+            public string AddressLine1 { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+            public string Zip { get; set; }
+
+            internal dynamic ToDynamicObject()
+            {
+                return new
+                {
+                    primary_line = AddressLine1,
+                    city = City,
+                    state = State,
+                    zip_code = Zip
+                };
+            }
+        }
+
         public class AddressCreateOptions
         {
             public string Name { get; set; }
@@ -454,6 +535,15 @@ namespace Lob
         {
             USPSFirstClass,
             UPSNextDayAir
+        }
+
+        public enum Deliverability
+        {
+            Deliverable,
+            DeliverableUnnecessaryUnit,
+            DeliverableIncorrectUnit,
+            DeliverableMissingUnit,
+            Undeliverable
         }
     }
 

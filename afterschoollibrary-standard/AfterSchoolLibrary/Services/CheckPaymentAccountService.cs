@@ -12,12 +12,23 @@ namespace AfterSchoolLibrary.Services
     {
         private static string LobFromAddressId = "adr_7e68ac15e4ff4bf7";
         private static string LobBankAccountId = "bank_a9ca0ac762c4040";
-
-        public static void VerifyAddress(this CheckPaymentAccount paymentAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        
+        public static bool IsDeliverable(this CheckPaymentAccount paymentAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            // TODO: lob address verification
+            var isDeliverable = LobHelper.IsDeliverableAddress(
+                address1: paymentAccount.Address1,
+                city: paymentAccount.City,
+                state: paymentAccount.State,
+                postalCode: paymentAccount.PostalCode,
+                msgs: msgs);
 
+            if (isDeliverable)
+            {
+                paymentAccount.IsVerified = true;
+                msgs.AddRange(paymentAccount.Save(dc));
+            }
 
+            return isDeliverable;
         }
 
         public static void SendPayment(this CheckPaymentAccount paymentAccount, Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
