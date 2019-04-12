@@ -70,6 +70,38 @@
                             </p>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        
+                        <div class="col-md-4"></div>
+                        <div class="col-md-8">
+                            <div class="text-medium-small text-center">
+                                <p>Are you an Individual or are you representing a Company?</p>
+                            </div>
+
+                            <div class="text-center">
+                                <div class="am-radio inline">
+                                    <input type="radio"
+                                           name="entitytype"
+                                           id="entitytype-individual"
+                                           value="@((int)LegalEntityType.Individual)"
+                                           onclick="showIndividual()"
+                                           @(Model.LegalEntityTypeId == LegalEntityType.Individual ? " checked=\"checked\"" : "") />
+                                    <label for="entitytype-individual">@LegalEntityType.Individual.ToString()</label>
+                                </div>
+                                <div class="am-radio inline">
+                                    <input type="radio"
+                                           name="entitytype"
+                                           id="entitytype-company"
+                                           value="@((int)LegalEntityType.Company)"
+                                           onclick="showCompany()"
+                                           @(Model.LegalEntityTypeId == LegalEntityType.Company ? " checked=\"checked\"" : "") />
+                                    <label for="entitytype-company">@LegalEntityType.Company.ToString()</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label class="col-sm-4 control-label">Payee <span class="text-danger">*</span></label>
                         <div class="col-sm-8">

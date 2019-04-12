@@ -2236,7 +2236,7 @@ namespace AfterSchoolLibrary.Services
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static CheckPaymentAccount CreateOrUpdateCheckPaymentAccount(this Account account, string name, string address1, string address2, string city, string state, string postalCode, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static CheckPaymentAccount CreateOrUpdateCheckPaymentAccount(this Account account, LegalEntityType legalEntityType, string name, string address1, string address2, string city, string state, string postalCode, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
 
@@ -2248,6 +2248,7 @@ namespace AfterSchoolLibrary.Services
                     AccountId = account.ID
                 };
 
+            checkAccount.LegalEntityTypeId = legalEntityType;
             checkAccount.Name = name;
             checkAccount.Address1 = address1;
             checkAccount.Address2 = address2;

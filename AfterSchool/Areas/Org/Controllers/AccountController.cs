@@ -164,10 +164,13 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult CheckSetup(string name, string address1, string address2, string city, string state, string postalcode)
+        public ActionResult CheckSetup(string entitytype, string name, string address1, string address2, string city, string state, string postalcode)
         {
             var msgs = new SystemMessages();
             CheckPaymentAccount checkAccount = null;
+
+            if (!entitytype.IsNumber())
+                msgs.Add("Select whether we're sending payments to an Individual or a Company", MessageType.UserError);
 
             if (name.IsEmpty())
                 msgs.Add("Payee Name is required", MessageType.UserError);
@@ -186,7 +189,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                checkAccount = SessionVariables.CurrentAccount.CreateOrUpdateCheckPaymentAccount(
+                SessionVariables.CurrentAccount.CreateOrUpdateCheckPaymentAccount(
+                    entitytype.ToEnum<LegalEntityType>(),
                     name,
                     address1,
                     address2,
@@ -203,7 +207,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
-            return View(checkAccount);
+            return View(SessionVariables.CurrentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
         }
         
         [HttpGet]

@@ -3,6 +3,7 @@
     var account = (Account)ViewBag.Account;
     var msgs = (SystemMessages)ViewBag.Messages;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
+    var stripeAccount = account.GetStripeAccount();
 
     ViewBag.Title = account.Name;
 
@@ -58,9 +59,18 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("paymentsentity", "account", new { isnew = 1 })" class="btn btn-alt5 btn-xl btn-block">
-                                        Choose Direct Deposits &raquo;
-                                    </a>
+                                    @if (stripeAccount.IsEmpty() || !stripeAccount.PayoutsEnabled)
+                                    {
+                                        <a href="@Url.Action("paymentsentity", "account", new { isnew = 1 })" class="btn btn-alt5 btn-xl btn-block">
+                                            Choose Direct Deposits &raquo;
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("paymentsentity", "account")" class="btn btn-alt5 btn-xl btn-block">
+                                            Update Direct Deposits &raquo;
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         </tbody>
@@ -92,9 +102,18 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("checksetup", "account", new { isnew = 1 })" class="btn btn-default btn-xl btn-block">
-                                        Choose Checks &raquo;
-                                    </a>
+                                    @if (account.GetCheckPaymentAccount().IsEmpty())
+                                    {
+                                        <a href="@Url.Action("checksetup", "account", new { isnew = 1 })" class="btn btn-default btn-xl btn-block">
+                                            Choose Checks &raquo;
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("checksetup", "account")" class="btn btn-default btn-xl btn-block">
+                                            Update Payout Details &raquo;
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         </tbody>

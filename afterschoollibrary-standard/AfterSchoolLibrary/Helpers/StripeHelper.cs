@@ -247,6 +247,44 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
 
+        #region StripeTransfer
+
+        private static TransferService GetTransferService()
+        {
+            return new TransferService(StripeAccessToken);
+        }
+
+        public static Transfer CreateTransfer(decimal amount, string description, string transferIdentifier, string destinationId, Dictionary<string, string> metaData, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new TransferCreateOptions()
+            {
+                Amount = (long)(amount * 100),
+                Currency = "usd",
+                Destination = destinationId,
+                Metadata = metaData,
+                Description = description,
+                TransferGroup = transferIdentifier
+            };
+
+            Transfer transfer = null;
+
+            try
+            {
+                transfer = GetTransferService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Transfer was not created", MessageType.UserError);
+            }
+
+            return transfer;
+        }
+
+        #endregion
+
         #region StripePayouts
 
         private static PayoutService GetPayoutService()
@@ -254,7 +292,7 @@ namespace AfterSchoolLibrary.Billing
             return new PayoutService(StripeAccessToken);
         }
 
-        public static Stripe.Payout CreatePayout(decimal amount, string destinationId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public static Payout CreatePayout(decimal amount, string externalAccountId, string connectedAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -262,17 +300,22 @@ namespace AfterSchoolLibrary.Billing
             {
                 Amount = (long)(amount * 100),
                 Currency = "usd",
-                Destination = destinationId,
+                Destination = externalAccountId,
                 Metadata = metaData,
                 Method = "standard",
                 StatementDescriptor = "AHQ Payout"
             };
 
-            Stripe.Payout stripePayout = null;
+            var requestOptions = new RequestOptions()
+            {
+                StripeConnectAccountId = connectedAccountId
+            };
+
+            Payout stripePayout = null;
 
             try
             {
-                stripePayout = GetPayoutService().Create(options);
+                stripePayout = GetPayoutService().Create(options, requestOptions);
             }
             catch (StripeException ex)
             {

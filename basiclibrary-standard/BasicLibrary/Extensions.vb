@@ -193,6 +193,11 @@ Public Module Extensions
     End Function
 
     <Extension()>
+    Public Function ToEnum(Of T)(ByVal aInt As Integer) As T
+        Return CType(CType(aInt, Object), T)
+    End Function
+
+    <Extension()>
     Public Function ToUTF8String(ByVal aByte As Byte()) As String
         Return System.Text.Encoding.UTF8.GetString(aByte)
     End Function

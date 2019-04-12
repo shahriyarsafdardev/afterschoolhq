@@ -40,12 +40,31 @@ namespace AfterSchoolLibrary.Services
 
         public static void Approve(this Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            var originalStatus = payout.PayoutStatusId;
+
             if (payout.PayoutStatusId != PayoutStatus.Approved)
             {
-                payout.UpdateStatus(PayoutStatus.Approved, loggedInUser, msgs, dc);                
+                payout.UpdateStatus(PayoutStatus.Approved, loggedInUser, msgs, dc);
                 payout.SendMoney(loggedInUser, msgs, dc);
 
-                // TODO: Send approved payout email
+                if (msgs.HasNoErrors())
+                {
+                    // TODO: Send approved payout email
+                }
+                else
+                    payout.UpdateStatus(originalStatus, loggedInUser, msgs, dc);
+            }
+
+            return;
+        }
+
+        public static void Deny(this Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (payout.PayoutStatusId != PayoutStatus.Denied)
+            {
+                payout.UpdateStatus(PayoutStatus.Denied, loggedInUser, msgs, dc);
+
+                // TODO: Send Denied payout email
             }
 
             return;
@@ -53,47 +72,49 @@ namespace AfterSchoolLibrary.Services
 
         private static void SendMoney(this Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = payout.GetAccount(msgs, dc);
-
-            if (payout.PaymentTypeId == PaymentType.ACH)
+            if (payout.PayoutStatusId == PayoutStatus.Approved)
             {
-                // send money via stripe
-                var stripeAccount = account.GetStripeAccount(msgs, dc);
-                if (stripeAccount.IsNotEmpty())
-                    stripeAccount.SendPayout(
-                        account: account,
-                        payout: payout,
-                        loggedInUser: loggedInUser,
-                        msgs: msgs,
-                        dc: dc);
+                var account = payout.GetAccount(msgs, dc);
 
-                if (msgs.HasNoErrors())
-                    payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+                if (payout.PaymentTypeId == PaymentType.ACH)
+                {
+                    // send money via stripe
+                    var stripeAccount = account.GetStripeAccount(msgs, dc);
+                    if (stripeAccount.IsNotEmpty())
+                        stripeAccount.SendPayout(
+                            account: account,
+                            payout: payout,
+                            loggedInUser: loggedInUser,
+                            msgs: msgs,
+                            dc: dc);
 
-                return;
+                    if (msgs.HasNoErrors())
+                        payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+
+                    return;
+                }
+                else if (payout.PaymentTypeId == PaymentType.Check)
+                {
+                    // send money via lob
+                    // get check payment account
+                    var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
+
+                    if (checkAccount.IsNotEmpty())
+                        checkAccount.SendPayment(
+                            account: account,
+                            payout: payout,
+                            loggedInUser: loggedInUser,
+                            msgs: msgs,
+                            dc: dc);
+
+                    if (msgs.HasNoErrors())
+                        payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+
+                    return;
+                }
+
+                msgs.Add("No valid payment account", MessageType.UserError);
             }
-            else if (payout.PaymentTypeId == PaymentType.Check)
-            {
-                // send money via lob
-                // get check payment account
-                var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
-
-                if (checkAccount.IsNotEmpty())
-                    checkAccount.SendPayment(
-                        account: account,
-                        payout: payout,
-                        loggedInUser: loggedInUser,
-                        msgs: msgs,
-                        dc: dc);
-
-                if (msgs.HasNoErrors())
-                    payout.UpdateStatus(PayoutStatus.InProgress, loggedInUser, msgs, dc);
-
-                return;
-            }
-
-            msgs.Add("No valid payment account", MessageType.UserError);
-
             return;
         }
 

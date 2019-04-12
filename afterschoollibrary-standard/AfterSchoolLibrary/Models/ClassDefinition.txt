@@ -1367,6 +1367,7 @@ property: DateRequested, DateTime?, DateTime, required
 property: RequestedBy, int?, Int, required
 loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
+loadmethod: PayoutStatusId, List<>
 loadmethod: Uid
 [end]
 

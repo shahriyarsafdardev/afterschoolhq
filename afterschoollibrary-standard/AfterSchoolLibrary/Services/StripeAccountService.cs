@@ -162,17 +162,27 @@ namespace AfterSchoolLibrary.Services
         public static void SendPayout(this StripeAccount stripeAccount, Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var requestor = payout.GetRequestor(msgs, dc);
-
-            StripeHelper.CreatePayout(
-                amount: payout.Amount.Value, 
-                destinationId: account.StripeUserId, 
-                metaData: new Dictionary<string, string>()
+            var metaData = new Dictionary<string, string>()
                 {
                     { "AccountUid", account.Uid.ToString() },
                     { "RequestedBy", requestor.Uid.ToString() },
                     { "ApprovedBy", loggedInUser.Uid.ToString() },
                     { "DateRequested", payout.DateRequested.ToShortDateTimeString() }
-                }, 
+                };
+
+            StripeHelper.CreateTransfer(
+                amount: payout.Amount.Value,
+                description: $"Transfer from AHQ to {account.Name} requested by {requestor.DisplayName} and approved by {loggedInUser.DisplayName}",
+                transferIdentifier: payout.Uid.ToString(),
+                destinationId: account.StripeUserId,
+                metaData: metaData,
+                msgs: msgs);
+
+            StripeHelper.CreatePayout(
+                amount: payout.Amount.Value,
+                externalAccountId: stripeAccount.BankAccountId,
+                connectedAccountId: account.StripeUserId, 
+                metaData: metaData, 
                 msgs);
         }
     }

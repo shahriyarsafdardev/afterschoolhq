@@ -209,6 +209,14 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
+		public static List<Payout> LoadByPayoutStatusId(PayoutStatus PayoutStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["PayoutStatusId"], PayoutStatusId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
 		public static Payout LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
@@ -217,13 +225,52 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
-        public static List<Payout> LoadPayouts(int accountId, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Payout> Load(PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            if (payoutStatusId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatusId.Value);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCount(PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            if (payoutStatusId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatusId.Value);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            return dq.GetCount(msgs);
+        }
+
+        public static List<Payout> LoadPayouts(int accountId, PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -235,8 +282,8 @@ namespace AfterSchoolLibrary.Models
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-            if (payoutStatus.HasValue)
-                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatus.Value);
+            if (payoutStatusId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatusId.Value);
 
             dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
 
@@ -245,7 +292,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountByAccountId(int accountId, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCountByAccountId(int accountId, PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
 
             var dq = DatabaseQuery;
@@ -258,8 +305,8 @@ namespace AfterSchoolLibrary.Models
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
-            if (payoutStatus.HasValue)
-                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatus.Value);
+            if (payoutStatusId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatusId.Value);
 
             return dq.GetCount(msgs);
         }
@@ -278,7 +325,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static decimal GetTotalAmountByAccountId(int accountId, PayoutStatus? payoutStatus, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static decimal GetTotalAmountByAccountId(int accountId, PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -291,8 +338,35 @@ namespace AfterSchoolLibrary.Models
 
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
 
-            if (payoutStatus.HasValue)
-                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatus.Value);
+            if (payoutStatusId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatusId.Value);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalAmount(PayoutStatus? payoutStatusId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["Amount"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            if (payoutStatusId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayoutStatusId"], (int)payoutStatusId.Value);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);

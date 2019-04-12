@@ -168,7 +168,7 @@ namespace Lob
                     if (response.StatusCode == HttpStatusCode.BadRequest || (int)response.StatusCode == 422)
                     {
                         var content = response.Content.ReadAsStringAsync().Result;
-                        throw new BadRequestException();
+                        throw new Exception(content);
                     }
                     if ((int)response.StatusCode == 429)
                     {

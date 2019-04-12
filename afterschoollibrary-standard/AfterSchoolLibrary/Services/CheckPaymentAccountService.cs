@@ -10,8 +10,8 @@ namespace AfterSchoolLibrary.Services
 {
     public static class CheckPaymentAccountService
     {
-        private static string LobFromAddressId = "";
-        private static string LobBankAccountId = "";
+        private static string LobFromAddressId = "adr_7e68ac15e4ff4bf7";
+        private static string LobBankAccountId = "bank_a9ca0ac762c4040";
 
         public static void VerifyAddress(this CheckPaymentAccount paymentAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -36,7 +36,7 @@ namespace AfterSchoolLibrary.Services
                 fromAddressId: LobFromAddressId,
                 bankAccountId: LobBankAccountId,
                 amount: payout.Amount.Value,
-                memo: $"AfterSchool HQ Payout - Requested {payout.DateRequested.ToShortDateString()} by {requestor.DisplayName}",
+                memo: $"Requested {payout.DateRequested.ToShortDateString()} by {requestor.DisplayName}".MaxChars(40, "..."),
                 metaData: new
                 {
                     accountUid = account.Uid,
