@@ -10,8 +10,20 @@ namespace AfterSchoolLibrary.Services
 {
     public static class CheckPaymentAccountService
     {
-        private static string LobFromAddressId = "adr_7e68ac15e4ff4bf7";
-        private static string LobBankAccountId = "bank_a9ca0ac762c4040";
+        private static string LobFromAddressId
+        {
+            get
+            {
+                return Helpers.Utilities.IsProduction ? "adr_9be39e9b290dbb3b" : "adr_7e68ac15e4ff4bf7";
+            }
+        }
+        private static string LobBankAccountId
+        {
+            get
+            {
+                return Helpers.Utilities.IsProduction ? "bank_e90556aa067848d" : "bank_a9ca0ac762c4040";
+            }
+        }
         
         public static bool IsDeliverable(this CheckPaymentAccount paymentAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
