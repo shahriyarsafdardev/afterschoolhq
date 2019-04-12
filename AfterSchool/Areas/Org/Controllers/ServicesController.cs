@@ -17,6 +17,28 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
+        [HttpPost]
+        public ActionResult RequestPayout(string payoutamount)
+        {
+            var msgs = new SystemMessages();
+            var maxAmountAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
+
+            if (!payoutamount.IsNumber() || payoutamount.ToDecimal() < 25 || payoutamount.ToDecimal() > maxAmountAvailable)
+                msgs.Add($"Amount must be at least $25 and no greater than {maxAmountAvailable.ToCurrency()}", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+                SessionVariables.CurrentAccount.RequestNewPayout(payoutamount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
+
+            if (msgs.HasNoErrors())
+                return Json(new
+                {
+                    status = "ok",
+                    messages = msgs
+                }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public ActionResult CalculateFinalPrice(string cost)
         {

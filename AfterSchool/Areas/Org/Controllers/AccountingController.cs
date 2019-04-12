@@ -125,23 +125,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalPages = totalPages
             };
             return View(payouts);
-        }
-
-        [HttpPost]
-        public ActionResult RequestPayout(string payoutamount)
-        {
-            var msgs = new SystemMessages();
-            var maxAmountAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
-
-            if (!payoutamount.IsNumber() || payoutamount.ToDecimal() < 0 || payoutamount.ToDecimal() > maxAmountAvailable)
-                msgs.Add($"Amount must be a number greater than $0 and less than {maxAmountAvailable.ToCurrency()}", MessageType.UserError);
-
-            if (msgs.HasNoErrors())
-                SessionVariables.CurrentAccount.RequestNewPayout(payoutamount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
-
-            return RedirectToAction("payouts");
-
-        }
+        }        
 
         //[HttpPost]
         //public ActionResult Refund(string uid, string amount)

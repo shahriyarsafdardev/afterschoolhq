@@ -31,6 +31,18 @@ namespace AfterSchool.Models
             };
         }
 
+        public static AddressViewModel ToAddressViewModel(this CheckPaymentAccount checkPaymentAccount)
+        {
+            return new AddressViewModel()
+            {
+                Address1 = checkPaymentAccount.Address1,
+                Address2 = checkPaymentAccount.Address2,
+                City = checkPaymentAccount.City,
+                State = checkPaymentAccount.State,
+                PostalCode = checkPaymentAccount.PostalCode
+            };
+        }
+
         public static AddressViewModel ToAddressViewModel(this Activity activity)
         {
             var location = activity.GetLocation();

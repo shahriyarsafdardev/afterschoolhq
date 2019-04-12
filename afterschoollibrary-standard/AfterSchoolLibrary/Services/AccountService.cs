@@ -2236,6 +2236,32 @@ namespace AfterSchoolLibrary.Services
             return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static CheckPaymentAccount CreateOrUpdateCheckPaymentAccount(this Account account, string name, string address1, string address2, string city, string state, string postalCode, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
+
+            if (checkAccount.IsEmpty())
+                checkAccount = new CheckPaymentAccount
+                {
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = loggedInUser.ID,
+                    AccountId = account.ID
+                };
+
+            checkAccount.Name = name;
+            checkAccount.Address1 = address1;
+            checkAccount.Address2 = address2;
+            checkAccount.City = city;
+            checkAccount.State = state;
+            checkAccount.PostalCode = postalCode;
+            checkAccount.LastModifiedDate = DateTime.UtcNow;
+            checkAccount.LastModifiedBy = loggedInUser.ID;
+            checkAccount.Country = "US";
+            msgs.AddRange(checkAccount.Save());
+
+            return checkAccount;
+        }
+
         public static CheckPaymentAccount GetCheckPaymentAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return CheckPaymentAccount.LoadByAccountId(account.ID.Value, msgs, dc);

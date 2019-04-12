@@ -147,6 +147,66 @@ namespace AfterSchool.Areas.Org.Controllers
         }     
 
         [HttpGet]
+        public ActionResult PaymentsOptions()
+        {
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult CheckSetup()
+        {
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = new SystemMessages();
+            return View(SessionVariables.CurrentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
+        }
+
+        [HttpPost]
+        public ActionResult CheckSetup(string name, string address1, string address2, string city, string state, string postalcode)
+        {
+            var msgs = new SystemMessages();
+            CheckPaymentAccount checkAccount = null;
+
+            if (name.IsEmpty())
+                msgs.Add("Payee Name is required", MessageType.UserError);
+
+            if (address1.IsEmpty())
+                msgs.Add("Address 1 is required", MessageType.UserError);
+
+            if (city.IsEmpty())
+                msgs.Add("City is required", MessageType.UserError);
+
+            if (state.IsEmpty())
+                msgs.Add("State is required", MessageType.UserError);
+
+            if (postalcode.IsEmpty())
+                msgs.Add("Postal Code is required", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                checkAccount = SessionVariables.CurrentAccount.CreateOrUpdateCheckPaymentAccount(
+                    name,
+                    address1,
+                    address2,
+                    city,
+                    state,
+                    postalcode,
+                    SessionVariables.LoggedInUser,
+                    msgs);
+            }
+
+            if (Request["isnew"] == "1")
+                return RedirectToAction("paymentsdone", new { isnew = 1 });
+
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = msgs;
+            return View(checkAccount);
+        }
+        
+        [HttpGet]
         public ActionResult PaymentsEntity()
         {
             var msgs = new SystemMessages();

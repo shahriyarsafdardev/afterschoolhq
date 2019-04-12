@@ -1,0 +1,108 @@
+﻿
+@{
+    var account = (Account)ViewBag.Account;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var isFullScreen = (bool)ViewBag.IsFullScreen;
+
+    ViewBag.Title = account.Name;
+
+    if (isFullScreen)
+    {
+        Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    }
+}
+
+@if (!isFullScreen)
+{
+    Html.RenderPartial("OrgAccountHeader");
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", account); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-edit"></i> Settings - Setup Payment Account
+        </div>
+        <div class="panel-body">
+
+            <div class="col-md-12">
+                <div class="margin-20">
+                    <h2 class="text-center">Please choose how you want us to pay you.</h2>
+                </div>
+                <div class="col-md-3"></div>
+                <div class="col-md-3">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr class="bg-success">
+                                <th class="text-center text-bold text-white">
+                                    <h3>
+                                        Get Paid<br />via Direct Deposit
+                                    </h3>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">Get payouts daily</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">Deposits take only 2 days</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">No more trips to the bank</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">Automated payouts and deposits coming soon</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("paymentsentity", "account")" class="btn btn-alt5 btn-xl btn-block">
+                                        Choose Direct Deposits &raquo;
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-3">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr class="bg-success">
+                                <th class="text-center text-bold text-white">
+                                    <h3>
+                                        Get Paid<br />via Check
+                                    </h3>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">Get payouts bi-weekly</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">Deposits take 5 - 7 days</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">You'll still have to deposit your check</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">No automated payouts</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("checksetup", "account")" class="btn btn-default btn-xl btn-block">
+                                        Choose Checks &raquo;
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-3"></div>
+            </div>
+        </div>
+    </div>      
+</div>
+
