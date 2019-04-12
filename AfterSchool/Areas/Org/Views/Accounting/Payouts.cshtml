@@ -16,7 +16,7 @@
     }
     else
     {
-        canRequestAnotherPayout = lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddWeeks(2) < DateTime.UtcNow;
+        canRequestAnotherPayout = true; // lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddWeeks(2) < DateTime.UtcNow;
     }
 }
 

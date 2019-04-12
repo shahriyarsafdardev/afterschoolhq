@@ -44,18 +44,20 @@
         <label class="control-label col-sm-3">What is your relationship with this location?</label>
         <div class="col-sm-9">
             <div class="am-radio">
-                <input type="radio" id="mylocation-no" name="mylocation" class="form-control my-location" required="required" value="" @(!isMyLocation && location.ID.HasValue ? "checked=\"checked\"" : "") />
-                <label for="mylocation-no">I provide an activity at this location</label>
+                <input type="radio" id="mylocation-yes" name="mylocation" class="form-control my-location" required="required" value="1" @(isMyLocation && location.ID.HasValue ? "checked=\"checked\"" : "") />
+                <label for="mylocation-yes">I am an <strong>employee/associated</strong> with this location</label>
             </div>
             <div class="am-radio">
-                <input type="radio" id="mylocation-yes" name="mylocation" class="form-control my-location" required="required" value="1" @(isMyLocation && location.ID.HasValue ? "checked=\"checked\"" : "") />
-                <label for="mylocation-yes">I am an employee/associated with this location</label>
+                <input type="radio" id="mylocation-no" name="mylocation" class="form-control my-location" required="required" value="" @(!isMyLocation && location.ID.HasValue ? "checked=\"checked\"" : "") />
+                <label for="mylocation-no">I am <strong>not an employee</strong> and I <strong>provide an activity</strong> at this location</label>
             </div>
         </div>
     </div>
 
     <div class="form-group @hideType" id="isschool-div">
-        <label class="col-sm-3">What type of location is this?</label>
+        <label class="col-sm-3 control-label">
+            What type of location is this?
+        </label>
         <div class="col-sm-9">
             <div class="am-checkbox">
                 @foreach (var item in Enum.GetValues(typeof(LocationType)).Cast<LocationType>().Where(x => x != LocationType.NotSet))

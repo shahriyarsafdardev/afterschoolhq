@@ -38,7 +38,7 @@ namespace AfterSchool.Controllers
             if (!model.OrgType.HasValue)
                 msgs.Add("Organization Type is required", MessageType.UserError);
 
-            if (!model.OrgPhone.IsNumber())
+            if (!model.OrgPhone.IsPhone())
                 msgs.Add("Organization Phone is required", MessageType.UserError);
 
             if (model.FirstName.IsEmpty())
