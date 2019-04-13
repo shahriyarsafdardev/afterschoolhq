@@ -47,8 +47,8 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    payout.UpdateStatus(PayoutStatus.Approved, loggedInUser, msgs, dc);
-                    payout.SendMoney(loggedInUser, msgs, dc);
+                    payout.UpdateStatus(PayoutStatus.Approved, loggedInUser, amsgs, adc);
+                    payout.SendMoney(loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => 
                 {
