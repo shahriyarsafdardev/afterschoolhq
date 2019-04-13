@@ -202,7 +202,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     SessionVariables.LoggedInUser,
                     msgs);
 
-            if (Request["isnew"] == "1")
+            if (msgs.HasNoErrors() && Request["isnew"] == "1")
                 return RedirectToAction("paymentsdone", new { isnew = 1 });
 
             ViewBag.Account = SessionVariables.CurrentAccount;
