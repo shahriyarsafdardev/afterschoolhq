@@ -37,24 +37,37 @@
             $('form').submit(function () {
                 $(this).find('button[type="submit"]').prop('disabled', true);
                 $(this).find('button[type="submit"]').html('...');
-                $("#modal-saving").addClass("md-show");
-                $('#saving-text').html('Saving...');
+                $('#modal-saving').removeClass('hide');
+                // $("#modal-saving").addClass("md-show");
+                // $('#saving-text').html('Saving...');
             });
 
             $('a').click(function () {
                 if ($(this).attr('href') != "#" && $(this).attr('href').indexOf('javascript:') == -1 && $(this).attr('target') != "_blank") {
-                    $("#modal-saving").addClass("md-show");
-                    $('#saving-text').html('Loading...');
+                    //$("#modal-saving").addClass("md-show");
+                    //$('#saving-text').html('Loading...');
+                    $('#modal-saving').removeClass('hide');
                 }
             });
 
         });
     </script>
+    <!-- -->
+    
+    <div id="modal-saving"
+            class="hide"
+            style="position: absolute; width: 250px; height: 65px; top: 10px; right: 10px; padding: 0px; margin: 0px; background-color: #333; color: #eee; border-radius: 10px;">
+        <h3 class="text-center">Loading...</h3>
+    </div>
 
-    <div id="modal-saving" class="md-modal modal-container modal-full-color modal-full-color-success modal-effect-8" style="perspective: 1300px;">
+    <div id="modal-saving-1" class="md-modal modal-container modal-full-color modal-full-color-success modal-effect-8" style="perspective: 1300px;">
         <div class="modal-content">
             <div class="modal-body">
-                <div style="background-image: url(/assets/img/spinner.gif); background-position: center; width: 600px; height: 300px;">
+                <div style="margin:auto; width: 90%; height: 90%;">
+                    <img src="/assets/img/spinner.gif" style="width: 300px;" />
+                </div>
+                <div class="hide" style="background-image: url(/assets/img/spinner.gif); background-position: center; width: 600px; height: 300px;">
+
                 </div>
                 <div class="text-center hide">
                     <h3 id="saving-text">Saving...</h3>
