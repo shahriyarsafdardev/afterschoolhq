@@ -745,7 +745,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
                     participationObject: aag.GetParticipationObject(msgs),
-                    questionsAndAnswers: qvms.Select(qvm => Tuple.Create<FormQuestion, string>(qvm.Question, qvm.Value)).ToList(),
+                    questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     period: aag.GetCurrentRegistrationPeriod(msgs),
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);

@@ -70,7 +70,7 @@ namespace AfterSchoolLibrary.Services
         /// <returns></returns>
         public static SubscriptionPlan AddSubscriptionPlan(this ActivityGroup activityGroup, decimal costPerPeriod, BillingPeriodType billingPeriodType, bool doesAutoRenew, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return SubscriptionPlanService.CreateNewSubscription(
+            return SubscriptionPlanService.CreateNewSubscriptionPlan(
                 activityGroup.GetAccount(msgs, dc),
                 activityGroup,
                 costPerPeriod,

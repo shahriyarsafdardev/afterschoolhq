@@ -17,6 +17,7 @@ namespace AfterSchoolLibrary.Models
         public string Details { get; set; }
         public ActivitySchedule Schedule { get; set; }
         public Location Location { get; set; }
+        public Account Provider { get; set; }
         public GenderRestrictionType GenderRestriction { get; set; }
         public int? MinGradeId { get; set; }
         public int? MaxGradeId { get; set; }
@@ -41,6 +42,7 @@ namespace AfterSchoolLibrary.Models
         public string ContactEmail { get; set; }
         public string CostDescription { get; set; }
         public string LocationDetails { get; set; }
+        public bool UseStripeConnectedAccount { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
@@ -101,8 +103,12 @@ namespace AfterSchoolLibrary.Models
             CostUnitType = global::CostUnitType.PerRegistrant;
             AllowToPayLater = activity.AllowToPayLater;
             RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
-            Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm();
+            Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);
+
             OwnerAccount = activity.GetAccount(msgs, dc);
+            Provider = activity.GetProvider(msgs, dc);
+
+            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
             SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
@@ -138,6 +144,7 @@ namespace AfterSchoolLibrary.Models
             // TODO: PayLater = activityGroup.AllowToPayLater;
             SeatsRemaining = activityGroup.GetSeatsRemaining(msgs, dc);
             WaitingListSeatsRemaining = activityGroup.GetWaitingListSeatsRemaining(msgs, dc);
+            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -172,6 +179,7 @@ namespace AfterSchoolLibrary.Models
             // Description = activityGroup.Description;
             Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
+            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
             SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
@@ -204,8 +212,17 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return !IsFree && OwnerAccount.CanProcessPayments();
+                return !IsFree && PaymentAccount.CanProcessPayments();
             } 
+        }
+
+        public Account PaymentAccount
+        {
+            get
+            {
+                return Provider ?? OwnerAccount;
+            }
+            
         }
 
         public string GetHomePageUrl(bool isAfterSchool = true)
@@ -235,12 +252,12 @@ namespace AfterSchoolLibrary.Models
             return this.ActivityGroupType == global::ActivityGroupType.League;
         }
 
-        public Tuple<GradeLevel, GradeLevel> GetMinAndMaxGradeLevels(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public (GradeLevel minGradeLevel, GradeLevel maxGradeLevel) GetMinAndMaxGradeLevels(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (MinGradeId.HasValue && MaxGradeId.HasValue)
-                return Tuple.Create(GetMinGradeLevel(msgs, dc), GetMaxGradeLevel(msgs, dc));
+                return (GetMinGradeLevel(msgs, dc), GetMaxGradeLevel(msgs, dc));
 
-            return null;
+            return (null, null);
         }            
 
         public GradeLevel GetMinGradeLevel(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -415,6 +432,11 @@ namespace AfterSchoolLibrary.Models
             return IsActivity() ? ObjectID : null;
         }
 
+        public int? GetId()
+        {
+            return GetActivityId() ?? GetActivityGroupId() ?? GetAccountActivityGroupId();
+        }
+
         public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
@@ -433,7 +455,7 @@ namespace AfterSchoolLibrary.Models
                 ParticipationObjectTypeId = this.ObjectType,
                 Amount = amount,
                 RegistrantId = registrant.ID,
-                AccountId = this.OwnerAccount.ID,
+                AccountId = this.PaymentAccount.ID,
                 TransactionId = transaction.ID,
                 RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
                 CreateDate = DateTime.UtcNow,
@@ -445,6 +467,32 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(payment.Save(dc));
 
             return payment;
+        }
+
+        public decimal GetCheckoutTotalCost()
+        {
+            if (this.Cost.HasValue)
+                return Cost.Value +
+                    GetCreditCardFee(FeesPaidByType.Parent) +
+                    GetConvenienceFee(FeesPaidByType.Parent);
+
+            return 0;
+        }
+
+        public decimal GetCreditCardFee(FeesPaidByType feesPaidByType)
+        {
+            if (Cost.HasValue && PaymentAccount.CreditCardFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
+                return Billing.Platform.GetCreditCardFee(Cost.Value, PaymentAccount);
+
+            return 0;
+        }
+
+        public decimal GetConvenienceFee(FeesPaidByType feesPaidByType)
+        {
+            if (Cost.HasValue && PaymentAccount.ConvenienceFeesPaidBy == feesPaidByType && !UseStripeConnectedAccount)
+                return Billing.Platform.GetConvenienceFee(Cost.Value, PaymentAccount);
+
+            return 0;
         }
 
         private static List<ParticipationObject> GetDemoActivities(List<GradeLevel> grades)
@@ -478,24 +526,23 @@ namespace AfterSchoolLibrary.Models
             return activities;
         }
 
-        public static void GenerateDemoObjects(ref Account account, List<ParticipationObject> participationObjects, List<Location> locations, string accountName, List<GradeLevel> grades)
+        public static void GenerateDemoObjects(ref Account account, List<ParticipationObject> participationObjects, List<Location> locations, string accountName, string accountUniqueName, List<GradeLevel> grades)
         {
-            var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            var accountUniqueName = reg.Replace(accountName.GetMaxWords(25), "");
-
             account = new Account()
             {
-                Name = accountName.SplitByUpperCase(),
+                Name = accountName,
                 UniqueName = accountUniqueName,
                 IsActive = true,
                 Uid = Guid.NewGuid()
             };
-            
+
+            var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
             var schedule = ActivitySchedule.GetNewDefaultSchedule(generateDates: true);
             var currentAccount = account;
 
             locations.Add(new Location()
             {
+                Name = "Launch Fishers",
                 Address1 = "12175 Visionary Way",
                 Address2 = "#710",
                 City = "Fishers",

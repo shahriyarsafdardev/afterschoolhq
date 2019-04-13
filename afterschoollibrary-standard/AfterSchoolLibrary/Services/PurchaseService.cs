@@ -11,12 +11,12 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var totalCost = checkoutObject.TuitionFee;
+            var totalCost = checkoutObject.TuitionCostNoFees;
 
             if (checkoutObject.PaymentPlan.IsNotEmpty())
-                totalCost = checkoutObject.PaymentPlanTotalCost;
+                totalCost = checkoutObject.PaymentPlanCostTodayNoFees;
             else if (checkoutObject.SubscriptionPlan.IsNotEmpty())
-                totalCost += checkoutObject.SubscriptionCostToday;
+                totalCost += checkoutObject.SubscriptionCostTodayNoFees;
 
             if (checkoutObject.OverrideAmount.HasValue)
                 totalCost = checkoutObject.OverrideAmount.Value;
@@ -31,7 +31,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 LoggedInUserId = loggedInUser?.ID.IfEmpty(0),
                 NumberOfSeats = checkoutObject.NumberOfSeats,
-                PurchaserAccountId = checkoutObject.PurchasingAccount?.ID,
+                PurchaserAccountId = checkoutObject.PayingAccount?.ID,
                 RegistrantId = checkoutObject.MasterRegistrant?.ID,
                 RegistrationId = checkoutObject.Registration.ID,
                 StripeToken = checkoutObject.StripeToken,

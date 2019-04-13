@@ -40,8 +40,16 @@ namespace AfterSchoolLibrary.Models
 		public string Description { get { return (string)MDV["Description"].Value; } set { MDV["Description"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public int? PurchaseId { get { return (int?)MDV["PurchaseId"].Value; } set { MDV["PurchaseId"].Value = value; } }
-		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
-		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
+		public decimal? PaymentTypeFeeCharged { get { return (decimal?)MDV["PaymentTypeFeeCharged"].Value; } set { MDV["PaymentTypeFeeCharged"].Value = value; } }
+		public decimal? ConvenienceFeeCharged { get { return (decimal?)MDV["ConvenienceFeeCharged"].Value; } set { MDV["ConvenienceFeeCharged"].Value = value; } }
+		/// <summary>
+		/// which account is paying the payment type (stripe or ach) fee
+		/// </summary>
+		public int? PaymentTypeFeePayerAccountId { get { return (int?)MDV["PaymentTypeFeePayerAccountId"].Value; } set { MDV["PaymentTypeFeePayerAccountId"].Value = value; } }
+		/// <summary>
+		/// which account is paying the convenience fee
+		/// </summary>
+		public int? ConvenienceFeePayerAccountId { get { return (int?)MDV["ConvenienceFeePayerAccountId"].Value; } set { MDV["ConvenienceFeePayerAccountId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
@@ -49,6 +57,8 @@ namespace AfterSchoolLibrary.Models
 		public string StripeChargeOrRefundId { get { return (string)MDV["StripeChargeOrRefundId"].Value; } set { MDV["StripeChargeOrRefundId"].Value = value; } }
 		public PaymentSourceType PaymentSourceTypeId { get { return (PaymentSourceType)MDV["PaymentSourceTypeId"].Value; } set { MDV["PaymentSourceTypeId"].Value = value; } }
 		public int? OriginalTransactionId { get { return (int?)MDV["OriginalTransactionId"].Value; } set { MDV["OriginalTransactionId"].Value = value; } }
+		public decimal? PlatformPercentFee { get { return (decimal?)MDV["PlatformPercentFee"].Value; } set { MDV["PlatformPercentFee"].Value = value; } }
+		public decimal? PlatformFlatFee { get { return (decimal?)MDV["PlatformFlatFee"].Value; } set { MDV["PlatformFlatFee"].Value = value; } }
 		
 
         public Transaction()
@@ -76,12 +86,16 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Description", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "PurchaseId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
-				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PaymentTypeFeeCharged", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "ConvenienceFeeCharged", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PaymentTypeFeePayerAccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ConvenienceFeePayerAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "TransactionTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeChargeOrRefundId", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "PaymentSourceTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "OriginalTransactionId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "PlatformPercentFee", System.Data.SqlDbType.Decimal , "10,2");
+				_dp.Add(className, "PlatformFlatFee", System.Data.SqlDbType.Decimal , "10,2");
 				
                 return _dp;
             }
@@ -196,11 +210,19 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PlatformPercentFee"]);
+			dps.Add(ObjectMap["PaymentTypeFeeCharged"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["PlatformFlatFee"]);
+			dps.Add(ObjectMap["ConvenienceFeeCharged"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PaymentTypeFeePayerAccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ConvenienceFeePayerAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -217,6 +239,14 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["OriginalTransactionId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PlatformPercentFee"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["PlatformFlatFee"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -388,12 +418,24 @@ namespace AfterSchoolLibrary.Models
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
-                return results.Rows[0][0].ToString().ToDecimal();
+                return results.Rows[0][0].ToString().ToDecimal() + 
+                    GetTotalConvenienceFeesPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc) +
+                    GetTotalPaymentTypeFeesPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc);
 
             return 0;
         }
 
-        public static decimal GetTotalAmountPaidToBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        /// <summary>
+        /// calculates the total "amount" that was billed by the biller account, not the amount that was collected
+        /// this is why we have to subtract the fees paid by the payer out of the transaction amount
+        /// </summary>
+        /// <param name="BillerAccountId"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
+        /// <returns></returns>
+        public static decimal GetTotalAmountBilledByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -405,6 +447,114 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
 
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal() -
+                    GetTotalConvenienceFeesNotPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc) -
+                    GetTotalPaymentTypeFeesNotPaidByBillerAccount(BillerAccountId, startDate, endDate, msgs, dc);
+
+            return 0;
+        }
+
+        public static decimal GetTotalConvenienceFeesNotPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["ConvenienceFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+            dq.Criterias.Add(ObjectMap["ConvenienceFeePayerAccountId"], BillerAccountId, DatabaseCriteriaOperatorEnum.NotEqualTo);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalPaymentTypeFeesNotPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+            dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], BillerAccountId, DatabaseCriteriaOperatorEnum.NotEqualTo);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalConvenienceFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["ConvenienceFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["ConvenienceFeePayerAccountId"], BillerAccountId);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            if (results.Rows.Any())
+                return results.Rows[0][0].ToString().ToDecimal();
+
+            return 0;
+        }
+
+        public static decimal GetTotalPaymentTypeFeesPaidByBillerAccount(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.SelectParameters.Clear();
+
+            var sp = new SelectParameter(ObjectMap["Amount"]);
+            sp.Function = $"ISNULL(SUM({ObjectMap["PaymentTypeFeeCharged"].ParameterFullName}), 0)";
+            dq.SelectParameters.Add(sp);
+
+            dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], BillerAccountId);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);

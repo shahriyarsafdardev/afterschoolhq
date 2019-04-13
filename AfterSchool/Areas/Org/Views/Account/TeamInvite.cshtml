@@ -32,7 +32,11 @@
                         </div>
                         <div class="am-radio inline">
                             <input type="radio" name="usertype" id="usertype3" required value="@((int)UserType.Instructor)">
-                            <label for="usertype3">@UserType.Instructor.ToString().SplitByUpperCase()</label>
+                            <label for="usertype3">@UserType.Instructor.ToString()</label>
+                        </div>
+                        <div class="am-radio inline">
+                            <input type="radio" name="usertype" id="usertype4" required value="@((int)UserType.Treasurer)">
+                            <label for="usertype4">@UserType.Treasurer.ToString()</label>
                         </div>
 
                     </div>

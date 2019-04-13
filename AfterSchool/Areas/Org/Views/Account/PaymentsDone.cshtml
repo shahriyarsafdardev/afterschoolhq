@@ -1,0 +1,53 @@
+﻿@model StripeAccount
+@{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+    ViewBag.Title = "Getting Started";
+    var hasActivities = (bool)ViewBag.HasActivities;
+}
+
+<div>
+    <div class="col-sm-12 col-md-8 col-lg-6 col-md-offset-2 col-lg-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <img src="@UILabel.ProductLogoInverseAfterSchoolHQ()" alt="logo" width="350px" class="logo-img center-block">
+            </div>
+            <div class="panel-body">
+                <h1>Great Job!</h1>
+                <div class="text-medium-small">
+                    <p class="padding-v-10">
+                        You've setup your payments account on the best platform for afterschool @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower(). We will notify you when you receive a payment into your account. You can <a href="@Url.Action("payouts", "accounting")">request payouts</a> as soon as funds are available.
+                    </p>
+
+                    @if (!hasActivities)
+                    {
+                         <p class="padding-v-10">
+                            <strong>@SessionVariables.LoggedInUser.FirstName, did you know you can use @UILabel.ProductName() totally free?</strong><br /><br /> We help you promote your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() to parents to get more seats filled, quicker.
+                        </p>
+                        <p class="padding-v-10">
+                            Get started by creating your first activity. You are on your way to reducing clutter, increasing parent satisfaction, and increasing afterschool safety and awareness.
+                        </p>
+                        <p class="padding-v-10">
+                            <div class="pull-right padding-v-10">
+                                <a href="@Url.Action("editsetup", "activity", new { isnew = 1 })" class="btn btn-primary btn-lg">Create your first activity &raquo;</a>
+                            </div>
+
+                            <div class="pull-left padding-v-10">
+                                <a href="@Url.Action("index", "activity")" class="text-muted text-small">Explore on my own</a>
+                            </div>
+                        </p>
+                    }
+                    else
+                    {
+                         <p class="padding-v-10">
+                            <div class="pull-right padding-v-10">
+                                <a href="@Url.Action("index", "home")" class="btn btn-primary btn-lg">Continue to Dashboard &raquo;</a>
+                            </div>
+                        </p>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

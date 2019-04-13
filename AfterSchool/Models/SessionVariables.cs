@@ -4,7 +4,7 @@ using BasicLibrary;
 
 namespace AfterSchool.Models
 {
-    public class SessionVariables
+    public static class SessionVariables
     {
         public static Registrant CurrentRegistrant
         {

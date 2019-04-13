@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<title>Become a Sponsor | AfterSchool HQ</title>
+		<link href="css/bootstrap.css" rel="stylesheet">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<link rel="stylesheet" type="text/css" href="css/responsive.css" >
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+		<link href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&amp;subset=cyrillic,cyrillic-ext,latin-ext,vietnamese" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet">
+		<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+
+					<!-- =========HEADER STARTED=============-->
+					<header>
+						<div class="custom-header">
+							<div class="container">
+								<div class="row">
+									<div class="col-xs-12 col-sm-5 col-md-4 col-lg-4 top-left">
+										<div class="logo">
+											<a href="./"><img src="images/ahq-logo.png" class="img-responsive"></a>
+										</div>
+										<!-- logo -->
+									</div>
+									<!-- col-xs-12 col-sm-5 col-md-4 col-lg-4 -->
+									<div class="col-xs-12 col-sm-7 col-md-8 col-lg-8 top-right">
+										<div class="text-right options-01">
+											<ul>
+												<!--<li><a href="#">sign up for free</a></li>-->
+												<li><a href="./../views/account/login">Log In</a></li>
+												<div class="clearfix"></div>
+											</ul>
+										</div>
+										<!-- text-right options-01 -->
+									</div>
+									<!-- col-xs-12 col-sm-5 col-md-4 col-lg-4 -->
+								</div>
+								<!-- row -->
+							</div>
+							<!-- conatainer -->
+						</div>
+						<!-- custom-header-->
+					</header>
+					<!-- header -->
+					<!-- =================HEADER COMPLETED===================-->
+
+
+	<!-- =========CONTACT STARTED=============-->
+
+<div class="custom-contact">
+	<div class="container">
+		<div class="row">
+			<div class="co-info-section">
+				<div class="site_container">
+					<div class="col-md-6 offset-md-1">
+                        <h1 class="green-header">Become a Sponsor</h1>
+                        <h3><i>Support afterschool enrichment</i></h3>
+                    </div>
+                    <div class="col-md-6 offset-md-1 margin-space-25">
+                        <p><b>About AfterSchool HQ Sponsorships</b></p>
+                        <p>Help make afterschool activities possible for the students in your area. The sponsorship you provide will enable a school to begin using the AfterSchool HQ platform to manage, promote, and track their afterschool activities. In return, your company’s brand will appear on all registration forms of your sponsored school. </p>
+                        <p>AfterSchool HQ sponsorships are annual plans, but you are under no obligation to continue sponsoring after the first year. Sponsorships come in two tiers and are based on the number of students in a school. To find out more information on pricing and how you can get involved, fill out the form below!</p>
+                    </div>
+                </div>
+			</div>
+        </div>
+        <div class="row">
+
+            <!-- form -->
+            <div class="col align-self-center">
+                <div class="form-section">
+
+                    <div class="hide submit-contact-success">Your message has been sent</div>
+                    <div class="hide submit-contact-error">Error sending message</div>
+  
+                    <form method="post" action="assets/contact.php">
+                        <div class="form-dv">
+                            <label for="name">Full Name*</label>
+                            <input type="text" name="name" id="name" class="form-control contact-name form-input" required>
+                        </div>
+                        <div class="form-dv">
+                            <label for="email">Email Address*</label>
+                            <input type="text" name="email" placeholder="Email" id="email" class="form-control contact-email form-input" required>
+                        </div>
+                        <div class="form-dv">
+                            <label for="company">Company Name*</label>
+                            <input type="text" name="company" id="company" class="form-control contact-name form-input" required>
+                        </div>
+                        <div class="form-dv">
+                           <p><b>Select the activity types you may be interested in sponsoring</b></p>
+                           <input type="checkbox" id="technology" name="technology"><label for="technology" class="sponsor-checkbox">Technology</label>
+                           <input type="checkbox" id="performing-arts" name="performing-arts"><label for="performing-arts" class="sponsor-checkbox">Performing Arts</label>
+                           <input type="checkbox" id="music" name="music"><label for="music" class="sponsor-checkbox">Music</label>
+                           <input type="checkbox" id="sports" name="sports"><label for="sports" class="sponsor-checkbox">Sports</label>
+                           <input type="checkbox" id="journalism-lit" name="journalism-lit"><label for="journalism-lit" class="sponsor-checkbox">Journalism & Literature</label>
+                        </div>
+                        <div class="form-dv">
+                            <label for="message">Additional Information</label>
+                            <p>Please specify if there is a certain school or neighborhood area you'd like to sponsor.</p>
+                            <textarea name="message" class="form-control form-textarea" id="message" rows="5"></textarea>
+                        </div>
+                        <div class="margin-b-10">
+                            <div class="g-recaptcha" data-sitekey="6Lfg2BEUAAAAADCXTFVlYUywSoqvMUgLd-tERDxO"></div>
+                        </div>
+                        <button type="button" id="btn-submit-contact-form" class="btn btn-contact btn-send sponsor-send" onclick="submitContactForm()">Submit</button>
+                    </form>
+                    <script>
+                        function submitContactForm() {
+  
+                            var params = 'name=' + $('#name').val() +
+                                '&email=' + $('#email').val() +
+                                '&company=' + $('#company').val() +
+                                '&message=' + $('#message').val() +
+                                '&g_recaptcha_response=' + $('#g-recaptcha-response').val();
+
+								if ($('#technology').is(':checked'))
+									params += '&technology=1'
+								if ($('#performing-arts').is(':checked'))
+									params += '&performing-arts=1'
+								if ($('#music').is(':checked'))
+									params += '&music=1'
+								if ($('#sports').is(':checked'))
+									params += '&sports=1'
+								if ($('#journalism-lit').is(':checked'))
+									params += '&journalism-lit=1'
+  
+                            $('#btn-submit-contact-form').html('Submitting...');
+                            $('#btn-submit-contact-form').prop('disabled', true);
+  
+                            $.post(
+                                '/services/submitcontactform',
+                                params,
+                                function (data) {
+  
+                                    $('#btn-submit-contact-form').html('Submit');
+                                    $('#btn-submit-contact-form').prop('disabled', false);
+                                    grecaptcha.reset();
+  
+                                    if (data && data.status == 'ok') {
+                                        
+                                        $('#name').val('');
+                                        $('#email').val('');
+                                        $('#company').val('');
+										$('#message').val('');
+										
+										$('#technology').prop('checked',false);
+										$('#performing-arts').prop('checked',false);
+										$('#music').prop('checked',false);
+										$('#sports').prop('checked',false);
+										$('#journalism-lit').prop('checked',false);
+  
+                                        $('.submit-contact-error').addClass('hide');
+                                        $('.submit-contact-success').removeClass('hide');
+  
+                                    } else {
+  
+                                        $('.submit-contact-success').addClass('hide');
+                                        $('.submit-contact-error').removeClass('hide');
+                                        $('.submit-contact-error').html('');
+  
+                                        for (var message of data.messages) {
+                                            $('.submit-contact-error').append('<p>');
+                                            $('.submit-contact-error').append(message.Text);
+                                            $('.submit-contact-error').append('</p>');
+                                        }
+  
+                                    }
+                                }
+                            );
+                        }
+                    </script>
+  
+                </div>
+            </div>
+
+        </div>
+	</div>
+	<!-- row -->
+</div>
+
+
+<!-- =================CONTACT COMPLETED===================-->
+<!-- ===============FOOTER START=======================-->
+				<div class="footer-section">
+					<div class="container">
+						<div class="row">
+							<div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 footer-col-first">
+								<h4 class="ft-heading">Contact</h4>
+								<div class="ft-address">
+									<ul class="list-unstyled">
+										<li>12175 Visionary Way #710,</li>
+										<li>Fishers, Indiana, USA</li>
+										<li> 317-316-0596</li>
+									</ul>
+									<div class="footer-logo">
+										<img src="images/footer-icon.png">
+									</div>
+								</div>
+							</div>
+							<!--<div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 footer-col-second">
+								<h4 class="ft-heading">Services</h4>
+								<div class="ft-service">
+									<ul class="list-unstyled">
+										<li><a href="">Enrollment</a></li>
+										<li><a href="">Online Payments</a></li>
+										<li><a href="">Waiting Lists</a></li>
+										<li><a href="">Messaging</a></li>
+										<li><a href="">Lottery System</a></li>
+										<li><a href="">I’m an activity provider</a></li>
+									</ul>
+								</div>
+							</div>-->
+							<div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 footer-col-fourth">
+								<h4 class="ft-heading">Company</h4>
+								<div class="ft-company">
+									<ul class="list-unstyled">
+										<li><a href="https://afterschoolhq.zendesk.com/" target="_blank">FAQ</a></li>
+										<li><a href="./about.html">About</a></li>
+										<li><a href="./contact-us.html">Contact</a></li>
+										<li><a href="./tos.html">Terms & Conditions</a></li>
+										<li><a href="./privacy.html">Privacy Policy</a></li>
+										<li><a href="./copyright.html">Copyright</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 footer-col-fourth">
+								<!--empty-->
+							</div>
+							<div class="col-xs-12 col-sm-6 col-md-3 col-lg-3 footer-col-fourth">
+								<h4 class="ft-heading">Newsletter</h4>
+								<p class="newsletter-text">Get the latest news from AfterSchool HQ:</p>
+
+								<!--<form class="form-inline">
+									<div class="form-group from-right">
+										<input type="email" class="form-control email-input" id="exampleInputEmail3" placeholder="YOUR EMAIL ADDRESS">
+									</div>
+									<button type="submit" class="btn btn-newsletter"> <img src="images/arrow-icon.png"> </button>
+									</form>-->
+
+									<!-- Begin MailChimp Signup Form -->
+									<link href="//cdn-images.mailchimp.com/embedcode/slim-10_7.css" rel="stylesheet" type="text/css">
+									<style type="text/css">
+										#mc_embed_signup{clear:left; font:14px Helvetica,Arial,sans-serif; }
+										/* Add your own MailChimp form style overrides in your site stylesheet or in this style block.
+										   We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+									</style>
+									<div id="mc_embed_signup">
+									<form action="https://afterschoolhq.us19.list-manage.com/subscribe/post?u=0bbc283afd364a09dabfa29d1&amp;id=d6f63303a2" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+									    <div id="mc_embed_signup_scroll">
+										<input type="email" value="" name="EMAIL" class="email form-control email-input" id="mce-EMAIL" placeholder="Email Address" required>
+									    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+									    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_0bbc283afd364a09dabfa29d1_d6f63303a2" tabindex="-1" value=""></div>
+										</br/>
+									    <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button btn btn-newsletter"></div>
+									    </div>
+									</form>
+									</div>
+
+									<!--End mc_embed_signup-->
+
+								<div class="social-icon">
+									<ul class="list-inline">
+										<!--<li>	<a href=""><img src="images/facebook.png"></a></li>-->
+										<li>	<a href="https://twitter.com/afterschoolhq" target="_blank"><img src="images/twitter.png"></a></li>
+										<!--<li>	<a href=""><img src="images/instagram.png"></a></li>-->
+										<li>	<a href="https://www.linkedin.com/company/afterschoolhq/" target="_blank"><img src="images/linked-in.png"></a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<!-- row -->
+					</div>
+					<!-- conatainer -->
+				</div>
+				<div class="bottom-footer text-center">
+					<div class="container">
+						<div class="row">
+							<ul class="list-inline last-icon-ul">
+								<li>AfterSchool HQ was created                   </li>
+								<li><img src="images/footer-copy-right-img.png" class="footer-copy"></li>
+								<li>with love in Fishers, IN.</li>
+							</ul>
+						</div>
+						<!-- row -->
+					</div>
+					<!-- conatainer -->
+				</div>
+				<!-- ================FOOTER COMPLETED================-->
+			</div>
+			<!-- row -->
+		</div>
+		<!-- container-fluid -->
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/custom.js"></script>
+
+	</body>
+</html>

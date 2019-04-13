@@ -31,6 +31,18 @@ namespace AfterSchool.Models
             };
         }
 
+        public static AddressViewModel ToAddressViewModel(this CheckPaymentAccount checkPaymentAccount)
+        {
+            return new AddressViewModel()
+            {
+                Address1 = checkPaymentAccount.Address1,
+                Address2 = checkPaymentAccount.Address2,
+                City = checkPaymentAccount.City,
+                State = checkPaymentAccount.State,
+                PostalCode = checkPaymentAccount.PostalCode
+            };
+        }
+
         public static AddressViewModel ToAddressViewModel(this Activity activity)
         {
             var location = activity.GetLocation();
@@ -44,14 +56,7 @@ namespace AfterSchool.Models
                     PostalCode = location.PostalCode
                 };
 
-            return new AddressViewModel()
-            {
-                Address1 = activity.Address1,
-                Address2 = activity.Address2,
-                City = activity.City,
-                State = activity.State,
-                PostalCode = activity.PostalCode
-            };
+            return new AddressViewModel();
         }
 
         public static AddressViewModel ToAddressViewModel(this Location location)

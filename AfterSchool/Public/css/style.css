@@ -1,6 +1,14 @@
 body {
     font-family: 'Montserrat', sans-serif;
 }
+.green-header {
+    font-family: Montserrat;
+    font-size: 60px;
+    font-weight: bold;
+    color: #00ae85;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
 .for-bg-img {
     background: url(../images/banner.jpg);
     background-size: cover;
@@ -1203,6 +1211,22 @@ a {
 }
 /************ sign-up-header end **********/
 
+/********* Become a Sponsor *************/
+
+.margin-space-25 {
+    margin-top: 25px;
+}
+.sponsor-checkbox {
+    margin: auto 10px;
+    font-weight: 400;
+}
+.sponsor-send {
+    margin: 30px auto;
+}
+.form-dv {
+    margin-bottom: 20px;
+}
+
 /********* Contact Us & About (Company Info) *************/
 
 .co-info-section {
@@ -1212,14 +1236,6 @@ a {
     float: left;
     display: block;
     width: 100%;
-}
-.co-info-header {
-    font-family: Montserrat;
-    font-size: 60px;
-    font-weight: bold;
-    color: #00ae85;
-    margin-top: 0px;
-    margin-bottom: 0px;
 }
 .co-info-body {
     font-family: Montserrat;
@@ -1382,7 +1398,6 @@ ul li.phone-li:after {
 .web-link:hover {
     color: #fff;
 }
-.top-social-icon {}
 .filter-row {
     background: #f0f0f0;
 }

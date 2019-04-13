@@ -7,6 +7,7 @@ using BasicLibrary;
 using AfterSchool.Models;
 using AfterSchool.Helpers;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibrary;
 
 namespace AfterSchool.Controllers
 {
@@ -20,13 +21,51 @@ namespace AfterSchool.Controllers
             if (origin.StartsWith("https://afterschoolhq.com") ||
                 origin.StartsWith("https://qa.afterschoolhq.com") ||
                 origin.StartsWith("https://ci.afterschoolhq.com") ||
-                origin.StartsWith("https://stating.afterschoolhq.com") ||
+                origin.StartsWith("https://staging.afterschoolhq.com") ||
                 origin.StartsWith("http://localhost:54849"))
             {
                 return true;
             }
 
             return false;
+        }
+
+        public ActionResult SetDemoOrgName(string orgname, string firstname, string email)
+        {
+            var msgs = new SystemMessages();
+
+            if (orgname.IsBlank())
+                msgs.Add("Organization / Program name is required", MessageType.UserError);
+
+            if (firstname.IsBlank())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (!email.IsEmail())
+                msgs.Add("Email is required", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var uniqueName = AccountService.GenerateUniqueName(orgname, null, msgs);
+                CookieVariables.DemoOrgName = orgname;
+                CookieVariables.DemoUniqueOrgName = uniqueName;
+                CookieVariables.DemoFirstName = firstname;
+                CookieVariables.DemoEmailAddress = email;
+
+                SendGridHelper.AddContactFromDemo(
+                    orgname,
+                    firstname,
+                    email,
+                    msgs);
+
+                return Json(new { status = "ok", demoUrl = $"/{uniqueName}" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult HasDemoOrgName()
+        {
+            return Json(new { status = "ok", hasDemoOrgName = CookieVariables.DemoOrgName.IsNotBlank() }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult LeadForm(string org, string name, string email, string phone, string comments)
@@ -85,7 +124,32 @@ namespace AfterSchool.Controllers
                     location.HostAccountId,
                     LocationType = location.LocationTypeId.ToString()
                 })
-            }, JsonRequestBehavior.AllowGet);            
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult SearchProviders(string search)
+        {
+            if (!IsRequestFromApp())
+                return Json(new { status = "error", messages = new SystemMessages() }, JsonRequestBehavior.AllowGet);
+
+            var msgs = new SystemMessages();
+            var accounts = Account.FullTextSearch(search.Trim(), 0, 10, msgs);
+
+            return Json(new
+            {
+                status = "ok",
+                providers = accounts.Select(account => new
+                {
+                    account.ID,
+                    account.Name,
+                    account.Address1,
+                    account.Address2,
+                    account.City,
+                    account.State,
+                    account.PostalCode,
+                    FullLabel = account.FormatAddress(useLineBreaks: false)
+                })
+            }, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult ValidateCoupon(string couponcode, string paymentoption)

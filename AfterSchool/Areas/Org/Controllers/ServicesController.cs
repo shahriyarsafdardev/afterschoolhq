@@ -17,6 +17,81 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
+        [HttpPost]
+        public ActionResult RequestPayout(string payoutamount)
+        {
+            var msgs = new SystemMessages();
+            var maxAmountAvailable = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
+
+            if (!payoutamount.IsNumber() || payoutamount.ToDecimal() < 25 || payoutamount.ToDecimal() > maxAmountAvailable)
+                msgs.Add($"Amount must be at least $25 and no greater than {maxAmountAvailable.ToCurrency()}", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+                SessionVariables.CurrentAccount.RequestNewPayout(payoutamount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
+
+            if (msgs.HasNoErrors())
+                return Json(new
+                {
+                    status = "ok",
+                    messages = msgs
+                }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult CalculateFinalPrice(string cost)
+        {
+            var msgs = new SystemMessages();
+
+            if (!cost.IsNumber() || cost.ToDecimal() <= 0)
+                msgs.Add("Total cost must be a number greater than 0", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var finalPrice = cost.ToDecimal();
+
+                if (!SessionVariables.CurrentAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
+                    finalPrice = AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(cost.ToDecimal(), SessionVariables.CurrentAccount);
+
+                return Json(new
+                {
+                    status = "ok",
+                    price = finalPrice,
+                    messages = msgs
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult InviteTreasurer(string firstname, string lastname, string email)
+        {
+            var msgs = new SystemMessages();
+
+            if (firstname.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (lastname.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!email.IsEmail())
+                msgs.Add("Email is required", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var emailText = $"{ SessionVariables.LoggedInUser.FirstName} has invited you to setup the payment account for {SessionVariables.CurrentAccount.Name} in {UILabel.ProductName()}. This will enable us to send registration money to your account.";
+
+                SessionVariables.CurrentAccount.InviteUser(firstname, lastname, email, null, emailText, UserType.Treasurer, SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public ActionResult MoveRegistrantAssignment(string id, string registrant, string assignmenttype)
         {

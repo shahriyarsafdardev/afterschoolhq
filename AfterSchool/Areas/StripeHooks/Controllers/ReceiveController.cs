@@ -37,10 +37,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 msgs.Add("Getting stripeEvent", MessageType.Notice);
-                var stripeEvent = AfterSchoolLibrary.Helpers.Utilities.IsLocalHost ?
-                    (StripeEvent)StripeEventUtility.ParseEvent(serializedJson) :
-                    (StripeEvent)StripeEventUtility.ParseEvent(
-                        serializedJson);
+                var stripeEvent = (Stripe.Event)Stripe.EventUtility.ParseEvent(serializedJson);
 
                 switch (stripeEvent.Type)
                 {
@@ -50,6 +47,8 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                     case "invoice.payment_succeeded":
                         msgs.Add("Getting payment_succeeded", MessageType.Notice);
                         return InvoicePaymentSucceeded(stripeEvent, msgs);
+                    case "invoice.payment_failed":
+                        return InvoicePaymentFailed(stripeEvent, msgs);
                     default:
                         return ReturnOK(msgs);
                 }
@@ -82,12 +81,12 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
         }
 
-        private IHttpActionResult AccountUpdated(StripeEvent stripeEvent, SystemMessages msgs)
+        private IHttpActionResult AccountUpdated(Stripe.Event stripeEvent, SystemMessages msgs)
         {
             msgs.Add("Getting stripeAccountId", MessageType.Notice);
-            var stripeAccountId = (string)stripeEvent.Data.Object.id;
+            var stripeAccountId = stripeEvent.Account;
             msgs.Add("Getting account", MessageType.Notice);
-            var account = Account.LoadByStripeUserId(stripeAccountId);
+            var account = AfterSchoolLibrary.Models.Account.LoadByStripeUserId(stripeAccountId);
 
             if (account.IsEmpty())
             {
@@ -96,24 +95,25 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             }
 
             msgs.Add("Getting stripeAccount", MessageType.Notice);
-            var stripeAccount = account.GetStripeAccount(msgs);
+            var ahqStripeAccount = account.GetStripeAccount(msgs);
 
-            if (stripeAccount.IsEmpty())
+            if (ahqStripeAccount.IsEmpty())
             {
                 msgs.Add("No stripe account yet", MessageType.Notice);
                 return ReturnOK(msgs);
-            }
+            }            
 
             msgs.Add("Getting serializedAccountJson", MessageType.Notice);
             var serializedAccountJson = JsonConvert.SerializeObject(stripeEvent.Data.Object);
+            var stripeAccount = Stripe.EventUtility.ParseEventDataItem<Stripe.Account>(serializedAccountJson);
             msgs.Add("Getting startingStatus", MessageType.Notice);
-            var startingStatus = stripeAccount.VerificationStatusId;
+            var startingStatus = ahqStripeAccount.VerificationStatusId;
 
             msgs.Add("Getting ParseAndUpdateStripeCustomAccount", MessageType.Notice);
-            stripeAccount.ParseAndUpdateStripeCustomAccount((string)serializedAccountJson, null, msgs);
+            ahqStripeAccount.ParseAndUpdateStripeCustomAccount(stripeAccount, null, msgs);
 
             msgs.Add("Getting SendStripeAccountVerified", MessageType.Notice);
-            if (msgs.HasNoErrors() && startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+            if (msgs.HasNoErrors() && startingStatus != ahqStripeAccount.VerificationStatusId && ahqStripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
                 account.SendStripeAccountVerified(null);
 
             if (msgs.HasErrors())
@@ -122,12 +122,13 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             return ReturnOK(msgs);
         }
 
-        private IHttpActionResult InvoicePaymentSucceeded(StripeEvent stripeEvent, SystemMessages msgs)
+        private IHttpActionResult InvoicePaymentSucceeded(Stripe.Event stripeEvent, SystemMessages msgs)
         {
-            var customerId = (string)stripeEvent.Data.Object.customer;
-            var stripeSubscriptionId = (string)stripeEvent.Data.Object.subscription;
-            var chargeId = (string)stripeEvent.Data.Object.charge;
-            var totalAmountInCents = ((string)stripeEvent.Data.Object.total).ToDecimal();
+            var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
+            // var customerId = stripeInvoice.CustomerId;
+            var stripeSubscriptionId = stripeInvoice.SubscriptionId;
+            var chargeId = stripeInvoice.ChargeId;
+            // var totalAmountInCents = (decimal)stripeInvoice.Total;
             var registrantSubscriptionPlan = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
             var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs);
             var registrant = registrantSubscriptionPlan.GetRegistrant(msgs);
@@ -149,20 +150,21 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
 
                 if (transaction.IsEmpty())
                 {
-                    // send payment succeeded email;
-                    msgs.AddRange(purchasingAccount.SendSubscriptionPaymentSucceeded(plan));
+                    // send payment succeeded email
+                    purchasingAccount.SendSubscriptionPaymentSucceeded(plan);
                     
                     // save transaction info and track payment to the activity as well.
                     var checkoutObject = new CheckoutObject()
                     {
-                        PurchasingAccount = purchasingAccount,
+                        PayingAccount = purchasingAccount,
                         BillingAccount = billingAccount,
-                        OverrideAmount = totalAmountInCents / 100,
+                        // OverrideAmount = totalAmountInCents / 100, // should be able to pull from the plan
                         ParticipationObject = participationObject,
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                         PaymentType = PaymentType.CreditCard,
                         StripeChargeId = chargeId,
-                        SubscriptionPlan = plan,
+                        SubscriptionPlan = plan.PlanTypeId == SubscriptionPlanType.Subscription ? plan : null,
+                        PaymentPlan = plan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? plan : null,
                         MasterRegistrant = masterRegistrant,
                         NumberOfSeats = 1,
                         Registration = registration,
@@ -179,11 +181,12 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             return ReturnOK(msgs);
         }
 
-        private IHttpActionResult InvoicePaymentFailed(StripeEvent stripeEvent, SystemMessages msgs)
+        private IHttpActionResult InvoicePaymentFailed(Stripe.Event stripeEvent, SystemMessages msgs)
         {
-            var customerId = (string)stripeEvent.Data.Object.customer;
-            var account = Account.LoadByStripeCustomerId(customerId, msgs);
-            var subscriptionId = (string)stripeEvent.Data.Object.subscription;
+            var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
+            var customerId = stripeInvoice.CustomerId;
+            var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
+            var subscriptionId = stripeInvoice.SubscriptionId;
             var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscriptionId, msgs);
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
 

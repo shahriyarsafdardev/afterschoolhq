@@ -9,6 +9,14 @@ namespace AfterSchoolLibrary
 {
     public static class Extensions
     {
+        public static Lob.Models.AccountType ToLobAccountType(this LegalEntityType legalEntityType)
+        {
+            if (legalEntityType == LegalEntityType.Company)
+                return Lob.Models.AccountType.Company;
+
+            return Lob.Models.AccountType.Individual;
+        }
+
         public static string GetDescription(this StripeVerificationFailedCode stripeVerificationFailedCode)
         {
             switch(stripeVerificationFailedCode)

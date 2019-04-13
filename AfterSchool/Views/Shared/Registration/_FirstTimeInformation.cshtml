@@ -1,0 +1,30 @@
+﻿@model Account
+
+@if (!Model.ID.HasValue)
+{
+    <div class="firsttime-information">
+        <div class="row">
+            <div class="pull-right hide">
+                <i class="s7-close text-white text-large"></i>
+            </div>
+            <div class="col-md-6 col-md-offset-3">
+                <h2 class="text-success">Welcome, @CookieVariables.DemoFirstName</h2>
+                <p class="text-medium-small">
+                    This is where your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower() will be listed to allow parents to discover, register, and pay. @UILabel.ProductName() also allows you to manage your students, take attendance, and send messages to parents.
+                </p>
+                <h2 class="text-success">Safe &amp; Trusted</h2>
+                <p class="text-medium-small">
+                    @UILabel.ProductName() is trusted by parents, providers, schools, and districts alike. The information entered by you and your participants is kept completely secure and private.
+                </p>
+                <h2 class="text-success">Free</h2>
+                <p class="text-medium-small">
+                    We understand you're working to make a difference. That is why we've decided to make our platform is free to use. You can add your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower(), register parents, and collect payments.
+                </p>
+                <p>&nbsp;</p>
+                <p>
+                    <a href="@Url.Action("index", "signup")" class="btn btn-register">Customize this page &raquo;</a>
+                </p>
+            </div>
+        </div>
+    </div>
+}

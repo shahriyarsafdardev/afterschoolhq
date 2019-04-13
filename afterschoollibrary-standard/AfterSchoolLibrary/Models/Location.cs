@@ -184,7 +184,6 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"
 
-
         public static List<Location> Search(string query, int? start, int? length, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

@@ -22,7 +22,7 @@ namespace AfterSchoolLibraryTests.Factories
                 Price = 100,
                 StartDate = DateTime.UtcNow.AddMonths(-1)
             };
-            msgs.AddRange(obj.Save(dc: dc));
+            msgs.AddRange(obj.Save(dc));
             return obj;
         }
     }

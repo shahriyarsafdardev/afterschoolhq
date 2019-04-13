@@ -287,14 +287,20 @@ var Notifications = {
 }
 
 var ActivitySetup = {
-    showAdvancedSettings: function () {
+    showAdvancedSettings: function (cmd) {
         if ($('.advanced-settings').attr('class').indexOf('hide') > -1) {
-            $('.advanced-settings').removeClass('hide');
-            $('#btn-advanced-settings').html('Hide Advanced Settings');
+            ActivitySetup.showAdvancedSettingsYes();
         } else {
-            $('.advanced-settings').addClass('hide');
-            $('#btn-advanced-settings').html('Show Advanced Settings');
+            ActivitySetup.showAdvancedSettingsNo();
         }
+    },
+    showAdvancedSettingsYes: function () {
+        $('.advanced-settings').removeClass('hide');
+        $('#btn-advanced-settings').html('Hide Advanced Settings');
+    },
+    showAdvancedSettingsNo: function () {
+        $('.advanced-settings').addClass('hide');
+        $('#btn-advanced-settings').html('Show Advanced Settings');
     },
     navigateActivity: function (url) {
         $('#form1').attr('action', url);
@@ -302,5 +308,27 @@ var ActivitySetup = {
     setCopyActivity: function (name, url) {
         $('#activitynamecopy').val(name + ' [copy]');
         $('#form-copy').attr('action', url);
+    }
+}
+
+var AccountSetup = {
+      
+    sendVerificationEmail: function() {
+        $.get(
+            '/org/services/sendverificationemail/',
+            function (data) {
+                if (data && data.status == 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: 'A verification email has been sent. Please check your email.'
+                    });
+                } else {
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: 'Error sending verification email. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress()" class="white">contact support</a>.'
+                    });
+                }
+            }
+        );
     }
 }

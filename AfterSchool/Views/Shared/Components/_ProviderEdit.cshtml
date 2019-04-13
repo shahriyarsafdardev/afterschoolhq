@@ -1,0 +1,183 @@
+﻿@model Account
+
+@{
+    var searchOnly = false;
+    var label = $"Who is providing this {UILabel.ActivityLabel(ActivityType.Activity).ToLower()}?";
+    var placeholderText = "Search Providers...";
+    var providerIsRequired = false;
+
+    if (ViewData["searchonly"].IsNotEmpty())
+    {
+        searchOnly = (bool)ViewData["searchonly"];
+    }
+
+    if (ViewData["label"].IsNotEmpty())
+    {
+        label = ViewData["label"].ToString();
+    }
+
+    if (ViewData["placeholderText"].IsNotEmpty())
+    {
+        placeholderText = ViewData["placeholderText"].ToString();
+    }
+
+    if (ViewData["providerIsRequired"].IsNotEmpty() && ViewData["providerIsRequired"].IsNotEmpty().ToString().ToBoolean())
+    {
+        providerIsRequired = ViewData["providerIsRequired"].IsNotEmpty().ToString().ToBoolean();
+    }
+}
+
+<div class="form-group">
+    <label class="col-sm-3 control-label">
+        @label
+        @if (@providerIsRequired)
+        {
+            <span class="text-danger">*</span>
+        }
+    </label>
+    <div class="col-sm-6" style="position:relative;">
+        <input type="text" class="form-control" id="provider-search" name="provider-search" value="@Model.Name" placeholder="@placeholderText" autocomplete="off" />
+        <input type="hidden" name="provider" id="provider" value="@(Model?.ID.IfEmpty("0"))" />
+        <div id="provider-list" class="border-light-gray pointer hide" style="position:absolute; width:100%; z-index:1000; background-color: white; border-width: 2px;">
+
+        </div>
+    </div>
+</div>
+
+<script>
+    var providerList;
+    var providerSearch;
+    var isSearching = false;
+    var listItemClass = "text-small padding-10";
+    var listItemStyle = "background-color: #f0f0f0;";
+    var listItemOnMouseOver = "providerMouseOver";
+    var listItemOnMouseOut = "providerMouseOut";
+    var listItemOnClick = "providerMouseClick";
+
+    function providerMouseOver(id) {
+        $(`#provider-${id}`).addClass('bg-warning');
+    }
+
+    function providerMouseOut(id) {
+        $(`#provider-${id}`).removeClass('bg-warning');
+    }
+
+    function providerMouseClick(id, fullLabel) {
+        providerList.addClass('hide');
+
+        if (id > 0) {
+
+            $('#add-provider').addClass('hide');
+            $('#provider').val(id);
+            providerSearch.val(fullLabel);
+            
+        } else if (@searchOnly.ToString().ToLower() == false) {
+
+            $('#providername').val(providerSearch.val());
+
+            $('#add-provider').removeClass('hide');
+            $('#provider').val('');
+            providerSearch.val('');
+        }
+    }
+
+    function doProviderSearch(providerSearch, providerList) {
+        if (providerSearch.val().length > 0 && !isSearching) {
+            isSearching = true;
+
+            $.get(
+                `@Url.Action("searchproviders", "services", new { Area = "" })?search=${providerSearch.val()}`,
+                function (data) {
+
+                    isSearching = false;
+
+                    if (data && data.status == 'ok') {
+
+                        providerList.html('');
+
+                        for (let provider of data.providers) {
+                            let labelEscaped = provider.FullLabel.replace(/'/g, "\\'");
+                            providerList.append(`
+                                <div class="${listItemClass}"
+                                    style="${listItemStyle}"
+                                    id="provider-${provider.ID}"
+                                    onmouseover="${listItemOnMouseOver}(${provider.ID})"
+                                    onmouseout="${listItemOnMouseOut}(${provider.ID})"
+                                    onclick="${listItemOnClick}(${provider.ID},'${labelEscaped}')">
+                                    <strong>${provider.FullLabel}</strong>
+                                </div>`);
+                        }
+
+                        if (providerSearch.val().length >= 4 && @searchOnly.ToString().ToLower() == false) {
+                            providerList.append(`
+                            <div class="${listItemClass}"
+                                style="${listItemStyle}"
+                                id="provider-0"
+                                onmouseover="${listItemOnMouseOver}(0)"
+                                onmouseout="${listItemOnMouseOut}(0)"
+                                onclick="${listItemOnClick}(0)">
+                                <strong>Provider not found &raquo; Click here to enter provider details</strong>
+                            </div>`);
+                        } else if (data.providers.length == 0) {
+                            providerList.append(`
+                            <div class="${listItemClass}"
+                                style="${listItemStyle}"
+                                id="provider-0">
+                                <strong>Searching... Type the provider name</strong>
+                            </div>`);
+                        }
+
+                        providerList.removeClass('hide');
+
+                    } else {
+
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: 'Error loading providers',
+                            success: false
+                        });
+                    }
+                }
+            );
+        } else {
+
+        }
+    }
+
+
+    var searchTimeout = null;
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        providerList = $('#provider-list');
+        providerSearch = $('#provider-search');
+
+        providerSearch.keyup(function () {
+
+            if (providerSearch.val().length > 0) {
+                providerList.removeClass('hide');
+                providerList.html('');
+                providerList.append(`
+                    <div class="${listItemClass}"
+                        style="${listItemStyle}"
+                        id="provider-0">
+                        <strong>Searching... Type the provider name</strong>
+                    </div>`);
+            }
+            else {
+                providerList.html('');
+                providerList.addClass('hide');
+            }
+
+            if (!isSearching) {
+                clearTimeout(searchTimeout);
+            }
+
+            searchTimeout = setTimeout(function () {
+                doProviderSearch($('#provider-search'), $('#provider-list'))
+            }, 250);
+
+        });
+
+    });
+</script>

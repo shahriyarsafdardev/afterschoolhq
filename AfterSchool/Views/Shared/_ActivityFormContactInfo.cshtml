@@ -3,7 +3,7 @@
     var instructors = (List<WebUser>)ViewBag.Instructors;
 }
 
-<div class="panel panel-default">
+<div class="panel panel-default panel-small-padding">
 
     <div class="panel-heading">
         @UILabel.ActivityLabel(Model.ActivityTypeId) Contact
@@ -14,6 +14,26 @@
         <div class="form-group">
             <div class="col-md-9 col-md-offset-3">
                 <p>Information listed here will be published out for parents who are browsing and/or registering.</p>
+            </div>
+        </div>
+       
+        <div class="form-group @(SessionVariables.CurrentAccount.IsSchool ? "" : "hide")">
+            <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Led By: <span class="text-danger">*</span></label>
+            <div class="col-sm-9">
+                @foreach (var item in Enum.GetValues(typeof(ActivityLeaderType)).Cast<ActivityLeaderType>().Except(ActivityLeaderType.NotSet.AsList()))
+                {
+                    var selected = (Model.LeaderTypeId == item) ? "checked=\"checked\"" : "";
+
+                    if (!SessionVariables.CurrentAccount.IsSchool)
+                    { 
+                        selected = item == ActivityLeaderType.StaffMember ? "checked=\"checked\"" : "";
+                    }
+
+                    <div class="am-radio inline">
+                        <input type="radio" class="form-control leadertype" name="leadertype" id="leadertype-@((int)item)" value="@((int)item)" required @selected /> 
+                        <label for="leadertype-@((int)item)">@item.ToString().SplitByUpperCase()</label>
+                    </div>
+                }
             </div>
         </div>
 
@@ -52,7 +72,7 @@
 
 </div>
 
-<div class="col-md-offset-3 col-md-9 padding-v-20">
+<div class="col-md-offset-3 col-md-9 padding-v-20 hide" id="show-advanced-settings">
     <span><a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a></span>
 </div>
 
@@ -152,8 +172,7 @@
                 name = `${$('#instructorfirstname').val()} ${$('#instructorlastname').val()}`;
                 email = $('#instructoremail').val();
                 phone = $('#instructorphone').val();
-            }
-            else if (instructorId != '0') {
+            } else if (instructorId != '0') {
                 name = $(`#instructor-${instructorId}`).attr('name');
                 email = $(`#instructor-${instructorId}`).attr('email');
                 phone = $(`#instructor-${instructorId}`).attr('phone');
@@ -163,5 +182,20 @@
             $('#contactemail').val(email);
             $('#contactphone').val(phone);
         });
+
+        $('.leadertype').click(function () {
+            showShowAdvancedSettings($(this).val());
+        });
+
+        showShowAdvancedSettings(@((int)Model.LeaderTypeId));
     });
+
+    function showShowAdvancedSettings(leaderType) {
+        if (leaderType == '@((int)ActivityLeaderType.ExternalProvider)') {
+            $('#show-advanced-settings').addClass('hide');
+            ActivitySetup.showAdvancedSettingsNo();
+        } else {
+            $('#show-advanced-settings').removeClass('hide');
+        }
+    }
 </script>

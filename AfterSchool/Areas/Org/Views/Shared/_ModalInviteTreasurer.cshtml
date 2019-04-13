@@ -1,0 +1,66 @@
+﻿
+<div id="modal-invite-treasurer" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Invite your financial administrator</h3>
+        </div>
+        <div class="modal-body form">
+            <div id="invite-form">
+                <p>Invite your treasurer / financial administrator and we'll take care of the rest.</p>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="treasurer-firstname" placeholder="First Name" />
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="treasurer-lastname" placeholder="Last Name" />
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-control" id="treasurer-email" placeholder="Email Address" />
+                </div>
+            </div>
+            <div class="hide text-center" id="invite-form-thanks">
+                Thanks! We've sent an invite email to <strong><span id="invite-person-text"></span></strong>
+            </div>
+        </div>
+        <div class="modal-footer" id="invite-form-footer">
+            <button class="btn btn-primary btn-lg btn-send-treasure-invite">
+                Send Invite &raquo;
+            </button>
+        </div>
+    </div>
+    <script>
+        PageEvent.add(PageEvent.AFTER_INIT, function() {
+
+            $('.btn-send-treasure-invite').click(function () {
+                var params = 'firstname=' + $('#treasurer-firstname').val() + '&lastname=' + $('#treasurer-lastname').val() + '&email=' + encodeURIComponent($('#treasurer-email').val());
+
+                $('.btn-send-treasure-invite').prop('disabled', true);
+
+                $.post(
+                    '@Url.Action("InviteTreasurer", "services")',
+                    params,
+                    function (data) {
+
+                        $('.btn-send-treasure-invite').prop('disabled', false);
+
+                        if (data && data.status == 'ok') {
+                            $('#invite-form').addClass('hide');
+                            $('#invite-form-footer').addClass('hide');
+                            $('#invite-form-thanks').removeClass('hide');
+                            $('#invite-person-text').html($('#treasurer-firstname').val());
+                        } else {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: 'Please fill in all required fields',
+                                success: false
+                            });
+                        }
+                    }
+                );
+            });
+
+        });
+    </script>
+</div>

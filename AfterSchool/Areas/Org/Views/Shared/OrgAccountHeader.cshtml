@@ -29,14 +29,7 @@
     if (!SessionVariables.LoggedInUser.VerifiedAccount)
     {
         <div class="trial-header text-center text-white bg-danger">
-            Please verify your email address in order to publish activities. <a href="javascript:sendVerificationEmail()" class="white">Resend Email Verification Email &raquo;</a>
-        </div>
-    }
-
-    if ((new UserType[] { UserType.Owner, UserType.Administrator }).Contains(SessionVariables.AccountUserType) && !SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser).IsVerified)
-    {
-        <div class="trial-header text-center text-white bg-danger">
-            Finish setting up your account in order to accept payments. <a href="@Url.Action("paymentsentity", "account")" class="white">Setup Payments &raquo;</a>
+            Please verify your email address in order to accept @UILabel.ActivityLabel().ToLower() registrations. <a href="javascript:AccountSetup.sendVerificationEmail()" class="white">Resend Email Verification Email &raquo;</a>
         </div>
     }
 
@@ -53,31 +46,10 @@
                 </a>
             </div>
             <div class="col-md-2 col-md-offset-3">
-                <div class="pull-right">
+                <div class="pull-right padding-10">
                     Logged in as: <a href="@Url.Action("edit", "user")">@SessionVariables.LoggedInUser.DisplayName</a> <br />
                 </div>
             </div>
         </div>    
     </div>
-
-    <script>
-        function sendVerificationEmail() {
-            $.get(
-                '@Url.Action("SendVerificationEmail", "Services")',
-                function (data) {
-                    if (data && data.status == 'ok') {
-                        Notifications.showBar({
-                            title: 'Success',
-                            message: 'A verification email has been sent. Please check your email.'
-                        });
-                    } else {
-                        Notifications.showBar({
-                            title: 'Error',
-                            message: 'Error sending verification email. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress()" class="white">contact support</a>.'
-                        });
-                    }
-                }
-                );
-        }
-    </script>
 }

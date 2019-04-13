@@ -13,15 +13,14 @@ namespace AfterSchoolLibrary
 {
     public class TwilioHelper
     {
-        private static string AccountSID { get { return "AC076fe5bae4597444448c56cea6038299"; } }
-        private static string AuthToken { get { return "b5db6ddd85ed7f9bec66a3e96d5f6ccf"; } }
-        private static string TwilioPhoneNumber { get { return "+12542756474"; } }
+        private const string AccountSID = "AC076fe5bae4597444448c56cea6038299";
+        private const string AuthToken = "b5db6ddd85ed7f9bec66a3e96d5f6ccf";
+        private const string TwilioPhoneNumber = "+12542756474";
 
         private static void InitializeTwilioClientService()
         {
            TwilioClient.Init(AccountSID, AuthToken);
         }
-
 
         public static SystemMessages SendSMS(string phoneNumber, string body)
         {

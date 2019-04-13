@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,14 +32,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.3.24.4" />
-    <PackageReference Include="AWSSDK.S3" Version="3.3.20" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Rollbar" Version="1.5.6" />
-    <PackageReference Include="Sendgrid" Version="9.9.0" />
-    <PackageReference Include="Stripe.net" Version="17.6.0" />
+    <PackageReference Include="AWSSDK.Core" Version="3.3.100.2" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.100.2" />
+    <PackageReference Include="AWSSDK.S3" Version="3.3.101" />
+    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="2.0.1" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="Microsoft.Net.Compilers" Version="2.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Rollbar" Version="3.0.3" />
+    <PackageReference Include="Sendgrid" Version="9.10.0" />
+    <PackageReference Include="Stripe.net" Version="25.3.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
-    <PackageReference Include="Twilio" Version="5.20.1" />
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
+    <PackageReference Include="System.Security.Cryptography.Cng" Version="4.5.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Twilio" Version="5.28.0" />
   </ItemGroup>
 
   <ItemGroup>

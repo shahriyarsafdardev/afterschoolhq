@@ -15,8 +15,7 @@
             @{ Html.RenderPartial(
                     "~/Views/Shared/_Users.cshtml",
                     Model,
-                    new ViewDataDictionary() {
-                        { "AccountId", ViewBag.AccountId },
+                    new ViewDataDictionary() {,
                         { "ReturnUrl", ViewBag.ReturnUrl } ,
                         { "PagingModel", ViewBag.PagingModel }
                     });

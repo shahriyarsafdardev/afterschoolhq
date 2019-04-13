@@ -73,7 +73,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var activities = new List<Activity>();
+            List<Activity> activities = null;
             var totalActivityCount = 0;
             var hasArchivedActivities = false;
 
@@ -125,14 +125,12 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditSetup(string id, string group)
         {
             var msgs = new SystemMessages();
-            var activity = new Activity();
-            var isLeader = true;
             ActivityGroup activityGroup = null;
+            Activity activity = null;
 
             if (id.IsGuid())
             {
                 activity = Activity.LoadByUid(id.ToGuid(), msgs);
-                isLeader = IsActivityLeader(activity);
                 activityGroup = activity.GetActivityGroup(msgs);
             }
             else
@@ -146,7 +144,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     activityGroup = ActivityGroup.LoadByUid(group.ToGuid(), msgs);
                     activity.RegistrationModeId = activityGroup.RegistrationModeId;
                 }
-
             }
 
             LoadEditSetupViewBag(activity, activityGroup, msgs);
@@ -370,13 +367,14 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditContact(string id, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd)
+        public ActionResult EditContact(string id, string leadertype, string contactname, string contactphone, string contactemail, string instructor, string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
 
             var values = new Dictionary<string, object>()
             {
+                { "leadertype", leadertype },
                 { "contactname", contactname},
                 { "contactphone", contactphone},
                 { "contactemail", contactemail},
@@ -446,6 +444,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             Activity activity = null;
 
+            if (details.IsEmpty())
+                msgs.Add($"{UILabel.ActivityLabel()} Details is required", MessageType.UserError);
+
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
@@ -465,13 +466,12 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -485,7 +485,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "next":
                         ViewBag.ActiveMenu = "EditContact";
                         ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
-                        ViewBag.IsFullScreen = GetIsFullScreen(activity);
                         return View("EditContact", activity);
                 }
             }
@@ -541,59 +540,68 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EditSchedule(string id, string cmd, string schedule, string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate, string dailystarttime, string dailyendtime, string isongoing)
         {
             var msgs = new SystemMessages();
-            Activity activity = null;
             var inSessionDates = new List<DateRange>();
-            var outOfSessionDates = new List<DateTime>();
+            Activity activity = null;
+            List<DateTime> outOfSessionDates = null;
+            Dictionary<string, object> values = null;
 
             activity = Activity.LoadByUid(id.ToGuid());
             if (activity.IsNotEmpty())
             {
-                var values = new Dictionary<string, object>();
-
                 var filteredParams = Request.Params.Filter("schedulerepeat-");
                 var days = ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
-                inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-                outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                values = new Dictionary<string, object>()
+                if (days.Count == 0 && repeatsweekly == "1")
+                    msgs.Add("Please select at least one day", MessageType.UserError);
+
+                if (msgs.HasNoErrors())
                 {
-                    { "scheduledetails", scheduledetails},
-                    { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
-                    { "repeatsweekly", repeatsweekly.IfBlank("0") },
-                    { "startdate", startdate },
-                    { "enddate", enddate },
-                    { "dailystarttime", dailystarttime },
-                    { "dailyendtime", dailyendtime },
-                    { "scheduledates", inSessionDates },
-                    { "scheduledatesclosed", outOfSessionDates },
-                    { "schedule", schedule },
-                    { "isongoing", isongoing }
-                };
+                    inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
+                    outOfSessionDates = ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
-                activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
-                    account: SessionVariables.CurrentAccount,
-                    activityId: activity.ID.Value.ToString(),
-                    values: values,
-                    msgs: msgs
-                );
+                    inSessionDates.ForEach(dateRange =>
+                    {
+                        if (dateRange.StartDate > dateRange.EndDate)
+                            msgs.Add("Please ensure start dates and end times are earlier than the corresponding end date and end times", MessageType.UserError);
+                    });
+                }
+
+                if (msgs.HasNoErrors())
+                {
+                    values = new Dictionary<string, object>()
+                    {
+                        { "scheduledetails", scheduledetails},
+                        { "days", days.Select(x => (int)x).ToArray().ToStringArray().ToStringList() },
+                        { "repeatsweekly", repeatsweekly.IfBlank("0") },
+                        { "startdate", startdate },
+                        { "enddate", enddate },
+                        { "dailystarttime", dailystarttime },
+                        { "dailyendtime", dailyendtime },
+                        { "scheduledates", inSessionDates },
+                        { "scheduledatesclosed", outOfSessionDates },
+                        { "schedule", schedule },
+                        { "isongoing", isongoing }
+                    };
+
+                    activity = ActivityService.EditExisting(
+                        loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                        account: SessionVariables.CurrentAccount,
+                        activityId: activity.ID.Value.ToString(),
+                        values: values,
+                        msgs: msgs
+                    );
+                }
             }
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} Schedule Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
-
-            var instances = new List<ActivityInstance>();
+            
             ActivitySchedule sched = null;
+
             if (msgs.HasNoErrors())
-            {
                 sched = activity.GetSchedule();
-            }
             else
-            {
                 sched = ActivitySchedule.GetNewDefaultSchedule(inSessionDates);
-            }
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -673,9 +681,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
@@ -736,7 +742,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber)
+        public ActionResult EditCost(string id, string cost, string costdescription, string acceptpaypal, string acceptcreditcard, string allowtopaylater, string cmd, string hassubscriptionplan, string subscriptionplancost, string subscriptionplanperiod, string haspaymentplan, string paymentplancost, string paymentplanperiod, string paymentplanperiodnumber, string provider, string providername, string providerfirstname, string providerlastname, string provideremail, string providerphone)
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -756,7 +762,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "haspaymentplan", haspaymentplan.IfBlank("0") },
                     { "paymentplancost", paymentplancost },
                     { "paymentplanperiod", paymentplanperiod },
-                    { "paymentplanperiodnumber", paymentplanperiodnumber }
+                    { "paymentplanperiodnumber", paymentplanperiodnumber },
+                    { "provider", provider },
+                    { "providername", providername },
+                    { "providerfirstname", providerfirstname },
+                    { "providerlastname", providerlastname },
+                    { "provideremail", provideremail },
+                    { "providerphone", providerphone }
                 };
 
                 activity = ActivityService.EditExisting(
@@ -1246,7 +1258,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     checkoutObject: new CheckoutObject()
                     {
                         BillingAccount = SessionVariables.CurrentAccount,
-                        PurchasingAccount = purchaserAccount,
+                        PayingAccount = purchaserAccount,
                         NumberOfSeats = 1,
                         ParticipationObject = registrantActivity.GetParticipationObject(msgs),
                         Registration = registrantActivity.GetRegistration(msgs),
@@ -1706,13 +1718,18 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Publish(string id)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            msgs.AddRange(activity.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+            activity.Publish(SessionVariables.LoggedInUser, msgs);
 
             if (msgs.HasNoErrors())
             {
+                var activityId = activity.ID.Value;
+                var loggedInUserId = SessionVariables.LoggedInUser.ID.Value;
+
+                BackgroundJob.Enqueue(() => ActivityService.NotifyProviderOfNewActivity(activityId, loggedInUserId));
+
                 msgs.Add(string.Format("{0} has been published", activity.Name), MessageType.Success);
                 UpdateSession(SessionActionType.ActivityPublish, SessionVariables.CurrentAccount.ID, activity.ID);
             }
@@ -1725,10 +1742,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Unpublish(string id)
         {
-            SystemMessages msgs = new SystemMessages();
+            var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            msgs.AddRange(activity.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+            activity.Unpublish(SessionVariables.LoggedInUser, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -2119,7 +2136,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 SessionVariables.CurrentAccount.CreateNewRegistrantAndRegistration(
                     participationObject: activity.GetParticipationObject(msgs),
-                    questionsAndAnswers: qvms.Select(qvm => Tuple.Create<FormQuestion, string>(qvm.Question, qvm.Value)).ToList(),
+                    questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     period: activity.GetCurrentRegistrationPeriod(msgs),
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);

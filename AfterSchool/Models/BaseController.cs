@@ -142,9 +142,6 @@ namespace AfterSchool.Models
                         return RedirectToAction("index", "account", new { area = "admin" });
 
                     case AccountType.SchoolDistrict:
-                        if (SessionVariables.AccountPackage.IsEmpty())
-                            return RedirectToAction("newbilling", "account", new { area = "district" });
-
                         return RedirectToAction("index", "home", new { area = "district" });
 
                     case AccountType.Registrant:
@@ -156,9 +153,6 @@ namespace AfterSchool.Models
                             return RedirectToAction("index", "home", new { area = "user" });
 
                     default:
-                        if (SessionVariables.AccountPackage.IsEmpty())
-                            return RedirectToAction("newbilling", "account", new { area = "org" });
-
                         return RedirectToAction("index", "home", new { area = "org" });
                 }
             }

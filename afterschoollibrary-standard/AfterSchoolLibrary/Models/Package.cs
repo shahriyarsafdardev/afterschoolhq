@@ -260,7 +260,7 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
-        private Stripe.StripeProduct AddOrUpdateStripeProduct(BillingPeriodType billingPeriodType, SystemMessages msgs)
+        private Stripe.Product AddOrUpdateStripeProduct(BillingPeriodType billingPeriodType, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             
@@ -273,6 +273,7 @@ namespace AfterSchoolLibrary.Models
                     this.GetStripePlanName(billingPeriodType),
                     $"{Helpers.Utilities.AppName(this.IsAfterSchool)} - {this.Name}".MaxChars(22),
                     true,
+                    null,
                     null,
                     msgs);
             }
@@ -290,7 +291,7 @@ namespace AfterSchoolLibrary.Models
             return product;
         }
 
-        private Stripe.StripePlan AddOrUpdateStripePlan(Stripe.StripeProduct product, decimal price, BillingPeriodType billingPeriodType, SystemMessages msgs)
+        private Stripe.Plan AddOrUpdateStripePlan(Stripe.Product product, decimal price, BillingPeriodType billingPeriodType, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             
@@ -304,6 +305,7 @@ namespace AfterSchoolLibrary.Models
                     price,
                     billingPeriodType,
                     this.GetStripePlanName(billingPeriodType),
+                    null,
                     null,
                     msgs);
             }

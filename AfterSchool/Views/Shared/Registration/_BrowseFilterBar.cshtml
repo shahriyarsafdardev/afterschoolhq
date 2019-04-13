@@ -100,14 +100,19 @@
         var location = $('#search-location').val();
         var totalDivs = 0;
         var hiddenDivs = 0;
+        var searchable = $('.searchable-object'); 
+        var searching = false;
 
-        $('.participation-object').each(function () {
+        $('.participation-object-add').removeClass('hide');
+
+        searchable.each(function () {
             $(this).removeClass('hide');
             totalDivs++;
         });
 
         if (name != null && name.length > 0) {
-            $('.participation-object').each(function () {
+            searching = true;
+            searchable.each(function () {
                 if ($(this).attr('name').toLowerCase().indexOf(name.toLowerCase()) == -1 && !$(this).hasClass('hide')) {
                     $(this).addClass('hide');
                     hiddenDivs++;
@@ -116,7 +121,8 @@
         }
 
         if (grade != null && grade.length > 0) {
-            $('.participation-object').each(function () {
+            searching = true;
+            searchable.each(function () {
                 if ((parseInt(grade) < parseInt($(this).attr('mingrade')) || parseInt(grade) > parseInt($(this).attr('maxgrade'))) && !$(this).hasClass('hide')) {
                     $(this).addClass('hide');
                     hiddenDivs++;
@@ -125,7 +131,8 @@
         }
         
         if (gender != null && gender.length > 0) {
-            $('.participation-object').each(function () {
+            searching = true;
+            searchable.each(function () {
                 var genderRestriction = parseInt($(this).attr('gender'));
                 if (genderRestriction > 0 && genderRestriction != gender && !$(this).hasClass('hide')) {
                     $(this).addClass('hide');
@@ -135,7 +142,8 @@
         }
 
         if (dayofweek != null && dayofweek.length > 0) {
-            $('.participation-object').each(function () {
+            searching = true;
+            searchable.each(function () {
                 var days = $(this).attr('days').split(',');
                 if (days.indexOf(dayofweek) == -1 && !$(this).hasClass('hide')) {
                     $(this).addClass('hide');
@@ -145,7 +153,8 @@
         }
 
         if (location != null && location.length > 0) {
-            $('.participation-object').each(function () {
+            searching = true;
+            searchable.each(function () {
                 if ($(this).attr('location') != location && !$(this).hasClass('hide')) {
                     $(this).addClass('hide');
                     hiddenDivs++;
@@ -154,7 +163,8 @@
         }
 
         if (seatsfilled != null && seatsfilled.length > 0) {
-            $('.participation-object').each(function () {
+            searching = true;
+            searchable.each(function () {
                 switch (seatsfilled) {
                     case '1':
                         if ($(this).attr('hasseatsremaining') != "true" && !$(this).hasClass('hide')) {
@@ -171,6 +181,10 @@
                 }
             });
         }
+
+        if (searching) {
+            $('.participation-object-add').addClass('hide');
+        } 
 
         if (totalDivs == 0) {
             $('#no-activities').removeClass('hide');
