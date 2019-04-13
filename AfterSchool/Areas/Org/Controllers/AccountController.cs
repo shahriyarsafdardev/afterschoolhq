@@ -149,6 +149,10 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PaymentsOptions()
         {
+            var stripeAccount = SessionVariables.CurrentAccount.GetStripeAccount();
+            if (stripeAccount.IsNotEmpty() && stripeAccount.PayoutsEnabled)
+                return RedirectToAction("paymentsentity");
+
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View();
