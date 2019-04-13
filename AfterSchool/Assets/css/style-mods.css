@@ -557,9 +557,23 @@ div.filter-full-width > span {
     background-color: #2f3c40;
 }
 
-/* new */
+.panel-small-padding > .panel-heading {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
 
-.trial-header{
+.panel-small-padding > .panel-body {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+
+/* new */
+.trial-header {
     padding: 10px;
 }
 
