@@ -49,10 +49,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
+                var finalPrice = cost.ToDecimal();
+
+                if (!SessionVariables.CurrentAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
+                    finalPrice = AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(cost.ToDecimal(), SessionVariables.CurrentAccount);
+
                 return Json(new
                 {
                     status = "ok",
-                    price = AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(cost.ToDecimal(), SessionVariables.CurrentAccount),
+                    price = finalPrice,
                     messages = msgs
                 }, JsonRequestBehavior.AllowGet);
             }
