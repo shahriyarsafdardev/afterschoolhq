@@ -85,7 +85,6 @@
                                            name="entitytype"
                                            id="entitytype-individual"
                                            value="@((int)LegalEntityType.Individual)"
-                                           onclick="showIndividual()"
                                            @(Model.LegalEntityTypeId == LegalEntityType.Individual ? " checked=\"checked\"" : "") />
                                     <label for="entitytype-individual">@LegalEntityType.Individual.ToString()</label>
                                 </div>
@@ -94,7 +93,6 @@
                                            name="entitytype"
                                            id="entitytype-company"
                                            value="@((int)LegalEntityType.Company)"
-                                           onclick="showCompany()"
                                            @(Model.LegalEntityTypeId == LegalEntityType.Company ? " checked=\"checked\"" : "") />
                                     <label for="entitytype-company">@LegalEntityType.Company.ToString()</label>
                                 </div>
