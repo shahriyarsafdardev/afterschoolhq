@@ -21,7 +21,7 @@ namespace AfterSchool.Controllers
             if (origin.StartsWith("https://afterschoolhq.com") ||
                 origin.StartsWith("https://qa.afterschoolhq.com") ||
                 origin.StartsWith("https://ci.afterschoolhq.com") ||
-                origin.StartsWith("https://stating.afterschoolhq.com") ||
+                origin.StartsWith("https://staging.afterschoolhq.com") ||
                 origin.StartsWith("http://localhost:54849"))
             {
                 return true;
