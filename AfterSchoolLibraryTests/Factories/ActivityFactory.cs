@@ -1,6 +1,7 @@
 ﻿using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Factories
 {
@@ -8,43 +9,84 @@ namespace AfterSchoolLibraryTests.Factories
     {
         public static Activity Create(Account account, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Activity() { AccountId = account.ID, SeatsAvailable = 4 };
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = account.ID,
+                SeatsAvailable = 4,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
+            };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static Activity Create(Account account, ActivityGroup group, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Activity() { AccountId = account.ID, SeatsAvailable = 4, ActivityGroupId = group.ID };
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = account.ID,
+                SeatsAvailable = 4,
+                ActivityGroupId = group.ID,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
+            };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static Activity Create(Account account, Location location, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Activity() { AccountId = account.ID, SeatsAvailable = 4, LocationId = location.ID };
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = account.ID,
+                SeatsAvailable = 4,
+                LocationId = location.ID,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
+            };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static Activity Create(Account account, ActivitySchedule schedule, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Activity() { AccountId = account.ID, SeatsAvailable = 4, ActivityScheduleId = schedule.ID };
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = account.ID,
+                SeatsAvailable = 4,
+                ActivityScheduleId = schedule.ID,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
+            };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static Activity Create(Account account, int seatsAvailable, SystemMessages msgs, DatabaseConnection dc)
         {
-            var obj = new Activity() { AccountId = account.ID, SeatsAvailable = seatsAvailable };
+            var name = "Test Activity";
+            var obj = new Activity()
+            {
+                AccountId = account.ID,
+                SeatsAvailable = seatsAvailable,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
+            };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
         public static Activity Create(Account account, ActivitySchedule schedule, ActivityGroup activityGroup, Location location, SystemMessages msgs, DatabaseConnection dc)
         {
+            var name = "Test Activity";
             var obj = new Activity()
             {
                 AccountId = account.ID,
                 SeatsAvailable = 4,
                 ActivityScheduleId = schedule.ID,
                 ActivityGroupId = activityGroup.ID,
-                LocationId = location.ID
+                LocationId = location.ID,
+                Name = name,
+                UniqueName = ActivityService.GenerateUniqueName(name, null, account.ID, msgs, dc)
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

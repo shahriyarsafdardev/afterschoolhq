@@ -2,9 +2,17 @@
 
 @{
     var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var isFullScreen = (bool?)ViewBag.IsFullScreen;
+
+    var defaultPaymentsAction = "paymentsoptions";
+
+    if (SessionVariables.CurrentAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
+    {
+        defaultPaymentsAction = "paymentsentity";
+    }
 }
 
-@if (Model?.ID.GetValueOrDefault(0) > 0)
+@if (Model?.ID.GetValueOrDefault(0) > 0 && (!isFullScreen.HasValue || !isFullScreen.Value))
 {
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
@@ -14,7 +22,7 @@
 
             <a href="@Url.Action("style", "account")" class="hide btn btn-alt6@(actionName == "style" ? "-active" : "")">Content</a>
             <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>
-            <a href="@Url.Action("paymentsentity", "account")" class="btn btn-alt6@(actionName == "paymentsentity" ? "-active" : "")">Accept Payments</a>
+            <a href="@Url.Action(defaultPaymentsAction, "account")" class="btn btn-alt6@(actionName == defaultPaymentsAction ? "-active" : "")">Accept Payments</a>
             @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
             {
                 <a href="@Url.Action("visitors", "account")" class="btn btn-alt6@(actionName == "visitors" ? "-active" : "")">Providers</a>
@@ -36,7 +44,7 @@
                 <option value="@Url.Action("edit", "account")">Details</option>
                 <option value="@Url.Action("location", "account")">Location</option>
                 <option value="@Url.Action("forms", "account")">Forms</option>
-                <option value="@Url.Action("paymentsentity", "account")">Accept Payments</option>
+                <option value="@Url.Action(defaultPaymentsAction, "account")">Accept Payments</option>
                 @if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.ActivityProvider)
                 {
                     <option value="@Url.Action("visitors", "account")">Providers</option>

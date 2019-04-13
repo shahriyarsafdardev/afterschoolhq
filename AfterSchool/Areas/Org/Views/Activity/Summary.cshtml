@@ -18,6 +18,12 @@
     var totalPossible = Model.GetAttendancePossibleCount();
     var totalAbsent = totalPossible - totalPresent;
     var attendanceRate = "0";
+    var isActivityLeader = true;
+
+    if (ViewBag.IsActivityLeader != null)
+    {
+        isActivityLeader = (bool)ViewBag.IsActivityLeader;
+    }
 
     if (totalPresent > 0) {
         attendanceRate = ((totalPresent.ToDouble() / (totalPresent + totalAbsent)) * 100).Round(1).ToString("###.#");
@@ -36,9 +42,12 @@
         <div class="panel-heading">
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Summary"); }   
             
-            <div class="pull-right">
-                <a href="@Url.Action("editsetup", "activity", new {id = Model.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;</a>
-            </div>
+            @if (isActivityLeader)
+            {
+                <div class="pull-right">
+                    <a href="@Url.Action("editsetup", "activity", new {id = Model.Uid })" class="btn btn-default">Edit @UILabel.ActivityLabel(Model.ActivityTypeId) &raquo;</a>
+                </div>
+            }
 
         </div>
         <div class="panel-body">
@@ -124,9 +133,13 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 Pricing
-                                <div class="pull-right">
-                                    <a href="@Url.Action("editcost", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
-                                </div>
+
+                                @if (isActivityLeader)
+                                {
+                                    <div class="pull-right">
+                                        <a href="@Url.Action("editcost", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                    </div>
+                                }
                             </div>
                             <div class="panel-body">
                                 @if (!participationObject.PaymentPlans.Any())
@@ -146,9 +159,14 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 Schedule
-                                <div class="pull-right">
-                                    <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
-                                </div>
+
+                                @if (isActivityLeader)
+                                {
+                                    <div class="pull-right">
+                                        <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })" class="btn btn-sm btn-link">Edit &raquo;</a>
+                                    </div>
+                                }
+
                             </div>
                             <div class="panel-body">
                                 @{

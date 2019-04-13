@@ -275,9 +275,9 @@ namespace AfterSchoolLibrary.Models
             return $"{participationObjectName} Plan {this.CostPerPeriod.ToCurrency()} / {this.BillingPeriodTypeId} for {this.TotalPeriods} {this.BillingPeriodTypeId}";
         }
 
-        public decimal GetStripeFeeAmount()
+        public decimal GetStripeFeeAmountWithConnectedAccount()
         {
-            return Billing.StripeHelper.GetStripeFee(this.CostPerPeriod.Value);
+            return Billing.StripeHelper.GetStripeFee(this.CostPerPeriod.Value, true);
         }
 
         #endregion

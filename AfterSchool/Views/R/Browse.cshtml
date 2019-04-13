@@ -12,9 +12,14 @@
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_BrowseRegistrationHeader.cshtml", Model); }
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model); }
+
 @{ Html.RenderPartial("~/Views/Shared/Registration/_BrowseFilterBar.cshtml", Model); }
 
 <div class="margin-10">
+
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_AddActivity.cshtml", Model); }
+
     @foreach (var item in objects)
     {
         Html.RenderPartial("~/Views/Shared/Registration/_BrowseParticipationObject.cshtml", item);
@@ -22,3 +27,5 @@
 </div>
 
 @{Html.RenderPartial("~/Views/Shared/Modals/_LeadForm.cshtml", Model);}
+
+@{Html.RenderPartial("~/Views/Shared/Modals/_FirstTimeDemoOrgName.cshtml", Model);}

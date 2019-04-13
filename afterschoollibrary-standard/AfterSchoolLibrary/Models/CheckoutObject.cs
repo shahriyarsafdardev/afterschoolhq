@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Models
         public string StripeToken { get; set; }
         public string SourceId { get; set; }
         public ParticipationObject ParticipationObject { get; set; }
-        public Account PurchasingAccount { get; set; }
+        public Account PayingAccount { get; set; }
         public Account BillingAccount { get; set; }
         public int NumberOfSeats { get; set; }
         public List<Product> Products { get; set; }
@@ -31,6 +31,8 @@ namespace AfterSchoolLibrary.Models
         public Purchase Purchase { get; set; }
         public PaymentSourceType PaymentSourceType { get; set; }
         public RegistrantSubscriptionPlan RegistrantSubscriptionPlan { get; set; }
+        public Account ConvenienceFeePayer { get; set; }
+        public Account CreditCardFeePayer { get; set; }
 
         public CheckoutObject()
         {
@@ -51,8 +53,8 @@ namespace AfterSchoolLibrary.Models
             {
                 return ParticipationObject.IsFree;
             }
-        }
-
+        }   
+        
         public bool IsTuitionFree
         {
             get
@@ -61,18 +63,50 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public decimal TotalCostToPurchaseToday
+        public decimal TotalCostToPurchaseTodayNoFees
         {
             get
             {
                 if (PaymentPlan.IsNotEmpty())
-                    return PaymentPlanCostToday + SubscriptionCostToday;
+                    return PaymentPlanCostTodayNoFees + SubscriptionCostTodayNoFees;
 
-                return TuitionFee + SubscriptionCostToday;
+                return TuitionCostNoFees + SubscriptionCostTodayNoFees;
             }
         }
 
-        public decimal TuitionFee
+        public decimal GetTotalCostToPurchaseTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (PaymentPlan.IsNotEmpty())
+                return GetPaymentPlanCostTodayWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc);
+
+            return GetTuitionCostWithFees(msgs, dc) + GetSubscriptionCostTodayWithFees(msgs, dc);
+        }
+
+        public decimal GetTotalFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (PaymentPlan.IsNotEmpty())
+                return GetPaymentPlanTotalFeesToday(msgs, dc) + GetSubscriptionTotalFeesToday(msgs, dc);
+
+            return GetTuitionTotalFees(msgs, dc) + GetSubscriptionTotalFeesToday(msgs, dc);
+        }
+
+        public decimal GetTotalConvenienceFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (PaymentPlan.IsNotEmpty())
+                return GetPaymentPlanCostTodayConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
+
+            return GetTuitionConvenienceFee(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
+        }
+
+        public decimal GetTotalCreditCardFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (PaymentPlan.IsNotEmpty())
+                return GetPaymentPlanCostTodayCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc);
+
+            return GetTuitionCreditCardFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc);
+        }
+
+        public decimal TuitionCostNoFees
         {
             get
             {
@@ -95,7 +129,33 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public decimal SubscriptionCostToday
+        public decimal GetTuitionCostWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return TuitionCostNoFees + GetTuitionConvenienceFee(msgs, dc) +  GetTuitionCreditCardFee(msgs, dc);
+        }     
+
+        public decimal GetTuitionCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!IsTuitionFree && !GetUseStripeConnectedAccount(msgs, dc))
+                return Billing.Platform.GetCreditCardFee(TuitionCostNoFees, BillingAccount);
+
+            return 0;
+        }
+
+        public decimal GetTuitionConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!IsTuitionFree && !GetUseStripeConnectedAccount(msgs, dc))
+                return Billing.Platform.GetConvenienceFee(TuitionCostNoFees, BillingAccount);
+
+            return 0;
+        }
+
+        public decimal GetTuitionTotalFees(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetTuitionConvenienceFee(msgs, dc) + GetTuitionCreditCardFee(msgs, dc);
+        }
+
+        public decimal SubscriptionCostTodayNoFees
         {
             get
             {
@@ -103,7 +163,35 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public decimal PaymentPlanCostToday
+        public decimal GetSubscriptionCostTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return SubscriptionCostTodayNoFees +
+                    GetSubscriptionCostTodayCreditCardFee(msgs, dc) +
+                    GetSubscriptionCostTodayConvenienceFee(msgs, dc);
+        }
+
+        public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!GetUseStripeConnectedAccount(msgs, dc))
+                return Billing.Platform.GetCreditCardFee(SubscriptionCostTodayNoFees, BillingAccount);
+
+            return 0;
+        }
+
+        public decimal GetSubscriptionCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!GetUseStripeConnectedAccount(msgs, dc))
+                return Billing.Platform.GetConvenienceFee(SubscriptionCostTodayNoFees, BillingAccount);
+
+            return 0;
+        }
+
+        public decimal GetSubscriptionTotalFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetSubscriptionCostTodayConvenienceFee(msgs, dc) + GetSubscriptionCostTodayCreditCardFee(msgs, dc);
+        }
+
+        public decimal PaymentPlanCostTodayNoFees
         {
             get
             {
@@ -111,21 +199,33 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public decimal PaymentPlanTotalCost
+        public decimal GetPaymentPlanCostTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            get
-            {
-                return PaymentPlan.IsNotEmpty() ? PaymentPlan.CostPerPeriod.Value * PaymentPlan.TotalPeriods.Value * NumberOfSeats : 0;
-            }
+            return PaymentPlanCostTodayNoFees +
+                    GetPaymentPlanCostTodayCreditCardFee(msgs, dc) +
+                    GetPaymentPlanCostTodayConvenienceFee(msgs, dc);
         }
 
-        public decimal ProductCost
+        public decimal GetPaymentPlanCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            get
-            {
-                return Products.Any() ? Products.Sum(Product => Product.Cost.IfEmpty(0)) : 0;
-            }
+            if (!GetUseStripeConnectedAccount(msgs, dc))
+                return Billing.Platform.GetCreditCardFee(PaymentPlanCostTodayNoFees, BillingAccount);
+
+            return 0;
         }
+
+        public decimal GetPaymentPlanCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!GetUseStripeConnectedAccount(msgs, dc))
+                return Billing.Platform.GetConvenienceFee(PaymentPlanCostTodayNoFees, BillingAccount);
+
+            return 0;
+        }
+
+        public decimal GetPaymentPlanTotalFeesToday(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return GetPaymentPlanCostTodayConvenienceFee(msgs, dc) + GetPaymentPlanCostTodayCreditCardFee(msgs, dc);
+        }        
 
         public decimal ApplyCoupon(decimal total)
         {
@@ -156,7 +256,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public void CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public Purchase CreateOrUpdatePurchase(WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (this.Purchase.IsEmpty())
                 this.Purchase = this.Registration.GetPurchase(msgs, dc);
@@ -167,6 +267,17 @@ namespace AfterSchoolLibrary.Models
                 this.Registration.PurchaseId = this.Purchase.ID;
                 msgs.AddRange(this.Registration.Save(dc));
             }
+
+            return this.Purchase;
+        }
+
+        private bool? _UseStripeConnectedAccount = null;
+        private bool GetUseStripeConnectedAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!_UseStripeConnectedAccount.HasValue)
+                _UseStripeConnectedAccount = BillingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+
+            return _UseStripeConnectedAccount.Value;
         }
 
     }

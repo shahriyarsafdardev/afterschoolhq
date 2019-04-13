@@ -4,6 +4,7 @@ using System.Text;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -76,6 +77,21 @@ namespace AfterSchoolLibrary.Services
         public static bool HasPercentageAmountType(this Coupon coupon)
         {
             return coupon.AmountTypeId == CouponAmountType.Percentage;
+        }
+
+        public static Stripe.Coupon CreateStripeCoupon(this Coupon coupon, string stripeAccountId, StripeCouponDuration couponDuration, int? durationInMonths, decimal discountValue, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var stripeCoupon = Billing.StripeHelper.CreateCoupon(discountValue, stripeAccountId, coupon.AmountTypeId, couponDuration, durationInMonths, msgs);
+
+            if (stripeCoupon.IsNotEmpty())
+            {
+                coupon.StripeCouponId = stripeCoupon.Id;
+                msgs.AddRange(coupon.Save(dc: dc));
+            }
+
+            return stripeCoupon;
         }
     }
 }

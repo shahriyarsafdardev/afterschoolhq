@@ -7,11 +7,115 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary.DataAccess;
+using Hangfire;
 
 namespace AfterSchool.Controllers
 {
     public class SignUpController : BaseController
     {
+        [HttpGet]
+        public ActionResult Index()
+        {
+            var signupIndexVM = new SignUpIndexViewModel()
+            {
+                FirstName = CookieVariables.DemoFirstName,
+                Email = CookieVariables.DemoEmailAddress,
+                OrgName = CookieVariables.DemoOrgName
+            };
+
+            ViewBag.Messages = new SystemMessages();
+            return View(signupIndexVM);
+        }
+
+        [HttpPost]
+        public ActionResult Index(SignUpIndexViewModel model)
+        {
+            var msgs = new SystemMessages();
+
+            if (model.OrgName.IsEmpty())
+                msgs.Add("Organization / Program Name is required", MessageType.UserError);
+
+            if (!model.OrgType.HasValue)
+                msgs.Add("Organization Type is required", MessageType.UserError);
+
+            if (!model.OrgPhone.IsPhone())
+                msgs.Add("Organization Phone is required", MessageType.UserError);
+
+            if (model.FirstName.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (model.LastName.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!model.Email.IsEmail())
+                msgs.Add("Please enter a valid email address", MessageType.UserError);
+            else if (WebUser.ExistsByEmail(model.Email, msgs))
+                msgs.Add("This email has already been registered", MessageType.UserError);
+
+            if (model.Password1.IsEmpty() || model.Password2.IsEmpty() || (model.Password1 != model.Password2))
+                msgs.Add("Passwords are required and must match", MessageType.UserError);
+            else if (model.Password1.Length < 8)
+                msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                WebUser user = null;
+                Account account = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        user = WebUserService.CreateNew(
+                            firstName: model.FirstName,
+                            lastName: model.LastName,
+                            email: model.Email,
+                            phone: model.OrgPhone,
+                            password: model.Password2,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            allowTextMessages: false,
+                            loggedInUser: null,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        if (user.IsNotEmpty())
+                            account = user.AddNewAccount(
+                                orgName: model.OrgName,
+                                phone: model.OrgPhone,
+                                isActive: true,
+                                accountType: model.OrgType.Value,
+                                addDefaultPackage: true,
+                                isAfterSchool: true,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        msgs.AddRange(LoadSessionInfo(user, account));
+
+                        var userId = user.ID.Value;
+                        var accountId = account.ID.Value;
+
+                        BackgroundJob.Enqueue(() => AccountService.SendWelcomeEmailPurchase(accountId));
+                        BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return LoginRedirect();
+
+            ViewBag.Messages = msgs;
+
+            return View(model);
+        }
+
         [HttpGet]
         public ActionResult New(string id, string a)
         {
@@ -50,6 +154,7 @@ namespace AfterSchool.Controllers
             else
             {
                 user = WebUser.LoadByUid(id.ToGuid(), null);
+
                 if (user.IsEmpty())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
                 else if (user.IsActive)
@@ -61,6 +166,7 @@ namespace AfterSchool.Controllers
             else
             {
                 account = Account.LoadByUid(a.ToGuid());
+
                 if (account.IsEmpty())
                     msgs.Add("Invalid invitation code", MessageType.UserError);
             }
@@ -85,9 +191,12 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
                 user.CompleteSignUp(account, firstname, lastname, email, password1, null, msgs);
-                
+
             if (msgs.HasNoErrors() && !user.VerifiedAccount)
-                msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));     
+            {
+                var userId = user.ID.Value;
+                Hangfire.BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+            }
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(LoadSessionInfo(user));
@@ -143,51 +252,37 @@ namespace AfterSchool.Controllers
             WebUser wu = null;
 
             if (Request.Form["firstname"].IsEmpty())
-            {
                 msgs.Add("First Name is required", MessageType.UserError);
-            }
+
             if (Request.Form["lastname"].IsEmpty())
-            {
                 msgs.Add("Last Name is required", MessageType.UserError);
-            }
+
             if (Request.Form["email"].IsEmpty())
-            {
                 msgs.Add("Email is required", MessageType.UserError);
-            }
-            else if (Request.Form["email"].IsMatch(BasicLibrary.Utilities.EmailRegEx) == false)
-            {
+            else if (!Request.Form["email"].IsEmail())
                 msgs.Add("Email is invalid", MessageType.UserError);
-            }
+
             if (Request.Form["username"].IsEmpty())
-            {
                 msgs.Add("Username is required", MessageType.UserError);
-            }
-            else if(Request.QueryString["i"].IsGuid() == false)
+            else if(!Request.QueryString["i"].IsGuid())
             {
                 wu = WebUser.LoadByUsername(Request.Form["username"], null);
-                if (wu.IsEmpty() == false)
-                {
+                if (wu.IsNotEmpty())
                     msgs.Add("Username is already in use", MessageType.UserError);
-                }
 
                 wu = WebUser.LoadByEmail(Request.Form["email"], null);
-                if (wu.IsEmpty() == false)
-                {
+                if (wu.IsNotEmpty())
                     msgs.Add("Email is already in use", MessageType.UserError);
-                }
             }
+
             if (Request.Form["password"].IsEmpty())
-            {
                 msgs.Add("Password is required", MessageType.UserError);
-            }
+
             if (Request.Form["password2"].IsEmpty())
-            {
                 msgs.Add("Verify Password is required", MessageType.UserError);
-            }
-            if (Request.Form["password"].IsEmpty() == false && Request.Form["password"] != Request.Form["password2"])
-            {
+
+            if (Request.Form["password"].IsNotEmpty() && Request.Form["password"] != Request.Form["password2"])
                 msgs.Add("Passwords do not match", MessageType.UserError);
-            }
 
 
             if (msgs.HasNoErrors())
@@ -196,13 +291,10 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
                     {
                         if (Request.QueryString["i"].IsGuid())
-                        {
                             wu = WebUser.LoadByUidByIsActive(Request.QueryString["i"].ToGuid(), false, dc: adc);
-                        }
                         else
-                        {
                             wu = new WebUser();
-                        }
+
                         wu.FirstName = Request.Form["firstname"];
                         wu.LastName = Request.Form["lastname"];
                         wu.Email = Request.Form["email"];
@@ -418,24 +510,11 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, BasicLibrary.DataAccess.DatabaseConnection adc) =>
-                    {
-                        // create a new user, then take then to create a real provider account
-                        user = WebUserService.CreateNew(firstname, lastname, email, phone, password1, true, true, false, false, null, amsgs, adc);
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
+                // create a new user, then take then to create a real provider account
+                user = WebUserService.CreateNew(firstname, lastname, email, phone, password1, true, true, false, false, null);
 
-                        if (!user.VerifiedAccount)
-                            msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
+                if (msgs.HasNoErrors() && !user.VerifiedAccount)
+                    msgs.AddRange(user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value));
             }
 
             if (msgs.HasNoErrors())

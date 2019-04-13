@@ -1,9 +1,18 @@
-﻿body.am-box-layout{
+﻿body {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.page-head h2 {
+    font-family: inherit;
+}
+
+body.am-box-layout{
     background-color: #f0f0f0;
 }
 
-body.registration{
-    background-color: #f0f0f0;
+hr {
+    border: solid 1px #f0f0f0;
+    width: 80%;
 }
 
 .am-top-header-darkgray{
@@ -41,6 +50,7 @@ div.border-light-gray {
 
 .text-xlarge{
     font-size: 4em;
+    line-height: 1em;
 }
 .text-large {
     font-size: 2em;
@@ -107,18 +117,42 @@ div.border-light-gray {
     overflow: hidden;
 }
 
-.margin-10{
+.margin-10 {
     margin: 10px;
 }
 
-.margin-h-10{
+.margin-20 {
+    margin: 20px;
+}
+
+.margin-h-10 {
     margin-left: 10px;
     margin-right: 10px;
 }
 
-.margin-v-10{
+.margin-h-20 {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.margin-h-30 {
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+.margin-v-10 {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.margin-v-20 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.margin-v-30 {
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 .margin-t-10{
@@ -523,9 +557,23 @@ div.filter-full-width > span {
     background-color: #2f3c40;
 }
 
-/* new */
+.panel-small-padding > .panel-heading {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
 
-.trial-header{
+.panel-small-padding > .panel-body {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+
+/* new */
+.trial-header {
     padding: 10px;
 }
 
@@ -584,94 +632,6 @@ div.filter-full-width > span {
         color: #fff;
         margin-bottom: 20px;
     }
-}
-
-.registration-titlebar .org-logo-container {
-    max-width: 900px;
-    max-height: 200px;
-    margin: auto;
-    /*overflow: hidden;*/
-    text-align: center;
-    border-radius: 5px;
-    border-color: #f5f5f5;
-    border-width: 1px;
-    border-style: solid;
-    /*
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    position:relative;
-        */
-    /*box-shadow: 1px 1px 10px rgba(0, 0, 0, .1) inset;*/
-    margin: 20px auto;
-    position:relative;
-}
-
-.registration-titlebar .org-logo{
-    max-height: inherit;
-    max-width: inherit;
-    /* IE 8 */
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=1)";
-    /* IE 5-7 */
-    filter: alpha(opacity=1);
-    /* modern browsers */
-    opacity: 1;
-    /*
-    margin: auto;
-    position:absolute;
-    top: 0; left: 0; bottom: 0; right: 0;
-    padding: 20px 0px;*/
-
-}
-
-.registration-titlebar .org-logo-icon-container {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    margin: auto;
-    border-radius: 50%;
-    border-color: #f9f9f9;
-    border-width: 1px;
-    border-style: solid;
-    background-color: #fff;
-    padding-top: 20px;
-    color: #444;
-}
-
-.registration-titlebar a{
-    color: #fff;
-    text-decoration: underline;
-}
-
-.registration-titlebar .org-title-area {
-    margin: 10px 10px 0px;
-    width: 90%;
-}
-
-.registration-titlebar .org-title-area .org-title {
-    position: relative;
-    margin-bottom: 15px;
-    color: #fff;
-    font-size: 3em;
-}
-
-.registration-titlebar .org-title-area .org-description {
-    position: relative;
-    color: #ededed;
-}
-
-.registration-titlebar .orghome-filters {
-    padding: 10px;
-    background-color: #fff;
-    position: relative;
-    top: 50px;
-    box-shadow: rgba(150,150,150,.4) 0px 3px 10px;
-}
-
-.activity-seats-left{
-    position: absolute;
-    right: 0;
-    top: -13px;
 }
 
 .panel-alt6 .activity-grid-filter-data,

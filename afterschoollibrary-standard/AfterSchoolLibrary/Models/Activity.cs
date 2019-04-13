@@ -14,7 +14,7 @@ namespace AfterSchoolLibrary.Models
     /// The after school activity/team that a registrant/student is registering for
     /// </summary>
 	
-    public class Activity : BaseEventWithAddress
+    public class Activity : BasicLookUpObject
     {
 		#region "ClassGenerator"
 
@@ -22,11 +22,18 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public int? SeatsAvailable { get { return (int?)MDV["SeatsAvailable"].Value; } set { MDV["SeatsAvailable"].Value = value; } }
+		/// <summary>
+		/// Refers to the related parent program
+		/// </summary>
 		public int? ProgramId { get { return (int?)MDV["ProgramId"].Value; } set { MDV["ProgramId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
 		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
+		/// <summary>
+		/// the actual provider account who financially is responsible
+		/// </summary>
+		public int? ProviderAccountId { get { return (int?)MDV["ProviderAccountId"].Value; } set { MDV["ProviderAccountId"].Value = value; } }
 		public int? AgeStart { get { return (int?)MDV["AgeStart"].Value; } set { MDV["AgeStart"].Value = value; } }
 		public int? AgeEnd { get { return (int?)MDV["AgeEnd"].Value; } set { MDV["AgeEnd"].Value = value; } }
 		public int? GradeLevelStart { get { return (int?)MDV["GradeLevelStart"].Value; } set { MDV["GradeLevelStart"].Value = value; } }
@@ -55,15 +62,27 @@ namespace AfterSchoolLibrary.Models
 		public int? ActivityGroupId { get { return (int?)MDV["ActivityGroupId"].Value; } set { MDV["ActivityGroupId"].Value = value; } }
 		public int? ActivityScheduleId { get { return (int?)MDV["ActivityScheduleId"].Value; } set { MDV["ActivityScheduleId"].Value = value; } }
 		public string UniqueName { get { return (string)MDV["UniqueName"].Value; } set { MDV["UniqueName"].Value = value; } }
+		/// <summary>
+		/// For tracking which section or grouping a team is in
+		/// </summary>
 		public int? ActivitySectionId { get { return (int?)MDV["ActivitySectionId"].Value; } set { MDV["ActivitySectionId"].Value = value; } }
 		/// <summary>
 		/// Required.
 		/// </summary>
 		public ActivityType ActivityTypeId { get { return (ActivityType)MDV["ActivityTypeId"].Value; } set { MDV["ActivityTypeId"].Value = value; } }
+		/// <summary>
+		/// Used to track when a team has been submitted to a league
+		/// </summary>
 		public DateTime? DateSubmittedToActivityGroup { get { return (DateTime?)MDV["DateSubmittedToActivityGroup"].Value; } set { MDV["DateSubmittedToActivityGroup"].Value = value; } }
+		/// <summary>
+		/// When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
+		/// </summary>
 		public int? AccountActivityGroupId { get { return (int?)MDV["AccountActivityGroupId"].Value; } set { MDV["AccountActivityGroupId"].Value = value; } }
+		/// <summary>
+		/// Track what kind of leader it is - internal or external
+		/// </summary>
+		public ActivityLeaderType LeaderTypeId { get { return (ActivityLeaderType)MDV["LeaderTypeId"].Value; } set { MDV["LeaderTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
-		public string AccountStripePublishableKey { get { return (string)MDV["AccountStripePublishableKey"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
 		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
@@ -82,6 +101,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsPublished = false;
 			this.IsArchived = false;
 			this.ActivityTypeId = ActivityType.NotSet;
+			this.LeaderTypeId = ActivityLeaderType.NotSet;
 			
         }
 
@@ -91,10 +111,11 @@ namespace AfterSchoolLibrary.Models
             {
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Activity).Name;
-                _dp = BaseEventWithAddress.get_BaseObjectMap(className);
+                _dp = BasicLookUpObject.get_BaseObjectMap(className);
 				_dp.Add(className, "SeatsAvailable", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ProgramId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ProviderAccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AgeStart", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AgeEnd", System.Data.SqlDbType.Int);
 				_dp.Add(className, "GradeLevelStart", System.Data.SqlDbType.Int);
@@ -124,8 +145,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ActivityTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateSubmittedToActivityGroup", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "LeaderTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
-				_dp.Add(className, "AccountStripePublishableKey", typeof(Account).Name, "StripePublishableKey", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
 				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
@@ -223,6 +244,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["AccountId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ProviderAccountId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
@@ -341,6 +366,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["AccountActivityGroupId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["LeaderTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -405,6 +434,14 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["ActivityScheduleId"], ActivityScheduleId);
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+		}
+
+		public static List<Activity> LoadByProviderAccountId(int ProviderAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		{
+			var dq = DatabaseQuery;
+			dq.Connection = dc;
+			dq.Criterias.Add(ObjectMap["ProviderAccountId"], ProviderAccountId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -499,24 +536,32 @@ namespace AfterSchoolLibrary.Models
 
             if (accountId.HasValue)
             {
-                dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+                var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                dcs.Add(ObjectMap["AccountId"], accountId);
+                dcs.Add(ObjectMap["ProviderAccountId"], accountId);
+                
+                var locationQuery = BaseObject.get_DatabaseQuery(Location.ObjectMap, typeof(Location).Name);
+                locationQuery.UseParameterizedQuery = false;
+                locationQuery.SelectParameters.Clear();
+                locationQuery.SelectParameters.Add(Location.ObjectMap["ID"]);
+                locationQuery.Criterias.Add(Location.ObjectMap["HostAccountId"], accountId);
+                dcs.Add(ObjectMap["LocationId"], locationQuery, DatabaseCriteriaOperatorEnum.In);
+
+                dq.Criterias.Add(dcs);
             }
+
             if (activityGroupId.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["activityGroupId"], activityGroupId.Value);
-            }
+
             if (accountActivityGroupId.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["accountActivityGroupId"], accountActivityGroupId.Value);
-            }
+
             if (activityType.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["ActivityTypeId"], (int)activityType.Value);
-            }
+
             if (isSubmitted.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["DateSubmittedToActivityGroup"], DBNull.Value, DatabaseCriteriaOperatorEnum.IsNot);
-            }
+
             if (isArchived.HasValue)
             {
                 if (!isArchived.Value)
@@ -543,13 +588,11 @@ namespace AfterSchoolLibrary.Models
 
                     dq.Criterias.Add(dcs);
                 }
-
-
             }
+
             if (isDeleted.HasValue)
-            {
                 dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted.Value);
-            }
+
             return dq;
         }
 
@@ -625,15 +668,7 @@ namespace AfterSchoolLibrary.Models
             {
                 return Services.ActivityService.GetActivityGroup(this).IsNotEmpty() && Services.ActivityService.GetActivityGroup(this).IsArchived;
             }
-        }
-        
-        public bool HasAddress
-        {
-            get
-            {
-                return (!Address1.IsEmpty() && ((!City.IsEmpty() && !State.IsEmpty()) || !PostalCode.IsEmpty()));                
-            }
-        }          
+        }     
         
         public bool HasSchedule
         {

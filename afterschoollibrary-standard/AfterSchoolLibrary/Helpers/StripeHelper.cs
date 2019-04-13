@@ -4,8 +4,7 @@ using Stripe;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using AfterSchoolLibrary.Helpers;
-using AfterSchoolLibrary.Models;
+using System.Configuration;
 
 namespace AfterSchoolLibrary.Billing
 {
@@ -13,18 +12,21 @@ namespace AfterSchoolLibrary.Billing
     {
         private static string TestSecretKey { get { return "sk_test_gfeMjl5rgl16L1HHITh3YT5s"; } }
         private static string TestPublishableKey { get { return "pk_test_wuL50O8i1mAzrmV2xDAXuClJ"; } }
-        private static string LiveSecretKey { get { return "sk_live_SDa559erkpDCJ9BkrPS58GrC"; } }
-        private static string LivePublishableKey { get { return "pk_live_4q5JuU2JIxsjWfQauJ7bNISK"; } }
+        private static string LiveSecretKey { get { return ConfigurationManager.AppSettings["Stripe.LiveSecretKey"]; } }
+        private static string LivePublishableKey { get { return ConfigurationManager.AppSettings["Stripe.LivePublishableKey"]; } }
 
         private static string DevPlatformClientId { get { return "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv"; } }
-        private static string LivePlatformClientId { get { return "ca_7kmNqL4oMYfH5z7tY2N9riALjFpkMJAQ"; } }
+        private static string LivePlatformClientId { get { return ConfigurationManager.AppSettings["Stripe.LivePlatformClientId"]; } }
 
-        private static decimal StripePercentFee { get { return .029M; } }
-        private static decimal StripeFlatFee { get { return .3M; } }
+        public const decimal StripePercentFee = .029M;
+        public const decimal StripeFlatFee = .3M;
 
-        public static decimal GetStripeFee(decimal cost)
+        public static decimal GetStripeFee(decimal cost, bool feeTakenOutOfCost)
         {
-            return (cost * StripePercentFee) + StripeFlatFee;
+            if (feeTakenOutOfCost)
+                return (cost * StripePercentFee) + StripeFlatFee;
+
+            return ((cost + StripeFlatFee) / (1 - StripePercentFee)) - cost;
         }
 
         public static string SecretKey
@@ -62,16 +64,16 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeAccounts
 
-        public static StripeAccountService GetAccountService()
+        public static AccountService GetAccountService()
         {
-            return new StripeAccountService(StripeAccessToken);
+            return new AccountService(StripeAccessToken);
         }
 
-        public static Stripe.StripeAccount GetCustomAccount(string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Account GetCustomAccount(string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();            
 
-            Stripe.StripeAccount account = null;
+            Stripe.Account account = null;
 
             try
             {
@@ -86,23 +88,37 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static Stripe.StripeAccount CreateCustomAccount(string businessName, string email, SystemMessages msgs)
+        public static Stripe.Account CreateCustomAccount(string businessName, string email, LegalEntityType entityType, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeAccountCreateOptions()
+            var options = new AccountCreateOptions()
             {
                 Type = "custom",
                 Country = "US",
                 DefaultCurrency = "usd",
-                BusinessName = businessName,
+                Company = new AccountCompanyOptions()
+                {
+                    Name = businessName,
+                },
                 Email = email,
-                DebitNegativeBalances = true,
-                PayoutStatementDescriptor = "AfterSchool transfer".MaxChars(22),
-                TransferScheduleInterval = "manual"
+                Settings = new AccountSettingsOptions()
+                {
+                    Payouts = new AccountSettingsPayoutsOptions()
+                    {
+                        DebitNegativeBalances = true,
+                        StatementDescriptor = "AHQ transfer".MaxChars(22),
+                        Schedule = new AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = "manual",
+                        }
+                    }
+                },
+                BusinessType = entityType.ToString().ToLower(),
+                RequestedCapabilities = new List<string>() { "platform_payments" }
             };
 
-            Stripe.StripeAccount account = null;
+            Stripe.Account account = null;
 
             try
             {
@@ -117,89 +133,108 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static Stripe.StripeAccount UpdateCustomAccountBankInfo(string stripeAccountId, string routingNumber, string accountNumber, SystemMessages msgs)
+        public static ExternalAccountService GetExternalAccountService()
+        {
+            return new ExternalAccountService(StripeAccessToken);
+        }
+
+        public static Stripe.BankAccount CreateCustomBankAccount(string stripeAccountId, string routingNumber, string accountNumber, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeAccountUpdateOptions()
-            {
-                ExternalBankAccount = new StripeAccountBankAccountOptions()
+            var options = new ExternalAccountCreateOptions()
+            {                
+                ExternalAccountBankAccount = new AccountBankAccountOptions()
                 {
-                     RoutingNumber = routingNumber,
-                     AccountNumber = accountNumber,
-                     Country = "US",
-                     Currency = "usd",
-                } 
+                    RoutingNumber = routingNumber,
+                    AccountNumber = accountNumber,
+                    Country = "US",
+                    Currency = "usd"
+                }
             };
 
-            Stripe.StripeAccount account = null;
+            BankAccount bankAccount = null;
 
             try
             {
-                account = GetAccountService().Update(stripeAccountId, options);
+                bankAccount = (BankAccount)GetExternalAccountService().Create(stripeAccountId, options);
             }
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Error updating payment account", MessageType.UserError);
+                msgs.Add("Error creating bank account", MessageType.UserError);
             }
 
-            return account;
+            return bankAccount;
         }
 
-        public static Stripe.StripeAccount UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
+        public static Stripe.Account UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, string ssnLast4, string fullSSN, DateTime? dateOfBirth, string address1, string address2, string city, string state, string postalCode, string supportPhone, string supportEmail, string businessName, string ein, string businessUrl, string businessPhone, string productDescription, string documentFileId, DateTime tosAcceptanceDate, string tosIPAddress, string tosUserAgent, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var legalOptions = new StripeAccountLegalEntityOptions()
+            var address = new AddressOptions()
             {
-                AddressCity = city,
-                AddressState = state,
-                AddressPostalCode = postalCode,
-                AddressTwoLetterCountry = "US",
-                AddressLine1 = address1,
-                AddressLine2 = address2,
-                Type = entityType.ToString().ToLower(),
-                FirstName = firstName,
-                LastName = lastName,
-                BirthDay = dateOfBirth.Day,
-                BirthMonth = dateOfBirth.Month,
-                BirthYear = dateOfBirth.Year,
-                SSNLast4 = ssnLast4
+                City = city,
+                State = state,
+                PostalCode = postalCode,
+                Country = "US",
+                Line1 = address1,
+                Line2 = address2,
             };
 
-            var options = new StripeAccountUpdateOptions()
+            var options = new AccountUpdateOptions()
             {
-                LegalEntity = legalOptions,
-                TosAcceptanceDate = tosAcceptanceDate,
-                TosAcceptanceIp = tosIPAddress,
-                SupportPhone = supportPhone,
-                SupportEmail = supportEmail
+                BusinessProfile = new AccountBusinessProfileOptions()
+                {
+                    SupportEmail = supportEmail,
+                    SupportPhone = supportPhone,
+                    Url = businessUrl,
+                    ProductDescription = productDescription
+                },
+                BusinessType = entityType.ToString().ToLower(),
+                TosAcceptance = new AccountTosAcceptanceOptions()
+                {
+                    Date = tosAcceptanceDate,
+                    Ip = tosIPAddress
+                },
             };
 
             if (entityType == LegalEntityType.Company)
             {
-                legalOptions.BusinessName = businessName;
-                legalOptions.BusinessTaxId = ein;
-                legalOptions.PhoneNumber = businessPhone;
-                options.BusinessUrl = businessUrl;
+                options.BusinessProfile.Name = businessName;
+                options.Company = new AccountCompanyOptions()
+                {
+                    Address = address,
+                    TaxId = ein,
+                    Phone = businessPhone,     
+                };
             }
+            else
+                options.Individual = new PersonUpdateOptions()
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Dob = new DobOptions()
+                    {
+                        Day = dateOfBirth.Value.Day,
+                        Month = dateOfBirth.Value.Month,
+                        Year = dateOfBirth.Value.Year,
+                    },
+                    SSNLast4 = ssnLast4,
+                    Address = address
+                };
 
             if (fullSSN.IsNotEmpty())
-            {
-                legalOptions.PersonalIdNumber = fullSSN;
-            }
+                options.Individual.PersonalIdNumber = fullSSN;
 
             if (documentFileId.IsNotEmpty())
-            {
-                legalOptions.VerificationDocumentFileId = documentFileId;
-            }
+                options.Individual.Verification.Document.FrontFileId = documentFileId;
 
-            Stripe.StripeAccount account = null;
+            Stripe.Account account = null;
 
             try
             {
-                account = GetAccountService().Update(stripeAccountId, options);
+                account = GetAccountService().Update(stripeAccountId, options);               
             }
             catch (StripeException ex)
             {
@@ -210,73 +245,116 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
-        public static void UpdateCustomAccountLegalEntity(string stripeAccountId, LegalEntityType entityType, string firstName, string lastName, DateTime dateOfBirth, string address1, string address2, string city, string state, string postalCode, string businessName, string ein, SystemMessages msgs)
+        #endregion
+
+        #region StripeTransfer
+
+        private static TransferService GetTransferService()
+        {
+            return new TransferService(StripeAccessToken);
+        }
+
+        public static Transfer CreateTransfer(decimal amount, string description, string transferIdentifier, string destinationId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var legalOptions = new StripeAccountLegalEntityOptions()
+            var options = new TransferCreateOptions()
             {
-                AddressCity = city,
-                AddressState = state,
-                AddressPostalCode = postalCode,
-                AddressTwoLetterCountry = "US",
-                AddressLine1 = address1,
-                AddressLine2 = address2,
-                Type = entityType.ToString(),
-                FirstName = firstName,
-                LastName = lastName,
-                BirthDay = dateOfBirth.Day,
-                BirthMonth = dateOfBirth.Month,
-                BirthYear = dateOfBirth.Year
+                Amount = (long)(amount * 100),
+                Currency = "usd",
+                Destination = destinationId,
+                Metadata = metaData,
+                Description = description,
+                TransferGroup = transferIdentifier
             };
 
-            if (entityType == LegalEntityType.Company)
-            {
-                legalOptions.BusinessName = businessName;
-                legalOptions.BusinessTaxId = ein;
-            }
-
-            var options = new StripeAccountUpdateOptions()
-            {
-                LegalEntity = legalOptions
-            };
-
-            Stripe.StripeAccount account = null;
+            Transfer transfer = null;
 
             try
             {
-                account = GetAccountService().Update(stripeAccountId, options);
+                transfer = GetTransferService().Create(options);
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Error updating payment account", MessageType.UserError);
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Transfer was not created", MessageType.UserError);
             }
+
+            return transfer;
+        }
+
+        #endregion
+
+        #region StripePayouts
+
+        private static PayoutService GetPayoutService()
+        {
+            return new PayoutService(StripeAccessToken);
+        }
+
+        public static Payout CreatePayout(decimal amount, string externalAccountId, string connectedAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var options = new PayoutCreateOptions()
+            {
+                Amount = (long)(amount * 100),
+                Currency = "usd",
+                Destination = externalAccountId,
+                Metadata = metaData,
+                Method = "standard",
+                StatementDescriptor = "AHQ Payout"
+            };
+
+            var requestOptions = new RequestOptions()
+            {
+                StripeConnectAccountId = connectedAccountId
+            };
+
+            Payout stripePayout = null;
+
+            try
+            {
+                stripePayout = GetPayoutService().Create(options, requestOptions);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add($"Payout was not created", MessageType.UserError);
+            }
+
+            return stripePayout;
         }
 
         #endregion
 
         #region StripeFiles
 
-        private static StripeFileUploadService GetFileUploadService()
+        private static FileService GetFileUploadService()
         {
-            return new StripeFileUploadService(StripeAccessToken);
+            return new FileService(StripeAccessToken);
         }
 
-        public static StripeFileUpload UploadFile(StripeUploadFile stripeUploadFile, SystemMessages msgs)
+        public static Stripe.File UploadFile(StripeUploadFile stripeUploadFile, SystemMessages msgs)
         {
             return UploadFile(stripeUploadFile.Document, stripeUploadFile.FileName, stripeUploadFile.Purpose, msgs);
         }
 
-        public static StripeFileUpload UploadFile(Stream file, string filename, StripeFilePurpose purpose, SystemMessages msgs)
+        public static Stripe.File UploadFile(Stream file, string filename, StripeFilePurpose purpose, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            StripeFileUpload fileUpload = null;
+            var fileCreateOptions = new FileCreateOptions()
+            {
+                File = file,
+                Purpose = purpose.ToString().SplitByUpperCase().Replace(" ", "_").ToLower()               
+            };
+
+            Stripe.File stripeFile = null;
             
             try
             {
-                fileUpload = GetFileUploadService().Create(filename, file, purpose.ToString().SplitByUpperCase().Replace(" ", "_").ToLower());
+                stripeFile = GetFileUploadService().Create(fileCreateOptions);
             }
             catch (StripeException ex)
             {
@@ -284,25 +362,25 @@ namespace AfterSchoolLibrary.Billing
                 msgs.Add($"payment account file was not uploaded", MessageType.UserError);
             }
 
-            return fileUpload;
+            return stripeFile;
         }
 
         #endregion
 
         #region StripeProducts
 
-        private static StripeProductService GetProductService()
+        private static ProductService GetProductService()
         {
-            return new StripeProductService(StripeAccessToken);
-        }
+            return new ProductService(StripeAccessToken);
+        }        
 
-        public static StripeProduct CreateProduct(string productId, string productName, string statementDescriptor, bool active, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Product CreateProduct(string productId, string productName, string statementDescriptor, bool active, string stripeAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            StripeProduct product = null;
+            Stripe.Product product = null;
 
-            var options = new StripeProductCreateOptions
+            var options = new ProductCreateOptions
             {
                 Id = productId,
                 Name = productName,
@@ -311,9 +389,12 @@ namespace AfterSchoolLibrary.Billing
                 Type = "service"
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
+
+            if (metaData.IsNotEmpty())
+                options.Metadata = metaData;
 
             try
             {
@@ -328,23 +409,23 @@ namespace AfterSchoolLibrary.Billing
             return product;
         }
 
-        public static StripeProduct UpdateProduct(string productId, string productName, string statementDescriptor, bool active, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Product UpdateProduct(string productId, string productName, string statementDescriptor, bool active, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
 
-            var options = new StripeProductUpdateOptions
+            var options = new ProductUpdateOptions
             {
                 Name = productName,
                 StatementDescriptor = statementDescriptor.MaxChars(22),
                 Active = active
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeProduct product = null;
+            Stripe.Product product = null;
 
             try
             {
@@ -363,7 +444,7 @@ namespace AfterSchoolLibrary.Billing
         {
             var msgs = new SystemMessages();
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
@@ -371,7 +452,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 var result = GetProductService().Delete(productId, requestOptions);
 
-                if (!result.Deleted)
+                if (result.Deleted.HasValue && !result.Deleted.Value)
                     msgs.Add($"Product ({productId}) was not deleted", MessageType.UserError);
             }
             catch (StripeException ex)
@@ -383,15 +464,15 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
 
-        public static StripeProduct GetProduct(string productId, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Product GetProduct(string productId, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeProduct product = null;
+            Stripe.Product product = null;
 
             try
             {
@@ -409,9 +490,9 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripePlans
 
-        private static StripePlanService GetPlanService()
+        private static PlanService GetPlanService()
         {
-            return new StripePlanService(StripeAccessToken);
+            return new PlanService(StripeAccessToken);
         }
 
         /// <summary>
@@ -423,14 +504,15 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="billingPeriodType"></param>
         /// <param name="planNickName"></param>
         /// <param name="stripeAccountId">optional, the account id of the connect account, if platform should be null</param>
+        /// <param name="metaData">A dictionary to send whatever information we want to store about the plan, for easier referencing between systems</param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static StripePlan CreatePlan(StripeProduct stripeProduct, string planId, decimal price, BillingPeriodType billingPeriodType, string planNickName, string stripeAccountId, SystemMessages msgs)
+        public static Plan CreatePlan(Stripe.Product stripeProduct, string planId, decimal price, BillingPeriodType billingPeriodType, string planNickName, string stripeAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            StripePlan plan = null;
-            var options = new StripePlanCreateOptions
+            Stripe.Plan plan = null;
+            var options = new Stripe.PlanCreateOptions
             {
                 Amount = Convert.ToInt32(price * 100),
                 Currency = "usd",
@@ -440,9 +522,12 @@ namespace AfterSchoolLibrary.Billing
                 ProductId = stripeProduct.Id
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
+
+            if (metaData.IsNotEmpty())
+                options.Metadata = metaData;
 
             // you can set your own id or just save it and get the plan id back
             if (planId.IsNotEmpty())
@@ -461,21 +546,21 @@ namespace AfterSchoolLibrary.Billing
             return plan;
         }
 
-        public static StripePlan UpdatePlan(string planId, string planNickName, bool active, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Plan UpdatePlan(string planId, string planNickName, bool active, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripePlanUpdateOptions
+            var options = new Stripe.PlanUpdateOptions
             {
                 Active = active,
                 Nickname = planNickName
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripePlan plan = null;
+            Stripe.Plan plan = null;
 
             try
             {
@@ -493,7 +578,7 @@ namespace AfterSchoolLibrary.Billing
         public static SystemMessages DeletePlan(string planId, string stripeAccountId)
         {
             var msgs = new SystemMessages();
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
 
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
@@ -502,7 +587,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 var result = GetPlanService().Delete(planId, requestOptions);
 
-                if (!result.Deleted)
+                if (result.Deleted.HasValue && !result.Deleted.Value)
                     msgs.Add($"Plan ({planId}) was not deleted", MessageType.UserError);
             }
             catch (StripeException ex)
@@ -514,15 +599,15 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
 
-        public static StripePlan GetPlan(string planId, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Plan GetPlan(string planId, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
 
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripePlan plan = null;
+            Stripe.Plan plan = null;
 
             try
             {
@@ -540,28 +625,28 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeCustomers
 
-        private static StripeCustomerService GetCustomerService()
+        private static Stripe.CustomerService GetCustomerService()
         {
-            return new StripeCustomerService(StripeAccessToken);
+            return new Stripe.CustomerService(StripeAccessToken);
         }
 
-        public static StripeCustomer CreateCustomer(string description, string email, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Customer CreateCustomer(string description, string email, string stripeAccountId, SystemMessages msgs)
         {
             return CreateCustomer(description, email, null, null, msgs);
         }
 
-        public static StripeCustomer CreateCustomer(string description, string email, string sourceId, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Customer CreateCustomer(string description, string email, string sourceId, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            StripeCustomer customer = null;
-            var options = new StripeCustomerCreateOptions
+            Stripe.Customer customer = null;
+            var options = new Stripe.CustomerCreateOptions
             {
                 Description = description,
                 Email = email
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
@@ -578,18 +663,18 @@ namespace AfterSchoolLibrary.Billing
             return customer;
         }
 
-        public static StripeCustomer CreateCustomerFromToken(string token, string description, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Customer CreateCustomerFromToken(string token, string description, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            StripeCustomer customer = null;
-            var options = new StripeCustomerCreateOptions
+            Stripe.Customer customer = null;
+            var options = new Stripe.CustomerCreateOptions
             {
                 Description = description,
                 SourceToken = token                
             };
 
-            var requestOptions = new StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
@@ -609,12 +694,12 @@ namespace AfterSchoolLibrary.Billing
         public static SystemMessages UpdateCustomerDefaultCard(string customerId, string stripeAccountId, string cardId)
         {
             var msgs = new SystemMessages();
-            var options = new StripeCustomerUpdateOptions
+            var options = new Stripe.CustomerUpdateOptions
             {
                 DefaultSource = cardId
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
@@ -631,21 +716,21 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
         
-        public static StripeCustomer UpdateCustomer(string customerId, string description, string email, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Customer UpdateCustomer(string customerId, string description, string email, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             
-            var options = new StripeCustomerUpdateOptions
+            var options = new Stripe.CustomerUpdateOptions
             {
                 Description = description,
                 Email = email
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeCustomer customer = null;
+            Stripe.Customer customer = null;
 
             try
             {
@@ -664,7 +749,7 @@ namespace AfterSchoolLibrary.Billing
         {
             var msgs = new SystemMessages();
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
@@ -672,7 +757,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 var result = GetCustomerService().Delete(customerId, requestOptions);
 
-                if (!result.Deleted)
+                if (result.Deleted.HasValue && !result.Deleted.Value)
                     msgs.Add($"Customer ({customerId}) was not deleted", MessageType.UserError);
             }
             catch (StripeException ex)
@@ -684,15 +769,15 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
 
-        public static StripeCustomer GetCustomer(string customerId, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Customer GetCustomer(string customerId, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
 
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeCustomer customer = null;
+            Stripe.Customer customer = null;
 
             try
             {
@@ -710,12 +795,12 @@ namespace AfterSchoolLibrary.Billing
         {
             var msgs = new SystemMessages();
 
-            var options = new StripeCustomerUpdateOptions
+            var options = new Stripe.CustomerUpdateOptions
             {
                 SourceToken = sourceToken
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
@@ -736,35 +821,38 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeSubscriptions
 
-        private static StripeSubscriptionService GetSubscriptionService()
+        private static Stripe.SubscriptionService GetSubscriptionService()
         {
-            return new StripeSubscriptionService(StripeAccessToken);
+            return new Stripe.SubscriptionService(StripeAccessToken);
         }
 
-        public static StripeSubscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
+        public static Stripe.Subscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            StripeSubscription subscription = null;
+            Stripe.Subscription subscription = null;
 
-            var options = new StripeSubscriptionCreateOptions
+            var options = new Stripe.SubscriptionCreateOptions
             {
                 CustomerId = customerId,
-                Billing = StripeBilling.ChargeAutomatically,
+                Billing = Stripe.Billing.ChargeAutomatically,
                 TrialEnd = trialEndDate,
-                ApplicationFeePercent = platformFeePercent * 100, // convert to integer
-                Source = sourceId,
-                CouponId = stripeCouponId,
+                DefaultSource = sourceId,
+                CouponId = stripeCouponId      ,
+                Items = new List<SubscriptionItemOption>() { new SubscriptionItemOption() { PlanId = planId, Quantity = 1 } }
                 
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
+            {
                 requestOptions.StripeConnectAccountId = stripeAccountId;
+                options.ApplicationFeePercent = platformFeePercent * 100;
+            }
 
             try
             {
-                subscription = GetSubscriptionService().Create(customerId, planId, options, requestOptions);
+                subscription = GetSubscriptionService().Create(options, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -782,23 +870,22 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="plan"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static StripeSubscription CreateSubscription(StripeCustomer customer, StripePlan plan, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
+        public static Stripe.Subscription CreateSubscription(Stripe.Customer customer, Stripe.Plan plan, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
         {
             return CreateSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, trialEndDate, stripeAccountId, stripeCouponId, msgs);
         }
 
-        public static StripeSubscription UpdateSubscription(string subscriptionId, string newPlanId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, bool? endTrialNow, bool? prorate, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Subscription UpdateSubscription(string subscriptionId, string newPlanId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, bool? endTrialNow, bool? prorate, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-
-            var options = new StripeSubscriptionUpdateOptions();
+            var options = new Stripe.SubscriptionUpdateOptions();
 
             if (newPlanId.IsNotBlank())
             {
-                options.Items = new List<StripeSubscriptionItemUpdateOption>()
+                options.Items = new List<Stripe.SubscriptionItemUpdateOption>()
                     {
-                        new StripeSubscriptionItemUpdateOption()
+                        new Stripe.SubscriptionItemUpdateOption()
                         {
                             PlanId = newPlanId,
                             Quantity = 1
@@ -818,11 +905,11 @@ namespace AfterSchoolLibrary.Billing
             if (prorate.HasValue)
                 options.Prorate = prorate.Value;
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeSubscription subscription = null;
+            Stripe.Subscription subscription = null;
 
             try
             {
@@ -841,12 +928,12 @@ namespace AfterSchoolLibrary.Billing
         {
             var msgs = new SystemMessages();
             
-            var options = new StripeSubscriptionUpdateOptions()
+            var options = new Stripe.SubscriptionUpdateOptions()
             {
                 CancelAtPeriodEnd = true
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
@@ -863,15 +950,15 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
 
-        public static StripeSubscription GetSubscription(string subscriptionId, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Subscription GetSubscription(string subscriptionId, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeSubscription subscription = null;
+            Stripe.Subscription subscription = null;
 
             try
             {
@@ -889,25 +976,25 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeCard
 
-        private static StripeCardService GetCardService()
+        private static Stripe.CardService GetCardService()
         {
-            return new StripeCardService(StripeAccessToken);
+            return new Stripe.CardService(StripeAccessToken);
         }
 
-        public static StripeCard CreateCard(StripeCustomer customer, string token, SystemMessages msgs)
+        public static Stripe.Card CreateCard(Stripe.Customer customer, string token, SystemMessages msgs)
         {
             return CreateCard(customer.Id, token, msgs);
         }
 
-        public static StripeCard CreateCard(string customerId, string token, SystemMessages msgs)
+        public static Stripe.Card CreateCard(string customerId, string token, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            StripeCard card = null;
+            Stripe.Card card = null;
 
             try
             {
-                var options = new StripeCardCreateOptions()
+                var options = new Stripe.CardCreateOptions()
                 {
                     SourceToken = token
                 };
@@ -923,9 +1010,9 @@ namespace AfterSchoolLibrary.Billing
             return card;
         }
 
-        public static List<StripeCard> GetCards(string customerId, SystemMessages msgs)
+        public static List<Stripe.Card> GetCards(string customerId, SystemMessages msgs)
         {
-            var cards = new List<StripeCard>();
+            var cards = new List<Stripe.Card>();
 
             try
             {
@@ -939,9 +1026,9 @@ namespace AfterSchoolLibrary.Billing
             return cards;
         }
 
-        public static StripeCard GetCard(string customerId, string cardId, SystemMessages msgs)
+        public static Stripe.Card GetCard(string customerId, string cardId, SystemMessages msgs)
         {
-            var card = new StripeCard();
+            var card = new Stripe.Card();
 
             try
             {
@@ -963,7 +1050,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 var result = GetCardService().Delete(customerId, cardId);
 
-                if (!result.Deleted)
+                if (result.Deleted.HasValue && !result.Deleted.Value)
                     msgs.Add($"Stripe card ({cardId}) was not deleted", MessageType.Error);
             }
             catch (StripeException ex)
@@ -974,17 +1061,18 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
 
-        public static SourceCard GetTestCard(StripeTestCardType stripeTestCardType)
-        {
-            return new SourceCard()
-            {
-                Name = "Bill Payer",
-                Number = GetTestCardNumber(stripeTestCardType),
-                ExpirationMonth = 1,
-                ExpirationYear = DateTime.UtcNow.AddYears(2).Year,
-                Cvc = "123"
-            };
-        }
+        //public static SourceCard GetTestCard(StripeTestCardType stripeTestCardType)
+        //{
+        //    return new SourceCard()
+        //    {
+        //        Name = "Bill Payer",
+                
+        //        Number = GetTestCardNumber(stripeTestCardType),
+        //        ExpirationMonth = 1,
+        //        ExpirationYear = DateTime.UtcNow.AddYears(2).Year,
+        //        Cvc = "123"
+        //    };
+        //}
 
         private static string GetTestCardNumber(StripeTestCardType stripeTestCardType)
         {
@@ -1027,25 +1115,27 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeSource
 
-        private static StripeSourceService GetSourceService()
+        public const string TestSourceToken = "tok_visa";
+
+        private static Stripe.SourceService GetSourceService()
         {
-            return new StripeSourceService(StripeAccessToken);
+            return new Stripe.SourceService(StripeAccessToken);
         }
 
-        public static StripeSource CreateSource(StripeCustomer customer, string token, SystemMessages msgs)
+        public static Stripe.Source CreateSource(Stripe.Customer customer, string token, SystemMessages msgs)
         {
             return CreateSource(token, msgs);
         }
 
-        public static StripeSource CreateSource(string token, SystemMessages msgs)
+        public static Stripe.Source CreateSource(string token, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            StripeSource source = null;
+            Stripe.Source source = null;
 
             try
             {
-                var options = new StripeSourceCreateOptions()
+                var options = new Stripe.SourceCreateOptions()
                 {
                     Type = "card",
                     Token = token
@@ -1062,22 +1152,22 @@ namespace AfterSchoolLibrary.Billing
             return source;
         }
 
-        public static StripeSource CreateSourceFromOriginal(string customerId, string originalSourceId, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Source CreateSourceFromOriginal(string customerId, string originalSourceId, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeSourceCreateOptions()
+            var options = new Stripe.SourceCreateOptions()
             {
                 Customer = customerId,
                 OriginalSource = originalSourceId,
                 Usage = "reusable"
             };
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeSource source = null;
+            Stripe.Source source = null;
 
             try
             {
@@ -1092,9 +1182,9 @@ namespace AfterSchoolLibrary.Billing
             return source;
         }
 
-        public static List<StripeSource> GetSources(string customerId, SystemMessages msgs)
+        public static List<Stripe.Source> GetSources(string customerId, SystemMessages msgs)
         {
-            var cards = new List<StripeSource>();
+            var cards = new List<Stripe.Source>();
 
             try
             {
@@ -1109,9 +1199,9 @@ namespace AfterSchoolLibrary.Billing
             return cards;
         }
 
-        public static StripeSource GetSource(string sourceId, SystemMessages msgs)
+        public static Stripe.Source GetSource(string sourceId, SystemMessages msgs)
         {
-            var source = new StripeSource();
+            var source = new Stripe.Source();
 
             try
             {
@@ -1129,29 +1219,41 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeCharge
 
-        private static StripeChargeService GetChargeService()
+        private static Stripe.ChargeService GetChargeService()
         {
-            return new StripeChargeService(StripeAccessToken);
+            return new Stripe.ChargeService(StripeAccessToken);
         }        
 
-        public static StripeCharge CreateCharge(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal platformFee, string description, string statementDescriptor, SystemMessages msgs)
+        public static Stripe.Charge CreateCharge(string fromCustomerId, string tokenOrSourceId, decimal totalAmount, string description, string statementDescriptor, SystemMessages msgs)
+        {
+            return CreateCharge(fromCustomerId, null, tokenOrSourceId, totalAmount, null, description, statementDescriptor, msgs);
+        }
+
+        public static Stripe.Charge CreateCharge(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal? platformFee, string description, string statementDescriptor, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeChargeCreateOptions
+            var options = new Stripe.ChargeCreateOptions
             {
                 Amount = (totalAmount * 100).ToInteger(),
                 Currency = "usd",
                 Description = description,
-                SourceTokenOrExistingSourceId = tokenOrSourceId,
+                SourceId = tokenOrSourceId,                
+                // SourceTokenOrExistingSourceId = tokenOrSourceId,
                 StatementDescriptor = statementDescriptor.MaxChars(22),
-                CustomerId = fromCustomerId,
-                // ApplicationFee = (platformFee * 100).ToInteger(),
-                Destination = destinationAccountId,
-                DestinationAmount = (totalAmount * 100).ToInteger() - (platformFee * 100).ToInteger()
+                CustomerId = fromCustomerId
             };
 
-            StripeCharge charge = null;
+            if (platformFee.HasValue)
+            {
+                options.Destination = new ChargeDestinationCreateOptions()
+                {
+                    Account = destinationAccountId,
+                    Amount = (totalAmount * 100).ToInteger() - (platformFee.Value * 100).ToInteger()
+                };
+            }
+
+            Stripe.Charge charge = null;
 
             try
             {
@@ -1166,12 +1268,12 @@ namespace AfterSchoolLibrary.Billing
             return charge;
         }
 
-        public static List<StripeCharge> GetCharges(string customerId, SystemMessages msgs)
+        public static List<Stripe.Charge> GetCharges(string customerId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var charges = new List<StripeCharge>();
-            var options = new StripeChargeListOptions
+            var charges = new List<Stripe.Charge>();
+            var options = new Stripe.ChargeListOptions
             {
                 CustomerId = customerId,
                 Limit = 10
@@ -1194,25 +1296,25 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeTokens
 
-        private static StripeTokenService GetTokenService()
+        private static Stripe.TokenService GetTokenService()
         {
-            return new StripeTokenService(StripeAccessToken);
+            return new Stripe.TokenService(StripeAccessToken);
         }
 
-        public static StripeToken CreateCustomerToken(string customerId, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Token CreateCustomerToken(string customerId, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeTokenCreateOptions()
+            var options = new Stripe.TokenCreateOptions()
             {
                 CustomerId = customerId               
             };
 
-            var requestOptions = new StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeToken token = null;
+            Stripe.Token token = null;
 
             try
             {
@@ -1231,27 +1333,28 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeRefunds
 
-        public static StripeRefundService GetRefundService()
+        public static Stripe.RefundService GetRefundService()
         {
-            return new StripeRefundService(StripeAccessToken);
+            return new Stripe.RefundService(StripeAccessToken);
         }
 
-        public static StripeRefund CreateRefund(string chargeId, decimal totalAmount, string reason, SystemMessages msgs)
+        public static Stripe.Refund CreateRefund(string chargeId, decimal totalAmount, string reason, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeRefundCreateOptions
+            var options = new Stripe.RefundCreateOptions
             {
                 Amount = (totalAmount * 100).ToInteger(),
                 Reason = reason,
-                ReverseTransfer = true
+                ReverseTransfer = true,
+                ChargeId = chargeId
             };
 
-            StripeRefund refund = null;
+            Stripe.Refund refund = null;
 
             try
             {
-                refund = GetRefundService().Create(chargeId, options);
+                refund = GetRefundService().Create(options);
             }
             catch (StripeException ex)
             {
@@ -1262,12 +1365,12 @@ namespace AfterSchoolLibrary.Billing
             return refund;
         }
 
-        public static List<StripeRefund> GetRefunds(string chargeId, SystemMessages msgs)
+        public static List<Stripe.Refund> GetRefunds(string chargeId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var refunds = new List<StripeRefund>();
-            var options = new StripeRefundListOptions
+            var refunds = new List<Stripe.Refund>();
+            var options = new Stripe.RefundListOptions
             {
                  ChargeId = chargeId
             };
@@ -1288,21 +1391,21 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeCoupons
 
-        private static StripeCouponService GetCouponService()
+        private static Stripe.CouponService GetCouponService()
         {
-            return new StripeCouponService(StripeAccessToken);
+            return new Stripe.CouponService(StripeAccessToken);
         }
 
-        public static StripeCoupon CreateCoupon(decimal discountValue, string stripeAccountId, CouponAmountType amountType, StripeCouponDuration couponDuration, int? durationInMonths, SystemMessages msgs)
+        public static Stripe.Coupon CreateCoupon(decimal discountValue, string stripeAccountId, CouponAmountType amountType, StripeCouponDuration couponDuration, int? durationInMonths, SystemMessages msgs)
         {
             return CreateCoupon(discountValue, couponDuration, durationInMonths, amountType, stripeAccountId, msgs);
         }
 
-        public static StripeCoupon CreateCoupon(decimal discountValue, StripeCouponDuration couponDuration, int? durationInMonths, CouponAmountType couponAmountType, string stripeAccountId, SystemMessages msgs)
+        public static Stripe.Coupon CreateCoupon(decimal discountValue, StripeCouponDuration couponDuration, int? durationInMonths, CouponAmountType couponAmountType, string stripeAccountId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var options = new StripeCouponCreateOptions();
+            var options = new Stripe.CouponCreateOptions();
 
             if (couponDuration == StripeCouponDuration.Repeating)
             {
@@ -1322,11 +1425,11 @@ namespace AfterSchoolLibrary.Billing
             else
                 options.PercentOff = value;
 
-            var requestOptions = new Stripe.StripeRequestOptions();
+            var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeConnectAccountId = stripeAccountId;
 
-            StripeCoupon coupon = null;
+            Stripe.Coupon coupon = null;
 
             try
             {
@@ -1406,4 +1509,5 @@ namespace AfterSchoolLibrary.Billing
         Pending,
         Canceled
     }
+    
 }

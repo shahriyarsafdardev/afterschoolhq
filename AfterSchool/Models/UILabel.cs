@@ -16,7 +16,7 @@ namespace AfterSchool.Models
 
             return ActivityLabel(ActivityType.Activity, plural);
         }
-        public static string ActivityLabel(ActivityType activityType, bool plural = false)
+        public static string ActivityLabel(ActivityType activityType = ActivityType.Activity, bool plural = false)
         {
             if (activityType == ActivityType.Team)
                 return GetLabelConfigParam("Team", plural);

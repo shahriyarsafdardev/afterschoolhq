@@ -231,8 +231,6 @@ namespace AfterSchoolLibrary.Models
                 return new Activity()
                 {
                     ID = this.ActivityId,
-                    StartDateTime = this.RegistrationPeriodStartDateTime,
-                    EndDateTime = this.RegistrationPeriodEndDateTime,
                     Description = this.RegistrationPeriodDescription,
                     Name = this.RegistrationPeriodName
                 };

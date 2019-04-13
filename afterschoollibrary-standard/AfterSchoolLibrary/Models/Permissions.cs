@@ -7,8 +7,20 @@
             switch(userType)
             {
                 case UserType.Owner:
-                case UserType.Administrator:
+                case UserType.Administrator:                   
                     return true;
+                case UserType.Treasurer:
+                    switch (permissionType)
+                    {
+                        case PermissionType.AccountingEdit:
+                        case PermissionType.AccountingManage:
+                        case PermissionType.AccountingView:
+                        case PermissionType.AccountSettingsEdit:
+                        case PermissionType.AccountSettingsManage:
+                        case PermissionType.AccountSettingsView:
+                            return true;
+                    }
+                    return false;
                 case UserType.Instructor:
                     switch (permissionType)
                     {

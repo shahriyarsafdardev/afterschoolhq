@@ -19,11 +19,26 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
 
+        private bool GetIsFullScreen()
+        {
+            return Request["isnew"] == "1";
+        }
+
+        [HttpGet]
+        public ActionResult GetStartedPayments(string id)
+        {
+            ViewBag.Messages = new SystemMessages();
+            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = true;
+            return View(SessionVariables.CurrentAccount);
+        }
+
         [HttpGet]
         public ActionResult Edit(string id)
         {
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen();
             return View(SessionVariables.CurrentAccount);
         }
 
@@ -34,9 +49,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var a = SessionVariables.CurrentAccount;                                
 
             if (name.IsEmpty())
-            {
                 msgs.Add("Organization Name is required", MessageType.UserError);
-            }
 
             a.Name = name;
             a.Phone = phone;
@@ -47,26 +60,21 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 if (a.UniqueName.IsEmpty() && uniquename.IsEmpty())
-                {
                     a.UniqueName = AccountService.GenerateUniqueName(name, a.ID);
-                }
                 else
-                {
                     a.UniqueName = AccountService.GenerateUniqueName(uniquename, a.ID);
-                }
 
                 a.LastModifiedDate = DateTime.UtcNow;
                 a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
                 msgs.AddRange(a.SaveWithStripe());
 
                 if (msgs.HasNoErrors())
-                {
                     msgs.Add("Saved Successfully", MessageType.Success);
-                }
             }
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen();
             return View(a);
         }
 
@@ -76,6 +84,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Messages = new SystemMessages();
             ViewBag.Location = SessionVariables.CurrentAccount.GetDefaultLocation();
+            ViewBag.IsFullScreen = GetIsFullScreen();
             return View(SessionVariables.CurrentAccount);
         }
 
@@ -133,303 +142,71 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Location = SessionVariables.CurrentAccount.GetDefaultLocation();
+            ViewBag.IsFullScreen = GetIsFullScreen();
             return View(a);
+        }     
+
+        [HttpGet]
+        public ActionResult PaymentsOptions()
+        {
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            return View();
         }
 
         [HttpGet]
-        public ActionResult Style()
+        public ActionResult CheckSetup()
         {
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = new SystemMessages();
-            ViewBag.LandingPage = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.LandingPageText);
-            ViewBag.RegThankYou = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail);
-            return View(SessionVariables.CurrentAccount);
+            return View(SessionVariables.CurrentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
         }
 
-        [ValidateInput(false)]
         [HttpPost]
-        public ActionResult Style(string id, string logourl, string landingpagetext, string regthankyoutext)
+        public ActionResult CheckSetup(string entitytype, string name, string address1, string address2, string city, string state, string postalcode)
         {
             var msgs = new SystemMessages();
-            var a = SessionVariables.CurrentAccount;
 
-            a.LogoUrl = logourl;
+            if (!entitytype.IsNumber())
+                msgs.Add("Select whether we're sending payments to an Individual or a Company", MessageType.UserError);
 
-            var landingPage = a.GetAccountProperty(AccountPropertyType.LandingPageText);
-            var thankyou = a.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail);
+            if (name.IsEmpty())
+                msgs.Add("Payee Name is required", MessageType.UserError);
 
-            if (landingPage.IsEmpty())
-            {
-                landingPage = new AccountProperty() { Value = landingpagetext };
-                landingPage.AccountPropertyTypeId = AccountPropertyType.LandingPageText;
-                landingPage.CreateDate = DateTime.UtcNow;
-                landingPage.CreatedBy = SessionVariables.LoggedInUser.ID;
-                landingPage.AccountId = a.ID;
-            }
-            else
-            {
-                landingPage.Value = landingpagetext;
-            }
+            if (address1.IsEmpty())
+                msgs.Add("Address 1 is required", MessageType.UserError);
 
-            if (thankyou.IsEmpty())
-            {
-                thankyou = new AccountProperty() { Value = regthankyoutext };
-                thankyou.AccountPropertyTypeId = AccountPropertyType.RegistrationThankYouEmail;
-                thankyou.CreateDate = DateTime.UtcNow;
-                thankyou.CreatedBy = SessionVariables.LoggedInUser.ID;
-                thankyou.AccountId = a.ID;
-            }
-            else
-            {
-                thankyou.Value = regthankyoutext;
-            }
+            if (city.IsEmpty())
+                msgs.Add("City is required", MessageType.UserError);
+
+            if (state.IsEmpty())
+                msgs.Add("State is required", MessageType.UserError);
+
+            if (postalcode.IsEmpty())
+                msgs.Add("Postal Code is required", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                        a.LastModifiedDate = DateTime.UtcNow;
-                        a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                        amsgs.AddRange(a.Save(adc));
+                SessionVariables.CurrentAccount.CreateOrUpdateCheckPaymentAccount(
+                    entitytype.ToEnum<LegalEntityType>(),
+                    name,
+                    address1,
+                    address2,
+                    city,
+                    state,
+                    postalcode,
+                    SessionVariables.LoggedInUser,
+                    msgs);
 
-                        if (amsgs.HasNoErrors())
-                        {
-                            landingPage.LastModifiedDate = DateTime.UtcNow;
-                            landingPage.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                            amsgs.AddRange(landingPage.Save(adc));
-                        }
+            if (Request["isnew"] == "1")
+                return RedirectToAction("paymentsdone", new { isnew = 1 });
 
-                        if (amsgs.HasNoErrors())
-                        {
-                            thankyou.LastModifiedDate = DateTime.UtcNow;
-                            thankyou.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                            amsgs.AddRange(thankyou.Save(adc));
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Saved Successfully", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) => {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
-                
-            }
-
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.LandingPage = landingPage;
-            ViewBag.RegThankYou = thankyou;
-            return View(a);
+            return View(SessionVariables.CurrentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
         }
-
-        [HttpGet]
-        public ActionResult Integrations()
-        {
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = new SystemMessages();
-            ViewBag.FacebookAdPixel = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.FacebookAdPixel);
-            return View(SessionVariables.CurrentAccount);
-        }
-
-        [ValidateInput(false)]
-        [HttpPost]
-        public ActionResult Integrations(string id, string facebookadpixelscript)
-        {
-            var msgs = new SystemMessages();
-            var a = SessionVariables.CurrentAccount;
-
-            var facebookAdPixel = a.GetAccountProperty(AccountPropertyType.FacebookAdPixel);
-
-            if (facebookAdPixel.IsEmpty())
-            {
-                facebookAdPixel = new AccountProperty() { Value = facebookadpixelscript };
-                facebookAdPixel.AccountPropertyTypeId = AccountPropertyType.FacebookAdPixel;
-                facebookAdPixel.CreateDate = DateTime.UtcNow;
-                facebookAdPixel.CreatedBy = SessionVariables.LoggedInUser.ID;
-                facebookAdPixel.AccountId = a.ID;
-            }
-            else
-            {
-                facebookAdPixel.Value = facebookadpixelscript;
-            }
-
-            if (msgs.HasNoErrors())
-            {
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-
-                        a.LastModifiedDate = DateTime.UtcNow;
-                        a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                        amsgs.AddRange(a.Save(adc));
-
-                        if (amsgs.HasNoErrors())
-                        {
-                            facebookAdPixel.LastModifiedDate = DateTime.UtcNow;
-                            facebookAdPixel.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                            amsgs.AddRange(facebookAdPixel.Save(adc));
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => {
-                        msgs.AddRange(smsgs);
-                        msgs.Add("Saved Successfully", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) => {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
-
-            }
-
-            ViewBag.Messages = msgs;
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.FacebookAdPixel = facebookAdPixel;
-            return View(a);
-        }
-
-        [HttpGet]
-        public ActionResult Detail()
-        {
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = new SystemMessages();
-            return View(SessionVariables.CurrentAccount);
-        }
-
-        [HttpGet]
-        public ActionResult Billing()
-        {
-            Account a = SessionVariables.CurrentAccount;
-            ViewBag.BillingHistory = a.GetStripeBillingHistory();
-            ViewBag.RefundHistory = a.GetStripeRefundHistory();
-            // ViewBag.Cards = a.GetStripeCards();
-            ViewBag.Messages = new SystemMessages();
-            return View(a);
-        }
-
-        [HttpGet]
-        public ActionResult NewBilling(string id)
-        {
-            var msgs = new SystemMessages();
-
-            if (SessionVariables.AccountPackage.IsEmpty())
-            {
-                var accountPackages = SessionVariables.CurrentAccount.GetAccountPackages(msgs).Where(ap => ap.IsActive);
-
-                if (!accountPackages.Any())
-                {
-                    var defaultPackage = Package.Load(msgs: msgs).First();
-                    SessionVariables.AccountPackage = SessionVariables.CurrentAccount.AddPackage(defaultPackage.ID.Value, BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
-                }
-                else
-                {
-                    SessionVariables.AccountPackage = accountPackages.Where(ap => ap.IsActive).First();
-                }
-
-                return LoginRedirect();
-            }
-
-            var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
-
-            ViewBag.Package = package;
-            ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
-            ViewBag.Messages = new SystemMessages();
-            return View(SessionVariables.CurrentAccount);
-        }
-
-        [HttpPost]
-        public ActionResult NewPayment(string selectedpackage, string stripetoken)
-        {
-            var msgs = new SystemMessages();
-
-            Package package = null;
-            var a = SessionVariables.CurrentAccount;
-            var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
-
-            Database.ExecuteTransaction(
-                action: (SystemMessages amsgs, DatabaseConnection adc) => {
-
-                    var selectedPackageArr = selectedpackage.Split('_');
-                    var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
-
-                    package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
-
-                    // amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
-
-                    if (amsgs.HasNoErrors())
-                        a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
-
-                    SessionVariables.AccountPackage = a.GetActiveAccountPackage(amsgs, adc);
-                },
-                onSuccess: (SystemMessages smsgs) => {
-                    msgs.AddRange(smsgs);
-
-                    msgs.Clear(MessageType.Success);
-                    msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
-
-                    if (isFromTrialAccount)
-                        SessionVariables.CurrentAccount.SendWelcomeEmailPurchase();
-                },
-                onFailure: (SystemMessages fmsgs) => {
-                    msgs.AddRange(fmsgs);
-                }
-            );            
-
-            ViewBag.Messages = msgs;
-
-            if (msgs.HasNoErrors())
-            {
-                ViewBag.BillingHistory = a.GetStripeBillingHistory();
-                ViewBag.RefundHistory = a.GetStripeRefundHistory();
-                // ViewBag.Cards = a.GetStripeCards();
-                return View("Billing", a);
-            }
-            else
-            {
-                ViewBag.Package = package;
-                ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
-                return View("NewBilling", a);
-            }
-        }
-
-        [HttpPost]
-        public ActionResult AddCard(string id, string stripetoken, string makeprimary)
-        {
-            SystemMessages msgs = new SystemMessages();
-
-            var a = SessionVariables.CurrentAccount;
-            //msgs.AddRange(a.AddCreditCard(stripetoken, !makeprimary.IsEmpty(), SessionVariables.LoggedInUser));
-            //ViewBag.Cards = a.GetStripeCards();
-            ViewBag.Messages = msgs;
-            return View("Billing", a);
-        }
-
-        [HttpGet]
-        public ActionResult Packages()
-        {
-            Account a = SessionVariables.CurrentAccount;
-            ViewBag.Packages = Package.LoadByIsActive(true);
-            ViewBag.AccountPackage = a.GetActiveAccountPackage();
-            ViewBag.Messages = new SystemMessages();
-            return View(a);
-        }
-
-        [HttpGet]
-        public ActionResult SelectPackage(string id)
-        {
-            SystemMessages msgs = new SystemMessages();
-
-            Account a = SessionVariables.CurrentAccount;
-            a.AddPackage(id.ToInteger(), BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
-
-            SessionVariables.AccountPackage = a.GetActiveAccountPackage();
-
-            ViewBag.Packages = Package.LoadByIsActive(true);
-            ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = msgs;
-            return View("Packages", a);
-        }
-
+        
         [HttpGet]
         public ActionResult PaymentsEntity()
         {
@@ -441,38 +218,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
             return View(stripeAccount);
         }
 
         [HttpPost]
-        public ActionResult PaymentsEntity(string entityType, string firstName, string lastName, string address1, string address2, string city, string state, string postalCode, string dateOfBirth, string ssn, string ssnLast4, string legalbusinessname, string businessUrl, string supportphone, string supportemail, string businessPhone, string ein, string tosagree)
+        public ActionResult PaymentsEntity(string entityType, string firstName, string lastName, string address1, string address2, string city, string state, string postalCode, string dateOfBirth, string ssn, string ssnLast4, string legalbusinessname, string businessUrl, string supportphone, string supportemail, string businessPhone, string productDescription, string ein, string tosagree)
         {
             var msgs = new SystemMessages();
             var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
             var startingStatus = stripeAccount.VerificationStatusId;
             var entityTypeId = (LegalEntityType)entityType.ToInteger();
-
-            if (firstName.IsEmpty())
-                msgs.Add("First Name is required", MessageType.UserError);
-            if (lastName.IsEmpty())
-                msgs.Add("Last Name is required", MessageType.UserError);
-            if (address1.IsEmpty())
-                msgs.Add("Address 1 is required", MessageType.UserError);
-            if (city.IsEmpty())
-                msgs.Add("City is required", MessageType.UserError);
-            if (state.IsEmpty())
-                msgs.Add("State is required", MessageType.UserError);
-            if (postalCode.IsEmpty())
-                msgs.Add("Postal Code is required", MessageType.UserError);
-            if (dateOfBirth.IsEmpty() || !dateOfBirth.IsDate())
-                msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
-            if (ssnLast4.IsEmpty() || !ssnLast4.IsNumber())
-                msgs.Add("SSN(last 4) is required", MessageType.UserError);
-            if (supportemail.IsEmpty())
-                msgs.Add("Support Email is required", MessageType.UserError);
-            if (supportphone.IsEmpty())
-                msgs.Add("Support Phone is required", MessageType.UserError);
-
 
             if (entityTypeId == LegalEntityType.Company)
             {
@@ -481,9 +237,36 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (ein.IsEmpty())
                     msgs.Add("Employer Identification Number is required", MessageType.UserError);
             }
+            else
+            {
+                if (firstName.IsEmpty())
+                    msgs.Add("First Name is required", MessageType.UserError);
+                if (lastName.IsEmpty())
+                    msgs.Add("Last Name is required", MessageType.UserError);
+                if (dateOfBirth.IsEmpty() || !dateOfBirth.IsDate())
+                    msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
+                if (ssnLast4.IsEmpty() || !ssnLast4.IsNumber())
+                    msgs.Add("SSN(last 4) is required", MessageType.UserError);
+            }
+
+            if (supportemail.IsEmpty())
+                msgs.Add("Support Email is required", MessageType.UserError);
+            if (supportphone.IsEmpty())
+                msgs.Add("Support Phone is required", MessageType.UserError);
+            if (address1.IsEmpty())
+                msgs.Add("Address 1 is required", MessageType.UserError);
+            if (city.IsEmpty())
+                msgs.Add("City is required", MessageType.UserError);
+            if (state.IsEmpty())
+                msgs.Add("State is required", MessageType.UserError);
+            if (postalCode.IsEmpty())
+                msgs.Add("Postal Code is required", MessageType.UserError);
 
             if (!tosagree.IsBoolean() || !tosagree.ToBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
+
+            if (businessUrl.IsEmpty() && productDescription.IsEmpty())
+                msgs.Add("You must enter either a website or a Service Description", MessageType.UserError);
 
             if (stripeAccount.RequiresFullSSN)
             {
@@ -511,20 +294,24 @@ namespace AfterSchool.Areas.Org.Controllers
                 stripeAccount.LegalEntityCity = city;
                 stripeAccount.LegalEntityState = state;
                 stripeAccount.LegalEntityPostalCode = postalCode;
-                stripeAccount.LegalEntityDOB = dateOfBirth.ToDateTime();
-                stripeAccount.LegalEntityFirstName = firstName;
-                stripeAccount.LegalEntityLastName = lastName;
-                stripeAccount.LegalEntitySSNLast4 = ssnLast4;
                 stripeAccount.LegalEntityTypeId = entityTypeId;
                 stripeAccount.SupportPhone = supportphone;
                 stripeAccount.SupportEmail = supportemail;
                 stripeAccount.BusinessUrl = businessUrl;
                 stripeAccount.BusinessPhone = businessPhone;
+                stripeAccount.ProductDescription = productDescription;
 
                 if (entityTypeId == LegalEntityType.Company)
                 {
                     stripeAccount.LegalEntityBusinessName = legalbusinessname;
                     stripeAccount.LegalEntityEIN = ein;
+                }
+                else
+                {
+                    stripeAccount.LegalEntityDOB = dateOfBirth.ToDateTime();
+                    stripeAccount.LegalEntityFirstName = firstName;
+                    stripeAccount.LegalEntityLastName = lastName;
+                    stripeAccount.LegalEntitySSNLast4 = ssnLast4;
                 }
 
                 if (tosagree.IsBoolean())
@@ -543,13 +330,20 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (msgs.HasNoErrors())
+            {
                 msgs.Add("Your update information has been submitted.", MessageType.Success);
 
-            if (msgs.HasNoErrors() && startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
-                BackgroundJob.Enqueue(() => SessionVariables.CurrentAccount.SendStripeAccountVerified(null));
+                if (startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+                    BackgroundJob.Enqueue(() => SessionVariables.CurrentAccount.SendStripeAccountVerified(null));
+
+                if (stripeAccount.LegalEntityTypeId == LegalEntityType.Company && stripeAccount.ChargesEnabled)
+                    return RedirectToAction("paymentsbank", "account", new { isnew = Request["isnew"] });
+            }
+           
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
             return View(stripeAccount);
         }
 
@@ -557,9 +351,11 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsBank()
         {
             var msgs = new SystemMessages();
+            var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
-            return View(SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs));
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            return View(stripeAccount);
         }
 
         [HttpPost]
@@ -583,12 +379,27 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Account Numbers must match", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-            {
                 stripeAccount.SaveAndSendBankInfoToStripe(routingnumber1, accountnumber1, msgs);
-            }
+
+            if (msgs.HasNoErrors() && Request["isnew"] == "1")
+                return RedirectToAction("PaymentsDone");
 
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            return View(stripeAccount);
+        }
+
+        [HttpGet]
+        public ActionResult PaymentsDone(string id)
+        {
+            var msgs = new SystemMessages();
+            var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
+
+            ViewBag.HasActivities = SessionVariables.CurrentAccount.HasActivities(msgs);
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Messages = msgs;
+            ViewBag.IsFullScreen = GetIsFullScreen();
             return View(stripeAccount);
         }
 
@@ -649,71 +460,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Features = a.GetAccountPackageFeatures();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(a);
-        }
-
-        public ActionResult OAuthStripe()
-        {
-            var msgs = new SystemMessages();
-
-            if (Request["error"].IsEmpty())
-            {
-                try
-                {
-                    string scope = Request["scope"];
-                    string code = Request["code"];
-                    string state = Request["state"];
-
-                    RestClient rc = new RestClient("https://connect.stripe.com/oauth/token");
-                    rc.RequestMethod = RestClientRequestMethod.POST;
-                    rc.Parameters.Add("client_secret", AfterSchoolLibrary.Billing.StripeHelper.SecretKey);
-                    rc.Parameters.Add("code", code);
-                    rc.Parameters.Add("grant_type", "authorization_code");
-                    rc.Parameters.Add("client_id", AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId);
-                    rc.ContentType = RestClientContentTypeEnum.URLEncoded;
-                    string responseFromServer = rc.DoRequest();
-
-                    dynamic results = responseFromServer.FromJSON();
-
-                    string token_type = results["token_type"];
-                    string stripe_publishable_key = results["stripe_publishable_key"];
-                    bool livemode = results["livemode"];
-                    string stripe_user_id = results["stripe_user_id"];
-                    string refresh_token = results["refresh_token"];
-                    string access_token = results["access_token"];
-                    scope = results["scope"];
-
-                    SessionVariables.CurrentAccount.StripePublishableKey = stripe_publishable_key;
-                    SessionVariables.CurrentAccount.StripeAccessToken = access_token;
-                    SessionVariables.CurrentAccount.StripeRefreshToken = refresh_token;
-                    SessionVariables.CurrentAccount.StripeUserId = stripe_user_id;
-                    msgs.AddRange(SessionVariables.CurrentAccount.Save());
-
-                    if(msgs.HasNoErrors())
-                    {
-                        msgs.Add("Your account has been connected to Stripe", MessageType.Success);
-                    }
-                    else
-                    {
-                        SessionVariables.CurrentAccount.StripePublishableKey = "";
-                        SessionVariables.CurrentAccount.StripeAccessToken = "";
-                        SessionVariables.CurrentAccount.StripeRefreshToken = "";
-                        SessionVariables.CurrentAccount.StripeUserId = "";
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    msgs.Add("An error occurred while connecting your Stripe account.", MessageType.Error, ex);
-                }
-            }
-            else
-            {
-                msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
-            }
-
-            ViewBag.Messages = msgs;
-
-            return View("Payments", SessionVariables.CurrentAccount);
         }
 
         [HttpGet]
@@ -1054,5 +800,365 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.QuestionGroup = questionGroup;
             return View(form);
         }
+
+
+        //[HttpGet]
+        //public ActionResult Style()
+        //{
+        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
+        //    ViewBag.Messages = new SystemMessages();
+        //    ViewBag.LandingPage = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.LandingPageText);
+        //    ViewBag.RegThankYou = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail);
+        //    return View(SessionVariables.CurrentAccount);
+        //}
+
+        //[ValidateInput(false)]
+        //[HttpPost]
+        //public ActionResult Style(string id, string logourl, string landingpagetext, string regthankyoutext)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var a = SessionVariables.CurrentAccount;
+
+        //    a.LogoUrl = logourl;
+
+        //    var landingPage = a.GetAccountProperty(AccountPropertyType.LandingPageText);
+        //    var thankyou = a.GetAccountProperty(AccountPropertyType.RegistrationThankYouEmail);
+
+        //    if (landingPage.IsEmpty())
+        //    {
+        //        landingPage = new AccountProperty() { Value = landingpagetext };
+        //        landingPage.AccountPropertyTypeId = AccountPropertyType.LandingPageText;
+        //        landingPage.CreateDate = DateTime.UtcNow;
+        //        landingPage.CreatedBy = SessionVariables.LoggedInUser.ID;
+        //        landingPage.AccountId = a.ID;
+        //    }
+        //    else
+        //    {
+        //        landingPage.Value = landingpagetext;
+        //    }
+
+        //    if (thankyou.IsEmpty())
+        //    {
+        //        thankyou = new AccountProperty() { Value = regthankyoutext };
+        //        thankyou.AccountPropertyTypeId = AccountPropertyType.RegistrationThankYouEmail;
+        //        thankyou.CreateDate = DateTime.UtcNow;
+        //        thankyou.CreatedBy = SessionVariables.LoggedInUser.ID;
+        //        thankyou.AccountId = a.ID;
+        //    }
+        //    else
+        //    {
+        //        thankyou.Value = regthankyoutext;
+        //    }
+
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        Database.ExecuteTransaction(
+        //            action: (SystemMessages amsgs, DatabaseConnection adc) => {
+        //                a.LastModifiedDate = DateTime.UtcNow;
+        //                a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+        //                amsgs.AddRange(a.Save(adc));
+
+        //                if (amsgs.HasNoErrors())
+        //                {
+        //                    landingPage.LastModifiedDate = DateTime.UtcNow;
+        //                    landingPage.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+        //                    amsgs.AddRange(landingPage.Save(adc));
+        //                }
+
+        //                if (amsgs.HasNoErrors())
+        //                {
+        //                    thankyou.LastModifiedDate = DateTime.UtcNow;
+        //                    thankyou.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+        //                    amsgs.AddRange(thankyou.Save(adc));
+        //                }
+        //            },
+        //            onSuccess: (SystemMessages smsgs) => {
+        //                msgs.AddRange(smsgs);
+        //                msgs.Add("Saved Successfully", MessageType.Success);
+        //            },
+        //            onFailure: (SystemMessages fmsgs) => {
+        //                msgs.AddRange(fmsgs);
+        //            }
+        //        );
+
+        //    }
+
+        //    ViewBag.Messages = msgs;
+        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
+        //    ViewBag.LandingPage = landingPage;
+        //    ViewBag.RegThankYou = thankyou;
+        //    return View(a);
+        //}
+
+        //[HttpGet]
+        //public ActionResult Integrations()
+        //{
+        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
+        //    ViewBag.Messages = new SystemMessages();
+        //    ViewBag.FacebookAdPixel = SessionVariables.CurrentAccount.GetAccountProperty(AccountPropertyType.FacebookAdPixel);
+        //    return View(SessionVariables.CurrentAccount);
+        //}
+
+        //[ValidateInput(false)]
+        //[HttpPost]
+        //public ActionResult Integrations(string id, string facebookadpixelscript)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var a = SessionVariables.CurrentAccount;
+
+        //    var facebookAdPixel = a.GetAccountProperty(AccountPropertyType.FacebookAdPixel);
+
+        //    if (facebookAdPixel.IsEmpty())
+        //    {
+        //        facebookAdPixel = new AccountProperty() { Value = facebookadpixelscript };
+        //        facebookAdPixel.AccountPropertyTypeId = AccountPropertyType.FacebookAdPixel;
+        //        facebookAdPixel.CreateDate = DateTime.UtcNow;
+        //        facebookAdPixel.CreatedBy = SessionVariables.LoggedInUser.ID;
+        //        facebookAdPixel.AccountId = a.ID;
+        //    }
+        //    else
+        //    {
+        //        facebookAdPixel.Value = facebookadpixelscript;
+        //    }
+
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        Database.ExecuteTransaction(
+        //            action: (SystemMessages amsgs, DatabaseConnection adc) => {
+
+        //                a.LastModifiedDate = DateTime.UtcNow;
+        //                a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+        //                amsgs.AddRange(a.Save(adc));
+
+        //                if (amsgs.HasNoErrors())
+        //                {
+        //                    facebookAdPixel.LastModifiedDate = DateTime.UtcNow;
+        //                    facebookAdPixel.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+        //                    amsgs.AddRange(facebookAdPixel.Save(adc));
+        //                }
+        //            },
+        //            onSuccess: (SystemMessages smsgs) => {
+        //                msgs.AddRange(smsgs);
+        //                msgs.Add("Saved Successfully", MessageType.Success);
+        //            },
+        //            onFailure: (SystemMessages fmsgs) => {
+        //                msgs.AddRange(fmsgs);
+        //            }
+        //        );
+
+        //    }
+
+        //    ViewBag.Messages = msgs;
+        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
+        //    ViewBag.FacebookAdPixel = facebookAdPixel;
+        //    return View(a);
+        //}
+
+        //[HttpGet]
+        //public ActionResult Detail()
+        //{
+        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
+        //    ViewBag.Messages = new SystemMessages();
+        //    return View(SessionVariables.CurrentAccount);
+        //}
+
+        //[HttpGet]
+        //public ActionResult Billing()
+        //{
+        //    Account a = SessionVariables.CurrentAccount;
+        //    ViewBag.BillingHistory = a.GetStripeBillingHistory();
+        //    ViewBag.RefundHistory = a.GetStripeRefundHistory();
+        //    // ViewBag.Cards = a.GetStripeCards();
+        //    ViewBag.Messages = new SystemMessages();
+        //    return View(a);
+        //}
+
+        //[HttpGet]
+        //public ActionResult NewBilling(string id)
+        //{
+        //    var msgs = new SystemMessages();
+
+        //    if (SessionVariables.AccountPackage.IsEmpty())
+        //    {
+        //        var accountPackages = SessionVariables.CurrentAccount.GetAccountPackages(msgs).Where(ap => ap.IsActive);
+
+        //        if (!accountPackages.Any())
+        //        {
+        //            var defaultPackage = Package.Load(msgs: msgs).First();
+        //            SessionVariables.AccountPackage = SessionVariables.CurrentAccount.AddPackage(defaultPackage.ID.Value, BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
+        //        }
+        //        else
+        //        {
+        //            SessionVariables.AccountPackage = accountPackages.Where(ap => ap.IsActive).First();
+        //        }
+
+        //        return LoginRedirect();
+        //    }
+
+        //    var package = id.IsGuid() ? Package.LoadByUid(id.ToGuid()) : SessionVariables.AccountPackage?.ToPackage();
+
+        //    ViewBag.Package = package;
+        //    ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
+        //    ViewBag.Messages = new SystemMessages();
+        //    return View(SessionVariables.CurrentAccount);
+        //}
+
+        //[HttpPost]
+        //public ActionResult NewPayment(string selectedpackage, string stripetoken)
+        //{
+        //    var msgs = new SystemMessages();
+
+        //    Package package = null;
+        //    var a = SessionVariables.CurrentAccount;
+        //    var isFromTrialAccount = SessionVariables.AccountPackage?.IsDuringTrial ?? false;
+
+        //    Database.ExecuteTransaction(
+        //        action: (SystemMessages amsgs, DatabaseConnection adc) => {
+
+        //            var selectedPackageArr = selectedpackage.Split('_');
+        //            var billingPeriod = (BillingPeriodType)selectedPackageArr[0].ToInteger();
+
+        //            package = Package.LoadByUid(selectedPackageArr[1].ToGuid(), amsgs, adc);
+
+        //            // amsgs.AddRange(a.AddCreditCard(stripetoken, true, SessionVariables.LoggedInUser, adc));
+
+        //            if (amsgs.HasNoErrors())
+        //                a.AddPackage(package.ID.Value, billingPeriod, SessionVariables.LoggedInUser, amsgs, adc);
+
+        //            SessionVariables.AccountPackage = a.GetActiveAccountPackage(amsgs, adc);
+        //        },
+        //        onSuccess: (SystemMessages smsgs) => {
+        //            msgs.AddRange(smsgs);
+
+        //            msgs.Clear(MessageType.Success);
+        //            msgs.Add(string.Format("The '{0} Package' has been added to your account", package.Name), MessageType.Success);
+
+        //            if (isFromTrialAccount)
+        //                SessionVariables.CurrentAccount.SendWelcomeEmailPurchase();
+        //        },
+        //        onFailure: (SystemMessages fmsgs) => {
+        //            msgs.AddRange(fmsgs);
+        //        }
+        //    );
+
+        //    ViewBag.Messages = msgs;
+
+        //    if (msgs.HasNoErrors())
+        //    {
+        //        ViewBag.BillingHistory = a.GetStripeBillingHistory();
+        //        ViewBag.RefundHistory = a.GetStripeRefundHistory();
+        //        // ViewBag.Cards = a.GetStripeCards();
+        //        return View("Billing", a);
+        //    }
+        //    else
+        //    {
+        //        ViewBag.Package = package;
+        //        ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
+        //        return View("NewBilling", a);
+        //    }
+        //}
+
+        //[HttpPost]
+        //public ActionResult AddCard(string id, string stripetoken, string makeprimary)
+        //{
+        //    SystemMessages msgs = new SystemMessages();
+
+        //    var a = SessionVariables.CurrentAccount;
+        //    //msgs.AddRange(a.AddCreditCard(stripetoken, !makeprimary.IsEmpty(), SessionVariables.LoggedInUser));
+        //    //ViewBag.Cards = a.GetStripeCards();
+        //    ViewBag.Messages = msgs;
+        //    return View("Billing", a);
+        //}
+
+        //[HttpGet]
+        //public ActionResult Packages()
+        //{
+        //    Account a = SessionVariables.CurrentAccount;
+        //    ViewBag.Packages = Package.LoadByIsActive(true);
+        //    ViewBag.AccountPackage = a.GetActiveAccountPackage();
+        //    ViewBag.Messages = new SystemMessages();
+        //    return View(a);
+        //}
+
+        //[HttpGet]
+        //public ActionResult SelectPackage(string id)
+        //{
+        //    SystemMessages msgs = new SystemMessages();
+
+        //    Account a = SessionVariables.CurrentAccount;
+        //    a.AddPackage(id.ToInteger(), BillingPeriodType.Month, SessionVariables.LoggedInUser, msgs);
+
+        //    SessionVariables.AccountPackage = a.GetActiveAccountPackage();
+
+        //    ViewBag.Packages = Package.LoadByIsActive(true);
+        //    ViewBag.AccountPackage = SessionVariables.AccountPackage;
+        //    ViewBag.Messages = msgs;
+        //    return View("Packages", a);
+        //}
+
+        //public ActionResult OAuthStripe()
+        //{
+        //    var msgs = new SystemMessages();
+
+        //    if (Request["error"].IsEmpty())
+        //    {
+        //        try
+        //        {
+        //            string scope = Request["scope"];
+        //            string code = Request["code"];
+        //            string state = Request["state"];
+
+        //            RestClient rc = new RestClient("https://connect.stripe.com/oauth/token");
+        //            rc.RequestMethod = RestClientRequestMethod.POST;
+        //            rc.Parameters.Add("client_secret", AfterSchoolLibrary.Billing.StripeHelper.SecretKey);
+        //            rc.Parameters.Add("code", code);
+        //            rc.Parameters.Add("grant_type", "authorization_code");
+        //            rc.Parameters.Add("client_id", AfterSchoolLibrary.Billing.StripeHelper.PlatformClientId);
+        //            rc.ContentType = RestClientContentTypeEnum.URLEncoded;
+        //            string responseFromServer = rc.DoRequest();
+
+        //            dynamic results = responseFromServer.FromJSON();
+
+        //            string token_type = results["token_type"];
+        //            string stripe_publishable_key = results["stripe_publishable_key"];
+        //            bool livemode = results["livemode"];
+        //            string stripe_user_id = results["stripe_user_id"];
+        //            string refresh_token = results["refresh_token"];
+        //            string access_token = results["access_token"];
+        //            scope = results["scope"];
+
+        //            SessionVariables.CurrentAccount.StripePublishableKey = stripe_publishable_key;
+        //            SessionVariables.CurrentAccount.StripeAccessToken = access_token;
+        //            SessionVariables.CurrentAccount.StripeRefreshToken = refresh_token;
+        //            SessionVariables.CurrentAccount.StripeUserId = stripe_user_id;
+        //            msgs.AddRange(SessionVariables.CurrentAccount.Save());
+
+        //            if(msgs.HasNoErrors())
+        //            {
+        //                msgs.Add("Your account has been connected to Stripe", MessageType.Success);
+        //            }
+        //            else
+        //            {
+        //                SessionVariables.CurrentAccount.StripePublishableKey = "";
+        //                SessionVariables.CurrentAccount.StripeAccessToken = "";
+        //                SessionVariables.CurrentAccount.StripeRefreshToken = "";
+        //                SessionVariables.CurrentAccount.StripeUserId = "";
+        //            }
+
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            msgs.Add("An error occurred while connecting your Stripe account.", MessageType.Error, ex);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        msgs.Add("It appears you have canceled your request to connect your Stripe account.", MessageType.Notice);
+        //    }
+
+        //    ViewBag.Messages = msgs;
+
+        //    return View("Payments", SessionVariables.CurrentAccount);
+        //}
     }
 }

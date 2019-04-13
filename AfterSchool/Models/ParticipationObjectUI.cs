@@ -25,12 +25,25 @@ namespace AfterSchool.Models
             return "No Location Available";
         }
 
-        public static string PrintTuitionFee(ParticipationObject participationObject)
+        public static string PrintTuitionFee(ParticipationObject participationObject, bool displayCheckoutPrice)
         {
             if (participationObject.Cost.HasValue)
+            {
+                if (displayCheckoutPrice)
+                    return participationObject.GetCheckoutTotalCost().ToCurrency();
+
                 return participationObject.Cost.ToCurrency();
+            }
 
             return "Free";
+        }
+
+        public static string PrintPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
+        {
+            if (displayCheckoutPrice)
+                return AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(plan.CostPerPeriod.Value, ownerAccount).ToCurrency();
+
+            return plan.CostPerPeriod.ToCurrency();
         }
 
         public static List<string> PrintSubscriptions(ParticipationObject participationObject)
@@ -78,9 +91,9 @@ namespace AfterSchool.Models
                 var account = participationObject.OwnerAccount;
 
                 if (participationObject.RegistrationPeriod.WillOpen(account))
-                    return $"Registration will open {participationObject.RegistrationPeriod.StartDateTime.ToLongDateTimeString()}";
+                    return $"<span style=\"display:inline-block;\">Registration will open</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.StartDateTime.Value.ToLongDateString()} {participationObject.RegistrationPeriod.StartDateTime.Value.ToShortTimeString()}</span>";
                 else if (participationObject.RegistrationPeriod.IsOpen(account))
-                    return $"Registration will close {participationObject.RegistrationPeriod.EndDateTime.ToLongDateTimeString()}";
+                    return $"<span style=\"display:inline-block;\">Registration will close</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.EndDateTime.Value.ToLongDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}</span>";
             }
             return "Registration is closed";
         }

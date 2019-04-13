@@ -38,6 +38,7 @@ namespace AfterSchoolLibrary.Models
 		public string SupportPhone { get { return (string)MDV["SupportPhone"].Value; } set { MDV["SupportPhone"].Value = value; } }
 		public string SupportEmail { get { return (string)MDV["SupportEmail"].Value; } set { MDV["SupportEmail"].Value = value; } }
 		public string BusinessUrl { get { return (string)MDV["BusinessUrl"].Value; } set { MDV["BusinessUrl"].Value = value; } }
+		public string ProductDescription { get { return (string)MDV["ProductDescription"].Value; } set { MDV["ProductDescription"].Value = value; } }
 		public bool RequiresFullSSN { get { return (bool)MDV["RequiresFullSSN"].Value; } set { MDV["RequiresFullSSN"].Value = value; } }
 		public StripeVerificationStatus VerificationStatusId { get { return (StripeVerificationStatus)MDV["VerificationStatusId"].Value; } set { MDV["VerificationStatusId"].Value = value; } }
 		public bool ChargesEnabled { get { return (bool)MDV["ChargesEnabled"].Value; } set { MDV["ChargesEnabled"].Value = value; } }
@@ -95,6 +96,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "SupportPhone", System.Data.SqlDbType.NVarChar , "50");
 				_dp.Add(className, "SupportEmail", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "BusinessUrl", System.Data.SqlDbType.NVarChar , "100");
+				_dp.Add(className, "ProductDescription", System.Data.SqlDbType.NVarChar , "400");
 				_dp.Add(className, "RequiresFullSSN", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "VerificationStatusId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ChargesEnabled", System.Data.SqlDbType.Bit);
@@ -259,6 +261,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["BusinessUrl"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ProductDescription"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();

@@ -218,10 +218,11 @@ namespace AfterSchoolLibrary.Helpers
         
         public static string AppNameEnrollHQ { get; set; }
         public static string AppNameAfterSchoolHQ { get; set;  }
-        public static string AppName(bool isAfterSchool)
+        public static string AppName(bool isAfterSchool = true)
         {
             if (isAfterSchool)
                 return AppNameAfterSchoolHQ;
+
             return AppNameEnrollHQ;
         }
 
@@ -289,7 +290,11 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(AddManageLeaguesFeatureType(adc));
+
+                    amsgs.AddRange(UpdateAccountPaidByTypes(adc));
+                    amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
+
+                    // amsgs.AddRange(AddManageLeaguesFeatureType(adc));
 
                     // amsgs.AddRange(UpdateActivityPaymentWithTransactionIds(adc));
                     // amsgs.AddRange(UpdateSeatIndexes(adc));
@@ -347,6 +352,50 @@ namespace AfterSchoolLibrary.Helpers
 
             return msgs;
         }        
+
+        public static SystemMessages UpdateAccountPaidByTypes(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            msgs.AddRange(Account.Update(
+                updateValues: new Hashtable() { { "ConvenienceFeesPaidBy", (int)FeesPaidByType.Parent } },
+                criterias: new Hashtable() { { "ConvenienceFeesPaidBy", 0 } },
+                ObjectMap: Account.ObjectMap,
+                dc: dc));
+
+            msgs.AddRange(Account.Update(
+                updateValues: new Hashtable() { { "CreditCardFeesPaidBy", (int)FeesPaidByType.Parent } },
+                criterias: new Hashtable() { { "CreditCardFeesPaidBy", 0 } },
+                ObjectMap: Account.ObjectMap,
+                dc: dc));
+
+            return msgs;
+        }
+
+        public static SystemMessages AddUseStripeConnectedAccountFeatureType(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var aps = AccountPackage.Load(msgs: msgs, dc: dc);
+
+            aps.ForEach(ap => {
+                var apf = ap.GetFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+                if (apf.IsEmpty())
+                {
+                    msgs.AddRange(new AccountPackageFeature()
+                    {
+                        AccountPackageId = ap.ID,
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = 0,
+                        FeatureTypeId = FeatureType.UseStripeConnectedAccount,
+                        LastModifiedBy = 0,
+                        LastModifiedDate = DateTime.UtcNow,
+                        Max = 1
+                    }.Save(dc));
+                }
+            });
+
+            return msgs;
+        }
 
         public static SystemMessages AddManageLeaguesFeatureType(DatabaseConnection dc = null)
         {
@@ -959,26 +1008,26 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages UpdateAccountProperties(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var accounts = Account.Load(dc: dc);
-            foreach (var account in accounts)
-            {
-                var properties = AccountProperty.LoadByAccountId(account.ID.Value, dc: dc);
-                if (properties.Count == 0 && account.LandingPageText.IsNotBlank())
-                {
-                    var property = new AccountProperty();
-                    property.AccountId = account.ID;
-                    property.AccountPropertyTypeId = AccountPropertyType.LandingPageText;
-                    property.Value = account.LandingPageText;
-                    property.CreateDate = property.LastModifiedDate = DateTime.UtcNow;
-                    property.CreatedBy = property.LastModifiedBy = 0;
-                    msgs.AddRange(property.Save(dc: dc));
-                }
-            }
-            return msgs;
-        }
+        //public static SystemMessages UpdateAccountProperties(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var accounts = Account.Load(dc: dc);
+        //    foreach (var account in accounts)
+        //    {
+        //        var properties = AccountProperty.LoadByAccountId(account.ID.Value, dc: dc);
+        //        if (properties.Count == 0 && account.LandingPageText.IsNotBlank())
+        //        {
+        //            var property = new AccountProperty();
+        //            property.AccountId = account.ID;
+        //            property.AccountPropertyTypeId = AccountPropertyType.LandingPageText;
+        //            property.Value = account.LandingPageText;
+        //            property.CreateDate = property.LastModifiedDate = DateTime.UtcNow;
+        //            property.CreatedBy = property.LastModifiedBy = 0;
+        //            msgs.AddRange(property.Save(dc: dc));
+        //        }
+        //    }
+        //    return msgs;
+        //}
 
         public static SystemMessages UpdateRegistrationModes(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {

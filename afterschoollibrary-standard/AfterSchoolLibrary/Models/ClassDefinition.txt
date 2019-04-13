@@ -47,33 +47,27 @@ property:
 type: Class
 name: Activity
 description: The after school activity/team that a registrant/student is registering for
-inherits: BaseEventWithAddress
+inherits: BasicLookUpObject
 property: SeatsAvailable, int?, Int, required
-property: ProgramId, int?, Int
+property: ProgramId, int?, Int, , Refers to the related parent program
 property: AccountId, int?, Int, required
+property: ProviderAccountId, int?, Int, , the actual provider account who financially is responsible
 property: AgeStart, int?, Int
 property: AgeEnd, int?, Int
 property: GradeLevelStart, int?, Int
 property: GradeLevelEnd, int?, Int
 property: CostPerRegistrant, decimal?, Money
 property: CostDescription, string, NVarChar "1000"
--property: AllowPreRegistration, bool, Bit
 property: Uid, Guid, UniqueIdentifier, required
 property: Details, string, NVarChar "4000"
 property: LocationDetails, string, NVarChar "4000"
 property: ScheduleDetails, string, NVarChar "4000"
--property: RegistrationTimeZone, string, NVarChar "30"
 property: InstructorId, int?, Int
 property: ContactName, string, NVarChar "50"
 property: ContactPhone, string, NVarChar "50"
 property: ContactEmail, string, NVarChar "100"
 property: WaitingListSeats, int?, Int
--property: AcceptPayPal, bool, Bit
--property: AcceptCreditCard, bool, Bit
--property: ParentActivityId, int?, Int
 property: AllowToPayLater, bool, Bit
--property: AllowToRequestDiscount, bool, Bit
--property: AllowOrganizationRegistration, bool, Bit
 property: GenderRestriction, GenderRestrictionType, Int
 property: RegistrationModeId, RegistrationMode, Int
 property: LocationId, int?, Int
@@ -82,18 +76,26 @@ property: IsPublished, bool, Bit
 property: IsArchived, bool, Bit
 property: ActivityGroupId, int?, Int
 property: ActivityScheduleId, int?, Int
--property: ScheduleRequiresAllDays, bool, Bit
 property: UniqueName, string, NVarChar "100"
--property: IsTemplate, bool, Bit
-property: ActivitySectionId, int?, Int
+property: ActivitySectionId, int?, Int, , For tracking which section or grouping a team is in
 property: ActivityTypeId, ActivityType, Int, required
-property: DateSubmittedToActivityGroup, DateTime?, DateTime
-property: AccountActivityGroupId, int?, Int
+property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track when a team has been submitted to a league
+property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
+property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
+-property: AllowPreRegistration, bool, Bit
+-property: RegistrationTimeZone, string, NVarChar "30"
+-property: AcceptPayPal, bool, Bit
+-property: AcceptCreditCard, bool, Bit
+-property: ParentActivityId, int?, Int
+-property: AllowToRequestDiscount, bool, Bit
+-property: AllowOrganizationRegistration, bool, Bit
+-property: ScheduleRequiresAllDays, bool, Bit
+-property: IsTemplate, bool, Bit
 join: Account.ID, AccountId, InnerJoin
 join: ActivityGroup.ID, ActivityGroupId, LeftOuterJoin
 joinproperty: Account.Name, string, NVarChar
 -joinproperty: Account.PayPalEmailAddress, string, NVarChar
-joinproperty: Account.StripePublishableKey, string, NVarChar
+-joinproperty: Account.StripePublishableKey, string, NVarChar
 joinproperty: Account.TimeZone, string, NVarChar
 joinproperty: ActivityGroup.IsArchived, bool?, Bit
 joinproperty: ActivityGroup.Name, string, NVarChar
@@ -106,6 +108,7 @@ loadmethod: Uid
 loadmethod: ActivityGroupId, List<>
 loadmethod: AccountActivityGroupId, List<>
 loadmethod: ActivityScheduleId, List<>
+loadmethod: ProviderAccountId, List<>
 loadmethod: UniqueName|AccountId
 [end]
 
@@ -309,9 +312,13 @@ name: Account
 serializable: true
 description: The main organization and account holder in the system
 inherits: BaseCompany
-property: StripeAccessToken, string, NVarChar "100"
-property: StripePublishableKey, string, NVarChar "100"
-property: StripeSecretKey, string, NVarChar "100"
+-property: StripeAccessToken, string, NVarChar "100"
+-property: StripePublishableKey, string, NVarChar "100"
+-property: StripeSecretKey, string, NVarChar "100"
+-property: PayPalEmailAddress, string, NVarChar "100"
+-property: StripeRefreshToken, string, NVarChar "100"
+-property: StripeDefaultCardId, string, NVarChar "50"
+-property: LandingPageText, string, NVarChar "4000"
 property: Uid, Guid, UniqueIdentifier, required
 property: UniqueName, string, NVarChar "50"
 property: OwnerId, int?, Int, , WebUser id that owns/created the account
@@ -319,19 +326,17 @@ property: IsAdminAccount, bool, Bit
 property: IsActive, bool, Bit
 property: IsAfterSchool, bool, Bit
 property: StripeCustomerId, string, NVarChar "50"
-property: StripeDefaultCardId, string, NVarChar "50"
 property: DefaultFormId, int?, Int
--property: PayPalEmailAddress, string, NVarChar "100"
-property: StripeRefreshToken, string, NVarChar "100"
 property: StripeUserId, string, NVarChar "100"
 property: TimeZone, string, NVarChar "30"
 property: LogoUrl, string, NVarChar "400"
-property: LandingPageText, string, NVarChar "4000"
 property: AccountTypeId, AccountType, Int
 property: DefaultLocationId, int?, Int
 property: MinGradeLevelOffered, int?, Int
 property: MaxGradeLevelOffered, int?, Int
 property: InviteCodeToShare, Guid, UniqueIdentifier
+property: CreditCardFeesPaidBy, FeesPaidByType, Int
+property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
@@ -341,6 +346,17 @@ loadmethod: AccountTypeId, List<>
 loadmethod: StripeUserId
 loadmethod: StripeCustomerId
 loadmethod: InviteCodeToShare
+[end]
+
+[begin]
+type: Class
+name: CheckPaymentAccount
+description: Where legal details and other info is stored for the account holder, specifically for sending checks
+inherits: BaseLocation
+property: AccountId, int?, Int, required
+property: IsVerified, bool, Bit, required, If the address is a real US address
+property: LegalEntityTypeId, LegalEntityType, Int, required
+loadmethod: AccountId
 [end]
 
 [begin]
@@ -368,6 +384,7 @@ property: BusinessPhone, string, NVarChar "20"
 property: SupportPhone, string, NVarChar "50"
 property: SupportEmail, string, NVarChar "100"
 property: BusinessUrl, string, NVarChar "100"
+property: ProductDescription, string, NVarChar "400"
 property: RequiresFullSSN, bool, Bit
 property: VerificationStatusId, StripeVerificationStatus, Int
 property: ChargesEnabled, bool, Bit
@@ -474,6 +491,7 @@ loadmethod: AccountId|WebUserId
 loadmethod: WebUserId|IsDefault
 loadmethod: WebUserId|IsActive, List<>
 loadmethod: AccountId|IsActive, List<>
+loadmethod: AccountId|UserTypeId, List<>
 [end]
 
 [begin]
@@ -1316,12 +1334,16 @@ property: PaymentTypeId, PaymentType, Int, required
 property: Description, string, NVarChar "400", required
 property: Uid, Guid, UniqueIdentifier
 property: PurchaseId, int?, Int
-property: PlatformPercentFee, decimal?, Decimal "10,2"
-property: PlatformFlatFee, decimal?, Decimal "10,2"
+property: PaymentTypeFeeCharged, decimal?, Decimal "10,2", , Stores the fee amount for a given payment type - such as ACH vs Stripe
+property: ConvenienceFeeCharged, decimal?, Decimal "10,2"
+property: PaymentTypeFeePayerAccountId, int?, Int, , which account is paying the payment type (stripe or ach) fee
+property: ConvenienceFeePayerAccountId, int?, Int, , which account is paying the convenience fee
 property: TransactionTypeId, TransactionType, Int, required
 property: StripeChargeOrRefundId, string, NVarChar "50"
 property: PaymentSourceTypeId, PaymentSourceType, Int
 property: OriginalTransactionId, int?, Int
+property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
+property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
 loadmethod: BillerAccountId, List<>
 loadmethod: PayerAccountId, List<>
 loadmethod: Uid
@@ -1329,6 +1351,24 @@ loadmethod: BillerAccountId|TransactionTypeId, List<>
 loadmethod: PayerAccountId|TransactionTypeId, List<>
 loadmethod: StripeChargeOrRefundId
 loadmethod: OriginalTransactionId, List<>
+[end]
+
+[begin]
+type: Class
+name: Payout
+description: Used to transfer money from the AHQ Platform to the provider
+inherits: BasicObjectWithModified
+property: AccountId, int?, Int, required
+property: Uid, Guid, UniqueIdentifier
+property: Amount, decimal?, Money, required
+property: PayoutStatusId, PayoutStatus, Int, required
+property: PaymentTypeId, PaymentType, Int, required
+property: DateRequested, DateTime?, DateTime, required
+property: RequestedBy, int?, Int, required
+loadmethod: AccountId, List<>
+loadmethod: AccountId|PayoutStatusId, List<>
+loadmethod: PayoutStatusId, List<>
+loadmethod: Uid
 [end]
 
 [begin]
@@ -1483,7 +1523,7 @@ values: NotSet, RegistrantFirstName, RegistrantLastName, RegistrantEmail, Regist
 [begin]
 type: Enum
 name: UserType
-values: NotSet, SuperAdmin, Owner, Administrator, Student, Instructor, Staff, Parent, ProgramDirector
+values: NotSet, SuperAdmin, Owner, Administrator, Student, Instructor, Staff, Parent, ProgramDirector, Treasurer
 [end]
 
 [begin]
@@ -1507,7 +1547,7 @@ values: NotSet, Individual, Organization
 [begin]
 type: Enum
 name: FeatureType
-values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageLeagues
+values: NotSet, Attendance, AcceptPayments, Messaging, CustomUrl, TeamAccounts, WaitingList, ManageForms, ManageLocations, ManageActivityGroups, Activities, Participants, AllowApplications, Lottery, TrialDays, ManageContacts, ViewInsights, PaymentsPercentageFee, PaymentsPercentageFlatFee, ManageLeagues, UseStripeConnectedAccount
 [end]
 
 [begin]
@@ -1562,6 +1602,12 @@ values: NotSet, Past, Current, Future
 type: Enum
 name: HostPermissionType
 values: NotSet, ApproveOnly, Edit, Admin
+[end]
+
+[begin]
+type: Enum
+name: PayoutStatus
+values: NotSet, Requested, Approved, Denied, InProgress, Error, Completed
 [end]
 
 [begin]
@@ -1670,4 +1716,16 @@ values: NotSet, Subscription, PaymentPlan
 type: Enum
 name: PermissionType
 values: NotSet, AccountingView, AccountingEdit, AccountingManage, TeamView, TeamEdit, TeamManage, AccountSettingsView, AccountSettingsEdit, AccountSettingsManage, ContactsView, ContactsEdit, ContactsManage, FormsView, FormsEdit, FormsManage, StudentsView, StudentsEdit, StudentsManage, ActivitiesView, ActivitiesEdit, ActivitiesManage, SessionsView, SessionsEdit, SessionsManage, LeaguesView, LeaguesEdit, LeaguesManage
+[end]
+
+[begin]
+type: Enum
+name: FeesPaidByType
+values: NotSet, Account, Parent
+[end]
+
+[begin]
+type: Enum
+name: ActivityLeaderType
+values: NotSet, StaffMember, Student, ExternalProvider
 [end]

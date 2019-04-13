@@ -35,7 +35,7 @@ namespace AfterSchoolLibraryTests.Factories
             {
                 AccountPackageId = accountPackage.ID,
                 FeatureTypeId = featureType,
-                Max = value
+                Max = value               
             };
             msgs.AddRange(obj.Save(dc: dc));
             return obj;

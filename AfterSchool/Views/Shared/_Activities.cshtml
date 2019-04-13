@@ -85,17 +85,17 @@ else
         <p></p>
     }
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="pull-right">
-                <a href="@currentListUrl" class="@currentClass">Current</a> |
-                @if (hasArchivedActivities)
-                {
-                    <a href="@archivedListUrl" class="@archiveClass">Archived</a>
-                }
+    if (hasArchivedActivities)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="pull-right">
+                    <a href="@currentListUrl" class="@currentClass">Current</a> |                
+                    <a href="@archivedListUrl" class="@archiveClass">Archived</a>                
+                </div>
             </div>
         </div>
-    </div>
+    }
 
     <div class="table-responsive">
         <table class="table table-hover">
@@ -169,6 +169,11 @@ else
                                                 onclick="editSchedule('@UI.JavascriptSafeString(@activity.Name)', '@activity.Uid', @activity.ActivityScheduleId)">
                                             <i class="s7-edit"></i> Schedule
                                         </button>
+                                    }
+
+                                    @if (group.IsEmpty())
+                                    {
+                                        <a href="@Url.Action("publishdetail", "activity", new { id = activity.Uid })" class="btn btn-default btn-sm">Publish...</a>
                                     }
 
                                     <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"

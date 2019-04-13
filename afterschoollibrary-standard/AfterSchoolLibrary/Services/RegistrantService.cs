@@ -125,67 +125,69 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
+        private static (Stripe.Customer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, bool useStripeConnectedAccount)
+        {
+            // have to copy the source from the platform to be able to move it to the stripe connected account
+            // unless you're not using connected accounts for subscriptions
+            var msgs = new SystemMessages();
+            var billingAccount = checkoutObject.BillingAccount;
+            var purchasingAccount = checkoutObject.PayingAccount;
+            string sourceId = null;
+            Stripe.Customer customer = null;
+
+            if (!useStripeConnectedAccount)
+            {
+                customer = purchasingAccount.GetStripeCustomer(msgs);
+                sourceId = purchasingAccount.CreateStripeSourceFromToken(checkoutObject.StripeToken, customer, msgs);
+            }
+            else
+            {
+                // if running the billing through stripe connected account
+                sourceId = purchasingAccount.CopyStripeSourceToAccount(checkoutObject.BillingAccount, checkoutObject.StripeToken, msgs);
+
+                // create the customer on the connected account
+                customer = Billing.StripeHelper.CreateCustomer(
+                    description: purchasingAccount.Name,
+                    email: purchasingAccount.Email,
+                    sourceId: sourceId,
+                    stripeAccountId: billingAccount.StripeUserId,
+                    msgs: msgs);
+            }
+
+            return (customer, sourceId);
+        }
 
         public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var billingAccount = checkoutObject.BillingAccount;
-            var purchasingAccount = checkoutObject.PurchasingAccount;
+            var purchasingAccount = checkoutObject.PayingAccount;            
+            var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, useStripeConnectedAccount);
+            var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
+            var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
 
-            // have to copy the source from the platform to be able to move it to the stripe connected account
-            var copiedSourceId = purchasingAccount.CopyStripeSourceToAccount(
-                billingAccount, 
-                checkoutObject.StripeToken, 
-                msgs);
-
-            // create the customer on the connected account
-            var accountCustomer = Billing.StripeHelper.CreateCustomer(
-                description: purchasingAccount.Name,
-                email: purchasingAccount.Email,         
-                sourceId: copiedSourceId,
-                stripeAccountId: billingAccount.StripeUserId,
-                msgs: msgs);
-
-            SubscriptionPlan plan = null;
-            var applyCoupon = false;
-            var coupon = checkoutObject.Coupon;
-
-            if (subscriptionPlanType == SubscriptionPlanType.PaymentPlan)
-            {
-                plan = checkoutObject.PaymentPlan;
-                applyCoupon = coupon.ID.IsNotEmpty() && coupon.DoesApplyToTuitionFee();
-            }
-            else
-            {
-                plan = checkoutObject.SubscriptionPlan;
-                applyCoupon = coupon.ID.IsNotEmpty() && coupon.DoesApplyToSubscriptionPlan();
-            }
-
-            var stripeCouponId = applyCoupon ? coupon.StripeCouponId : null;
-
-            // create the subscription on the connected account
+            // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = Billing.StripeHelper.CreateSubscription(
-                customerId: accountCustomer.Id,
+                customerId: customer.Id,
                 planId: plan.StripePlanId,
-                sourceId: copiedSourceId,
-                platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan),
+                sourceId: sourceId,
+                platformFeePercent: useStripeConnectedAccount ? billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc) : new decimal?(),
+                stripeAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId: null,
                 trialEndDate: null,
-                stripeAccountId: billingAccount.StripeUserId,
                 stripeCouponId: stripeCouponId,
                 msgs: msgs);
 
             if (msgs.HasErrors())
                 return;
 
-            // have to have a purchase record
-            checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+            var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
 
-            checkoutObject.RegistrantSubscriptionPlan = RegistrantSubscriptionPlanService.CreateNew(
+            checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                 registrant,
-                plan,
-                startDateTime.IfEmpty(DateTime.UtcNow),
-                checkoutObject.Purchase.ID,
+                startDateTime,
+                purchase,
                 subscription.Id,
                 loggedInUser,
                 msgs,

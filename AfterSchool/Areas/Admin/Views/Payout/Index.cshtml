@@ -1,0 +1,381 @@
+﻿@model List<Payout>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var payoutCount = ((PagingModel)ViewBag.PagingModel).TotalCount;
+    var totalPayoutAmount = (decimal)ViewBag.TotalPayoutAmount;
+    var avgPayoutAmount = payoutCount == 0 ? 0 : totalPayoutAmount / payoutCount;
+    var totalPendingAmount = (decimal)ViewBag.TotalPendingAmount;
+}
+
+@{ Html.RenderPartial("AdminHeader"); }
+
+<div class="main-content">
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-note2"></i> Payouts
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@payoutCount" id="payoutCount" data-decimals="0" data-suffix="" class="value">@payoutCount</div>
+                            <div class="desc">Total Payouts</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@avgPayoutAmount" id="avgPayoutAmount" data-decimals="2" data-suffix="" class="value">@avgPayoutAmount.ToCurrency()</div>
+                            <div class="desc">Avg Payout Amt</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalPayoutAmount" id="totalPayoutAmount" data-decimals="2" data-suffix="" class="value">@totalPayoutAmount.ToCurrency()</div>
+                            <div class="desc">Total Amt</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@totalPendingAmount" id="totalPendingAmount" data-decimals="2" data-suffix="" class="value">@totalPendingAmount.ToCurrency()</div>
+                            <div class="desc">Pending Amount</div>
+                        </div>
+                        <div class="icon"><span class=""></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date"
+                            }
+                        );
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel()
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date"
+                            }
+                        );
+                    }
+                </div>
+                <div class="col-md-2">
+                    <select id="payoutstatus" class="form-control">
+                        <option value="">All</option>
+                        @foreach (var status in Enum.GetValues(typeof(PayoutStatus)).Cast<PayoutStatus>().Except(PayoutStatus.NotSet.AsList()))
+                        {
+                            var selected = "";
+
+                            if (Request["ps"] == ((int)status).ToString())
+                            {
+                                selected = "selected=\"selected\"";
+                            }
+
+                            <option value="@((int)status)" @selected>@status.ToString().SplitByUpperCase()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
+                </div>
+
+                <script>
+                    function search() {
+                        window.location.href = `@Url.Action("index", "payout")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&ps=${$('#payoutstatus').val()}`;
+                    }
+                </script>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-condensed" id="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Account</th>
+                            <th>Requested On</th>
+                            <th>Requested By</th>
+                            <th>Status</th>
+                            <th>Method</th>
+                            <th class="text-center">Amount</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var payout in Model)
+                            {
+                                var account = payout.GetAccount();
+
+                                <tr id="@payout.Uid">
+                                    <td>
+                                        @payout.Uid
+                                    </td>
+                                    <td>
+                                        @account.Name - @account.Uid
+                                    </td>
+                                    <td>
+                                        @payout.DateRequested.ToShortDateTimeString()
+                                    </td>
+                                    <td>
+                                        @payout.GetRequestor().DisplayName
+                                    </td>
+                                    <td>
+                                        @payout.PayoutStatusId.ToString().SplitByUpperCase()
+                                    </td>
+                                    <td>
+                                        @payout.PaymentTypeId.ToString().SplitByUpperCase()
+                                    </td>
+                                    <td class="text-center">
+                                        @payout.Amount.ToCurrency()
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            @if (payout.PayoutStatusId == PayoutStatus.Requested || payout.PayoutStatusId == PayoutStatus.Denied)
+                                            {
+                                                <button class="btn btn-sm btn-primary md-trigger" data-modal="modal-payout-approve" onclick="approve('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
+                                                    Approve
+                                                </button>
+
+                                                if (payout.PayoutStatusId == PayoutStatus.Requested)
+                                                {
+                                                    <button class="btn btn-sm btn-danger md-trigger" data-modal="modal-payout-deny" onclick="deny('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
+                                                        Deny
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8">There are no payouts</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    (PagingModel)ViewBag.PagingModel,
+                    new ViewDataDictionary()
+                    {
+                                { "controller", "accounting" },
+                                { "action", "index" },
+                                { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
+                    }
+                );
+            }
+        </div>
+    </div>
+</div>
+
+<div id="modal-payout-approve" class="md-modal colored-header custom-width md-effect-9">
+    <form method="post" action="@Url.Action("approve", "payout")" class="form">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Approve Payout</h3>
+            </div>
+            <div class="modal-body form">
+                <div class="form-approve">
+                    <p>Are you sure you want to <strong>approve</strong> a payout of <strong>$<span class="approve-payout-amount"></span></strong> to <strong><span class="approve-payout-account"></span></strong>?</p>
+                </div>
+                <div class="form-approve-waiting hide">
+                    <p>Approving...</p>
+                </div>
+                <div class="form-approve-done hide">
+                    <p>The request has been approved for <strong>$<span class="approve-payout-amount"></span></strong> to <strong><span class="approve-payout-account"></span></strong></p>
+                </div>
+            </div>
+            <div class="modal-footer modal-footer-approve">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="button" id="btn-approve-payout" class="btn btn-primary">Approve &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-payout-deny" class="md-modal colored-header custom-width md-effect-9">
+    <form method="post" action="@Url.Action("deny", "payout")" class="form">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Deny Payout</h3>
+            </div>
+            <div class="modal-body form">
+                <div class="form-deny">
+                    <p>Are you sure you want to <strong>deny</strong> a payout of <strong>$<span class="deny-payout-amount"></span></strong> to <strong><span class="deny-payout-account"></span></strong>?</p>
+                </div>
+                <div class="form-deny-waiting hide">
+                    <p>Denying...</p>
+                </div>
+                <div class="form-deny-done hide">
+                    <p>The requiest has been denied for <strong>$<span class="deny-payout-amount"></span></strong> to <strong><span class="deny-payout-account"></span></strong></p>
+                </div>
+            </div>
+            <div class="modal-footer modal-footer-deny">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="button" id="btn-deny-payout" class="btn btn-danger">Deny &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    var selectedPayoutId = null;
+
+    function approve(payoutId, amount, accountName) {
+        $('.approve-payout-amount').html(amount);
+        $('.approve-payout-account').html(accountName);
+        selectedPayoutId = payoutId;
+    }
+
+    function deny(payoutId, amount, accountName) {
+        $('.deny-payout-amount').html(amount);
+        $('.deny-payout-account').html(accountName);
+        selectedPayoutId = payoutId;
+    }
+
+    function showApproveWaiting() {
+        $('.form-approve').addClass('hide');
+        $('.form-approve-waiting').removeClass('hide');
+        $('.form-approve-done').addClass('hide');
+        $('.modal-footer-approve').addClass('hide');
+    }
+
+    function showApprove() {
+        $('.form-approve').removeClass('hide');
+        $('.form-approve-waiting').addClass('hide');
+        $('.form-approve-done').addClass('hide');
+        $('.modal-footer-approve').removeClass('hide');
+    }
+
+    function showApproveDone() {
+        $('.form-approve').addClass('hide');
+        $('.form-approve-waiting').addClass('hide');
+        $('.form-approve-done').removeClass('hide');
+        $('.modal-footer-approve').addClass('hide');
+    }
+
+    function showDenyWaiting() {
+        $('.form-deny').addClass('hide');
+        $('.form-deny-waiting').removeClass('hide');
+        $('.form-deny-done').addClass('hide');
+        $('.modal-footer-deny').addClass('hide');
+    }
+
+    function showDeny() {
+        $('.form-deny').removeClass('hide');
+        $('.form-deny-waiting').addClass('hide');
+        $('.form-deny-done').addClass('hide');
+        $('.modal-footer-deny').removeClass('hide');
+    }
+
+    function showDenyDone() {
+        $('.form-deny').addClass('hide');
+        $('.form-deny-waiting').addClass('hide');
+        $('.form-deny-done').removeClass('hide');
+        $('.modal-footer-deny').addClass('hide');
+    }
+
+    function reloadPage() {
+        setTimeout(function () {
+            location.href = '@Url.Action("index", "payout", new { sdate = Request["sdate"], edate = Request["edate"], pn = Request["pn"], rpp = Request["rpp"], ps = Request["ps"] })';
+        }, 2000);
+    }
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $('#btn-approve-payout').click(function () {
+            approveOrDeny(
+                '@Url.Action("approve", "payout")',
+                showApprove,
+                showApproveWaiting,
+                showApproveDone
+            );
+        });
+
+        $('#btn-deny-payout').click(function () {
+            approveOrDeny(
+                '@Url.Action("deny", "payout")',
+                showDeny,
+                showDenyWaiting,
+                showDenyDone
+            );
+        });
+    });
+
+    function approveOrDeny(url, show, showWaiting, showDone) {
+
+        showWaiting();
+
+        $.post(
+            url,
+            'uid=' + selectedPayoutId,
+            function (data) {
+                if (data && data.status == 'ok') {
+
+                    Notifications.showBar({
+                        title: 'Success',
+                        success: true
+                    });
+
+                    showDone();
+                    reloadPage();
+
+                } else {
+
+                    var items = "";
+                    for (var message of data.messages) {
+                        items += message.Text + "<br />";
+                    }
+
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: items,
+                        success: false
+                    });
+
+                    show();
+                }
+            }
+        );
+    }
+</script>

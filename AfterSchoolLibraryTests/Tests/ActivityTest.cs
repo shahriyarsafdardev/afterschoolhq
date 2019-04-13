@@ -692,15 +692,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.NotNull(activity.AddFormAndActivitate(form, accountOwner.ID.Value, false, msgs, dc));
         }
 
-        [Fact]
-        public void HasAdressTest()
-        {
-            var activity = new Activity() { };
-            activity.Save(dc: dc);
-
-            Assert.False(activity.HasAddress);
-        }
-
         [Fact(Skip = "Need to add this test in the future")]
         public void EditExistingTest()
         {
@@ -982,8 +973,7 @@ namespace AfterSchoolLibraryTests.Tests
             var start = new DateTime(2118, 10, 10, 10, 10, 10) { };
             schedule.StartDate = start;
             msgs.AddRange(schedule.Save(dc));
-
-            activity.StartDateTime = start;
+            
             activityInstance.StartDateTime = start;
             msgs.AddRange(activityInstance.Save(dc));
 

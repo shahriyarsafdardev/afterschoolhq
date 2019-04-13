@@ -22,7 +22,7 @@
 </div>
 
 <div>
-    <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-8 col-md-offset-2 participation-object-detail">
         <div class="panel panel-alt6">
             <div class="panel-heading">
                 <div class="row">
@@ -40,72 +40,108 @@
             </div>
             <div class="panel-body">
 
-                <div class="activity-detail-block">
-                    @Html.Raw(Model.Details)
-                </div>
+                <div class="col-md-8">
 
-                <div class="activity-detail-block">
-                    <h3>Schedule</h3>
-                    <p>
-                        @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
-                    </p>
-                </div>
-
-                @if (Model.Location.IsNotEmpty())
-                {
                     <div class="activity-detail-block">
-                        <h3>Location <a href="@Model.Location.GetGoogleMapsLink()" target="_blank"><i class="s7-map-marker"></i></a></h3>
-                        <p>
-                            <a href="@Model.Location.GetGoogleMapsLink()" target="_blank">@ParticipationObjectUI.PrintLocation(Model)</a>
-                        </p>
-                        @if (Model.LocationDetails.IsNotEmpty())
-                        {
-                            @:@Html.Raw(Model.LocationDetails)
-                        }
+                        <h3>Description</h3>
+                        @Html.Raw(Model.Details)
                     </div>
-                }
 
-                <div class="activity-detail-block">
-                    <h3>
-                        @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_FreeTuition.cshtml", Model); }
-                    </h3>
-                    @if (!Model.IsFree)
-                    {
-                        if (!Model.PaymentPlans.Any())
+                </div>
+                <div class="col-md-4">
+
+                    <div class="activity-detail-block">
+                        <h3>
+                            @{ Html.RenderPartial("~/Views/Shared/ParticipationObject/_FreeTuition.cshtml", Model); }
+                        </h3>
+
+                        @if (!Model.IsFree)
                         {
-                            Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", Model);
-                        }
-                        else
-                        {
-                            Html.RenderPartial("~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml", Model);
+                            if (!Model.PaymentPlans.Any())
+                            {
+                                Html.RenderPartial(
+                                    "~/Views/Shared/ParticipationObject/_TuitionAndNoPaymentPlans.cshtml", 
+                                    Model, 
+                                    new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
+                            }
+                            else
+                            {
+                                Html.RenderPartial(
+                                    "~/Views/Shared/ParticipationObject/_TuitionAndPaymentPlans.cshtml", 
+                                    Model,
+                                    new ViewDataDictionary() { { "DisplayCheckoutPrice", true } });
+                            }
+
+                            if (Model.CostDescription.IsNotEmpty())
+                            {
+                                <p class="padding-v-10">
+                                    @Model.CostDescription
+                                </p>
+                            }
                         }
 
-                        if (Model.CostDescription.IsNotEmpty())
-                        {
-                            <p class="padding-v-10">
-                                @Model.CostDescription
-                            </p>
-                        }
-                    }
+                    </div>
+
+                    <div class="activity-detail-block">
+                        <h3>Schedule</h3>
+                        <p>
+                            @{ Html.RenderPartial("_ActivityScheduleHtml", Model.Schedule); }
+                        </p>
+                    </div>
+
+                    <div class="activity-detail-block">
+                        <h3>Contact</h3>
+                        <p>
+                            @Model.ContactName<br />
+                            @Model.ContactPhone<br />
+                            <a href="mailto:@Model.ContactEmail">@Model.ContactEmail</a><br />
+                        </p>
+                    </div>
+
                 </div>
 
-                <div class="activity-detail-block">
-                    <h3>Contact</h3>
-                    <p>
-                        @Model.ContactName &bull;
-                        <a href="mailto:@Model.ContactEmail">@Model.ContactEmail</a> &bull;
-                        @Model.ContactPhone
-                    </p>
+                <div class="margin-b-20">
+                    &nbsp;
                 </div>
 
-                <div class="margin-10">
-                    @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
+                <hr />
+
+                <div class="margin-t-20">
+                    <div class="col-md-12">
+                        <div class="activity-detail-block">
+                            <div class="row">
+                                <div>
+                                    <h3>Location</h3>
+                                </div>
+                                <div>
+                                    <p>
+                                        @ParticipationObjectUI.PrintLocation(Model)
+                                    </p>
+                                    @if (Model.LocationDetails.IsNotEmpty())
+                                    {
+                                        @:@Html.Raw(Model.LocationDetails)
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="position: relative; margin-left: -20px; margin-right: -20px">
+                        <iframe width="100%" height="300" frameborder="0" style="border:0"
+                                src="https://www.google.com/maps/embed/v1/place?q=@Url.Encode($"{Model.Location.GetAddress()}")&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk" allowfullscreen>
+                        </iframe>
+                        @*<img src="https://maps.googleapis.com/maps/api/staticmap?markers=@Url.Encode(Model.Location.GetAddress())&size=1500x300&maptype=roadmap&key=AIzaSyAdjn8QBBStTz9TDAjZOyijAato7uzvjjk&zoom=13" style="width:100%"/>*@
+                    </div>
                 </div>
 
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="margin-v-30">
+                        @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model); }
+                    </div>
+                </div>
             </div>
             <div class="panel-footer">
                 <p class="text-center">
-                    @ParticipationObjectUI.PrintRegistrationPeriod(Model)
+                    @Html.Raw(ParticipationObjectUI.PrintRegistrationPeriod(Model))
                 </p>
             </div>
         </div>

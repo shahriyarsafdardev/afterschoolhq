@@ -1,11 +1,29 @@
 ﻿@model ParticipationObject
 
+@{ 
+    var displayCheckoutPrice = false;
+
+    if (ViewData["DisplayCheckoutPrice"] != null && ViewData["DisplayCheckoutPrice"].ToString().IsBoolean())
+    {
+        displayCheckoutPrice = ViewData["DisplayCheckoutPrice"].ToString().ToBoolean();
+    }
+}
+
 <p>
-    The tuition fee is <strong>@Model.Cost.ToCurrency()</strong>
+    The tuition fee is 
+    <strong>
+        @ParticipationObjectUI.PrintTuitionFee(Model, displayCheckoutPrice)
+    </strong>
+
     @if (Model.SubscriptionPlans.Any())
     {
         <span>
-            plus <strong>@Model.SubscriptionPlans.First().CostPerPeriod.ToCurrency()</strong> each @Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
+            plus 
+            <strong>
+                @ParticipationObjectUI.PrintPlanFee(Model.SubscriptionPlans.First(), Model.OwnerAccount, displayCheckoutPrice)
+            </strong> 
+            each 
+            @Model.SubscriptionPlans.First().BillingPeriodTypeId.ToString().ToLower()
         </span>
     }
 </p>

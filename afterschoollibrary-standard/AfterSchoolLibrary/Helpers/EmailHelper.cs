@@ -84,9 +84,9 @@ namespace AfterSchoolLibrary.Helpers
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, bool sendBcc)
         {
             var msgs = new SystemMessages();
-            var isAfterSchool = checkoutObject.PurchasingAccount.IsAfterSchool;
-            var purchaserAccount = checkoutObject.PurchasingAccount;
-            var purchaser = checkoutObject.PurchasingAccount.GetAccountOwner(msgs);
+            var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
+            var purchaserAccount = checkoutObject.PayingAccount;
+            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs);
             var participationObject = checkoutObject.ParticipationObject;
             var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
             var billingAccountOwner = billingAccount.GetAccountOwner(msgs);
@@ -95,16 +95,19 @@ namespace AfterSchoolLibrary.Helpers
             var registrant = checkoutObject.MasterRegistrant;
             var parentOrGuardian = registrant.GetParentOrGuardian(msgs);
             var stripeAccount = billingAccount.GetStripeAccount(msgs);
-            var canAccountAcceptPayments = stripeAccount.IsNotEmpty() && stripeAccount.IsVerified;
+            var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs);
 
             var receiptRows = "";
             var regStatus = "";
             var registeredOrApplied = "registered";
-            var cost = "";
             var registrantActivity = checkoutObject.Registration.GetRegistrantActivities().First();
             var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs);
+            var cost = "";
+            var ccFee = "";
+            var asFee = "";
+            var additionalDetails = "";
 
-            switch(registrantActivity.AssignmentTypeId)
+            switch (registrantActivity.AssignmentTypeId)
             {
                 case RegistrationAssignmentType.Reserved:
                 case RegistrationAssignmentType.ReservedPendingPayment:
@@ -135,18 +138,35 @@ namespace AfterSchoolLibrary.Helpers
             if (checkoutObject.IsFree || participationObject.Cost > 0.ToDecimal() || paymentPlan.IsNotEmpty())
             {
                 if (checkoutObject.IsFree)
+                {
                     cost = "FREE";
+                    ccFee = "$0";
+                    asFee = "$0";
+                }
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
-                    cost = $"{checkoutObject.PaymentPlanCostToday.ToCurrency()} today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                {
+                    cost = checkoutObject.PaymentPlanCostTodayNoFees.ToCurrency();
+                    ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs).ToCurrency();
+                    asFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs).ToCurrency();
+
+                    additionalDetails = $"today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                }
                 else
-                    cost = $"{participationObject.Cost.ToCurrency()} - tuition fee";
+                {
+                    cost = checkoutObject.TuitionCostNoFees.ToCurrency();
+                    ccFee = checkoutObject.GetTuitionCreditCardFee(msgs).ToCurrency();
+                    asFee = checkoutObject.GetTuitionConvenienceFee(msgs).ToCurrency();
+
+                    additionalDetails = "tuition fee";
+                }
 
                 // add tuition fee row
                 var tuitionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
                     { "Quantity",  "1"},
-                    { "Cost", cost }
+                    { "Cost", cost },
+                    { "AdditionalDetails", additionalDetails }
                 };
 
                 receiptRows += ProcessTemplate(
@@ -160,14 +180,18 @@ namespace AfterSchoolLibrary.Helpers
             if (subscription.IsNotEmpty())
             {
                 description = $"Subscription for {participationObject.Name}";
-                cost = $"{subscription.CostPerPeriod.ToCurrency()} per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
+                cost = checkoutObject.SubscriptionCostTodayNoFees.ToCurrency();
+                additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
+                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs).ToCurrency();
+                asFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs).ToCurrency();
 
                 // add tuition fee row
                 var subscriptionFeeModel = new NameValueCollection()
                 {
                     { "Description", description },
                     { "Quantity",  "1"},
-                    { "Cost", cost }
+                    { "Cost", cost },
+                    { "CostDescription", additionalDetails }
                 };
 
                 receiptRows += ProcessTemplate(
@@ -188,9 +212,11 @@ namespace AfterSchoolLibrary.Helpers
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
                 { "AmountDueOrPaid", amountDueOrPaid },
-                { "TotalCost", checkoutObject.TotalCostToPurchaseToday.ToCurrency() },
+                { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs).ToCurrency() },
                 { "BodyRows", receiptRows },
-                { "CustomMessage", registrationThankYou }
+                { "CustomMessage", registrationThankYou },
+                { "CreditCardFee", ccFee },
+                { "ConvenienceFee", asFee }
             };
 
             var subject = $"{registrant.FirstName} has {registeredOrApplied} for {participationObject.Name}!";
@@ -212,8 +238,8 @@ namespace AfterSchoolLibrary.Helpers
             {
                 var emails = new List<string>();
 
-                if (billingAccountOwner.Email.IsEmail())
-                    emails.Add(billingAccountOwner.Email.ToLower());
+                //if (billingAccountOwner.Email.IsEmail())
+                //    emails.Add(billingAccountOwner.Email.ToLower());
 
                 if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
                     emails.Add(participationObject.ContactEmail.ToLower());
@@ -526,11 +552,11 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
 
-            // send copy to enroll hq team
+            // send copy to afterschool hq team
             SendGridHelper.SendMail(
                 fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
                 toEmail: Email.SendGridAppAdminEmailAddress,
-                subject: $"CC: {Utilities.AppName(account.IsAfterSchool)} PURCHASE - {subject}",
+                subject: $"CC: {Utilities.AppName(account.IsAfterSchool)} SIGNUP - {subject}",
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
@@ -813,6 +839,52 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendProviderNewActivityNotification(Account hostAccount, Account visitorAccount, WebUser visitorAccountOwner, Activity activity, WebUser loggedInUser)
+        {
+            var msgs = new SystemMessages();
+            var getStartedLink = $"{Email.BaseUrl(hostAccount.IsAfterSchool)}login";
+            var getStartedText = "Login to view your account";
+
+            if (!visitorAccount.IsActive)
+            {
+                getStartedLink = $"{visitorAccountOwner.GetInviteUrl(visitorAccount)}";
+                getStartedText = "Let us know how to pay you";
+            }
+
+            var model = new NameValueCollection()
+            {
+                { "FirstName", visitorAccountOwner.DisplayName },
+                { "HostAccountName", hostAccount.Name},
+                { "AmountCharged", activity.CostPerRegistrant.ToCurrency() },
+                { "ProductName", Utilities.AppName(hostAccount.IsAfterSchool) },
+                { "GetStartedLink", getStartedLink },
+                { "GetStartedText", getStartedText },
+                { "HomePageUrl", hostAccount.HomePageUrl },
+                { "ActivityHomePageUrl", activity.HomePageUrl },
+                { "ActivityName", activity.Name },
+                { "SupportEmail", Email.AppSupportEmailAddress() },
+                { "InviterFirstName", loggedInUser.FirstName }
+            };
+
+            var subject = $"You have been designated as the provider for {activity.Name} at {hostAccount.Name}";
+            var body = ProcessTemplate(
+               EmailTemplates.ProviderAccount_Added,
+               model,
+               "provideraccountadded",
+               msgs
+               );
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
 
         private static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
