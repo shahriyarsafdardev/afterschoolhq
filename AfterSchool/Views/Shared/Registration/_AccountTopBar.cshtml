@@ -40,7 +40,7 @@
                         @if (SessionVariables.LoggedInUser.IsNotEmpty())
                         {
                             <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View @accountOrDashboard</a>
-                            <a href="@Url.Action("index", "logout", new { returnurl = Request.Url.AbsolutePath })" class="btn btn-link">Logout</a>
+                            <a href="@Url.Action("index", "logout", new { returnurl = SessionVariables.RegistrationStartPageAccount.HomePageUrl })" class="btn btn-link">Logout</a>
                         }
                         else
                         {
