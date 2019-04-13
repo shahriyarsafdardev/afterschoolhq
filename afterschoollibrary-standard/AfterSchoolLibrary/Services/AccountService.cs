@@ -1710,14 +1710,15 @@ namespace AfterSchoolLibrary.Services
                 paymentType = PaymentType.ACH;
             else
             {
-                var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
-                if (checkAccount.IsNotEmpty())
-                {
-                    if (!checkAccount.IsVerified)
-                        msgs.Add("Your payment address is not verified. Please correct in Settings > Accept Payments", MessageType.UserError);
-                    else
-                        paymentType = PaymentType.Check;
-                }
+                paymentType = PaymentType.Check;
+                //var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
+                //if (checkAccount.IsNotEmpty())
+                //{
+                //    if (!checkAccount.IsVerified)
+                //        msgs.Add("Your payment address is not verified. Please correct in Settings > Accept Payments", MessageType.UserError);
+                //    else
+                //        paymentType = PaymentType.Check;
+                //}
             }
 
             if (paymentType != PaymentType.NotSet)
@@ -2275,11 +2276,12 @@ namespace AfterSchoolLibrary.Services
                     checkAccount.Country = "US";
                     amsgs.AddRange(checkAccount.Save(adc));
 
-                    if (msgs.HasNoErrors())
-                    {
-                        if (!checkAccount.IsDeliverable(amsgs, adc))
-                            msgs.Add("Your address is invalid and not deliverable. Please update your address to a valid address", MessageType.UserError);
-                    }
+                    // Check deliverability later
+                    //if (msgs.HasNoErrors())
+                    //{
+                    //    if (!checkAccount.IsDeliverable(amsgs, adc))
+                    //        msgs.Add("Your address is invalid and not deliverable. Please update your address to a valid address", MessageType.UserError);
+                    //}
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -2308,11 +2310,12 @@ namespace AfterSchoolLibrary.Services
         public static bool CanReceivePaymentDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var stripeAccount = account.GetStripeAccount(msgs, dc);
+            var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
 
             if (stripeAccount.IsNotEmpty())
-                return stripeAccount.CanReceivePaymentDeposits();
+                return stripeAccount.CanReceivePaymentDeposits() || checkAccount.IsNotEmpty();
 
-            return false;
+            return checkAccount.IsNotEmpty();
         }
 
         public static Stripe.Customer AddCustomerToConnectedAccount(this Account billingAccount, Account purchasingAccount, string stripeBillToSourceId, SystemMessages msgs)
