@@ -471,6 +471,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.IsFullScreen = GetIsFullScreen(activity);
 
             if (msgs.HasNoErrors())
             {
@@ -484,7 +485,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     case "next":
                         ViewBag.ActiveMenu = "EditContact";
                         ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
-                        ViewBag.IsFullScreen = GetIsFullScreen(activity);
                         return View("EditContact", activity);
                 }
             }
