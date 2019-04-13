@@ -1,4 +1,4 @@
-﻿@if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+﻿@if (AfterSchoolLibrary.Helpers.Utilities.IsProduction && SessionVariables.OriginalLoggedInUser.IsEmpty())
 {
     <script>
     window['_fs_debug'] = false;
