@@ -167,7 +167,6 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult CheckSetup(string entitytype, string name, string address1, string address2, string city, string state, string postalcode)
         {
             var msgs = new SystemMessages();
-            CheckPaymentAccount checkAccount = null;
 
             if (!entitytype.IsNumber())
                 msgs.Add("Select whether we're sending payments to an Individual or a Company", MessageType.UserError);
