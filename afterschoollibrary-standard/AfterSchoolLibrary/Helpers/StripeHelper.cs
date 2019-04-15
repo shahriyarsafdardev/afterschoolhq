@@ -1229,7 +1229,7 @@ namespace AfterSchoolLibrary.Billing
             return CreateCharge(fromCustomerId, null, tokenOrSourceId, totalAmount, null, description, statementDescriptor, msgs);
         }
 
-        public static Stripe.Charge CreateCharge(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal? platformFee, string description, string statementDescriptor, SystemMessages msgs)
+        public static Stripe.Charge CreateCharge(string fromCustomerId, string destinationAccountId, string tokenOrSourceId, decimal totalAmount, decimal? platformFee, string description, string statementDescriptor, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1241,7 +1241,8 @@ namespace AfterSchoolLibrary.Billing
                 SourceId = tokenOrSourceId,                
                 // SourceTokenOrExistingSourceId = tokenOrSourceId,
                 StatementDescriptor = statementDescriptor.MaxChars(22),
-                CustomerId = fromCustomerId
+                CustomerId = fromCustomerId,
+                Metadata = metaData
             };
 
             if (platformFee.HasValue)
