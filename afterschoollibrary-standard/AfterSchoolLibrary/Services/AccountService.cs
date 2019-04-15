@@ -1828,8 +1828,17 @@ namespace AfterSchoolLibrary.Services
                 platformFee: useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                 tokenOrSourceId: checkoutObject.SourceId.IfEmpty(checkoutObject.StripeToken),
                 totalAmount: checkoutObject.GetTuitionCostWithFees(msgs, dc), 
-                description: $"{checkoutObject.ParticipationObject.ObjectType.ToString()} {checkoutObject.ParticipationObject.GetId()} Registration",
-                statementDescriptor: $"AFTRSCHL/{checkoutObject.BillingAccount.Name}",
+                description: $"{checkoutObject.ParticipationObject.Name} Registration",
+                statementDescriptor: $"AHQ/{checkoutObject.BillingAccount.Name}",
+                metaData: new Dictionary<string, string>()
+                {
+                    { "ActivityUid", checkoutObject.ParticipationObject.Uid.ToString() },
+                    { "BillingAccountUid", checkoutObject.BillingAccount.Uid.ToString() },
+                    { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
+                    { "RegistrationUid", checkoutObject.Registration.Uid.ToString() },
+                    { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
+                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() }
+                },
                 msgs: msgs
                 );
 
