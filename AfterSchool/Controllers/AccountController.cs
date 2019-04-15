@@ -1281,6 +1281,14 @@ namespace AfterSchool.Controllers
                 SubscriptionPlan paymentPlan = null;
                 var billingAccount = participationObject.PaymentAccount;
                 var payingAccount = SessionVariables.CurrentAccount;
+                var convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
+                var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
+                
+                if (participationObject.UseStripeConnectedAccount)
+                {
+                    convenienceFeePayer = billingAccount;
+                    creditCardFeePayer = billingAccount;
+                }
 
                 if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
                     paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);                                
@@ -1303,8 +1311,8 @@ namespace AfterSchool.Controllers
                         MasterRegistrant = SessionVariables.CurrentRegistrant,
                         PaymentType = PaymentType.CreditCard,
                         PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                        ConvenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount,
-                        CreditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount
+                        ConvenienceFeePayer = convenienceFeePayer,
+                        CreditCardFeePayer = creditCardFeePayer
                     },
                     loggedInUser: SessionVariables.LoggedInUser,
                     msgs: msgs);
