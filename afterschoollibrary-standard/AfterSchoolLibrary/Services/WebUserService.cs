@@ -404,7 +404,7 @@ namespace AfterSchoolLibrary.Services
                 accountOwner: accountOwner, 
                 packageId: packageId,
                 packageBillingPeriod: packageBillingPeriod,
-                createWithStripe: true,
+                createWithStripe: false,
                 loggedInUser: loggedInUser, 
                 isAfterSchool: isAfterSchool, 
                 msgs: msgs, 
