@@ -1837,7 +1837,9 @@ namespace AfterSchoolLibrary.Services
                     { "PayingAccountUid", checkoutObject.PayingAccount.Uid.ToString() },
                     { "RegistrationUid", checkoutObject.Registration.Uid.ToString() },
                     { "CreditCardFeePayer", checkoutObject.CreditCardFeePayer.Uid.ToString() },
-                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() }
+                    { "ConvenienceFeePayer", checkoutObject.ConvenienceFeePayer.Uid.ToString() },
+                    { "PurchasedBy", checkoutObject.MasterRegistrant.DisplayName },
+                    { "BilledBy", checkoutObject.BillingAccount.Name }
                 },
                 msgs: msgs
                 );
