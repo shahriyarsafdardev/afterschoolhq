@@ -1021,7 +1021,7 @@ namespace AfterSchoolLibrary.Services
             var duplicate = Account.LoadByUniqueName(uniqueName, msgs, dc);
             var count = 1;
 
-            while (duplicate.IsNotEmpty() && duplicate.ID != accountId)
+            while ((duplicate.IsNotEmpty() && duplicate.ID != accountId) || uniqueName.ToLower() == "demo")
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
