@@ -115,7 +115,7 @@ namespace AfterSchoolLibrary.Billing
                     }
                 },
                 BusinessType = entityType.ToString().ToLower(),
-                RequestedCapabilities = new List<string>() { "platform_payments" }
+                // RequestedCapabilities = new List<string>() { "platform_payments" }
             };
 
             Stripe.Account account = null;
