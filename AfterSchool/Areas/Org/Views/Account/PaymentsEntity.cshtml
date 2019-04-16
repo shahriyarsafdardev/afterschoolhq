@@ -3,6 +3,7 @@
     var account = (Account)ViewBag.Account;
     var msgs = (SystemMessages)ViewBag.Messages;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
+    var showForm = !Model.PayoutsEnabled && Model.VerificationStatusId != StripeVerificationStatus.Pending;
 
     ViewBag.Title = account.Name;
 
@@ -152,8 +153,8 @@
                         </div>
                     </div>
                 }
-
-                @if (!Model.PayoutsEnabled && Model.ChargesEnabled)
+                
+                @if (!showForm || (Model.ChargesEnabled && !Model.PayoutsEnabled))
                 {
                      <div class="row">
                          <div class="pull-right">
@@ -161,9 +162,8 @@
                          </div>
                      </div>
                 }
-                
 
-                @if (!Model.PayoutsEnabled && Model.VerificationStatusId != StripeVerificationStatus.Pending)
+                @if (showForm)
                 { 
                     <form method="post" action="@Url.Action("paymentsentity", "account", new { isnew = Request["isnew"] })" class="form-horizontal" enctype="multipart/form-data">
 
