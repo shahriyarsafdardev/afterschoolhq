@@ -16,11 +16,13 @@ namespace AfterSchool
             //    defaults: new { controller = "Home", action = "HandleStatic", area = "" }
             //);
 
-            routes.MapRoute(
-                "HomePage",
-                "",
-                new { controller = "home", action = "index", id = UrlParameter.Optional },
-                new[] { "AfterSchool.Controllers" });
+            routes.IgnoreRoute("");
+
+            //routes.MapRoute(
+            //    "HomePage",
+            //    "",
+            //    new { controller = "home", action = "index", id = UrlParameter.Optional },
+            //    new[] { "AfterSchool.Controllers" });
 
             routes.MapRoute(
                 "Home",
