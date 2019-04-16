@@ -700,6 +700,7 @@
     <Content Include="Public\css\responsive.css" />
     <Content Include="Public\css\style.css" />
     <Content Include="Public\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Public\ian19.html" />
     <Content Include="Public\images\activity-icon.png" />
     <Content Include="Public\images\arrow-icon.png" />
     <Content Include="Public\images\ASHQ-Logo.png" />

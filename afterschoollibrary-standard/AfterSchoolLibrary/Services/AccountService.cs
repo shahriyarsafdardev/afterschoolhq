@@ -1020,8 +1020,9 @@ namespace AfterSchoolLibrary.Services
             var uniqueName = origUniqueName;
             var duplicate = Account.LoadByUniqueName(uniqueName, msgs, dc);
             var count = 1;
+            var reservedUniqueNames = new string[] { "demo", "about", "copyright", "index", "parents", "privacy", "providers", "schools", "tos", "account", "afterschool", "db", "faq", "home", "legal", "login", "logout", "oauth", "r", "reg", "services", "signup" };
 
-            while ((duplicate.IsNotEmpty() && duplicate.ID != accountId) || uniqueName.ToLower() == "demo")
+            while ((duplicate.IsNotEmpty() && duplicate.ID != accountId) || uniqueName.ToLower().In(reservedUniqueNames))
             {
                 uniqueName = origUniqueName + count.ToString();
                 count++;
