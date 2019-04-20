@@ -135,7 +135,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult EmailReport(string id, string q, string activity, string group, string emails, string filename, string reporttype, string question, string regstatus, string at)
         {
             var msgs = new SystemMessages();
-            var rat = RegistrationAssignmentType.NotSet;
+            RegistrationAssignmentType? rat = null;
             var registrationStatus = RegistrationStatus.NotSet;
             var questionId = new int?();
             var activityIds = new List<int>();
@@ -158,7 +158,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (question.IsNumber())
                 questionId = question.ToInteger();
-
+            
             if (regstatus.IsNumber())
                 registrationStatus = (RegistrationStatus)regstatus.ToInteger();
 
@@ -173,7 +173,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     ParticipationObjectType.Activity,
                     filename,
                     (RegistrationReportType)reporttype.ToInteger(),
-                    Registration.ReservedStatuses,
+                    rat.HasValue ? rat.Value.AsList() : null,
+                    registrationStatus,
                     UILabel.ActivityLabel(ActivityType.Activity, false),
                     emails,
                     null,

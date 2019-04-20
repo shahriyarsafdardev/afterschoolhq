@@ -2152,6 +2152,7 @@ namespace AfterSchoolLibrary.Services
                 "registrations",
                 RegistrationReportType.SingleActivity,
                 null,
+                RegistrationStatus.NotSet,
                 uiActivityLabel,
                 activity.ContactEmail,
                 subject,
