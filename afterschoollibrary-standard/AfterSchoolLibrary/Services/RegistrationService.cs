@@ -12,27 +12,76 @@ namespace AfterSchoolLibrary.Services
     {
         #region CSVReport
 
-        public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats, string uiActivityLabel, string emails, string subject, string body)
+        public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats, RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body)
         {
             var msgs = new SystemMessages();
+
             var account = Account.Load(accountId);
+
             var registrations = account.SearchRegistrations(
                 searchText,
                 questionId,
                 participationObjectIds,
                 participationObjectType,
-                RegistrationStatus.NotSet,
+                registrationStatus,
                 rats,
                 null,
                 null);
 
-            string csv = RegistrationService.ExportCSV(
+            var csv = RegistrationService.ExportCSV(
                 registrations,
                 account,
                 reportType,
-                RegistrationStatus.NotSet,
-                RegistrationAssignmentType.NotSet);
+                registrationStatus,
+                rats);
 
+            var fileLink = RegistrationService.UploadCSV(account, filename, csv, msgs);
+
+            EmailCSV(account, emails, subject, body, uiActivityLabel, fileLink, msgs);
+
+            return msgs;
+        }
+
+        private static void EmailCSV(Account account, string emails, string subject, string body, string uiActivityLabel, string fileLink, SystemMessages msgs)
+        {
+            if (subject.IsBlank())
+                subject = uiActivityLabel + " Report";
+
+            if (body.IsBlank())
+                body = "";
+
+            body += $"<p>Here is your {uiActivityLabel} report: <a href=\"{fileLink}\">{fileLink}</a></p>{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "student_report"))}";
+
+            var emailList = new List<string>();
+
+            // add account email address
+            if (account.Email.IsNotBlank())
+                emailList.Add(account.Email);
+
+            // get additional emails the user enters
+            if (emails.IsNotBlank())
+                emailList.AddRange(
+                    emails.Split(',')
+                    .Select(x => x.Trim())
+                    .Where(email => email.IsEmail() && email.NotIn(emailList)));
+
+            // send to email list
+            emailList.ForEach(email =>
+                msgs.AddRange(SendGridHelper.SendMail(
+                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
+                        Helpers.Email.AppEmailAddress,
+                        $"{account.Name} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"
+                        ),
+                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
+                    subject: subject,
+                    body: body,
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                ))
+            );
+        }
+
+        private static string UploadCSV(Account account, string filename, string csv, SystemMessages msgs)
+        {
             var ms = new System.IO.MemoryStream(Encoding.UTF8.GetBytes(csv));
             var ah = new AmazonHelper(
                 Helpers.Utilities.AmazonBucketName,
@@ -54,55 +103,18 @@ namespace AfterSchoolLibrary.Services
             string amazonLocation = $"{account.Uid.ToString()}/{Guid.NewGuid().ToString()}/{filename}";
             msgs.AddRange(ah.AddFile(ms, amazonLocation, true));
 
-            string fileLink = ah.GetFileLink(amazonLocation, false, null, true);
-
-            if (subject.IsBlank())
-                subject = uiActivityLabel + " Report";
-
-            if (body.IsBlank())
-                body = "";
-
-            body += $"<p>Here is your {uiActivityLabel} report: <a href=\"{fileLink}\">{fileLink}</a></p>{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "student_report"))}";
-
-            var emailList = new List<string>();
-
-            // add account email address
-            if (account.Email.IsNotBlank())
-                emailList.Add(account.Email);
-
-            // get additional emails the user enters
-            if (emails.IsNotBlank())
-                emailList.AddRange(
-                    emails.Split(',')
-                    .Select(x => x.Trim())
-                    .Where(email => email.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx)));
-
-            // send to email list
-            emailList.ForEach(email =>
-                msgs.AddRange(SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Helpers.Email.AppEmailAddress,
-                        $"{account.Name} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"
-                        ),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
-                    subject: subject,
-                    body: body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                ))
-            );
-
-            return msgs;
+            return ah.GetFileLink(amazonLocation, false, null, true);
         }
 
-        public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus registrationStatus, RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static string ExportCSV(List<Registration> registrations, Account account, RegistrationReportType reportType, RegistrationStatus registrationStatus, List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var registrantActivities = new List<RegistrantActivity>();
             var registrantIds = registrations.Select(x => x.RegistrantId.Value).ToList();
 
             registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, msgs, dc);
 
-            if (assignmentType != RegistrationAssignmentType.NotSet)
-                registrantActivities = registrantActivities.Where(x => x.AssignmentTypeId == assignmentType)
+            if (assignmentTypes.IsNotEmpty() && assignmentTypes.Count > 0)
+                registrantActivities = registrantActivities.Where(x => x.AssignmentTypeId.In(assignmentTypes))
                 .ToList();
 
             switch (registrationStatus)
@@ -133,17 +145,10 @@ namespace AfterSchoolLibrary.Services
                 .Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet)
                 .DistinctBy(x => x.QuestionDataTypeId)
                 .ToList();
+
             var customQuestions = questions
                 .Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet)
                 .DistinctBy(x => x.Text)
-                .ToList();
-
-            var assignmentTypes = Enum.GetValues(typeof(RegistrationAssignmentType))
-                .Cast<RegistrationAssignmentType>()
-                .Where(x => x != RegistrationAssignmentType.NotSet &&
-                            x != RegistrationAssignmentType.Declined &&
-                            x != RegistrationAssignmentType.Invited)
-                .OrderBy(x => x)
                 .ToList();
 
             var table = new List<List<string>>();
@@ -160,7 +165,6 @@ namespace AfterSchoolLibrary.Services
                     registration,
                     account,
                     reportType,
-                    assignmentTypes,
                     registrantActivities,
                     standardQuestions,
                     customQuestions,
@@ -192,7 +196,7 @@ namespace AfterSchoolLibrary.Services
             return row;
         }
 
-        private static List<string> AddEachRegistrationToCSVReport(Registration registration, Account account, RegistrationReportType reportType, List<RegistrationAssignmentType> assignmentTypes, List<RegistrantActivity> registrantActivities, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, SystemMessages msgs, DatabaseConnection dc = null)
+        private static List<string> AddEachRegistrationToCSVReport(Registration registration, Account account, RegistrationReportType reportType, List<RegistrantActivity> registrantActivities, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions, List<FormQuestionAnswer> answers, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var row = new List<string>();
 
@@ -222,26 +226,32 @@ namespace AfterSchoolLibrary.Services
                 new
                 {
                     registrantActivity.ParticipationObjectId,
-                    registrantActivity.ParticipationObjectTypeId
+                    registrantActivity.ParticipationObjectTypeId,
+                    registrantActivity.AssignmentTypeId
                 })
                 .ToList();
 
             var activitiesList = new List<string>();
-            participationObjects.ForEach(participationObject => {
+            participationObjects.ForEach(participationObject => 
+            {
+                var name = "";
+
                 switch (participationObject.ParticipationObjectTypeId)
                 {
                     case ParticipationObjectType.AccountActivityGroup:
                         var aag = AccountActivityGroup.Load(participationObject.ParticipationObjectId.Value, msgs, dc);
-                        activitiesList.Add(ActivityGroup.Load(aag.ActivityGroupId.Value, msgs, dc).Name);
+                        name = ActivityGroup.Load(aag.ActivityGroupId.Value, msgs, dc).Name;
                         break;
                     case ParticipationObjectType.Activity:
-                        activitiesList.Add(Activity.Load(participationObject.ParticipationObjectId.Value, msgs, dc).Name);
+                        name = Activity.Load(participationObject.ParticipationObjectId.Value, msgs, dc).Name;
                         break;
                     case ParticipationObjectType.ActivityGroup:
-                        activitiesList.Add(ActivityGroup.Load(participationObject.ParticipationObjectId.Value, msgs, dc).Name);
+                        name = ActivityGroup.Load(participationObject.ParticipationObjectId.Value, msgs, dc).Name;
                         break;
                 }
-            });
+
+                activitiesList.Add($"{name} - {participationObject.AssignmentTypeId.ToString().SplitByUpperCase()}");
+            });            
 
             row.Add(activitiesList.ToStringList("; "));
         }
@@ -290,7 +300,7 @@ namespace AfterSchoolLibrary.Services
 
         private static void AddQuestionHeadersToCSVReport(List<string> row, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions)
         {
-            foreach (var question in standardQuestions)
+            standardQuestions.ForEach(question => 
             {
                 switch (question.QuestionDataTypeId)
                 {
@@ -302,11 +312,9 @@ namespace AfterSchoolLibrary.Services
                         row.Add($"{question.FormQuestionGroupName} - {question.Text.ToString()}");
                         break;
                 }
-            }
-            foreach (var question in customQuestions)
-            {
-                row.Add(question.Text.ToString());
-            }
+            });
+
+            customQuestions.ForEach(question => row.Add(question.Text.ToString()));
         }
 
         public static ParticipationObject GetParticipationObject(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
