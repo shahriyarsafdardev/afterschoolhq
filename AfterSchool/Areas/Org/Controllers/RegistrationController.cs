@@ -173,7 +173,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     ParticipationObjectType.Activity,
                     filename,
                     (RegistrationReportType)reporttype.ToInteger(),
-                    rat.HasValue ? rat.Value.AsList() : new List<RegistrationAssignmentType>(),
+                    rat.HasValue ? rat.Value.AsList() : null,
                     registrationStatus,
                     UILabel.ActivityLabel(ActivityType.Activity, false),
                     emails,
