@@ -2,7 +2,7 @@
 @{ 
     var showAdd = !Model.ID.HasValue || (
         SessionVariables.LoggedInUser.IsNotEmpty() &&
-        SessionVariables.AccountUserType.NotIn(new List<UserType>() { UserType.Parent, UserType.Student }));
+        SessionVariables.CurrentAccount.AccountTypeId.In(new List<AccountType>() { AccountType.ActivityProvider, AccountType.School }));
 
     var addActivityUrl = "";
     var addText = $"Add {UILabel.ActivityLabel()}";
