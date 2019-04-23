@@ -88,6 +88,24 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
+        public static Stripe.Account CreateCustomAccount(AccountCreateOptions options, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Stripe.Account account = null;
+
+            try
+            {
+                account = GetAccountService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error creating payment account", MessageType.UserError);
+            }
+
+            return account;
+        }
+
         public static Stripe.Account CreateCustomAccount(string businessName, string email, LegalEntityType entityType, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -243,6 +261,33 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return account;
+        }
+
+        #endregion
+
+        #region StripePerson
+
+        private static PersonService GetPersonService()
+        {
+            return new PersonService(StripeAccessToken);
+        }
+
+        public static Stripe.Person CreatePerson(string stripeAccountId, PersonCreateOptions options, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Stripe.Person person = null;
+
+            try
+            {
+                person = GetPersonService().Create(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error creating payment account", MessageType.UserError);
+            }
+
+            return person;
         }
 
         #endregion

@@ -559,7 +559,7 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static void CreateStripeCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Stripe.Account CreateStripeCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var stripeAccount = StripeHelper.CreateCustomAccount(account.Name, account.Email, LegalEntityType.Company, msgs);
 
@@ -568,6 +568,8 @@ namespace AfterSchoolLibrary.Services
                 account.StripeUserId = stripeAccount.Id;
                 msgs.AddRange(account.Save(dc));
             }
+
+            return stripeAccount;
         }
 
         private static void SetStripeCustomer(this Account account, Stripe.Customer customer, SystemMessages msgs = null, DatabaseConnection dc = null)

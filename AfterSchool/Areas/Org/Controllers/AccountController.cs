@@ -227,102 +227,85 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult PaymentsEntity(string entityType, string firstName, string lastName, string address1, string address2, string city, string state, string postalCode, string dateOfBirth, string ssn, string ssnLast4, string legalbusinessname, string businessUrl, string supportphone, string supportemail, string businessPhone, string productDescription, string ein, string tosagree)
+        public ActionResult PaymentsEntity(PaymentsEntityViewModel paymentsEntityVM)
         {
             var msgs = new SystemMessages();
-            var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
-            var startingStatus = stripeAccount.VerificationStatusId;
-            var entityTypeId = (LegalEntityType)entityType.ToInteger();
 
-            if (entityTypeId == LegalEntityType.Company)
+            if (!paymentsEntityVM.BusinessType.HasValue)
+                msgs.Add("Please select your business type", MessageType.UserError);
+
+            if (paymentsEntityVM.BusinessType == LegalEntityType.Company)
             {
-                if (legalbusinessname.IsEmpty())
+                if (paymentsEntityVM.BusinessName.IsEmpty())
                     msgs.Add("Legal Business Name is required", MessageType.UserError);
-                if (ein.IsEmpty())
+
+                if (paymentsEntityVM.EIN.IsEmpty())
                     msgs.Add("Employer Identification Number is required", MessageType.UserError);
-            }
-            else
-            {
-                if (firstName.IsEmpty())
-                    msgs.Add("First Name is required", MessageType.UserError);
-                if (lastName.IsEmpty())
-                    msgs.Add("Last Name is required", MessageType.UserError);
-                if (dateOfBirth.IsEmpty() || !dateOfBirth.IsDate())
-                    msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
-                if (ssnLast4.IsEmpty() || !ssnLast4.IsNumber())
-                    msgs.Add("SSN(last 4) is required", MessageType.UserError);
+
+                if (paymentsEntityVM.BusinessPhone.IsEmpty())
+                    msgs.Add("Business Phone is required", MessageType.UserError);
             }
 
-            if (supportemail.IsEmpty())
+            if (paymentsEntityVM.FirstName.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (paymentsEntityVM.LastName.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!paymentsEntityVM.DateOfBirth.HasValue)
+                msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
+
+            if (paymentsEntityVM.SSNLast4.IsEmpty() || !paymentsEntityVM.SSNLast4.IsNumber())
+                msgs.Add("SSN(last 4) is required", MessageType.UserError);            
+
+            if (paymentsEntityVM.SupportEmail.IsEmpty())
                 msgs.Add("Support Email is required", MessageType.UserError);
-            if (supportphone.IsEmpty())
+
+            if (paymentsEntityVM.SupportPhone.IsEmpty())
                 msgs.Add("Support Phone is required", MessageType.UserError);
-            if (address1.IsEmpty())
+
+            if (paymentsEntityVM.Address1.IsEmpty())
                 msgs.Add("Address 1 is required", MessageType.UserError);
-            if (city.IsEmpty())
+
+            if (paymentsEntityVM.City.IsEmpty())
                 msgs.Add("City is required", MessageType.UserError);
-            if (state.IsEmpty())
+
+            if (paymentsEntityVM.State.IsEmpty())
                 msgs.Add("State is required", MessageType.UserError);
-            if (postalCode.IsEmpty())
+
+            if (paymentsEntityVM.PostalCode.IsEmpty())
                 msgs.Add("Postal Code is required", MessageType.UserError);
 
-            if (!tosagree.IsBoolean() || !tosagree.ToBoolean())
+            if (!paymentsEntityVM.TOSAccept)
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
 
-            if (businessUrl.IsEmpty() && productDescription.IsEmpty())
+            if (paymentsEntityVM.BusinessUrl.IsEmpty() && paymentsEntityVM.ProductDescription.IsEmpty())
                 msgs.Add("You must enter either a website or a Service Description", MessageType.UserError);
 
-            if (stripeAccount.RequiresFullSSN)
-            {
-                if (ssn.IsEmpty())
-                    msgs.Add("SSN is required", MessageType.UserError);
+            //if (stripeAccount.RequiresFullSSN)
+            //{
+            //    if (ssn.IsEmpty())
+            //        msgs.Add("SSN is required", MessageType.UserError);
 
-                if (!ssn.LastChars(4).IsSameAs(ssnLast4))
-                    msgs.Add("SSN and Last 4 of SSN must match", MessageType.UserError);
-            }
+            //    if (!ssn.LastChars(4).IsSameAs(ssnLast4))
+            //        msgs.Add("SSN and Last 4 of SSN must match", MessageType.UserError);
+            //}
 
-            if (stripeAccount.RequiresDocument)
-            {
-                if (Request.Files.Count == 0 || Request.Files[0].ContentLength == 0 || Request.Files[0].ContentType != "image/jpeg" && Request.Files[0].ContentType != "image/png")
-                    msgs.Add("A valid Driver's License or Passport is required as either a jpg or a png", MessageType.UserError);
-                else if (ByteSizeLib.ByteSize.FromBytes(Request.Files[0].ContentLength).MegaBytes > 8)
-                    msgs.Add("Your document must be less than 8 MBs", MessageType.UserError);
-            }
+            //if (stripeAccount.RequiresDocument)
+            //{
+            //    if (Request.Files.Count == 0 || Request.Files[0].ContentLength == 0 || Request.Files[0].ContentType != "image/jpeg" && Request.Files[0].ContentType != "image/png")
+            //        msgs.Add("A valid Driver's License or Passport is required as either a jpg or a png", MessageType.UserError);
+            //    else if (ByteSizeLib.ByteSize.FromBytes(Request.Files[0].ContentLength).MegaBytes > 8)
+            //        msgs.Add("Your document must be less than 8 MBs", MessageType.UserError);
+            //}
 
             if (msgs.HasNoErrors())
-            {                
-                stripeAccount.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                stripeAccount.LastModifiedDate = DateTime.UtcNow;
-                stripeAccount.LegalEntityAddress1 = address1;
-                stripeAccount.LegalEntityAddress2 = address2;
-                stripeAccount.LegalEntityCity = city;
-                stripeAccount.LegalEntityState = state;
-                stripeAccount.LegalEntityPostalCode = postalCode;
-                stripeAccount.LegalEntityTypeId = entityTypeId;
-                stripeAccount.SupportPhone = supportphone;
-                stripeAccount.SupportEmail = supportemail;
-                stripeAccount.BusinessUrl = businessUrl;
-                stripeAccount.BusinessPhone = businessPhone;
-                stripeAccount.ProductDescription = productDescription;
-
-                if (entityTypeId == LegalEntityType.Company)
+            {                                
+                if (paymentsEntityVM.TOSAccept)
                 {
-                    stripeAccount.LegalEntityBusinessName = legalbusinessname;
-                    stripeAccount.LegalEntityEIN = ein;
-                }
-                else
-                {
-                    stripeAccount.LegalEntityDOB = dateOfBirth.ToDateTime();
-                    stripeAccount.LegalEntityFirstName = firstName;
-                    stripeAccount.LegalEntityLastName = lastName;
-                    stripeAccount.LegalEntitySSNLast4 = ssnLast4;
-                }
-
-                if (tosagree.IsBoolean())
-                {
-                    stripeAccount.TOSAcceptanceDate = DateTime.UtcNow;
-                    stripeAccount.TOSAcceptanceIP = Request.UserHostAddress;
-                    stripeAccount.TOSAcceptanceUserAgent = Request.UserAgent.MaxChars(400);
+                    paymentsEntityVM.TOSAcceptanceDate = DateTime.UtcNow;
+                    paymentsEntityVM.TOSAcceptanceIP = Request.UserHostAddress;
+                    paymentsEntityVM.TOSAcceptanceUserAgent = Request.UserAgent;
                 }
 
                 StripeUploadFile uploadFile = null;

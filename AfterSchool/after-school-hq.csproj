@@ -520,6 +520,7 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\ParticipationObjectUI.cs" />
+    <Compile Include="Models\PaymentsEntityViewModel.cs" />
     <Compile Include="Models\RebornImage.cs" />
     <Compile Include="Models\RegistrantImportField.cs" />
     <Compile Include="Models\RollbarExceptionFilter.cs" />
