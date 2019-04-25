@@ -357,21 +357,13 @@ namespace AfterSchoolLibrary.Helpers
         public static SystemMessages MigrateChargesAndPayoutsEnabled(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var accounts = Account.Load(new Hashtable() { { "StripeChargesEnabled", DBNull.Value } }, null, null, msgs, dc);
+            var stripeAccounts = StripeAccount.Load(null, null, null, msgs, dc);
 
-            accounts.ForEach(account => 
+            stripeAccounts.ForEach(stripeAccount => 
             {
-                var stripeAccount = StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
-                if (stripeAccount.IsEmpty())
-                {
-                    account.StripeChargesEnabled = false;
-                    account.StripePayoutsEnabled = false;
-                }
-                else
-                {
-                    account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
-                    account.StripePayoutsEnabled = stripeAccount.PayoutsEnabled;
-                }
+                var account = stripeAccount.GetAccount(msgs, dc);
+                account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
+                account.StripePayoutsEnabled = stripeAccount.PayoutsEnabled;
                 msgs.AddRange(account.Save(dc));
             });
 
