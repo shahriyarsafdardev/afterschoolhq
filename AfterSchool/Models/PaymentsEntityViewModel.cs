@@ -93,23 +93,28 @@ namespace AfterSchool.Models
             return new PaymentsEntityViewModel();
         }
 
+        private static StripeVerificationStatus GetStripeVerificationStatus(Stripe.Account stripeAccount)
+        {
+            if (stripeAccount.Individual.Verification.Status.IsNotEmpty())
+                return stripeAccount.Individual.Verification.Status.Replace("_", " ")
+                                                                    .ToProperCase()
+                                                                    .Replace(" ", "")
+                                                                    .ParseEnum<StripeVerificationStatus>();
+            return StripeVerificationStatus.NotSet;
+        }
+
+        private static StripeVerificationFailedCode GetStripeVerificationFailedCode(Stripe.Account stripeAccount)
+        {
+            if (stripeAccount.Individual.Verification.Status.IsNotEmpty())
+                return stripeAccount.Individual.Verification.DetailsCode.Replace("_", " ")
+                                                                    .ToProperCase()
+                                                                    .Replace(" ", "")
+                                                                    .ParseEnum<StripeVerificationFailedCode>();
+            return StripeVerificationFailedCode.NotSet;
+        }
+
         private static PaymentsEntityViewModel LoadFromStripeAccountIndividual(Stripe.Account stripeAccount)
         {
-            var failedDetailsCode = StripeVerificationFailedCode.NotSet;
-            var verificationStatus = StripeVerificationStatus.NotSet;
-
-            if (stripeAccount.Individual.Verification.DetailsCode.IsNotEmpty())
-                failedDetailsCode = stripeAccount.Individual.Verification.DetailsCode.Replace("_", " ")
-                                                                                        .ToProperCase()
-                                                                                        .Replace(" ", "")
-                                                                                        .ParseEnum<StripeVerificationFailedCode>();
-
-            if (stripeAccount.Individual.Verification.Status.IsNotEmpty())
-                verificationStatus = stripeAccount.Individual.Verification.Status.Replace("_", " ")
-                                                                                        .ToProperCase()
-                                                                                        .Replace(" ", "")
-                                                                                        .ParseEnum<StripeVerificationStatus>();
-
             if (stripeAccount.IsNotEmpty())
                 return new PaymentsEntityViewModel()
                 {
@@ -138,8 +143,8 @@ namespace AfterSchool.Models
                     BankAccountId = stripeAccount.ExternalAccounts.FirstOrDefault()?.Id,
                     BankName = ((Stripe.BankAccount)stripeAccount.ExternalAccounts.FirstOrDefault())?.BankName,
                     BankLast4 = ((Stripe.BankAccount)stripeAccount.ExternalAccounts.FirstOrDefault())?.Last4,
-                    FailedDetailsCode = failedDetailsCode,
-                    VerificationStatus = verificationStatus,
+                    FailedDetailsCode = GetStripeVerificationFailedCode(stripeAccount),
+                    VerificationStatus = GetStripeVerificationStatus(stripeAccount),
                 };
 
             return new PaymentsEntityViewModel();
