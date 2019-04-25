@@ -2347,7 +2347,7 @@ namespace AfterSchoolLibrary.Services
             var oldPaymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
 
             if (account.HasAccountPackageFeatures(oldPaymentFeatures, msgs, dc))
-                return StripeAccount.CanProcessPayments(account.ID.Value, msgs, dc);
+                return account.StripeChargesEnabled;
 
             return true;
         }

@@ -34,7 +34,7 @@ namespace AfterSchoolLibraryTests.Tests
             var accountPackageFeature2 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.PaymentsPercentageFlatFee, .99M, msgs, dc);
             var accountPackageFeature3 = AccountPackageFeatureFactory.Create(accountPackage, FeatureType.UseStripeConnectedAccount, stripeConnectedAccountValue, msgs, dc);
 
-            billingAccount.CreateStripeCustomAccount(msgs, dc);
+            // billingAccount.CreateStripeCustomAccount(msgs, dc);
 
             var paymentPlan = SubscriptionPlanFactory.CreatePaymentPlan(billingAccount, activity, 100, 3, msgs, dc);
 
