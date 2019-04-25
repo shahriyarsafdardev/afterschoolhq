@@ -74,7 +74,7 @@ namespace AfterSchool.Models
         protected void HandleIsLoggedIn(HttpContextBase requestContext)
         {
             if (!IsLoggedIn())
-                requestContext.Response.Redirect("/login?url=" + requestContext.Server.UrlEncode(requestContext.Request.Url.PathAndQuery));
+                requestContext.Response.Redirect($"/login?returnurl={requestContext.Request.Url.PathAndQuery}");
         }
 
         protected void WriteOutput(object obj, ResponseType rt)

@@ -337,6 +337,8 @@ property: MaxGradeLevelOffered, int?, Int
 property: InviteCodeToShare, Guid, UniqueIdentifier
 property: CreditCardFeesPaidBy, FeesPaidByType, Int
 property: ConvenienceFeesPaidBy, FeesPaidByType, Int
+property: StripeChargesEnabled, bool, Bit
+property: StripePayoutsEnabled, bool, Bit
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName

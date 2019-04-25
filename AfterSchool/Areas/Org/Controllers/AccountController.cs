@@ -9,6 +9,7 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Services;
 using Hangfire;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -149,11 +150,12 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PaymentsOptions()
         {
-            var stripeAccount = SessionVariables.CurrentAccount.GetStripeAccount();
-            if (stripeAccount.IsNotEmpty() && stripeAccount.PayoutsEnabled)
+            var account = SessionVariables.CurrentAccount;
+
+            if (account.HasStripeConnectedAccount && account.StripePayoutsEnabled)
                 return RedirectToAction("paymentsentity");
 
-            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.Account = account;
             ViewBag.IsFullScreen = GetIsFullScreen();
             return View();
         }
@@ -215,175 +217,183 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult PaymentsEntity()
         {
             var msgs = new SystemMessages();
-            var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
-
-            if (stripeAccount.TOSAcceptanceDate.HasValue)
-                stripeAccount.GetLatestStripeAccountDetails(SessionVariables.CurrentAccount, msgs);
+            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs));
 
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(stripeAccount);
+            return View(paymentsEntityVM);
+        }
+
+        private void ValidateFile(System.Web.HttpPostedFileBase file, SystemMessages msgs)
+        {
+            if (file.IsEmpty())
+                return;
+
+            if (file.ContentLength == 0 || (file.ContentType != "image/jpeg" && file.ContentType != "image/png"))
+                msgs.Add("A valid Driver's License or Passport is required as either a jpg or a png", MessageType.UserError);
+            else if (ByteSizeLib.ByteSize.FromBytes(file.ContentLength).MegaBytes > 8)
+                msgs.Add("Your document must be less than 8 MBs", MessageType.UserError);
         }
 
         [HttpPost]
-        public ActionResult PaymentsEntity(string entityType, string firstName, string lastName, string address1, string address2, string city, string state, string postalCode, string dateOfBirth, string ssn, string ssnLast4, string legalbusinessname, string businessUrl, string supportphone, string supportemail, string businessPhone, string productDescription, string ein, string tosagree)
+        public ActionResult PaymentsEntity(PaymentsEntityViewModel paymentsEntityVM)
         {
             var msgs = new SystemMessages();
-            var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
-            var startingStatus = stripeAccount.VerificationStatusId;
-            var entityTypeId = (LegalEntityType)entityType.ToInteger();
+            var stripeAccount = SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs);
 
-            if (entityTypeId == LegalEntityType.Company)
+            if (paymentsEntityVM.BusinessType == LegalEntityType.NotSet)
+                msgs.Add("Please select your business type", MessageType.UserError);
+
+            if (paymentsEntityVM.BusinessType == LegalEntityType.Company)
             {
-                if (legalbusinessname.IsEmpty())
+                if (paymentsEntityVM.BusinessName.IsEmpty())
                     msgs.Add("Legal Business Name is required", MessageType.UserError);
-                if (ein.IsEmpty())
+
+                if (paymentsEntityVM.EIN.IsEmpty())
                     msgs.Add("Employer Identification Number is required", MessageType.UserError);
-            }
-            else
-            {
-                if (firstName.IsEmpty())
-                    msgs.Add("First Name is required", MessageType.UserError);
-                if (lastName.IsEmpty())
-                    msgs.Add("Last Name is required", MessageType.UserError);
-                if (dateOfBirth.IsEmpty() || !dateOfBirth.IsDate())
-                    msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
-                if (ssnLast4.IsEmpty() || !ssnLast4.IsNumber())
-                    msgs.Add("SSN(last 4) is required", MessageType.UserError);
+
+                if (paymentsEntityVM.BusinessPhone.IsEmpty())
+                    msgs.Add("Business Phone is required", MessageType.UserError);
             }
 
-            if (supportemail.IsEmpty())
-                msgs.Add("Support Email is required", MessageType.UserError);
-            if (supportphone.IsEmpty())
-                msgs.Add("Support Phone is required", MessageType.UserError);
-            if (address1.IsEmpty())
+            if (paymentsEntityVM.FirstName.IsEmpty())
+                msgs.Add("First Name is required", MessageType.UserError);
+
+            if (paymentsEntityVM.LastName.IsEmpty())
+                msgs.Add("Last Name is required", MessageType.UserError);
+
+            if (!paymentsEntityVM.DateOfBirth.HasValue)
+                msgs.Add("Date of Birth is required and must be a valid date", MessageType.UserError);
+
+            if (paymentsEntityVM.SSNLast4.IsEmpty() || !paymentsEntityVM.SSNLast4.IsNumber())
+                msgs.Add("SSN(last 4) is required", MessageType.UserError);            
+
+            if (paymentsEntityVM.PersonalEmail.IsEmpty())
+                msgs.Add("Email is required", MessageType.UserError);
+
+            if (paymentsEntityVM.PersonalPhone.IsEmpty())
+                msgs.Add("Phone is required", MessageType.UserError);
+
+            if (paymentsEntityVM.Address1.IsEmpty())
                 msgs.Add("Address 1 is required", MessageType.UserError);
-            if (city.IsEmpty())
+
+            if (paymentsEntityVM.City.IsEmpty())
                 msgs.Add("City is required", MessageType.UserError);
-            if (state.IsEmpty())
+
+            if (paymentsEntityVM.State.IsEmpty())
                 msgs.Add("State is required", MessageType.UserError);
-            if (postalCode.IsEmpty())
+
+            if (paymentsEntityVM.PostalCode.IsEmpty())
                 msgs.Add("Postal Code is required", MessageType.UserError);
 
-            if (!tosagree.IsBoolean() || !tosagree.ToBoolean())
+            if (!paymentsEntityVM.TOSAccept)
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
 
-            if (businessUrl.IsEmpty() && productDescription.IsEmpty())
+            if (paymentsEntityVM.BusinessUrl.IsEmpty() && paymentsEntityVM.ProductDescription.IsEmpty())
                 msgs.Add("You must enter either a website or a Service Description", MessageType.UserError);
 
-            if (stripeAccount.RequiresFullSSN)
-            {
-                if (ssn.IsEmpty())
-                    msgs.Add("SSN is required", MessageType.UserError);
+            if (PaymentsEntityViewModel.LoadFromStripeAccount(stripeAccount).RequiresFullSSN.IsTrue() && paymentsEntityVM.SSN.IsEmpty())
+                msgs.Add("SSN is required", MessageType.UserError);
 
-                if (!ssn.LastChars(4).IsSameAs(ssnLast4))
-                    msgs.Add("SSN and Last 4 of SSN must match", MessageType.UserError);
+            if (PaymentsEntityViewModel.LoadFromStripeAccount(stripeAccount).RequiresDocument.IsTrue())
+            {
+                if (Request.Files.Count < 2)
+                    msgs.Add("Please upload the front and back of your identification", MessageType.UserError);
+
+                ValidateFile(Request.Files[0], msgs);
+                ValidateFile(Request.Files[1], msgs);
             }
 
-            if (stripeAccount.RequiresDocument)
+            if (paymentsEntityVM.TOSAccept)
             {
-                if (Request.Files.Count == 0 || Request.Files[0].ContentLength == 0 || Request.Files[0].ContentType != "image/jpeg" && Request.Files[0].ContentType != "image/png")
-                    msgs.Add("A valid Driver's License or Passport is required as either a jpg or a png", MessageType.UserError);
-                else if (ByteSizeLib.ByteSize.FromBytes(Request.Files[0].ContentLength).MegaBytes > 8)
-                    msgs.Add("Your document must be less than 8 MBs", MessageType.UserError);
+                paymentsEntityVM.TOSAcceptanceDate = DateTime.UtcNow;
+                paymentsEntityVM.TOSAcceptanceIP = Request.UserHostAddress;
+                paymentsEntityVM.TOSAcceptanceUserAgent = Request.UserAgent;
             }
 
             if (msgs.HasNoErrors())
-            {                
-                stripeAccount.LastModifiedBy = SessionVariables.LoggedInUser.ID;
-                stripeAccount.LastModifiedDate = DateTime.UtcNow;
-                stripeAccount.LegalEntityAddress1 = address1;
-                stripeAccount.LegalEntityAddress2 = address2;
-                stripeAccount.LegalEntityCity = city;
-                stripeAccount.LegalEntityState = state;
-                stripeAccount.LegalEntityPostalCode = postalCode;
-                stripeAccount.LegalEntityTypeId = entityTypeId;
-                stripeAccount.SupportPhone = supportphone;
-                stripeAccount.SupportEmail = supportemail;
-                stripeAccount.BusinessUrl = businessUrl;
-                stripeAccount.BusinessPhone = businessPhone;
-                stripeAccount.ProductDescription = productDescription;
-
-                if (entityTypeId == LegalEntityType.Company)
+            {
+                if (PaymentsEntityViewModel.LoadFromStripeAccount(stripeAccount).RequiresDocument.IsTrue())
                 {
-                    stripeAccount.LegalEntityBusinessName = legalbusinessname;
-                    stripeAccount.LegalEntityEIN = ein;
+                    var documentFront = StripeHelper.UploadFile(
+                        Request.Files[0].InputStream,
+                        Request.Files[0].FileName,
+                        StripeFilePurpose.IdentityDocument,
+                        msgs);
+
+                    var documentBack = StripeHelper.UploadFile(
+                        Request.Files[1].InputStream,
+                        Request.Files[1].FileName,
+                        StripeFilePurpose.IdentityDocument,
+                        msgs);
+
+                    paymentsEntityVM.DocumentFrontId = documentFront.Id;
+                    paymentsEntityVM.DocumentBackId = documentBack.Id;
                 }
+
+                if (SessionVariables.CurrentAccount.StripeUserId.IsEmpty())
+                    SessionVariables.CurrentAccount.CreateStripeCustomAccount(
+                        paymentsEntityVM.GetStripeAccountCreateOptions(SessionVariables.CurrentAccount),
+                        msgs);
                 else
-                {
-                    stripeAccount.LegalEntityDOB = dateOfBirth.ToDateTime();
-                    stripeAccount.LegalEntityFirstName = firstName;
-                    stripeAccount.LegalEntityLastName = lastName;
-                    stripeAccount.LegalEntitySSNLast4 = ssnLast4;
-                }
-
-                if (tosagree.IsBoolean())
-                {
-                    stripeAccount.TOSAcceptanceDate = DateTime.UtcNow;
-                    stripeAccount.TOSAcceptanceIP = Request.UserHostAddress;
-                    stripeAccount.TOSAcceptanceUserAgent = Request.UserAgent.MaxChars(400);
-                }
-
-                StripeUploadFile uploadFile = null;
-
-                if (stripeAccount.RequiresDocument)
-                    uploadFile = new StripeUploadFile(Request.Files[0].InputStream, Request.Files[0].FileName, AfterSchoolLibrary.Billing.StripeFilePurpose.IdentityDocument);
-
-                stripeAccount.SaveAndSendLegalEntityToStripe(ssn, uploadFile, msgs);
+                    SessionVariables.CurrentAccount.UpdateStripeCustomAccount(
+                        paymentsEntityVM.GetStripeAccountUpdateOptions(SessionVariables.CurrentAccount),
+                        msgs);
             }
 
             if (msgs.HasNoErrors())
             {
                 msgs.Add("Your update information has been submitted.", MessageType.Success);
 
-                if (startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
-                    BackgroundJob.Enqueue(() => SessionVariables.CurrentAccount.SendStripeAccountVerified(null));
+                //if (startingStatus != stripeAccount.VerificationStatusId && stripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+                //    BackgroundJob.Enqueue(() => SessionVariables.CurrentAccount.SendStripeAccountVerified(null));
 
-                if (stripeAccount.LegalEntityTypeId == LegalEntityType.Company && stripeAccount.ChargesEnabled)
+                if (paymentsEntityVM.BusinessType == LegalEntityType.Company && stripeAccount.ChargesEnabled)
                     return RedirectToAction("paymentsbank", "account", new { isnew = Request["isnew"] });
             }
            
-
             ViewBag.Messages = msgs;
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(stripeAccount);
+            return View(PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs)));
         }
 
         [HttpGet]
         public ActionResult PaymentsBank()
         {
             var msgs = new SystemMessages();
-            var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
+            var paymentsEntityVM = PaymentsEntityViewModel.LoadFromStripeAccount(SessionVariables.CurrentAccount.GetStripeCustomAccount(msgs));
+
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(stripeAccount);
+            return View(paymentsEntityVM);
         }
 
         [HttpPost]
-        public ActionResult PaymentsBank(string routingnumber1, string routingnumber2, string accountnumber1, string accountnumber2)
+        public ActionResult PaymentsBank(PaymentsEntityViewModel paymentsEntityVM)
         {
             var msgs = new SystemMessages();
-            var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
-
-            if (routingnumber1.IsEmpty())
+            
+            if (paymentsEntityVM.BankRoutingNumber1.IsEmpty())
                 msgs.Add("Routing Number is required", MessageType.UserError);
-            if (routingnumber2.IsEmpty())
+            if (paymentsEntityVM.BankRoutingNumber2.IsEmpty())
                 msgs.Add("Confirm Routing Number is required", MessageType.UserError);
-            if (routingnumber1 != routingnumber2)
+            if (paymentsEntityVM.BankRoutingNumber1 != paymentsEntityVM.BankRoutingNumber2)
                 msgs.Add("Routing Numbers must match", MessageType.UserError);
 
-            if (accountnumber1.IsEmpty())
+            if (paymentsEntityVM.BankAccountNumber1.IsEmpty())
                 msgs.Add("Account Number is required", MessageType.UserError);
-            if (accountnumber2.IsEmpty())
+            if (paymentsEntityVM.BankAccountNumber2.IsEmpty())
                 msgs.Add("Confirm Account Number is required", MessageType.UserError);
-            if (accountnumber1 != accountnumber2)
+            if (paymentsEntityVM.BankAccountNumber1 != paymentsEntityVM.BankAccountNumber2)
                 msgs.Add("Account Numbers must match", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                stripeAccount.SaveAndSendBankInfoToStripe(routingnumber1, accountnumber1, msgs);
+                SessionVariables.CurrentAccount.UpdateStripeCustomAccount(
+                        paymentsEntityVM.GetStripeAccountUpdateOptions(SessionVariables.CurrentAccount),
+                        msgs);
 
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
                 return RedirectToAction("PaymentsDone");
@@ -391,20 +401,19 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(stripeAccount);
+            return View(paymentsEntityVM);
         }
 
         [HttpGet]
         public ActionResult PaymentsDone(string id)
         {
             var msgs = new SystemMessages();
-            var stripeAccount = SessionVariables.CurrentAccount.GetOrCreateStripeAccount(SessionVariables.LoggedInUser, msgs);
 
             ViewBag.HasActivities = SessionVariables.CurrentAccount.HasActivities(msgs);
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = GetIsFullScreen();
-            return View(stripeAccount);
+            return View();
         }
 
         [HttpGet]

@@ -16,5 +16,16 @@ namespace AfterSchoolLibraryTests.Factories
             msgs.AddRange(obj.Save(dc: dc));
             return obj;
         }
+
+        public static StripeAccount Create(Account account, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var obj = new StripeAccount()
+            {
+                AccountId = account.ID,
+                VerificationStatusId = StripeVerificationStatus.NotSet
+            };
+            msgs.AddRange(obj.Save(dc: dc));
+            return obj;
+        }
     }
 }

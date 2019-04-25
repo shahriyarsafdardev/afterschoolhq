@@ -559,15 +559,48 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static void CreateStripeCustomAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Stripe.Account UpdateStripeCustomAccount(this Account account, Stripe.AccountUpdateOptions options, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var stripeAccount = StripeHelper.CreateCustomAccount(account.Name, account.Email, LegalEntityType.Company, msgs);
+            var stripeAccount = StripeHelper.UpdateCustomAccount(account.StripeUserId, options, msgs);
 
-            if(stripeAccount.IsNotEmpty())
+            if (stripeAccount.IsNotEmpty())
+            {
+                account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
+                account.StripePayoutsEnabled = stripeAccount.PayoutsEnabled;
+                msgs.AddRange(account.Save(dc));
+            }
+
+            return stripeAccount;
+        }
+
+        public static Stripe.Account CreateStripeCustomAccount(this Account account, Stripe.AccountCreateOptions options, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var stripeAccount = StripeHelper.CreateCustomAccount(options, msgs);
+
+            if (stripeAccount.IsNotEmpty())
             {
                 account.StripeUserId = stripeAccount.Id;
                 msgs.AddRange(account.Save(dc));
+
+                account.UpdateStripeChargesAndPayouts(stripeAccount, msgs, dc);
             }
+
+            return stripeAccount;
+        }
+
+        public static void UpdateStripeChargesAndPayouts(this Account account, Stripe.Account stripeAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
+            account.StripePayoutsEnabled = stripeAccount.PayoutsEnabled;
+            msgs.AddRange(account.Save(dc));
+        }
+
+        public static Stripe.Account GetStripeCustomAccount(this Account account, SystemMessages msgs)
+        {
+            if (account.HasStripeConnectedAccount)
+                return StripeHelper.GetCustomAccount(account.StripeUserId, msgs);
+
+            return null;
         }
 
         private static void SetStripeCustomer(this Account account, Stripe.Customer customer, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1296,8 +1329,8 @@ namespace AfterSchoolLibrary.Services
                     account.AddPackage(packageId.Value, packageBillingPeriod.Value, loggedInUser, msgs, dc);
 
                 // create stripe custom account to allow account to receive payments
-                if (accountType != AccountType.AfterSchool && accountType != AccountType.Registrant && createWithStripe)
-                    account.CreateStripeCustomAccount(msgs, dc);
+                //if (accountType != AccountType.AfterSchool && accountType != AccountType.Registrant && createWithStripe)
+                //    account.CreateStripeCustomAccount(msgs, dc);
 
                 //create default form for account to use for registration
                 account.CreateDefaultForm(loggedInUser, msgs, dc);
@@ -1704,10 +1737,9 @@ namespace AfterSchoolLibrary.Services
 
         public static Payout RequestNewPayout(this Account account, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var stripeAccount = account.GetStripeAccount(msgs, dc);
             var paymentType = PaymentType.NotSet;
 
-            if (stripeAccount.PayoutsEnabled)
+            if (account.StripePayoutsEnabled)
                 paymentType = PaymentType.ACH;
             else
             {
@@ -2220,43 +2252,44 @@ namespace AfterSchoolLibrary.Services
             
         }
 
-        public static StripeAccount GetOrCreateStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var stripeAccount = account.GetStripeAccount(msgs, dc);
+        //[Obsolete]
+        //public static StripeAccount GetOrCreateStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
+        //    var stripeAccount = account.GetStripeAccount(msgs, dc);
 
-            if (stripeAccount.IsEmpty())
-            {
-                var location = account.GetDefaultLocation(msgs, dc);
+        //    if (stripeAccount.IsEmpty())
+        //    {
+        //        var location = account.GetDefaultLocation(msgs, dc);
 
-                stripeAccount = new StripeAccount()
-                {
-                    AccountId = account.ID,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                    LastModifiedDate = DateTime.UtcNow,
-                    LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    LegalEntityAddress1 = location?.Address1,
-                    LegalEntityAddress2 = location?.Address2,
-                    LegalEntityCity = location?.City,
-                    LegalEntityState = location?.State,
-                    LegalEntityPostalCode = location?.PostalCode,
-                    LegalEntityFirstName = loggedInUser.FirstName,
-                    LegalEntityLastName = loggedInUser.LastName,
-                    LegalEntityBusinessName = account.Name,
-                    SupportEmail = account.Email,
-                    SupportPhone = account.Phone
-                };
-                msgs.AddRange(stripeAccount.Save(dc));
-            }
+        //        stripeAccount = new StripeAccount()
+        //        {
+        //            AccountId = account.ID,
+        //            CreateDate = DateTime.UtcNow,
+        //            CreatedBy = loggedInUser?.ID.IfEmpty(0),
+        //            LastModifiedDate = DateTime.UtcNow,
+        //            LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+        //            LegalEntityAddress1 = location?.Address1,
+        //            LegalEntityAddress2 = location?.Address2,
+        //            LegalEntityCity = location?.City,
+        //            LegalEntityState = location?.State,
+        //            LegalEntityPostalCode = location?.PostalCode,
+        //            LegalEntityFirstName = loggedInUser.FirstName,
+        //            LegalEntityLastName = loggedInUser.LastName,
+        //            LegalEntityBusinessName = account.Name,
+        //            SupportEmail = account.Email,
+        //            SupportPhone = account.Phone
+        //        };
+        //        msgs.AddRange(stripeAccount.Save(dc));
+        //    }
 
-            return stripeAccount;
-        }
+        //    return stripeAccount;
+        //}
 
-        public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
-        }
+        //public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+        //}
 
         public static CheckPaymentAccount CreateOrUpdateCheckPaymentAccount(this Account account, LegalEntityType legalEntityType, string name, string address1, string address2, string city, string state, string postalCode, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
@@ -2314,20 +2347,15 @@ namespace AfterSchoolLibrary.Services
             var oldPaymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };
 
             if (account.HasAccountPackageFeatures(oldPaymentFeatures, msgs, dc))
-                return StripeAccount.CanProcessPayments(account.ID.Value, msgs, dc);
+                return account.StripeChargesEnabled;
 
             return true;
         }
 
         public static bool CanReceivePaymentDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var stripeAccount = account.GetStripeAccount(msgs, dc);
-            var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
-
-            if (stripeAccount.IsNotEmpty())
-                return stripeAccount.CanReceivePaymentDeposits() || checkAccount.IsNotEmpty();
-
-            return checkAccount.IsNotEmpty();
+            return (account.HasStripeConnectedAccount && account.StripePayoutsEnabled && account.StripeChargesEnabled) || 
+                account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty();
         }
 
         public static Stripe.Customer AddCustomerToConnectedAccount(this Account billingAccount, Account purchasingAccount, string stripeBillToSourceId, SystemMessages msgs)
@@ -2351,6 +2379,87 @@ namespace AfterSchoolLibrary.Services
                 trialEndDate: null,
                 stripeAccountId: billingAccount.StripeUserId,
                 stripeCouponId: stripeCouponId,
+                msgs: msgs);
+        }
+
+        public static decimal GetTotalPayoutAmount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Payout.GetTotalAmountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountBilledOut(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountBilledByBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
+        }
+
+        public static decimal GetTotalFeesPaidAsBiller(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
+        }
+
+        public static decimal GetTotalAmountRefundedTo(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, msgs, dc);
+        }
+
+        public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (plan.CostPerPeriod <= 0)
+                return 0;
+
+            decimal feeAmount = 0;
+            decimal billedCostPerPeriod = plan.CostPerPeriod.Value;
+
+            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+            {
+                var platformFeeAmount = billingAccount.CalculatePlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
+                var stripeFeeAmount = plan.GetStripeFeeAmountWithConnectedAccount();
+
+                if (platformFeeAmount > stripeFeeAmount)
+                    feeAmount = platformFeeAmount - stripeFeeAmount;
+                else
+                    feeAmount = 0;
+            }
+            else
+            {
+                feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
+
+                if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
+                    billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod, billingAccount);
+
+                if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
+                    billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);
+
+            }
+
+            return Math.Round(feeAmount / billedCostPerPeriod, 4);
+        }
+        public static void SendPayout(this Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var requestor = payout.GetRequestor(msgs, dc);
+            var metaData = new Dictionary<string, string>()
+                {
+                    { "AccountUid", account.Uid.ToString() },
+                    { "RequestedBy", requestor.Uid.ToString() },
+                    { "ApprovedBy", loggedInUser.Uid.ToString() },
+                    { "DateRequested", payout.DateRequested.ToShortDateTimeString() }
+                };
+
+            StripeHelper.CreateTransfer(
+                amount: payout.Amount.Value,
+                description: $"Transfer from AHQ to {account.Name} requested by {requestor.DisplayName} and approved by {loggedInUser.DisplayName}",
+                transferIdentifier: payout.Uid.ToString(),
+                destinationId: account.StripeUserId,
+                metaData: metaData,
+                msgs: msgs);
+
+            var stripeAccount = account.GetStripeCustomAccount(msgs);
+
+            StripeHelper.CreatePayout(
+                amount: payout.Amount.Value,
+                externalAccountId: stripeAccount.ExternalAccounts.First().Id,
+                connectedAccountId: account.StripeUserId,
+                metaData: metaData,
                 msgs: msgs);
         }
 
@@ -2588,59 +2697,6 @@ namespace AfterSchoolLibrary.Services
             );
 
             return accountActivityGroups;
-        }
-
-        public static decimal GetTotalPayoutAmount(this Account account, PayoutStatus? payoutStatus, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Payout.GetTotalAmountByAccountId(account.ID.Value, payoutStatus, startDate, endDate, msgs, dc);
-        }
-
-        public static decimal GetTotalAmountBilledOut(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Transaction.GetTotalAmountBilledByBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
-        }
-
-        public static decimal GetTotalFeesPaidAsBiller(this Account account, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Transaction.GetTotalFeesPaidByBillerAccount(account.ID.Value, startDate, endDate, msgs, dc);
-        }
-
-        public static decimal GetTotalAmountRefundedTo(this Account account, DateTime? startDate = null, DateTime? endDate = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Transaction.GetTotalAmountPaidByPayerAccount(account.ID.Value, startDate, endDate, msgs, dc);
-        }
-
-        public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (plan.CostPerPeriod <= 0)
-                return 0;
-
-            decimal feeAmount = 0;
-            decimal billedCostPerPeriod = plan.CostPerPeriod.Value;
-
-            if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-            {
-                var platformFeeAmount = billingAccount.CalculatePlatformFeeAmount(plan.CostPerPeriod.Value, msgs, dc);
-                var stripeFeeAmount = plan.GetStripeFeeAmountWithConnectedAccount();
-
-                if (platformFeeAmount > stripeFeeAmount)
-                    feeAmount = platformFeeAmount - stripeFeeAmount;
-                else
-                    feeAmount = 0;
-            }
-            else
-            {
-                feeAmount = Platform.GetTotalFees(plan.CostPerPeriod.Value, billingAccount);
-
-                if (!billingAccount.IsConvenienceFeeTakenOutOfCost)
-                    billedCostPerPeriod += Platform.GetConvenienceFee(billedCostPerPeriod, billingAccount);
-
-                if (!billingAccount.IsCreditCardFeeTakenOutOfCost)
-                    billedCostPerPeriod += Platform.GetCreditCardFee(billedCostPerPeriod, billingAccount);
-
-            }
-
-            return Math.Round(feeAmount / billedCostPerPeriod, 4);
         }
 
         public static bool IsProviderForOtherAccounts(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)

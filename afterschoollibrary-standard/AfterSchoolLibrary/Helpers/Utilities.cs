@@ -290,9 +290,10 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
+                    amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
 
-                    amsgs.AddRange(UpdateAccountPaidByTypes(adc));
-                    amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
+                    //amsgs.AddRange(UpdateAccountPaidByTypes(adc));
+                    //amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
 
                     // amsgs.AddRange(AddManageLeaguesFeatureType(adc));
 
@@ -351,7 +352,23 @@ namespace AfterSchoolLibrary.Helpers
             );            
 
             return msgs;
-        }        
+        }
+
+        public static SystemMessages MigrateChargesAndPayoutsEnabled(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var stripeAccounts = StripeAccount.Load(null, null, null, msgs, dc);
+
+            stripeAccounts.ForEach(stripeAccount => 
+            {
+                var account = stripeAccount.GetAccount(msgs, dc);
+                account.StripeChargesEnabled = stripeAccount.ChargesEnabled;
+                account.StripePayoutsEnabled = stripeAccount.PayoutsEnabled;
+                msgs.AddRange(account.Save(dc));
+            });
+
+            return msgs;
+        }
 
         public static SystemMessages UpdateAccountPaidByTypes(DatabaseConnection dc = null)
         {
