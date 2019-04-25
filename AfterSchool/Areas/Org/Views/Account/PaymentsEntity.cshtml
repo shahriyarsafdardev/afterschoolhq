@@ -193,7 +193,8 @@
                                                id="entitytype-individual"
                                                value="@((int)LegalEntityType.Individual)"
                                                onclick="showIndividual()"
-                                               @(Model.BusinessType == LegalEntityType.Individual ? " checked=\"checked\"" : "") />
+                                               @(Model.BusinessType == LegalEntityType.Individual ? " checked=\"checked\"" : "") 
+                                               @disabled />
                                         <label for="entitytype-individual">Yes</label>
                                     </div>
                                     <div class="am-radio inline">
@@ -202,7 +203,8 @@
                                                id="entitytype-company"
                                                value=""
                                                onclick="hideAll()"
-                                               @(Model.BusinessType == LegalEntityType.Company ? " checked=\"checked\"" : "") />
+                                               @(Model.BusinessType == LegalEntityType.Company ? " checked=\"checked\"" : "") 
+                                               @disabled />
                                         <label for="entitytype-company">No</label>
                                     </div>
                                 }
