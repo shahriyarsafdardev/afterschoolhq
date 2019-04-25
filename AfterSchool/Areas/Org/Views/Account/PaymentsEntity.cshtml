@@ -176,15 +176,17 @@
                 { 
                     <form method="post" action="@Url.Action("paymentsentity", "account", new { isnew = Request["isnew"] })" class="form-horizontal" enctype="multipart/form-data">
 
-                        <div role="alert" class="alert alert-info alert-icon">
-                            <div class="icon">
-                                <span class="s7-close-circle"></span>
+                        @if (!Model.ChargesEnabled && Model.VerificationStatus != StripeVerificationStatus.Pending)
+                        { 
+                            <div role="alert" class="alert alert-info alert-icon">
+                                <div class="icon">
+                                    <span class="s7-close-circle"></span>
+                                </div>
+                                <div class="message">
+                                    <p class="text-muted">If you're a for-profit company (partnership, LLC, or corporation) please email us at <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a> to enable Direct Deposits or <a href="@Url.Action("checksetup", "account")">enable payouts via check</a></p>
+                                </div>
                             </div>
-                            <div class="message">
-                                <p class="text-muted">If you're a for-profit company (partnership, LLC, or corporation) please email us at <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a> to enable Direct Deposits or <a href="@Url.Action("checksetup", "account")">enable payouts via check</a></p>
-                            </div>
-                        </div>
-
+                        }
                         <div class="form-group">
                             <div class="text-center">
 
