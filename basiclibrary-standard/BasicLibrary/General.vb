@@ -1186,8 +1186,89 @@ Public Class Utilities
         Return "Alabama,Alaska,Arizona,Arkansas,California,Colorado,Connecticut,Delaware,Florida,Georgia,Hawaii,Idaho,Illinois,Indiana,Iowa,Kansas,Kentucky,Louisiana,Maine,Maryland,Massachusetts,Michigan,Minnesota,Mississippi,Missouri,Montana,Nebraska,Nevada,New Hampshire,New Jersey,New Mexico,New York,North Carolina,North Dakota,Ohio,Oklahoma,Oregon,Pennsylvania,Rhode Island,South Carolina,South Dakota,Tennessee,Texas,Utah,Vermont,Virginia,Washington,West Virginia,Wisconsin,Wyoming"
     End Function
 
+    Public Shared Function GetStates() As List(Of State)
+        Dim states = New List(Of State)
+        states.Add(New State("Alabama", "AL"))
+        states.Add(New State("Alaska", "AK"))
+        states.Add(New State("Arizona", "AZ"))
+        states.Add(New State("Arkansas", "AR"))
+        states.Add(New State("California", "CA"))
+        states.Add(New State("Colorado", "CO"))
+        states.Add(New State("Connecticut", "CT"))
+        states.Add(New State("Delaware", "DE"))
+        states.Add(New State("Florida", "FL"))
+        states.Add(New State("Georgia", "GA"))
+        states.Add(New State("Hawaii", "HI"))
+        states.Add(New State("Idaho", "ID"))
+        states.Add(New State("Illinois", "IL"))
+        states.Add(New State("Indiana", "IN"))
+        states.Add(New State("Iowa", "IA"))
+        states.Add(New State("Kansas", "KS"))
+        states.Add(New State("Kentucky", "KY"))
+        states.Add(New State("Louisiana", "LA"))
+        states.Add(New State("Maine", "ME"))
+        states.Add(New State("Maryland", "MD"))
+        states.Add(New State("Massachusetts", "MA"))
+        states.Add(New State("Michigan", "MI"))
+        states.Add(New State("Minnesota", "MN"))
+        states.Add(New State("Mississippi", "MS"))
+        states.Add(New State("Missouri", "MO"))
+        states.Add(New State("Montana", "MT"))
+        states.Add(New State("Nebraska", "ME"))
+        states.Add(New State("Nevada", "NV"))
+        states.Add(New State("New Hampshire", "NH"))
+        states.Add(New State("New Jersey", "NJ"))
+        states.Add(New State("New Mexico", "NM"))
+        states.Add(New State("New York", "NY"))
+        states.Add(New State("North Carolina", "NC"))
+        states.Add(New State("North Dakota", "ND"))
+        states.Add(New State("Ohio", "OH"))
+        states.Add(New State("Oklahoma", "OK"))
+        states.Add(New State("Oregon", "OR"))
+        states.Add(New State("Pennsylvania", "PA"))
+        states.Add(New State("Rhode Island", "RI"))
+        states.Add(New State("South Carolina", "SC"))
+        states.Add(New State("South Dakota", "SD"))
+        states.Add(New State("Tennessee", "TN"))
+        states.Add(New State("Texas", "TX"))
+        states.Add(New State("Utah", "UT"))
+        states.Add(New State("Vermont", "VT"))
+        states.Add(New State("Virginia", "VA"))
+        states.Add(New State("Washington", "WA"))
+        states.Add(New State("West Virginia", "WV"))
+        states.Add(New State("Wisconsin", "WI"))
+        states.Add(New State("Wyoming", "WY"))
+        Return states
+    End Function
+
 End Class
 
+Public Class State
+    Private _Name As String
+    Public Property Name() As String
+        Get
+            Return _Name
+        End Get
+        Set(ByVal value As String)
+            _Name = value
+        End Set
+    End Property
+
+    Private _Abbreviation As String
+    Public Property Abbreviation() As String
+        Get
+            Return _Abbreviation
+        End Get
+        Set(ByVal value As String)
+            _Abbreviation = value
+        End Set
+    End Property
+
+    Public Sub New(ByVal name As String, ByVal abbreviation As String)
+        Me.Name = name
+        Me.Abbreviation = abbreviation
+    End Sub
+End Class
 
 ''' <summary>
 ''' Provides methods for converting <see cref="DateTime"/> structures to and from the equivalent RFC 3339 string representation.

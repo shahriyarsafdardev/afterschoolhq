@@ -94,7 +94,6 @@ namespace AfterSchoolLibrary.Helpers
             var subscription = checkoutObject.SubscriptionPlan;
             var registrant = checkoutObject.MasterRegistrant;
             var parentOrGuardian = registrant.GetParentOrGuardian(msgs);
-            var stripeAccount = billingAccount.GetStripeAccount(msgs);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs);
 
             var receiptRows = "";

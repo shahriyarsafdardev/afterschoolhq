@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace AfterSchoolLibrary
+namespace AfterSchoolLibrary.Models
 {
     public class StripeUploadFile
     {

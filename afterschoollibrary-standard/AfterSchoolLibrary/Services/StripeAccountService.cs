@@ -7,13 +7,16 @@ using System.Collections.Generic;
 
 namespace AfterSchoolLibrary.Services
 {
+    [Obsolete]
     public static class StripeAccountService
     {
+        [Obsolete]
         public static bool CanReceivePaymentDeposits(this StripeAccount stripeAccount)
         {
             return stripeAccount.ChargesEnabled && stripeAccount.PayoutsEnabled;
         }
 
+        [Obsolete]
         public static void SaveAndSendBankInfoToStripe(this StripeAccount ahqStripeAccount, string routingNumber, string accountNumber, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -41,6 +44,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Your bank account info has been saved", MessageType.Success);
         }
 
+        [Obsolete]
         public static void GetLatestStripeAccountDetails(this StripeAccount stripeAccount, Account account = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (account.IsEmpty())
@@ -51,53 +55,55 @@ namespace AfterSchoolLibrary.Services
             stripeAccount.ParseAndUpdateStripeCustomAccount(stripeStripeAccount, null, msgs, dc);
         }
 
-        public static void SaveAndSendLegalEntityToStripe(this StripeAccount ahqStripeAccount, string fullSSN, StripeUploadFile document, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if(msgs.IsEmpty()) msgs = new SystemMessages();
+        //[Obsolete]
+        //public static void SaveAndSendLegalEntityToStripe(this StripeAccount ahqStripeAccount, string fullSSN, StripeUploadFile document, SystemMessages msgs = null, DatabaseConnection dc = null)
+        //{
+        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var account = ahqStripeAccount.GetAccount(msgs, dc);
+        //    var account = ahqStripeAccount.GetAccount(msgs, dc);
 
-            Stripe.File stripeFileUpload = null;
+        //    Stripe.File stripeFileUpload = null;
 
-            if (ahqStripeAccount.RequiresDocument)
-                stripeFileUpload = StripeHelper.UploadFile(document, msgs);
+        //    if (ahqStripeAccount.RequiresDocument)
+        //        stripeFileUpload = StripeHelper.UploadFile(document, msgs);
 
-            if (msgs.HasErrors())
-                return;
+        //    if (msgs.HasErrors())
+        //        return;
 
-            if (account.StripeUserId.IsEmpty())
-                account.CreateStripeCustomAccount(msgs, dc);
+        //    if (account.StripeUserId.IsEmpty())
+        //        account.CreateStripeCustomAccount(msgs, dc);
 
-            var stripeAccount = StripeHelper.UpdateCustomAccountLegalEntity(
-                stripeAccountId: account.StripeUserId,
-                entityType: ahqStripeAccount.LegalEntityTypeId,
-                firstName: ahqStripeAccount.LegalEntityFirstName,
-                lastName: ahqStripeAccount.LegalEntityLastName,
-                ssnLast4: ahqStripeAccount.LegalEntitySSNLast4,
-                fullSSN: fullSSN,
-                dateOfBirth: ahqStripeAccount.LegalEntityDOB,
-                address1: ahqStripeAccount.LegalEntityAddress1,
-                address2: ahqStripeAccount.LegalEntityAddress2,
-                city: ahqStripeAccount.LegalEntityCity,
-                state: ahqStripeAccount.LegalEntityState,
-                postalCode: ahqStripeAccount.LegalEntityPostalCode,
-                supportPhone: ahqStripeAccount.SupportPhone,
-                supportEmail: ahqStripeAccount.SupportEmail,
-                businessName: ahqStripeAccount.LegalEntityBusinessName,
-                ein: ahqStripeAccount.LegalEntityEIN,
-                businessUrl: ahqStripeAccount.BusinessUrl,
-                businessPhone: ahqStripeAccount.BusinessPhone,
-                productDescription: ahqStripeAccount.ProductDescription,
-                documentFileId: stripeFileUpload?.Id,
-                tosAcceptanceDate: ahqStripeAccount.TOSAcceptanceDate.Value,
-                tosIPAddress: ahqStripeAccount.TOSAcceptanceIP,
-                tosUserAgent: ahqStripeAccount.TOSAcceptanceUserAgent,
-                msgs: msgs);
+        //    var stripeAccount = StripeHelper.UpdateCustomAccountLegalEntity(
+        //        stripeAccountId: account.StripeUserId,
+        //        entityType: ahqStripeAccount.LegalEntityTypeId,
+        //        firstName: ahqStripeAccount.LegalEntityFirstName,
+        //        lastName: ahqStripeAccount.LegalEntityLastName,
+        //        ssnLast4: ahqStripeAccount.LegalEntitySSNLast4,
+        //        fullSSN: fullSSN,
+        //        dateOfBirth: ahqStripeAccount.LegalEntityDOB,
+        //        address1: ahqStripeAccount.LegalEntityAddress1,
+        //        address2: ahqStripeAccount.LegalEntityAddress2,
+        //        city: ahqStripeAccount.LegalEntityCity,
+        //        state: ahqStripeAccount.LegalEntityState,
+        //        postalCode: ahqStripeAccount.LegalEntityPostalCode,
+        //        supportPhone: ahqStripeAccount.SupportPhone,
+        //        supportEmail: ahqStripeAccount.SupportEmail,
+        //        businessName: ahqStripeAccount.LegalEntityBusinessName,
+        //        ein: ahqStripeAccount.LegalEntityEIN,
+        //        businessUrl: ahqStripeAccount.BusinessUrl,
+        //        businessPhone: ahqStripeAccount.BusinessPhone,
+        //        productDescription: ahqStripeAccount.ProductDescription,
+        //        documentFileId: stripeFileUpload?.Id,
+        //        tosAcceptanceDate: ahqStripeAccount.TOSAcceptanceDate.Value,
+        //        tosIPAddress: ahqStripeAccount.TOSAcceptanceIP,
+        //        tosUserAgent: ahqStripeAccount.TOSAcceptanceUserAgent,
+        //        msgs: msgs);
 
-            if (msgs.HasNoErrors())
-                ahqStripeAccount.ParseAndUpdateStripeCustomAccount(stripeAccount, stripeFileUpload, msgs, dc);
-        }
+        //    if (msgs.HasNoErrors())
+        //        ahqStripeAccount.ParseAndUpdateStripeCustomAccount(stripeAccount, stripeFileUpload, msgs, dc);
+        //}
 
+        [Obsolete]
         public static void ParseAndUpdateStripeCustomAccount(this StripeAccount ahqStripeAccount, Stripe.Account stripeAccount, Stripe.File stripeFileUpload, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var json = stripeAccount.StripeResponse.ObjectJson;
@@ -118,9 +124,9 @@ namespace AfterSchoolLibrary.Services
                         msgs.Add("It has been determined that a scan of a Valid Driver's license or Passport is required to be uploaded in order to process payments. Please update your information.", MessageType.Warning);
                         break;
                 }
-                
+
             }
-            
+
             ahqStripeAccount.VerificationDueBy = stripeAccount.Requirements.CurrentDeadline;
             ahqStripeAccount.PayoutsEnabled = stripeAccount.PayoutsEnabled;
             ahqStripeAccount.ChargesEnabled = stripeAccount.ChargesEnabled;
@@ -143,7 +149,7 @@ namespace AfterSchoolLibrary.Services
                 if (stripeAccount.Individual.Verification.Status != null)
                     ahqStripeAccount.VerificationStatusId = stripeAccount.Individual.Verification.Status.ParseEnum<StripeVerificationStatus>();
             }
-            
+
 
             if (ahqStripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
                 msgs.Add("Your account is now verified", MessageType.Notice);
@@ -154,11 +160,13 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(ahqStripeAccount.Save(dc));
         }
 
+        [Obsolete]
         public static Account GetAccount(this StripeAccount stripeAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Account.Load(stripeAccount.AccountId.Value, msgs, dc);
         }
 
+        [Obsolete]
         public static void SendPayout(this StripeAccount stripeAccount, Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var requestor = payout.GetRequestor(msgs, dc);
@@ -181,8 +189,8 @@ namespace AfterSchoolLibrary.Services
             StripeHelper.CreatePayout(
                 amount: payout.Amount.Value,
                 externalAccountId: stripeAccount.BankAccountId,
-                connectedAccountId: account.StripeUserId, 
-                metaData: metaData, 
+                connectedAccountId: account.StripeUserId,
+                metaData: metaData,
                 msgs: msgs);
         }
     }

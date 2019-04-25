@@ -88,6 +88,43 @@ namespace AfterSchoolLibrary.Billing
             return account;
         }
 
+        public static Stripe.Account CreateCustomAccount(AccountCreateOptions options, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Stripe.Account account = null;
+
+            try
+            {
+                account = GetAccountService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error creating payment account", MessageType.UserError);
+            }
+
+            return account;
+        }
+
+        public static Stripe.Account UpdateCustomAccount(string stripeAccountId, AccountUpdateOptions options, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Stripe.Account account = null;
+
+            try
+            {
+                account = GetAccountService().Update(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error updating payment account", MessageType.UserError);
+            }
+
+            return account;
+        }
+
+        [Obsolete]
         public static Stripe.Account CreateCustomAccount(string businessName, string email, LegalEntityType entityType, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -247,6 +284,33 @@ namespace AfterSchoolLibrary.Billing
 
         #endregion
 
+        #region StripePerson
+
+        private static PersonService GetPersonService()
+        {
+            return new PersonService(StripeAccessToken);
+        }
+
+        public static Stripe.Person CreatePerson(string stripeAccountId, PersonCreateOptions options, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Stripe.Person person = null;
+
+            try
+            {
+                person = GetPersonService().Create(stripeAccountId, options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Error creating payment account", MessageType.UserError);
+            }
+
+            return person;
+        }
+
+        #endregion
+
         #region StripeTransfer
 
         private static TransferService GetTransferService()
@@ -333,11 +397,6 @@ namespace AfterSchoolLibrary.Billing
         private static FileService GetFileUploadService()
         {
             return new FileService(StripeAccessToken);
-        }
-
-        public static Stripe.File UploadFile(StripeUploadFile stripeUploadFile, SystemMessages msgs)
-        {
-            return UploadFile(stripeUploadFile.Document, stripeUploadFile.FileName, stripeUploadFile.Purpose, msgs);
         }
 
         public static Stripe.File UploadFile(Stream file, string filename, StripeFilePurpose purpose, SystemMessages msgs)
