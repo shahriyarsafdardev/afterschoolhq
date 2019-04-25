@@ -95,10 +95,8 @@ namespace AfterSchoolLibrary.Services
             if (payout.PaymentTypeId == PaymentType.ACH)
             {
                 // send money via stripe
-                var stripeAccount = account.GetStripeAccount(msgs, dc);
-                if (stripeAccount.IsNotEmpty())
-                    stripeAccount.SendPayout(
-                        account: account,
+                if (account.CanReceivePaymentDeposits())
+                    account.SendPayout(
                         payout: payout,
                         loggedInUser: loggedInUser,
                         msgs: msgs,

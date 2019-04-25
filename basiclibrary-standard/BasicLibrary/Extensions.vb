@@ -10,6 +10,11 @@ Imports System.Data
 Public Module Extensions
 
     <Extension>
+    Public Function IsTrue(ByVal aBool As Boolean?) As Boolean
+        Return aBool.HasValue AndAlso aBool.Value
+    End Function
+
+    <Extension>
     Public Function IsPhone(ByVal aString As String) As Boolean
         Return aString.IsNotEmpty() AndAlso aString.IsRegExMatch(Utilities.PhoneRegEx)
     End Function

@@ -3,7 +3,6 @@
     var account = (Account)ViewBag.Account;
     var msgs = (SystemMessages)ViewBag.Messages;
     var isFullScreen = (bool)ViewBag.IsFullScreen;
-    var stripeAccount = account.GetStripeAccount();
 
     ViewBag.Title = account.Name;
 
@@ -59,7 +58,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    @if (stripeAccount.IsEmpty() || !stripeAccount.PayoutsEnabled)
+                                    @if (!account.HasStripeConnectedAccount || !account.StripePayoutsEnabled)
                                     {
                                         <a href="@Url.Action("paymentsentity", "account", new { isnew = 1 })" class="btn btn-alt5 btn-xl btn-block">
                                             Choose Direct Deposits &raquo;

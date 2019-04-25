@@ -4,6 +4,9 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
 using System.Collections.Generic;
+using System;
+using AfterSchoolLibrary.Billing;
+using BasicLibrary;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -325,6 +328,226 @@ namespace AfterSchoolLibraryTests.Tests
             var accountPackageFeature = AccountPackageFeatureFactory.Create(accountPackage, featureType, value, msgs, dc);
 
             Assert.Equal(expectedResult, account.HasAccountPackageFeature(featureType, msgs, dc));
+        }
+
+        [Fact]
+        public void CreateStripeCustomAccountTestIndividual()
+        {
+            // school mcc code: 8211
+            // educational services: 8299
+
+            var accountOwner = WebUserFactory.Create(msgs, dc);
+            var account = AccountFactory.Create(accountOwner, msgs, dc);
+            var dob = DateTime.UtcNow.AddYears(-25);
+
+            var createOptions = new Stripe.AccountCreateOptions()
+            {
+                Type = "custom",
+                Country = "US",
+                DefaultCurrency = "usd",
+                Email = "test@test.com",
+                BusinessProfile = new Stripe.AccountBusinessProfileOptions()
+                {
+                    Url = "www.thebluehouse.co",
+                    //SupportEmail = "support@email.com",
+                    //SupportPhone = "317-316-0596",
+                    //SupportUrl = "www.support.com",
+                    Mcc = "8299",
+                    Name = "The Blue House"
+                },
+                BusinessType = LegalEntityType.Individual.ToString().ToLower(),
+                Individual = new Stripe.PersonCreateOptions()
+                {
+                    Address = new Stripe.AddressOptions()
+                    {
+                        City = "Fishers",
+                        Line1 = "10864 Knightsbridge Lane",
+                        Line2 = "",
+                        Country = "US",
+                        PostalCode = "46037",
+                        State = "IN"
+                    },
+                    FirstName = "Darye",
+                    LastName = "Henry",
+                    Phone = "317-809-2345",
+                    SSNLast4 = "0000",
+                    Email = "darye@darye.com",
+                    Dob = new Stripe.DobOptions()
+                    {
+                        Day = dob.Day,
+                        Month = dob.Month,
+                        Year = dob.Year
+                    },
+                },                
+                Settings = new Stripe.AccountSettingsOptions()
+                {
+                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
+                    {
+                        DebitNegativeBalances = true,
+                        StatementDescriptor = "AHQ transfer".MaxChars(22),
+                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = "manual",
+                        }
+                    }
+                },
+                RequestedCapabilities = new List<string>() { "card_payments" },
+                TosAcceptance = new Stripe.AccountTosAcceptanceOptions()
+                {
+                    Date = DateTime.UtcNow,
+                    Ip = "1.1.1.1",
+                    UserAgent = "Chrome"
+                },
+                ExternalBankAccount = new Stripe.AccountBankAccountOptions()
+                {
+                    RoutingNumber = "110000000",
+                    AccountNumber = "000123456789",
+                    Country = "US"
+                }
+            };
+
+            var stripeAccount = account.CreateStripeCustomAccount(createOptions, msgs, dc);
+
+            stripeAccount = account.GetStripeCustomAccount(msgs);
+
+            msgs.Add($"Status: {stripeAccount.Individual.Verification.Status}", MessageType.Warning);
+
+            stripeAccount.Requirements.CurrentlyDue.ForEach(field =>
+            {
+                switch ((string)field)
+                {
+                    case "legal_entity.personal_id_number":
+                        msgs.Add("It has been determined your Full SSN required in order to process payments. Please update your information.", MessageType.Warning);
+                        break;
+                    case "legal_entity.verification.document":
+                        msgs.Add("It has been determined that a scan of a Valid Driver's license or Passport is required to be uploaded in order to process payments. Please update your information.", MessageType.Warning);
+                        break;
+                    default:
+                        msgs.Add($"{field}", MessageType.Warning);
+                        break;
+                }
+            });
+
+            Assert.True(msgs.HasNoErrors() && msgs.HasNo(new MessageType[] { MessageType.Warning }));
+        }
+
+        [Fact]
+        public void CreateStripeCustomAccountTestCompany()
+        {
+            // school mcc code: 8211
+            // educational services: 8299
+
+            var createOptions = new Stripe.AccountCreateOptions()
+            {
+                Type = "custom",
+                Country = "US",
+                DefaultCurrency = "usd",
+                Email = "test@test.com",
+                BusinessProfile = new Stripe.AccountBusinessProfileOptions()
+                {
+                    Url = "www.thebluehouse.co",
+                    //SupportEmail = "support@email.com",
+                    //SupportPhone = "317-316-0596",
+                    //SupportUrl = "www.support.com",
+                    Mcc = "8299"
+                },
+                BusinessType = LegalEntityType.Company.ToString().ToLower(),
+                Company = new Stripe.AccountCompanyOptions()
+                {
+                    Address = new Stripe.AddressOptions()
+                    {
+                        City = "Fishers",
+                        Line1 = "12175 Visionary Way",
+                        Line2 = "#710",
+                        Country = "US",
+                        PostalCode = "46038",
+                        State = "IN"
+                    },
+                    Phone = "317-316-0596",
+                    TaxId = "23-1231233",
+                    Name = "The Blue House"
+                },
+                Settings = new Stripe.AccountSettingsOptions()
+                {
+                    Payouts = new Stripe.AccountSettingsPayoutsOptions()
+                    {
+                        DebitNegativeBalances = true,
+                        StatementDescriptor = "AHQ transfer".MaxChars(22),
+                        Schedule = new Stripe.AccountSettingsPayoutsScheduleOptions()
+                        {
+                            Interval = "manual",
+                        }
+                    }
+                },
+                RequestedCapabilities = new List<string>() { "card_payments" },
+                TosAcceptance = new Stripe.AccountTosAcceptanceOptions()
+                {
+                    Date = DateTime.UtcNow,
+                    Ip = "1.1.1.1",
+                    UserAgent = "Chrome"
+                },
+                ExternalBankAccount = new Stripe.AccountBankAccountOptions()
+                {
+                    RoutingNumber = "110000000",
+                    AccountNumber = "000123456789",
+                    Country = "US"
+                }
+            };
+
+            var stripeAccount = StripeHelper.CreateCustomAccount(createOptions, msgs);
+
+            var dob = DateTime.UtcNow.AddYears(-25);
+            var personCreateOptions = new Stripe.PersonCreateOptions()
+            {
+                FirstName = "Darye",
+                LastName = "Henry",
+                Phone = "317-809-2345",
+                SSNLast4 = "0000",
+                Email = "darye@darye.com",
+                Dob = new Stripe.DobOptions()
+                {
+                    Day = dob.Day,
+                    Month = dob.Month,
+                    Year = dob.Year
+                },
+                Relationship = new Stripe.PersonRelationshipOptions()
+                {
+                    AccountOpener = true,
+                    Title = "President",
+                    Owner = true,
+                    PercentOwnership = 100
+                },
+                Address = new Stripe.AddressOptions()
+                {
+                    City = "Fishers",
+                    Line1 = "12175 Visionary Way",
+                    Line2 = "#710",
+                    Country = "US",
+                    PostalCode = "46038",
+                    State = "IN"
+                },
+            };
+
+            var accountCreator = StripeHelper.CreatePerson(stripeAccount.Id, personCreateOptions, msgs);
+
+            stripeAccount = StripeHelper.GetCustomAccount(stripeAccount.Id, msgs);
+            stripeAccount.Requirements.CurrentlyDue.ForEach(field =>
+            {
+                switch ((string)field)
+                {
+                    case "legal_entity.personal_id_number":
+                        msgs.Add("It has been determined your Full SSN required in order to process payments. Please update your information.", MessageType.Warning);
+                        break;
+                    case "legal_entity.verification.document":
+                        msgs.Add("It has been determined that a scan of a Valid Driver's license or Passport is required to be uploaded in order to process payments. Please update your information.", MessageType.Warning);
+                        break;
+                    default:
+                        msgs.Add($"{field}", MessageType.Warning);
+                        break;
+                }
+            });
+
+            Assert.True(msgs.HasNoErrors() && msgs.HasNo(new MessageType[] { MessageType.Warning }));
         }
     }
 }

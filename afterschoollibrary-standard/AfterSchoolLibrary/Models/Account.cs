@@ -42,6 +42,8 @@ namespace AfterSchoolLibrary.Models
 		public Guid InviteCodeToShare { get { return (Guid)MDV["InviteCodeToShare"].Value; } set { MDV["InviteCodeToShare"].Value = value; } }
 		public FeesPaidByType CreditCardFeesPaidBy { get { return (FeesPaidByType)MDV["CreditCardFeesPaidBy"].Value; } set { MDV["CreditCardFeesPaidBy"].Value = value; } }
 		public FeesPaidByType ConvenienceFeesPaidBy { get { return (FeesPaidByType)MDV["ConvenienceFeesPaidBy"].Value; } set { MDV["ConvenienceFeesPaidBy"].Value = value; } }
+		public bool StripeChargesEnabled { get { return (bool)MDV["StripeChargesEnabled"].Value; } set { MDV["StripeChargesEnabled"].Value = value; } }
+		public bool StripePayoutsEnabled { get { return (bool)MDV["StripePayoutsEnabled"].Value; } set { MDV["StripePayoutsEnabled"].Value = value; } }
 		
 
         public Account()
@@ -56,6 +58,8 @@ namespace AfterSchoolLibrary.Models
 			this.InviteCodeToShare = Guid.NewGuid();
 			this.CreditCardFeesPaidBy = FeesPaidByType.NotSet;
 			this.ConvenienceFeesPaidBy = FeesPaidByType.NotSet;
+			this.StripeChargesEnabled = false;
+			this.StripePayoutsEnabled = false;
 			
         }
 
@@ -84,6 +88,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "InviteCodeToShare", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "CreditCardFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
+				_dp.Add(className, "StripeChargesEnabled", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "StripePayoutsEnabled", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -233,6 +239,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["ConvenienceFeesPaidBy"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripeChargesEnabled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["StripePayoutsEnabled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -312,6 +326,14 @@ namespace AfterSchoolLibrary.Models
         #endregion
 
 		#region "UserDefined"
+
+        public bool HasStripeConnectedAccount
+        {
+            get
+            {
+                return StripeUserId.IsNotEmpty();
+            }
+        }
 
         public bool IsSchool
         {

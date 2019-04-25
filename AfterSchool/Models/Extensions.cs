@@ -19,15 +19,15 @@ namespace AfterSchool.Models
             return new FormQuestionViewModel(question);
         }
 
-        public static AddressViewModel ToAddressViewModel(this StripeAccount stripeAccount)
+        public static AddressViewModel ToAddressViewModel(this PaymentsEntityViewModel paymentsEntityVM)
         {
             return new AddressViewModel()
             {
-                Address1 = stripeAccount.LegalEntityAddress1,
-                Address2 = stripeAccount.LegalEntityAddress2,
-                City = stripeAccount.LegalEntityCity,
-                State = stripeAccount.LegalEntityState,
-                PostalCode = stripeAccount.LegalEntityPostalCode
+                Address1 = paymentsEntityVM.Address1,
+                Address2 = paymentsEntityVM.Address2,
+                City = paymentsEntityVM.City,
+                State = paymentsEntityVM.State,
+                PostalCode = paymentsEntityVM.PostalCode
             };
         }
 

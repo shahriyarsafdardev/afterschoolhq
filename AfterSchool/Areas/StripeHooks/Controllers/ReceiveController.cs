@@ -95,26 +95,22 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             }
 
             msgs.Add("Getting stripeAccount", MessageType.Notice);
-            var ahqStripeAccount = account.GetStripeAccount(msgs);
 
-            if (ahqStripeAccount.IsEmpty())
+            if (!account.HasStripeConnectedAccount)
             {
                 msgs.Add("No stripe account yet", MessageType.Notice);
                 return ReturnOK(msgs);
             }            
 
             msgs.Add("Getting serializedAccountJson", MessageType.Notice);
-            var serializedAccountJson = JsonConvert.SerializeObject(stripeEvent.Data.Object);
-            var stripeAccount = Stripe.EventUtility.ParseEventDataItem<Stripe.Account>(serializedAccountJson);
-            msgs.Add("Getting startingStatus", MessageType.Notice);
-            var startingStatus = ahqStripeAccount.VerificationStatusId;
-
-            msgs.Add("Getting ParseAndUpdateStripeCustomAccount", MessageType.Notice);
-            ahqStripeAccount.ParseAndUpdateStripeCustomAccount(stripeAccount, null, msgs);
+            var stripeAccount = stripeEvent.Data.Object as Stripe.Account;
 
             msgs.Add("Getting SendStripeAccountVerified", MessageType.Notice);
-            if (msgs.HasNoErrors() && startingStatus != ahqStripeAccount.VerificationStatusId && ahqStripeAccount.VerificationStatusId == StripeVerificationStatus.Verified)
+            if (msgs.HasNoErrors() && !account.StripeChargesEnabled && stripeAccount.ChargesEnabled)
+            {
+                account.UpdateStripeChargesAndPayouts(stripeAccount, msgs);
                 account.SendStripeAccountVerified(null);
+            }
 
             if (msgs.HasErrors())
                 return Return500(msgs);
