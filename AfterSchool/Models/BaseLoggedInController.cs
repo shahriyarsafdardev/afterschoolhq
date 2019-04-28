@@ -89,7 +89,7 @@ namespace AfterSchool.Models
                     "login",
                     new
                     {
-                        returnurl = filterContext.HttpContext.Server.UrlEncode(filterContext.HttpContext.Request.Url.PathAndQuery),
+                        returnurl = filterContext.HttpContext.Request.Url.PathAndQuery,
                         area = ""
                     }
                 );
