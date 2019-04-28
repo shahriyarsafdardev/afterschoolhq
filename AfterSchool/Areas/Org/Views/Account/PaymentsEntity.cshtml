@@ -176,16 +176,24 @@
                 { 
                     <form method="post" action="@Url.Action("paymentsentity", "account", new { isnew = Request["isnew"] })" class="form-horizontal" enctype="multipart/form-data">
 
-                        <div class="form-group">
-                            <div class="text-medium-small text-center">
-                                <p class="text-muted">If you're a Company (Partnership, LLC, or Corporation) please call 1-888-231-1724</p>
+                        @if (!Model.ChargesEnabled && Model.VerificationStatus != StripeVerificationStatus.Pending)
+                        { 
+                            <div role="alert" class="alert alert-info alert-icon">
+                                <div class="icon">
+                                    <span class="s7-close-circle"></span>
+                                </div>
+                                <div class="message">
+                                    <p class="text-muted">If you're a for-profit company (partnership, LLC, or corporation) please email us at <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a> to enable Direct Deposits or <a href="@Url.Action("checksetup", "account")">enable payouts via check</a></p>
+                                </div>
                             </div>
+                        }
+                        <div class="form-group">
                             <div class="text-center">
 
                                 @if (Model.BusinessType == LegalEntityType.Individual || (!Model.ChargesEnabled && Model.VerificationStatus != StripeVerificationStatus.Pending))
                                 {
                                     <div class="text-medium-small text-center margin-t-20">
-                                        <p>Are you an Individual / Non-profit?</p>
+                                        <p>Are you an Individual or Non-profit Organization?</p>
                                     </div>
                                     <div class="am-radio inline">
                                         <input type="radio"
