@@ -9,14 +9,16 @@
     var lastPayout = (Payout)ViewBag.LastPayout;
     var canReceiveDeposits = SessionVariables.CurrentAccount.CanReceivePaymentDeposits();
     var canRequestAnotherPayout = false;
+    var payoutWaitingDaysDeposits = 1;
+    var payoutWaitingDaysChecks = 3;
 
     if (canReceiveDeposits)
     {
-        canRequestAnotherPayout = true; // lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddDays(1) < DateTime.UtcNow;
+        canRequestAnotherPayout = lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddDays(payoutWaitingDaysDeposits) < DateTime.UtcNow;
     }
     else
     {
-        canRequestAnotherPayout = true; // lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddWeeks(2) < DateTime.UtcNow;
+        canRequestAnotherPayout = lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddDays(payoutWaitingDaysChecks) < DateTime.UtcNow;
     }
 }
 
@@ -44,11 +46,11 @@
                     <button class="btn btn-primary" disabled>
                         @if (canReceiveDeposits)
                         {
-                            @: Must wait 1 day from your last payout request
+                            @: Must wait @payoutWaitingDaysDeposits day from your last payout request
                         }
                         else
                         {
-                            @: Must wait 2 weeks from your last payout request
+                            @: Must wait @payoutWaitingDaysChecks days from your last payout request
                         }                        
                     </button>
                 }
