@@ -355,7 +355,7 @@
 
 @helper BillingPeriodOptions(SubscriptionPlan plan)
 {
-    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x != BillingPeriodType.NotSet))
+    foreach (var billingPeriodType in Enum.GetValues(typeof(BillingPeriodType)).Cast<BillingPeriodType>().Where(x => x.NotIn(new List<BillingPeriodType> { BillingPeriodType.NotSet, BillingPeriodType.Day, BillingPeriodType.Year })))
     {
         var selected = "";
         if (plan.IsEmpty() && billingPeriodType == BillingPeriodType.Month)
