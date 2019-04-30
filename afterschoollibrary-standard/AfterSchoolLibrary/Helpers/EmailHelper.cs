@@ -128,7 +128,7 @@ namespace AfterSchoolLibrary.Helpers
             // so we should treat them as registered
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
                 amountDueOrPaid = "Amount Due (If Confirmed)";
-            else if (!canAccountAcceptPayments)
+            else if (!canAccountAcceptPayments || registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
                 amountDueOrPaid = "Amount Due";
             else
                 amountDueOrPaid = "Amount Paid";
