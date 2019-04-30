@@ -2152,14 +2152,8 @@ namespace AfterSchoolLibrary.Services
                         Registration.SendConfirmation(checkoutObject, true);
 
                 },
-                onFailure: (SystemMessages amsgs) =>
-                {
-                    msgs.AddRange(amsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
         }
