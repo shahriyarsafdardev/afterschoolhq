@@ -268,7 +268,10 @@
                             <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
                             @if (participationObject.AllowToPayLater)
                             {
-                                @:&bull; <a href="@Url.Action("finalizeregistration", new { id = registration.Uid })" class="text-muted">Pay Later</a>
+                                @:&bull; 
+                                <a href="@Url.Action("finalizeregistration", new { id = registration.Uid })" class="text-muted">
+                                    Pay Later
+                                </a>
                             }
 
                         </div>
