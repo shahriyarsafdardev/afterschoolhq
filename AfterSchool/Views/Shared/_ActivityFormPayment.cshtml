@@ -272,9 +272,13 @@
             showTuitionCosts();
         })
 
-        if ('@Model.IsFree' == '@false') {
+        if ('@Model.IsFree' == '@false' || '@Model.HasSubscriptionPlan()' == '@true' || '@Model.HasPaymentPlan()' == '@true') {
             $('#do-parents-pay-yes').prop('checked', true);
             $('#do-parents-pay-yes').trigger('click');
+
+            if ('@Model.HasSubscriptionPlan()' == '@true' || '@Model.HasPaymentPlan()' == '@true') {
+                ActivitySetup.showAdvancedSettings();
+            }
         }
        
         $('#cost').keyup(function () {

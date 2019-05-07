@@ -128,7 +128,7 @@
 
                 <div class="col-md-4">
                     
-                    @if (!Model.IsFree)
+                    @if (!Model.IsFree || Model.HasSubscriptionPlan())
                     {
                         <div class="panel panel-default">
                             <div class="panel-heading">
