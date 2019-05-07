@@ -57,10 +57,9 @@ namespace AfterSchoolLibraryTests.Tests
             };
 
             masterRegistrant.StartSubscriptionPlan(
-                checkoutObject, 
-                SubscriptionPlanType.PaymentPlan, 
-                DateTime.UtcNow, 
-                purchasingAccountOwner, 
+                checkoutObject,
+                SubscriptionPlanType.PaymentPlan,                
+                purchasingAccountOwner,
                 msgs, 
                 dc);
 
