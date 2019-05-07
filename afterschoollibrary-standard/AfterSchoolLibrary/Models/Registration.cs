@@ -1322,7 +1322,7 @@ namespace AfterSchoolLibrary.Models
                 checkoutObject.NumberOfSeats,
                 checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetActivityGroupId() : new int?(),
                 checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(msgs, dc)?.ID,
-                checkoutObject.GetTotalCostWithFees(msgs, dc),
+                checkoutObject.GetTotalCost(),
                 loggedInUser,
                 msgs,
                 dc);

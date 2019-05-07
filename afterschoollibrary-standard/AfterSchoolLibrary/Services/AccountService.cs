@@ -944,7 +944,7 @@ namespace AfterSchoolLibrary.Services
                         seatsRequested: 1,
                         activityGroupId: groupId,
                         periodId: period?.ID,
-                        amountCharged: participationObject.GetCheckoutTotalCost(),
+                        amountCharged: participationObject.Cost,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
                         dc: adc);
@@ -961,7 +961,7 @@ namespace AfterSchoolLibrary.Services
                             preferenceNumber: activityAndPreference.preferenceNumber,
                             activityGroupId: groupId,
                             periodId: period?.ID,
-                            amountCharged: activityParticipationObject.GetCheckoutTotalCost(),
+                            amountCharged: activityParticipationObject.Cost,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -2231,58 +2231,13 @@ namespace AfterSchoolLibrary.Services
 
                     Registration.SendConfirmation(checkoutObject, true);
                 },
-                onFailure: (SystemMessages amsgs) =>
-                {
-                    msgs.AddRange(amsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
             
         }
-
-        //[Obsolete]
-        //public static StripeAccount GetOrCreateStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
-        //    var stripeAccount = account.GetStripeAccount(msgs, dc);
-
-        //    if (stripeAccount.IsEmpty())
-        //    {
-        //        var location = account.GetDefaultLocation(msgs, dc);
-
-        //        stripeAccount = new StripeAccount()
-        //        {
-        //            AccountId = account.ID,
-        //            CreateDate = DateTime.UtcNow,
-        //            CreatedBy = loggedInUser?.ID.IfEmpty(0),
-        //            LastModifiedDate = DateTime.UtcNow,
-        //            LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-        //            LegalEntityAddress1 = location?.Address1,
-        //            LegalEntityAddress2 = location?.Address2,
-        //            LegalEntityCity = location?.City,
-        //            LegalEntityState = location?.State,
-        //            LegalEntityPostalCode = location?.PostalCode,
-        //            LegalEntityFirstName = loggedInUser.FirstName,
-        //            LegalEntityLastName = loggedInUser.LastName,
-        //            LegalEntityBusinessName = account.Name,
-        //            SupportEmail = account.Email,
-        //            SupportPhone = account.Phone
-        //        };
-        //        msgs.AddRange(stripeAccount.Save(dc));
-        //    }
-
-        //    return stripeAccount;
-        //}
-
-        //public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
-        //}
-
+        
         public static CheckPaymentAccount CreateOrUpdateCheckPaymentAccount(this Account account, LegalEntityType legalEntityType, string name, string address1, string address2, string city, string state, string postalCode, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             CheckPaymentAccount checkAccount = null;

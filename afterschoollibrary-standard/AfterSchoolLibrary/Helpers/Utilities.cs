@@ -270,19 +270,11 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     if (WebUser.GetCount() == 0)
-                    {
                         amsgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, adc));
-                    }
 
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                }
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
             );
 
             Database.ExecuteTransaction
@@ -290,10 +282,13 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
 
-                    //amsgs.AddRange(UpdateAccountPaidByTypes(adc));
-                    //amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
+
+
+                    // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
+
+                    // amsgs.AddRange(UpdateAccountPaidByTypes(adc));
+                    // amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
 
                     // amsgs.AddRange(AddManageLeaguesFeatureType(adc));
 
@@ -352,6 +347,24 @@ namespace AfterSchoolLibrary.Helpers
             );            
 
             return msgs;
+        }
+
+        public static SystemMessages MigrateAmountCharged(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var registrantActivities = RegistrantActivity.Load(
+                                        criterias: new Hashtable() { { "AmountCharged", DBNull.Value } },
+                                        msgs: msgs,
+                                        dc: dc);
+
+            registrantActivities.ForEach(registrantActivity => {
+                var activity = registrantActivity.GetActivity(msgs, dc);
+
+                if (activity.IsNotEmpty())
+                {
+                    registrantActivity.AmountCharged = activity.GetParticipationObject(msgs, dc).cost()
+                }
+            });
         }
 
         public static SystemMessages MigrateChargesAndPayoutsEnabled(DatabaseConnection dc = null)

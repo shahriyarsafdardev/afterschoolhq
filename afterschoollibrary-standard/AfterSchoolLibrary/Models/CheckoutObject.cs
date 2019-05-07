@@ -82,6 +82,14 @@ namespace AfterSchoolLibrary.Models
             return GetTuitionCostWithFees(msgs, dc);
         }
 
+        public decimal GetTotalCost()
+        {
+            if (PaymentPlan.IsNotEmpty())
+                return PaymentPlan.CostPerPeriod.Value * PaymentPlan.TotalPeriods.Value;
+
+            return TuitionCostNoFees;
+        }
+
         public decimal GetTotalCostToPurchaseTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (PaymentPlan.IsNotEmpty())

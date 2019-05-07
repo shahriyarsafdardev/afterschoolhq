@@ -64,7 +64,7 @@ namespace AfterSchool.Models
                                         seatsRequested: 1,
                                         activityGroupId: activity.ActivityGroupId,
                                         periodId: activity.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
-                                        amountCharged: participationObject.GetCheckoutTotalCost(),
+                                        amountCharged: participationObject.Cost,
                                         loggedInUser: SessionVariables.LoggedInUser,
                                         msgs: amsgs,
                                         dc: adc);
