@@ -128,12 +128,11 @@
 
                 <div class="col-md-4">
                     
-                    @if (!Model.IsFree || Model.HasSubscriptionPlan() || Model.HasPaymentPlan())
+                    @if (!Model.IsFree)
                     {
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 Pricing
-
                                 @if (isActivityLeader)
                                 {
                                     <div class="pull-right">

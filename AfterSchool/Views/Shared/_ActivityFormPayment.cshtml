@@ -272,7 +272,7 @@
             showTuitionCosts();
         })
 
-        if ('@Model.IsFree' == '@false' || '@Model.HasSubscriptionPlan()' == '@true' || '@Model.HasPaymentPlan()' == '@true') {
+        if ('@Model.IsFree' == '@false') {
             $('#do-parents-pay-yes').prop('checked', true);
             $('#do-parents-pay-yes').trigger('click');
 
