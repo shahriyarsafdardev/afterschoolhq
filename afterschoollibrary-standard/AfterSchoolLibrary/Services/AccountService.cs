@@ -2184,7 +2184,6 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
-                            startDateTime: DateTime.UtcNow,
                             subscriptionPlanType: SubscriptionPlanType.Subscription,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
@@ -2213,7 +2212,6 @@ namespace AfterSchoolLibrary.Services
 
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
-                            startDateTime: DateTime.UtcNow,
                             subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
@@ -2323,9 +2321,10 @@ namespace AfterSchoolLibrary.Services
                 planId: plan.StripePlanId,
                 sourceId: stripeBillToSourceId,
                 platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc),
-                trialEndDate: null,
+                startDate: DateTime.UtcNow,
                 stripeAccountId: billingAccount.StripeUserId,
                 stripeCouponId: stripeCouponId,
+                metaData: null,
                 msgs: msgs);
         }
 
