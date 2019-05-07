@@ -270,19 +270,11 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     if (WebUser.GetCount() == 0)
-                    {
                         amsgs.AddRange(AccountService.CreateAfterSchoolAccount(adminEmail, adminPassword, adminPhone, accountName, adc));
-                    }
 
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                }
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
             );
 
             Database.ExecuteTransaction
@@ -290,10 +282,12 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
 
-                    //amsgs.AddRange(UpdateAccountPaidByTypes(adc));
-                    //amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
+
+                    // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
+
+                    // amsgs.AddRange(UpdateAccountPaidByTypes(adc));
+                    // amsgs.AddRange(AddUseStripeConnectedAccountFeatureType(adc));
 
                     // amsgs.AddRange(AddManageLeaguesFeatureType(adc));
 
@@ -350,6 +344,46 @@ namespace AfterSchoolLibrary.Helpers
                     msgs.AddRange(fmsgs);
                 }
             );            
+
+            return msgs;
+        }
+
+        public static SystemMessages MigrateAmountCharged(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var registrantActivities = RegistrantActivity.Load(
+                                        criterias: new Hashtable() { { "AmountCharged", DBNull.Value } },
+                                        msgs: msgs,
+                                        dc: dc);
+
+            registrantActivities.ForEach(registrantActivity => 
+            {
+                var activity = registrantActivity.GetActivity(msgs, dc);
+
+                if (activity.IsNotEmpty())
+                {
+                    var amountCharged = activity.GetParticipationObject(msgs, dc).Cost;
+                    var registrationId = registrantActivity.RegistrationId.Value;
+                    var purchase = Purchase.LoadByRegistrationId(registrantActivity.RegistrationId.Value, msgs, dc).FirstOrDefault();
+
+                    if (purchase.IsNotEmpty())
+                    {
+                        var rsp = RegistrantSubscriptionPlan.LoadByPurchaseId(purchase.ID.Value, msgs, dc).FirstOrDefault();
+                        
+                        if (rsp.IsEmpty())
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                    }
+
+                    registrantActivity.AmountCharged = amountCharged;
+                    msgs.AddRange(registrantActivity.Save(dc));
+                }
+            });
 
             return msgs;
         }

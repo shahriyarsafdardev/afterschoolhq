@@ -275,6 +275,10 @@
         if ('@Model.IsFree' == '@false') {
             $('#do-parents-pay-yes').prop('checked', true);
             $('#do-parents-pay-yes').trigger('click');
+
+            if ('@Model.HasSubscriptionPlan()' == '@true' || '@Model.HasPaymentPlan()' == '@true') {
+                ActivitySetup.showAdvancedSettings();
+            }
         }
        
         $('#cost').keyup(function () {

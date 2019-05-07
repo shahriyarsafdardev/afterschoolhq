@@ -11,21 +11,15 @@ using System.Web;
 
 namespace AfterSchool.Models
 {
-    public class LeagueHelper
+    public static class LeagueHelper
     {
         public static SystemMessages UpdateStudentsInTeam(Activity activity, List<Registrant> registrants, NameValueCollection Request)
         {
             var msgs = new SystemMessages();
-            var updatedRegistrants = new List<Registrant>();
             var activityGroup = activity.GetActivityGroup();
             var accountActivityGroup = activityGroup.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
-            // var activities = activityGroup.GetActivities();
             var activities = accountActivityGroup.IsEmpty() ? activityGroup.GetActivities() : accountActivityGroup.GetActivities();
-            activities = activities.Where(a => a.ID.Value != activity.ID.Value).ToList();
-
-            var period = activity.GetCurrentRegistrationPeriod();
-
-            // var registrants = LoadEditStudentsViewBag(activity);
+            activities = activities.Where(a => a.ID.Value != activity.ID.Value).ToList();            
 
             Database.ExecuteTransaction
             (
@@ -41,48 +35,40 @@ namespace AfterSchool.Models
                             adc)
                             .GetRegistration(amsgs, adc);
 
-                        var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
+                        var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                                    activity.ID.Value, 
+                                    ParticipationObjectType.Activity, 
+                                    registrant.ID.Value, 
+                                    amsgs, 
+                                    adc);
 
                         if (Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsEmpty())
                         {
                             //check if students is registered for another team on the league
-                            foreach (var otherTeam in activities)
+                            activities.ForEach(otherTeam =>
                             {
                                 if (RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsNotEmpty())
-                                {
-                                    //var otherRegAct = RegistrantActivity.LoadByParticipationObjectByRegistrant(otherTeam.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc);
-                                    //var otherRegistration = otherRegAct.GetRegistration(amsgs, adc);
                                     amsgs.AddRange(registration.RemoveParticipation(otherTeam.ID.Value, ParticipationObjectType.Activity, adc));
-                                }
-
-                            }
+                            });
 
                             //check if the student is not already registered for this team
                             if (RegistrantActivity.LoadByParticipationObjectByRegistrant(activity.ID.Value, ParticipationObjectType.Activity, registrant.ID.Value, amsgs, adc).IsEmpty())
                             {
-                                //var registration = registrant.AddRegistration(
-                                //    SessionVariables.CurrentAccount.ID.Value,
-                                //    activity.ActivityGroupId,
-                                //    period?.ID,
-                                //    RegistrationCompletionStatus.Completed,
-                                //    SessionVariables.LoggedInUser.ID.Value,
-                                //    amsgs,
-                                //    adc);
-
                                 // manages seats and create registrantactivity record
+                                var participationObject = activity.GetParticipationObject(amsgs, adc);
+
                                 Registration.ProcessRegistrationAssignment(
                                         registration: registration,
-                                        participationObject: activity.GetParticipationObject(amsgs, adc),
+                                        participationObject: participationObject,
                                         registrant: registrant,
                                         seatsRequested: 1,
                                         activityGroupId: activity.ActivityGroupId,
                                         periodId: activity.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
+                                        amountCharged: participationObject.Cost,
                                         loggedInUser: SessionVariables.LoggedInUser,
                                         msgs: amsgs,
                                         dc: adc);
                             }
-
-
                         }
                         else if (!Request[$"registrant-{registrant.ID}"].IsBoolean() && ra.IsNotEmpty())
                         {
@@ -96,16 +82,12 @@ namespace AfterSchool.Models
                     msgs.AddRange(smsgs);
                     msgs.Add("Your new team registrations have been added", MessageType.Success);
                 },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                }
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
             );
 
             if (msgs.HasNoErrors())
-            {
-                msgs.Add(string.Format("{0} Saved", UILabel.ActivityLabel(activity.ActivityTypeId)), MessageType.Success);
-            }
+                msgs.Add($"{UILabel.ActivityLabel(activity.ActivityTypeId)} Saved", MessageType.Success);
 
             return msgs;
         }

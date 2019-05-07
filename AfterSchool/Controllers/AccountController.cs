@@ -1100,8 +1100,8 @@ namespace AfterSchool.Controllers
                         // also only if the session is set to Apply
                         if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().RegistrationModeId == RegistrationMode.Apply)
                         {
-                            var activitiesAndPreferences = new List<(Activity activity, int preferenceNumber)>();
-                            var activities = participationObject.GetActivityGroup().GetActivities(null, false, false, null, null, false, amsgs, adc);
+                            var activities = participationObject.GetActivityGroup()
+                                .GetActivities(null, false, false, null, null, false, amsgs, adc);
 
                             for (int i = 1; i <= activities.Count; i++)
                             {
@@ -1117,6 +1117,7 @@ namespace AfterSchool.Controllers
                                         seatsRequested: 1,
                                         preferenceNumber: i,
                                         activityGroupId: participationObject.GetActivityGroupId(),
+                                        amountCharged: participationObject.Cost,
                                         periodId: period?.ID,
                                         loggedInUser: SessionVariables.LoggedInUser,
                                         msgs: amsgs,
@@ -1126,18 +1127,9 @@ namespace AfterSchool.Controllers
                         }
 
                     },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) =>
-                    {
-                        msgs.AddRange(fmsgs);
-                    },
-                    onException: (SystemMessages emsgs) =>
-                    {
-                        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
-                    }
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
             }
 
@@ -1198,9 +1190,7 @@ namespace AfterSchool.Controllers
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         Registration = registration,
-                        MasterRegistrant = SessionVariables.CurrentRegistrant,
-                        PaymentType = PaymentType.CreditCard,
-                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform
+                        MasterRegistrant = SessionVariables.CurrentRegistrant                        
                     },
                     sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.LoggedInUser,
