@@ -1198,9 +1198,7 @@ namespace AfterSchool.Controllers
                         NumberOfSeats = 1,
                         ParticipationObject = participationObject,
                         Registration = registration,
-                        MasterRegistrant = SessionVariables.CurrentRegistrant,
-                        PaymentType = PaymentType.CreditCard,
-                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform
+                        MasterRegistrant = SessionVariables.CurrentRegistrant                        
                     },
                     sendConfirmationEmail: true,
                     loggedInUser: SessionVariables.LoggedInUser,

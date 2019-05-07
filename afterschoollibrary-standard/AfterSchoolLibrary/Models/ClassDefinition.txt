@@ -756,6 +756,7 @@ property: RegistrationPeriodId, int?, Int
 property: ActivityGroupId, int?, Int
 property: Rating, int?, Int
 property: AssignmentTypeId, RegistrationAssignmentType, Int
+property: AmountCharged, decimal?, Money
 -join: Activity.ID, ActivityId, InnerJoin
 join: Registrant.ID, RegistrantId, InnerJoin
 -join: Account.ID, Activity.AccountId, InnerJoin

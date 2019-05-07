@@ -472,7 +472,7 @@ namespace AfterSchoolLibrary.Models
         }
 
 
-        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, decimal? amountCharged, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return AddOrUpdateParticipationObject(
                 registrationId, 
@@ -482,12 +482,13 @@ namespace AfterSchoolLibrary.Models
                 1, 
                 registrationPeriodId, 
                 activityGroupId, 
+                amountCharged,
                 loggedInUserId, 
                 msgs, 
                 dc);
         }
 
-        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, decimal? amountCharged, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -514,6 +515,7 @@ namespace AfterSchoolLibrary.Models
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
             ra.PreferenceNumber = preferenceNumber;
+            ra.AmountCharged = amountCharged;
 
             msgs.AddRange(ra.Save(dc));
 
