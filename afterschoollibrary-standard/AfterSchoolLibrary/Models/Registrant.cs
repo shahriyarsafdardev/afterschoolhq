@@ -515,7 +515,9 @@ namespace AfterSchoolLibrary.Models
             ra.LastModifiedDate = DateTime.UtcNow;
             ra.LastModifiedBy = loggedInUserId;
             ra.PreferenceNumber = preferenceNumber;
-            ra.AmountCharged = amountCharged;
+
+            if (amountCharged.HasValue)
+                ra.AmountCharged = amountCharged;
 
             msgs.AddRange(ra.Save(dc));
 

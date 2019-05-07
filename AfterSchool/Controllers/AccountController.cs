@@ -1117,6 +1117,7 @@ namespace AfterSchool.Controllers
                                         seatsRequested: 1,
                                         preferenceNumber: i,
                                         activityGroupId: participationObject.GetActivityGroupId(),
+                                        amountCharged: participationObject.GetCheckoutTotalCost(),
                                         periodId: period?.ID,
                                         loggedInUser: SessionVariables.LoggedInUser,
                                         msgs: amsgs,

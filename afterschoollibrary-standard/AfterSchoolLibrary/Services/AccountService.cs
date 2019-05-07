@@ -944,20 +944,24 @@ namespace AfterSchoolLibrary.Services
                         seatsRequested: 1,
                         activityGroupId: groupId,
                         periodId: period?.ID,
+                        amountCharged: participationObject.GetCheckoutTotalCost(),
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
                         dc: adc);
                     
                     activitiesAndPreferences.ForEach(activityAndPreference =>
                     {
+                        var activityParticipationObject = activityAndPreference.activity.GetParticipationObject(amsgs, adc);
+
                         Registration.ProcessRegistrationAssignment(
                             registration: registration,
-                            participationObject: activityAndPreference.activity.GetParticipationObject(amsgs, adc),
+                            participationObject: activityParticipationObject,
                             registrant: student,
                             seatsRequested: 1,       
                             preferenceNumber: activityAndPreference.preferenceNumber,
                             activityGroupId: groupId,
                             periodId: period?.ID,
+                            amountCharged: activityParticipationObject.GetCheckoutTotalCost(),
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -969,14 +973,8 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
                     msgs.Add("Your new registration has been added", MessageType.Success);
                 },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
         }

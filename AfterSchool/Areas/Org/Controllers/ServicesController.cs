@@ -117,6 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             newAssignmentType,
                             ra.RegistrationPeriodId,
                             ra.ActivityGroupId,
+                            null,
                             SessionVariables.LoggedInUser.ID.Value,
                             amsgs,
                             adc);
@@ -176,6 +177,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         assignmentType,
                         ra.RegistrationPeriodId,
                         ra.ActivityGroupId,
+                        null,
                         SessionVariables.LoggedInUser.ID.Value,
                         msgs);
                 }
