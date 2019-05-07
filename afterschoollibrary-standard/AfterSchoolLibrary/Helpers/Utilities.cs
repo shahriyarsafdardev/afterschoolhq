@@ -284,7 +284,6 @@ namespace AfterSchoolLibrary.Helpers
                     amsgs.AddRange(AdditionalData(adc));
 
 
-
                     // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
 
                     // amsgs.AddRange(UpdateAccountPaidByTypes(adc));
@@ -357,14 +356,36 @@ namespace AfterSchoolLibrary.Helpers
                                         msgs: msgs,
                                         dc: dc);
 
-            registrantActivities.ForEach(registrantActivity => {
+            registrantActivities.ForEach(registrantActivity => 
+            {
                 var activity = registrantActivity.GetActivity(msgs, dc);
 
                 if (activity.IsNotEmpty())
                 {
-                    registrantActivity.AmountCharged = activity.GetParticipationObject(msgs, dc).cost()
+                    var amountCharged = activity.GetParticipationObject(msgs, dc).Cost;
+                    var registrationId = registrantActivity.RegistrationId.Value;
+                    var purchase = Purchase.LoadByRegistrationId(registrantActivity.RegistrationId.Value, msgs, dc).FirstOrDefault();
+
+                    if (purchase.IsNotEmpty())
+                    {
+                        var rsp = RegistrantSubscriptionPlan.LoadByPurchaseId(purchase.ID.Value, msgs, dc).FirstOrDefault();
+                        
+                        if (rsp.IsEmpty())
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                    }
+
+                    registrantActivity.AmountCharged = amountCharged;
+                    msgs.AddRange(registrantActivity.Save(dc));
                 }
             });
+
+            return msgs;
         }
 
         public static SystemMessages MigrateChargesAndPayoutsEnabled(DatabaseConnection dc = null)
