@@ -157,7 +157,7 @@ namespace AfterSchoolLibrary.Services
             return (customer, sourceId);
         }
 
-        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, DateTime? startDateTime, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartSubscriptionPlan(this Registrant registrant, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -167,16 +167,43 @@ namespace AfterSchoolLibrary.Services
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, useStripeConnectedAccount);
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
+            DateTime? startDateTime = DateTime.UtcNow;
+            var platformFeePercent = new decimal?();
+            string stripeAccountId = null;
+
+            if (checkoutObject.ParticipationObject.IsActivity())
+            {
+                var firstActivityDate = checkoutObject.ParticipationObject.GetActivity().GetFirstDate(msgs, dc);
+
+                // can't start in the past
+                if (firstActivityDate.HasValue && firstActivityDate.Value.IsAfter(startDateTime.Value))
+                    startDateTime = firstActivityDate;
+            }
+
+            if (useStripeConnectedAccount)
+            {
+                platformFeePercent = billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc);
+                stripeAccountId = billingAccount.StripeUserId;
+            }
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = Billing.StripeHelper.CreateSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
                 sourceId: sourceId,
-                platformFeePercent: useStripeConnectedAccount ? billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc) : new decimal?(),
-                stripeAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId: null,
-                trialEndDate: null,
+                platformFeePercent: platformFeePercent,
+                stripeAccountId: stripeAccountId,
+                startDate: startDateTime,
                 stripeCouponId: stripeCouponId,
+                metaData: new Dictionary<string, string>()
+                {
+                    { "BillingAccountUid", billingAccount.Uid.ToString() },
+                    { "BillingAccountName", billingAccount.Name.ToString() },
+                    { "PayingAccountUid", purchasingAccount.Uid.ToString() },
+                    { "PayingAccountName", purchasingAccount.Name.ToString() },
+                    { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
+                    { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
+                },
                 msgs: msgs);
 
             if (msgs.HasErrors())

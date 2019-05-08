@@ -43,7 +43,7 @@
                             </p>
                             <div class="am-radio">
                                 <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" />
-                                <label for="paymentoption-0">Pay @participationObject.Cost.ToCurrency() Today</label>                                
+                                <label for="paymentoption-0">Pay <strong>@participationObject.GetCheckoutTotalCost().ToCurrency()</strong> today</label>                                
                             </div>
 
                             @foreach (var plan in participationObject.PaymentPlans)
@@ -51,7 +51,7 @@
                                 <div class="am-radio">
                                     <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
                                     <label for="paymentoption-@plan.ID">
-                                        Pay <strong>@plan.CostPerPeriod.ToCurrency()</strong> Today
+                                        Pay <strong>@plan.GetTotalCostWithFees(participationObject.OwnerAccount).ToCurrency()</strong> today
                                         @if (plan.TotalPeriods > 1)
                                         {
                                             <span>

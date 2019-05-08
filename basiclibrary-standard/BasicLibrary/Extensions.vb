@@ -97,6 +97,26 @@ Public Module Extensions
     End Function
 
     <Extension>
+    Public Function IsAfter(ByVal aDate As DateTime, ByVal bDate As DateTime) As Boolean
+        Return aDate > bDate
+    End Function
+
+    <Extension>
+    Public Function IsOnOrAfter(ByVal aDate As DateTime, ByVal bDate As DateTime) As Boolean
+        Return aDate >= bDate
+    End Function
+
+    <Extension>
+    Public Function IsBefore(ByVal aDate As DateTime, ByVal bDate As DateTime) As Boolean
+        Return aDate < bDate
+    End Function
+
+    <Extension>
+    Public Function IsOnOrBefore(ByVal aDate As DateTime, ByVal bDate As DateTime) As Boolean
+        Return aDate <= bDate
+    End Function
+
+    <Extension>
     Public Function ClosestDate(ByVal aDate As DateTime, ByVal list As IEnumerable(Of DateTime)) As DateTime
         Return list.OrderBy(Function(x) Math.Abs((aDate - x).Ticks)).First()
     End Function

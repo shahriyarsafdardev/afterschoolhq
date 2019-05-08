@@ -326,9 +326,11 @@ namespace AfterSchoolLibrary.Models
                         planId: this.GetPackage(msgs, dc).GetStripePlanId(this.BillingPeriodTypeId), 
                         sourceId: null,
                         platformFeePercent: null,
-                        trialEndDate: this.TrialEndDate, 
+                        // trialEndDate: this.TrialEndDate, 
+                        startDate: DateTime.UtcNow,
                         stripeAccountId: null,
                         stripeCouponId: null,
+                        metaData: null,
                         msgs: msgs);
 
                     if (subscription.IsNotEmpty())
