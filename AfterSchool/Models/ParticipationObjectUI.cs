@@ -41,7 +41,7 @@ namespace AfterSchool.Models
         public static string PrintPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
         {
             if (displayCheckoutPrice)
-                return AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(plan.CostPerPeriod.Value, ownerAccount).ToCurrency();
+                return plan.GetTotalCostWithFees(ownerAccount).ToCurrency();
 
             return plan.CostPerPeriod.ToCurrency();
         }

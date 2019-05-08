@@ -472,9 +472,9 @@ namespace AfterSchoolLibrary.Models
         public decimal GetCheckoutTotalCost()
         {
             if (this.Cost.HasValue)
-                return Cost.Value +
-                    GetCreditCardFee(FeesPaidByType.Parent) +
-                    GetConvenienceFee(FeesPaidByType.Parent);
+                return Cost.Value
+                    + GetCreditCardFee(FeesPaidByType.Parent)
+                    + GetConvenienceFee(FeesPaidByType.Parent);
 
             return 0;
         }
