@@ -172,7 +172,13 @@ namespace AfterSchoolLibrary.Services
             string stripeAccountId = null;
 
             if (checkoutObject.ParticipationObject.IsActivity())
-                startDateTime = checkoutObject.ParticipationObject.GetActivity().GetFirstDate(msgs, dc);
+            {
+                var firstActivityDate = checkoutObject.ParticipationObject.GetActivity().GetFirstDate(msgs, dc);
+
+                // can't start in the past
+                if (firstActivityDate.HasValue && firstActivityDate.Value.IsAfter(startDateTime.Value))
+                    startDateTime = firstActivityDate;
+            }
 
             if (useStripeConnectedAccount)
             {
