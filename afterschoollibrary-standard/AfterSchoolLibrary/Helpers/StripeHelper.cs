@@ -885,7 +885,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.SubscriptionService(StripeAccessToken);
         }
 
-        public static Stripe.Subscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
+        public static Stripe.Subscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -895,11 +895,12 @@ namespace AfterSchoolLibrary.Billing
             {
                 CustomerId = customerId,
                 Billing = Stripe.Billing.ChargeAutomatically,
-                TrialEnd = trialEndDate,
+                TrialEnd = startDate.Value.AddDays(-1),
                 DefaultSource = sourceId,
-                CouponId = stripeCouponId      ,
-                Items = new List<SubscriptionItemOption>() { new SubscriptionItemOption() { PlanId = planId, Quantity = 1 } }
-                
+                CouponId = stripeCouponId,
+                Items = new List<SubscriptionItemOption>() { new SubscriptionItemOption() { PlanId = planId, Quantity = 1 } },
+                Metadata = metaData,
+                Prorate = false,
             };
 
             var requestOptions = new Stripe.RequestOptions();
@@ -929,9 +930,9 @@ namespace AfterSchoolLibrary.Billing
         /// <param name="plan"></param>
         /// <param name="msgs"></param>
         /// <returns></returns>
-        public static Stripe.Subscription CreateSubscription(Stripe.Customer customer, Stripe.Plan plan, string sourceId, decimal? platformFeePercent, DateTime? trialEndDate, string stripeAccountId, string stripeCouponId, SystemMessages msgs)
+        public static Stripe.Subscription CreateSubscription(Stripe.Customer customer, Stripe.Plan plan, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
         {
-            return CreateSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, trialEndDate, stripeAccountId, stripeCouponId, msgs);
+            return CreateSubscription(customer.Id, plan.Id, sourceId, platformFeePercent, startDate, stripeAccountId, stripeCouponId, metaData, msgs);
         }
 
         public static Stripe.Subscription UpdateSubscription(string subscriptionId, string newPlanId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, bool? endTrialNow, bool? prorate, string stripeAccountId, SystemMessages msgs)
