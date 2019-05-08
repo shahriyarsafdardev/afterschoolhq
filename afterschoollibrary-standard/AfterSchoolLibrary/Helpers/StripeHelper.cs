@@ -895,11 +895,12 @@ namespace AfterSchoolLibrary.Billing
             {
                 CustomerId = customerId,
                 Billing = Stripe.Billing.ChargeAutomatically,
-                BillingCycleAnchor = startDate,
+                TrialEnd = startDate.Value.AddDays(-1),
                 DefaultSource = sourceId,
                 CouponId = stripeCouponId,
                 Items = new List<SubscriptionItemOption>() { new SubscriptionItemOption() { PlanId = planId, Quantity = 1 } },
-                Metadata = metaData
+                Metadata = metaData,
+                Prorate = false,
             };
 
             var requestOptions = new Stripe.RequestOptions();
