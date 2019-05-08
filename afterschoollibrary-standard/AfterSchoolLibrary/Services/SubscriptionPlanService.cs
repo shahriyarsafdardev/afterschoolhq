@@ -276,8 +276,9 @@ namespace AfterSchoolLibrary.Services
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
             if (subscriptionPlan.CostPerPeriod.HasValue)
-                return subscriptionPlan.CostPerPeriod.Value + 
-                    Billing.Platform.GetTotalFees(subscriptionPlan.CostPerPeriod.Value, ownerAccount);
+                return subscriptionPlan.CostPerPeriod.Value 
+                    + subscriptionPlan.GetCreditCardFee(ownerAccount, msgs, dc)
+                    + subscriptionPlan.GetConvenienceFee(ownerAccount, msgs, dc);
 
             return 0;
         }
@@ -287,7 +288,7 @@ namespace AfterSchoolLibrary.Services
             if (ownerAccount.IsEmpty())
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
-            if (subscriptionPlan.CostPerPeriod.HasValue)
+            if (subscriptionPlan.CostPerPeriod.HasValue && !ownerAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
                 return Billing.Platform.GetCreditCardFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount);
 
             return 0;
@@ -298,7 +299,7 @@ namespace AfterSchoolLibrary.Services
             if (ownerAccount.IsEmpty())
                 ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
 
-            if (subscriptionPlan.CostPerPeriod.HasValue)
+            if (subscriptionPlan.CostPerPeriod.HasValue && !ownerAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
                 return Billing.Platform.GetConvenienceFee(subscriptionPlan.CostPerPeriod.Value, ownerAccount);
 
             return 0;
