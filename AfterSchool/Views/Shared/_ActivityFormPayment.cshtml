@@ -43,7 +43,7 @@
                 <div class="col-sm-9">
                     <div class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">$</span>
-                        <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@Model.CostPerRegistrant.ToCurrency().Replace("$", "")" required min="0.00" step=".01" @paymentdisabled />
+                        <input type="number" class="form-control" id="cost" name="cost" onfocus="this.select()" value="@(Model.CostPerRegistrant.HasValue ? Model.CostPerRegistrant.Value.ToString("0.00") : "0.00")" required min="0.00" step=".01" @paymentdisabled />
                     </div>
                     <p class="text-muted">
                         <em>The parent will be charged $<span id="finaltuitioncost">0.00</span> upon checkout including credit card and convenience fees</em>
@@ -145,7 +145,7 @@
                             <span class="input-group-addon">Payment Amt $</span>
                             <input type="number" class="form-control" id="paymentplancost"
                                    name="paymentplancost" onfocus="this.select()"
-                                   value="@(paymentPlan.IsNotEmpty() ? paymentPlan.CostPerPeriod.ToCurrency().Replace("$", "") : "0")"
+                                   value="@(paymentPlan.IsNotEmpty() && paymentPlan.CostPerPeriod.HasValue ? paymentPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
                         <p class="text-muted">
@@ -214,7 +214,7 @@
                             <span class="input-group-addon">Payment Amt $</span>
                             <input type="number" class="form-control" id="subscriptionplancost"
                                    name="subscriptionplancost" placeholder="Amount" onfocus="this.select()"
-                                   value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.CostPerPeriod.ToCurrency().Replace("$", "") : "0")"
+                                   value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.CostPerPeriod.HasValue ? subscriptionPlan.CostPerPeriod.Value.ToString("0.00") : "0.00")"
                                    required min="0.00" step=".01" @paymentdisabled />
                         </div>
                         <p class="text-muted">
@@ -275,6 +275,10 @@
         if ('@Model.IsFree' == '@false') {
             $('#do-parents-pay-yes').prop('checked', true);
             $('#do-parents-pay-yes').trigger('click');
+
+            if ('@Model.HasSubscriptionPlan()' == '@true' || '@Model.HasPaymentPlan()' == '@true') {
+                ActivitySetup.showAdvancedSettings();
+            }
         }
        
         $('#cost').keyup(function () {

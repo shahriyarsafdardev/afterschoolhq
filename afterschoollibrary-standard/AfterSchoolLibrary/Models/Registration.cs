@@ -1322,12 +1322,13 @@ namespace AfterSchoolLibrary.Models
                 checkoutObject.NumberOfSeats,
                 checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetActivityGroupId() : new int?(),
                 checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(msgs, dc)?.ID,
+                checkoutObject.GetTotalCost(),
                 loggedInUser,
                 msgs,
                 dc);
         }
 
-        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             ProcessRegistrationAssignment(
                 registration,
@@ -1337,12 +1338,13 @@ namespace AfterSchoolLibrary.Models
                 1,
                 activityGroupId,
                 periodId,
+                amountCharged,
                 loggedInUser,
                 msgs,
                 dc);
         }
 
-        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
@@ -1361,6 +1363,7 @@ namespace AfterSchoolLibrary.Models
                 preferenceNumber: preferenceNumber,
                 registrationPeriodId: periodId,
                 activityGroupId: activityGroupId,
+                amountCharged: amountCharged,
                 loggedInUserId: loggedInUser.ID.Value,
                 msgs: msgs,
                 dc: dc);

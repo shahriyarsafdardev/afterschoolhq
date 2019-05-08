@@ -1283,337 +1283,337 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(ra);
         }
 
-        [HttpGet]
-        public ActionResult RegistrantImport(string id)
-        {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            ViewBag.Step = 1;
-            ViewBag.StepLabel = "Upload";
-            ViewBag.Messages = new SystemMessages();
-            return View(activity);
-        }
+        //[HttpGet]
+        //public ActionResult RegistrantImport(string id)
+        //{
+        //    var activity = Activity.LoadByUid(id.ToGuid());
+        //    ViewBag.Step = 1;
+        //    ViewBag.StepLabel = "Upload";
+        //    ViewBag.Messages = new SystemMessages();
+        //    return View(activity);
+        //}
 
-        [HttpPost]
-        public ActionResult RegistrantImport(string id, HttpPostedFileBase importfile, string csv)
-        {
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
-            var af = activity.GetActiveActivityForm();
-            string extension = "";
-            var questions = af.GetForm().GetAllQuestions();
+        //[HttpPost]
+        //public ActionResult RegistrantImport(string id, HttpPostedFileBase importfile, string csv)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var activity = Activity.LoadByUid(id.ToGuid());
+        //    var af = activity.GetActiveActivityForm();
+        //    string extension = "";
+        //    var questions = af.GetForm().GetAllQuestions();
 
-            if (csv.IsBlank())
-            {
-                if (importfile.IsEmpty())
-                {
-                    msgs.Add("Please upload a file", MessageType.UserError);
-                }
-                else if (!new string[] { ".xls", ".csv", ".xlsx" }.Contains(Path.GetExtension(importfile.FileName)))
-                {
-                    msgs.Add("Please upload a valid file", MessageType.UserError);
-                }
-                else
-                {
-                    extension = Path.GetExtension(importfile.FileName);
-                }
+        //    if (csv.IsBlank())
+        //    {
+        //        if (importfile.IsEmpty())
+        //        {
+        //            msgs.Add("Please upload a file", MessageType.UserError);
+        //        }
+        //        else if (!new string[] { ".xls", ".csv", ".xlsx" }.Contains(Path.GetExtension(importfile.FileName)))
+        //        {
+        //            msgs.Add("Please upload a valid file", MessageType.UserError);
+        //        }
+        //        else
+        //        {
+        //            extension = Path.GetExtension(importfile.FileName);
+        //        }
 
-                if (msgs.HasNoErrors())
-                {
-                    ViewBag.Step = 2;
-                    ViewBag.StepLabel = "Review";
+        //        if (msgs.HasNoErrors())
+        //        {
+        //            ViewBag.Step = 2;
+        //            ViewBag.StepLabel = "Review";
 
-                    //import
-                    var sr = new StreamReader(importfile.InputStream);
+        //            //import
+        //            var sr = new StreamReader(importfile.InputStream);
 
-                    List<string> headers = new List<string>();
-                    List<string> headersWithData = new List<string>();
-                    List<List<string>> rows = new List<List<string>>();
-                    List<List<ImportField>> validatedRows = new List<List<ImportField>>();
+        //            List<string> headers = new List<string>();
+        //            List<string> headersWithData = new List<string>();
+        //            List<List<string>> rows = new List<List<string>>();
+        //            List<List<ImportField>> validatedRows = new List<List<ImportField>>();
 
-                    if (extension == ".csv")
-                    {
-                        CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
-                        reader.Configuration.Delimiter = ",";
-                        reader.Configuration.HasHeaderRecord = true;
-                        reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
+        //            if (extension == ".csv")
+        //            {
+        //                CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
+        //                reader.Configuration.Delimiter = ",";
+        //                reader.Configuration.HasHeaderRecord = true;
+        //                reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
 
-                        while (reader.Read())
-                        {
-                            if (headers.Count == 0)
-                            {
-                                headers = reader.Context.HeaderRecord.ToList();
-                            }
+        //                while (reader.Read())
+        //                {
+        //                    if (headers.Count == 0)
+        //                    {
+        //                        headers = reader.Context.HeaderRecord.ToList();
+        //                    }
 
-                            var row = new List<string>();
-                            for (var i = 0; i < headers.Count; i++)
-                            {
-                                var header = headers[i];
-                                var field = reader.GetField<string>(i);
-                                if (questions.Select(x => x.QuestionDataTypeId.ToString().ToLower()).Contains(header.ToLower()) && field.IsNotBlank())
-                                {
-                                    row.Add(field);
-                                    if (!headersWithData.Contains(header))
-                                    {
-                                        headersWithData.Add(header);
-                                    }
-                                }
-                            }
+        //                    var row = new List<string>();
+        //                    for (var i = 0; i < headers.Count; i++)
+        //                    {
+        //                        var header = headers[i];
+        //                        var field = reader.GetField<string>(i);
+        //                        if (questions.Select(x => x.QuestionDataTypeId.ToString().ToLower()).Contains(header.ToLower()) && field.IsNotBlank())
+        //                        {
+        //                            row.Add(field);
+        //                            if (!headersWithData.Contains(header))
+        //                            {
+        //                                headersWithData.Add(header);
+        //                            }
+        //                        }
+        //                    }
 
-                            rows.Add(row);
-                        }
-                    }
+        //                    rows.Add(row);
+        //                }
+        //            }
 
-                    foreach (var row in rows)
-                    {
-                        var validatedRow = new List<ImportField>();
+        //            foreach (var row in rows)
+        //            {
+        //                var validatedRow = new List<ImportField>();
 
-                        for (var i = 0; i < headersWithData.Count; i++)
-                        {
-                            var validatedField = new ImportField();
-                            validatedField.Value = row[i];
+        //                for (var i = 0; i < headersWithData.Count; i++)
+        //                {
+        //                    var validatedField = new ImportField();
+        //                    validatedField.Value = row[i];
 
-                            var field = row[i].ToLower();
-                            var question = questions.Where(x => x.QuestionDataTypeId.ToString().ToLower() == headersWithData[i].ToLower()).First();
+        //                    var field = row[i].ToLower();
+        //                    var question = questions.Where(x => x.QuestionDataTypeId.ToString().ToLower() == headersWithData[i].ToLower()).First();
 
-                            validatedField.Value = field;
+        //                    validatedField.Value = field;
 
-                            if (field.Length > 1000)
-                            {
-                                validatedField.Messages.Add("Must be less than or equal to 1000 characters. Data will be truncated.", MessageType.Warning);
-                            }
+        //                    if (field.Length > 1000)
+        //                    {
+        //                        validatedField.Messages.Add("Must be less than or equal to 1000 characters. Data will be truncated.", MessageType.Warning);
+        //                    }
 
-                            switch (question.QuestionTypeId)
-                            {
-                                case QuestionType.Date:
+        //                    switch (question.QuestionTypeId)
+        //                    {
+        //                        case QuestionType.Date:
 
-                                    if (field.IsNotBlank() && !field.IsDateTime())
-                                    {
-                                        validatedField.Messages.Add("Must be a valid date", MessageType.UserError);
-                                    }
+        //                            if (field.IsNotBlank() && !field.IsDateTime())
+        //                            {
+        //                                validatedField.Messages.Add("Must be a valid date", MessageType.UserError);
+        //                            }
 
-                                    break;
+        //                            break;
 
-                                case QuestionType.Checkbox:
+        //                        case QuestionType.Checkbox:
 
-                                    if (field.IsNotBlank() && !field.IsBoolean())
-                                    {
-                                        validatedField.Messages.Add("Must be one of the following values: 0, 1, T, F, True, False", MessageType.UserError);
-                                    }
+        //                            if (field.IsNotBlank() && !field.IsBoolean())
+        //                            {
+        //                                validatedField.Messages.Add("Must be one of the following values: 0, 1, T, F, True, False", MessageType.UserError);
+        //                            }
 
-                                    break;
+        //                            break;
 
-                                case QuestionType.TextBox:
-                                case QuestionType.TextArea:
+        //                        case QuestionType.TextBox:
+        //                        case QuestionType.TextArea:
 
-                                    break;
+        //                            break;
 
-                                case QuestionType.Email:
+        //                        case QuestionType.Email:
 
-                                    if (field.IsNotBlank() && !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-                                    {
-                                        validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
-                                    }
+        //                            if (field.IsNotBlank() && !field.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+        //                            {
+        //                                validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
+        //                            }
 
-                                    break;
+        //                            break;
 
-                                case QuestionType.DropDownList:
-                                case QuestionType.RadioList:
+        //                        case QuestionType.DropDownList:
+        //                        case QuestionType.RadioList:
 
-                                    if (field.IsNotBlank())
-                                    {
-                                        var options = question.Options.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
+        //                            if (field.IsNotBlank())
+        //                            {
+        //                                var options = question.Options.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
 
-                                        if (!options.Contains(field))
-                                        {
-                                            validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
-                                        }
-                                    }
+        //                                if (!options.Contains(field))
+        //                                {
+        //                                    validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
+        //                                }
+        //                            }
 
-                                    break;
+        //                            break;
 
-                                case QuestionType.CheckboxList:
+        //                        case QuestionType.CheckboxList:
 
-                                    if (field.IsNotBlank())
-                                    {
-                                        var options = question.Options.Split(',').Select(x => x.Trim().ToLower());
-                                        var fieldvalues = field.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
+        //                            if (field.IsNotBlank())
+        //                            {
+        //                                var options = question.Options.Split(',').Select(x => x.Trim().ToLower());
+        //                                var fieldvalues = field.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
 
-                                        foreach (var fieldvalue in fieldvalues)
-                                        {
-                                            if (!options.Contains(fieldvalue))
-                                            {
-                                                validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
-                                            }
-                                        }
-                                    }
+        //                                foreach (var fieldvalue in fieldvalues)
+        //                                {
+        //                                    if (!options.Contains(fieldvalue))
+        //                                    {
+        //                                        validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
+        //                                    }
+        //                                }
+        //                            }
 
-                                    break;
-                            }
+        //                            break;
+        //                    }
 
-                            validatedRow.Add(validatedField);
-                        }
+        //                    validatedRow.Add(validatedField);
+        //                }
 
-                        validatedRows.Add(validatedRow);
-                    }
+        //                validatedRows.Add(validatedRow);
+        //            }
 
-                    var csvString = new System.Text.StringBuilder();
-                    foreach (var header in headersWithData)
-                    {
-                        csvString.Append(header);
-                        csvString.Append(",");
-                    }
-                    csvString.Append("\n");
+        //            var csvString = new System.Text.StringBuilder();
+        //            foreach (var header in headersWithData)
+        //            {
+        //                csvString.Append(header);
+        //                csvString.Append(",");
+        //            }
+        //            csvString.Append("\n");
 
-                    foreach (var row in rows)
-                    {
-                        foreach (var field in row)
-                        {
-                            csvString.Append(field);
-                            csvString.Append(",");
-                        }
-                        csvString.Append("\n");
-                    }
+        //            foreach (var row in rows)
+        //            {
+        //                foreach (var field in row)
+        //                {
+        //                    csvString.Append(field);
+        //                    csvString.Append(",");
+        //                }
+        //                csvString.Append("\n");
+        //            }
 
-                    ViewBag.Headers = headersWithData;
-                    ViewBag.Rows = validatedRows;
-                    ViewBag.Csv = csvString.ToString();
-                }
+        //            ViewBag.Headers = headersWithData;
+        //            ViewBag.Rows = validatedRows;
+        //            ViewBag.Csv = csvString.ToString();
+        //        }
 
-            }
-            else
-            {
-                ViewBag.Step = 3;
-                ViewBag.StepLabel = "Import Complete";
+        //    }
+        //    else
+        //    {
+        //        ViewBag.Step = 3;
+        //        ViewBag.StepLabel = "Import Complete";
 
-                //import
-                var sr = new StringReader(csv);
+        //        //import
+        //        var sr = new StringReader(csv);
 
-                List<string> headers = new List<string>();
-                List<string> headersWithData = new List<string>();
-                List<List<string>> rows = new List<List<string>>();
-                List<List<ImportField>> validatedRows = new List<List<ImportField>>();
+        //        List<string> headers = new List<string>();
+        //        List<string> headersWithData = new List<string>();
+        //        List<List<string>> rows = new List<List<string>>();
+        //        List<List<ImportField>> validatedRows = new List<List<ImportField>>();
 
-                //do import
-                CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
-                reader.Configuration.Delimiter = ",";
-                reader.Configuration.HasHeaderRecord = true;
-                reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
+        //        //do import
+        //        CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
+        //        reader.Configuration.Delimiter = ",";
+        //        reader.Configuration.HasHeaderRecord = true;
+        //        reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
 
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) => {
-                        while (reader.Read())
-                        {
-                            if (headers.Count == 0)
-                            {
-                                headers = reader.Context.HeaderRecord.ToList();
-                            }
+        //        Database.ExecuteTransaction(
+        //            action: (SystemMessages amsgs, DatabaseConnection adc) => {
+        //                while (reader.Read())
+        //                {
+        //                    if (headers.Count == 0)
+        //                    {
+        //                        headers = reader.Context.HeaderRecord.ToList();
+        //                    }
 
-                            //assuming 1 seat per registrant line for now
-                            var seatsRequested = 1;
-                            var seatsLeft = activity.GetSeatsRemaining();
-                            var seatCount = 0;
-                            var waitingListSeatCount = 0;
-                            var applicationSeatCount = 0;
-                            var invitationSeatCount = 0;
-                            var declinedSeatCount = 0;
+        //                    //assuming 1 seat per registrant line for now
+        //                    var seatsRequested = 1;
+        //                    var seatsLeft = activity.GetSeatsRemaining();
+        //                    var seatCount = 0;
+        //                    var waitingListSeatCount = 0;
+        //                    var applicationSeatCount = 0;
+        //                    var invitationSeatCount = 0;
+        //                    var declinedSeatCount = 0;
 
-                            if (seatsRequested > seatsLeft)
-                            {
-                                seatCount = 0;
-                                waitingListSeatCount = 1;
-                            }
-                            else
-                            {
-                                seatCount = 1;
-                                waitingListSeatCount = 0;
-                            }
+        //                    if (seatsRequested > seatsLeft)
+        //                    {
+        //                        seatCount = 0;
+        //                        waitingListSeatCount = 1;
+        //                    }
+        //                    else
+        //                    {
+        //                        seatCount = 1;
+        //                        waitingListSeatCount = 0;
+        //                    }
 
-                            var hasSeatsAvailable = activity.GetRegistrantCount(amsgs, adc) < activity.SeatsAvailable;
+        //                    var hasSeatsAvailable = activity.GetRegistrantCount(amsgs, adc) < activity.SeatsAvailable;
 
-                            // TODO: need to verify if this really should be the master account. What is master
-                            var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
-                            var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
+        //                    // TODO: need to verify if this really should be the master account. What is master
+        //                    var registrant = SessionVariables.CurrentAccount.AddRegistrant(0, RegistrantType.Individual, true, amsgs, dc: adc);
+        //                    var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
 
-                            var registration = registrant.AddRegistration(
-                                SessionVariables.CurrentAccount.ID.Value, 
-                                activity.ActivityGroupId,
-                                activity.AccountActivityGroupId,
-                                period?.ID,
-                                RegistrationCompletionStatus.RequiresParentSignature,
-                                SessionVariables.LoggedInUser.ID.Value, 
-                                amsgs, 
-                                adc);
+        //                    var registration = registrant.AddRegistration(
+        //                        SessionVariables.CurrentAccount.ID.Value, 
+        //                        activity.ActivityGroupId,
+        //                        activity.AccountActivityGroupId,
+        //                        period?.ID,
+        //                        RegistrationCompletionStatus.RequiresParentSignature,
+        //                        SessionVariables.LoggedInUser.ID.Value, 
+        //                        amsgs, 
+        //                        adc);
 
-                            var ra = registrant.AddOrUpdateParticipationObject(
-                                registration.ID.Value, 
-                                af.ActivityId.Value, 
-                                ParticipationObjectType.Activity,
-                                RegistrationAssignmentType.Reserved,
-                                null,
-                                null,
-                                SessionVariables.LoggedInUser.ID.Value,
-                                amsgs, 
-                                dc: adc);
+        //                    var ra = registrant.AddOrUpdateParticipationObject(
+        //                        registration.ID.Value, 
+        //                        af.ActivityId.Value, 
+        //                        ParticipationObjectType.Activity,
+        //                        RegistrationAssignmentType.Reserved,
+        //                        null,
+        //                        null,
+        //                        SessionVariables.LoggedInUser.ID.Value,
+        //                        amsgs, 
+        //                        dc: adc);
 
-                            for (var i = 0; i < headers.Count; i++)
-                            {
-                                var header = headers[i];
-                                if (header.IsNotBlank())
-                                {
-                                    var field = reader.GetField<string>(i);
-                                    var question = questions.Where(x => x.QuestionDataTypeId.ToString().ToLower() == headers[i].ToLower()).First();
+        //                    for (var i = 0; i < headers.Count; i++)
+        //                    {
+        //                        var header = headers[i];
+        //                        if (header.IsNotBlank())
+        //                        {
+        //                            var field = reader.GetField<string>(i);
+        //                            var question = questions.Where(x => x.QuestionDataTypeId.ToString().ToLower() == headers[i].ToLower()).First();
 
-                                    if (field.IsNotBlank())
-                                    {
-                                        var answer = registration.AddAnswer(field, question, registrant, 0, amsgs, dc: adc);
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => {
-                        msgs.AddRange(smsgs);
-                    },
-                    onFailure: (SystemMessages fmsgs) => {
-                        msgs.AddRange(fmsgs);
-                    }
-                );
-            }
+        //                            if (field.IsNotBlank())
+        //                            {
+        //                                var answer = registration.AddAnswer(field, question, registrant, 0, amsgs, dc: adc);
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //            },
+        //            onSuccess: (SystemMessages smsgs) => {
+        //                msgs.AddRange(smsgs);
+        //            },
+        //            onFailure: (SystemMessages fmsgs) => {
+        //                msgs.AddRange(fmsgs);
+        //            }
+        //        );
+        //    }
 
-            ViewBag.Messages = msgs;
-            return View(activity);
-        }
+        //    ViewBag.Messages = msgs;
+        //    return View(activity);
+        //}
 
-        [HttpGet]
-        public ActionResult GetImportSample(string id)
-        {
-            var msgs = new SystemMessages();
-            var activity = Activity.LoadByUid(id.ToGuid());
-            var af = activity.GetActiveActivityForm();
+        //[HttpGet]
+        //public ActionResult GetImportSample(string id)
+        //{
+        //    var msgs = new SystemMessages();
+        //    var activity = Activity.LoadByUid(id.ToGuid());
+        //    var af = activity.GetActiveActivityForm();
 
-            var questions = af.GetForm().GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
+        //    var questions = af.GetForm().GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
 
-            var swriter = new StringWriter();
-            var csvWriter = new CsvHelper.CsvWriter(swriter);
-            csvWriter.Configuration.HasHeaderRecord = true;
+        //    var swriter = new StringWriter();
+        //    var csvWriter = new CsvHelper.CsvWriter(swriter);
+        //    csvWriter.Configuration.HasHeaderRecord = true;
 
-            foreach (var question in questions)
-            {
-                csvWriter.WriteField(question.QuestionDataTypeId.ToString());
-            }
-            csvWriter.NextRecord();
+        //    foreach (var question in questions)
+        //    {
+        //        csvWriter.WriteField(question.QuestionDataTypeId.ToString());
+        //    }
+        //    csvWriter.NextRecord();
 
-            string csv = swriter.GetStringBuilder().ToString();
+        //    string csv = swriter.GetStringBuilder().ToString();
 
-            Response.Clear();
-            Response.Write(csv);
-            Response.AddHeader("Content-Disposition", "attachment; filename=importsample.csv");
-            Response.AddHeader("Content-Type", "text/csv");
-            Response.AddHeader("Content-Length", System.Text.Encoding.UTF8.GetByteCount(csv).ToString());
-            Response.End();
+        //    Response.Clear();
+        //    Response.Write(csv);
+        //    Response.AddHeader("Content-Disposition", "attachment; filename=importsample.csv");
+        //    Response.AddHeader("Content-Type", "text/csv");
+        //    Response.AddHeader("Content-Length", System.Text.Encoding.UTF8.GetByteCount(csv).ToString());
+        //    Response.End();
 
-            return View();
-        }
+        //    return View();
+        //}
 
         [HttpGet]
         public ActionResult PublishDetail(string id)

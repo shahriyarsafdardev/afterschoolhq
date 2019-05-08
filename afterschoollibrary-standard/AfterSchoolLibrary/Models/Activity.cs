@@ -642,7 +642,7 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return !this.CostPerRegistrant.HasValue || this.CostPerRegistrant.Value == 0;
+                return (!this.CostPerRegistrant.HasValue || this.CostPerRegistrant.Value == 0) && !this.HasSubscriptionPlan() && !this.HasPaymentPlan();
             }
         }
 

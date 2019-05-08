@@ -10,15 +10,23 @@
 }
 
 <p>
-    The tuition fee is 
-    <strong>
-        @ParticipationObjectUI.PrintTuitionFee(Model, displayCheckoutPrice)
-    </strong>
+    @if (!Model.IsTuitionFree)
+    {
+        <span>
+            The tuition fee is
+            <strong>
+                @ParticipationObjectUI.PrintTuitionFee(Model, displayCheckoutPrice)
+            </strong>
+        </span>
+    }    
 
     @if (Model.SubscriptionPlans.Any())
     {
         <span>
-            plus 
+            @if (!Model.IsTuitionFree)
+            {
+                <span>plus</span>
+            }            
             <strong>
                 @ParticipationObjectUI.PrintPlanFee(Model.SubscriptionPlans.First(), Model.OwnerAccount, displayCheckoutPrice)
             </strong> 

@@ -944,20 +944,24 @@ namespace AfterSchoolLibrary.Services
                         seatsRequested: 1,
                         activityGroupId: groupId,
                         periodId: period?.ID,
+                        amountCharged: participationObject.Cost,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
                         dc: adc);
                     
                     activitiesAndPreferences.ForEach(activityAndPreference =>
                     {
+                        var activityParticipationObject = activityAndPreference.activity.GetParticipationObject(amsgs, adc);
+
                         Registration.ProcessRegistrationAssignment(
                             registration: registration,
-                            participationObject: activityAndPreference.activity.GetParticipationObject(amsgs, adc),
+                            participationObject: activityParticipationObject,
                             registrant: student,
                             seatsRequested: 1,       
                             preferenceNumber: activityAndPreference.preferenceNumber,
                             activityGroupId: groupId,
                             periodId: period?.ID,
+                            amountCharged: activityParticipationObject.Cost,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
@@ -969,14 +973,8 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
                     msgs.Add("Your new registration has been added", MessageType.Success);
                 },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
         }
@@ -2186,7 +2184,6 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.SubscriptionPlan.IsNotEmpty())
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
-                            startDateTime: DateTime.UtcNow,
                             subscriptionPlanType: SubscriptionPlanType.Subscription,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
@@ -2215,7 +2212,6 @@ namespace AfterSchoolLibrary.Services
 
                         accountRegistrant.StartSubscriptionPlan(
                             checkoutObject: checkoutObject,
-                            startDateTime: DateTime.UtcNow,
                             subscriptionPlanType: SubscriptionPlanType.PaymentPlan,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
@@ -2233,58 +2229,13 @@ namespace AfterSchoolLibrary.Services
 
                     Registration.SendConfirmation(checkoutObject, true);
                 },
-                onFailure: (SystemMessages amsgs) =>
-                {
-                    msgs.AddRange(amsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
             
         }
-
-        //[Obsolete]
-        //public static StripeAccount GetOrCreateStripeAccount(this Account account, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
-        //    var stripeAccount = account.GetStripeAccount(msgs, dc);
-
-        //    if (stripeAccount.IsEmpty())
-        //    {
-        //        var location = account.GetDefaultLocation(msgs, dc);
-
-        //        stripeAccount = new StripeAccount()
-        //        {
-        //            AccountId = account.ID,
-        //            CreateDate = DateTime.UtcNow,
-        //            CreatedBy = loggedInUser?.ID.IfEmpty(0),
-        //            LastModifiedDate = DateTime.UtcNow,
-        //            LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-        //            LegalEntityAddress1 = location?.Address1,
-        //            LegalEntityAddress2 = location?.Address2,
-        //            LegalEntityCity = location?.City,
-        //            LegalEntityState = location?.State,
-        //            LegalEntityPostalCode = location?.PostalCode,
-        //            LegalEntityFirstName = loggedInUser.FirstName,
-        //            LegalEntityLastName = loggedInUser.LastName,
-        //            LegalEntityBusinessName = account.Name,
-        //            SupportEmail = account.Email,
-        //            SupportPhone = account.Phone
-        //        };
-        //        msgs.AddRange(stripeAccount.Save(dc));
-        //    }
-
-        //    return stripeAccount;
-        //}
-
-        //public static StripeAccount GetStripeAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    return StripeAccount.LoadByAccountId(account.ID.Value, msgs, dc);
-        //}
-
+        
         public static CheckPaymentAccount CreateOrUpdateCheckPaymentAccount(this Account account, LegalEntityType legalEntityType, string name, string address1, string address2, string city, string state, string postalCode, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             CheckPaymentAccount checkAccount = null;
@@ -2370,9 +2321,10 @@ namespace AfterSchoolLibrary.Services
                 planId: plan.StripePlanId,
                 sourceId: stripeBillToSourceId,
                 platformFeePercent: billingAccount.GetSubscriptionPlatformFeePercent(plan, msgs, dc),
-                trialEndDate: null,
+                startDate: DateTime.UtcNow,
                 stripeAccountId: billingAccount.StripeUserId,
                 stripeCouponId: stripeCouponId,
+                metaData: null,
                 msgs: msgs);
         }
 
