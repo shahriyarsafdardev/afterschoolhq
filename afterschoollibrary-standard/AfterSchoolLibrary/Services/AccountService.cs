@@ -2287,6 +2287,48 @@ namespace AfterSchoolLibrary.Services
             return CheckPaymentAccount.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
+        public static BankPaymentAccount CreateOrUpdateBankPaymentAccount(this Account account, string bankName, BankAccountType bankAccountType, string routingNumber, string accountNumber, string accountHoldersName, string bankCountry, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            BankPaymentAccount bankAccount = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    bankAccount = account.GetBankPaymentAccount(amsgs, adc);
+
+                    if (bankAccount.IsEmpty())
+                        bankAccount = new BankPaymentAccount
+                        {
+                            CreateDate = DateTime.UtcNow,
+                            CreatedBy = loggedInUser.ID,
+                            AccountId = account.ID
+                        };
+
+                    bankAccount.BankAccountTypeId = bankAccountType;
+                    bankAccount.BankCountry = bankCountry;
+                    bankAccount.RoutingNumber = routingNumber;
+                    bankAccount.AccountNumber = accountNumber;
+                    bankAccount.BankName = bankName;
+                    bankAccount.AccountHoldersName = accountHoldersName;
+                    amsgs.AddRange(bankAccount.Save(adc));
+
+                    // TODO: need to validate bank info at some point
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return bankAccount;
+        }
+
+        public static BankPaymentAccount GetBankPaymentAccount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return BankPaymentAccount.LoadByAccountId(account.ID.Value, msgs, dc);
+        }
+
         public static bool CanProcessPayments(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var oldPaymentFeatures = new List<FeatureType>() { FeatureType.UseStripeConnectedAccount, FeatureType.AcceptPayments };

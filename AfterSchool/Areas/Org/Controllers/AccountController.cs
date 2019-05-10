@@ -212,7 +212,72 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             return View(SessionVariables.CurrentAccount.GetCheckPaymentAccount() ?? new CheckPaymentAccount());
         }
-        
+
+
+        [HttpGet]
+        public ActionResult BankSetup()
+        {            
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = new SystemMessages();
+            return View(BankInfoViewModel.FromBankPaymentAccount(SessionVariables.CurrentAccount.GetBankPaymentAccount() ?? new BankPaymentAccount()));
+        }
+
+        [HttpPost]
+        public ActionResult BankSetup(BankInfoViewModel bankInfoVM)
+        {
+            var msgs = new SystemMessages();
+
+            if (!bankInfoVM.BankAccountTypeId.HasValue && bankInfoVM.BankAccountTypeId.Value == BankAccountType.NotSet)
+                msgs.Add("Select the bank account type", MessageType.UserError);
+
+            if (bankInfoVM.BankName.IsEmpty())
+                msgs.Add("Bank Name is required", MessageType.UserError);
+
+            if (bankInfoVM.AccountHoldersName.IsEmpty())
+                msgs.Add("Account holder's name is required", MessageType.UserError);
+
+            if (bankInfoVM.RoutingNumber1.IsEmpty() || bankInfoVM.RoutingNumber1.Trim().Length != 9)
+                msgs.Add("Routing Number 1 is required", MessageType.UserError);
+
+            if (bankInfoVM.RoutingNumber2.IsEmpty() || bankInfoVM.RoutingNumber2.Trim().Length != 9)
+                msgs.Add("Routing Number 2 is required", MessageType.UserError);
+
+            if (bankInfoVM.RoutingNumber1 != bankInfoVM.RoutingNumber2)
+                msgs.Add("Routing Numbers must match", MessageType.UserError);
+
+            if (bankInfoVM.AccountNumber1.IsEmpty())
+                msgs.Add("Account Number 1 is required", MessageType.UserError);
+
+            if (bankInfoVM.AccountNumber2.IsEmpty())
+                msgs.Add("Account Number 2 is required", MessageType.UserError);
+
+            if (bankInfoVM.AccountNumber1 != bankInfoVM.AccountNumber2)
+                msgs.Add("Account Numbers must match", MessageType.UserError);
+
+            if (bankInfoVM.BankCountry.IsEmpty())
+                msgs.Add("Bank Country is required", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+                SessionVariables.CurrentAccount.CreateOrUpdateBankPaymentAccount(
+                    bankInfoVM.BankName,
+                    bankInfoVM.BankAccountTypeId.Value,
+                    bankInfoVM.RoutingNumber1,
+                    bankInfoVM.AccountNumber1,
+                    bankInfoVM.AccountHoldersName,
+                    bankInfoVM.BankCountry,
+                    SessionVariables.LoggedInUser,
+                    msgs);
+
+            if (msgs.HasNoErrors() && Request["isnew"] == "1")
+                return RedirectToAction("paymentsdone", new { isnew = 1 });
+
+            ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.IsFullScreen = GetIsFullScreen();
+            ViewBag.Messages = msgs;
+            return View(BankInfoViewModel.FromBankPaymentAccount(SessionVariables.CurrentAccount.GetBankPaymentAccount() ?? new BankPaymentAccount()));
+        }
+
         [HttpGet]
         public ActionResult PaymentsEntity()
         {
