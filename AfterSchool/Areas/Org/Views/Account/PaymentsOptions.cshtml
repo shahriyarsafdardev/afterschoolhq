@@ -60,13 +60,13 @@
                                 <td>
                                     @if (!account.HasStripeConnectedAccount || !account.StripePayoutsEnabled)
                                     {
-                                        <a href="@Url.Action("paymentsentity", "account", new { isnew = 1 })" class="btn btn-alt5 btn-xl btn-block">
+                                        <a href="@Url.Action("banksetup", "account", new { isnew = 1 })" class="btn btn-alt5 btn-xl btn-block">
                                             Choose Direct Deposits &raquo;
                                         </a>
                                     }
                                     else
                                     {
-                                        <a href="@Url.Action("paymentsentity", "account")" class="btn btn-alt5 btn-xl btn-block">
+                                        <a href="@Url.Action("banksetup", "account")" class="btn btn-alt5 btn-xl btn-block">
                                             Update Direct Deposits &raquo;
                                         </a>
                                     }

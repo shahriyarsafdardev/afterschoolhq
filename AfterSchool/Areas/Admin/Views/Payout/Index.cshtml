@@ -164,13 +164,17 @@
                                         <div class="btn-group">
                                             @if (payout.PayoutStatusId == PayoutStatus.Requested || payout.PayoutStatusId == PayoutStatus.Denied)
                                             {
-                                                <button class="btn btn-sm btn-primary md-trigger" data-modal="modal-payout-approve" onclick="approve('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
+                                                <button class="btn btn-sm btn-primary md-trigger" 
+                                                        data-modal="modal-payout-approve" 
+                                                        onclick="approve('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
                                                     Approve
                                                 </button>
 
                                                 if (payout.PayoutStatusId == PayoutStatus.Requested)
                                                 {
-                                                    <button class="btn btn-sm btn-danger md-trigger" data-modal="modal-payout-deny" onclick="deny('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
+                                                    <button class="btn btn-sm btn-danger md-trigger" 
+                                                            data-modal="modal-payout-deny" 
+                                                            onclick="deny('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
                                                         Deny
                                                     </button>
                                                 }

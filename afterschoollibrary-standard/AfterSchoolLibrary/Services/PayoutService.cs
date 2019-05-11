@@ -54,7 +54,6 @@ namespace AfterSchoolLibrary.Services
                 {
                     msgs.AddRange(smsgs);
                     // TODO: Send approved payout email
-
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

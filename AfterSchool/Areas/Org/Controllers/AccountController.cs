@@ -228,7 +228,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (!bankInfoVM.BankAccountTypeId.HasValue && bankInfoVM.BankAccountTypeId.Value == BankAccountType.NotSet)
+            if (!bankInfoVM.BankAccountType.HasValue && bankInfoVM.BankAccountType.Value == BankAccountType.NotSet)
                 msgs.Add("Select the bank account type", MessageType.UserError);
 
             if (bankInfoVM.BankName.IsEmpty())
@@ -261,7 +261,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 SessionVariables.CurrentAccount.CreateOrUpdateBankPaymentAccount(
                     bankInfoVM.BankName,
-                    bankInfoVM.BankAccountTypeId.Value,
+                    bankInfoVM.BankAccountType.Value,
                     bankInfoVM.RoutingNumber1,
                     bankInfoVM.AccountNumber1,
                     bankInfoVM.AccountHoldersName,
