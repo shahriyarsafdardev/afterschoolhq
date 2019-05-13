@@ -15,7 +15,7 @@
 
     if (canReceiveACHDeposits)
     {
-        canRequestAnotherPayout = true; // lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddDays(payoutWaitingDaysDeposits) < DateTime.UtcNow;
+        canRequestAnotherPayout = lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddDays(payoutWaitingDaysDeposits) < DateTime.UtcNow;
     }
     else
     {
