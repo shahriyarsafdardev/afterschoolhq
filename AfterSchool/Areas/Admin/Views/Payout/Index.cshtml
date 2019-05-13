@@ -162,23 +162,32 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            @if (payout.PayoutStatusId == PayoutStatus.Requested || payout.PayoutStatusId == PayoutStatus.Denied)
+                                            @if (payout.PayoutStatusId.In(new List<PayoutStatus> { PayoutStatus.Requested, PayoutStatus.Denied }))
                                             {
-                                                <button class="btn btn-sm btn-primary md-trigger" 
-                                                        data-modal="modal-payout-approve" 
+                                                <button class="btn btn-sm btn-primary md-trigger"
+                                                        data-modal="modal-payout-approve"
                                                         onclick="approve('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
                                                     Approve
                                                 </button>
 
                                                 if (payout.PayoutStatusId == PayoutStatus.Requested)
                                                 {
-                                                    <button class="btn btn-sm btn-danger md-trigger" 
-                                                            data-modal="modal-payout-deny" 
+                                                    <button class="btn btn-sm btn-danger md-trigger"
+                                                            data-modal="modal-payout-deny"
                                                             onclick="deny('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
                                                         Deny
                                                     </button>
                                                 }
                                             }
+                                            else if (payout.PayoutStatusId.In(new List<PayoutStatus> { PayoutStatus.Approved, PayoutStatus.InProgress }))
+                                            {
+                                                <button class="btn btn-sm btn-primary md-trigger"
+                                                        data-modal="modal-payout-complete"
+                                                        onclick="complete('@payout.Uid', @payout.Amount.Value, '@UI.JavascriptSafeString(account.Name)')">
+                                                    Complete
+                                                </button>
+                                            }
+
                                         </div>
                                     </td>
                                 </tr>
@@ -200,9 +209,9 @@
                     (PagingModel)ViewBag.PagingModel,
                     new ViewDataDictionary()
                     {
-                                { "controller", "accounting" },
-                                { "action", "index" },
-                                { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
+                        { "controller", "accounting" },
+                        { "action", "index" },
+                        { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
                     }
                 );
             }
@@ -251,12 +260,62 @@
                     <p>Denying...</p>
                 </div>
                 <div class="form-deny-done hide">
-                    <p>The requiest has been denied for <strong>$<span class="deny-payout-amount"></span></strong> to <strong><span class="deny-payout-account"></span></strong></p>
+                    <p>The request has been denied for <strong>$<span class="deny-payout-amount"></span></strong> to <strong><span class="deny-payout-account"></span></strong></p>
                 </div>
             </div>
             <div class="modal-footer modal-footer-deny">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
                 <button type="button" id="btn-deny-payout" class="btn btn-danger">Deny &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-payout-complete" class="md-modal colored-header custom-width md-effect-9">
+    <form method="post" action="@Url.Action("complete", "payout")" class="form">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+                <h3 class="modal-title">Complete Payout</h3>
+            </div>
+            <div class="modal-body form">
+                <div class="form-complete">
+                    <p>
+                        Are you sure you want to <strong>complete</strong> a payout of <strong>$<span class="complete-payout-amount"></span></strong> to <strong><span class="complete-payout-account"></span></strong>?
+                    </p>
+                    <table class="table table-condensed">
+                        <tr>
+                            <td>Account Holder Name</td>
+                            <td><span id="payout-account-holders-name"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Bank Name</td>
+                            <td><span id="payout-bank-name"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Account Type</td>
+                            <td><span id="payout-account-type"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Routing Number</td>
+                            <td><span id="payout-routing-number"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Account Number</td>
+                            <td><span id="payout-account-number"></span></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="form-complete-waiting hide">
+                    <p>Completing...</p>
+                </div>
+                <div class="form-complete-done hide">
+                    <p>The request has been completed for <strong>$<span class="complete-payout-amount"></span></strong> to <strong><span class="complete-payout-account"></span></strong></p>
+                </div>
+            </div>
+            <div class="modal-footer modal-footer-complete">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="button" id="btn-complete-payout" class="btn btn-danger">Mark as Completed &raquo;</button>
             </div>
         </div>
     </form>
@@ -269,6 +328,47 @@
         $('.approve-payout-amount').html(amount);
         $('.approve-payout-account').html(accountName);
         selectedPayoutId = payoutId;
+    }
+
+    function deny(payoutId, amount, accountName) {
+        $('.deny-payout-amount').html(amount);
+        $('.deny-payout-account').html(accountName);
+        selectedPayoutId = payoutId;
+    }
+
+    function complete(payoutId, amount, accountName) {
+        $('.complete-payout-amount').html(amount);
+        $('.complete-payout-account').html(accountName);
+
+        selectedPayoutId = payoutId;        
+
+        $.post(
+            '@Url.Action("getbankinfo", "payout")',
+            'uid=' + selectedPayoutId,
+            function (data) {
+                if (data && data.status == 'ok') {
+
+                    $('#payout-account-holders-name').html(data.accountHoldersName);
+                    $('#payout-bank-name').html(data.bankName);
+                    $('#payout-routing-number').html(data.routingNumber);
+                    $('#payout-account-number').html(data.accountNumber);
+                    $('#payout-account-type').html(data.accountType);
+
+                } else {
+
+                    var items = "";
+                    for (var message of data.messages) {
+                        items += message.Text + "<br />";
+                    }
+
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: items,
+                        success: false
+                    });
+                }
+            }
+        )
     }
 
     function deny(payoutId, amount, accountName) {
@@ -319,6 +419,27 @@
         $('.modal-footer-deny').addClass('hide');
     }
 
+    function showCompleteWaiting() {
+        $('.form-complete').addClass('hide');
+        $('.form-complete-waiting').removeClass('hide');
+        $('.form-complete-done').addClass('hide');
+        $('.modal-footer-complete').addClass('hide');
+    }
+
+    function showComplete() {
+        $('.form-deny').removeClass('hide');
+        $('.form-deny-waiting').addClass('hide');
+        $('.form-deny-done').addClass('hide');
+        $('.modal-footer-deny').removeClass('hide');
+    }
+
+    function showCompleteDone() {
+        $('.form-complete').addClass('hide');
+        $('.form-complete-waiting').addClass('hide');
+        $('.form-complete-done').removeClass('hide');
+        $('.modal-footer-complete').addClass('hide');
+    }
+
     function reloadPage() {
         setTimeout(function () {
             location.href = '@Url.Action("index", "payout", new { sdate = Request["sdate"], edate = Request["edate"], pn = Request["pn"], rpp = Request["rpp"], ps = Request["ps"] })';
@@ -328,7 +449,7 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $('#btn-approve-payout').click(function () {
-            approveOrDeny(
+            updateStatus(
                 '@Url.Action("approve", "payout")',
                 showApprove,
                 showApproveWaiting,
@@ -337,16 +458,25 @@
         });
 
         $('#btn-deny-payout').click(function () {
-            approveOrDeny(
+            updateStatus(
                 '@Url.Action("deny", "payout")',
                 showDeny,
                 showDenyWaiting,
                 showDenyDone
             );
         });
+
+        $('#btn-complete-payout').click(function () {
+            updateStatus(
+                '@Url.Action("complete", "payout")',
+                showComplete,
+                showCompleteWaiting,
+                showCompleteDone
+            );
+        });
     });
 
-    function approveOrDeny(url, show, showWaiting, showDone) {
+    function updateStatus(url, show, showWaiting, showDone) {
 
         showWaiting();
 

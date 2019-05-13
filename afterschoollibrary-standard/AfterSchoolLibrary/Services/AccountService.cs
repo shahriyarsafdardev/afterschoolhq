@@ -1737,7 +1737,7 @@ namespace AfterSchoolLibrary.Services
         {
             var paymentType = PaymentType.NotSet;
 
-            if (account.StripePayoutsEnabled)
+            if (account.CanReceiveACHDeposits(msgs, dc))
                 paymentType = PaymentType.ACH;
             else
             {
@@ -2341,9 +2341,17 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CanReceivePaymentDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return (account.HasStripeConnectedAccount && account.StripePayoutsEnabled && account.StripeChargesEnabled) || 
-                account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty() ||
-                account.GetBankPaymentAccount(msgs, dc).IsNotEmpty();
+            return account.CanReceiveACHDeposits(msgs, dc) || account.GetCheckPaymentAccount(msgs, dc).IsNotEmpty();
+        }
+
+        public static bool CanReceiveACHDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.CanReceiveStripeDeposits(msgs, dc) || account.GetBankPaymentAccount(msgs, dc).IsNotEmpty();
+        }
+
+        public static bool CanReceiveStripeDeposits(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return (account.HasStripeConnectedAccount && account.StripePayoutsEnabled && account.StripeChargesEnabled);
         }
 
         public static Stripe.Customer AddCustomerToConnectedAccount(this Account billingAccount, Account purchasingAccount, string stripeBillToSourceId, SystemMessages msgs)
@@ -2423,7 +2431,7 @@ namespace AfterSchoolLibrary.Services
 
             return Math.Round(feeAmount / billedCostPerPeriod, 4);
         }
-        public static void SendPayout(this Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendStripePayout(this Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var requestor = payout.GetRequestor(msgs, dc);
 

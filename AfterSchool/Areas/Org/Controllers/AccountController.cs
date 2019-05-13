@@ -228,7 +228,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (!bankInfoVM.BankAccountType.HasValue && bankInfoVM.BankAccountType.Value == BankAccountType.NotSet)
+            if (!bankInfoVM.BankAccountType.HasValue || bankInfoVM.BankAccountType.Value == BankAccountType.NotSet)
                 msgs.Add("Select the bank account type", MessageType.UserError);
 
             if (bankInfoVM.BankName.IsEmpty())
@@ -272,10 +272,13 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
                 return RedirectToAction("paymentsdone", new { isnew = 1 });
 
+            if (msgs.HasNoErrors())
+                bankInfoVM = BankInfoViewModel.FromBankPaymentAccount(SessionVariables.CurrentAccount.GetBankPaymentAccount() ?? new BankPaymentAccount());
+
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.IsFullScreen = GetIsFullScreen();
             ViewBag.Messages = msgs;
-            return View(BankInfoViewModel.FromBankPaymentAccount(SessionVariables.CurrentAccount.GetBankPaymentAccount() ?? new BankPaymentAccount()));
+            return View(bankInfoVM);
         }
 
         [HttpGet]

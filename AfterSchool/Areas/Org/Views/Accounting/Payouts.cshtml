@@ -7,14 +7,15 @@
     var totalPendingAmount = (decimal)ViewBag.TotalPendingAmount;
     var maxRequestAmount = (decimal)ViewBag.MaxRequestAmount;
     var lastPayout = (Payout)ViewBag.LastPayout;
-    var canReceiveDeposits = SessionVariables.CurrentAccount.CanReceivePaymentDeposits();
+    var canReceiveACHDeposits = (bool)ViewBag.CanReceiveACHDeposits;
+    var canReceiveDeposits = (bool)ViewBag.CanReceiveDeposits;
     var canRequestAnotherPayout = false;
     var payoutWaitingDaysDeposits = 1;
     var payoutWaitingDaysChecks = 3;
 
-    if (canReceiveDeposits)
+    if (canReceiveACHDeposits)
     {
-        canRequestAnotherPayout = lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddDays(payoutWaitingDaysDeposits) < DateTime.UtcNow;
+        canRequestAnotherPayout = true; // lastPayout.IsEmpty() || lastPayout.DateRequested.Value.AddDays(payoutWaitingDaysDeposits) < DateTime.UtcNow;
     }
     else
     {
@@ -35,7 +36,13 @@
         <div class="panel-heading">
 
             <div class="pull-right">
-                @if (canRequestAnotherPayout)
+                @if (!canReceiveDeposits)
+                {
+                    <button class="btn btn-primary">
+                        Setup Payment Account &raquo;
+                    </button>
+                }
+                else if (canRequestAnotherPayout)
                 {
                     <button class="btn btn-primary md-trigger" data-modal="modal-payout-request">
                         Request Payout
@@ -44,7 +51,7 @@
                 else
                 {
                     <button class="btn btn-primary" disabled>
-                        @if (canReceiveDeposits)
+                        @if (canReceiveACHDeposits)
                         {
                             @: Must wait @payoutWaitingDaysDeposits day from your last payout request
                         }
@@ -209,7 +216,7 @@
 </div>
 
 <div id="modal-payout-request" class="md-modal colored-header custom-width md-effect-9">
-    <form method="post" action="@Url.Action("requestpayout", "accounting")" class="form">
+    <form method="post" action="@Url.Action("requestpayout", "services")" class="form">
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
@@ -220,7 +227,7 @@
                     <div class="form-group">
                         <label for="payout-amount">Amount Requested</label>
                         <input type="number" class="form-control" name="payoutamount" id="payout-amount" step=".01" required="required" min="1.00" />
-                        <p class="muted"><em>The maximum amount available for request is <strong>@maxRequestAmount.ToCurrency()</strong></em></p>
+                        <p class="muted"><em>The amount requested must be between <strong>$25</strong> and <strong>@maxRequestAmount.ToCurrency()</strong></em></p>
                     </div>
                 </div>
                 <div class="form-saving hide">

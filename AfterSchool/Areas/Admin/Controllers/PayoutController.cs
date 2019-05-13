@@ -122,5 +122,65 @@ namespace AfterSchool.Areas.Admin.Controllers
                 messages = msgs
             }, JsonRequestBehavior.AllowGet);
         }
+
+        [HttpPost]
+        public ActionResult Complete(string uid)
+        {
+            var msgs = new SystemMessages();
+
+            if (!uid.IsGuid())
+                msgs.Add("Invalid payout", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var payout = Payout.LoadByUid(uid.ToGuid(), msgs);
+                payout.Complete(SessionVariables.LoggedInUser, msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                    }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new
+            {
+                status = "error",
+                messages = msgs
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult GetBankInfo(string uid)
+        {
+            var msgs = new SystemMessages();
+
+            if (!uid.IsGuid())
+                msgs.Add("Invalid payout", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var payout = Payout.LoadByUid(uid.ToGuid(), msgs);
+                var account = payout.GetAccount(msgs);
+                var bankAccount = account.GetBankPaymentAccount(msgs);
+
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                        accountHoldersName = bankAccount.AccountHoldersName,
+                        accountNumber = bankAccount.AccountNumber,
+                        routingNumber = bankAccount.RoutingNumber,
+                        bankName = bankAccount.BankName,
+                        accountType = bankAccount.BankAccountTypeId.ToString().SplitByUpperCase()
+                    }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new
+            {
+                status = "error",
+                messages = msgs
+            }, JsonRequestBehavior.AllowGet);
+        }
     }
 }

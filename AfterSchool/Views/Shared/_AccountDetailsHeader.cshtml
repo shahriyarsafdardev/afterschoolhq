@@ -6,9 +6,9 @@
 
     var defaultPaymentsAction = "paymentsoptions";
 
-    if (SessionVariables.CurrentAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
+    if (SessionVariables.CurrentAccount.CanReceiveACHDeposits())
     {
-        defaultPaymentsAction = "paymentsentity";
+        defaultPaymentsAction = "banksetup";
     }
 }
 
@@ -51,7 +51,7 @@
                 }
                 else
                 {
-
+                    <option value="@Url.Action("hosts", "account")">Schools</option>
                 }
                 @if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
                 {

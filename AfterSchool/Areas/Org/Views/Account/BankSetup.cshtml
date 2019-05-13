@@ -82,7 +82,7 @@
                             <div class="text-center">
                                 @foreach (var item in Enum.GetValues(typeof(BankAccountType)).Cast<BankAccountType>().Except(BankAccountType.NotSet.AsList()))
                                 {
-                                    AccountTypeRadio(item);
+                                    @:@AccountTypeRadio(item)
                                 }
                             </div>
                         </div>
@@ -132,10 +132,14 @@
                         </div>
                     </div>
 
+                    <input type="hidden" value="US" name="bankcountry" />
+
                     <div class="form-group text-center">
                         <label class="col-sm-4 control-label"></label>
                         <div class="col-sm-8">
-                            <button type="submit" class="btn btn-primary btn-xl">Save Payment Information &raquo;</button>
+                            <button type="submit" class="btn btn-primary btn-xl">
+                                @(Model.ID.HasValue ? "Update": "Save") Payment Information &raquo;
+                            </button>
                         </div>
                     </div>
 

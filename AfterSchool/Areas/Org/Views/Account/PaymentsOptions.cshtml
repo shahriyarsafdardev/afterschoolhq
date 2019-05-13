@@ -58,7 +58,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    @if (!account.HasStripeConnectedAccount || !account.StripePayoutsEnabled)
+                                    @if (!account.CanReceiveACHDeposits())
                                     {
                                         <a href="@Url.Action("banksetup", "account", new { isnew = 1 })" class="btn btn-alt5 btn-xl btn-block">
                                             Choose Direct Deposits &raquo;
