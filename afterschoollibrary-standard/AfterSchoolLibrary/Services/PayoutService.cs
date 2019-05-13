@@ -118,18 +118,39 @@ namespace AfterSchoolLibrary.Services
             if (payout.PaymentTypeId == PaymentType.ACH)
             {
                 // send money via ACH
-                if (account.CanReceivePaymentDeposits() && account.StripeUserId.IsNotEmpty())
+                if (account.CanReceiveACHDeposits(msgs, dc))
                 {
-                    account.SendStripePayout(
-                        payout: payout,
-                        loggedInUser: loggedInUser,
-                        msgs: msgs,
-                        dc: dc);
+                    if (account.StripeUserId.IsNotEmpty())
+                    {
+                        account.SendStripePayout(
+                            payout: payout,
+                            loggedInUser: loggedInUser,
+                            msgs: msgs,
+                            dc: dc);
 
-                    if (msgs.HasNoErrors())
-                        payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+                        if (msgs.HasNoErrors())
+                            payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+                    }
+                    // transfer money to the main AHQ account to prep for sending an ACH
+                    else
+                    {
+                        Billing.StripeHelper.CreatePayout(
+                            amount: payout.Amount.Value,
+                            externalAccountId: null,
+                            connectedAccountId: null,
+                            metaData: new Dictionary<string, string>()
+                            {
+                                { "AccountUid", account.Uid.ToString() },
+                                { "RequestedBy", payout.GetRequestor(msgs, dc).Uid.ToString() },
+                                { "ApprovedBy", loggedInUser.Uid.ToString() },
+                                { "DateRequested", payout.DateRequested.ToShortDateTimeString() }
+                            },
+                            msgs: msgs);
+
+                        if (msgs.HasNoErrors())
+                            payout.UpdateStatus(PayoutStatus.InProgress, loggedInUser, msgs, dc);
+                    }
                 }
-
                 return;
             }
             else if (payout.PaymentTypeId == PaymentType.Check)
