@@ -22,6 +22,7 @@ namespace AfterSchoolLibrary.Models
 		public bool IsDefault { get { return (bool)MDV["IsDefault"].Value; } set { MDV["IsDefault"].Value = value; } }
 		public string Details { get { return (string)MDV["Details"].Value; } set { MDV["Details"].Value = value; } }
 		public LocationType LocationTypeId { get { return (LocationType)MDV["LocationTypeId"].Value; } set { MDV["LocationTypeId"].Value = value; } }
+		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
 		
 
         public Location()
@@ -30,6 +31,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.IsDefault = false;
 			this.LocationTypeId = LocationType.NotSet;
+			this.IsTest = false;
 			
         }
 
@@ -44,6 +46,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsDefault", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "Details", System.Data.SqlDbType.NVarChar , "4000");
 				_dp.Add(className, "LocationTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -143,6 +146,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["LocationTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsTest"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 			
 
             return msgs;
@@ -192,8 +199,10 @@ namespace AfterSchoolLibrary.Models
             var sql = $@"
                     select * from Location
                     where 
-                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') or
-                        Contains(address1,'{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
+                        (
+                            Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}') or
+                            Contains(address1,'{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
+                        ) and IsTest = 0
                 ";
             
            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);

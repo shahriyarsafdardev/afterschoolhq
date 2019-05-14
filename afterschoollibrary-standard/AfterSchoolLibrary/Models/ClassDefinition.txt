@@ -121,6 +121,7 @@ property: HostAccountId, int?, Int
 property: IsDefault, bool, Bit
 property: Details, string, NVarChar "4000"
 property: LocationTypeId, LocationType, Int
+property: IsTest, bool, Bit
 baseproperty: Name, required
 baseproperty: Address1, required
 baseproperty: City, required
@@ -339,6 +340,7 @@ property: CreditCardFeesPaidBy, FeesPaidByType, Int
 property: ConvenienceFeesPaidBy, FeesPaidByType, Int
 property: StripeChargesEnabled, bool, Bit
 property: StripePayoutsEnabled, bool, Bit
+property: IsTest, bool, Bit
 baseproperty: Name, required
 loadmethod: OwnerId, List<>
 loadmethod: UniqueName
