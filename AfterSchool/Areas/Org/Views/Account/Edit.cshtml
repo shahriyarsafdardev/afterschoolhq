@@ -58,20 +58,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Time Zone</label>
                         <div class="col-sm-9">
-                            <select name="timezone" id="timezone" class="form-control" required>
-                                <!--
-                                @foreach (var zone in TimeZoneInfo.GetSystemTimeZones().Select(t => t.Id).OrderBy(x=>x))
-                                {
-                                    <option value="@zone">@zone</option>
-                                }
-                                    -->
-                                @foreach (var zone in new string[] { "Eastern - EST", "Central - CST", "Mountain - MST", "Pacific - PST", "Alaska - AKST", "Hawaii - HAST" })
-                                {
-                                    var selected = "";
-                                    if (zone == Model.TimeZone) { selected = " selected=\"selected\" "; }
-                                    <option value="@zone" @selected>@zone</option>
-                                }
-                            </select>
+                            @{ Html.RenderPartial("~/Views/Shared/Components/_TimezoneDropdown.cshtml", Model.TimeZone); }
                         </div>
                     </div>
 

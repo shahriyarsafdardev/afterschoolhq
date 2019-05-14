@@ -155,6 +155,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 accountType: (AccountType)accounttype.ToInteger(),
                                 packageId: package.ToInteger(),
                                 packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
+                                timeZone: null,
                                 isAfterSchool: SessionVariables.IsAfterSchool.Value,
                                 loggedInUser: SessionVariables.LoggedInUser,
                                 msgs: amsgs,

@@ -99,6 +99,7 @@ namespace AfterSchool.Areas.District.Controllers
                             accountType: AccountType.ActivityProvider,
                             packageId: null,
                             packageBillingPeriod: null,
+                            timeZone: null,
                             isAfterSchool: SessionVariables.IsAfterSchool.Value,
                             loggedInUser: SessionVariables.LoggedInUser,
                             msgs: amsgs,

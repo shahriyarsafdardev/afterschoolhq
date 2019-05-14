@@ -367,6 +367,7 @@ namespace AfterSchoolLibrary.Services
                 accountOwner: accountOwner,
                 packageId: null,
                 packageBillingPeriod: null,
+                timeZone: null,
                 createWithStripe: true,
                 loggedInUser: loggedInUser,
                 isAfterSchool: isAfterSchool,
@@ -383,9 +384,9 @@ namespace AfterSchoolLibrary.Services
             return AddNewRegistrantAccount(accountOwner, isActive, null, null, isAfterSchool, loggedInUser, msgs, dc);
         }
 
-        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, bool addDefaultPackage, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, bool addDefaultPackage, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, phone, isActive, accountType, null, null, true, loggedInUser, msgs, dc);
+            var account = AddNewAccount(accountOwner, orgName, phone, isActive, accountType, null, null, timeZone, true, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
                 account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
@@ -393,7 +394,7 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccount(this WebUser accountOwner, string orgName, string phone, bool isActive, AccountType accountType, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, bool isAfterSchool, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AccountService.CreateNew(
                 orgName: orgName, 
@@ -404,6 +405,7 @@ namespace AfterSchoolLibrary.Services
                 accountOwner: accountOwner, 
                 packageId: packageId,
                 packageBillingPeriod: packageBillingPeriod,
+                timeZone: timeZone,
                 createWithStripe: false,
                 loggedInUser: loggedInUser, 
                 isAfterSchool: isAfterSchool, 

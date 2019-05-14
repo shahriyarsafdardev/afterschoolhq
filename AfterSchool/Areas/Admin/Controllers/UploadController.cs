@@ -396,6 +396,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                         accountType: AccountType.School,
                                         packageId: Package.Load(msgs: amsgs, dc: adc).First().ID.Value,
                                         packageBillingPeriod: BillingPeriodType.Month,
+                                        timeZone: null,
                                         isAfterSchool: SessionVariables.IsAfterSchool.Value,
                                         loggedInUser: SessionVariables.LoggedInUser,
                                         msgs: amsgs,
