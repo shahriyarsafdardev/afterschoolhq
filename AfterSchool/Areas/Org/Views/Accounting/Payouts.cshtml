@@ -12,6 +12,7 @@
     var canRequestAnotherPayout = false;
     var payoutWaitingDaysDeposits = 1;
     var payoutWaitingDaysChecks = 3;
+    var minRequestAmount = 25;
 
     if (canReceiveACHDeposits)
     {
@@ -48,7 +49,7 @@
                         Request Payout
                     </button>
                 }
-                else
+                else if (maxRequestAmount >= minRequestAmount)
                 {
                     <button class="btn btn-primary" disabled>
                         @if (canReceiveACHDeposits)
@@ -227,7 +228,7 @@
                     <div class="form-group">
                         <label for="payout-amount">Amount Requested</label>
                         <input type="number" class="form-control" name="payoutamount" id="payout-amount" step=".01" required="required" min="1.00" />
-                        <p class="muted"><em>The amount requested must be between <strong>$25</strong> and <strong>@maxRequestAmount.ToCurrency()</strong></em></p>
+                        <p class="muted"><em>The amount requested must be between <strong>@minRequestAmount.ToCurrency()</strong> and <strong>@maxRequestAmount.ToCurrency()</strong></em></p>
                     </div>
                 </div>
                 <div class="form-saving hide">
