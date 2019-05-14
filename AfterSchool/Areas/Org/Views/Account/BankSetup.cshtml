@@ -25,6 +25,14 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
+            
+            @if (isFullScreen)
+            {
+                <div class="pull-right">
+                    <a href="@Url.Action("paymentsoptions", "account")" class="btn btn-default">&laquo; Exit</a>
+                </div>
+            }
+
             <i class="s7-edit"></i> Settings - Bank Account Info
         </div>
         <div class="panel-body">
