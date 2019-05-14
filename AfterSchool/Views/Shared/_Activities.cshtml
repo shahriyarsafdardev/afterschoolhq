@@ -103,6 +103,7 @@ else
                 <tr>
                     <th></th>
                     <th>@UILabel.ActivityLabel(activityType)</th>
+                    <th class="text-center">Starts</th>
                     <th class="text-center">Days</th>
                     <th class="text-center">Grades</th>
                     <!--<th class="text-center">Ages</th>-->
@@ -132,6 +133,18 @@ else
                                 }
                             </td>
                             <td class="text-center">
+                                @if (activity.HasSchedule)
+                                {
+                                    <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
+                                        @activity.GetFirstDate().ToShortDateString().Replace("/", "-")
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">-</a>
+                                }
+                            </td>
+                            <td class="text-center">
                                 @if (activity.GetDaysOfTheWeek().Any())
                                 {
                                     <a href="@Url.Action("editschedule", "activity", new { id = activity.Uid })">
@@ -153,8 +166,7 @@ else
                                 else
                                 {
                                     <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
-                                }
-                                
+                                }                                
                             </td>
                             <td class="text-center @reservedTextClass">
                                 <a href="@Url.Action("registrants", "activity", new { id = activity.Uid })">@activity.GetRegistrantCount()</a>
@@ -208,7 +220,7 @@ else
                 else
                 {
                     <tr>
-                        <td colspan="8">There are no @UILabel.ActivityLabel(activityType, true).ToLower(). Please <a href="@addUrl">add new @UILabel.ActivityLabel(activityType).ToLower()</a></td>
+                        <td colspan="9">There are no @UILabel.ActivityLabel(activityType, true).ToLower(). Please <a href="@addUrl">add new @UILabel.ActivityLabel(activityType).ToLower()</a></td>
                     </tr>
                 }
             </tbody>
