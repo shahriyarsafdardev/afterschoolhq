@@ -44,6 +44,7 @@ namespace AfterSchoolLibrary.Models
 		public FeesPaidByType ConvenienceFeesPaidBy { get { return (FeesPaidByType)MDV["ConvenienceFeesPaidBy"].Value; } set { MDV["ConvenienceFeesPaidBy"].Value = value; } }
 		public bool StripeChargesEnabled { get { return (bool)MDV["StripeChargesEnabled"].Value; } set { MDV["StripeChargesEnabled"].Value = value; } }
 		public bool StripePayoutsEnabled { get { return (bool)MDV["StripePayoutsEnabled"].Value; } set { MDV["StripePayoutsEnabled"].Value = value; } }
+		public bool IsTest { get { return (bool)MDV["IsTest"].Value; } set { MDV["IsTest"].Value = value; } }
 		
 
         public Account()
@@ -60,6 +61,7 @@ namespace AfterSchoolLibrary.Models
 			this.ConvenienceFeesPaidBy = FeesPaidByType.NotSet;
 			this.StripeChargesEnabled = false;
 			this.StripePayoutsEnabled = false;
+			this.IsTest = false;
 			
         }
 
@@ -90,6 +92,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ConvenienceFeesPaidBy", System.Data.SqlDbType.Int);
 				_dp.Add(className, "StripeChargesEnabled", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StripePayoutsEnabled", System.Data.SqlDbType.Bit);
+				_dp.Add(className, "IsTest", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -245,6 +248,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["StripePayoutsEnabled"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["IsTest"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -470,8 +477,10 @@ namespace AfterSchoolLibrary.Models
             var sql = $@"
                     select * from Account
                     where 
-                        AccountTypeId = {(int)AccountType.ActivityProvider} and
-                        Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
+                        (
+                            AccountTypeId = {(int)AccountType.ActivityProvider} and
+                            Contains(name, '{"\""}{query.Split(' ').ToStringList("*\" AND \"")}{"*\""}')
+                        ) and IsTest = 0
                 ";
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
