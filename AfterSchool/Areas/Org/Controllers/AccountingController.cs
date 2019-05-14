@@ -110,8 +110,10 @@ namespace AfterSchool.Areas.Org.Controllers
             );
 
             // sort transactions
-            payouts = payouts.OrderByDescending(x => x.ID).ToList();            
+            payouts = payouts.OrderByDescending(x => x.ID).ToList();
 
+            ViewBag.CanReceiveACHDeposits = SessionVariables.CurrentAccount.CanReceiveACHDeposits(msgs);
+            ViewBag.CanReceiveDeposits = SessionVariables.CurrentAccount.CanReceivePaymentDeposits(msgs);
             ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs); 
             ViewBag.LastPayout = SessionVariables.CurrentAccount.GetLastPayout(msgs);
             ViewBag.TotalPayoutAmount = totalPayoutAmount;

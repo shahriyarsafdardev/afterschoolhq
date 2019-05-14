@@ -363,6 +363,22 @@ loadmethod: AccountId
 
 [begin]
 type: Class
+name: BankPaymentAccount
+description: Where legal details and other info is stored for the account holder, specifically for sending checks
+inherits: BasicObjectWithModified
+property: AccountId, int?, Int, required
+property: IsVerified, bool, Bit, required, If the bank account is real
+property: RoutingNumber, string, NVarChar "20", required
+property: AccountNumber, string, NVarChar "20", required
+property: BankName, string, NVarChar "50", required
+property: BankCountry, string, NVarChar "2", required
+property: BankAccountTypeId, BankAccountType, Int, required
+property: AccountHoldersName, string, NVarChar "50", required
+loadmethod: AccountId
+[end]
+
+[begin]
+type: Class
 name: StripeAccount
 description: Where legal details and other info is stored for the stripe account holder
 inherits: BasicObjectWithModified
@@ -1731,4 +1747,10 @@ values: NotSet, Account, Parent
 type: Enum
 name: ActivityLeaderType
 values: NotSet, StaffMember, Student, ExternalProvider
+[end]
+
+[begin]
+type: Enum
+name: BankAccountType
+values: NotSet, BusinessChecking, PersonalChecking, PersonalSavings
 [end]

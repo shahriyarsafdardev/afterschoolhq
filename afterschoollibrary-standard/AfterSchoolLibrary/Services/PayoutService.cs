@@ -54,7 +54,6 @@ namespace AfterSchoolLibrary.Services
                 {
                     msgs.AddRange(smsgs);
                     // TODO: Send approved payout email
-
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
@@ -85,6 +84,30 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
+        public static void Complete(this Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (payout.PayoutStatusId == PayoutStatus.Completed)
+                return;
+
+            Database.ExecuteTransaction
+           (
+               action: (SystemMessages amsgs, DatabaseConnection adc) =>
+               {
+                   payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+               },
+               onSuccess: (SystemMessages smsgs) =>
+               {
+                   msgs.AddRange(smsgs);
+                    // TODO: Send completed payout email
+
+                },
+               onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+               onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+               dc: dc
+           );
+
+        }
+
         private static void SendMoney(this Payout payout, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (payout.PayoutStatusId != PayoutStatus.Approved)
@@ -94,17 +117,40 @@ namespace AfterSchoolLibrary.Services
 
             if (payout.PaymentTypeId == PaymentType.ACH)
             {
-                // send money via stripe
-                if (account.CanReceivePaymentDeposits())
-                    account.SendPayout(
-                        payout: payout,
-                        loggedInUser: loggedInUser,
-                        msgs: msgs,
-                        dc: dc);
+                // send money via ACH
+                if (account.CanReceiveACHDeposits(msgs, dc))
+                {
+                    if (account.StripeUserId.IsNotEmpty())
+                    {
+                        account.SendStripePayout(
+                            payout: payout,
+                            loggedInUser: loggedInUser,
+                            msgs: msgs,
+                            dc: dc);
 
-                if (msgs.HasNoErrors())
-                    payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+                        if (msgs.HasNoErrors())
+                            payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+                    }
+                    // transfer money to the main AHQ account to prep for sending an ACH
+                    else
+                    {
+                        Billing.StripeHelper.CreatePayout(
+                            amount: payout.Amount.Value,
+                            externalAccountId: null,
+                            connectedAccountId: null,
+                            metaData: new Dictionary<string, string>()
+                            {
+                                { "AccountUid", account.Uid.ToString() },
+                                { "RequestedBy", payout.GetRequestor(msgs, dc).Uid.ToString() },
+                                { "ApprovedBy", loggedInUser.Uid.ToString() },
+                                { "DateRequested", payout.DateRequested.ToShortDateTimeString() }
+                            },
+                            msgs: msgs);
 
+                        if (msgs.HasNoErrors())
+                            payout.UpdateStatus(PayoutStatus.InProgress, loggedInUser, msgs, dc);
+                    }
+                }
                 return;
             }
             else if (payout.PaymentTypeId == PaymentType.Check)
