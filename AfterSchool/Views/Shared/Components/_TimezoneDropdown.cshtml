@@ -1,0 +1,10 @@
+﻿@model string
+
+<select name="timezone" id="timezone" class="form-control" required>
+    @foreach (var zone in new string[] { "Eastern - EST", "Central - CST", "Mountain - MST", "Pacific - PST", "Alaska - AKST", "Hawaii - HAST" })
+    {
+        var selected = "";
+        if (zone == Model) { selected = " selected=\"selected\" "; }
+        <option value="@zone" @selected>@zone</option>
+    }
+</select>

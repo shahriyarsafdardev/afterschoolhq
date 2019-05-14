@@ -465,16 +465,17 @@ namespace AfterSchoolLibraryTests.Tests
             var package = Factories.PackageFactory.Create(msgs, dc);
 
             var account = accountOwner.AddNewAccount(
-                           orgName: "Test Org",
-                           phone: null,
-                           isActive: true,
-                           accountType: AccountType.School,
-                           packageId: package.ID,
-                           packageBillingPeriod: BillingPeriodType.Month,
-                           isAfterSchool: true,
-                           loggedInUser: loggedInUser,
-                           msgs: msgs,
-                           dc: dc);
+                            orgName: "Test Org",
+                            phone: null,
+                            isActive: true,
+                            accountType: AccountType.School,
+                            packageId: package.ID,
+                            packageBillingPeriod: BillingPeriodType.Month,
+                            timeZone: null,
+                            isAfterSchool: true,
+                            loggedInUser: loggedInUser,
+                            msgs: msgs,
+                            dc: dc);
 
             Assert.NotNull(AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, accountOwner.ID.Value, msgs, dc));
         }
@@ -486,16 +487,17 @@ namespace AfterSchoolLibraryTests.Tests
             var package = Factories.PackageFactory.CreateWithStripe(msgs, dc); // because adding a new account saves with stripe
 
             var account = accountOwner.AddNewAccount(
-                           orgName: "Test Org",
-                           phone: null,
-                           isActive: true,
-                           accountType: AccountType.School,
-                           packageId: package.ID,
-                           packageBillingPeriod: BillingPeriodType.Month,
-                           isAfterSchool: true,
-                           loggedInUser: loggedInUser,
-                           msgs: msgs,
-                           dc: dc);
+                            orgName: "Test Org",
+                            phone: null,
+                            isActive: true,
+                            accountType: AccountType.School,
+                            packageId: package.ID,
+                            packageBillingPeriod: BillingPeriodType.Month,
+                            timeZone: null,
+                            isAfterSchool: true,
+                            loggedInUser: loggedInUser,
+                            msgs: msgs,
+                            dc: dc);
 
             accountOwner.CompleteSignUp(account, "jeff", "gordon", "jeff@gordon.com", "1234", null, msgs, dc);
 

@@ -1426,6 +1426,7 @@ namespace AfterSchoolLibrary.Services
                          accountOwner: null,
                          packageId: null,
                          packageBillingPeriod: null,
+                         timeZone: null,
                          loggedInUser: loggedInUser,
                          isAfterSchool: true,
                          createWithStripe: false,

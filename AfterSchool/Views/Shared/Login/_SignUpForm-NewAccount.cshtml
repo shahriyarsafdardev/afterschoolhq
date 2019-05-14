@@ -86,6 +86,12 @@
             <input type="password" name="password2" required="required" placeholder="Confirm Password" class="form-control">
         </div>
     </div>
+    <div class="form-group">
+        <div id="nick-handler" class="input-group">
+            <span class="input-group-addon"><i class="icon s7-clock"></i></span>
+            @{ Html.RenderPartial("~/Views/Shared/Components/_TimezoneDropdown.cshtml", Model.TimeZone.IfEmpty("")); }
+        </div>
+    </div>
 </div>
 <p class="conditions">By creating an account, you agree with the <a href="~/Public/tos.html" target="_blank">Terms and Conditions</a>.</p>
 <button type="submit" class="btn btn-block btn-primary btn-lg">Get Started &raquo;</button>

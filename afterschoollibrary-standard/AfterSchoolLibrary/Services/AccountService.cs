@@ -1288,10 +1288,10 @@ namespace AfterSchoolLibrary.Services
 
         public static Account CreateNewGhostAccount(string orgName, AccountType accountType, WebUser loggedInUser, bool isAfterSchool, SystemMessages msgs, DatabaseConnection dc)
         {
-            return CreateNew(orgName, null, null, false, accountType, null, null, null, loggedInUser, isAfterSchool, false, msgs, dc);
+            return CreateNew(orgName, null, null, false, accountType, null, null, null, null, loggedInUser, isAfterSchool, false, msgs, dc);
         }
 
-        public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
+        public static Account CreateNew(string orgName, string email, string phone, bool isActive, AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod, string timeZone, WebUser loggedInUser, bool isAfterSchool, bool createWithStripe, SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var uniqueName = AccountService.GenerateUniqueName(orgName, null, dc: dc);
@@ -1312,7 +1312,8 @@ namespace AfterSchoolLibrary.Services
                 AccountTypeId = accountType,
                 UniqueName = uniqueName,
                 ConvenienceFeesPaidBy = FeesPaidByType.Parent,
-                CreditCardFeesPaidBy = FeesPaidByType.Parent
+                CreditCardFeesPaidBy = FeesPaidByType.Parent,
+                TimeZone = timeZone
             };
 
             if (createWithStripe)
@@ -1603,6 +1604,7 @@ namespace AfterSchoolLibrary.Services
                 accountType: AccountType.AfterSchool,
                 packageId: null,
                 packageBillingPeriod: null,
+                timeZone: null,
                 isAfterSchool: true,
                 loggedInUser: user, 
                 msgs: msgs, 
@@ -1625,7 +1627,7 @@ namespace AfterSchoolLibrary.Services
                 throw new Exception("User with the same email address already exists.");
 
             var user = WebUserService.CreateNew(firstName, lastName, email, phone, password, true, true, true, true, null, msgs, dc);
-            var account = user.AddNewAccount("Sample Account", "317-899-9189", true, accountType, packageId, BillingPeriodType.Month, true, user, msgs, dc);
+            var account = user.AddNewAccount("Sample Account", "317-899-9189", true, accountType, packageId, BillingPeriodType.Month, null, true, user, msgs, dc);
 
             var defaultLocation = LocationService.CreateNewWithValidation(
                 locationName: "The Sample Account Building",
