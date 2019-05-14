@@ -31,6 +31,7 @@ namespace AfterSchoolLibraryTests.Tests
                 accountOwner: accountOwner,
                 packageId: package.ID,
                 packageBillingPeriod: BillingPeriodType.Month,
+                timeZone: null,
                 createWithStripe: true,
                 loggedInUser: loggedInUser,
                 isAfterSchool: true,

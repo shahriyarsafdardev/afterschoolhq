@@ -84,7 +84,18 @@ else
             }
             else
             {
-                @:Registration will open in @Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount).Days days @Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount).Hours hrs
+                var ts = Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount);
+
+                @:Registration will open in 
+
+                if (ts.Days > 0)
+                {
+                    @: @ts.Days days @ts.Hours hrs
+                }
+                else
+                {
+                    @: @ts.Hours hrs @ts.Minutes mins
+                }
             }
         </button>
     }

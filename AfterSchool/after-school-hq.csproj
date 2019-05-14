@@ -1555,6 +1555,7 @@
     <Content Include="Views\Shared\Registration\_AddActivity.cshtml" />
     <Content Include="Views\Shared\Registration\_FirstTimeInformation.cshtml" />
     <Content Include="Views\Shared\Modals\_FirstTimeDemoOrgName.cshtml" />
+    <Content Include="Views\Shared\Components\_TimezoneDropdown.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

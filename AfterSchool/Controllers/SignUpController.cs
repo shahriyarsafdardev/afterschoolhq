@@ -87,6 +87,7 @@ namespace AfterSchool.Controllers
                                 isActive: true,
                                 accountType: model.OrgType.Value,
                                 addDefaultPackage: true,
+                                timeZone: model.TimeZone,
                                 isAfterSchool: true,
                                 loggedInUser: user,
                                 msgs: amsgs,
@@ -570,9 +571,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Phone must be a valid phone number", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-            {
-                
-
+            {                
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -586,6 +585,7 @@ namespace AfterSchool.Controllers
                             accountOwner: SessionVariables.LoggedInUser,
                             packageId: Package.LoadByIsActiveByIsAfterSchool(true, true, amsgs, adc).Last().ID,
                             packageBillingPeriod: BillingPeriodType.Month,
+                            timeZone: null,
                             loggedInUser: SessionVariables.LoggedInUser,
                             isAfterSchool: true,
                             createWithStripe: true,
