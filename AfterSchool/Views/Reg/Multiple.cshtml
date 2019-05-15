@@ -185,7 +185,7 @@
                         { "addonly", addOnly }
                      }); }
 
-                @if (SessionVariables.LoggedInUser.IsEmpty() || adminMode)
+                @if (SessionVariables.CurrentUser.IsEmpty() || adminMode)
                 {
                     Html.RenderPartial("_RegCreateAccount");
                 }
