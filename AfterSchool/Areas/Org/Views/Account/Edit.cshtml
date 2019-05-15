@@ -58,7 +58,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Time Zone</label>
                         <div class="col-sm-9">
-                            @{ Html.RenderPartial("~/Views/Shared/Components/_TimezoneDropdown.cshtml", Model.TimeZone); }
+                            @{ Html.RenderPartial("~/Views/Shared/Components/_TimezoneDropdown.cshtml", Model.TimeZone.IfEmpty("")); }
                         </div>
                     </div>
 
