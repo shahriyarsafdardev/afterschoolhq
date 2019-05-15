@@ -30,7 +30,7 @@
 }
 else if (accountOwner.IsNotEmpty() && !accountOwner.VerifiedAccount)
 {
-    if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.LoggedInUser.HasAccessTo(Model.OwnerAccount))
+    if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.HasAccessTo(Model.OwnerAccount))
     {
         <button class="btn btn-register" onclick="AccountSetup.sendVerificationEmail()">
             @if (condensed)

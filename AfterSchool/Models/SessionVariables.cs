@@ -21,11 +21,11 @@ namespace AfterSchool.Models
             }
         }
         
-        public static WebUser LoggedInUser
+        public static WebUser CurrentUser
         {
             get
-            {
-                return SessionHelper.GetLoggedInUser();
+            {                
+                return SessionHelper.GetCurrentUser();
             }
             set
             {
@@ -35,7 +35,15 @@ namespace AfterSchool.Models
                     SessionHelper.RemoveFromSession("LoggedInUser");
             }
         }
-        
+
+        public static WebUser LoggedInUser
+        {
+            get
+            {
+                return OriginalLoggedInUser ?? CurrentUser;
+            }
+        }
+
         public static WebUser OriginalLoggedInUser
         {
             get

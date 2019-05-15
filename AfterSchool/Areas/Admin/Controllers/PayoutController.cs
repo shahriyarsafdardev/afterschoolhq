@@ -80,7 +80,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (msgs.HasNoErrors())
             {
                 var payout = Payout.LoadByUid(uid.ToGuid(), msgs);
-                payout.Approve(SessionVariables.LoggedInUser, msgs);
+                payout.Approve(SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return Json(new
@@ -107,7 +107,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (msgs.HasNoErrors())
             {
                 var payout = Payout.LoadByUid(uid.ToGuid(), msgs);
-                payout.Deny(SessionVariables.LoggedInUser, msgs);
+                payout.Deny(SessionVariables.CurrentUser, msgs);
 
                 if(msgs.HasNoErrors())
                     return Json(new
@@ -134,7 +134,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (msgs.HasNoErrors())
             {
                 var payout = Payout.LoadByUid(uid.ToGuid(), msgs);
-                payout.Complete(SessionVariables.LoggedInUser, msgs);
+                payout.Complete(SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return Json(new

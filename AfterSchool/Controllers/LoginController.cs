@@ -16,7 +16,7 @@ namespace AfterSchool.Controllers
         public ActionResult Index(string regaccount)
         {
             var msgs = new SystemMessages();
-            var loggedInWithAnAccount = SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty();
+            var loggedInWithAnAccount = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty();
 
             if (loggedInWithAnAccount && (regaccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant))
                 return LoginRedirect();
@@ -91,7 +91,7 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                LoadSessionInfo(SessionVariables.LoggedInUser, account);
+                LoadSessionInfo(SessionVariables.CurrentUser, account);
 
                 if (returnurl.IsNotEmpty())
                     return Redirect(returnurl);
@@ -101,7 +101,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.ReturnUrl = returnurl;
             ViewBag.Messages = msgs;
-            return View(SessionVariables.LoggedInUser.GetAccounts());
+            return View(SessionVariables.CurrentUser.GetAccounts());
         }
 
         [HttpGet]

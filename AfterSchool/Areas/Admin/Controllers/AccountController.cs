@@ -77,7 +77,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 var user = account.GetUsers(msgs: msgs).FirstOrDefault();
                 if (user.IsNotEmpty())
-                    msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.LoggedInUser));
+                    msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.CurrentUser));
             }
 
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
@@ -138,7 +138,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             account.AddPackage(
                                 package.ToInteger(), 
                                 (BillingPeriodType)billingperiod.ToInteger(), 
-                                SessionVariables.LoggedInUser, 
+                                SessionVariables.CurrentUser, 
                                 amsgs, 
                                 adc
                             );
@@ -148,7 +148,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 lastname, 
                                 email, 
                                 UserType.Owner, 
-                                SessionVariables.LoggedInUser, 
+                                SessionVariables.CurrentUser, 
                                 amsgs, 
                                 adc);
                         }
@@ -158,7 +158,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 firstName: firstname,
                                 lastName: lastname,
                                 email: email,
-                                loggedInUser: SessionVariables.LoggedInUser,
+                                loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
                                 dc: adc);
 
@@ -171,7 +171,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 packageBillingPeriod: (BillingPeriodType)billingperiod.ToInteger(),
                                 timeZone: null,
                                 isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                                loggedInUser: SessionVariables.LoggedInUser,
+                                loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
                                 dc: adc);
                         }
@@ -179,7 +179,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.LoggedInUser, message));
+                        msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.CurrentUser, message));
                     },
                     onFailure: (SystemMessages fmsgs) =>
                     {

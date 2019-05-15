@@ -37,7 +37,7 @@
             {
                 <div class="widget">
                     <div class="widget-tile text-medium-small">
-                        <p>Welcome @SessionVariables.LoggedInUser.FirstName!</p>
+                        <p>Welcome @SessionVariables.CurrentUser.FirstName!</p>
                         <p>                            
                             <ol>
                                 <li><a href="@Url.Action("edit", "league", new { id = Model.Uid })">Setup final details</a> to enable parents to register</li>

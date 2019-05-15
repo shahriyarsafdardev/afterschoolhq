@@ -223,7 +223,7 @@ namespace AfterSchool.Controllers
         {
             SetRegistrationStartPage(account);
 
-            SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
+            SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
             SessionVariables.Cart.AddCartItem(participationObject, msgs);
 
             if (SessionVariables.CurrentRegistrant.IsEmpty())

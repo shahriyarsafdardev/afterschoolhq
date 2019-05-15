@@ -122,7 +122,7 @@ namespace AfterSchool.Areas.District.Controllers
             }
             else
             {
-                regperiod.CreatedBy = SessionVariables.LoggedInUser.ID.Value;
+                regperiod.CreatedBy = SessionVariables.CurrentUser.ID.Value;
                 regperiod.CreateDate = DateTime.UtcNow;
                 regperiod.ActivityGroupId = group.ID;
                 regperiod.AccountId = SessionVariables.CurrentAccount.ID;
@@ -130,7 +130,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
             regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
-            regperiod.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            regperiod.LastModifiedBy = SessionVariables.CurrentUser.ID.Value;
             regperiod.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(regperiod.Save());
 
@@ -357,7 +357,7 @@ namespace AfterSchool.Areas.District.Controllers
             values.Add("schedule", schedule);
             values.Add("isongoing", isongoing);
 
-            var league = ActivityGroupService.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+            var league = ActivityGroupService.SaveLeague(SessionVariables.CurrentUser, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -419,12 +419,12 @@ namespace AfterSchool.Areas.District.Controllers
                     invitedSchools.Add(school);
             });
 
-            AccountService.InviteSchoolsToLeague(invitedSchools, activityGroup, invitemessage, SessionVariables.LoggedInUser, msgs);            
+            AccountService.InviteSchoolsToLeague(invitedSchools, activityGroup, invitemessage, SessionVariables.CurrentUser, msgs);            
 
             if (msgs.HasNoErrors() && sendinvite.IsBoolean())
             {
                 var activityGroupId = activityGroup.ID.Value;
-                var senderUserId = SessionVariables.LoggedInUser.ID.Value;
+                var senderUserId = SessionVariables.CurrentUser.ID.Value;
 
                 invitedSchools.ForEach(school => {
                     var schoolId = school.ID.Value;
@@ -569,7 +569,7 @@ namespace AfterSchool.Areas.District.Controllers
                                     (LocationType)locationtype.ToInteger(),
                                     null,
                                     SessionVariables.CurrentAccount,
-                                    SessionVariables.LoggedInUser,
+                                    SessionVariables.CurrentUser,
                                     amsgs,
                                     adc
                                 );
@@ -585,7 +585,7 @@ namespace AfterSchool.Areas.District.Controllers
                                     .AddInstance(
                                         dateRange, 
                                         InstanceType.InSession, 
-                                        SessionVariables.LoggedInUser.ID.Value, 
+                                        SessionVariables.CurrentUser.ID.Value, 
                                         amsgs, 
                                         adc
                                      );
@@ -624,7 +624,7 @@ namespace AfterSchool.Areas.District.Controllers
                             selectedTeams.ForEach(selectedTeam => {
                                 if (!activityInstanceTeams.Contains(selectedTeam))
                                     MatchService.CreateOrUpdate(
-                                        currentUser: SessionVariables.LoggedInUser,
+                                        currentUser: SessionVariables.CurrentUser,
                                         teamId: selectedTeam.ID.Value,
                                         activityInstanceId: activityInstance.ID.Value,
                                         match: null,

@@ -55,7 +55,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult GetStarted(string regaccount)
         {
-            if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
+            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
                 return RedirectToAction("select");
 
             var msgs = new SystemMessages();
@@ -169,7 +169,7 @@ namespace AfterSchool.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        SessionVariables.LoggedInUser = user;
+                        SessionVariables.CurrentUser = user;
                         SessionVariables.CurrentAccount = account;
                         SessionVariables.AccountUserType = user.GetUserType(account);
                     },
@@ -259,7 +259,7 @@ namespace AfterSchool.Controllers
                             parentRegistrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -392,7 +392,7 @@ namespace AfterSchool.Controllers
                             isParentOrGuardian: true,
                             allowTextMessages: false,
                             schoolLocationId: null,
-                            loggedInUser: SessionVariables.LoggedInUser,
+                            loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
 
@@ -401,7 +401,7 @@ namespace AfterSchool.Controllers
                             otherParent.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -510,7 +510,7 @@ namespace AfterSchool.Controllers
                             parentRegistrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -665,7 +665,7 @@ namespace AfterSchool.Controllers
                             isParentOrGuardian: false,
                             allowTextMessages: false,
                             schoolLocationId: location.IsNumber() ? location.ToInteger() : new int?(),
-                            loggedInUser: SessionVariables.LoggedInUser,
+                            loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
 
@@ -676,7 +676,7 @@ namespace AfterSchool.Controllers
                             student.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -694,7 +694,7 @@ namespace AfterSchool.Controllers
                                 student.AddAnswer(
                                     answerText: answer.Text.IfEmpty("").Trim(),
                                     question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
-                                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                     msgs: amsgs,
                                     dc: adc);
                             });
@@ -720,7 +720,7 @@ namespace AfterSchool.Controllers
                                parentRegistrant,
                                key,
                                parent1Map[key],
-                               SessionVariables.LoggedInUser,
+                               SessionVariables.CurrentUser,
                                amsgs,
                                adc);
                         }
@@ -741,7 +741,7 @@ namespace AfterSchool.Controllers
                                parentRegistrant,
                                key,
                                parent1AddressMap[key],
-                               SessionVariables.LoggedInUser,
+                               SessionVariables.CurrentUser,
                                amsgs,
                                adc);
                         }
@@ -766,7 +766,7 @@ namespace AfterSchool.Controllers
                                    parentRegistrant2,
                                    key,
                                    parent2Map[key],
-                                   SessionVariables.LoggedInUser,
+                                   SessionVariables.CurrentUser,
                                    amsgs,
                                    adc);
                             }
@@ -824,7 +824,7 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult AddHealth()
         {
-            if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+            if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
                 return RedirectToAction("");
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
@@ -842,7 +842,7 @@ namespace AfterSchool.Controllers
         [HttpPost]
         public ActionResult AddHealth(string id)
         {
-            if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+            if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
                 return RedirectToAction("");
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
@@ -882,7 +882,7 @@ namespace AfterSchool.Controllers
                             SessionVariables.CurrentRegistrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -1037,7 +1037,7 @@ namespace AfterSchool.Controllers
                             SessionVariables.CurrentRegistrant.AddAnswer(
                                 answerText: qvm.Value,
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });                        
@@ -1046,7 +1046,7 @@ namespace AfterSchool.Controllers
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
                         var accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
                             ownerAccount: participationObject.OwnerAccount,
-                            loggedInUser: SessionVariables.LoggedInUser,
+                            loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc
                             );
@@ -1070,7 +1070,7 @@ namespace AfterSchool.Controllers
                             periodId: period?.ID,
                             esignature: signature,
                             completionStatus: RegistrationCompletionStatus.Started,
-                            loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                            loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                             msgs: amsgs,
                             dc: adc);                        
 
@@ -1078,7 +1078,7 @@ namespace AfterSchool.Controllers
                         SessionVariables.CurrentRegistrant.CopyAnswers(
                             copyingRegistrant: accountRegistrantCopy, 
                             registration: registration, 
-                            loggedInUser: SessionVariables.LoggedInUser, 
+                            loggedInUser: SessionVariables.CurrentUser, 
                             msgs: amsgs, 
                             dc: adc);
 
@@ -1091,7 +1091,7 @@ namespace AfterSchool.Controllers
                                 answerText: qvm.Value,
                                 question: qvm.Question,
                                 registrationId: registration.ID,
-                                loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -1119,7 +1119,7 @@ namespace AfterSchool.Controllers
                                         activityGroupId: participationObject.GetActivityGroupId(),
                                         amountCharged: participationObject.Cost,
                                         periodId: period?.ID,
-                                        loggedInUser: SessionVariables.LoggedInUser,
+                                        loggedInUser: SessionVariables.CurrentUser,
                                         msgs: amsgs,
                                         dc: adc);
                                 }
@@ -1193,7 +1193,7 @@ namespace AfterSchool.Controllers
                         MasterRegistrant = SessionVariables.CurrentRegistrant                        
                     },
                     sendConfirmationEmail: true,
-                    loggedInUser: SessionVariables.LoggedInUser,
+                    loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);   
 
             if (msgs.HasNoErrors())
@@ -1304,7 +1304,7 @@ namespace AfterSchool.Controllers
                         ConvenienceFeePayer = convenienceFeePayer,
                         CreditCardFeePayer = creditCardFeePayer
                     },
-                    loggedInUser: SessionVariables.LoggedInUser,
+                    loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
             }
 
@@ -1339,7 +1339,7 @@ namespace AfterSchool.Controllers
                 if (parentAccount.ID != SessionVariables.CurrentAccount.ID)
                     return Logout(Request.Url.ToString());
 
-                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.LoggedInUser, msgs: msgs);
+                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
                 SessionVariables.Cart.AddCartItem(participationObject, msgs);
                 SessionVariables.CurrentRegistrant = currentRegistrant;
                 SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
@@ -1395,7 +1395,7 @@ namespace AfterSchool.Controllers
 
         private ActionResult CheckRedirect(bool checkForEmptyCart = false)
         {
-            if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+            if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
                 return RedirectToAction(SessionVariables.RegistrationStartPageAccount.HomePageUrl);
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)
@@ -1415,7 +1415,7 @@ namespace AfterSchool.Controllers
 
         private ActionResult HandleIsLoggedIn()
         {
-            if (SessionVariables.LoggedInUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
+            if (SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty())
                 return Logout(Request.Url.ToString(), true);
 
             if (SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant)

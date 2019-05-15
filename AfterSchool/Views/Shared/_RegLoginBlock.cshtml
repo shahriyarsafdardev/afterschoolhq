@@ -27,7 +27,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
 
-            @if (SessionVariables.LoggedInUser.IsNotEmpty() && !adminMode)
+            @if (SessionVariables.CurrentUser.IsNotEmpty() && !adminMode)
             {
                 <span>Register with your login</span>
                 <div class="btn-group pull-right">
@@ -57,10 +57,10 @@
                 }
             </script>
         </div>
-        <div class="panel-body @(SessionVariables.LoggedInUser.IsNotEmpty() && !adminMode ? "" : "hide")" id="register-body">
-            @if (SessionVariables.LoggedInUser.IsNotEmpty() && !adminMode)
+        <div class="panel-body @(SessionVariables.CurrentUser.IsNotEmpty() && !adminMode ? "" : "hide")" id="register-body">
+            @if (SessionVariables.CurrentUser.IsNotEmpty() && !adminMode)
             {
-                var registrants = SessionVariables.LoggedInUser.GetRegistrants();
+                var registrants = SessionVariables.CurrentUser.GetRegistrants();
                 <form method="post" action="@postAction" id="formprofile" class="form-horizontal">
                     <div class="form-group">
                         <div class="col-md-6 col-md-offset-3">

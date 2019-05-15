@@ -25,7 +25,7 @@
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12">
 
-                @if (SessionVariables.LoggedInUser.IsNotEmpty())
+                @if (SessionVariables.CurrentUser.IsNotEmpty())
                 {
                     <span class="reg-login-bar-title">@SessionVariables.CurrentAccount.Name</span>
                 }
@@ -37,7 +37,7 @@
                         
                         @RenderReturnToHomeUrl()
 
-                        @if (SessionVariables.LoggedInUser.IsNotEmpty())
+                        @if (SessionVariables.CurrentUser.IsNotEmpty())
                         {
                             <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View @accountOrDashboard</a>
                             <a href="@Url.Action("index", "logout", new { returnurl = SessionVariables.RegistrationStartPageAccount.HomePageUrl })" class="btn btn-link">Logout</a>

@@ -89,6 +89,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
+<<<<<<< HEAD
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -97,7 +98,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             user = new WebUser()
                             {
                                 CreateDate = DateTime.UtcNow,
-                                CreatedBy = SessionVariables.LoggedInUser.ID
+                                CreatedBy = SessionVariables.CurrentUser.ID
                             };
 
                         user.FirstName = firstname;
@@ -105,7 +106,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         user.Email = email;
                         user.Phone = phone;
                         user.LastModifiedDate = DateTime.UtcNow;
-                        user.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                        user.LastModifiedBy = SessionVariables.CurrentUser.ID;
                         user.IsActive = !isactive.IsEmpty();
 
                         if (password1.IsNotEmpty() && password2.IsNotEmpty())
@@ -118,7 +119,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 .AddUser(
                                     user,
                                     UserType.Administrator,
-                                    SessionVariables.LoggedInUser,
+                                    SessionVariables.CurrentUser,
                                     amsgs,
                                     adc);
                     },
@@ -137,6 +138,26 @@ namespace AfterSchool.Areas.Admin.Controllers
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
+=======
+                user.FirstName = firstname;
+                user.LastName = lastname;                
+
+                if (!user.ID.HasValue)
+                {
+                    user.CreateDate = DateTime.UtcNow;
+                    user.CreatedBy = SessionVariables.CurrentUser.ID;
+                }
+                user.LastModifiedDate = DateTime.UtcNow;
+                user.LastModifiedBy = SessionVariables.CurrentUser.ID;
+
+                if (password1.IsNotEmpty() && password2.IsNotEmpty())
+                {
+                    user.Password = WebUserService.EncryptPassword(password1);
+                }
+
+                user.IsActive = !isactive.IsEmpty();
+                msgs.AddRange(user.Save());
+>>>>>>> change to current user for the which account is loaded, move logged in user to track who is actually logged in at the moment
 
                 if (msgs.HasNoErrors())
                     msgs.Add("Save successful", MessageType.Success);
@@ -149,7 +170,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult MyProfile()
         {
-            return RedirectToAction("edit", new { id = SessionVariables.LoggedInUser.Uid.ToString() });
+            return RedirectToAction("edit", new { id = SessionVariables.CurrentUser.Uid.ToString() });
         }
 
         [HttpGet]
@@ -199,7 +220,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                 foreach (string email in emails.Split(',').Select(x => x.Trim()))
                 {
-                    a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.LoggedInUser, msgs);
+                    a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.CurrentUser, msgs);
                 }
             }
 
@@ -233,7 +254,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-                SessionVariables.OriginalLoggedInUser = SessionVariables.LoggedInUser;
+                SessionVariables.OriginalLoggedInUser = SessionVariables.CurrentUser;
                 msgs.AddRange(LoadSessionInfo(user, null, false));
             }
 

@@ -383,7 +383,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                             firstName: firstname,
                                             lastName: lastname,
                                             email: email,
-                                            loggedInUser: SessionVariables.LoggedInUser,
+                                            loggedInUser: SessionVariables.CurrentUser,
                                             msgs: amsgs,
                                             dc: adc
                                         );
@@ -398,7 +398,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                         packageBillingPeriod: BillingPeriodType.Month,
                                         timeZone: null,
                                         isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                                        loggedInUser: SessionVariables.LoggedInUser,
+                                        loggedInUser: SessionVariables.CurrentUser,
                                         msgs: amsgs,
                                         dc: adc
                                     );
@@ -435,7 +435,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                        account,
                                        HostPermissionType.Edit,
                                        ApprovalStatus.Approved,
-                                       SessionVariables.LoggedInUser,
+                                       SessionVariables.CurrentUser,
                                        adc
                                    )
                                );
@@ -462,7 +462,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                locationType,
                                locationHostAccount?.ID,
                                null,
-                               SessionVariables.LoggedInUser,
+                               SessionVariables.CurrentUser,
                                amsgs,
                                adc);
                            }
@@ -477,7 +477,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                        var usersAndAccounts = users.Zip(accounts, (u, a) => new { user = u, account = a });
                        foreach (var userAndAccount in usersAndAccounts)
                        {
-                           // msgs.AddRange(userAndAccount.account.SendInvitedEmail(userAndAccount.user, SessionVariables.LoggedInUser, inviteMessage));
+                           // msgs.AddRange(userAndAccount.account.SendInvitedEmail(userAndAccount.user, SessionVariables.CurrentUser, inviteMessage));
                        }
                    },
                    onFailure: (SystemMessages fmsgs) =>
