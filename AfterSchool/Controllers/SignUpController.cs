@@ -592,7 +592,7 @@ namespace AfterSchool.Controllers
                             msgs: amsgs, 
                             dc: adc);
 
-                        msgs.AddRange(newAccount.AddUser(SessionVariables.LoggedInUser, UserType.Owner, SessionVariables.LoggedInUser.ID.Value, adc));
+                        newAccount.AddUser(SessionVariables.LoggedInUser, UserType.Owner, SessionVariables.LoggedInUser, amsgs, adc);
 
                         if (invitecode.IsGuid())
                         {

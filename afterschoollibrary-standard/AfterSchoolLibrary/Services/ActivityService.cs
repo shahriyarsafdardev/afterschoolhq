@@ -1439,7 +1439,7 @@ namespace AfterSchoolLibrary.Services
                         email: provideremail,
                         phone: providerphone,
                         userType: UserType.Owner,
-                        loggedInUserId: loggedInUser.ID.Value,
+                        loggedInUser: loggedInUser,
                         msgs: msgs,
                         dc: dc);
 
