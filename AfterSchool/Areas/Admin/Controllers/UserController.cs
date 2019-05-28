@@ -116,13 +116,24 @@ namespace AfterSchool.Areas.Admin.Controllers
                         if (sysadmin.IsNumber())
                             AccountService.GetAfterSchoolAccount(amsgs, adc)
                                 .AddUser(
-                                    user, 
-                                    UserType.Administrator, 
-                                    SessionVariables.LoggedInUser, 
-                                    amsgs, 
+                                    user,
+                                    UserType.Administrator,
+                                    SessionVariables.LoggedInUser,
+                                    amsgs,
                                     adc);
                     },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onSuccess: (SystemMessages smsgs) => 
+                    {
+                        msgs.AddRange(smsgs);
+
+                        if (sysadmin.IsNumber())
+                            SendGridHelper.SendMail(
+                                fromEmail: AfterSchoolLibrary.Helpers.Email.SendGridNoReplyEmailAddress(true),
+                                toEmail: AfterSchoolLibrary.Helpers.Email.SendGridSupportEmailAddress,
+                                subject: $"ALERT: A new Super Admin Account has been created: {user.Email}",
+                                body: $"<p>{user.DisplayName}<br/>{user.Email}<br />{user.Phone}</p>",
+                                emailTemplateId: SendGridHelper.AfterSchoolHQGenericTemplateId);
+                    },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );

@@ -85,7 +85,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     SendGridHelper.SendMail(
                         fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                            Helpers.Email.AppEmailAddress,
+                            Helpers.Email.AppNoReplyEmailAddress,
                             $"{account.Name} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(reg.RegistrantEmail, reg.Name),
                         subject: subject,
