@@ -93,7 +93,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        if (!id.IsGuid())
+                        if (user.IsEmpty())
                             user = new WebUser()
                             {
                                 CreateDate = DateTime.UtcNow,
