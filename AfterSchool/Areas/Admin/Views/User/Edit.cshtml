@@ -8,12 +8,15 @@
     <h2>@Model.DisplayName</h2>
 </div>
 <div class="main-content">
-    
-    @Html.Raw(UI.RenderMessagesToHtml((SystemMessages)ViewBag.Messages))
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", (SystemMessages)ViewBag.Messages); }
 
     <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-user"></i> @Model.DisplayName
+        </div>
         <div class="panel-body">
-            <form method="post" action="@Url.Action("edit", "user", new { id = @Model.ID})" class="form-horizontal">
+            <form method="post" action="@Url.Action("edit", "user", new { id = @Model.Uid, returnurl = Request["returnurl"] })" class="form-horizontal">
                 <div class="form-group">
                     <label class="col-sm-3 control-label">First Name</label>
                     <div class="col-sm-6">
@@ -27,15 +30,15 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Email</label>
+                    <label class="col-sm-3 control-label">Cellphone</label>
                     <div class="col-sm-6">
-                        <input type="email" class="form-control" id="email" name="email" value="@Model.Email" onfocus="this.select()" required />
+                        <input type="text" class="form-control" id="phone" name="phone" value="@Model.Phone" onfocus="this.select()" required />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Username</label>
+                    <label class="col-sm-3 control-label">Email</label>
                     <div class="col-sm-6">
-                        <input type="text" class="form-control" id="username" name="username" value="@Model.Username" onfocus="this.select()" required readonly="readonly" />
+                        <input type="email" class="form-control" id="email" name="email" value="@Model.Email" onfocus="this.select()" required />
                     </div>
                 </div>
                 <div class="form-group">
@@ -53,20 +56,33 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Is Active</label>
                     <div class="col-sm-6">
-                        <div class="switch-button switch-button-yesno">
-                            <input type="checkbox" @(Model.IsActive ? " checked=\"checked\" " : "") name="isactive" id="isactive">
-                            <span>
-                                <label for="isactive"></label>
-                            </span>
-                        </div>
+                        @{ Html.RenderPartial(
+                     "~/Views/Shared/_SwitchButton.cshtml",
+                     Model.IsActive,
+                     new ViewDataDictionary() { { "checkboxname", "isactive" }, { "checkboxid", "isactive" } });
+                        }
                     </div>
                 </div>
+                @if (!Model.ID.HasValue)
+                {
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Create System Admin Account</label>
+                        <div class="col-sm-6">
+                            @{ Html.RenderPartial(
+                             "~/Views/Shared/_SwitchButton.cshtml",
+                             false,
+                             new ViewDataDictionary() { { "checkboxname", "sysadmin" }, { "checkboxid", "sysadmin" } });
+                            }
+                        </div>
+                    </div>
+                }
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="reset" class="btn btn-default">Discard Changes</button>
-                        <a href="@returnUrl" class="btn btn-default pull-right"><i class="icon icon-left s7-left-arrow"></i> Back to List</a>
+                        <button type="submit" class="btn btn-primary pull-right">Save</button>
+                        <a href="@returnUrl" class="pull-left text-muted">
+                            Back to List
+                        </a>
                     </div>
                 </div>
             </form>

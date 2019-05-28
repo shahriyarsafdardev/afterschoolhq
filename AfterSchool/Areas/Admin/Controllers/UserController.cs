@@ -8,6 +8,7 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
@@ -54,63 +55,90 @@ namespace AfterSchool.Areas.Admin.Controllers
         public ActionResult Edit(string id)
         {
             ViewBag.Messages = new SystemMessages();
-            ViewBag.ReturnUrl = "/user/index";
 
             if (Request["returnurl"].IsNotEmpty())
-            {
                 ViewBag.ReturnUrl = Request["returnurl"];
-            }
 
             if (id.IsEmpty())
-            {
                 return View(new WebUser() { FirstName = "New", LastName = "User" });
-            }
-            else
-            {
-                return View(WebUser.Load(id.ToInteger()));
-            }
+
+           return View(WebUser.LoadByUid(id.ToGuid()));
         }
 
         [HttpPost]
-        public ActionResult Edit(string id, string firstname, string lastname, string username, string password1, string password2, string isactive)
+        public ActionResult Edit(string id, string firstname, string lastname, string email, string phone, string password1, string password2, string isactive, string sysadmin)
         {
-            SystemMessages msgs = new SystemMessages();
-            WebUser user = WebUser.Load(id.ToInteger());
+            var msgs = new SystemMessages();
+            WebUser user = null; 
+
+            if (id.IsGuid())
+                user = WebUser.LoadByUid(id.ToGuid()); 
+
+            if (!email.IsEmail())
+                msgs.Add("Email must be a valid email address", MessageType.UserError);
+            else if (user.IsNotEmpty() && !user.Email.IsSameAs(email) && WebUser.ExistsByEmail(email))
+                msgs.Add("Email is already in use", MessageType.UserError);
+
+            if (!phone.IsPhone())
+                msgs.Add("Phone must be unique and a valid US phone number", MessageType.UserError);
+            else if (user.IsNotEmpty() && !user.Phone.IsSameAs(phone) && WebUser.ExistsByPhone(phone))
+                msgs.Add("Phone number is already in use", MessageType.UserError);
 
             if (password1 != password2)
-            {
                 msgs.Add("Password do not match", MessageType.UserError);
-            }
 
             if (msgs.HasNoErrors())
             {
-                user.FirstName = firstname;
-                user.LastName = lastname;                
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        if (user.IsEmpty())
+                            user = new WebUser()
+                            {
+                                CreateDate = DateTime.UtcNow,
+                                CreatedBy = SessionVariables.LoggedInUser.ID
+                            };
 
-                if (!user.ID.HasValue)
-                {
-                    user.CreateDate = DateTime.UtcNow;
-                    user.CreatedBy = SessionVariables.LoggedInUser.ID;
-                }
-                user.LastModifiedDate = DateTime.UtcNow;
-                user.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                        user.FirstName = firstname;
+                        user.LastName = lastname;
+                        user.Email = email;
+                        user.Phone = phone;
+                        user.LastModifiedDate = DateTime.UtcNow;
+                        user.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                        user.IsActive = !isactive.IsEmpty();
 
-                if (password1.IsNotEmpty() && password2.IsNotEmpty())
-                {
-                    user.Password = WebUserService.EncryptPassword(password1);
-                }
+                        if (password1.IsNotEmpty() && password2.IsNotEmpty())
+                            user.Password = WebUserService.EncryptPassword(password1);
 
-                user.IsActive = !isactive.IsEmpty();
-                msgs.AddRange(user.Save());
+                        msgs.AddRange(user.Save(adc));
+
+                        if (sysadmin.IsNumber())
+                            AccountService.GetAfterSchoolAccount(amsgs, adc)
+                                .AddUser(
+                                    user, 
+                                    UserType.Administrator, 
+                                    SessionVariables.LoggedInUser, 
+                                    amsgs, 
+                                    adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
 
                 if (msgs.HasNoErrors())
-                {
                     msgs.Add("Save successful", MessageType.Success);
-                }
             }
 
             ViewBag.Messages = msgs;
             return View(user);
+        }
+
+        [HttpGet]
+        public ActionResult MyProfile()
+        {
+            return RedirectToAction("edit", new { id = SessionVariables.LoggedInUser.Uid.ToString() });
         }
 
         [HttpGet]
