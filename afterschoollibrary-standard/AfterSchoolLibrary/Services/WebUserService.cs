@@ -72,7 +72,7 @@ namespace AfterSchoolLibrary.Services
         public static SystemMessages SendInviteToAccount(this WebUser user, Account account, string message, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             return SendGridHelper.SendMail(
-                fromEmail: new EmailAddress(Helpers.Email.AppEmailAddress, Helpers.Utilities.AppName(account.IsAfterSchool)),
+                fromEmail: new EmailAddress(Helpers.Email.AppNoReplyEmailAddress, Helpers.Utilities.AppName(account.IsAfterSchool)),
                 toEmail: new EmailAddress(user.Email),
                 subject: BuildAccountInviteSubject(account),
                 body: BuildAccountInviteBody(user, account, message),

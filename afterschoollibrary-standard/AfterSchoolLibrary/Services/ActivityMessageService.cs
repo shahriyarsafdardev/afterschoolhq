@@ -44,7 +44,7 @@ namespace AfterSchoolLibrary.Services
                     member.WebUserDisplayName.IfBlank(""));
 
                 msgs.AddRange(SendGridHelper.SendMail(
-                    fromEmail: Helpers.Email.SendGridAppEmailAddress(account.IsAfterSchool),
+                    fromEmail: Helpers.Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(member.WebUserEmail),
                     subject: activityMessage.Subject,
                     body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "activity_message"))}",
@@ -76,7 +76,7 @@ namespace AfterSchoolLibrary.Services
                 // send to account admin
                 SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Helpers.Email.AppEmailAddress,
+                        Helpers.Email.AppNoReplyEmailAddress,
                         $"CC: {account.Name} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email),
                     subject: am.Subject,
