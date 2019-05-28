@@ -15,7 +15,7 @@ namespace AfterSchoolLibrary.Helpers
         {
             var msgs = new SystemMessages();
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(toEmail),
                 subject: subject,
                 body: body,
@@ -70,7 +70,7 @@ namespace AfterSchoolLibrary.Helpers
                 msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(participationObject.OwnerAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(participationObject.OwnerAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
                 subject: subject,
                 body: body,
@@ -226,7 +226,7 @@ namespace AfterSchoolLibrary.Helpers
                 msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
                 subject: subject,
                 body: body,
@@ -245,7 +245,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 emails.ForEach(email =>
                     SendGridHelper.SendMail(
-                        fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                        fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
                         subject: $"New Registration CC: {subject}",
                         body: body,
@@ -267,7 +267,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "ProductName", Utilities.AppName(isAfterSchool) },
                 { "ResetPasswordLink", $"{Email.BaseUrl(isAfterSchool)}login/changepassword/?token={token.Uid.ToString()}" },
                 { "ExpiresInDays", (token.ExpireDate.Value.Date - DateTime.UtcNow.Date).Days.ToString() },
-                { "SupportEmail", Email.AppSupportEmailAddress() },
+                { "SupportEmail", Email.AppSupportEmailAddress },
             };
 
             var body = ProcessTemplate(
@@ -280,7 +280,7 @@ namespace AfterSchoolLibrary.Helpers
             var subject = $"Password reset request from {Utilities.AppName(isAfterSchool)}";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
                 subject: subject,
                 body: body,
@@ -328,7 +328,7 @@ namespace AfterSchoolLibrary.Helpers
             var subject = $"You've received a coupon from {sendingAccount.Name}";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(receivingAccountOwner.Email),
                 subject: subject,
                 body: body,
@@ -361,7 +361,7 @@ namespace AfterSchoolLibrary.Helpers
             var subject = $"You can now accept payments on {Utilities.AppName(isAfterSchool)}!";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
                 subject: subject,
                 body: body,
@@ -403,7 +403,7 @@ namespace AfterSchoolLibrary.Helpers
             var subject = $"Your payment failed for ${activityName}";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
                 subject: subject,
                 body: body,
@@ -439,7 +439,7 @@ namespace AfterSchoolLibrary.Helpers
                 );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(true),
+                fromEmail: Email.SendGridNoReplyEmailAddress(true),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(payingAccountUser.Email),
                 subject: subject,
                 body: body,
@@ -459,7 +459,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "FirstName", user.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
                 { "VerificationLink", $"{Email.BaseUrl(isAfterSchool)}signup/verify/{user.Uid.ToString()}" },
-                { "SupportEmail", Email.AppSupportEmailAddress() },
+                { "SupportEmail", Email.AppSupportEmailAddress },
             };
 
             var body = ProcessTemplate(
@@ -472,7 +472,7 @@ namespace AfterSchoolLibrary.Helpers
             var subject = $"{Utilities.AppName(isAfterSchool)}: Please verify your email address";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(isAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
                 subject: subject,
                 body: body,
@@ -503,7 +503,7 @@ namespace AfterSchoolLibrary.Helpers
             var subject = $"Welcome to {Utilities.AppName(account.IsAfterSchool)}!";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
                 subject: subject,
                 body: body,
@@ -512,8 +512,8 @@ namespace AfterSchoolLibrary.Helpers
 
             // send copy to enroll hq team
             SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
-                toEmail: Email.SendGridAppAdminEmailAddress,
+                fromEmail: Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
+                toEmail: Email.SendGridSupportEmailAddress,
                 subject: $"CC: {Utilities.AppName(account.IsAfterSchool)} TRIAL - {subject}",
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
@@ -531,7 +531,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "FirstName", user.FirstName },
                 { "ProductName", Utilities.AppName(account.IsAfterSchool) },
-                { "SupportEmail", Email.AppSupportEmailAddress() }
+                { "SupportEmail", Email.AppSupportEmailAddress }
             };
 
             var body = ProcessTemplate(
@@ -544,7 +544,7 @@ namespace AfterSchoolLibrary.Helpers
             var subject = $"Welcome to the {Utilities.AppName(account.IsAfterSchool)} Family!";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(user.Email),
                 subject: subject,
                 body: body,
@@ -553,8 +553,8 @@ namespace AfterSchoolLibrary.Helpers
 
             // send copy to afterschool hq team
             SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(account.IsAfterSchool),
-                toEmail: Email.SendGridAppAdminEmailAddress,
+                fromEmail: Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
+                toEmail: Email.SendGridSupportEmailAddress,
                 subject: $"CC: {Utilities.AppName(account.IsAfterSchool)} SIGNUP - {subject}",
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
@@ -575,7 +575,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "FirstName", invitedUser.FirstName },
                 { "ProductName", Utilities.AppName(invitedAccount.IsAfterSchool) },
-                { "SupportEmail", Email.AppSupportEmailAddress() },
+                { "SupportEmail", Email.AppSupportEmailAddress },
                 { "InviteUrl", invitedUser.GetInviteUrl(invitedAccount) },
                 { "CustomMessage", customMessage }
             };
@@ -590,7 +590,7 @@ namespace AfterSchoolLibrary.Helpers
             var subject = $"{loggedInUser.DisplayName} has invited you to use {Utilities.AppName(invitedAccount.IsAfterSchool)}!";
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(invitedAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(invitedUser.Email),
                 subject: subject,
                 body: body,
@@ -633,7 +633,7 @@ namespace AfterSchoolLibrary.Helpers
                 );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(invitedAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(invitedUser.Email),
                 subject: subject,
                 body: body,
@@ -672,7 +672,7 @@ namespace AfterSchoolLibrary.Helpers
                 );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(invitedAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(leagueOwner.Email),
                 subject: subject,
                 body: body,
@@ -708,7 +708,7 @@ namespace AfterSchoolLibrary.Helpers
                );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(visitorAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(visitorAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(hostAccount.Email),
                 subject: subject,
                 body: body,
@@ -717,8 +717,8 @@ namespace AfterSchoolLibrary.Helpers
 
             // send copy to enroll hq team
             SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(visitorAccount.IsAfterSchool),
-                toEmail: Email.SendGridAppAdminEmailAddress,
+                fromEmail: Email.SendGridNoReplyEmailAddress(visitorAccount.IsAfterSchool),
+                toEmail: Email.SendGridSupportEmailAddress,
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(hostAccount.IsAfterSchool)
@@ -750,7 +750,7 @@ namespace AfterSchoolLibrary.Helpers
                );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
                 subject: subject,
                 body: body,
@@ -783,7 +783,7 @@ namespace AfterSchoolLibrary.Helpers
                );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
                 subject: subject,
                 body: body,
@@ -819,14 +819,14 @@ namespace AfterSchoolLibrary.Helpers
                );
 
             var mailMsgsHost = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(hostAccount.Email),
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
                 );
             var mailMsgsVisitor = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
                 subject: subject,
                 body: body,
@@ -861,7 +861,7 @@ namespace AfterSchoolLibrary.Helpers
                 { "HomePageUrl", hostAccount.HomePageUrl },
                 { "ActivityHomePageUrl", activity.HomePageUrl },
                 { "ActivityName", activity.Name },
-                { "SupportEmail", Email.AppSupportEmailAddress() },
+                { "SupportEmail", Email.AppSupportEmailAddress },
                 { "InviterFirstName", loggedInUser.FirstName }
             };
 
@@ -874,7 +874,7 @@ namespace AfterSchoolLibrary.Helpers
                );
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.SendGridAppEmailAddress(hostAccount.IsAfterSchool),
+                fromEmail: Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(visitorAccount.Email),
                 subject: subject,
                 body: body,

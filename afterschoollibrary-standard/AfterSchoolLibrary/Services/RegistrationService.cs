@@ -69,7 +69,7 @@ namespace AfterSchoolLibrary.Services
             emailList.ForEach(email =>
                 msgs.AddRange(SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Helpers.Email.AppEmailAddress,
+                        Helpers.Email.AppNoReplyEmailAddress,
                         $"{account.Name} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"
                         ),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
