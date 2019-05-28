@@ -1873,6 +1873,13 @@ namespace AfterSchoolLibrary.Helpers
                 return new EmailAddress(Email.AppAdminEmailAddress);
             }
         }
+        public static EmailAddress SendGridSupportEmailAddress
+        {
+            get
+            {
+                return new EmailAddress(AppSupportEmailAddress());
+            }
+        }
 
         public static string AppSupportEmailAddress()
         {
