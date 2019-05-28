@@ -8,20 +8,22 @@
 </div>
 <div class="main-content">
     <div class="panel panel-default">
-
-        <div class="pull-right">
-            <a href="@Url.Action("edit", "user")" class="btn btn-primary">Add Administrator</a>
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a href="@Url.Action("edit", "user", new { returnurl = Url.Action("index", "user") })" class="btn btn-primary">Add Administrator</a>
+            </div>
+            <i class="s7-users"></i> Users
         </div>
-
         <div class="panel-body">
+
             @{ Html.RenderPartial(
-                   "~/Views/Shared/_Users.cshtml", 
-                   Model, 
-                   new ViewDataDictionary() { 
-                    { "AccountId", ViewBag.AccountId }, 
+             "~/Views/Shared/_Users.cshtml",
+             Model,
+             new ViewDataDictionary() {
+                    { "AccountId", ViewBag.AccountId },
                     { "ReturnUrl", ViewBag.ReturnUrl } ,
                     { "PagingModel", ViewBag.PagingModel }
-                   }); 
+             });
             }
         </div>
     </div>

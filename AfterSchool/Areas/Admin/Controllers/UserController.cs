@@ -55,7 +55,6 @@ namespace AfterSchool.Areas.Admin.Controllers
         public ActionResult Edit(string id)
         {
             ViewBag.Messages = new SystemMessages();
-            ViewBag.ReturnUrl = "/user/index";
 
             if (Request["returnurl"].IsNotEmpty())
                 ViewBag.ReturnUrl = Request["returnurl"];
@@ -63,7 +62,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             if (id.IsEmpty())
                 return View(new WebUser() { FirstName = "New", LastName = "User" });
 
-           return View(WebUser.Load(id.ToInteger()));
+           return View(WebUser.LoadByUid(id.ToGuid()));
         }
 
         [HttpPost]
@@ -72,8 +71,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             var msgs = new SystemMessages();
             WebUser user = null; 
 
-            if (id.IsNumber())
-                user = WebUser.Load(id.ToInteger()); 
+            if (id.IsGuid())
+                user = WebUser.LoadByUid(id.ToGuid()); 
 
             if (!email.IsEmail())
                 msgs.Add("Email must be a valid email address", MessageType.UserError);
@@ -94,9 +93,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        if (id.IsNumber())
-                            user = WebUser.Load(id.ToInteger());
-                        else
+                        if (!id.IsGuid())
                             user = new WebUser()
                             {
                                 CreateDate = DateTime.UtcNow,
@@ -136,6 +133,12 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             ViewBag.Messages = msgs;
             return View(user);
+        }
+
+        [HttpGet]
+        public ActionResult MyProfile()
+        {
+            return RedirectToAction("edit", new { id = SessionVariables.LoggedInUser.Uid.ToString() });
         }
 
         [HttpGet]
