@@ -236,8 +236,7 @@ namespace AfterSchoolLibrary.Helpers
             Utilities.MasterAPISecret = ""; //at least 65 random alphanumeric characters
 
             Utilities.AmazonRegionEndPoint = Amazon.RegionEndpoint.USEast2;
-
-            Email.AppAdminEmailAddress = "support@afterschoolhq.com"; //all app admin emails are sent to this email address
+            
             Email.ReplyHostName = "afterschoolhq.com"; // can be modified based on live/dev/test server
             Email.SenderHostName = "mailer.afterschoolhq.com"; // can be modified based on live/dev/test server            
 
@@ -1860,37 +1859,41 @@ namespace AfterSchoolLibrary.Helpers
 
         public static System.Net.Mail.MailAddress AppFromAddress(bool isAfterSchool)
         {
-            return new System.Net.Mail.MailAddress(AppEmailAddress, AppEmailFromName(isAfterSchool));
+            return new System.Net.Mail.MailAddress(AppNoReplyEmailAddress, AppEmailFromName(isAfterSchool));
         }
-        public static EmailAddress SendGridAppEmailAddress(bool isAfterSchool)
+
+        public static EmailAddress SendGridNoReplyEmailAddress(bool isAfterSchool)
         {
-            return new EmailAddress(Email.AppEmailAddress, Utilities.AppName(isAfterSchool));
+            return new EmailAddress(Email.AppNoReplyEmailAddress, Utilities.AppName(isAfterSchool));
         }
-        public static EmailAddress SendGridAppAdminEmailAddress
+
+        public static EmailAddress SendGridSupportEmailAddress
         {
             get
             {
-                return new EmailAddress(Email.AppAdminEmailAddress);
+                return new EmailAddress(AppSupportEmailAddress);
             }
         }
 
-        public static string AppSupportEmailAddress()
-        {
-            return "support@" + Utilities.HostName;
-        }
-
-        public static string AppEmailAddress
+        public static string AppSupportEmailAddress
         {
             get
             {
-                return "noreply@" + SenderHostName;
+                return $"support@{ReplyHostName}";
+            }
+        }
+
+        public static string AppNoReplyEmailAddress
+        {
+            get
+            {
+                return $"noreply@{SenderHostName}";
             }
         }
         public static string AppEmailFromName(bool isAfterSchool)
         {
             return Utilities.AppName(isAfterSchool);
         }
-        public static string AppAdminEmailAddress { get; set; }
 
         public static string AppSignature(bool isAfterSchool)
         {

@@ -135,8 +135,22 @@ namespace AfterSchool.Areas.Admin.Controllers
                     {
                         if (account.IsNotEmpty())
                         {
-                            account.AddPackage(package.ToInteger(), (BillingPeriodType)billingperiod.ToInteger(), SessionVariables.LoggedInUser, amsgs, adc);
-                            user = account.AddUser(firstname, lastname, email, UserType.Owner, SessionVariables.LoggedInUser.ID.Value, amsgs, adc);
+                            account.AddPackage(
+                                package.ToInteger(), 
+                                (BillingPeriodType)billingperiod.ToInteger(), 
+                                SessionVariables.LoggedInUser, 
+                                amsgs, 
+                                adc
+                            );
+
+                            user = account.AddUser(
+                                firstname, 
+                                lastname, 
+                                email, 
+                                UserType.Owner, 
+                                SessionVariables.LoggedInUser, 
+                                amsgs, 
+                                adc);
                         }
                         else
                         {

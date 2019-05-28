@@ -261,7 +261,7 @@ namespace AfterSchoolLibrary.Services
             if (registrant.Email.IsNotEmpty())
                 msgs.AddRange(SendGridHelper.SendMail(
                     fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Helpers.Email.AppEmailAddress,
+                        Helpers.Email.AppNoReplyEmailAddress,
                         $"{fromName} via {Helpers.Utilities.AppName(isAfterSchool)}"),
                     toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
                     subject: subject,

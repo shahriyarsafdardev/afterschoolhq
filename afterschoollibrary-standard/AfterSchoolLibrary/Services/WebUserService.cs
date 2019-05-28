@@ -72,7 +72,7 @@ namespace AfterSchoolLibrary.Services
         public static SystemMessages SendInviteToAccount(this WebUser user, Account account, string message, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             return SendGridHelper.SendMail(
-                fromEmail: new EmailAddress(Helpers.Email.AppEmailAddress, Helpers.Utilities.AppName(account.IsAfterSchool)),
+                fromEmail: new EmailAddress(Helpers.Email.AppNoReplyEmailAddress, Helpers.Utilities.AppName(account.IsAfterSchool)),
                 toEmail: new EmailAddress(user.Email),
                 subject: BuildAccountInviteSubject(account),
                 body: BuildAccountInviteBody(user, account, message),
@@ -374,7 +374,7 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs,
                 dc: dc);
 
-            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, dc));
+            accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc);
 
             return account;
         }
@@ -412,7 +412,7 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs, 
                 dc: dc);
 
-            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, dc));
+            accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc);
 
             return account;
         }
@@ -426,9 +426,9 @@ namespace AfterSchoolLibrary.Services
         /// <param name="loggedInUser"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static SystemMessages AddAccount(this WebUser user, Account account, UserType userTypeId, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static AccountWebUser AddAccount(this WebUser user, Account account, UserType userTypeId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return account.AddUser(user, userTypeId, loggedInUser.ID.Value, dc);
+            return account.AddUser(user, userTypeId, loggedInUser, msgs, dc);
         }
 
         /// <summary>

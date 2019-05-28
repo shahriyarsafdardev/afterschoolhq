@@ -373,7 +373,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                            adc);
                                    }
 
-                                   amsgs.AddRange(account.AddUser(user, UserType.Owner, 0, adc));
+                                   account.AddUser(user, UserType.Owner, new WebUser(), amsgs, adc);
                                }
                                else
                                {

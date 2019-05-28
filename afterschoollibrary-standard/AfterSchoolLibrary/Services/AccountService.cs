@@ -353,19 +353,20 @@ namespace AfterSchoolLibrary.Services
             return AccountWebUser.LoadByAccountIdByIsActive(account.ID.Value, true, dc: dc);
         }
 
-        public static SystemMessages AddUser(this Account account, WebUser user, UserType ut, int loggedInUserId, DatabaseConnection dc = null)
+        public static AccountWebUser AddUser(this Account account, WebUser user, UserType ut, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            AccountWebUser awu = null;
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, dc: adc);
+                    awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, amsgs, adc);
+
                     if (awu.IsEmpty())
                         awu = new AccountWebUser
                         {
                             CreateDate = DateTime.UtcNow,
-                            CreatedBy = loggedInUserId,
+                            CreatedBy = loggedInUser?.ID.IfEmpty(0),
                             WebUserId = user.ID.Value,
                             AccountId = account.ID.Value,
                             IsDefault = false,
@@ -375,7 +376,7 @@ namespace AfterSchoolLibrary.Services
                         awu.IsActive = true;
 
                     awu.LastModifiedDate = DateTime.UtcNow;
-                    awu.LastModifiedBy = loggedInUserId;
+                    awu.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
                     awu.UserTypeId = ut;
                     amsgs.AddRange(awu.Save(adc));
 
@@ -385,35 +386,26 @@ namespace AfterSchoolLibrary.Services
                         amsgs.AddRange(account.Save(adc));
                     }
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 
-            return msgs;
+            return awu;
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType userType, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, null, null, false, true, false, userType, loggedInUserId, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, null, null, false, true, false, userType, loggedInUser, msgs, dc: dc);
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, phone, null, false, true, false, userType, loggedInUserId, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, phone, null, false, true, false, userType, loggedInUser, msgs, dc: dc);
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             WebUser user = null;
@@ -434,7 +426,7 @@ namespace AfterSchoolLibrary.Services
                             user.Password = WebUserService.EncryptPassword(password);
 
                         user.CreateDate = user.LastModifiedDate = DateTime.Now;
-                        user.CreatedBy = user.LastModifiedBy = loggedInUserId;
+                        user.CreatedBy = user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
                         user.IsActive = isActive;
                         user.IsRegistered = isRegistered;
                         user.VerifiedAccount = isVerified;
@@ -444,23 +436,14 @@ namespace AfterSchoolLibrary.Services
                     else
                         user = WebUser.LoadByEmail(email.Trim(), amsgs, adc);
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(AddUser(account, user, userType, loggedInUserId, dc: dc));
+                AddUser(account, user, userType, loggedInUser, msgs, dc);
 
             return user;
 
@@ -470,7 +453,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var user = account.AddUser(firstName, lastName, email, phone, userType, loggedInUser.ID.Value, msgs, dc);
+            var user = account.AddUser(firstName, lastName, email, phone, userType, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(account.SendInvitedEmail(user, loggedInUser, message, dc));

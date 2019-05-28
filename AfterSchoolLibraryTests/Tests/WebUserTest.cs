@@ -196,8 +196,8 @@ namespace AfterSchoolLibraryTests.Tests
             var user = Factories.WebUserFactory.Create(true, msgs, dc: dc);
             for (var i = 0; i < numberOfAccounts; i++)
             {
-                var account = Factories.AccountFactory.Create(accountOwner, msgs, dc: dc);
-                msgs.AddRange(account.AddUser(user, UserType.Administrator, user.ID.Value, dc: dc));
+                var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
+                account.AddUser(user, UserType.Administrator, user, msgs, dc);
             }
 
             Assert.Equal(numberOfAccounts, user.GetAccounts(dc: dc).Count);
@@ -452,7 +452,7 @@ namespace AfterSchoolLibraryTests.Tests
             var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
             var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
 
-            msgs.AddRange(accountOwner.AddAccount(account, UserType.Owner, loggedInUser, dc));
+            accountOwner.AddAccount(account, UserType.Owner, loggedInUser, msgs, dc);
 
             Assert.NotNull(AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, accountOwner.ID.Value, msgs, dc));
         }

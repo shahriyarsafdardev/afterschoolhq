@@ -512,7 +512,7 @@ namespace AfterSchoolLibrary.Services
 
                     SendGridHelper.SendMail(
                         fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                            Helpers.Email.AppEmailAddress,
+                            Helpers.Email.AppNoReplyEmailAddress,
                             string.Format("{0} via {1}", account.Name,
                             Helpers.Utilities.AppName(account.IsAfterSchool))),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(contact.Email, contact.Name),
