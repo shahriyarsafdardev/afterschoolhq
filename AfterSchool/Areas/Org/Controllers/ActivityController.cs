@@ -909,21 +909,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (activity.IsNotEmpty())
-            {
                 msgs.AddRange(activity.MarkAsDeleted(SessionVariables.LoggedInUser.ID.Value));
-            }
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} has been deleted", activity.Name), MessageType.Success);
-            }
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "activity");
         }
@@ -935,22 +929,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (activity.IsNotEmpty())
-            {
                 msgs.AddRange(activity.MoveToArchive(SessionVariables.LoggedInUser.ID.Value));
-            }
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} has been archived", activity.Name), MessageType.Success);
-            }
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
-
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "activity");
         }
@@ -962,21 +949,15 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (activity.IsNotEmpty())
-            {
                 msgs.AddRange(activity.MoveFromArchive(SessionVariables.LoggedInUser.ID.Value));
-            }
 
             ViewBag.Messages = msgs;
 
             if (msgs.HasNoErrors())
-            {
                 msgs.Add(string.Format("{0} has been restored", activity.Name), MessageType.Success);
-            }
 
             if (Request.UrlReferrer.IsNotEmpty())
-            {
-                Response.Redirect(Request.UrlReferrer.ToString(), true);
-            }
+                return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "activity");
         }
