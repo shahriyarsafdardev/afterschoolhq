@@ -325,7 +325,7 @@ var AccountSetup = {
                 } else {
                     Notifications.showBar({
                         title: 'Error',
-                        message: 'Error sending verification email. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress()" class="white">contact support</a>.'
+                        message: 'Error sending verification email. Please <a href="mailto:support@afterschoolhq.com" class="white">contact support</a>.'
                     });
                 }
             }
