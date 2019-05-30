@@ -48,7 +48,7 @@ namespace AfterSchoolLibrary.Services
             var requestor = payout.GetRequestor(msgs, dc);            
 
             LobHelper.CreateCheck(
-                description: $"Payout to {account.Name} requested {payout}",
+                description: $"Payout to {account.Name} requested {payout.Amount.ToCurrency()}",
                 accountType: paymentAccount.LegalEntityTypeId.ToLobAccountType(),
                 toName: paymentAccount.Name,
                 toAddress1: paymentAccount.Address1,
