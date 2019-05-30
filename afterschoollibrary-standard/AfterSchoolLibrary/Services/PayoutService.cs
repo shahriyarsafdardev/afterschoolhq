@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary.Services
                 // send money via ACH
                 if (payoutAccount.CanReceiveACHDeposits(msgs, dc))
                 {
-                    if (payoutAccount.StripeUserId.IsNotEmpty())
+                    if (payoutAccount.HasStripeConnectedAccount)
                     {
                         payoutAccount.SendStripePayout(
                             payout: payout,
@@ -134,7 +134,7 @@ namespace AfterSchoolLibrary.Services
                     // transfer money to the main AHQ account to prep for sending an ACH
                     else
                     {
-                        payout.MoveMoneyToAHQAccount(payoutAccount, loggedInUser, msgs, dc);
+                        payout.MoveMoneyInStripeToAHQBankAccount(payoutAccount, loggedInUser, msgs, dc);
 
                         if (msgs.HasNoErrors())
                             payout.UpdateStatus(PayoutStatus.InProgress, loggedInUser, msgs, dc);
@@ -154,7 +154,7 @@ namespace AfterSchoolLibrary.Services
 
                 if (msgs.HasNoErrors() && checkAccount.IsNotEmpty())
                 {
-                    payout.MoveMoneyToAHQAccount(payoutAccount, loggedInUser, msgs, dc);
+                    payout.MoveMoneyInStripeToAHQBankAccount(payoutAccount, loggedInUser, msgs, dc);
 
                     if (msgs.HasNoErrors())
                         checkAccount.SendPayment(
@@ -174,7 +174,7 @@ namespace AfterSchoolLibrary.Services
             msgs.Add("No valid payment account", MessageType.UserError);            
         }
 
-        public static void MoveMoneyToAHQAccount(this Payout payout, Account payoutAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void MoveMoneyInStripeToAHQBankAccount(this Payout payout, Account payoutAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Billing.StripeHelper.CreatePayout(
                 amount: payout.Amount.Value,
