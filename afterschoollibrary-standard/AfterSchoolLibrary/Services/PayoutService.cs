@@ -148,7 +148,8 @@ namespace AfterSchoolLibrary.Services
                 // get check payment account
                 var checkAccount = payoutAccount.GetCheckPaymentAccount(msgs, dc);
 
-                if (!checkAccount.IsDeliverable(msgs, dc))
+                // lob only validates addresses on production
+                if (Helpers.Utilities.IsProduction && !checkAccount.IsDeliverable(msgs, dc))
                     msgs.Add("Your address is invalid and not deliverable. Please update your address to a valid address", MessageType.UserError);
 
                 if (msgs.HasNoErrors() && checkAccount.IsNotEmpty())
