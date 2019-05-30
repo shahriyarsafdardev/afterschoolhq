@@ -113,16 +113,16 @@ namespace AfterSchoolLibrary.Services
             if (payout.PayoutStatusId != PayoutStatus.Approved)
                 return;
 
-            var account = payout.GetAccount(msgs, dc);
+            var payoutAccount = payout.GetAccount(msgs, dc);
 
             if (payout.PaymentTypeId == PaymentType.ACH)
             {
                 // send money via ACH
-                if (account.CanReceiveACHDeposits(msgs, dc))
+                if (payoutAccount.CanReceiveACHDeposits(msgs, dc))
                 {
-                    if (account.StripeUserId.IsNotEmpty())
+                    if (payoutAccount.StripeUserId.IsNotEmpty())
                     {
-                        account.SendStripePayout(
+                        payoutAccount.SendStripePayout(
                             payout: payout,
                             loggedInUser: loggedInUser,
                             msgs: msgs,
@@ -134,18 +134,7 @@ namespace AfterSchoolLibrary.Services
                     // transfer money to the main AHQ account to prep for sending an ACH
                     else
                     {
-                        Billing.StripeHelper.CreatePayout(
-                            amount: payout.Amount.Value,
-                            externalAccountId: null,
-                            connectedAccountId: null,
-                            metaData: new Dictionary<string, string>()
-                            {
-                                { "AccountUid", account.Uid.ToString() },
-                                { "RequestedBy", payout.GetRequestor(msgs, dc).Uid.ToString() },
-                                { "ApprovedBy", loggedInUser.Uid.ToString() },
-                                { "DateRequested", payout.DateRequested.ToShortDateTimeString() }
-                            },
-                            msgs: msgs);
+                        payout.MoveMoneyToAHQAccount(payoutAccount, loggedInUser, msgs, dc);
 
                         if (msgs.HasNoErrors())
                             payout.UpdateStatus(PayoutStatus.InProgress, loggedInUser, msgs, dc);
@@ -157,18 +146,23 @@ namespace AfterSchoolLibrary.Services
             {
                 // send money via lob
                 // get check payment account
-                var checkAccount = account.GetCheckPaymentAccount(msgs, dc);
+                var checkAccount = payoutAccount.GetCheckPaymentAccount(msgs, dc);
 
                 if (!checkAccount.IsDeliverable(msgs, dc))
                     msgs.Add("Your address is invalid and not deliverable. Please update your address to a valid address", MessageType.UserError);
 
-                if (checkAccount.IsNotEmpty())
-                    checkAccount.SendPayment(
-                        account: account,
+                if (msgs.HasNoErrors() && checkAccount.IsNotEmpty())
+                {
+                    payout.MoveMoneyToAHQAccount(payoutAccount, loggedInUser, msgs, dc);
+
+                    if (msgs.HasNoErrors())
+                        checkAccount.SendPayment(
+                        account: payoutAccount,
                         payout: payout,
                         loggedInUser: loggedInUser,
                         msgs: msgs,
                         dc: dc);
+                }
 
                 if (msgs.HasNoErrors())
                     payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
@@ -177,6 +171,22 @@ namespace AfterSchoolLibrary.Services
             }
 
             msgs.Add("No valid payment account", MessageType.UserError);            
+        }
+
+        public static void MoveMoneyToAHQAccount(this Payout payout, Account payoutAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            Billing.StripeHelper.CreatePayout(
+                amount: payout.Amount.Value,
+                externalAccountId: null,
+                connectedAccountId: null,
+                metaData: new Dictionary<string, string>()
+                {
+                    { "AccountUid", payoutAccount.Uid.ToString() },
+                    { "RequestedBy", payout.GetRequestor(msgs, dc).Uid.ToString() },
+                    { "ApprovedBy", loggedInUser.Uid.ToString() },
+                    { "DateRequested", payout.DateRequested.ToShortDateTimeString() }
+                },
+                msgs: msgs);
         }
 
         public static WebUser GetRequestor(this Payout payout, SystemMessages msgs = null, DatabaseConnection dc = null)
