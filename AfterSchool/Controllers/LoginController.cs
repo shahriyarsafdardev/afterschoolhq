@@ -51,11 +51,11 @@ namespace AfterSchool.Controllers
                 WebUser user = null;
 
                 if (username.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-                    user = WebUser.LoginByEmail(username, password);
+                    user = WebUserService.LoginByEmail(username, password);
                 else if (username.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
-                    user = WebUser.LoginByPhone(username, password);
+                    user = WebUserService.LoginByPhone(username, password);
                 else
-                    user = WebUser.LoginByUsername(username, password);
+                    user = WebUserService.LoginByUsername(username, password);
 
                 if (user.IsEmpty())
                     msgs.Add("Invalid username and/or password", MessageType.UserError);
