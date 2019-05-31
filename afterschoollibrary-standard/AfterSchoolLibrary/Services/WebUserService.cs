@@ -7,43 +7,49 @@ using BasicLibrary.DataAccess;
 using System.Linq;
 using SendGrid.Helpers.Mail;
 using AfterSchoolLibrary.Models;
+using BCrypt.Net;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class WebUserService
     {
-        public static string GenerateRandomCryptographicKey(int keyLength)
+        public static bool IsValidPassword(string plainPassword, string hashedPassword)
         {
-            return Convert.ToBase64String(GenerateRandomCryptographicBytes(keyLength));
-        }
-
-        public static byte[] GenerateRandomCryptographicBytes(int keyLength)
-        {
-            RNGCryptoServiceProvider rngCryptoServiceProvider = new RNGCryptoServiceProvider();
-            byte[] randomBytes = new byte[keyLength];
-            rngCryptoServiceProvider.GetBytes(randomBytes);
-            return randomBytes;
-        }
-
-        public static (byte[] saltedbytes, byte[] hashedbytes) SaltandHashPassword(string password)
-        {
-            byte[] saltBytes = GenerateRandomCryptographicBytes(32 - password.Length);
-            byte[] passwordinBytes = Encoding.UTF8.GetBytes(password);
-            List<byte> passwordSalted = new List<byte>();
-            passwordSalted.AddRange(passwordinBytes);
-            passwordSalted.AddRange(saltBytes);
-            byte[] hashedBytes = SHA256.Create().ComputeHash(passwordSalted.ToArray());
-            return (saltBytes, hashedBytes);
+            return BCrypt.Net.BCrypt.Verify(plainPassword, hashedPassword);
         }
 
         public static string EncryptPassword(string password)
         {
+            return BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt());
             return Convert.ToBase64String(Encryption.Encrypt(password, Helpers.Utilities.AppAESKey, Helpers.Utilities.AppIV));
         }
 
         public static string DecryptPassword(string password)
         {
             return Encryption.DecryptToString(Convert.FromBase64String(password), Helpers.Utilities.AppAESKey, Helpers.Utilities.AppIV);
+        }
+
+        public static WebUser LoginByUsername(string username, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return WebUser.LoadByUsername(username, msgs, dc).ReturnUserIfValidPassword(password);
+        }
+
+        public static WebUser LoginByPhone(string phone, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return WebUser.LoadByPhone(phone, msgs, dc).ReturnUserIfValidPassword(password);
+        }
+
+        public static WebUser LoginByEmail(string email, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return WebUser.LoadByEmail(email, msgs, dc).ReturnUserIfValidPassword(password);
+        }
+
+        public static WebUser ReturnUserIfValidPassword(this WebUser user, string plainPassword)
+        {
+            if (user.IsNotEmpty() && IsValidPassword(plainPassword, user.Password))
+                return user;
+
+            return null;
         }
 
         private static string BuildAccountInviteSubject(Account account)

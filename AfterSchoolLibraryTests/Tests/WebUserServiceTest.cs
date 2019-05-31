@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 using BasicLibrary;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Services;
+using AfterSchoolLibraryTests.Factories;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -33,6 +34,26 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.True(newUser.ID.HasValue);
 
+        }
+
+        [Fact]
+        public void EncryptPasswordTest()
+        {
+            var password = "123123123";
+            var hashedPassword = WebUserService.EncryptPassword(password);
+
+            Assert.True(WebUserService.IsValidPassword(password, hashedPassword));
+
+        }
+
+        [Theory]
+        [InlineData("test@test.com", "123123123", "123123123", true)]
+        [InlineData("test@test.com", "123123123", "123412341", false)]
+        public void LoginByEmailTest(string email, string setPassword, string testingPassword, bool expectedResult)
+        {
+            var user = WebUserFactory.CreateWithEmail(email, setPassword, msgs, dc);
+
+            Assert.Equal(expectedResult, WebUserService.LoginByEmail(email, testingPassword, msgs, dc).IsNotEmpty());
         }
     }
 }

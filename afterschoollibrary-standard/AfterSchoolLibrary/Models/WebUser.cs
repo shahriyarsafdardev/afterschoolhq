@@ -241,15 +241,6 @@ namespace AfterSchoolLibrary.Models
                 ) > 0;
         }
 
-        public static WebUser LoginByEmail(string email, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["email"], email);
-            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-
         public static WebUser LoadByPhone(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
@@ -277,15 +268,6 @@ namespace AfterSchoolLibrary.Models
                 ) > 0;
         }
 
-        public static WebUser LoginByPhone(string phone, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["phone"], phone);
-            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-
         public static bool ExistsByUid(Guid uid, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetCount(
@@ -304,89 +286,6 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static WebUser LoginByUsername(string username, string password, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["username"], username);
-            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.EncryptPassword(password));
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-
-        public static WebUser LoginByEmailHashed(string email, string password, DatabaseConnection dc = null)
-        {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["email"], email);
-            dq.Criterias.Add(ObjectMap["password"], Services.WebUserService.SaltandHashPassword(password));
-            return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-
-        /*
-        public static string GenerateRandomCryptographicKey(int keyLength)
-        {
-            return Convert.ToBase64String(GenerateRandomCryptographicBytes(keyLength));
-        }
-
-
-        public static byte[] GenerateRandomCryptographicBytes(int keyLength)
-        {
-            RNGCryptoServiceProvider rngCryptoServiceProvider = new RNGCryptoServiceProvider();
-            byte[] randomBytes = new byte[keyLength];
-            rngCryptoServiceProvider.GetBytes(randomBytes);
-            return randomBytes;
-        }
-
- 
-        public static (byte[] saltedbytes, byte[] hashedbytes) SaltandHashPassword( string password)
-        {
-            byte[] saltBytes = GenerateRandomCryptographicBytes(32 - password.Length);
-            byte[] passwordinBytes = Encoding.UTF8.GetBytes(password);
-            List<byte> passwordSalted = new List<byte>();
-            passwordSalted.AddRange(passwordinBytes);
-            passwordSalted.AddRange(saltBytes);
-            byte[] hashedBytes = SHA256.Create().ComputeHash(passwordSalted.ToArray());
-            return (saltBytes, hashedBytes);
-        }
-
-        public static string EncryptPassword(string password)
-        {
-            return Convert.ToBase64String(Encryption.Encrypt(password, Utilities.AppAESKey, Utilities.AppIV));
-        }
-
-        public static string DecryptPassword(string password)
-        {
-            return Encryption.DecryptToString(Convert.FromBase64String(password), Utilities.AppAESKey, Utilities.AppIV);
-        }
-        public SystemMessages SendInvite(string email, string message, WebUser loggedInUser, Account account, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var subject = $"You have been invited by {account.Name} to use {Utilities.AppName(account.IsAfterSchool)}";
-            var body = "";
-
-            if (!message.IsEmpty())
-                body += "<p>" + message + "</p><p>-------------------------------</p>";
-
-            if (!this.IsActive)
-                body += $"<p>Click on the following link to create your account and start using {Utilities.AppName(account.IsAfterSchool)}: <a href=\"{this.GetInviteUrl(account)}\">{this.GetInviteUrl(account)}</a></p>";
-            else
-                body += $"<p>Click the following login link to access \"{account.Name}\": <a href=\"{AfterSchoolLibrary.Helpers.Email.BaseUrl(account.IsAfterSchool)}login?group={account.ID.Value.ToString()}\">{AfterSchoolLibrary.Helpers.Email.HostName(account.IsAfterSchool)}/login</a></p>";
-
-            body += "<p>Thank you!!</p>";
-            body += AfterSchoolLibrary.Helpers.Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "invite_team_member");
-
-            msgs.AddRange(SendGridHelper.SendMail(
-                fromEmail: new SendGrid.Helpers.Mail.EmailAddress(AfterSchoolLibrary.Helpers.Email.AppEmailAddress, Utilities.AppName(account.IsAfterSchool)),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(email),
-                subject: subject,
-                body: body,
-                replyTo: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email, loggedInUser.DisplayName),
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
-                ));
-
-            return msgs;
-        }        
-        */
         #endregion
     }
 }
