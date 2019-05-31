@@ -1241,14 +1241,6 @@ Public MustInherit Class BaseWebUser
             MDV("Password").Value = value
         End Set
     End Property
-    Public Property Salt() As String
-        Get
-            Return MDV("Salt").Value
-        End Get
-        Set(ByVal value As String)
-            MDV("Salt").Value = value
-        End Set
-    End Property
     Public Property ImageUrl() As String
         Get
             Return MDV("ImageUrl").Value
@@ -1308,7 +1300,7 @@ Public MustInherit Class BaseWebUser
             Dim _databaseParameters As DataAccess.DatabaseParameters = Nothing
             _databaseParameters = BasePerson.BaseObjectMap(className)
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Username", tableName, SqlDbType.NVarChar, "50"))
-            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Password", tableName, SqlDbType.NVarChar, "50"))
+            _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "Password", tableName, SqlDbType.NVarChar, "60"))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "ImageUrl", tableName, SqlDbType.NVarChar, "400"))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenId", tableName, SqlDbType.NVarChar, "400"))
             _databaseParameters.Add(New DataAccess.DatabaseParameter(className, "OpenIdProviderUrl", tableName, SqlDbType.NVarChar, "400"))
