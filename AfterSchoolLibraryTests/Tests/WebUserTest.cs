@@ -140,7 +140,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var user = Factories.WebUserFactory.CreateWithUsername(username, password, msgs, dc: dc);
 
-            Assert.True(WebUser.LoginByUsername(testUsername, testPassword, dc: dc).IsNotEmpty() == result);
+            Assert.True(WebUserService.LoginByUsername(testUsername, testPassword, dc: dc).IsNotEmpty() == result);
         }
 
         [Theory(DisplayName = "Login with email and password")]
@@ -152,7 +152,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var user = Factories.WebUserFactory.CreateWithEmail(email, password, msgs, dc: dc);
 
-            Assert.True(WebUser.LoginByEmail(testEmail, testPassword, dc: dc).IsNotEmpty() == result);
+            Assert.True(WebUserService.LoginByEmail(testEmail, testPassword, dc: dc).IsNotEmpty() == result);
         }
 
         [Theory(DisplayName = "Encrypt password")]
@@ -305,7 +305,7 @@ namespace AfterSchoolLibraryTests.Tests
             var user = Factories.WebUserFactory.CreateWithUsername(username, password, msgs, dc: dc);
             msgs.AddRange(user.ChangePassword(password2, dc: dc));
 
-            Assert.NotNull(WebUser.LoginByUsername(username, password2, dc: dc));
+            Assert.NotNull(WebUserService.LoginByUsername(username, password2, dc: dc));
         }
 
         [Theory(DisplayName = "Sends password reset token")]
@@ -377,72 +377,6 @@ namespace AfterSchoolLibraryTests.Tests
             var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc: dc);
 
             Assert.True(user.IsActivityLeader(activity, dc: dc));
-        }
-
-        [Fact]
-        public void saltPasswordTest()
-        {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-
-            var orig = ASCIIEncoding.ASCII.GetBytes("test");
-            var saltAndHashed = WebUserService.SaltandHashPassword("test");
-
-            Assert.NotEqual(orig, WebUserService.SaltandHashPassword("test").hashedbytes);
-        }
-
-        /// <summary>
-        /// Then decrypt their passwords using the old method, 
-        /// then encrypt and store the new passwords in the db with the new 
-        /// encryption method, then test that the passwords are different
-        /// </summary>
-        [Fact]
-        public void FullPasswordTest()
-        {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var user = Factories.WebUserFactory.Create(msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-
-            var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
-            var encrypt = AfterSchoolLibrary.Helpers.Utilities.EncryptToBase64("test");
-            var decrypt = AfterSchoolLibrary.Helpers.Utilities.DecryptFromBase64(encrypt);
-            var saltAndHashed = WebUserService.SaltandHashPassword(decrypt);
-
-            Assert.NotEqual(decrypt, saltAndHashed.hashedbytes.ToString());
-        }
-
-        [Fact(Skip = "Need to figure out why it's not working")]
-        public void LoadAndHashAllTest()
-        {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var user = Factories.WebUserFactory.CreateWithEmail("notDarye", "NothisPassword", msgs, dc);
-            var orig = user.Password;
-            var origInBytes = ASCIIEncoding.ASCII.GetBytes(orig);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-
-            var message = AfterSchoolLibrary.Helpers.Utilities.LoadAndHashAllUsers(dc);
-            var newBytes = user.Password;
-
-            Assert.NotEqual(orig, newBytes);
-        }
-
-        [Fact(Skip = "Need to figure out why it's not working")]
-        public void LoadAndHashAllT2est()
-        {
-            var accountOwner = Factories.WebUserFactory.Create(msgs, dc);
-            var user = Factories.WebUserFactory.CreateWithEmail("notDarye", "NothisPassword", msgs, dc);
-            var account = Factories.AccountFactory.Create(accountOwner, msgs, dc);
-            var activity = Factories.ActivityFactory.Create(account, msgs, dc);
-            var awu = Factories.ActivityWebUserFactory.Create(activity, user, true, msgs, dc);
-
-            var origInBytes = ASCIIEncoding.ASCII.GetBytes("test");
-            var message = AfterSchoolLibrary.Helpers.Utilities.LoadAndHashAllUsers(dc);
-            user.Reload(dc: dc);
-
-            user = WebUser.LoginByEmailHashed("notDarye", "nothisPassword", dc);
-
-            Assert.NotNull(user);
         }
 
         [Fact(DisplayName = "Give user access to existing account")]

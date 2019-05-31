@@ -281,7 +281,7 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-
+                    amsgs.AddRange(MigrateToBCrypt(adc));
 
                     // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
 
@@ -334,15 +334,35 @@ namespace AfterSchoolLibrary.Helpers
                     // msgs.AddRange(CreateSessionsLeagues(dc: dc));
                     // msgs.AddRange(CreateActivitiesTeams(dc: dc));
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                }
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
             );            
+
+            return msgs;
+        }
+
+        public static SystemMessages MigrateToBCrypt(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var users = WebUser.Load(msgs: msgs, dc: dc);
+
+            users.ForEach(user => 
+            {
+                if (user.Password.IsNotEmpty())
+                {
+                    var plainPassword = WebUserService.DecryptPassword(user.Password);
+                    user.Password = WebUserService.EncryptPassword(plainPassword);
+                    msgs.AddRange(user.Save(dc));
+
+                    var userTest = WebUserService.LoginByEmail(user.Email, plainPassword, msgs, dc);
+
+                    if (userTest.IsEmpty())
+                        msgs.Add("Error updating password", MessageType.Error);
+
+                    if (msgs.HasErrors())
+                        return;
+                }
+            });
 
             return msgs;
         }
@@ -791,21 +811,6 @@ namespace AfterSchoolLibrary.Helpers
                 msgs.AddRange(activity.Save(dc));
             });
 
-            return msgs;
-        }
-
-        public static SystemMessages LoadAndHashAllUsers(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            var users = WebUser.Load(dc: dc);
-            foreach (WebUser user in users)
-            {
-                var Pass = WebUserService.DecryptPassword(user.Password);
-                user.Salt = System.Text.Encoding.UTF8.GetString(WebUserService.SaltandHashPassword(Pass).saltedbytes);
-                user.Password = WebUserService.SaltandHashPassword(Pass).hashedbytes.ToString();
-                msgs.AddRange(user.Save(dc));
-
-            }
             return msgs;
         }
 
