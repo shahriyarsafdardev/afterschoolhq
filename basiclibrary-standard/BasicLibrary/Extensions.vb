@@ -10,6 +10,11 @@ Imports System.Data
 Public Module Extensions
 
     <Extension>
+    Public Function KeepInRange(ByVal aDecimal As Decimal, ByVal min As Decimal, ByVal max As Decimal) As Decimal
+        Return Math.Min(Math.Max(aDecimal, min), max)
+    End Function
+
+    <Extension>
     Public Function IsTrue(ByVal aBool As Boolean?) As Boolean
         Return aBool.HasValue AndAlso aBool.Value
     End Function
