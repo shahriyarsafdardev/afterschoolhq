@@ -929,13 +929,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (activity.IsNotEmpty())
-<<<<<<< HEAD
-                msgs.AddRange(activity.MoveToArchive(SessionVariables.LoggedInUser.ID.Value));
-=======
-            {
                 msgs.AddRange(activity.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
-            }
->>>>>>> change to current user for the which account is loaded, move logged in user to track who is actually logged in at the moment
 
             ViewBag.Messages = msgs;
 
@@ -955,13 +949,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (activity.IsNotEmpty())
-<<<<<<< HEAD
-                msgs.AddRange(activity.MoveFromArchive(SessionVariables.LoggedInUser.ID.Value));
-=======
-            {
                 msgs.AddRange(activity.MoveFromArchive(SessionVariables.CurrentUser.ID.Value));
-            }
->>>>>>> change to current user for the which account is loaded, move logged in user to track who is actually logged in at the moment
 
             ViewBag.Messages = msgs;
 

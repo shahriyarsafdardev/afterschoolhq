@@ -89,7 +89,6 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-<<<<<<< HEAD
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -126,6 +125,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                     onSuccess: (SystemMessages smsgs) => 
                     {
                         msgs.AddRange(smsgs);
+                        msgs.Add("Save successful", MessageType.Success);
 
                         if (sysadmin.IsNumber())
                             SendGridHelper.SendMail(
@@ -138,29 +138,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
-=======
-                user.FirstName = firstname;
-                user.LastName = lastname;                
-
-                if (!user.ID.HasValue)
-                {
-                    user.CreateDate = DateTime.UtcNow;
-                    user.CreatedBy = SessionVariables.CurrentUser.ID;
-                }
-                user.LastModifiedDate = DateTime.UtcNow;
-                user.LastModifiedBy = SessionVariables.CurrentUser.ID;
-
-                if (password1.IsNotEmpty() && password2.IsNotEmpty())
-                {
-                    user.Password = WebUserService.EncryptPassword(password1);
-                }
-
-                user.IsActive = !isactive.IsEmpty();
-                msgs.AddRange(user.Save());
->>>>>>> change to current user for the which account is loaded, move logged in user to track who is actually logged in at the moment
-
-                if (msgs.HasNoErrors())
-                    msgs.Add("Save successful", MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
