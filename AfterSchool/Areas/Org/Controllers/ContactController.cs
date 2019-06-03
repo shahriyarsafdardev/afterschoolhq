@@ -129,7 +129,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     }
                                     else
                                     {
-                                        contactList = ContactList.CreateNew(listname, SessionVariables.CurrentAccount.ID.Value, SessionVariables.LoggedInUser.ID.Value, amsgs, dc: adc);
+                                        contactList = ContactList.CreateNew(listname, SessionVariables.CurrentAccount.ID.Value, SessionVariables.CurrentUser.ID.Value, amsgs, dc: adc);
                                     }
                                 }
 
@@ -209,7 +209,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private SystemMessages AddContact(Registrant contact, ContactList contactList, DatabaseConnection dc = null)
         {
-            return contactList.AddContact(contact.ID.Value, SessionVariables.LoggedInUser.ID.Value, dc: dc);
+            return contactList.AddContact(contact.ID.Value, SessionVariables.CurrentUser.ID.Value, dc: dc);
         }
         private SystemMessages AddContact(string email, string firstname, string lastname, ContactList contactList, DatabaseConnection dc = null)
         {
@@ -237,7 +237,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 contact = new Registrant();
                 contact.AccountId = SessionVariables.CurrentAccount.ID;
                 contact.CreateDate = contact.LastModifiedDate = DateTime.UtcNow;
-                contact.CreatedBy = contact.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                contact.CreatedBy = contact.LastModifiedBy = SessionVariables.CurrentUser.ID;
                 contact.IsContactOnly = true;
                 contact.RegistrantTypeId = RegistrantType.Individual;
                 contact.Email = email;
@@ -437,7 +437,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrant.FirstName = firstname;
                 registrant.LastName = lastname;
                 registrant.Email = email;
-                registrant.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;
                 registrant.LastModifiedDate = DateTime.UtcNow;
                 msgs.AddRange(registrant.Save());
             }
@@ -516,13 +516,13 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 contactList = ContactList.Load(list.ToInteger());
                 contactList.Name = listname;
-                contactList.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                contactList.LastModifiedBy = SessionVariables.CurrentUser.ID;
                 contactList.LastModifiedDate = DateTime.UtcNow;
                 msgs.AddRange(contactList.Save());
             }
             else
             {
-                contactList = ContactList.CreateNew(listname, SessionVariables.CurrentAccount.ID.Value, SessionVariables.LoggedInUser.ID.Value, msgs);
+                contactList = ContactList.CreateNew(listname, SessionVariables.CurrentAccount.ID.Value, SessionVariables.CurrentUser.ID.Value, msgs);
             }
 
             return RedirectToAction("lists");
@@ -652,13 +652,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         contacts = contactList.GetContacts(adc);
 
-                        amsgs.AddRange(group.InviteContacts(contacts, period, activityIds, SessionVariables.LoggedInUser.ID.Value, adc));
+                        amsgs.AddRange(group.InviteContacts(contacts, period, activityIds, SessionVariables.CurrentUser.ID.Value, adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         // get session information because it isn't available in a background task
                         var account = SessionVariables.CurrentAccount;
-                        var loggedInUser = SessionVariables.LoggedInUser;
+                        var loggedInUser = SessionVariables.CurrentUser;
 
                         BackgroundJob.Enqueue(() =>
                             ActivityGroupService.EmailInvitedContacts(
@@ -698,13 +698,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         contacts = contactList.GetContacts(adc);
 
-                        amsgs.AddRange(activity.InviteContacts(contacts, period, SessionVariables.LoggedInUser.ID.Value, adc));
+                        amsgs.AddRange(activity.InviteContacts(contacts, period, SessionVariables.CurrentUser.ID.Value, adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         // get session information because it isn't available in a background task
                         var account = SessionVariables.CurrentAccount;
-                        var loggedInUser = SessionVariables.LoggedInUser;
+                        var loggedInUser = SessionVariables.CurrentUser;
 
                         BackgroundJob.Enqueue(() =>
                             ActivityService.EmailInvitedContacts(

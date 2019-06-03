@@ -87,9 +87,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, isArchived, false, msgs);
-                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, isArchived, false, start, length, msgs);
-                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, true, false, msgs) > 0;
+                totalActivityCount = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, isArchived, false, msgs);
+                activities = SessionVariables.CurrentAccount.GetActivities(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, isArchived, false, start, length, msgs);
+                hasArchivedActivities = SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, true, false, msgs) > 0;
             }
 
             var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
@@ -180,7 +180,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsNotEmpty())
             {
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
@@ -194,7 +194,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors() && !SessionVariables.AccountPackage.HasFeature(FeatureType.ManageForms))
                 {
                     var defaultForm = SessionVariables.CurrentAccount.GetDefaultForm();
-                    var newForm = defaultForm.Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
+                    var newForm = defaultForm.Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, (name + " form").MaxChars(100, "..."), msgs);
                     if (msgs.HasNoErrors())
                         values.Add("form", newForm.ID.Value.ToString());
                 }
@@ -203,7 +203,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 values.Add("applicationthankyouemail", "Thank you for applying");
 
                 activity = ActivityService.CreateNew(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     values: values,
                     msgs: msgs
@@ -313,7 +313,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                        loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                        loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                         account: SessionVariables.CurrentAccount,
                         activityId: activity.ID.Value.ToString(),
                         values: values,
@@ -389,7 +389,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsNotEmpty())
             {
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
@@ -457,7 +457,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
@@ -584,7 +584,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     };
 
                     activity = ActivityService.EditExisting(
-                        loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                        loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                         account: SessionVariables.CurrentAccount,
                         activityId: activity.ID.Value.ToString(),
                         values: values,
@@ -672,7 +672,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
@@ -772,7 +772,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
@@ -839,7 +839,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
@@ -889,10 +889,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (copywithregistrants.IsBoolean())
                 activity = activityToCopy
-                    .CopyWithRegistrants(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
+                    .CopyWithRegistrants(activitynamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
             else
                 activity = activityToCopy
-                    .Copy(activitynamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
+                    .Copy(activitynamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
 
@@ -909,7 +909,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (activity.IsNotEmpty())
-                msgs.AddRange(activity.MarkAsDeleted(SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(activity.MarkAsDeleted(SessionVariables.CurrentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
@@ -929,7 +929,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (activity.IsNotEmpty())
-                msgs.AddRange(activity.MoveToArchive(SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(activity.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
@@ -949,7 +949,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             if (activity.IsNotEmpty())
-                msgs.AddRange(activity.MoveFromArchive(SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(activity.MoveFromArchive(SessionVariables.CurrentUser.ID.Value));
 
             ViewBag.Messages = msgs;
 
@@ -998,7 +998,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            var attendance = activity.GetOrCreateNewAttendance(attendanceId, SessionVariables.LoggedInUser, msgs);
+            var attendance = activity.GetOrCreateNewAttendance(attendanceId, SessionVariables.CurrentUser, msgs);
 
 
             ViewBag.Messages = msgs;
@@ -1025,7 +1025,7 @@ namespace AfterSchool.Areas.Org.Controllers
             });
 
             if (msgs.HasNoErrors())
-                attendance.UpdateAttendance(activityinstance.ToInteger(), presentStudents, SessionVariables.LoggedInUser, msgs);
+                attendance.UpdateAttendance(activityinstance.ToInteger(), presentStudents, SessionVariables.CurrentUser, msgs);
 
 
             ViewBag.Messages = msgs;
@@ -1084,7 +1084,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         ra.ChangeSeatAssignment(
                             newAssignmentType, 
-                            SessionVariables.LoggedInUser,
+                            SessionVariables.CurrentUser,
                             amsgs,
                             adc);
                     },
@@ -1248,7 +1248,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         PaymentSourceType = PaymentSourceType.Manual,
                         OverrideAmount = amountpaid.ToDecimal()
                     },
-                    loggedInUser: SessionVariables.LoggedInUser,
+                    loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs
                     );  
 
@@ -1318,7 +1318,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             applyType: couponApplyType,
                             durationInMonths: durationInMonths,
                             couponDuration: duration,
-                            loggedInUser: SessionVariables.LoggedInUser,
+                            loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
 
@@ -1326,11 +1326,11 @@ namespace AfterSchool.Areas.Org.Controllers
                         var poc = PurchaseableObjectCouponService.CreateNew(
                             purchaseableObject: activity.GetPurchaseableObject(), 
                             coupon: coupon, 
-                            loggedInUser: SessionVariables.LoggedInUser, 
+                            loggedInUser: SessionVariables.CurrentUser, 
                             msgs: amsgs, 
                             dc: adc);
 
-                        attachedCoupon = registrantAccount.AttachCoupon(coupon, SessionVariables.LoggedInUser, amsgs, adc);
+                        attachedCoupon = registrantAccount.AttachCoupon(coupon, SessionVariables.CurrentUser, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1702,12 +1702,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            activity.Publish(SessionVariables.LoggedInUser, msgs);
+            activity.Publish(SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
             {
                 var activityId = activity.ID.Value;
-                var loggedInUserId = SessionVariables.LoggedInUser.ID.Value;
+                var loggedInUserId = SessionVariables.CurrentUser.ID.Value;
 
                 BackgroundJob.Enqueue(() => ActivityService.NotifyProviderOfNewActivity(activityId, loggedInUserId));
 
@@ -1726,7 +1726,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
 
-            activity.Unpublish(SessionVariables.LoggedInUser, msgs);
+            activity.Unpublish(SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -1822,7 +1822,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (questionGroup.IsNotEmpty())
                         {
                             questionGroup.Name = Request.Params[string.Format("name-{0}", questionGroup.ID)];
-                            questionGroup.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                            questionGroup.LastModifiedBy = SessionVariables.CurrentUser.ID;
                             questionGroup.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(questionGroup.Save(adc));
                         }
@@ -1940,7 +1940,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
-                am = activity.AddMessage(subject, body, registrantIds, SessionVariables.LoggedInUser.ID.Value, msgs);
+                am = activity.AddMessage(subject, body, registrantIds, SessionVariables.CurrentUser.ID.Value, msgs);
                 
                 BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
             }
@@ -1991,7 +1991,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     foreach (var user in users)
                     {
-                        var doNotSkip = !(activity.CreatedBy.Value == user.ID.Value || SessionVariables.LoggedInUser.ID == user.ID);
+                        var doNotSkip = !(activity.CreatedBy.Value == user.ID.Value || SessionVariables.CurrentUser.ID == user.ID);
 
                         if (doNotSkip)
                         {
@@ -2005,7 +2005,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     awu.ActivityId = activity.ID;
                                     awu.WebUserId = user.ID;
                                     awu.CreateDate = DateTime.UtcNow;
-                                    awu.CreatedBy = SessionVariables.LoggedInUser.ID;
+                                    awu.CreatedBy = SessionVariables.CurrentUser.ID;
                                 }
 
                                 if (Request["isleader-" + user.ID.Value.ToString()].IsNotEmpty())
@@ -2018,7 +2018,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 }
 
                                 awu.LastModifiedDate = DateTime.UtcNow;
-                                awu.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                awu.LastModifiedBy = SessionVariables.CurrentUser.ID;
                                 amsgs.AddRange(awu.Save(adc));
 
                             }
@@ -2119,7 +2119,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     participationObject: activity.GetParticipationObject(msgs),
                     questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     period: activity.GetCurrentRegistrationPeriod(msgs),
-                    loggedInUser: SessionVariables.LoggedInUser,
+                    loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
 
             if (msgs.HasNoErrors())
@@ -2133,7 +2133,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private bool IsActivityLeader(Activity activity)
         {
-            return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.LoggedInUser.IsActivityLeader(activity);
+            return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.CurrentUser.IsActivityLeader(activity);
         }
     }
 }

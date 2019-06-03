@@ -17,7 +17,7 @@
     var registration = (Registration)ViewBag.Registration;
     var adminMode = (bool)ViewBag.AdminMode;
     var activityGroup = (ActivityGroup)ViewBag.Group;
-    var addOnly = SessionVariables.LoggedInUser.IsEmpty() && registration.IsNotEmpty();
+    var addOnly = SessionVariables.CurrentUser.IsEmpty() && registration.IsNotEmpty();
 
     var haveGenderRestrictions = activities.Where(x => x.GenderRestriction != GenderRestrictionType.None).Any();
     var haveGradeRestrictions = activities.Where(x => x.GetGradeLevels().Any()).Any();

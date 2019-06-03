@@ -27,7 +27,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add($"Amount must be at least $25 and no greater than {maxAmountAvailable.ToCurrency()}", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                SessionVariables.CurrentAccount.RequestNewPayout(payoutamount.ToDecimal(), SessionVariables.LoggedInUser, msgs);
+                SessionVariables.CurrentAccount.RequestNewPayout(payoutamount.ToDecimal(), SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
                 return Json(new
@@ -81,9 +81,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var emailText = $"{ SessionVariables.LoggedInUser.FirstName} has invited you to setup the payment account for {SessionVariables.CurrentAccount.Name} in {UILabel.ProductName()}. This will enable us to send registration money to your account.";
+                var emailText = $"{ SessionVariables.CurrentUser.FirstName} has invited you to setup the payment account for {SessionVariables.CurrentAccount.Name} in {UILabel.ProductName()}. This will enable us to send registration money to your account.";
 
-                SessionVariables.CurrentAccount.InviteUser(firstname, lastname, email, null, emailText, UserType.Treasurer, SessionVariables.LoggedInUser, msgs);
+                SessionVariables.CurrentAccount.InviteUser(firstname, lastname, email, null, emailText, UserType.Treasurer, SessionVariables.CurrentUser, msgs);
 
                 if (msgs.HasNoErrors())
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
@@ -118,7 +118,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             ra.RegistrationPeriodId,
                             ra.ActivityGroupId,
                             null,
-                            SessionVariables.LoggedInUser.ID.Value,
+                            SessionVariables.CurrentUser.ID.Value,
                             amsgs,
                             adc);
 
@@ -178,7 +178,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ra.RegistrationPeriodId,
                         ra.ActivityGroupId,
                         null,
-                        SessionVariables.LoggedInUser.ID.Value,
+                        SessionVariables.CurrentUser.ID.Value,
                         msgs);
                 }
 
@@ -349,7 +349,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (contactList.AccountId == SessionVariables.CurrentAccount.ID.Value)
                 {
-                    msgs.AddRange(contactList.AddContact(registrant.ID.Value, SessionVariables.LoggedInUser.ID.Value));
+                    msgs.AddRange(contactList.AddContact(registrant.ID.Value, SessionVariables.CurrentUser.ID.Value));
                     if (msgs.HasNoErrors())
                     {
                         WriteOutput(new { status = "ok", contactName = registrant.DisplayName, listName = contactList.Name }, ResponseType.JSON);
@@ -388,7 +388,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (contactList.AccountId == SessionVariables.CurrentAccount.ID.Value)
                 {
-                    msgs.AddRange(contactList.RemoveContact(registrant.ID.Value, SessionVariables.LoggedInUser.ID.Value));
+                    msgs.AddRange(contactList.RemoveContact(registrant.ID.Value, SessionVariables.CurrentUser.ID.Value));
                     if (msgs.HasNoErrors())
                     {
                         WriteOutput(new { status = "ok", contactName = registrant.DisplayName, listName = contactList.Name }, ResponseType.JSON);
@@ -507,7 +507,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         public ActionResult SendVerificationEmail()
         {
-            var msgs = SessionVariables.LoggedInUser.SendVerificationEmail(SessionVariables.IsAfterSchool.Value);
+            var msgs = SessionVariables.CurrentUser.SendVerificationEmail(SessionVariables.IsAfterSchool.Value);
 
             Response.Clear();
             WriteOutput(new { status = "ok", messages = msgs }, ResponseType.JSON);

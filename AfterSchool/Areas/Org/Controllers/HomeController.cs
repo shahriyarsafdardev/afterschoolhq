@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (SessionVariables.CurrentAccount.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
 
-            if (SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, null, null, null) == 0)
+            if (SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null) == 0)
                 return RedirectToAction("getstarted");
 
             var account = SessionVariables.CurrentAccount;

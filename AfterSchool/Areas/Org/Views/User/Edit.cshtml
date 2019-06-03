@@ -59,7 +59,7 @@
                         <input type="password" class="form-control" id="password2" name="password2" value="" onfocus="this.select()" />
                     </div>
                 </div>
-                @if(Model.IsRegistered && SessionVariables.LoggedInUser.ID != Model.ID)
+                @if(Model.IsRegistered && SessionVariables.CurrentUser.ID != Model.ID)
                 { 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Is Active</label>

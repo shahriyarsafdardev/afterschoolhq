@@ -21,7 +21,7 @@ namespace AfterSchool.Models
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             base.Initialize(requestContext);
-            if (SessionVariables.LoggedInUser.IsEmpty())
+            if (SessionVariables.CurrentUser.IsEmpty())
             {
                 WebUser user = null;
                 Account Account = null;
@@ -48,15 +48,15 @@ namespace AfterSchool.Models
                 // Auto login
                 if (!user.IsEmpty() && !Account.IsEmpty())
                 {
-                    SessionVariables.LoggedInUser = user;
+                    SessionVariables.CurrentUser = user;
                     SessionVariables.CurrentAccount = Account;
                     SessionVariables.AccountUserType = user.GetUserType(Account);
                 }
             }
 
-            if (SessionVariables.LoggedInUser.IsNotEmpty())
+            if (SessionVariables.CurrentUser.IsNotEmpty())
             {
-                SessionVariables.LoggedInUser.UpdateLastActivity();
+                SessionVariables.CurrentUser.UpdateLastActivity();
 
                 if (SessionVariables.CurrentAccount.IsEmpty())
                 {
@@ -69,7 +69,7 @@ namespace AfterSchool.Models
 
         private bool HasAccess()
         {
-            if (SessionVariables.LoggedInUser.IsEmpty())
+            if (SessionVariables.CurrentUser.IsEmpty())
                 return false;
 
             if (AllowedAccountTypes.IsNotEmpty() &&
@@ -113,9 +113,9 @@ namespace AfterSchool.Models
                 int AccountId = Request.QueryString["Account"].ToInteger();
                 if (SessionVariables.CurrentAccount.IsEmpty() || AccountId != SessionVariables.CurrentAccount.ID.Value)
                 {
-                    msgs.Add("Checking if a member of this Account: " + AccountId + " " + SessionVariables.LoggedInUser.ID.Value, MessageType.Notice);
+                    msgs.Add("Checking if a member of this Account: " + AccountId + " " + SessionVariables.CurrentUser.ID.Value, MessageType.Notice);
 
-                    AccountWebUser gwu = AccountWebUser.LoadByAccountIdByWebUserId(AccountId, SessionVariables.LoggedInUser.ID.Value, null);
+                    AccountWebUser gwu = AccountWebUser.LoadByAccountIdByWebUserId(AccountId, SessionVariables.CurrentUser.ID.Value, null);
                     if (!gwu.IsEmpty())
                     {
                         msgs.Add("GWU is not empty: " + gwu.ID.Value, MessageType.Notice);
@@ -123,7 +123,7 @@ namespace AfterSchool.Models
 
                         if (!SessionVariables.CurrentAccount.IsEmpty())
                         {
-                            SessionVariables.AccountUserType = SessionVariables.LoggedInUser.GetUserType(SessionVariables.CurrentAccount);
+                            SessionVariables.AccountUserType = SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount);
                             msgs.Add("Account is not empty: " + SessionVariables.CurrentAccount.ID.Value, MessageType.Notice);
                         }
                     }

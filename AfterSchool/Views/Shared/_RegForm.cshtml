@@ -184,7 +184,7 @@
         </div>
     }
 
-    @if (SessionVariables.LoggedInUser.IsEmpty())
+    @if (SessionVariables.CurrentUser.IsEmpty())
     {
         Html.RenderPartial("_RegCreateAccount");
     }

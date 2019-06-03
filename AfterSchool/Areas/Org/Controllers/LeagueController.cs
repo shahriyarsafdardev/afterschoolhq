@@ -177,14 +177,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 else
                     regperiod.ActivityGroupId = group.ID;
 
-                regperiod.CreatedBy = SessionVariables.LoggedInUser.ID.Value;
+                regperiod.CreatedBy = SessionVariables.CurrentUser.ID.Value;
                 regperiod.CreateDate = DateTime.UtcNow;
                 regperiod.AccountId = SessionVariables.CurrentAccount.ID;
             }
 
             regperiod.StartDateTime = $"{opendate} {opentime}".ToDateTime();
             regperiod.EndDateTime = $"{closedate} {closetime}".ToDateTime();
-            regperiod.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            regperiod.LastModifiedBy = SessionVariables.CurrentUser.ID.Value;
             regperiod.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(regperiod.Save());
 
@@ -240,9 +240,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     Name = teamname.MaxChars(50),
                     SeatsAvailable = seatsavailable.ToInteger(),
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = SessionVariables.LoggedInUser.ID,
+                    CreatedBy = SessionVariables.CurrentUser.ID,
                     LastModifiedDate = DateTime.UtcNow,
-                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                    LastModifiedBy = SessionVariables.CurrentUser.ID,
                     AccountActivityGroupId = aag?.ID,
                     ActivityGroupId = activityGroup.ID,
                     AccountId = SessionVariables.CurrentAccount.ID,
@@ -255,7 +255,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             
             if (msgs.HasNoErrors())
-                msgs.AddRange(activity.SetupTeam(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(activity.SetupTeam(SessionVariables.CurrentAccount, SessionVariables.CurrentUser.ID.Value));
 
             var group = ActivityGroup.LoadByUid(id.ToGuid());
             LoadLeagueActivityViewBag(group, id, "", "", "", msgs);
@@ -464,9 +464,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (form.ToString().ToInteger() == 0)
                         {
-                            var defaultForm = SessionVariables.CurrentAccount.GetOrCreateDefaultForm(SessionVariables.LoggedInUser, amsgs, adc);
+                            var defaultForm = SessionVariables.CurrentAccount.GetOrCreateDefaultForm(SessionVariables.CurrentUser, amsgs, adc);
                             var newForm = defaultForm.Copy(
-                                SessionVariables.LoggedInUser.ID.Value,
+                                SessionVariables.CurrentUser.ID.Value,
                                 SessionVariables.CurrentAccount.ID.Value,
                                 (league.Name + " Form").MaxChars(100, "..."),
                                 amsgs,
@@ -506,7 +506,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "maxgrade", maxgrade }
                 };
 
-                league = ActivityGroupService.SaveLeague(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+                league = ActivityGroupService.SaveLeague(SessionVariables.CurrentUser, SessionVariables.CurrentAccount, id, values, msgs);
 
                 if (msgs.HasNoErrors())
                 {
@@ -535,7 +535,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             activity.DateSubmittedToActivityGroup = DateTime.UtcNow;
             activity.LastModifiedDate = DateTime.UtcNow;
-            activity.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            activity.LastModifiedBy = SessionVariables.CurrentUser.ID.Value;
             msgs.AddRange(activity.Save());
 
 
@@ -559,7 +559,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             activity.DateSubmittedToActivityGroup = null;
             activity.LastModifiedDate = DateTime.UtcNow;
-            activity.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            activity.LastModifiedBy = SessionVariables.CurrentUser.ID.Value;
             msgs.AddRange(activity.Save());
 
             if (msgs.HasNoErrors())
@@ -592,7 +592,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.AddRange(aag.SendInviteStatusUpdateEmail(inviteStatus, SessionVariables.CurrentAccount, SessionVariables.LoggedInUser, msgs));
+                msgs.AddRange(aag.SendInviteStatusUpdateEmail(inviteStatus, SessionVariables.CurrentAccount, SessionVariables.CurrentUser, msgs));
 
                 if (inviteStatus == InviteStatus.Accepted)
                     return RedirectToAction("publishwizard1", new { id = league.Uid });
@@ -629,11 +629,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (accountActivityGroup.IsNotEmpty())
             {
-                msgs.AddRange(accountActivityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(accountActivityGroup.SetIsPublished(true, SessionVariables.CurrentUser.ID.Value));
                 ViewBag.aagRegistrationURL = accountActivityGroup.GetHomePageUrl(SessionVariables.IsAfterSchool.Value);
             }
             else
-                msgs.AddRange(activityGroup.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(activityGroup.SetIsPublished(true, SessionVariables.CurrentUser.ID.Value));
 
             if (msgs.HasNoErrors())
             {
@@ -658,10 +658,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (accountActivityGroup.IsNotEmpty())
             {
                 ViewBag.aagRegistrationURL = accountActivityGroup.GetHomePageUrl(SessionVariables.IsAfterSchool.Value);
-                msgs.AddRange(accountActivityGroup.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(accountActivityGroup.SetIsPublished(false, SessionVariables.CurrentUser.ID.Value));
             }
             else
-                msgs.AddRange(activityGroup.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(activityGroup.SetIsPublished(false, SessionVariables.CurrentUser.ID.Value));
 
             if (msgs.HasNoErrors())
             {
@@ -747,7 +747,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     participationObject: aag.GetParticipationObject(msgs),
                     questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     period: aag.GetCurrentRegistrationPeriod(msgs),
-                    loggedInUser: SessionVariables.LoggedInUser,
+                    loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
 
             if (msgs.HasNoErrors())
@@ -769,11 +769,11 @@ namespace AfterSchool.Areas.Org.Controllers
             if (aag.FormId.IsEmpty())
                 aag.FormId = SessionVariables.CurrentAccount.GetForms().FirstOrDefault()?.ID;
             if (aag.ContactName.IsEmpty())
-                aag.ContactName = SessionVariables.LoggedInUser.DisplayName;
+                aag.ContactName = SessionVariables.CurrentUser.DisplayName;
             if (aag.ContactPhone.IsEmpty())
-                aag.ContactPhone = SessionVariables.LoggedInUser.Phone;
+                aag.ContactPhone = SessionVariables.CurrentUser.Phone;
             if (aag.ContactEmail.IsEmpty())
-                aag.ContactEmail = SessionVariables.LoggedInUser.Email;
+                aag.ContactEmail = SessionVariables.CurrentUser.Email;
 
             msgs.AddRange(aag.Save());
             
@@ -872,16 +872,16 @@ namespace AfterSchool.Areas.Org.Controllers
                         {
                             StartDateTime = $"{opendate} {opentime}".ToDateTime(),
                             EndDateTime = $"{closedate} {closetime}".ToDateTime(),
-                            LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                            LastModifiedBy = SessionVariables.CurrentUser.ID,
                             LastModifiedDate = DateTime.UtcNow,
                             CreateDate = DateTime.UtcNow,
-                            CreatedBy = SessionVariables.LoggedInUser.ID,
+                            CreatedBy = SessionVariables.CurrentUser.ID,
                             AccountActivityGroupId = aag.ID,
                             AccountId = SessionVariables.CurrentAccount.ID
                         };
                         amsgs.AddRange(period.Save(adc));
 
-                        amsgs.AddRange(aag.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value, adc));
+                        amsgs.AddRange(aag.SetIsPublished(true, SessionVariables.CurrentUser.ID.Value, adc));
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {

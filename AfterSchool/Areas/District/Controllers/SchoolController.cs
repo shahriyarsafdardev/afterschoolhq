@@ -87,7 +87,7 @@ namespace AfterSchool.Areas.District.Controllers
                             firstName: firstname,
                             lastName: lastname,
                             email: email,
-                            loggedInUser: SessionVariables.LoggedInUser,
+                            loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
 
@@ -100,7 +100,7 @@ namespace AfterSchool.Areas.District.Controllers
                             packageBillingPeriod: BillingPeriodType.Month,
                             timeZone: null,
                             isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                            loggedInUser: SessionVariables.LoggedInUser,
+                            loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
 
@@ -110,7 +110,7 @@ namespace AfterSchool.Areas.District.Controllers
                                 account, 
                                 HostPermissionType.ApproveOnly,
                                 ApprovalStatus.Approved, 
-                                SessionVariables.LoggedInUser, 
+                                SessionVariables.CurrentUser, 
                                 adc
                             )
                         );
@@ -118,7 +118,7 @@ namespace AfterSchool.Areas.District.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.LoggedInUser, message));
+                        msgs.AddRange(account.SendInvitedEmail(user, SessionVariables.CurrentUser, message));
                     },
                     onFailure: (SystemMessages fmsgs) =>
                     {

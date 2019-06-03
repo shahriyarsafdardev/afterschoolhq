@@ -148,7 +148,7 @@ namespace AfterSchool.Areas.Org.Controllers
             values.Add("schedule", schedule);
             values.Add("isongoing", isongoing);
 
-            var group = ActivityGroupService.SaveSession(SessionVariables.LoggedInUser, SessionVariables.CurrentAccount, id, values, msgs);
+            var group = ActivityGroupService.SaveSession(SessionVariables.CurrentUser, SessionVariables.CurrentAccount, id, values, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -192,10 +192,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
-            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, landingpagetext, SessionVariables.LoggedInUser.ID.Value, msgs);
-            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, registrationthankyouemail, SessionVariables.LoggedInUser.ID.Value, msgs);
-            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, applicationthankyouemail, SessionVariables.LoggedInUser.ID.Value, msgs);
-            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, noactivitiestext, SessionVariables.LoggedInUser.ID.Value, msgs);
+            group.AddOrUpdateGroupProperty(AccountPropertyType.LandingPageText, landingpagetext, SessionVariables.CurrentUser.ID.Value, msgs);
+            group.AddOrUpdateGroupProperty(AccountPropertyType.RegistrationThankYouEmail, registrationthankyouemail, SessionVariables.CurrentUser.ID.Value, msgs);
+            group.AddOrUpdateGroupProperty(AccountPropertyType.ApplicationThankYouEmail, applicationthankyouemail, SessionVariables.CurrentUser.ID.Value, msgs);
+            group.AddOrUpdateGroupProperty(AccountPropertyType.NoActivitiesText, noactivitiestext, SessionVariables.CurrentUser.ID.Value, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -244,7 +244,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                regperiod.CreatedBy = SessionVariables.LoggedInUser.ID.Value;
+                regperiod.CreatedBy = SessionVariables.CurrentUser.ID.Value;
                 regperiod.CreateDate = DateTime.UtcNow;
                 regperiod.ActivityGroupId = group.ID;
                 regperiod.AccountId = SessionVariables.CurrentAccount.ID;
@@ -252,7 +252,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             regperiod.StartDateTime = string.Format("{0} {1}", opendate, opentime).ToDateTime();
             regperiod.EndDateTime = string.Format("{0} {1}", closedate, closetime).ToDateTime();
-            regperiod.LastModifiedBy = SessionVariables.LoggedInUser.ID.Value;
+            regperiod.LastModifiedBy = SessionVariables.CurrentUser.ID.Value;
             regperiod.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(regperiod.Save());
 
@@ -535,7 +535,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
-                am = group.AddMessage(subject, body, registrantIds, SessionVariables.LoggedInUser.ID.Value, msgs);
+                am = group.AddMessage(subject, body, registrantIds, SessionVariables.CurrentUser.ID.Value, msgs);
 
                 BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
             }
@@ -594,7 +594,7 @@ namespace AfterSchool.Areas.Org.Controllers
             SystemMessages msgs = new SystemMessages();
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
-            msgs.AddRange(group.SetIsPublished(true, SessionVariables.LoggedInUser.ID.Value));
+            msgs.AddRange(group.SetIsPublished(true, SessionVariables.CurrentUser.ID.Value));
 
             if (msgs.HasNoErrors())
             {
@@ -612,7 +612,7 @@ namespace AfterSchool.Areas.Org.Controllers
             SystemMessages msgs = new SystemMessages();
             var group = ActivityGroup.LoadByUid(id.ToGuid());
 
-            msgs.AddRange(group.SetIsPublished(false, SessionVariables.LoggedInUser.ID.Value));
+            msgs.AddRange(group.SetIsPublished(false, SessionVariables.CurrentUser.ID.Value));
 
             if (msgs.HasNoErrors())
             {
@@ -632,7 +632,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (group.IsNotEmpty())
             {
-                msgs.AddRange(group.MoveToArchive(SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(group.MoveToArchive(SessionVariables.CurrentUser.ID.Value));
             }
 
             ViewBag.Messages = msgs;
@@ -658,7 +658,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (group.IsNotEmpty())
             {
-                msgs.AddRange(group.MoveFromArchive(SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(group.MoveFromArchive(SessionVariables.CurrentUser.ID.Value));
             }
 
             ViewBag.Messages = msgs;
@@ -707,7 +707,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
 
                 activity = ActivityService.EditExisting(
-                    loggedInUserId: SessionVariables.LoggedInUser.ID.Value,
+                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
                     account: SessionVariables.CurrentAccount,
                     activityId: id,
                     values: values,
@@ -770,7 +770,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Copy(string id, string groupnamecopy, string usesameformcopy)
         {
             var msgs = new SystemMessages();
-            var group = ActivityGroup.LoadByUid(id.ToGuid()).Copy(groupnamecopy, true, SessionVariables.LoggedInUser.ID.Value, msgs);
+            var group = ActivityGroup.LoadByUid(id.ToGuid()).Copy(groupnamecopy, true, SessionVariables.CurrentUser.ID.Value, msgs);
 
             ViewBag.Messages = msgs;
             if (msgs.HasNoErrors())
@@ -871,7 +871,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     activitiesAndPreferences: activitiesAndPreferences,
                     period: session.GetCurrentRegistrationPeriod(msgs),
-                    loggedInUser: SessionVariables.LoggedInUser,
+                    loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs);
 
             if (msgs.HasNoErrors())
@@ -905,7 +905,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 case 2:
                     var registrations = group.GetRegistrations();
                     var ras = group.GetRegistrantActivities(registrations);
-                    var registrantAssignments = group.RandomizePlacementAttempt(SessionVariables.LoggedInUser, msgs);
+                    var registrantAssignments = group.RandomizePlacementAttempt(SessionVariables.CurrentUser, msgs);
 
                     var assignments = new List<int>();
                     var assignmentsWL = new List<int>();
@@ -936,7 +936,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (group.RegistrationModeId == RegistrationMode.Apply)
             {
-                msgs.AddRange(group.RandomizePlacementReset(SessionVariables.LoggedInUser, msgs));
+                msgs.AddRange(group.RandomizePlacementReset(SessionVariables.CurrentUser, msgs));
 
                 if (msgs.HasNoErrors())
                     msgs.Add("All Registration Placement has been reset", MessageType.Success);
@@ -964,7 +964,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var regperiod = period.IsNumber() ? RegistrationPeriod.Load(period.ToInteger()) : null;
             var registrantAssignments = new JavaScriptSerializer() { MaxJsonLength = 50000000 }.Deserialize<List<RegistrantAssignment>>(assignmentsJSON);
 
-            group.RandomizePlacementApply(registrantAssignments, SessionVariables.LoggedInUser, msgs);
+            group.RandomizePlacementApply(registrantAssignments, SessionVariables.CurrentUser, msgs);
 
             var registrations = group.GetRegistrations();
             var ras = group.GetRegistrantActivities(registrations);

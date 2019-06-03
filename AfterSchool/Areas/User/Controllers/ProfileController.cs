@@ -18,7 +18,7 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Edit()
         {
             ViewBag.Messages = new SystemMessages();
-            return View(SessionVariables.LoggedInUser);
+            return View(SessionVariables.CurrentUser);
         }
 
         [HttpPost]
@@ -42,7 +42,7 @@ namespace AfterSchool.Areas.User.Controllers
             {
                 msgs.Add("Email must be valid", MessageType.UserError);
             }
-            else if (!SessionVariables.LoggedInUser.CanEmailBeUsed(email))
+            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email))
             {
                 msgs.Add("Email is already in use by another user", MessageType.UserError);
             }
@@ -57,12 +57,12 @@ namespace AfterSchool.Areas.User.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var user = WebUser.Load(SessionVariables.LoggedInUser.ID.Value);
+                var user = WebUser.Load(SessionVariables.CurrentUser.ID.Value);
                 user.FirstName = firstname;
                 user.LastName = lastname;
                 user.Email = email;
                 user.LastModifiedDate = DateTime.UtcNow;
-                user.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                user.LastModifiedBy = SessionVariables.CurrentUser.ID;
 
                 if (!password1.IsEmpty())
                 {
@@ -75,12 +75,12 @@ namespace AfterSchool.Areas.User.Controllers
                 {
                     msgs.Clear();
                     msgs.Add("Save successful", MessageType.Success);
-                    SessionVariables.LoggedInUser = user;
+                    SessionVariables.CurrentUser = user;
                 }
             }
 
             ViewBag.Messages = msgs;
-            return View(SessionVariables.LoggedInUser);
+            return View(SessionVariables.CurrentUser);
         }
     }
 }

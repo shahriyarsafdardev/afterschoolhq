@@ -53,7 +53,7 @@ else if (isExternalGroupsView && Model.Count == 0)
         </div>
         <div class="widget-tile">
             <hr />
-            <p>Welcome, @SessionVariables.LoggedInUser.FirstName!</p>
+            <p>Welcome, @SessionVariables.CurrentUser.FirstName!</p>
             @if (isExternalGroupsView)
             {
                 <p>You haven't accepted invitations to or created any @UILabel.ActivityGroupLabel(activityGroupType, true).ToLower() yet. </p>

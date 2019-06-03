@@ -66,7 +66,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     a.UniqueName = AccountService.GenerateUniqueName(uniquename, a.ID);
 
                 a.LastModifiedDate = DateTime.UtcNow;
-                a.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                a.LastModifiedBy = SessionVariables.CurrentUser.ID;
                 msgs.AddRange(a.SaveWithStripe());
 
                 if (msgs.HasNoErrors())
@@ -112,12 +112,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     currentLocation.LocationTypeId = locationType;
                     currentLocation.HostAccountId = hostAccountId;
-                    currentLocation.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                    currentLocation.LastModifiedBy = SessionVariables.CurrentUser.ID;
                     currentLocation.LastModifiedDate = DateTime.UtcNow;
                     msgs.AddRange(currentLocation.Save());
                 }
 
-                SessionVariables.CurrentAccount.SetDefaultLocation(location.ToInteger(), SessionVariables.LoggedInUser.ID.Value);
+                SessionVariables.CurrentAccount.SetDefaultLocation(location.ToInteger(), SessionVariables.CurrentUser.ID.Value);
             }
             else
             {
@@ -132,12 +132,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     locationType: locationType,
                     hostAccountId: hostAccountId,
                     visitorAccount: SessionVariables.CurrentAccount,
-                    loggedInUser: SessionVariables.LoggedInUser,
+                    loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs
                     );
 
                 if (msgs.HasNoErrors())
-                    SessionVariables.CurrentAccount.SetDefaultLocation(newLocation.ID.Value, SessionVariables.LoggedInUser.ID.Value);
+                    SessionVariables.CurrentAccount.SetDefaultLocation(newLocation.ID.Value, SessionVariables.CurrentUser.ID.Value);
             }            
 
             ViewBag.Messages = msgs;
@@ -201,7 +201,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     city,
                     state,
                     postalcode,
-                    SessionVariables.LoggedInUser,
+                    SessionVariables.CurrentUser,
                     msgs);
 
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
@@ -266,7 +266,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     bankInfoVM.AccountNumber1,
                     bankInfoVM.AccountHoldersName,
                     bankInfoVM.BankCountry,
-                    SessionVariables.LoggedInUser,
+                    SessionVariables.CurrentUser,
                     msgs);
 
             if (msgs.HasNoErrors() && Request["isnew"] == "1")
@@ -513,12 +513,12 @@ namespace AfterSchool.Areas.Org.Controllers
                                 accountFeature = new AccountPackageFeature();
                                 accountFeature.AccountPackageId = accountPackage.ID;
                                 accountFeature.CreateDate = DateTime.UtcNow;
-                                accountFeature.CreatedBy = SessionVariables.LoggedInUser.ID;
+                                accountFeature.CreatedBy = SessionVariables.CurrentUser.ID;
                                 accountFeature.FeatureTypeId = type;
                             }
 
                             accountFeature.Max = Request[type.ToString()].ToDecimal();
-                            accountFeature.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                            accountFeature.LastModifiedBy = SessionVariables.CurrentUser.ID;
                             accountFeature.LastModifiedDate = DateTime.UtcNow;
                             msgs.AddRange(accountFeature.Save(adc));
 
@@ -591,7 +591,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             "",
                             Request.Params["message"], 
                             (UserType)usertype.ToInteger(), 
-                            SessionVariables.LoggedInUser,
+                            SessionVariables.CurrentUser,
                             msgs)
                      );
 
@@ -623,7 +623,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var accountRelationship = AccountRelationship.Load(id.ToInteger(), msgs);
-            msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Approved, SessionVariables.LoggedInUser));
+            msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Approved, SessionVariables.CurrentUser));
 
             return RedirectToAction("visitors");
         }
@@ -633,7 +633,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var accountRelationship = AccountRelationship.Load(id.ToInteger(), msgs);
-            msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Denied, SessionVariables.LoggedInUser));
+            msgs.AddRange(accountRelationship.UpdateApprovalStatus(ApprovalStatus.Denied, SessionVariables.CurrentUser));
 
             return RedirectToAction("visitors");
         }
@@ -711,11 +711,11 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (copyfrom.IsNumber())
                     form = Form.Load(copyfrom.ToInteger(), msgs)
-                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
+                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
                 else
                     form = SessionVariables.CurrentAccount
                         .GetDefaultForm(msgs)
-                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
+                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
             }
             else
             {
@@ -743,9 +743,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                 questionGroup = new FormQuestionGroup()
                                 {
                                     CreateDate = DateTime.UtcNow,
-                                    CreatedBy = SessionVariables.LoggedInUser.ID,
+                                    CreatedBy = SessionVariables.CurrentUser.ID,
                                     LastModifiedDate = DateTime.UtcNow,
-                                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                                    LastModifiedBy = SessionVariables.CurrentUser.ID,
                                     DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
                                     FormId = form.ID,
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,                                   
@@ -763,7 +763,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
                                 {
                                     questionGroup.Name = Request.Params[$"name-{questionGroup.ID}"];
-                                    questionGroup.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                    questionGroup.LastModifiedBy = SessionVariables.CurrentUser.ID;
                                     questionGroup.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(questionGroup.Save(adc));
                                 }
@@ -789,7 +789,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                     }
 
-                                    question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                    question.LastModifiedBy = SessionVariables.CurrentUser.ID;
                                     question.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(question.Save(adc));
                                 }
@@ -808,8 +808,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                         FormId = form.ID,
                                         CreateDate = DateTime.UtcNow,
                                         LastModifiedDate = DateTime.UtcNow,
-                                        CreatedBy = SessionVariables.LoggedInUser.ID,
-                                        LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                                        CreatedBy = SessionVariables.CurrentUser.ID,
+                                        LastModifiedBy = SessionVariables.CurrentUser.ID,
                                         DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
                                         FormQuestionGroupId = questionGroup.ID,
                                         IsTemplate = false,

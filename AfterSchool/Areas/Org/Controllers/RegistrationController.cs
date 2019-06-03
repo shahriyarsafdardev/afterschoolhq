@@ -89,7 +89,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             activities = SessionVariables.CurrentAccount.GetActivities(
                 UserType.Administrator, 
-                SessionVariables.LoggedInUser,
+                SessionVariables.CurrentUser,
                 null,
                 false, 
                 false)
@@ -205,7 +205,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (mergeintoreg.IsGuid())
             {
                 var mergeInto = Registration.LoadByUid(mergeintoreg.ToGuid());
-                msgs.AddRange(mergeInto.MergeInto(registration, SessionVariables.LoggedInUser.ID.Value));
+                msgs.AddRange(mergeInto.MergeInto(registration, SessionVariables.CurrentUser.ID.Value));
                 mergeInto = mergeInto.Reload();
                 LoadRegistrationViewBag(mergeInto, mergeintoreg);
 
@@ -234,7 +234,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ratTo = (RegistrationAssignmentType)to.ToInteger();
 
             if(ratTo != RegistrationAssignmentType.NotSet)
-                registrantActivity.ChangeSeatAssignment(ratTo, SessionVariables.LoggedInUser, msgs);
+                registrantActivity.ChangeSeatAssignment(ratTo, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -312,7 +312,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 choiceNumber, 
                 registrationPeriodId, 
                 act.ActivityGroupId, 
-                SessionVariables.LoggedInUser.ID.Value, 
+                SessionVariables.CurrentUser.ID.Value, 
                 msgs);
 
             if (msgs.HasNoErrors())
@@ -421,7 +421,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (registration.ActivityGroupId.HasValue)
                 activities = registration.GetActivityGroup().GetActivities(null, false, false, null, null, false);
             else
-                activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.LoggedInUser, null, false, false, null, null);
+                activities = SessionVariables.CurrentAccount.GetActivities(UserType.Administrator, SessionVariables.CurrentUser, null, false, false, null, null);
 
             ViewBag.Activities = activities.Where(x =>
                     x.ID.Value.NotIn(registrantActivities.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity)
