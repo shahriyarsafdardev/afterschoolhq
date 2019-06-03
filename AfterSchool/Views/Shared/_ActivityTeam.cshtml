@@ -23,7 +23,7 @@
                     var awu = member.GetActivityWebUser(Model);
                     var isonteam = awu.IsNotEmpty();
                     var isleader = awu.IsNotEmpty() && awu.IsLeader;
-                    var isteamdisabled = Model.CreatedBy.Value == member.ID.Value || (SessionVariables.LoggedInUser.ID == member.ID);
+                    var isteamdisabled = Model.CreatedBy.Value == member.ID.Value || (SessionVariables.CurrentUser.ID == member.ID);
                     var isleaderdisabled = isteamdisabled;
                 
                     var onteamid = string.Format("onteam-{0}", member.ID.Value);

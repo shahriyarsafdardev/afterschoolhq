@@ -33,7 +33,7 @@
                     <div class="btn-group pull-right">
                         @if (Model.IsPublishable)
                         {
-                            if (SessionVariables.LoggedInUser.VerifiedAccount)
+                            if (SessionVariables.CurrentUser.VerifiedAccount)
                             {
                                 if (!Model.IsPublished)
                                 {

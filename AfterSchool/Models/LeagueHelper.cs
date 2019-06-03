@@ -65,7 +65,7 @@ namespace AfterSchool.Models
                                         activityGroupId: activity.ActivityGroupId,
                                         periodId: activity.GetCurrentRegistrationPeriod(amsgs, adc)?.ID,
                                         amountCharged: participationObject.Cost,
-                                        loggedInUser: SessionVariables.LoggedInUser,
+                                        loggedInUser: SessionVariables.CurrentUser,
                                         msgs: amsgs,
                                         dc: adc);
                             }

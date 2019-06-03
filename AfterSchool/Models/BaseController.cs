@@ -61,14 +61,14 @@ namespace AfterSchool.Models
                     RegistrationPeriodId = registrationPeriodId,
                     ActivityGroupId = activityGroupId,
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = SessionVariables.LoggedInUser.IsNotEmpty() ? SessionVariables.LoggedInUser.ID : 0
+                    CreatedBy = SessionVariables.CurrentUser.IsNotEmpty() ? SessionVariables.CurrentUser.ID : 0
                 }.Save(dc: dc);
             }
         }
 
         protected bool IsLoggedIn()
         {
-            return !SessionVariables.LoggedInUser.IsEmpty();
+            return !SessionVariables.CurrentUser.IsEmpty();
         }
 
         protected void HandleIsLoggedIn(HttpContextBase requestContext)
@@ -134,7 +134,7 @@ namespace AfterSchool.Models
                 // take to account creation screen
                 return RedirectToAction("createaccount", "signup");
             }
-            else if (SessionVariables.LoggedInUser.HasAccessTo(SessionVariables.CurrentAccount))
+            else if (SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
             {
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
@@ -165,12 +165,12 @@ namespace AfterSchool.Models
             var msgs = new SystemMessages();
 
             SessionVariables.CurrentAccount = null;
-            SessionVariables.LoggedInUser = user;
+            SessionVariables.CurrentUser = user;
 
             if (account.IsNotEmpty())
             {
                 SessionVariables.CurrentAccount = account;
-                SessionVariables.AccountUserType = SessionVariables.LoggedInUser.GetUserType(account);
+                SessionVariables.AccountUserType = SessionVariables.CurrentUser.GetUserType(account);
             }
             else
             {
@@ -190,7 +190,7 @@ namespace AfterSchool.Models
             if (doRememberMe)
             {
                 var cookieUser = new HttpCookie("sessionuser", Convert.ToBase64String(Encryption.Encrypt(
-                    SessionVariables.LoggedInUser.Uid.ToString(), AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV)));
+                    SessionVariables.CurrentUser.Uid.ToString(), AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV)));
                 cookieUser.Expires = DateTime.Now.AddMonths(1);
                 Response.Cookies.Add(cookieUser);
 
@@ -208,7 +208,7 @@ namespace AfterSchool.Models
 
         internal ActionResult Logout(string returnUrl = null, bool goToLoginScreenBeforeReturn = false)
         {
-            SessionVariables.LoggedInUser = null;
+            SessionVariables.CurrentUser = null;
             SessionVariables.OriginalLoggedInUser = null;
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentRegistrant = null;

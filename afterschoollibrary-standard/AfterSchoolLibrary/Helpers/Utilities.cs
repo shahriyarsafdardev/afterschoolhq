@@ -281,7 +281,7 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-                    amsgs.AddRange(MigrateToBCrypt(adc));
+                    // amsgs.AddRange(MigrateToBCrypt(adc));
 
                     // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
 

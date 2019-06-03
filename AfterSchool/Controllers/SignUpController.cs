@@ -236,9 +236,9 @@ namespace AfterSchool.Controllers
                     msgs.Add("Your account has been verified", MessageType.Success);
 
                     // if logged in reload with new verified value
-                    if(SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.LoggedInUser.Uid == id.ToGuid())
+                    if(SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentUser.Uid == id.ToGuid())
                     {
-                        SessionVariables.LoggedInUser = WebUser.Load(SessionVariables.LoggedInUser.ID.Value);
+                        SessionVariables.CurrentUser = WebUser.Load(SessionVariables.CurrentUser.ID.Value);
                     }
                 }
             }
@@ -430,7 +430,7 @@ namespace AfterSchool.Controllers
 
                 user.SendVerificationEmail(SessionVariables.IsAfterSchool.Value);
 
-                SessionVariables.LoggedInUser = user;
+                SessionVariables.CurrentUser = user;
 
                 return RedirectToAction("index", "home", new { area = "user" });
             }
@@ -452,9 +452,9 @@ namespace AfterSchool.Controllers
                 msgs.Add("Invalid invite code", MessageType.UserError);
 
             // auto accept invite
-            if (SessionVariables.LoggedInUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant && SessionVariables.CurrentAccount.ID != invitingAccount.ID)
+            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId != AccountType.AfterSchool && SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant && SessionVariables.CurrentAccount.ID != invitingAccount.ID)
             {
-                invitingAccount.ApproveAccessToAccount(SessionVariables.CurrentAccount, SessionVariables.LoggedInUser, msgs);
+                invitingAccount.ApproveAccessToAccount(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, msgs);
 
                 return LoginRedirect();
             }
@@ -539,10 +539,10 @@ namespace AfterSchool.Controllers
                 ViewBag.InvitingAccount = Account.LoadByInviteCodeToShare(invitecode.ToGuid(), msgs);
 
             ViewBag.Messages = msgs;
-            ViewBag.User = SessionVariables.LoggedInUser;
+            ViewBag.User = SessionVariables.CurrentUser;
             ViewBag.InviteCode = invitecode;
 
-            return View(new Account() { Email = SessionVariables.LoggedInUser.Email, Phone = SessionVariables.LoggedInUser.Phone });
+            return View(new Account() { Email = SessionVariables.CurrentUser.Email, Phone = SessionVariables.CurrentUser.Phone });
         }
 
         [HttpPost]
@@ -582,28 +582,28 @@ namespace AfterSchool.Controllers
                             phone: phone,
                             isActive: true,
                             accountType: (AccountType)accounttype.ToInteger(),
-                            accountOwner: SessionVariables.LoggedInUser,
+                            accountOwner: SessionVariables.CurrentUser,
                             packageId: Package.LoadByIsActiveByIsAfterSchool(true, true, amsgs, adc).Last().ID,
                             packageBillingPeriod: BillingPeriodType.Month,
                             timeZone: null,
-                            loggedInUser: SessionVariables.LoggedInUser,
+                            loggedInUser: SessionVariables.CurrentUser,
                             isAfterSchool: true,
                             createWithStripe: true,
                             msgs: amsgs, 
                             dc: adc);
 
-                        newAccount.AddUser(SessionVariables.LoggedInUser, UserType.Owner, SessionVariables.LoggedInUser, amsgs, adc);
+                        newAccount.AddUser(SessionVariables.CurrentUser, UserType.Owner, SessionVariables.CurrentUser, amsgs, adc);
 
                         if (invitecode.IsGuid())
                         {
                             invitingAccount = Account.LoadByInviteCodeToShare(invitecode.ToGuid(), amsgs, adc);
-                            invitingAccount.ApproveAccessToAccount(newAccount, SessionVariables.LoggedInUser, amsgs, adc);
+                            invitingAccount.ApproveAccessToAccount(newAccount, SessionVariables.CurrentUser, amsgs, adc);
                         }   
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        LoadSessionInfo(SessionVariables.LoggedInUser, newAccount);
+                        LoadSessionInfo(SessionVariables.CurrentUser, newAccount);
                     },
                     onFailure: (SystemMessages fmsgs) =>
                     {
@@ -616,7 +616,7 @@ namespace AfterSchool.Controllers
                 return LoginRedirect();
 
             ViewBag.Messages = msgs;
-            ViewBag.User = SessionVariables.LoggedInUser;
+            ViewBag.User = SessionVariables.CurrentUser;
             ViewBag.InviteCode = invitecode;
 
             return View(newAccount);

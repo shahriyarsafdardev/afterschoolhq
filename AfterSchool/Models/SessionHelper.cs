@@ -25,7 +25,7 @@ namespace AfterSchool.Models
             return null;
         }
 
-        public static WebUser GetLoggedInUser(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser GetCurrentUser(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var id = (string)HttpContext.Current.Session["LoggedInUser"];
             if (id.IsNotEmpty())

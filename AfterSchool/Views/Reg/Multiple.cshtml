@@ -26,7 +26,7 @@
     var registration = (Registration)ViewBag.Registration;
     var registrationUid = (string)ViewBag.RegistrationUid;
     var fieldValues = (NameValueCollection)ViewBag.FieldValues;
-    var addOnly = registration.IsNotEmpty() && SessionVariables.LoggedInUser.IsEmpty();
+    var addOnly = registration.IsNotEmpty() && SessionVariables.CurrentUser.IsEmpty();
     var routeId = ViewContext.RouteData.Values["id"].ToString();
     var postParams = string.Format("reg={0}&group={1}&profile={2}&copy={3}", registrationUid, Request["group"], Request["profile"], Request["copy"]);
 
@@ -185,7 +185,7 @@
                         { "addonly", addOnly }
                      }); }
 
-                @if (SessionVariables.LoggedInUser.IsEmpty() || adminMode)
+                @if (SessionVariables.CurrentUser.IsEmpty() || adminMode)
                 {
                     Html.RenderPartial("_RegCreateAccount");
                 }

@@ -1,7 +1,7 @@
 ﻿@model Account
 @{ 
     var showAdd = !Model.ID.HasValue || (
-        SessionVariables.LoggedInUser.IsNotEmpty() &&
+        SessionVariables.CurrentUser.IsNotEmpty() &&
         SessionVariables.CurrentAccount.AccountTypeId.In(new List<AccountType>() { AccountType.ActivityProvider, AccountType.School }));
 
     var addActivityUrl = "";

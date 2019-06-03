@@ -5,7 +5,7 @@
     var registrations = Model.GetCurrentRegistrations();
     var totalPaid = (decimal)ViewBag.TotalPaid;
     int registrationCount = Registration.TotalCurrentRegistrationsCount(Model.ID.Value);
-    var activityCount = Model.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.LoggedInUser, ActivityType.Activity, null, false);
+    var activityCount = Model.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, null, false);
     var dates = registrations.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
     var classes = Model.GetCompletedAttendance();
@@ -32,7 +32,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            Welcome @SessionVariables.LoggedInUser.FirstName!
+            Welcome @SessionVariables.CurrentUser.FirstName!
 
             @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.ActivitiesEdit))
             {

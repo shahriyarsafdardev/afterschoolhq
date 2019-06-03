@@ -79,7 +79,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         {
                             package = new Package();
                             package.CreateDate = DateTime.UtcNow;
-                            package.CreatedBy = SessionVariables.LoggedInUser.ID;
+                            package.CreatedBy = SessionVariables.CurrentUser.ID;
                         }
                         else
                         {
@@ -91,7 +91,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         package.PricePerYear = priceperyear.ToDecimal();
 
                         package.LastModifiedDate = DateTime.UtcNow;
-                        package.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                        package.LastModifiedBy = SessionVariables.CurrentUser.ID;
 
                         package.Name = name;
                         package.IsActive = isactive.IsNotEmpty();
@@ -112,12 +112,12 @@ namespace AfterSchool.Areas.Admin.Controllers
                                         feature = new PackageFeature();
                                         feature.PackageId = package.ID;
                                         feature.CreateDate = DateTime.UtcNow;
-                                        feature.CreatedBy = SessionVariables.LoggedInUser.ID;
+                                        feature.CreatedBy = SessionVariables.CurrentUser.ID;
                                         feature.FeatureTypeId = type;
                                     }
 
                                     feature.Max = Request[type.ToString()].ToDecimal();
-                                    feature.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                    feature.LastModifiedBy = SessionVariables.CurrentUser.ID;
                                     feature.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(feature.Save(adc));
                                 }

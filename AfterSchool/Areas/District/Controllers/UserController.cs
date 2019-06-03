@@ -60,7 +60,7 @@ namespace AfterSchool.Areas.District.Controllers
                 ViewBag.ReturnUrl = Request["returnurl"];
 
             if (id.IsEmpty())
-                return View(SessionVariables.LoggedInUser);
+                return View(SessionVariables.CurrentUser);
 
             return View(WebUser.Load(id.ToInteger()));
         }
@@ -84,10 +84,10 @@ namespace AfterSchool.Areas.District.Controllers
                 if (!user.ID.HasValue)
                 {
                     user.CreateDate = DateTime.UtcNow;
-                    user.CreatedBy = SessionVariables.LoggedInUser.ID;
+                    user.CreatedBy = SessionVariables.CurrentUser.ID;
                 }
                 user.LastModifiedDate = DateTime.UtcNow;
-                user.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                user.LastModifiedBy = SessionVariables.CurrentUser.ID;
 
                 if (password1.IsNotEmpty() && password2.IsNotEmpty())
                 {
@@ -154,7 +154,7 @@ namespace AfterSchool.Areas.District.Controllers
 
                 foreach (string email in emails.Split(',').Select(x => x.Trim()))
                 {
-                    a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.LoggedInUser, msgs);
+                    a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.CurrentUser, msgs);
                 }
             }
 
@@ -188,7 +188,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             if (msgs.HasNoErrors())
             {
-                SessionVariables.OriginalLoggedInUser = SessionVariables.LoggedInUser;
+                SessionVariables.OriginalLoggedInUser = SessionVariables.CurrentUser;
                 msgs.AddRange(LoadSessionInfo(user, null, false));
             }
 

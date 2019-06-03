@@ -26,7 +26,7 @@
         }
     }
 
-    if (!SessionVariables.LoggedInUser.VerifiedAccount)
+    if (!SessionVariables.CurrentUser.VerifiedAccount)
     {
         <div class="trial-header text-center text-white bg-danger">
             Please verify your email address in order to accept @UILabel.ActivityLabel().ToLower() registrations. <a href="javascript:AccountSetup.sendVerificationEmail()" class="white">Resend Email Verification Email &raquo;</a>
@@ -47,7 +47,7 @@
             </div>
             <div class="col-md-2 col-md-offset-3">
                 <div class="pull-right padding-10">
-                    Logged in as: <a href="@Url.Action("edit", "user")">@SessionVariables.LoggedInUser.DisplayName</a> <br />
+                    Logged in as: <a href="@Url.Action("edit", "user")">@SessionVariables.CurrentUser.DisplayName</a> <br />
                 </div>
             </div>
         </div>    

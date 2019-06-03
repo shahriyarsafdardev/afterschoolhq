@@ -97,7 +97,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                             user = new WebUser()
                             {
                                 CreateDate = DateTime.UtcNow,
-                                CreatedBy = SessionVariables.LoggedInUser.ID
+                                CreatedBy = SessionVariables.CurrentUser.ID
                             };
 
                         user.FirstName = firstname;
@@ -105,7 +105,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                         user.Email = email;
                         user.Phone = phone;
                         user.LastModifiedDate = DateTime.UtcNow;
-                        user.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                        user.LastModifiedBy = SessionVariables.CurrentUser.ID;
                         user.IsActive = !isactive.IsEmpty();
 
                         if (password1.IsNotEmpty() && password2.IsNotEmpty())
@@ -118,13 +118,14 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 .AddUser(
                                     user,
                                     UserType.Administrator,
-                                    SessionVariables.LoggedInUser,
+                                    SessionVariables.CurrentUser,
                                     amsgs,
                                     adc);
                     },
                     onSuccess: (SystemMessages smsgs) => 
                     {
                         msgs.AddRange(smsgs);
+                        msgs.Add("Save successful", MessageType.Success);
 
                         if (sysadmin.IsNumber())
                             SendGridHelper.SendMail(
@@ -137,9 +138,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
-
-                if (msgs.HasNoErrors())
-                    msgs.Add("Save successful", MessageType.Success);
             }
 
             ViewBag.Messages = msgs;
@@ -149,7 +147,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult MyProfile()
         {
-            return RedirectToAction("edit", new { id = SessionVariables.LoggedInUser.Uid.ToString() });
+            return RedirectToAction("edit", new { id = SessionVariables.CurrentUser.Uid.ToString() });
         }
 
         [HttpGet]
@@ -199,7 +197,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
                 foreach (string email in emails.Split(',').Select(x => x.Trim()))
                 {
-                    a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.LoggedInUser, msgs);
+                    a.InviteUser("", "", email, null, Request.Params["message"], ut, SessionVariables.CurrentUser, msgs);
                 }
             }
 
@@ -233,7 +231,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             if (msgs.HasNoErrors())
             {
-                SessionVariables.OriginalLoggedInUser = SessionVariables.LoggedInUser;
+                SessionVariables.OriginalLoggedInUser = SessionVariables.CurrentUser;
                 msgs.AddRange(LoadSessionInfo(user, null, false));
             }
 

@@ -93,11 +93,11 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (copyfrom.IsNumber())
                     form = Form.Load(copyfrom.ToInteger(), msgs)
-                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
+                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
                 else
                     form = SessionVariables.CurrentAccount
                         .GetDefaultForm(msgs)
-                        .Copy(SessionVariables.LoggedInUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
+                        .Copy(SessionVariables.CurrentUser.ID.Value, SessionVariables.CurrentAccount.ID.Value, null, msgs);
             }
             else
             {
@@ -125,9 +125,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                 questionGroup = new FormQuestionGroup()
                                 {
                                     CreateDate = DateTime.UtcNow,
-                                    CreatedBy = SessionVariables.LoggedInUser.ID,
+                                    CreatedBy = SessionVariables.CurrentUser.ID,
                                     LastModifiedDate = DateTime.UtcNow,
-                                    LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                                    LastModifiedBy = SessionVariables.CurrentUser.ID,
                                     DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
                                     FormId = form.ID,
                                     QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
@@ -145,7 +145,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
                                 {
                                     questionGroup.Name = Request.Params[$"name-{questionGroup.ID}"];
-                                    questionGroup.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                    questionGroup.LastModifiedBy = SessionVariables.CurrentUser.ID;
                                     questionGroup.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(questionGroup.Save(adc));
                                 }
@@ -171,7 +171,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         
                                         }
 
-                                    question.LastModifiedBy = SessionVariables.LoggedInUser.ID;
+                                    question.LastModifiedBy = SessionVariables.CurrentUser.ID;
                                     question.LastModifiedDate = DateTime.UtcNow;
                                     amsgs.AddRange(question.Save(adc));
                                 }
@@ -190,8 +190,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                         FormId = form.ID,
                                         CreateDate = DateTime.UtcNow,
                                         LastModifiedDate = DateTime.UtcNow,
-                                        CreatedBy = SessionVariables.LoggedInUser.ID,
-                                        LastModifiedBy = SessionVariables.LoggedInUser.ID,
+                                        CreatedBy = SessionVariables.CurrentUser.ID,
+                                        LastModifiedBy = SessionVariables.CurrentUser.ID,
                                         DisplayOrder = questionGroup.GetQuestionCount(amsgs, adc) + 1,
                                         FormQuestionGroupId = questionGroup.ID,
                                         IsTemplate = false,
