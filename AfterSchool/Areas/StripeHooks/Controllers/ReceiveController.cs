@@ -121,15 +121,22 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
         private IHttpActionResult InvoicePaymentSucceeded(Stripe.Event stripeEvent, SystemMessages msgs)
         {
             var stripeInvoice = (Stripe.Invoice)stripeEvent.Data.Object;
-            // var customerId = stripeInvoice.CustomerId;
+            var customerId = stripeInvoice.CustomerId;
+            var account = AfterSchoolLibrary.Models.Account.LoadByStripeCustomerId(customerId, msgs);
+
+            if (account.IsNotEmpty())
+            {
+                msgs.Add($"Ignoring - Account is a customer of AHQ - Stripe Sub ID {customerId}", MessageType.Notice);
+                ReturnOK(msgs);
+            }
+
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
             var chargeId = stripeInvoice.ChargeId;
-            // var totalAmountInCents = (decimal)stripeInvoice.Total;
             var registrantSubscriptionPlan = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
 
             if (registrantSubscriptionPlan.IsEmpty())
             {
-                msgs.Add($"Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
                 ReturnOK(msgs);
             }
 
@@ -145,38 +152,40 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
                 registrant.ID.Value, msgs);
             var registration = registrantActivity.GetRegistration(msgs);
 
+            if (msgs.HasErrors())
+                return Return500(msgs);
+           
+            // check if this same charge has been posted already and tracked.
+            var transaction = Transaction.LoadByStripeChargeOrRefundId(chargeId, msgs);
 
-            if (msgs.HasNoErrors())
+            if (transaction.IsNotEmpty())
             {
-                // check if this same charge has been posted already and tracked.
-                var transaction = Transaction.LoadByStripeChargeOrRefundId(chargeId, msgs);
-
-                if (transaction.IsEmpty())
-                {
-                    // send payment succeeded email
-                    purchasingAccount.SendSubscriptionPaymentSucceeded(plan);
-                    
-                    // save transaction info and track payment to the activity as well.
-                    var checkoutObject = new CheckoutObject()
-                    {
-                        PayingAccount = purchasingAccount,
-                        BillingAccount = billingAccount,
-                        OverrideAmount = plan.CostPerPeriod, // should be able to pull from the plan, but there's a bug for right now, have to really fix later
-                        ParticipationObject = participationObject,
-                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                        PaymentType = PaymentType.CreditCard,
-                        StripeChargeId = chargeId,
-                        SubscriptionPlan = plan.PlanTypeId == SubscriptionPlanType.Subscription ? plan : null,
-                        PaymentPlan = plan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? plan : null,
-                        MasterRegistrant = masterRegistrant,
-                        NumberOfSeats = 1,
-                        Registration = registration,
-                        RegistrantSubscriptionPlan = registrantSubscriptionPlan
-                    };
-
-                    billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, registrantSubscriptionPlan, msgs);
-                }
+                msgs.Add($"Ignoring - Transaction has already been processed - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                ReturnOK(msgs);
             }
+
+            // send payment succeeded email
+            purchasingAccount.SendSubscriptionPaymentSucceeded(plan);
+                    
+            // save transaction info and track payment to the activity as well.
+            var checkoutObject = new CheckoutObject()
+            {
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                OverrideAmount = plan.CostPerPeriod, // should be able to pull from the plan, but there's a bug for right now, have to really fix later
+                ParticipationObject = participationObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = PaymentType.CreditCard,
+                StripeChargeId = chargeId,
+                SubscriptionPlan = plan.PlanTypeId == SubscriptionPlanType.Subscription ? plan : null,
+                PaymentPlan = plan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? plan : null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                Registration = registration,
+                RegistrantSubscriptionPlan = registrantSubscriptionPlan
+            };
+
+            billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, registrantSubscriptionPlan, msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);
