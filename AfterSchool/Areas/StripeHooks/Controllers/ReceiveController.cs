@@ -126,6 +126,13 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             var chargeId = stripeInvoice.ChargeId;
             // var totalAmountInCents = (decimal)stripeInvoice.Total;
             var registrantSubscriptionPlan = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
+
+            if (registrantSubscriptionPlan.IsEmpty())
+            {
+                msgs.Add($"Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                ReturnOK(msgs);
+            }
+
             var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs);
             var registrant = registrantSubscriptionPlan.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
