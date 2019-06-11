@@ -127,7 +127,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             if (account.IsNotEmpty())
             {
                 msgs.Add($"Ignoring - Account is a customer of AHQ - Stripe Sub ID {customerId}", MessageType.Notice);
-                ReturnOK(msgs);
+                return ReturnOK(msgs);
             }
 
             var stripeSubscriptionId = stripeInvoice.SubscriptionId;
@@ -137,7 +137,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             if (registrantSubscriptionPlan.IsEmpty())
             {
                 msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
-                ReturnOK(msgs);
+                return ReturnOK(msgs);
             }
 
             var plan = registrantSubscriptionPlan.GetSubscriptionPlan(msgs);
@@ -161,7 +161,7 @@ namespace AfterSchool.Areas.StripeHooks.Controllers
             if (transaction.IsNotEmpty())
             {
                 msgs.Add($"Ignoring - Transaction has already been processed - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
-                ReturnOK(msgs);
+                return ReturnOK(msgs);
             }
 
             // send payment succeeded email
