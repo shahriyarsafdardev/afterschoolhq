@@ -354,6 +354,26 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Registration> LoadByAccountIdByDate(int AccountId, DateTime startDate, DateTime endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["CreateDate"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            dq.Criterias.Add(ObjectMap["CreateDate"], endDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCountByAccountIdByDate(int AccountId, DateTime startDate, DateTime endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["CreateDate"], startDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            dq.Criterias.Add(ObjectMap["CreateDate"], endDate, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            return dq.GetCount(msgs);
+        }
+
         public static List<Registration> LoadList(List<int> ids, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;

@@ -2,19 +2,20 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var actions = (List<SessionAction>)ViewBag.Actions;
-    var registrations = Model.GetCurrentRegistrations();
+    var registrations = (List<Registration>)ViewBag.CurrentRegistrations;
     var totalPaid = (decimal)ViewBag.TotalPaid;
-    int registrationCount = Registration.TotalCurrentRegistrationsCount(Model.ID.Value);
-    var activityCount = Model.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, ActivityType.Activity, null, false);
+    int registrationCount = (int)ViewBag.RegistrationCount;
+    var activityCount = (int)ViewBag.ActivityCount;
     var dates = registrations.Select(x => SessionVariables.CurrentAccount.ConvertToAccountTimeZone(x.CreateDate.Value).ToShortDateString()).Distinct();
 
-    var classes = Model.GetCompletedAttendance();
-    var totalPresent = Model.GetAttendancePresentCount();
-    var totalPossible = Model.GetAttendancePossibleCount();
+    var classesCount = (int)ViewBag.TotalCompleted;
+    var totalPresent = (int)ViewBag.TotalPresent;
+    var totalPossible = (int)ViewBag.TotalPossible;
     var totalAbsent = totalPossible - totalPresent;
     var attendanceRate = "0";
     var hasVisitorAccountsToApprove = (bool)ViewBag.HasVisitorAccountsToApprove;
     var hasOutstandingLeagueInvites = (bool)ViewBag.HasOutstandingLeagueInvites;
+    var externalLeagueCount = (int)ViewBag.ExternalLeagueCount;
 
     if (totalPresent > 0)
     {
@@ -93,7 +94,7 @@
                     </div>
                 </div>
 
-                if (SessionVariables.CurrentAccount.GetExternalLeagueCount() > 0)
+                if (externalLeagueCount > 0)
                 {
                     <div class="col-md-6 col-sm-12">
                         <div class="widget">
@@ -128,7 +129,7 @@
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
                                     <div data-toggle="counter" data-end="@registrationCount" data-decimals="0" data-suffix="" class="value">@registrationCount</div>
-                                    <div class="desc">Total Active Registrations</div>
+                                    <div class="desc">Total Registrations (30 days)</div>
                                 </div>
                                 <div class="icon"><span class="s7-users"></span></div>
                             </div>
@@ -150,7 +151,7 @@
                         <div class="col-md-6">
                             <div class="widget widget-tile widget-bordered">
                                 <div class="data-info">
-                                    <div data-toggle="counter" data-end="@classes.Count" data-decimals="0" data-suffix="" class="value">@classes.Count</div>
+                                    <div data-toggle="counter" data-end="@classesCount" data-decimals="0" data-suffix="" class="value">@classesCount</div>
                                     <div class="desc">@UILabel.ActivityLabel(ActivityType.Activity) Meetings</div>
                                 </div>
                                 <div class="icon"><span class="s7-users"></span></div>
@@ -174,7 +175,7 @@
 
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
-                                        Registrations By Date
+                                        Registrations By Date (last 30 days)
                                     </div>
                                     <div class="panel-body">
                                         <div id="registrantsbydate" style="height: 350px;"></div>

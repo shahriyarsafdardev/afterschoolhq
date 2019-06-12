@@ -257,6 +257,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static int GetCountByAccountIdByIsCompleted(int AccountId, bool IsCompleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ActivityAccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsCompleted"], IsCompleted);
+            return dq.GetCount(msgs);
+        }
+
         #endregion
     }
 }

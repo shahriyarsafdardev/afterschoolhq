@@ -773,24 +773,29 @@ namespace AfterSchoolLibrary.Services
 
         #region Attendance
 
-        public static List<Attendance> GetCompletedAttendance(this Account account, DatabaseConnection dc = null)
+        public static List<Attendance> GetCompletedAttendance(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByAccountIdByIsCompleted(account.ID.Value, true, dc: dc);
+            return Attendance.LoadByAccountIdByIsCompleted(account.ID.Value, true, msgs, dc);
         }
 
-        public static int GetAttendancePresentCount(this Account account, DatabaseConnection dc = null)
+        public static int GetAttendanceCompletedCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPresentCountByAccountId(account.ID.Value, dc: dc);
+            return Attendance.GetCountByAccountIdByIsCompleted(account.ID.Value, true, msgs, dc);            
         }
 
-        public static int GetAttendancePossibleCount(this Account account, DatabaseConnection dc = null)
+        public static int GetAttendancePresentCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPossibleCountByAccountId(account.ID.Value, dc: dc);
+            return AttendanceRegistrant.GetPresentCountByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static List<Attendance> GetAttendanceByDate(this Account account, DateTime date, DatabaseConnection dc = null)
+        public static int GetAttendancePossibleCount(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByAccountIdByDate(account.ID.Value, date, dc: dc);
+            return AttendanceRegistrant.GetPossibleCountByAccountId(account.ID.Value, msgs, dc);
+        }
+
+        public static List<Attendance> GetAttendanceByDate(this Account account, DateTime date, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Attendance.LoadByAccountIdByDate(account.ID.Value, date, msgs, dc);
         }
 
         #endregion
@@ -804,11 +809,14 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static List<Registration> GetCurrentRegistrations(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registration> GetRegistrationsByDate(this Account account, DateTime startDate, DateTime endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.LoadCurrentByAccountId(account.ID.Value, msgs, dc)
-                .Where(registration => Registration.ValidCompletionStatus.Contains((int)registration.CompletionStatusId))
-                .ToList();
+            return Registration.LoadByAccountIdByDate(account.ID.Value, startDate, endDate, msgs, dc);
+        }
+
+        public static int GetRegistrationCountByDate(this Account account, DateTime startDate, DateTime endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registration.GetCountByAccountIdByDate(account.ID.Value, startDate, endDate, msgs, dc);
         }
 
         public static List<Registration> GetRegistrations(this Account account, int start, int length, SystemMessages msgs = null, DatabaseConnection dc = null)
