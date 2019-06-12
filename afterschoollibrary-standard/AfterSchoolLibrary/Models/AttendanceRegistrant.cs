@@ -316,7 +316,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static int GetPresentCountByAccountId(int accountId, DatabaseConnection dc = null)
+        public static int GetPresentCountByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -328,14 +328,14 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RegistrantAccountId"], accountId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger();
 
             return 0;
         }
 
-        public static int GetPossibleCountByAccountId(int accountId, DatabaseConnection dc = null)
+        public static int GetPossibleCountByAccountId(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -347,7 +347,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RegistrantAccountId"], accountId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
 
-            var results = dq.Select();
+            var results = dq.Select(msgs);
             if (results.Rows.Any())
                 return results.Rows[0][0].ToString().ToInteger();
 
