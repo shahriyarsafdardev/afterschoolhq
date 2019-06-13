@@ -4,6 +4,7 @@ using BasicLibrary;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
+using System;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -27,6 +28,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (SessionVariables.CurrentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null) == 0)
                 return RedirectToAction("getstarted");
 
+            var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
             var actions = SessionAction.LoadByAccountId(
                 account.ID.Value, 
@@ -43,12 +45,30 @@ namespace AfterSchool.Areas.Org.Controllers
                     SessionActionType.ActivityMoveToWaitingList,
                 }, 
                 0, 
-                10);            
-            ViewBag.Messages = new SystemMessages();
+                10,
+                msgs);       
+            
+            var activityCount = account.GetActivityCount(
+                SessionVariables.AccountUserType, 
+                SessionVariables.CurrentUser, 
+                ActivityType.Activity, 
+                null, 
+                false,
+                msgs);
+
+            ViewBag.Messages = msgs;
             ViewBag.Actions = actions;
-            ViewBag.HasVisitorAccountsToApprove = SessionVariables.CurrentAccount.GetRequestedVisitorAccountsCount() > 0;
-            ViewBag.HasOutstandingLeagueInvites = SessionVariables.CurrentAccount.GetExternalLeagueInviteCount() > 0;
-            ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut();
+            ViewBag.HasVisitorAccountsToApprove = SessionVariables.CurrentAccount.GetRequestedVisitorAccountsCount(msgs) > 0;
+            ViewBag.HasOutstandingLeagueInvites = SessionVariables.CurrentAccount.GetExternalLeagueInviteCount(msgs) > 0;
+            ViewBag.TotalPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(msgs: msgs);
+            ViewBag.ActivityCount = activityCount;
+            ViewBag.CurrentRegistrations = account.GetRegistrationsByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+            ViewBag.RegistrationCount = account.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+            ViewBag.TotalPresent = account.GetAttendancePresentCount(msgs);
+            ViewBag.TotalPossible = account.GetAttendancePossibleCount(msgs);
+            ViewBag.TotalCompleted = account.GetAttendanceCompletedCount(msgs);
+            ViewBag.ExternalLeagueCount = account.GetExternalLeagueCount(msgs);
+
             return View(account);
         }
 
