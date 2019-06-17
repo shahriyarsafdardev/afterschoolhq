@@ -1,0 +1,44 @@
+﻿@model Account
+@{
+    ViewBag.Title = Model.Name;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-users"></i> Invite Team Members
+        </div>
+        <div class="panel-body">
+
+            <form method="post" action="@Url.Action("teaminvite", "account")" class="form-horizontal">
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Emails</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="emails" name="emails" value="@ViewBag.Emails" onfocus="this.select()" required placeholder="name@domain.com, name2@domain.com" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Message</label>
+                    <div class="col-sm-6">
+                        <textarea class="form-control" id="message" name="message" onfocus="this.select()">@ViewBag.InviteMessage</textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-primary btn-lg pull-right">Invite &raquo;</button>
+                        <a href="@Url.Action("team", "account")" class="pull-left text-muted">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
