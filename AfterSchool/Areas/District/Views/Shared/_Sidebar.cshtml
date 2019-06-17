@@ -57,8 +57,8 @@
             <li class="hide @formactive">
                 <a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i><span>Forms</span></a>
             </li>
-            <li class="hide @teamactive">
-                <a href="@Url.Action("index", "user" )"><i class="icon s7-users"></i><span>Team</span></a>
+            <li class="@teamactive">
+                <a href="@Url.Action("team", "account" )"><i class="icon s7-users"></i><span>Staff</span></a>
             </li>
             <li class="@profileactive">
                 <a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i><span>Profile</span></a>
