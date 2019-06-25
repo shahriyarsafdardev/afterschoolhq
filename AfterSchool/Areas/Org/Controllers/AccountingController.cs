@@ -127,7 +127,81 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalPages = totalPages
             };
             return View(payouts);
-        }        
+        }    
+        
+        public ActionResult DownloadCSV(string pn, string rpp, string sdate, string edate)
+        {
+            int pageNumber = 1;
+            int recordsPerPage = 25;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var startDate = sdate.IsDateTime() ?
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
+                new DateTime?();
+            var endDate = edate.IsDateTime() ?
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
+                new DateTime?();
+
+            // transaction data
+            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, start, length);
+            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, start, length);
+            var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
+
+            allTransactions.ForEach(transaction =>
+                transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
+            );
+
+            // sort transactions
+            allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
+            var table = new List<List<string>>();
+
+            var row = new List<string>();
+            row.Add("ID");
+            row.Add("CreatedOn");
+            row.Add("Payer");
+            row.Add("For");
+            row.Add("Item Description");
+            row.Add("Total Amount Paid");
+            row.Add("Platform Fee");
+            row.Add("Your Amount");
+            table.Add(row);
+            foreach (var t in allTransactions)
+            {
+                var purchase = t.GetPurchase();
+                var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                var participationObjects = t.GetParticipationObjects();
+
+                row = new List<string>();
+                row.Add(t.GetTransactionNumber());
+                row.Add(t.CreateDate.ToShortTimeString());
+                row.Add(t.GetPayerAccount().Name);
+                row.Add(t.IsCharge()? registrant.DisplayName:t.GetBillerAccount().Name);
+                row.Add(participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "));
+                row.Add(t.GetBillerAmount().ToCurrency());
+                row.Add(t.GetFeesChargedToBiller().ToCurrency());
+                row.Add(t.GetBillerPayout().ToCurrency());
+                table.Add(row);
+            }
+            string csv = CsvFile.Create(table);
+
+            Response.Clear();
+            Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
+            Response.AddHeader("Content-Disposition", "attachment; filename=transactions.csv");
+
+            byte[] filebytes = System.Text.UTF8Encoding.UTF8.GetBytes(csv);
+            Response.AddHeader("Content-Length", filebytes.Length.ToString());
+            Response.BinaryWrite(filebytes);
+            Response.End();
+            return null;
+        }
 
         //[HttpPost]
         //public ActionResult Refund(string uid, string amount)
