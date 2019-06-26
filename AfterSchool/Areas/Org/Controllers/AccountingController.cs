@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
+using System.Web;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
@@ -10,6 +11,7 @@ using System.Web.Helpers;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using AfterSchoolLibrary;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -22,8 +24,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Accounting
         [HttpGet]
-        public ActionResult Index(string pn, string rpp, string sdate, string edate,string activity)
+        public ActionResult Index(string pn, string rpp, string sdate, string edate, string activity)
         {
+            var activities = new List<Activity>();
             var msgs = new SystemMessages();
             int pageNumber = 1;
             int recordsPerPage = 25;
@@ -45,9 +48,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 new DateTime?();
 
             // transaction count
-            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate,activity);
+            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate, activity);
             var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, activity);
             var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
+            activities = SessionVariables.CurrentAccount.GetActivities(
+               UserType.Administrator,
+               SessionVariables.CurrentUser,
+               null,
+               false,
+               false)
+               .OrderBy(x => x.Name)
+               .ToList();
 
             // transaction data
             var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, activity, start, length);
@@ -66,6 +77,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefundedTo(startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
+            ViewBag.Activities = activities;
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
