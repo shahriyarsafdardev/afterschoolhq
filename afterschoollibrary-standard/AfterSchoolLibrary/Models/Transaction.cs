@@ -359,6 +359,25 @@ namespace AfterSchoolLibrary.Models
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
+            if (activity.IsNotEmpty())
+            {
+                var itemList = new List<string>();
+
+                // split list
+                itemList.AddRange(activity.Split(' ').Select(x => x.Trim()).Where(x => x.IsNotBlank()));
+
+                var dcsAnd = new DatabaseCriterias(LogicalOperatorType.And);
+
+                foreach (var item in itemList)
+                {
+                    var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                    dcs.Add(ObjectMap["Description"], item, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Like);
+                    dcsAnd.Add(dcs);
+                }
+
+                dq.Criterias.Add(dcsAnd);
+            }
+
             dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
 
             dq.SelectRange.Start = start;
@@ -366,7 +385,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Transaction> LoadByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Transaction> LoadByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, string activity, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -376,7 +395,26 @@ namespace AfterSchoolLibrary.Models
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            if (activity.IsNotEmpty())
+            {
+                var itemList = new List<string>();
 
+                // split list
+                itemList.AddRange(activity.Split(' ').Select(x => x.Trim()).Where(x => x.IsNotBlank()));
+
+                var dcsAnd = new DatabaseCriterias(LogicalOperatorType.And);
+
+                foreach (var item in itemList)
+                {
+                    var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                    dcs.Add(ObjectMap["Description"], item, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Like);
+                    dcsAnd.Add(dcs);
+                }
+
+                dq.Criterias.Add(dcsAnd);
+            }
+
+            dq.OrderBys.Add(ObjectMap["Description"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
 
             dq.SelectRange.Start = start;
@@ -384,21 +422,39 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCountByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, string activity, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
-
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            if (activity.IsNotEmpty())
+            {
+                var itemList = new List<string>();
 
+                // split list
+                itemList.AddRange(activity.Split(' ').Select(x => x.Trim()).Where(x => x.IsNotBlank()));
+
+                var dcsAnd = new DatabaseCriterias(LogicalOperatorType.And);
+
+                foreach (var item in itemList)
+                {
+                    var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                    dcs.Add(ObjectMap["Description"], item, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Like);
+                    dcsAnd.Add(dcs);
+                }
+
+                dq.Criterias.Add(dcsAnd);
+            }
+
+            dq.OrderBys.Add(ObjectMap["Description"], OrderByDirectionEnum.Ascending);
             return dq.GetCount();
         }
 
-        public static int GetCountByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCountByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate,string activity, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -408,7 +464,26 @@ namespace AfterSchoolLibrary.Models
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             if (endDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+            if (activity.IsNotEmpty())
+            {
+                var itemList = new List<string>();
 
+                // split list
+                itemList.AddRange(activity.Split(' ').Select(x => x.Trim()).Where(x => x.IsNotBlank()));
+
+                var dcsAnd = new DatabaseCriterias(LogicalOperatorType.And);
+
+                foreach (var item in itemList)
+                {
+                    var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                    dcs.Add(ObjectMap["Description"], item, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Like);
+                    dcsAnd.Add(dcs);
+                }
+
+                dq.Criterias.Add(dcsAnd);
+            }
+
+            dq.OrderBys.Add(ObjectMap["Description"], OrderByDirectionEnum.Ascending);
             return dq.GetCount();
         }
 

@@ -100,14 +100,17 @@
                         );
                     }
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-2">
+                        <input type="text" name="activity" id="activity" placeholder="" class="form-control" value="" />
+                </div>
+                <div class="col-md-2">
                     <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
                     <button type="button" class="btn btn-primary btn-lg" onclick="DownloadToCSV()">Export To CSV</button>
                 </div>
 
                 <script>
                     function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&activity=${encodeURIComponent($('#activity').val())}`;
                     }
                     function DownloadToCSV() {
                          window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
@@ -217,7 +220,7 @@
                                     { "controller", "accounting" },
                                     { "action", "index" },
                                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
-    }
+                    }
                 );
             }
         </div>

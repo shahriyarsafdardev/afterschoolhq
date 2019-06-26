@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Accounting
         [HttpGet]
-        public ActionResult Index(string pn, string rpp, string sdate, string edate)
+        public ActionResult Index(string pn, string rpp, string sdate, string edate,string activity)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;
@@ -45,13 +45,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 new DateTime?();
 
             // transaction count
-            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate);
-            var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate);
+            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate,activity);
+            var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, activity);
             var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
 
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, start, length);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, start, length);
+            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, activity, start, length);
+            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, activity, start, length);
             var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
