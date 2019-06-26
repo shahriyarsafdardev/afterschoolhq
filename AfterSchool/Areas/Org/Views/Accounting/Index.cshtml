@@ -97,15 +97,17 @@
                 </div>
                 <div class="col-md-5">
                     <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
-                    <a href="@Url.Action("DownloadCSV", "accounting")" class="btn btn-default btn-lg">
-                        Export To CSV
-                    </a>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="DownloadToCSV()">Export To CSV</button>
                 </div>
 
                 <script>
                     function search() {
                         window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
                     }
+                    function DownloadToCSV() {
+                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                    }
+
                 </script>
             </div>
 
@@ -118,7 +120,7 @@
                             <th>Payer</th>
                             <th>For</th>
                             <th>Item Description</th>
-                            <th class="text-center">Total Amt Paid</th>                            
+                            <th class="text-center">Total Amt Paid</th>
                             <th class="text-center">Platform Fee</th>
                             <th class="text-center">Your Amount</th>
                             @*<th>Refund</th>*@
@@ -167,15 +169,15 @@
                                     </td>
 
                                     @*<td>
-                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
-                                        {
-                                            <button onclick="openDialog('@transaction.Uid')"
-                                                    class="md-trigger"
-                                                    data-modal="modal-refund">
-                                                Refund
-                                            </button>
-                                        }
-                                    </td>*@
+                                            @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                            {
+                                                <button onclick="openDialog('@transaction.Uid')"
+                                                        class="md-trigger"
+                                                        data-modal="modal-refund">
+                                                    Refund
+                                                </button>
+                                            }
+                                        </td>*@
                                 </tr>
                             }
                         }
@@ -198,12 +200,12 @@
                                     { "controller", "accounting" },
                                     { "action", "index" },
                                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
-                    }
+            }
                 );
             }
         </div>
     </div>
- </div>
+</div>
 
 <div id="modal-refund" class="md-modal colored-header custom-width md-effect-9">
 

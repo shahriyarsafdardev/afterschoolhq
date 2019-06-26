@@ -129,40 +129,25 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(payouts);
         }    
         
-        public ActionResult DownloadCSV(string pn, string rpp, string sdate, string edate)
+        public ActionResult DownloadCSV(string sdate, string edate)
         {
-            int pageNumber = 1;
-            int recordsPerPage = 25;
-
-            if (pn.IsNumber() && pn.ToInteger() > 0)
-                pageNumber = pn.ToInteger();
-
-            if (rpp.IsNumber() && rpp.ToInteger() > 0)
-                recordsPerPage = rpp.ToInteger();
-
-            var start = recordsPerPage * (pageNumber - 1);
-            var length = recordsPerPage;
-
             var startDate = sdate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
                 new DateTime?();
             var endDate = edate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
-
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, start, length);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, start, length);
+            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, null, null);
+            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, null, null);
             var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             allTransactions.ForEach(transaction =>
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
-
             // sort transactions
             allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
             var table = new List<List<string>>();
-
             var row = new List<string>();
             row.Add("ID");
             row.Add("CreatedOn");
