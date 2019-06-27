@@ -63,8 +63,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
-
-
             var allParticipationObjects = allTransactions.SelectMany(p => p.GetParticipationObjects()).DistinctBy(po => new { po.ObjectID, po.ObjectType,po.Name });
 
             // sort transactions
