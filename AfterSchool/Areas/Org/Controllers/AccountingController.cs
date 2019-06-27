@@ -166,7 +166,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 row = new List<string>();
                 row.Add(t.GetTransactionNumber());
-                row.Add(t.CreateDate.ToShortTimeString());
+                row.Add(t.CreateDate.ToShortDateTimeString());
                 row.Add(t.GetPayerAccount().Name);
                 row.Add(t.IsCharge()? registrant.DisplayName:t.GetBillerAccount().Name);
                 row.Add(participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "));
