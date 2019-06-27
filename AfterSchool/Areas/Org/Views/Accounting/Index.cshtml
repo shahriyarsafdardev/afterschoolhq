@@ -6,7 +6,6 @@
     var avgTransactionAmount = transactionCount == 0 ? 0 : totalTransactionAmount / transactionCount;
     var totalFees = (decimal)ViewBag.TotalFeesPaid;
     var totalPayout = totalTransactionAmount - totalFees;
-    var activities = (List<Activity>)ViewBag.Activities;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -105,9 +104,9 @@
                     <div class="form-group">
                         <select id="activities" class="form-control">
                             <option value="">All Activities</option>
-                            @foreach (var activity in activities)
+                            @foreach (var po in (List<ParticipationObject>)ViewBag.Activities)
                             {
-                                <option value="@activity.ID" @(Request["activity"] == activity.ID.ToString() ? " selected=\"selected\" " : "")>&bull; @activity.Name - (@activity.GetRegistrantCount() seats)</option>
+                                <option value="@po.ObjectID" type="@po.ObjectType">@po.Name</option>
                             }
                         </select>
                     </div>
@@ -119,7 +118,7 @@
 
                 <script>
                     function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&activity=${encodeURIComponent($('#activity').val())}`;
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poid=${encodeURIComponent($('#activities').val())}`;
                     }
                     function DownloadToCSV() {
                          window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
