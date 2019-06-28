@@ -46,11 +46,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
 
-            // transaction count
-            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate);
-            var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate);
-            var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
-
             //PO filters
             List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
             if (!string.IsNullOrEmpty(poid) && !string.IsNullOrEmpty(poTypeId))
@@ -58,6 +53,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
                 poFilter.Add((poid.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
             }
+            
+            // transaction count
+            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate,poFilter);
+            var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, poFilter);
+            var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
 
             // transaction data
             var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, poFilter, start, length);
@@ -70,7 +70,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
-            var allParticipationObjects = allTransactions.SelectMany(p => p.GetParticipationObjects()).DistinctBy(po => new { po.ObjectID, po.ObjectType, po.Name });
+            var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, startDate, endDate);
+            allPos.AddRange(Transaction.GetParticipationObjectsByPayerAccountId(SessionVariables.CurrentAccount.ID.Value, startDate, endDate));
+            var allParticipationObjects= allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
             // sort transactions
             allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();

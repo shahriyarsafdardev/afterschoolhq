@@ -469,7 +469,7 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount();
         }
 
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -488,16 +488,16 @@ namespace AfterSchoolLibrary.Models
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
             var results = dq.Select(msgs);
-            var list = new List<(int, ParticipationObjectType)>();
+            var list = new List<(int, ParticipationObjectType, string)>();
             if (results.Rows.Count > 0)
                 foreach(DataRow row in results.Rows)
-                    list.Add(((int)row[0], (ParticipationObjectType)row[1]));
+                    list.Add(((int)row[0], (ParticipationObjectType)row[1],""));
 
             return list;
 
         }
 
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
