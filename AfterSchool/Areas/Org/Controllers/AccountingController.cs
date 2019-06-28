@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Accounting
         [HttpGet]
-        public ActionResult Index(string pn, string rpp, string sdate, string edate, string poid)
+        public ActionResult Index(string pn, string rpp, string sdate, string edate, string poid, string poTypeId)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;
@@ -51,10 +51,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate);
             var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
 
+            //PO filters
+            List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
+            if (!string.IsNullOrEmpty(poid) && !string.IsNullOrEmpty(poTypeId))
+            {
+                poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
+                poFilter.Add((poid.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
+            }
 
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, null, start, length);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, null, start, length);
+            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, poFilter, start, length);
+            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, poFilter, start, length);
             var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
@@ -63,7 +70,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
-            var allParticipationObjects = allTransactions.SelectMany(p => p.GetParticipationObjects()).DistinctBy(po => new { po.ObjectID, po.ObjectType,po.Name });
+            var allParticipationObjects = allTransactions.SelectMany(p => p.GetParticipationObjects()).DistinctBy(po => new { po.ObjectID, po.ObjectType, po.Name });
 
             // sort transactions
             allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
