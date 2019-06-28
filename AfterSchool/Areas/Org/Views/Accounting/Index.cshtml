@@ -118,10 +118,10 @@
 
                 <script>
                     function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poid=${encodeURIComponent($('#activities').val())}&poTypeId=${encodeURIComponent($('#activities option:selected').data('type'))}`;
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#activities').val())}&poTypeId=${encodeURIComponent($('#activities option:selected').data('type'))}`;
                     }
                     function DownloadToCSV() {
-                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#activities').val())}&poTypeId=${encodeURIComponent($('#activities option:selected').data('type'))}`;
                     }
 
                 </script>
@@ -225,7 +225,7 @@
                 {
                     { "controller", "accounting" },
                     { "action", "index" },
-                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
+                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
                 }
             );
         }
@@ -387,4 +387,7 @@
             );
         }
     }
+    window.onload = function () {
+        document.getElementById('activities').value = '@Request["poid"]';
+    };
 </script>

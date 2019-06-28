@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Accounting
         [HttpGet]
-        public ActionResult Index(string pn, string rpp, string sdate, string edate, string poid, string poTypeId)
+        public ActionResult Index(string pn, string rpp, string sdate, string edate, string poId, string poTypeId)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;
@@ -48,10 +48,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             //PO filters
             List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
-            if (!string.IsNullOrEmpty(poid) && !string.IsNullOrEmpty(poTypeId))
+            if (!string.IsNullOrEmpty(poId) && !string.IsNullOrEmpty(poTypeId))
             {
                 poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
-                poFilter.Add((poid.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
+                poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
             }
             
             // transaction count
@@ -187,9 +187,18 @@ namespace AfterSchool.Areas.Org.Controllers
             var endDate = edate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
+
+            //PO filters
+            List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
+            if (!string.IsNullOrEmpty(poId) && !string.IsNullOrEmpty(poTypeId))
+            {
+                poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
+                poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
+            }
+
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, null, null);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, null, null);
+            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, poFilter, null, null);
+            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, poFilter, null, null);
             var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             allTransactions.ForEach(transaction =>
