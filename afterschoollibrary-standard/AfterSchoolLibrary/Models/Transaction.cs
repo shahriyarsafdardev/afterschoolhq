@@ -377,19 +377,24 @@ namespace AfterSchoolLibrary.Models
         {
             var activityPaymentQuery = ActivityPayment.get_DatabaseQuery(ActivityPayment.ObjectMap, typeof(ActivityPayment).Name);
             activityPaymentQuery.UseParameterizedQuery = false;
-            activityPaymentQuery.Criterias.LogicalOperator = LogicalOperatorType.Or;
             activityPaymentQuery.SelectParameters.Clear();
             activityPaymentQuery.SelectParameters.Add(
                 ActivityPayment.ObjectMap["ID"],
                 null,
                 $"COUNT({ActivityPayment.ObjectMap["ID"].ParameterFullName})");
 
+            activityPaymentQuery.Criterias.Add(ActivityPayment.ObjectMap["TransactionId"], 0, Transaction.ObjectMap["ID"].ParameterFullName);
+
+            var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
+
             participationObjects.ForEach(participationObject => {
-                var dcs = new DatabaseCriterias(LogicalOperatorType.And);
-                dcs.Add(ActivityPayment.ObjectMap["ParticipationObjectId"], participationObject.ID);
-                dcs.Add(ActivityPayment.ObjectMap["ParticipationObjectTypeId"], (int)participationObject.ObjectType);
-                activityPaymentQuery.Criterias.Add(dcs);
+                var dcs2 = new DatabaseCriterias(LogicalOperatorType.And);
+                dcs2.Add(ActivityPayment.ObjectMap["ParticipationObjectId"], participationObject.ID);
+                dcs2.Add(ActivityPayment.ObjectMap["ParticipationObjectTypeId"], (int)participationObject.ObjectType);
+                dcs.Add(dcs2);
             });
+
+            activityPaymentQuery.Criterias.Add(dcs);
 
             return activityPaymentQuery;
         }
@@ -464,6 +469,60 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount();
         }
 
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+
+            dq.Joins.Add(ActivityPayment.ObjectMap["TransactionId"], ObjectMap["ID"], DatabaseJoinTypeEnum.InnerJoin);
+
+            dq.SelectParameters.Clear();
+            dq.SelectParameters.Add(ActivityPayment.ObjectMap["ParticipationObjectId"]);
+            dq.SelectParameters.Add(ActivityPayment.ObjectMap["ParticipationObjectTypeId"]);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            var list = new List<(int, ParticipationObjectType)>();
+            if (results.Rows.Count > 0)
+                foreach(DataRow row in results.Rows)
+                    list.Add(((int)row[0], (ParticipationObjectType)row[1]));
+
+            return list;
+
+        }
+
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+
+            dq.Joins.Add(ActivityPayment.ObjectMap["TransactionId"], ObjectMap["ID"], DatabaseJoinTypeEnum.InnerJoin);
+
+            dq.SelectParameters.Clear();
+            dq.SelectParameters.Add(ActivityPayment.ObjectMap["ParticipationObjectId"]);
+            dq.SelectParameters.Add(ActivityPayment.ObjectMap["ParticipationObjectTypeId"]);
+
+            if (startDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            if (endDate.HasValue)
+                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
+
+            var results = dq.Select(msgs);
+            var list = new List<(int, ParticipationObjectType)>();
+            if (results.Rows.Count > 0)
+                foreach (DataRow row in results.Rows)
+                    list.Add(((int)row[0], (ParticipationObjectType)row[1]));
+
+            return list;
+        }
 
         public static int GetCountByPurchaseId(int PurchaseId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
