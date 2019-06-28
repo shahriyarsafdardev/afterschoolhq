@@ -1363,6 +1363,7 @@ property: TransactionTypeId, TransactionType, Int, required
 property: StripeChargeOrRefundId, string, NVarChar "50"
 property: PaymentSourceTypeId, PaymentSourceType, Int
 property: OriginalTransactionId, int?, Int
+property: PayoutId, int?, Int, , If associated to a payout then it cannot be requested for another payout
 property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
 property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
 loadmethod: BillerAccountId, List<>
