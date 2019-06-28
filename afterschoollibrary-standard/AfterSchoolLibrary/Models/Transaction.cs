@@ -516,10 +516,10 @@ namespace AfterSchoolLibrary.Models
                 dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
 
             var results = dq.Select(msgs);
-            var list = new List<(int, ParticipationObjectType)>();
+            var list = new List<(int, ParticipationObjectType,string)>();
             if (results.Rows.Count > 0)
                 foreach (DataRow row in results.Rows)
-                    list.Add(((int)row[0], (ParticipationObjectType)row[1]));
+                    list.Add(((int)row[0], (ParticipationObjectType)row[1], ""));
 
             return list;
         }
