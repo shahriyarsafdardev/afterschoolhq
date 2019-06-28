@@ -491,7 +491,7 @@ namespace AfterSchoolLibrary.Models
             var list = new List<(int, ParticipationObjectType, string)>();
             if (results.Rows.Count > 0)
                 foreach(DataRow row in results.Rows)
-                    list.Add(((int)row[0], (ParticipationObjectType)row[1],""));
+                    list.Add(((int)row[0], (ParticipationObjectType)row[1], new ParticipationObject((int)row[0], (ParticipationObjectType)row[1]).Name));
 
             return list;
 
@@ -519,7 +519,7 @@ namespace AfterSchoolLibrary.Models
             var list = new List<(int, ParticipationObjectType,string)>();
             if (results.Rows.Count > 0)
                 foreach (DataRow row in results.Rows)
-                    list.Add(((int)row[0], (ParticipationObjectType)row[1], ""));
+                    list.Add(((int)row[0], (ParticipationObjectType)row[1], new ParticipationObject((int)row[0], (ParticipationObjectType)row[1]).Name));
 
             return list;
         }

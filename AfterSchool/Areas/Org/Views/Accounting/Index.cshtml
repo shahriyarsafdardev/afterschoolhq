@@ -103,7 +103,7 @@
                 <div class="col-md-2">
                     <div class="form-group">
                         <select id="activities" class="form-control">
-                            <option value="">All Activities</option>
+                            <option data-type="" value="">All Activities</option>
                             @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>)ViewBag.Activities)
                             {
                                 <option value="@po.ID" data-type="@((int)po.ParticipationObjectTypeId)">@po.Name</option>
