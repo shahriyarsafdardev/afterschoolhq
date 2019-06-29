@@ -47,7 +47,7 @@ namespace AfterSchoolLibrary.Services
         {
             var requestor = payout.GetRequestor(msgs, dc);            
 
-            LobHelper.CreateCheck(
+            var check = LobHelper.CreateCheck(
                 description: $"Payout to {account.Name} requested {payout.Amount.ToCurrency()}",
                 accountType: paymentAccount.LegalEntityTypeId.ToLobAccountType(),
                 toName: paymentAccount.Name,
@@ -60,6 +60,7 @@ namespace AfterSchoolLibrary.Services
                 bankAccountId: LobBankAccountId,
                 amount: payout.Amount.Value,
                 memo: $"Requested {payout.DateRequested.ToShortDateString()} by {requestor.DisplayName}".MaxChars(40, "..."),
+                attachment: $"{Helpers.Utilities.BaseUrl(true)}/lob/payout/attachment/{payout.Uid.ToString()}",
                 metaData: new
                 {
                     accountUid = account.Uid,
@@ -67,6 +68,9 @@ namespace AfterSchoolLibrary.Services
                     approvedBy = loggedInUser.Uid
                 },
                 msgs: msgs);
+
+            payout.SetExternalPayoutId(check.Id, loggedInUser, msgs, dc);
+
         }
     }
 }

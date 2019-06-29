@@ -234,5 +234,13 @@ namespace AfterSchoolLibrary.Services
             transaction.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(transaction.Save(dc));
         }
+
+        public static void SetExternalPayoutId(this Payout payout, string externalPayoutId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            payout.ExternalPayoutId = externalPayoutId;
+            payout.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            payout.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(payout.Save(dc));
+        }
     }
 }
