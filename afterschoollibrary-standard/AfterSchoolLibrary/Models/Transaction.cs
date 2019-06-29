@@ -350,10 +350,25 @@ namespace AfterSchoolLibrary.Models
 
         public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
+            return LoadByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, start, length, msgs, dc);
+        }
+
+        public static List<Transaction> LoadByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return LoadByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, participationObjects, start, length, msgs, dc);
+        }
+
+        private static List<Transaction> LoadByBillerOrPayerAccountId(int? BillerAccountId, int? PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+
+            if (BillerAccountId.HasValue)
+                dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+
+            if (PayerAccountId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -363,11 +378,13 @@ namespace AfterSchoolLibrary.Models
 
             if (participationObjects.IsNotEmpty() && participationObjects.Count > 0)
                 dq.Criterias.Add(
-                    GetParticipationObjectQuery(participationObjects), 
-                    0, 
+                    GetParticipationObjectQuery(participationObjects),
+                    0,
                     DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
 
+            dq.OrderBys.Add(ObjectMap["Description"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
+
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
@@ -399,61 +416,27 @@ namespace AfterSchoolLibrary.Models
             return activityPaymentQuery;
         }
 
-        public static List<Transaction> LoadByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
-
-            if (startDate.HasValue)
-                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-
-            if (endDate.HasValue)
-                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-
-            if (participationObjects.IsNotEmpty() && participationObjects.Count > 0)
-                dq.Criterias.Add(
-                    GetParticipationObjectQuery(participationObjects),
-                    0,
-                    DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-
-            dq.OrderBys.Add(ObjectMap["Description"], OrderByDirectionEnum.Ascending);
-            dq.OrderBys.Add(ObjectMap["CreateDate"], OrderByDirectionEnum.Descending);
-
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
         public static int GetCountByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
-
-            if (startDate.HasValue)
-                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-
-            if (endDate.HasValue)
-                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-
-            if (participationObjects.IsNotEmpty() && participationObjects.Count > 0)
-                dq.Criterias.Add(
-                    GetParticipationObjectQuery(participationObjects),
-                    0,
-                    DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
-
-            return dq.GetCount();
+            return GetCountByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, msgs, dc);
         }
 
         public static int GetCountByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
+            return GetCountByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, participationObjects, msgs, dc);
+        }
+
+        private static int GetCountByBillerOrPayerAccountId(int? BillerAccountId, int? PayerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
+
+            if (BillerAccountId.HasValue)
+                dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId.Value);
+
+            if (PayerAccountId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId.Value);
 
             if (startDate.HasValue)
                 dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
@@ -471,10 +454,25 @@ namespace AfterSchoolLibrary.Models
 
         public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
+            return GetParticipationObjectsByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, msgs, dc);
+        }
+
+        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return GetParticipationObjectsByBillerOrPayerAccountId(null, PayerAccountId, startDate, endDate, msgs, dc);
+        }
+
+        private static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByBillerOrPayerAccountId(int? billerAccountId, int? payerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["BillerAccountId"], BillerAccountId);
+
+            if (billerAccountId.HasValue)
+                dq.Criterias.Add(ObjectMap["billerAccountId"], billerAccountId.Value);
+
+            if (payerAccountId.HasValue)
+                dq.Criterias.Add(ObjectMap["PayerAccountId"], payerAccountId.Value);
 
             dq.Joins.Add(ActivityPayment.ObjectMap["TransactionId"], ObjectMap["ID"], DatabaseJoinTypeEnum.InnerJoin);
 
@@ -490,36 +488,19 @@ namespace AfterSchoolLibrary.Models
             var results = dq.Select(msgs);
             var list = new List<(int, ParticipationObjectType, string)>();
             if (results.Rows.Count > 0)
-                foreach(DataRow row in results.Rows)
-                    list.Add(((int)row[0], (ParticipationObjectType)row[1], new ParticipationObject((int)row[0], (ParticipationObjectType)row[1]).Name));
-
-            return list;
-
-        }
-
-        public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)> GetParticipationObjectsByPayerAccountId(int PayerAccountId, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["PayerAccountId"], PayerAccountId);
-
-            dq.Joins.Add(ActivityPayment.ObjectMap["TransactionId"], ObjectMap["ID"], DatabaseJoinTypeEnum.InnerJoin);
-
-            dq.SelectParameters.Clear();
-            dq.SelectParameters.Add(ActivityPayment.ObjectMap["ParticipationObjectId"]);
-            dq.SelectParameters.Add(ActivityPayment.ObjectMap["ParticipationObjectTypeId"]);
-
-            if (startDate.HasValue)
-                dq.Criterias.Add(ObjectMap["CreateDate"], startDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
-            if (endDate.HasValue)
-                dq.Criterias.Add(ObjectMap["CreateDate"], endDate.Value, DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-
-            var results = dq.Select(msgs);
-            var list = new List<(int, ParticipationObjectType,string)>();
-            if (results.Rows.Count > 0)
                 foreach (DataRow row in results.Rows)
-                    list.Add(((int)row[0], (ParticipationObjectType)row[1], new ParticipationObject((int)row[0], (ParticipationObjectType)row[1]).Name));
+                    list.Add((
+                            (int)row[0],
+                            (ParticipationObjectType)row[1],
+                            new ParticipationObject
+                            (
+                                participationObjectId: (int)row[0], 
+                                participationObjectType: (ParticipationObjectType)row[1],
+                                loadAllDetails: false,
+                                msgs: msgs,
+                                dc: dc
+                            ).Name
+                        ));
 
             return list;
         }
