@@ -3,38 +3,31 @@
 ## Local Requirements
 
 - Windows 10
-- .NET Framework 4.6.2+
+- .NET Framework 4.7.2
 - SQL Server Express
 - Visual Studio
 - .NET Standard SDK
+- .NET Core 2.0
 
 ## SQL Server Installation and Setup
 
 - Install SQL Server Database
-- Don't do a `named instance` instead select `default instance`
+- Do NOT do a `named instance` instead select `default instance`
 - Turn on Mixed Mode Authentication - required for the local app to access the database
 - Install SQL Server Management Studio (SSMS)
 - Login to database using SSMS
 - Create new `AfterSchool` and `AfterSchoolTest` database
-- Create `AfterSchoolUser` and give it Owner access to `AfterSchool` and `AfterSchoolTest` database
+- Create `AfterSchoolUser` in the global area for db users `Security > Logins` and give it Owner access to `AfterSchool` and `AfterSchoolTest` database
 - Give it the password found in `Database.cs` for the local and test environments
 - Turn off the password policy
 - Select `User Mapping` in left menu, click on `AfterSchool` and `AfterSchoolTest`, check the `db owner` checkbox, save the user
 
 ## Getting up and running
 
-- Turn on the ASP.NET State Service
-	- Go to start menu
-	- Type "Services"
-	- Open Services (should be top choice)
-	- Go to ASP.NET State Service
-	- Open Properties
-	- Setup Startup Type to Automatic
-	- "Start" the service
-- Open up the code - `AfterSchoolHQ - Darye.sln`
+- Open up the project using - `AfterSchoolHQ - Darye.sln`
 - Set `after-school-hq` the start up project
 - Run the Code - `after-school-hq` (Hit IIS Express button at the top middle of the screen)
-- Run `/db/update` to create tables and create default admin account for logging in
+- Go to `/db/update` in your browser to create tables and seed the database.
 - Go to `/login` and use default admin credentials found in `DBController.cs`
 
 ## Resources
