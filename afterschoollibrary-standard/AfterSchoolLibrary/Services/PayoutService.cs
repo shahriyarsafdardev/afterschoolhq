@@ -13,7 +13,7 @@ namespace AfterSchoolLibrary.Services
         public static Payout CreateNew(Account account, List<Transaction> transactions, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Payout payout = null;
-            decimal amount = transactions.Sum(transaction => transaction.GetBillerAmount());
+            var amount = transactions.Sum(transaction => transaction.GetBillerAmount());
 
             Database.ExecuteTransaction
             (
