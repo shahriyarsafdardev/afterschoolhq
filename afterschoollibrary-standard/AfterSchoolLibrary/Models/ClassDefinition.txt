@@ -1373,6 +1373,7 @@ loadmethod: BillerAccountId|TransactionTypeId, List<>
 loadmethod: PayerAccountId|TransactionTypeId, List<>
 loadmethod: StripeChargeOrRefundId
 loadmethod: OriginalTransactionId, List<>
+loadmethod: PayoutId, List<>
 [end]
 
 [begin]

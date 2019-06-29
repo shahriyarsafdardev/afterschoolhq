@@ -1726,7 +1726,7 @@ namespace AfterSchoolLibrary.Services
 
         #region Finance
 
-        public static Payout RequestNewPayout(this Account account, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Payout RequestNewPayout(this Account account, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var paymentType = PaymentType.NotSet;
 
@@ -1746,7 +1746,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             if (paymentType != PaymentType.NotSet)
-                return PayoutService.CreateNew(account, PayoutStatus.Requested, amount, paymentType, loggedInUser, msgs, dc);
+                return PayoutService.CreateNew(account, transactions, PayoutStatus.Requested, paymentType, loggedInUser, msgs, dc); 
             
             msgs.Add("No payment account defined", MessageType.UserError);
 

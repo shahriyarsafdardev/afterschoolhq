@@ -532,6 +532,7 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_PayerAccountId_TransactionTypeId ON [Transaction] (PayerAccountId,TransactionTypeId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_StripeChargeOrRefundId ON [Transaction] (StripeChargeOrRefundId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_OriginalTransactionId ON [Transaction] (OriginalTransactionId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Transaction_PayoutId ON [Transaction] (PayoutId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId ON [Payout] (AccountId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_AccountId_PayoutStatusId ON [Payout] (AccountId,PayoutStatusId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Payout_PayoutStatusId ON [Payout] (PayoutStatusId)"));

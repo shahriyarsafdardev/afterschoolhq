@@ -1,31 +1,48 @@
-﻿using AfterSchoolLibrary.Models;
+﻿
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class PayoutService
     {
-        public static Payout CreateNew(Account account, PayoutStatus payoutStatus, decimal amount, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Payout CreateNew(Account account, List<Transaction> transactions, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var payout = new Payout()
-            {
-                AccountId = account.ID,
-                Amount = amount,
-                CreateDate = DateTime.UtcNow,
-                CreatedBy = loggedInUser?.ID.IfEmpty(0),
-                LastModifiedDate = DateTime.UtcNow,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                PaymentTypeId = paymentType,
-                PayoutStatusId = payoutStatus,
-                DateRequested = DateTime.UtcNow,
-                RequestedBy = loggedInUser.ID
-            };
+            Payout payout = null;
+            decimal amount = transactions.Sum(transaction => transaction.GetBillerAmount());
 
-            msgs.AddRange(payout.Save(dc));
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    payout = new Payout()
+                    {
+                        AccountId = account.ID,
+                        Amount = amount,
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                        LastModifiedDate = DateTime.UtcNow,
+                        LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                        PaymentTypeId = paymentType,
+                        PayoutStatusId = payoutStatus,
+                        DateRequested = DateTime.UtcNow,
+                        RequestedBy = loggedInUser?.ID.IfEmpty(0)
+                    };
+
+                    amsgs.AddRange(payout.Save(adc));
+
+                    payout.AddTransactions(transactions, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+           
 
             return payout;
         }
@@ -198,6 +215,24 @@ namespace AfterSchoolLibrary.Services
         public static Account GetAccount(this Payout payout, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Account.Load(payout.AccountId.Value, msgs, dc);
+        }
+
+        public static List<Transaction> GetTransactions(this Payout payout, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Transaction.LoadByPayoutId(payout.ID.Value, msgs, dc);
+        }
+
+        public static void AddTransactions(this Payout payout, List<Transaction> transactions, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            transactions.ForEach(transaction => payout.AddTransaction(transaction, loggedInUser, msgs, dc));
+        }
+
+        public static void AddTransaction(this Payout payout, Transaction transaction, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            transaction.PayoutId = payout.ID.Value;
+            transaction.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            transaction.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(transaction.Save(dc));
         }
     }
 }
