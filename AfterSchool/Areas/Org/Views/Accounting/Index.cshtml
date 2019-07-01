@@ -102,11 +102,16 @@
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <select id="activities" class="form-control">
-                            <option data-type="" value="">All Activities</option>
-                            @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>)ViewBag.Activities)
+                        <select id="participationObjects" class="form-control">
+                            <option data-type="" value="">Activities</option>
+                            @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>)ViewBag.ParticipationObjects)
                             {
-                                <option value="@po.ID" data-type="@((int)po.ParticipationObjectTypeId)">@po.Name</option>
+                                var selected = "";
+                                if (po.ID.ToString() == Request["poid"] && ((int)po.ParticipationObjectTypeId).ToString() == Request["poTypeId"])
+                                {
+                                    selected = "selected=\"selected\"";
+                                }
+                                <option value="@po.ID" data-type="@((int)po.ParticipationObjectTypeId)" @selected>@po.Name</option>
                             }
                         </select>
                     </div>
@@ -118,10 +123,10 @@
 
                 <script>
                     function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#activities').val())}&poTypeId=${encodeURIComponent($('#activities option:selected').data('type'))}`;
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
                     }
                     function DownloadToCSV() {
-                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#activities').val())}&poTypeId=${encodeURIComponent($('#activities option:selected').data('type'))}`;
+                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
                     }
 
                 </script>
@@ -194,43 +199,43 @@
                                     @transaction.GetBillerPayout().ToCurrency()
                                 </td>
 
-                                @*<td>
-                                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
-                                        {
-                                            <button onclick="openDialog('@transaction.Uid')"
-                                                    class="md-trigger"
-                                                    data-modal="modal-refund">
-                                                Refund
-                                            </button>
-                                        }
-                                    </td>*@
+                                    @*<td>
+                                            @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                            {
+                                                <button onclick="openDialog('@transaction.Uid')"
+                                                        class="md-trigger"
+                                                        data-modal="modal-refund">
+                                                    Refund
+                                                </button>
+                                            }
+                                        </td>*@
+                            </tr>
+                            
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8">There are no transactions</td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="8">There are no transactions</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
 
-        @{
-            Html.RenderPartial(
-                "~/Views/Shared/_Paging.cshtml",
-                (PagingModel)ViewBag.PagingModel,
-                new ViewDataDictionary()
-                {
+            @{
+                Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    (PagingModel)ViewBag.PagingModel,
+                    new ViewDataDictionary()
+                    {
                     { "controller", "accounting" },
                     { "action", "index" },
                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
-                }
-            );
-        }
+            }
+                );
+            }
+        </div>
     </div>
-</div>
 </div>
 
 <div id="modal-refund" class="md-modal colored-header custom-width md-effect-9">
@@ -387,7 +392,4 @@
             );
         }
     }
-    window.onload = function () {
-        document.getElementById('activities').value = '@Request["poid"]';
-    };
 </script>

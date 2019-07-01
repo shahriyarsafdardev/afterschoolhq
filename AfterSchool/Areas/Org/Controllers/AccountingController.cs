@@ -53,9 +53,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
                 poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
             }
-            
+
             // transaction count
-            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate,poFilter);
+            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate, poFilter);
             var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, poFilter);
             var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
 
@@ -70,9 +70,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
-            var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, startDate, endDate);
-            allPos.AddRange(Transaction.GetParticipationObjectsByPayerAccountId(SessionVariables.CurrentAccount.ID.Value, startDate, endDate));
-            var allParticipationObjects= allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
+            var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null);
+            allPos.AddRange(Transaction.GetParticipationObjectsByPayerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null));
+            var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
 
             // sort transactions
             allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
@@ -80,7 +80,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefundedTo(startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
-            ViewBag.Activities = allParticipationObjects;
+            ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
