@@ -666,6 +666,18 @@ loadmethod: ParentRegistrantId|AccountId, List<>
 
 [begin]
 type: Class
+name: RegistrantWebUser
+description: Maintains the relationship between a Registrant and Webuser. Meaning a Registrant can be accessed by multiple WebUsers
+inherits: BasicObject
+property: RegistrantId, int?, Int, required
+property: WebUserId, int?, Int, required
+loadmethod: RegistrantId, List<>
+loadmethod: WebUserId, List<>
+loadmethod: RegistrantId|WebUserId
+[end]
+
+[begin]
+type: Class
 name: ContactList
 description: A list of contacts. A way to group contacts together to send messages to them or invites.
 inherits: BasicLookUpObject

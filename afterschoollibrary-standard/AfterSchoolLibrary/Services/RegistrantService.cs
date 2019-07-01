@@ -280,5 +280,26 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
+        public static void AddUsersWithAccess(this Registrant registrant, List<WebUser> users, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            users.ForEach(user => registrant.AddUserWithAccess(user, loggedInUser, msgs, dc));
+        }
+
+        public static void AddUserWithAccess(this Registrant registrant, WebUser user, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (user.IsNotEmpty())
+            {
+                var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(registrant.ID.Value, user.ID.Value, msgs, dc);
+
+                if (registrantWebUser.IsEmpty())
+                    registrantWebUser = new RegistrantWebUser()
+                    {
+                        RegistrantId = registrant.ID.Value,
+                        WebUserId = user.ID.Value,
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0)                       
+                    }
+            }
+        }
     }
 }
