@@ -127,8 +127,16 @@ namespace AfterSchool.Areas.Org.Controllers
                 TotalPages = totalPages
             };
             return View(payouts);
-        }    
-        
+        }
+
+        [HttpGet]
+        public ActionResult RequestPayout(string transactionIds)
+        {
+            var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+            //SessionVariables.CurrentAccount.GetRequestPayouts(ids);
+            return null;
+        }
+
         public ActionResult DownloadCSV(string sdate, string edate)
         {
             var startDate = sdate.IsDateTime() ?
