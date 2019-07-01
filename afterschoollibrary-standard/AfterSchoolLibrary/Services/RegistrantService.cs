@@ -292,13 +292,16 @@ namespace AfterSchoolLibrary.Services
                 var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(registrant.ID.Value, user.ID.Value, msgs, dc);
 
                 if (registrantWebUser.IsEmpty())
+                {
                     registrantWebUser = new RegistrantWebUser()
                     {
                         RegistrantId = registrant.ID.Value,
                         WebUserId = user.ID.Value,
                         CreateDate = DateTime.UtcNow,
-                        CreatedBy = loggedInUser?.ID.IfEmpty(0)                       
-                    }
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0)
+                    };
+                    msgs.AddRange(registrantWebUser.Save(dc));
+                }
             }
         }
     }
