@@ -465,6 +465,7 @@
     <Compile Include="Areas\District\Controllers\ServicesController.cs" />
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
+    <Compile Include="Areas\Lob\Controllers\PayoutController.cs" />
     <Compile Include="Areas\Lob\LobAreaRegistration.cs" />
     <Compile Include="Areas\Org\Controllers\AccountController.cs" />
     <Compile Include="Areas\Org\Controllers\AccountingController.cs" />
@@ -1114,6 +1115,7 @@
     <Content Include="Areas\District\Views\Account\Team.cshtml" />
     <Content Include="Areas\District\Views\Account\TeamInvite.cshtml" />
     <Content Include="Areas\Lob\Views\web.config" />
+    <Content Include="Areas\Lob\Views\Payout\Attachment.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1575,7 +1577,6 @@
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
     <Folder Include="Areas\District\Models\" />
-    <Folder Include="Areas\Lob\Controllers\" />
     <Folder Include="Areas\Lob\Models\" />
     <Folder Include="Areas\Lob\Views\Shared\" />
     <Folder Include="Areas\Org\Models\" />
