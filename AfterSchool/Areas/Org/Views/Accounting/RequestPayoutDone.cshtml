@@ -1,0 +1,32 @@
+﻿
+@{
+    ViewBag.Title = "RequestPayoutDone";
+}
+
+    <div class="main-content">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Request Payouts
+            </div>
+            <div class="panel-body">
+                <h4>
+                    Thanks, your payment request for @ViewBag.totalAmount has been submitted,and payment will be on it's way ASAP.
+                </h4>
+                <br />
+                <br />
+                <br />
+                <div class="text-center">
+                    <button class="btn btn-primary" onclick="returnToTransactions()">
+                        Return to Transactions
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function returnToTransactions() {
+         window.location.href = `@Url.Action("Index", "accounting")`;
+    }
+</script>
+

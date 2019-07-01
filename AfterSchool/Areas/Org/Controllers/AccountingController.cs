@@ -37,11 +37,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var startDate = sdate.IsDateTime() ? 
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) : 
+            var startDate = sdate.IsDateTime() ?
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
                 new DateTime?();
-            var endDate = edate.IsDateTime() ? 
-                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) : 
+            var endDate = edate.IsDateTime() ?
+                SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
 
             // transaction count
@@ -56,7 +56,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
 
-            allTransactions.ForEach(transaction => 
+            allTransactions.ForEach(transaction =>
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
@@ -99,9 +99,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var endDate = edate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
-            
+
             var totalPayoutAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.Completed, startDate, endDate, msgs);
-            var totalPayoutCount = SessionVariables.CurrentAccount.GetPayoutCount(null, startDate, endDate);            
+            var totalPayoutCount = SessionVariables.CurrentAccount.GetPayoutCount(null, startDate, endDate);
             var payouts = SessionVariables.CurrentAccount.GetPayouts(null, startDate, endDate, start, length);
             var totalPages = Math.Ceiling(totalPayoutCount.ToDouble() / recordsPerPage).ToInteger();
 
@@ -114,7 +114,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.CanReceiveACHDeposits = SessionVariables.CurrentAccount.CanReceiveACHDeposits(msgs);
             ViewBag.CanReceiveDeposits = SessionVariables.CurrentAccount.CanReceivePaymentDeposits(msgs);
-            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs); 
+            ViewBag.MaxRequestAmount = SessionVariables.CurrentAccount.GetMaxAmountAvailableForPayout(msgs);
             ViewBag.LastPayout = SessionVariables.CurrentAccount.GetLastPayout(msgs);
             ViewBag.TotalPayoutAmount = totalPayoutAmount;
             ViewBag.TotalPendingAmount = SessionVariables.CurrentAccount.GetTotalPayoutAmount(PayoutStatus.InProgress, msgs: msgs);
@@ -130,10 +130,29 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult RequestPayout(string transactionIds)
+        public ActionResult RequestPayout(string id)
         {
-            var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
-            //SessionVariables.CurrentAccount.GetRequestPayouts(ids);
+            if (!string.IsNullOrEmpty(id))
+            {
+                var ids = id.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var transactions = Transaction.LoadList(ids);
+                ViewBag.tranIds = id;
+                return View(transactions);
+            }
+            return null;
+        }
+
+        public ActionResult RequestPayoutDone(string id)
+        {
+            if (!string.IsNullOrEmpty(id))
+            {
+                var msgs = new SystemMessages();
+                var ids = id.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var transactions = Transaction.LoadList(ids).ToList();
+                ViewBag.totalAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
+                SessionVariables.CurrentAccount.RequestNewPayout(transactions, loggedInUser: SessionVariables.CurrentUser, msgs);
+                return View();
+            }
             return null;
         }
 
@@ -176,7 +195,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 row.Add(t.GetTransactionNumber());
                 row.Add(t.CreateDate.ToShortDateTimeString());
                 row.Add(t.GetPayerAccount().Name);
-                row.Add(t.IsCharge()? registrant.DisplayName:t.GetBillerAccount().Name);
+                row.Add(t.IsCharge() ? registrant.DisplayName : t.GetBillerAccount().Name);
                 row.Add(participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", "));
                 row.Add(t.GetBillerAmount().ToCurrency());
                 row.Add(t.GetFeesChargedToBiller().ToCurrency());

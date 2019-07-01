@@ -267,7 +267,7 @@
      }
 
       function getRequestPayout() {
-         window.location.href = `@Url.Action("RequestPayout", "accounting")?transactionIds=${this.selectedTransactions.join()}`;
+         window.location.href = `@Url.Action("RequestPayout", "accounting")/${this.selectedTransactions.join()}`;
        }
 
     function openDialog(newUid) {
