@@ -15,17 +15,15 @@ namespace AfterSchool.Areas.Lob.Controllers
         // GET: Lob/Payout
         public ActionResult Attachment(string id)
         {
-            //http://localhost:54849/Lob/Payout/attachment/F6CA8D1B-3D0C-4685-B069-DEA9C4F2C9ED
+            var transactions = new List<Transaction>();
             if (id.IsGuid())
             {
                 var msgs = new SystemMessages();
                 var payout = Payout.LoadByUid(id.ToGuid(), msgs);
-                //var transactions = payout.GetTransactions(msgs);
-
-
+                transactions = payout.GetTransactions(msgs);
+                ViewBag.TotalPayout = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
             }
-
-            return View();
+            return View(transactions);
         }
     }
 }
