@@ -2,8 +2,9 @@
 @{
     ViewBag.Title = "RequestPayoutDone";
 }
-
+@{Html.RenderPartial("OrgAccountHeader");}
     <div class="main-content">
+        @{ Html.RenderPartial("_AccountingHeader"); }
         <div class="panel panel-default">
             <div class="panel-heading">
                 Request Payouts
