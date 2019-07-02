@@ -16,12 +16,13 @@ namespace AfterSchool.Controllers
     public class AccountController : BaseController
     {
 
-        #region GetStarted
+        #region GetStartedParent
 
-        private List<FormQuestion> GetStartedViewBag(string regaccount, SystemMessages msgs)
+        private List<FormQuestion> GetStartedParentViewBag(SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
-            var personalContactGroup = form.GetQuestionGroups(msgs).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First();
+            var personalContactGroup = form.GetQuestionGroups(msgs)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);
 
             questions = questions.Where(question =>
@@ -59,7 +60,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("select");
 
             var msgs = new SystemMessages();
-            var questions = GetStartedViewBag(regaccount, msgs);
+            var questions = GetStartedParentViewBag(msgs);
 
             ViewBag.Messages = msgs;
 
@@ -73,7 +74,8 @@ namespace AfterSchool.Controllers
         public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications)
         {
             var msgs = new SystemMessages();
-            var questions = GetStartedViewBag(regaccount, msgs);
+
+            var questions = GetStartedParentViewBag(msgs);
 
             questions.ForEach(question => {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
@@ -81,7 +83,7 @@ namespace AfterSchool.Controllers
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
 
-                switch(question.QuestionDataTypeId)
+                switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantMobilePhone:
                     case QuestionDataType.RegistrantHomePhone:
@@ -137,6 +139,7 @@ namespace AfterSchool.Controllers
 
                         // create account
                         account = user.AddNewRegistrantAccount(
+                            userType: UserType.Owner,
                             isActive: true,
                             isAfterSchool: SessionVariables.IsAfterSchool.Value,
                             loggedInUser: user,
@@ -183,11 +186,9 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("addhomeaddress");
 
-            ViewBag.Messages = msgs;
-
             return View(qvms);
         }
-
+       
         #endregion
 
         #region AddHomeAddress
@@ -1407,6 +1408,237 @@ namespace AfterSchool.Controllers
         public ActionResult ThankYou(string id)
         {
             return HandleIsLoggedIn() ?? ThankYouActionGet(id);
+        }
+
+        #endregion
+
+        #region GetStartedStudent
+
+        private List<FormQuestion> GetStartedStudentViewBag(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var personalContactGroup = form.GetQuestionGroups(msgs)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalContactGroup.GetAllQuestions(msgs);
+
+            questions = questions.Where(question =>
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantMobilePhone &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
+                )
+                .ToList();
+
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        question.IsRequired = true;
+                        break;
+                }
+            });
+
+            ViewBag.Cart = SessionVariables.Cart;
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult GetStartedStudent(string regaccount)
+        {
+            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
+                return RedirectToAction("select");
+
+            var msgs = new SystemMessages();
+            var questions = GetStartedStudentViewBag(msgs);
+
+            ViewBag.Messages = msgs;
+
+            if (regaccount.IsGuid())
+                ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
+
+            return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult GetStartedStudent(string regaccount, string password1, string password2, string agree)
+        {
+            var msgs = new SystemMessages();
+
+            var questions = GetStartedStudentViewBag(msgs);
+
+            questions.ForEach(question => {
+                var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                if (question.IsRequired && answer.IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+            });
+
+            if (password1.IsEmpty())
+                msgs.Add("Password 1 is required", MessageType.UserError);
+            if (password1.Length < 8)
+                msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
+            if (password2.IsEmpty())
+                msgs.Add("Password 2 is required", MessageType.UserError);
+            if (password1 != password2)
+                msgs.Add("Passwords must match", MessageType.UserError);
+            if (!agree.IsBoolean())
+                msgs.Add("You must agree to the terms of service", MessageType.UserError);
+
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (msgs.HasNoErrors())
+            {
+                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+
+                WebUser user = null;
+                Account account = null;
+
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // create user
+                        user = WebUserService.CreateNew(
+                            firstName: firstName.Value,
+                            lastName: lastName.Value,
+                            email: email.Value.Trim(),
+                            phone: null,
+                            password: password1,
+                            isActive: true,
+                            isRegistered: true,
+                            isVerified: false,
+                            allowTextMessages: false,
+                            loggedInUser: null,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        // create account
+                        account = user.AddNewRegistrantAccount(
+                            userType: UserType.Student,
+                            isActive: true,
+                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                            loggedInUser: user,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        // create student registrant record
+                        var registrant = account.CreateRegistrant(
+                            registrantOwner: user,
+                            canBeAccessedBy: user.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: null, // probably should have a school location id
+                            loggedInUser: user,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        // add answers to student registrant record
+                        qvms.ForEach(qvm =>
+                        {
+                            registrant.AddAnswer(
+                                answerText: qvm.Value.IfEmpty("").Trim(),
+                                question: qvm.Question,
+                                loggedInUserId: user.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+                    },
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+                        SessionVariables.CurrentUser = user;
+                        SessionVariables.CurrentAccount = account;
+                        SessionVariables.AccountUserType = user.GetUserType(account);
+                    },
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("inviteparent");
+
+            return View(qvms);
+        }
+
+        #endregion
+
+        #region InviteParent
+
+        private List<FormQuestion> InviteParentViewBag(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var personalContactGroup = form.GetQuestionGroups(msgs)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = personalContactGroup.GetAllQuestions(msgs);
+
+            questions = questions.Where(question =>
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantMobilePhone &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
+                    question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
+                )
+                .ToList();
+
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        question.IsRequired = true;
+                        break;
+                }
+            });
+
+            ViewBag.Cart = SessionVariables.Cart;
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult InviteParent()
+        {
+            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
+                return RedirectToAction("select");
+
+            var msgs = new SystemMessages();
+            var questions = InviteParentViewBag(msgs);
+
+            ViewBag.Messages = msgs;
+
+            return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult InviteParent(string id)
+        {
+            // create parent account
+            // set as the owner of account
+            // give parent access to child registrant
+            // create parent as a registrant
+            // send invite to parent
+
+            return View();
         }
 
         #endregion
