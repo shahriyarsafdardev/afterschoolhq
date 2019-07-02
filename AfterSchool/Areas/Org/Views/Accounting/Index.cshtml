@@ -121,7 +121,10 @@
                     <thead>
                         <tr>
                             <th>
-                                 <input type="checkbox" id="selectAllTransaction" onchange="selectAllTransaction(this)" />
+                                <span class="am-checkbox">
+                                    <input type="checkbox" id="selectAllTransaction" onchange="selectAllTransaction(this)" />
+                                    <label for="selectAllTransaction"></label>
+                                </span>
                             </th>
                             <th>ID</th>
                             <th>Created On</th>
@@ -145,9 +148,11 @@
 
                                 <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
                                     <td>
-                                        <input type="checkbox" id="selectTransaction" class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
+                                        <span class="am-checkbox">
+                                            <input type="checkbox" id="selectTransaction-@transaction.ID" class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
+                                            <label for="selectTransaction-@transaction.ID"></label>
+                                        </span>
                                     </td>
-
                                     <td>
                                         @transaction.GetTransactionNumber()
                                     </td>
@@ -212,7 +217,7 @@
                                     { "controller", "accounting" },
                                     { "action", "index" },
                                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
-        }
+    }
                 );
             }
         </div>

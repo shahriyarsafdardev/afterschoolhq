@@ -1,19 +1,41 @@
 ﻿@model List<Transaction>
+@{ 
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
 
+@{Html.RenderPartial("OrgAccountHeader");}
 <div class="main-content">
+    @{ Html.RenderPartial("_AccountingHeader"); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
     <div class="panel panel-default">
         <div class="panel-heading">
-            Request Payouts
+            <strong>Request Payouts - Preview</strong>
             <div class="pull-right">
                 <label>Total: </label>
                 <strong>
-                    @Model.Sum(po => po.GetBillerPayout()).ToCurrency()
+                    @ViewBag.TotalPayoutAmount
                 </strong>
-                <button class="btn btn-primary" onclick="requestPayout('@ViewBag.tranIds')">
-                    Request Payouts
-                </button>
+
             </div>
+
             <div class="clearfix"></div>
+            <div>
+                <p>Please review the following transactions to ensure all of the correct transactions are listed</p>
+            </div>
+            <div>
+                <div class="pull-left">
+                    <button class="btn btn-default" onclick="returnToTransaction()">
+                       < Cancel
+                    </button>
+                </div>
+                <span class="pull-right">
+                    <button class="btn btn-primary" onclick="requestPayout('@ViewBag.TranIds')">
+                        Complete Payout Request >
+                    </button>
+                </span>
+            </div>
+            <br />
         </div>
         <div class="panel-body">
 
@@ -69,7 +91,6 @@
                                 <td class="text-center">
                                     @transaction.GetBillerPayout().ToCurrency()
                                 </td>
-
                             </tr>
                         }
                     </tbody>
