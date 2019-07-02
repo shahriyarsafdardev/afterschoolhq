@@ -1503,6 +1503,7 @@ namespace AfterSchool.Controllers
 
                 WebUser user = null;
                 Account account = null;
+                Registrant registrant = null;
 
                 Database.ExecuteTransaction
                 (
@@ -1533,7 +1534,7 @@ namespace AfterSchool.Controllers
                             dc: adc);
 
                         // create student registrant record
-                        var registrant = account.CreateRegistrant(
+                        registrant = account.CreateRegistrant(
                             registrantOwner: user,
                             canBeAccessedBy: user.AsList(),
                             registrantType: RegistrantType.Individual,
@@ -1562,6 +1563,7 @@ namespace AfterSchool.Controllers
                         SessionVariables.CurrentUser = user;
                         SessionVariables.CurrentAccount = account;
                         SessionVariables.AccountUserType = user.GetUserType(account);
+                        SessionVariables.CurrentRegistrant = registrant;
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
@@ -1632,16 +1634,44 @@ namespace AfterSchool.Controllers
         [HttpPost]
         public ActionResult InviteParent(string id)
         {
-            // create parent account
-            // set as the owner of account
-            // give parent access to child registrant
-            // create parent as a registrant
-            // send invite to parent
+            // Get parent info from page
+            //  var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+            //  var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+            //  var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+            //  var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
+
+            // invite parent: 
+            //  var parent = SessionVariables.CurrentAccount.InviteUser()
+            //      UserType should be set to UserType.Owner
+
+            // Create parent registrant
+            //  SessionVariables.CurrentAccount.CreateRegistrant()
+            //      Parent registrant owner should be the new parent user
+            //      Parent Registrant account can only be accessed by the new parent user
+
+            // Give the parent access to the student registrant record
+            //  SessionVariables.CurrentRegistrant.AddUserWithAccess(parentUser)
+            
+            // if no errors go to RegisterStudent page
+
+            // If errors display current page and ensure msgs object is passed into the viewbag
 
             return View();
         }
 
         #endregion
+
+        #region RegisterStudent
+
+        // Add Get and post actions
+
+        #endregion
+
+        #region RegisterStudentThanks
+
+         // add get action
+
+        #endregion  
 
         #region Helpers
 
