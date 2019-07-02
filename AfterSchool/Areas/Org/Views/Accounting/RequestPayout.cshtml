@@ -10,22 +10,17 @@
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
     <div class="panel panel-default">
         <div class="panel-heading">
-            <strong>Request Payouts - Preview</strong>
+            Request Payouts - Preview
             <div class="pull-right">
-                <label>Total: </label>
-                <strong>
-                    @ViewBag.TotalPayoutAmount
-                </strong>
-
+                    Total: @ViewBag.TotalPayoutAmount
             </div>
-
             <div class="clearfix"></div>
-            <div>
+            <div style="font-size: 13px">
                 <p>Please review the following transactions to ensure all of the correct transactions are listed</p>
             </div>
             <div>
                 <div class="pull-left">
-                    <button class="btn btn-default" onclick="returnToTransaction()">
+                    <button class="btn btn-default" onclick="returnToTransactions()">
                        < Cancel
                     </button>
                 </div>
@@ -109,6 +104,9 @@
     function requestPayout(ids) {
         $("#TransactionIds").val(ids);
         $("#requestPayoutForm").submit();
+        }
+     function returnToTransactions() {
+         window.location.href = `@Url.Action("Index", "accounting")`;
     }
 </script>
 
