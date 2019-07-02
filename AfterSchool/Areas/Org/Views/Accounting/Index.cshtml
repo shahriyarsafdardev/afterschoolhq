@@ -21,7 +21,7 @@
         <div class="panel-heading">
             <i class="s7-note2"></i> Transactions
             <div class="pull-right">
-                <button class="btn btn-primary md-trigger" id="request-payout" disabled="true" onclick="getRequestPayout()" data-modal="modal-payout-request">
+                <button class="btn btn-primary md-trigger" id="request-payout" disabled="true" onclick="requestPayout()" data-modal="modal-payout-request">
                     Request Payouts
                 </button>
             </div>
@@ -256,6 +256,9 @@
     </div>
 </div>
 
+<form action="@Url.Action("RequestPayout","Accounting")" id="requestPayoutForm" method="post">
+    @Html.Hidden("TransactionIds")
+</form>
 
 <script>
      var selectedTransactions = [];
@@ -266,9 +269,10 @@
         $("#confirm-refund-btn").attr('disabled', !isValid);
      }
 
-      function getRequestPayout() {
-         window.location.href = `@Url.Action("RequestPayout", "accounting")/${this.selectedTransactions.join()}`;
-       }
+    function requestPayout() {
+        $("#TransactionIds").val(this.selectedTransactions.join());
+        $("#requestPayoutForm").submit();
+    }
 
     function openDialog(newUid) {
         $("#modal-refund").data("uid", newUid);

@@ -129,25 +129,30 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(payouts);
         }
 
-        [HttpGet]
-        public ActionResult RequestPayout(string id)
+        [HttpPost]
+        public ActionResult RequestPayout()
         {
-            if (!string.IsNullOrEmpty(id))
+            var transactionIds = Request.Form["TransactionIds"];
+
+            if (!string.IsNullOrEmpty(transactionIds))
             {
-                var ids = id.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
                 var transactions = Transaction.LoadList(ids);
-                ViewBag.tranIds = id;
+                ViewBag.tranIds = transactionIds;
                 return View(transactions);
             }
             return null;
         }
 
-        public ActionResult RequestPayoutDone(string id)
+        [HttpPost]
+        public ActionResult RequestPayoutDone()
         {
-            if (!string.IsNullOrEmpty(id))
+            var transactionIds = Request.Form["TransactionIds"];
+
+            if (!string.IsNullOrEmpty(transactionIds))
             {
                 var msgs = new SystemMessages();
-                var ids = id.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+                var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
                 var transactions = Transaction.LoadList(ids).ToList();
                 ViewBag.totalAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
                 SessionVariables.CurrentAccount.RequestNewPayout(transactions, loggedInUser: SessionVariables.CurrentUser, msgs);

@@ -1,6 +1,4 @@
 ﻿@model List<Transaction>
-@{
-}
 
 <div class="main-content">
     <div class="panel panel-default">
@@ -12,7 +10,7 @@
                     @Model.Sum(po => po.GetBillerPayout()).ToCurrency()
                 </strong>
                 <button class="btn btn-primary" onclick="requestPayout('@ViewBag.tranIds')">
-                    Request Payouts     
+                    Request Payouts
                 </button>
             </div>
             <div class="clearfix"></div>
@@ -82,9 +80,14 @@
     </div>
 </div>
 
+<form action="@Url.Action("RequestPayoutDone","Accounting")" id="requestPayoutForm" method="post">
+    @Html.Hidden("TransactionIds")
+</form>
+
 <script>
     function requestPayout(ids) {
-         window.location.href = `@Url.Action("RequestPayoutDone", "accounting")/${ids}`;
+        $("#TransactionIds").val(ids);
+        $("#requestPayoutForm").submit();
     }
 </script>
 
