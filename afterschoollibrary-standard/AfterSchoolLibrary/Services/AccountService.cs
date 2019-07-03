@@ -894,15 +894,16 @@ namespace AfterSchoolLibrary.Services
 
                     // create student registrant record associated to this account
                     student = account.CreateRegistrant(
-                        associatedUser: null,
-                        registrantType: RegistrantType.Individual,
-                        isMaster: false,
-                        isParentOrGuardian: false,
-                        allowTextMessages: false,
-                        schoolLocationId: location?.ID,
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
+                            registrantOwner: null,
+                            canBeAccessedBy: null,
+                            registrantType: RegistrantType.Individual,
+                            isMaster: false,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: location?.ID,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
 
                     // create a registration
                     var registration = student.AddRegistration(
