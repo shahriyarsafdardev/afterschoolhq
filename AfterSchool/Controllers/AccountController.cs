@@ -1664,14 +1664,23 @@ namespace AfterSchool.Controllers
         #region RegisterStudent
 
         // Add Get and post actions
+        // in the post action, 
+        //  Copy student information to ParticipationObject.OwnerAccount using SessionVariables.CurrentRegistrant.CopyToAccount();
+        //      
+        // Create a registration for student - use accountRegistrantCopy.AddRegistration() (we're copying the registration to the provider's account)
+        //  Check lines 1087 - 1104
+        //  Set completionstatus to RequiresParentSignature (since this is a student registering)
+        //
+        // Complete Registration (without payment)
+        //  check line 1206
 
         #endregion
 
         #region RegisterStudentThanks
 
-         // add get action
+        // add get action
 
-        #endregion  
+        #endregion
 
         #region Helpers
 
