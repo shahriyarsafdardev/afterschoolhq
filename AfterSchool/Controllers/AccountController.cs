@@ -1620,9 +1620,6 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult InviteParent()
         {
-            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
-                return RedirectToAction("select");
-
             var msgs = new SystemMessages();
             var questions = InviteParentViewBag(msgs);
 
