@@ -1572,7 +1572,7 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("inviteparent");
-
+            ViewBag.Messages = msgs;
             return View(qvms);
         }
 
