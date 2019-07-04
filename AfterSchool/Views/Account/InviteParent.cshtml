@@ -2,18 +2,26 @@
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Invite Parent";
+    var cart = (Cart)ViewBag.Cart;
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
+<div class="reg-header">
+    <div>
+        @foreach (var item in cart.GetCartItems())
+        {
+            <div>
+                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
+            </div>
+        }
+    </div>
+</div>
 
 <div>
     <div class="am-content">
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="text-center">
-                    <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" width="350px" class="logo-img"></a>
-                </div>
-            </div>
             <div class="panel-body">
                 <div class="text-center">
                     <h5>Enter your Parent/Guardian Info</h5><br />
@@ -36,7 +44,7 @@
 </div>
 
 <script>
-     PageEvent.add(PageEvent.AFTER_INIT, function () {
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#invite-parent-form').submit(function () {
             $('#btn-invite-parent').html('Saving...');
             $('#btn-invite-parent').prop('disabled', true);
