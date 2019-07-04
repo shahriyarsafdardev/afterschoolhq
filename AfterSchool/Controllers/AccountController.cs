@@ -1653,20 +1653,20 @@ namespace AfterSchool.Controllers
                      message: null,
                      UserType.Owner,
                      SessionVariables.CurrentUser,
-                     msgs
-                 );
+                     msgs);
                      // Create parent registrant
                      SessionVariables.CurrentAccount.CreateRegistrant(
                                      registrantOwner: parent,
                                      canBeAccessedBy: parent.AsList(),
                                      registrantType: RegistrantType.Individual,
                                      isMaster: true,
-                                     isParentOrGuardian: false,
+                                     isParentOrGuardian: true,
                                      allowTextMessages: false,
                                      schoolLocationId: null, // probably should have a school location id
-                                     loggedInUser: parent,
+                                     loggedInUser: SessionVariables.CurrentUser,
                                      msgs: msgs,
                                      dc: adc);
+
                      SessionVariables.CurrentRegistrant.AddUserWithAccess(
                          user: parent,
                          loggedInUser: null,
