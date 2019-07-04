@@ -1,70 +1,74 @@
 ﻿@model List<FormQuestionViewModel>
 
 @{
-    Layout = "~/Views/Shared/layouts/_fullscreen.cshtml";
-    ViewBag.Title = "Sign Up";
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Create Account";
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div class="">
     <div class="am-content">
-        <div class="">
-            <div class="sign-up" style="margin: 80px auto;">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" width="350px" class="logo-img"></a>
-                    </div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <button type="button" class="btn btn-block btn-primary btn-lg" onclick="getStarted()">Are u a parent? Click here to get started</button>
-                            <p class="text-medium-small">To get started, please enter your information as Parent or Guardian</p>
-                        </div>
-                        <form method="post"  id="student-sign-up-form" action="@Url.Action("GetStartedStudent", "account")">
-
-                            @foreach (var item in Model)
-                            {
-                            <div class="form-group">
-                                <div id="input-handler" class="input-group">
-                                    <span class="input-group-addon"><i class="icon s7-@(item.Question.Text=="Email"?"mail":"user")"></i></span>
-                                    <input type="text" class="form-control" id="@item.Name" name="@item.Name" placeholder="Your @item.Question.Text" autocomplete="off" />
-                                </div>
-                            </div>
-                            }
-                            <div class="form-group">
-                                <div>
-                                    <div class="am-checkbox">
-                                        <input type="checkbox" class="form-control" name="agree" id="agree" />
-                                        <label for="agree">I agree to recieve email messages relevant to registration and activities</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div>
-                                    <div id="password-handler" class="input-group">
-                                        <span class="input-group-addon"><i class="icon s7-lock"></i></span>
-                                        <input id="password1" name="password1" type="password" data-parsley-errors-messages-disabled="true" placeholder="Create Password" data-parsley-class-handler="#password-handler" autocomplete="off" required="required" class="form-control" data-parsley-id="8" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div>
-                                    <div id="confirm-handler" class="input-group">
-                                        <span class="input-group-addon"><i class="icon s7-lock"></i></span>
-                                        <input id="password2" name="password2" parsley-equalto="#pass1" type="password" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#confirm-handler" required="required" placeholder="Confirm" class="form-control" data-parsley-id="10" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-block btn-primary btn-lg">Next</button>
-                        </form>
-                    </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="text-center">
+                    <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" width="350px" class="logo-img"></a>
                 </div>
-                <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+            </div>
+            <div class="panel-body">
+                <div class="text-center">
+                    <p>Already have an account? <a href="#" class="md-trigger" data-modal="modal-login">Login</a></p>
+                    <p>Are u a parent? <a href="#" class="md-trigger" data-modal="modal-login">Click here to get started</a></p>
+                    <h5>To get started, please enter your information as Parent or Guardian.</h5>
+                </div>
+                <form method="post" class="form-horizontal" id="sign-up-form" action="@Url.Action("GetStartedStudent", "account")">
+                    @foreach (var item in Model)
+                    {
+                        Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", item);
+                    }
+                    <div class="form-group">
+                        <label for="password1" class="control-label col-md-3">
+                        </label>
+                        <div class="col-md-9">
+                            <div class="am-checkbox">
+                                <input type="checkbox" class="form-control" name="agree" id="agree" />
+                                <label for="agree">I agree to recieve email messages relevant to registration and activities</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password1" class="control-label col-md-3">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-6">
+                            <input id="password1" name="password1" type="password" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password1" class="control-label col-md-3">
+                            Verify Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-6">
+                            <input id="password2" name="password2" type="password" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="text-center">
+                            <button type="submit" id="btn-create-account" class="btn btn-register btn-lg">Next</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+<script>
+     PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#sign-up-form').submit(function () {
+            $('#btn-create-account').html('Saving...');
+            $('#btn-create-account').prop('disabled', true);
+        });
+    });
+</script>
 

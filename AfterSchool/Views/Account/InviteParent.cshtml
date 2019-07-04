@@ -1,46 +1,45 @@
-﻿
+﻿@model List<FormQuestionViewModel>
 @{
-    Layout = "~/Views/Shared/layouts/_fullscreen.cshtml";
-    ViewBag.Title = "Sign Up";
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Invite Parent";
+    var msgs = (SystemMessages)ViewBag.Messages;
 }
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-<div class="am-content">
-    <div class="sign-up" style="margin: 80px auto;">
+<div>
+    <div class="am-content">
         <div class="panel panel-default">
             <div class="panel-heading">
-                Invite Parent
-                <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" width="350px" class="logo-img"></a>
+                <div class="text-center">
+                    <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" width="350px" class="logo-img"></a>
+                </div>
             </div>
             <div class="panel-body">
+                <div class="text-center">
+                    <h5>Enter your Parent/Guardian Info</h5><br />
+                </div>
+                <div class="panel-body">
+                    <form method="post" id="invite-parent-form" class="form-horizontal" action="@Url.Action("InviteParent", "account")">
 
-                    <div class="form-group">
-                        <div id="nick-handler" class="input-group">
-                            <span class="input-group-addon"><i class="icon s7-user"></i></span>
-                            <input type="text" name="firstname" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#nick-handler" required="required" placeholder="First Name" autocomplete="off" class="form-control" data-parsley-id="4" />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div id="nick-handler" class="input-group">
-                            <span class="input-group-addon"><i class="icon s7-user"></i></span>
-                            <input type="text" name="lastname" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#nick-handler" required="required" placeholder="Last Name" autocomplete="off" class="form-control" data-parsley-id="4" />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div id="nick-handler" class="input-group">
-                            <span class="input-group-addon"><i class="icon s7-user"></i></span>
-                            <input type="text" name="mobilePhone" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#nick-handler" required="required" placeholder="Mobile Phone" autocomplete="off" class="form-control" data-parsley-id="4" />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div id="email-handler" class="input-group">
-                            <span class="input-group-addon"><i class="icon s7-mail"></i></span>
-                            <input type="email" id="email" name="email" data-parsley-trigger="change" data-parsley-errors-messages-disabled="true" data-parsley-class-handler="#email-handler" required="required" placeholder="E-mail" autocomplete="off" class="form-control" data-parsley-id="6" />
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-block btn-primary btn-lg">Next</button>
+                        @foreach (var item in Model)
+                        {
+                            Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", item);
+                        }
+                        <button type="submit" id="btn-invite-parent" class="btn btn-register btn-lg">Next</button>
+                    </form>
+                </div>
             </div>
+            <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
         </div>
-        <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
     </div>
+
 </div>
 
+<script>
+     PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#invite-parent-form').submit(function () {
+            $('#btn-invite-parent').html('Saving...');
+            $('#btn-invite-parent').prop('disabled', true);
+        });
+    });
+</script>
