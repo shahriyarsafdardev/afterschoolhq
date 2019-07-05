@@ -47,6 +47,19 @@
                         @foreach (var qvm in Model)
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                            if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)
+                            {
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="createUserAccount" name="createUserAccount" value="1" @(Request["createUserAccount"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
+                                            <label for="createUserAccount">
+                                                Create User Account
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         }
 
                         @{
@@ -58,7 +71,7 @@
                                    { "label", "Enter your school" },
                                    { "searchOnly", true },
                                    { "placeholderText", "Enter your school name" }
-                               }
+               }
                             );
                         }
 
