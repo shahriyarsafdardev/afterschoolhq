@@ -1613,7 +1613,7 @@ values: NotSet, Register, Apply
 [begin]
 type: Enum
 name: RegistrationAssignmentType
-values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendingPayment
+values: NotSet, Reserved, WaitingList, Applied, Invited, Declined, ReservedPendingPayment, ReservedPendingParentalConsent
 [end]
 
 [begin]

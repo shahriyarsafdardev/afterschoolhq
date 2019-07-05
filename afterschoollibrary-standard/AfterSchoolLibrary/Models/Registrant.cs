@@ -431,7 +431,7 @@ namespace AfterSchoolLibrary.Models
             if (FirstName.IsNotEmpty() && LastName.IsNotEmpty() && Email.IsNotEmpty())
                 msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
 
-            return reg;
+            return reg.Reload(msgs, dc);
         }
 
         public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -723,6 +723,11 @@ namespace AfterSchoolLibrary.Models
         public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return this.AccountId.HasValue ? Account.Load(this.AccountId.Value, msgs, dc) : null;
+        }
+
+        public WebUser GetOwner(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return this.WebUserId.HasValue ? WebUser.Load(this.WebUserId.Value, msgs, dc) : null;
         }
 
         public Registrant GetMasterRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)

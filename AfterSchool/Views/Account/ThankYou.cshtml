@@ -5,7 +5,8 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var account = (Account)ViewBag.Account;
     var registration = (Registration)ViewBag.Registration;
-    var registrant = registration.GetRegistrant();
+    var registrant = (Registrant)ViewBag.Registrant;
+    var isSelfRegistered = (bool)ViewBag.IsSelfRegistered;
     var assignmentType = registration.GetRegistrantActivities().First().AssignmentTypeId;
     var participationObject = registration.GetParticipationObject();
 }
@@ -14,9 +15,6 @@
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
 
-<div>
-
-</div>
 
 <div>
     <div class="col-md-6 col-md-offset-3 text-center">
@@ -27,7 +25,7 @@
 
                 <div class="reg-ul">
                     <p>
-                        @registrant.Name has 
+                        @(isSelfRegistered ? "You have" : $"{registrant.FirstName} has") 
                         @if(assignmentType == RegistrationAssignmentType.Applied)
                         {
                             <span>applied</span>
@@ -40,10 +38,10 @@
                         {
                             <span>been registered</span>
                         }
-                        for @participationObject.Name
+                        for <strong>@participationObject.Name</strong>
                     </p>
                     <p>
-                        <a href="@Url.Action("index", "home", new { area = "user" })" target="_blank">View your Family Account</a>
+                        <a href="@Url.Action("index", "home", new { area = "user" })" target="_blank">View your account</a>
                     </p>
                 </div>
 

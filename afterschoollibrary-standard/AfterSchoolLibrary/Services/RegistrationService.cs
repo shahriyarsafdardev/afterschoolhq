@@ -10,6 +10,14 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RegistrationService
     {
+        public static void SendConfirmation(this Registration registration, CheckoutObject checkoutObject, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, loggedInUser, false, sendBcc, dc));
+
+            if (!loggedInUser.GetMasterRegistrant(msgs, dc).IsParentOrGuardian)
+                msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, loggedInUser, true, false, dc));
+        }
+
         #region CSVReport
 
         public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats, RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body)

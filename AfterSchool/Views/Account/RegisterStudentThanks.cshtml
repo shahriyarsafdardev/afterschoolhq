@@ -1,28 +1,52 @@
-﻿
+﻿@model List<Registrant>
 @{
-    ViewBag.Title = "RegisterStudentThanks";
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Thank you";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var account = (Account)ViewBag.Account;
+    var registration = (Registration)ViewBag.Registration;
+    var registrant = registration.GetRegistrant();
+    var assignmentType = registration.GetRegistrantActivities().First().AssignmentTypeId;
+    var participationObject = registration.GetParticipationObject();
 }
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
 <div>
-    <div class="am-content">
-        <div class="panel panel-default">
+    <div class="col-md-6 col-md-offset-3 text-center">
+        <div class="panel">
             <div class="panel-body">
-                <div class="text-center">
-                    <h2>Thanks</h2><br />
-                    <br />
-                    <br />
+
+                <h1>Thank You</h1>
+
+                <div class="reg-ul">
+                    <p>
+                        @registrant.Name has
+                        @if (assignmentType == RegistrationAssignmentType.Applied)
+                        {
+                            <span>applied</span>
+                        }
+                        else if (assignmentType == RegistrationAssignmentType.WaitingList)
+                        {
+                            <span>been placed on the waiting list</span>
+                        }
+                        else
+                        {
+                            <span>been registered</span>
+                        }
+                        for @participationObject.Name
+                    </p>
+                    <p>
+                        <a href="@Url.Action("index", "home", new { area = "user" })" target="_blank">View your Account</a>
+                    </p>
                 </div>
-                <div class="panel-body">
-                    <form method="post" id="register-form" class="form-horizontal">
-                        <div class="form-group">
-                            <div class="text-center">
-                                You have been registred for Gymnastics pending parent approval<br />
-                                <br />
-                            </div>
-                        </div>
-                    </form>
+
+                <div>
+                    <a href="@account.HomePageUrl" class="btn btn-xl btn-register btn-register-xl">Register for another activity</a>
                 </div>
-                <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
+
             </div>
         </div>
     </div>

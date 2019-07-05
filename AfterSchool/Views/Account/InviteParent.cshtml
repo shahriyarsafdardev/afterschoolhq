@@ -5,6 +5,7 @@
     var cart = (Cart)ViewBag.Cart;
     var msgs = (SystemMessages)ViewBag.Messages;
 }
+
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
 
@@ -20,12 +21,20 @@
 </div>
 
 <div>
-    <div class="am-content">
-        <div class="panel panel-default">
+    <div class="col-md-12">
+        <div class="panel">
             <div class="panel-body">
-                <div class="text-center">
-                    <h5>Enter your Parent/Guardian Info</h5><br />
+
+                <div class="text-center reg-instructions">
+                    <p><strong>Step 2 of 2: Invite your parent</strong></p>
                 </div>
+                
+                <div class="text-center reg-login">
+                    <p>
+                        Please enter your parents information below in order to continue
+                    </p>
+                </div>
+
                 <div class="panel-body">
                     <form method="post" id="invite-parent-form" class="form-horizontal" action="@Url.Action("InviteParent", "account")">
 
@@ -33,14 +42,21 @@
                         {
                             Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", item);
                         }
-                        <button type="submit" id="btn-invite-parent" class="btn btn-register btn-lg">Next</button>
+
+                        <div class="padding-v-20">
+                            <button type="submit" id="btn-create-account" class="btn btn-register btn-lg">Invite &amp; Continue &raquo;</button>
+                        </div>
+
+                        <div class="row">
+                            <div class="padding-v-20 text-center">
+                                <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
-            <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
         </div>
     </div>
-
 </div>
 
 <script>

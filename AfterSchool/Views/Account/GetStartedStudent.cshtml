@@ -23,7 +23,7 @@
                 }
             </div>
             <div>
-                Enter your information below to begin your most simple registration yet.
+                Enter your information below to begin your simplest registration yet.
             </div>
         </div>
 
@@ -38,56 +38,101 @@
 
 </div>
 
-<div class="am-content">
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <div class="text-center">
-                <p>Already have an account? <a href="#" class="md-trigger" data-modal="modal-login">Login</a></p>
-                <p>Are u a parent? <a href="#" class="md-trigger" data-modal="modal-login">Click here to get started</a></p>
-                <h5>To get started, please enter your information as Parent or Guardian.</h5>
-            </div>
-            <form method="post" class="form-horizontal" id="sign-up-form" action="@Url.Action("GetStartedStudent", "account")">
-                @foreach (var item in Model)
-                {
-                    Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", item);
-                }
-                <div class="form-group">
-                    <label for="password1" class="control-label col-md-3">
-                    </label>
-                    <div class="col-md-9">
-                        <div class="am-checkbox">
-                            <input type="checkbox" class="form-control" name="agree" id="agree" />
-                            <label for="agree">I agree to recieve email messages relevant to registration and activities</label>
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+
+                <div class="text-center reg-instructions">
+                    <p><strong>Step 1 of 2: Your Student Information</strong></p>
+                </div>
+
+                <div class="text-center reg-login">
+                    <p>
+                        If this is your first time signing up, we'll keep it quick. <br />Even better: you'll only have to input your information once.
+                    </p>
+                    <br />
+                    <p>
+                        Already have an account?
+                        <a href="#" class="md-trigger" data-modal="modal-login">
+                            Login
+                        </a>
+                    </p>
+                    <p>
+                        Are you a Parent?
+                        <a href="@Url.Action("getstarted", "account", new { regaccount = Request["regaccount"] })">
+                            Register Here
+                        </a>
+                    </p>
+                </div>
+
+                <form method="post" class="form-horizontal" id="sign-up-form" action="@Url.Action("GetStartedStudent", "account")">
+
+                    @foreach (var item in Model)
+                    {
+                        Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", item);
+
+                        if (item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
+                        {
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox text-center">
+                                        <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(Request["textnotifications"] == "1" ? " checked=\"checked\" " : "") />
+                                        <label for="textnotifications">
+                                            I would like to receive text messages about my student&#39;s activities&#46;
+                                            Notifications may include information about attendance&#44; reminders&#44; and important information&#46;
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    <div class="form-group">
+                        <label for="password1" class="control-label col-md-3">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-6">
+                            <input id="password1" name="password1" type="password" class="form-control" />
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="password1" class="control-label col-md-3">
-                        Password <span class="text-danger">*</span>
-                    </label>
-                    <div class="col-md-6">
-                        <input id="password1" name="password1" type="password" class="form-control" />
+
+                    <div class="form-group">
+                        <label for="password1" class="control-label col-md-3">
+                            Verify Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-md-6">
+                            <input id="password2" name="password2" type="password" class="form-control" />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="password1" class="control-label col-md-3">
-                        Verify Password <span class="text-danger">*</span>
-                    </label>
-                    <div class="col-md-6">
-                        <input id="password2" name="password2" type="password" class="form-control" />
+
+                    <div class="row padding-v-20">
+                        <div class="col-md-6 col-md-offset-3">
+                            <div class="am-checkbox text-center">
+                                <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "") />
+                                <label for="agree">
+                                    I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and services</a> of using @UILabel.ProductName()
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <div class="text-center">
-                        <button type="submit" id="btn-create-account" class="btn btn-register btn-lg">Next</button>
+
+                    <div class="padding-v-20">
+                        <button type="submit" id="btn-create-account" class="btn btn-register btn-lg">Save &amp; Continue &raquo;</button>
                     </div>
-                </div>
-            </form>
+
+                    <div class="row">
+                        <div class="padding-v-20 text-center">
+                            <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#sign-up-form').submit(function () {

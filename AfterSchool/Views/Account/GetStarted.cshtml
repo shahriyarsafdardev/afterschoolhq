@@ -24,7 +24,7 @@
                 }
             </div>
             <div>
-                Enter your information below to begin your most simple registration yet.
+                Enter your information below to begin your simplest registration yet.
             </div>
         </div>
 
@@ -43,12 +43,28 @@
     <div class="col-md-12">
         <div class="panel">
             <div class="panel-body">
+
                 <div class="text-center reg-instructions">
                     <p><strong>Step 1 of 6: Parent / Guardian Information</strong></p>
                 </div>
+
                 <div class="text-center reg-login">
-                    <p>If this is your first time signing up, we'll keep it quick. <br />Even better: you'll only have to input parent information once.</p><br />
-                    <p>Already have an account? <a href="#" class="md-trigger" data-modal="modal-login">Login</a></p>
+                    <p>
+                        If this is your first time signing up, we'll keep it quick. <br />Even better: you'll only have to input parent information once.
+                    </p>
+                    <br />
+                    <p>
+                        Already have an account? 
+                        <a href="#" class="md-trigger" data-modal="modal-login">
+                            Login
+                        </a>
+                    </p>
+                    <p>
+                        Are you a student? 
+                        <a href="@Url.Action("getstartedstudent", "account", new { regaccount = Request["regaccount"] })">
+                            Register Here
+                        </a>
+                    </p>
                 </div>
 
                 <div>

@@ -1,39 +1,59 @@
-﻿
+﻿@model ParticipationObject
 @{
     ViewBag.Title = "RegisterStudent";
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    var cart = (Cart)ViewBag.Cart;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var agree = false;
 }
+
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
+<div class="reg-header">
+    <div>
+        @foreach (var item in cart.GetCartItems())
+        {
+            <div>
+                <h1>You are registering for: @item.GetParticipationObject().Name</h1>
+            </div>
+        }
+    </div>
+</div>
+
 <div>
     <div class="am-content">
         <div class="panel panel-default">
             <div class="panel-body">
                 <div class="text-center">
                     <h2>Registration Confirmation</h2><br />
-                    <br />
-                    <br />
                 </div>
                 <div class="panel-body">
                     <form method="post" id="register-form" class="form-horizontal" action="@Url.Action("RegisterStudent", "account")">
                         <div class="form-group">
-                            <label for="password1" class="control-label col-md-3">
+                            <label for="" class="control-label col-md-3">
                             </label>
                             <div class="col-md-9">
                                 <div class="am-checkbox">
                                     <input type="checkbox" required class="form-control" name="agree" id="agree" />
                                     <label for="agree">
-                                        I have entered both my information and my parent's information correctly and I intead to participate in Gymnastics<br />
+                                        I have entered both my information and my parent's information correctly and I intend to participate in <strong>@Model.Name</strong><br />
                                     </label>
                                 </div>
                             </div>
-                            <button type="submit" id="btn-register-account" class="btn btn-register btn-lg">Register</button>
-                            <br />
                         </div>
+
+                        <div class="padding-v-20">
+                            <button type="submit" id="btn-create-account" class="btn btn-register btn-lg">Register &raquo;</button>
+                        </div>
+
+                        <div class="row">
+                            <div class="padding-v-20 text-center">
+                                <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                            </div>
+                        </div>
+
                     </form>
                 </div>
-                <div class="text-center out-links"><a href="/">&copy; @DateTime.UtcNow.Year @UILabel.ProductName()</a></div>
             </div>
         </div>
     </div>

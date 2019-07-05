@@ -60,6 +60,7 @@ namespace AfterSchool.Models
                                 Registration.ProcessRegistrationAssignment(
                                         registration: registration,
                                         participationObject: participationObject,
+                                        masterRegistrant: null,
                                         registrant: registrant,
                                         seatsRequested: 1,
                                         activityGroupId: activity.ActivityGroupId,

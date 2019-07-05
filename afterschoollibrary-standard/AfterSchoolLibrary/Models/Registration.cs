@@ -441,7 +441,12 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                return new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment };
+                return new List<RegistrationAssignmentType>()
+                {
+                    RegistrationAssignmentType.Reserved,
+                    RegistrationAssignmentType.ReservedPendingPayment,
+                    RegistrationAssignmentType.ReservedPendingParentalConsent
+                };
             }
         }
 
@@ -765,12 +770,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(this.Save(dc: dc));
 
             return msgs;
-        }
-
-        public static SystemMessages SendConfirmation(CheckoutObject checkoutObject, bool sendBcc, DatabaseConnection dc = null)
-        {
-            return Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, sendBcc);
-        }       
+        }  
 
         private static DatabaseQuery GetSearchQuery(string searchText, int accountId, int? questionId, RegistrationStatus regStatus, List<int> participationObjectIds = null, ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet, List<RegistrationAssignmentType> rats = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1263,18 +1263,14 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
-        public SystemMessages SetRegistrationToCompleted(WebUser loggedInUser, DatabaseConnection dc = null)
+        public void SetRegistrationStatus(RegistrationCompletionStatus completionStatus, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
-            this.CompletionStatusId = RegistrationCompletionStatus.Completed;
+            this.CompletionStatusId = completionStatus;
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(this.Save(dc));
 
             msgs.AddRange(this.FindAndSetFirstRegistration(this.RegistrantFirstName, this.RegistrantLastName, this.RegistrantEmail, dc));
-
-            return msgs;
         }
 
         public bool IsPaid(SystemMessages msgs, DatabaseConnection dc = null)
@@ -1299,22 +1295,27 @@ namespace AfterSchoolLibrary.Models
             return false;
         }
 
-        private static RegistrationAssignmentType ProcessRegistrationSeats(ParticipationObject participationObject, int numberOfSeatsRequested, RegistrantActivity ra, SystemMessages msgs, DatabaseConnection dc = null)
+        private static RegistrationAssignmentType GetRegistrationAssignmentType(ParticipationObject participationObject, Registrant masterRegistrant, int numberOfSeatsRequested, RegistrantActivity ra, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var seatsAvailable = participationObject.SeatsRemaining;
             var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
-            var isPendingOrReserved = ra.IsNotEmpty() && ra.AssignmentTypeId.In(Registration.ReservedStatuses);
+            var isExistingAndIsPendingOrReserved = ra.IsNotEmpty() && ra.AssignmentTypeId.In(Registration.ReservedStatuses);
 
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
 
             // if they're paying for a registration they already completed
-            if (isPendingOrReserved)
+            // or could be just esigning for a student so this will need to be double checked
+            if (isExistingAndIsPendingOrReserved)
                 return RegistrationAssignmentType.Reserved;
             
             // if there is room
             if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
+                // if the person registering is the student
+                if (masterRegistrant.WebUserId.HasValue && loggedInUser.ID == masterRegistrant.WebUserId)
+                    return RegistrationAssignmentType.ReservedPendingParentalConsent;
+
                 // if the person didn't pay yet
                 if (!participationObject.IsFree && 
                     (ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal()))
@@ -1324,11 +1325,7 @@ namespace AfterSchoolLibrary.Models
             }
             // if there aren't any more seats available, but there's a waiting list
             else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
-                return RegistrationAssignmentType.WaitingList;
-
-            msgs.Add(
-                $"Sorry, there are no more reserved seats or waiting list seats available for {participationObject.Name}",
-                MessageType.UserError);
+                return RegistrationAssignmentType.WaitingList;            
 
             return RegistrationAssignmentType.NotSet;
         }
@@ -1338,6 +1335,7 @@ namespace AfterSchoolLibrary.Models
             ProcessRegistrationAssignment(
                 checkoutObject.Registration,
                 checkoutObject.ParticipationObject,
+                checkoutObject.MasterRegistrant,
                 checkoutObject.Registration.GetRegistrant(msgs, dc),
                 checkoutObject.NumberOfSeats,
                 checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetActivityGroupId() : new int?(),
@@ -1348,11 +1346,12 @@ namespace AfterSchoolLibrary.Models
                 dc);
         }
 
-        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             ProcessRegistrationAssignment(
                 registration,
                 participationObject,
+                masterRegistrant,
                 registrant,
                 seatsRequested,
                 1,
@@ -1364,15 +1363,27 @@ namespace AfterSchoolLibrary.Models
                 dc);
         }
 
-        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessRegistrationAssignment(Registration registration, ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
             var ra = registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
-            var assignmentType = Registration.ProcessRegistrationSeats(participationObject, seatsRequested, ra, msgs, dc);
+            var assignmentType = Registration.GetRegistrationAssignmentType(
+                participationObject, 
+                masterRegistrant,
+                seatsRequested, 
+                ra, 
+                loggedInUser,
+                msgs, 
+                dc);
 
-            if (msgs.HasErrors())
+            if (assignmentType == RegistrationAssignmentType.NotSet)
+            {
+                msgs.Add(
+                   $"Sorry, there are no more reserved seats or waiting list seats available for {participationObject.Name}",
+                   MessageType.UserError);
                 return;
+            }
 
             // add or update the registrant for the activity
             ra = registrant.AddOrUpdateParticipationObject(
@@ -1387,6 +1398,14 @@ namespace AfterSchoolLibrary.Models
                 loggedInUserId: loggedInUser.ID.Value,
                 msgs: msgs,
                 dc: dc);
+        }
+
+        public string GetParentalConsentUrl
+        {
+            get
+            {
+                return $"{Helpers.Utilities.BaseUrl(true)}/account/finalizeregistration/{this.Uid}";
+            }
         }
 
         public string GetPaymentUrl
