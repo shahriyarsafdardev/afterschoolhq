@@ -2,16 +2,13 @@
 @{
     ViewBag.Title = "RegisterStudent";
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var agree = false;
 }
-
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 <div>
     <div class="am-content">
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="text-center">
-                    <a href="/"><img src="@UILabel.ProductLogoInverse()" alt="logo" width="350px" class="logo-img"></a>
-                </div>
-            </div>
             <div class="panel-body">
                 <div class="text-center">
                     <h2>Registration Confirmation</h2><br />
@@ -19,13 +16,13 @@
                     <br />
                 </div>
                 <div class="panel-body">
-                    <form method="post" id="register-form" class="form-horizontal" action="@Url.Action("RegisterAccount", "account")">
+                    <form method="post" id="register-form" class="form-horizontal" action="@Url.Action("RegisterStudent", "account")">
                         <div class="form-group">
                             <label for="password1" class="control-label col-md-3">
                             </label>
                             <div class="col-md-9">
                                 <div class="am-checkbox">
-                                    <input type="checkbox" class="form-control" name="agree" id="agree" />
+                                    <input type="checkbox" required class="form-control" name="agree" id="agree" />
                                     <label for="agree">
                                         I have entered both my information and my parent's information correctly and I intead to participate in Gymnastics<br />
                                     </label>
@@ -42,7 +39,8 @@
     </div>
 </div>
 <script>
-     PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#register-form').submit(function () {
             $('#btn-register-account').html('Saving...');
             $('#btn-register-account').prop('disabled', true);

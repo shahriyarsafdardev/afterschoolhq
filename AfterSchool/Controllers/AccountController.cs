@@ -74,7 +74,8 @@ namespace AfterSchool.Controllers
 
             var questions = GetStartedParentViewBag(msgs);
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
 
                 if (question.IsRequired && answer.IsEmpty())
@@ -236,7 +237,8 @@ namespace AfterSchool.Controllers
             var questions = AddHomeAddressViewBag(msgs);
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
             });
@@ -325,7 +327,8 @@ namespace AfterSchool.Controllers
             var questions = AddParentViewBag(msgs);
             var values = new NameValueCollection();
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantLastName:
@@ -348,7 +351,8 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var questions = AddParentViewBag(msgs);
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
 
                 if (question.IsRequired && answer.IsEmpty())
@@ -484,7 +488,8 @@ namespace AfterSchool.Controllers
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
             var phones = new List<string>();
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
 
                 if (question.IsRequired && answer.IsEmpty())
@@ -602,8 +607,9 @@ namespace AfterSchool.Controllers
             var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
             var values = new NameValueCollection();
 
-            questions.ForEach(question => {
-                switch(question.QuestionDataTypeId)
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantLastName:
                     case QuestionDataType.RegistrantEmail:
@@ -634,7 +640,8 @@ namespace AfterSchool.Controllers
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
             var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
 
                 if (question.IsRequired && answer.IsEmpty())
@@ -743,7 +750,7 @@ namespace AfterSchool.Controllers
                             { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent1WorkPhone },
                         };
 
-                        foreach(var key in parent1Map.Keys)
+                        foreach (var key in parent1Map.Keys)
                         {
                             student.MapAndAddAnswer(
                                allquestions,
@@ -829,7 +836,8 @@ namespace AfterSchool.Controllers
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HealthInformation);
             var questions = healthQuestionGroup.GetAllQuestions(msgs);
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 switch (question.QuestionDataTypeId)
                 {
                     default:
@@ -1033,7 +1041,8 @@ namespace AfterSchool.Controllers
             var questions = RegisterViewBag(participationObject, msgs);
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
             });
@@ -1473,7 +1482,8 @@ namespace AfterSchool.Controllers
 
             var questions = GetStartedStudentViewBag(msgs);
 
-            questions.ForEach(question => {
+            questions.ForEach(question =>
+            {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
 
                 if (question.IsRequired && answer.IsEmpty())
@@ -1704,13 +1714,101 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult RegisterStudent()
         {
+            var msgs = new SystemMessages();
+            ViewBag.Messages = msgs;
             return View();
         }
 
         [HttpPost]
-        public ActionResult RegisterStudent(string id)
+        public ActionResult RegisterStudent(string signature)
         {
-            return View();
+            var msgs = new SystemMessages();
+            var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
+            // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
+            var questions = RegisterViewBag(participationObject, msgs);
+            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            questions.ForEach(question =>
+            {
+                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+            });
+
+
+            Registration registration = null;
+
+            if (msgs.HasNoErrors())
+            {
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        // account gets copy / snapshot of master registrant record
+                        // required in order to make sure registration data doesn't change as registrant changes information in master record.
+                        var accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
+                            ownerAccount: participationObject.OwnerAccount,
+                            loggedInUser: SessionVariables.CurrentUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        // Create Registration
+                        var activityGroupId = new int?();
+                        if (participationObject.IsAccountActivityGroup())
+                            activityGroupId = participationObject.GetAccountActivityGroup().ActivityGroupId;
+                        else if (participationObject.IsActivityGroup())
+                            activityGroupId = participationObject.GetActivityGroupId();
+                        else if (participationObject.IsActivity())
+                            activityGroupId = participationObject.GetActivity().ActivityGroupId;
+
+                        var period = participationObject.GetCurrentRegistrationPeriod(amsgs, adc);
+                        registration = accountRegistrantCopy.AddRegistration(
+                            ownerAccountId: participationObject.OwnerAccount.ID.Value,
+                            activityGroupId: activityGroupId,
+                            accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
+                            periodId: period?.ID,
+                            completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                            loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                            msgs: amsgs,
+                            dc: adc);
+
+
+                        SessionVariables.CurrentRegistrant.CopyAnswers(
+                          copyingRegistrant: accountRegistrantCopy,
+                          registration: registration,
+                          loggedInUser: SessionVariables.CurrentUser,
+                          msgs: amsgs,
+                          dc: adc);
+
+
+                        if (msgs.HasNoErrors())
+                            AccountService.ProcessRegistrationWithoutPayment(
+                                checkoutObject: new CheckoutObject()
+                                {
+                                    BillingAccount = participationObject.OwnerAccount,
+                                    PayingAccount = SessionVariables.CurrentAccount,
+                                    NumberOfSeats = 1,
+                                    ParticipationObject = participationObject,
+                                    Registration = registration,
+                                    MasterRegistrant = SessionVariables.CurrentRegistrant
+                                },
+                                sendConfirmationEmail: true,
+                                loggedInUser: SessionVariables.CurrentUser,
+                                msgs: msgs, dc: adc);
+
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("RegisterStudentThanks", new { id = registration.Uid });
+
+            ViewBag.QuestionViewModels = qvms;
+            ViewBag.Messages = msgs;
+
+            return View(participationObject);
         }
 
 
@@ -1730,6 +1828,11 @@ namespace AfterSchool.Controllers
         #region RegisterStudentThanks
 
         // add get action
+        [HttpGet]
+        public ActionResult RegisterStudentThanks()
+        {
+            return View();
+        }
 
         #endregion
 
