@@ -1434,7 +1434,6 @@ namespace AfterSchool.Controllers
                     question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
                     question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
                     question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize &&
-                    question.QuestionDataTypeId != QuestionDataType.RegistrantMobilePhone &&
                     question.QuestionDataTypeId != QuestionDataType.RegistrantHomePhone &&
                     question.QuestionDataTypeId != QuestionDataType.RegistrantWorkPhone
                 )
@@ -1448,6 +1447,7 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantLastName:
                     case QuestionDataType.RegistrantGrade:
                     case QuestionDataType.RegistrantEmail:
+                    case QuestionDataType.RegistrantMobilePhone:
                         question.IsRequired = true;
                         break;
                 }
@@ -1508,6 +1508,7 @@ namespace AfterSchool.Controllers
                 var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
                 var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
                 var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
 
                 WebUser user = null;
                 Account account = null;
@@ -1522,7 +1523,7 @@ namespace AfterSchool.Controllers
                             firstName: firstName.Value,
                             lastName: lastName.Value,
                             email: email.Value.Trim(),
-                            phone: null,
+                            phone: phone.Value.Trim(),
                             password: password1,
                             isActive: true,
                             isRegistered: true,
