@@ -1726,14 +1726,6 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegisterViewBag(participationObject, msgs);
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-
-            questions.ForEach(question =>
-            {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
-                    msgs.Add($"{question.Text} is required", MessageType.UserError);
-            });
 
 
             Registration registration = null;
@@ -1772,15 +1764,6 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-
-                        SessionVariables.CurrentRegistrant.CopyAnswers(
-                          copyingRegistrant: accountRegistrantCopy,
-                          registration: registration,
-                          loggedInUser: SessionVariables.CurrentUser,
-                          msgs: amsgs,
-                          dc: adc);
-
-
                         if (msgs.HasNoErrors())
                             AccountService.ProcessRegistrationWithoutPayment(
                                 checkoutObject: new CheckoutObject()
@@ -1806,7 +1789,6 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("RegisterStudentThanks", new { id = registration.Uid });
 
-            ViewBag.QuestionViewModels = qvms;
             ViewBag.Messages = msgs;
 
             return View(participationObject);
