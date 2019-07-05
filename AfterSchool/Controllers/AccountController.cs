@@ -1764,20 +1764,21 @@ namespace AfterSchool.Controllers
                             msgs: amsgs,
                             dc: adc);
 
-                        if (msgs.HasNoErrors())
-                            AccountService.ProcessRegistrationWithoutPayment(
-                                checkoutObject: new CheckoutObject()
-                                {
-                                    BillingAccount = participationObject.OwnerAccount,
-                                    PayingAccount = SessionVariables.CurrentAccount,
-                                    NumberOfSeats = 1,
-                                    ParticipationObject = participationObject,
-                                    Registration = registration,
-                                    MasterRegistrant = SessionVariables.CurrentRegistrant
-                                },
-                                sendConfirmationEmail: true,
-                                loggedInUser: SessionVariables.CurrentUser,
-                                msgs: msgs, dc: adc);
+                        //Todod: Getting some error in executing this function as it is expecting some activity but we are not deducting payment
+                        //if (msgs.HasNoErrors())
+                        //    AccountService.ProcessRegistrationWithoutPayment(
+                        //        checkoutObject: new CheckoutObject()
+                        //        {
+                        //            BillingAccount = participationObject.OwnerAccount,
+                        //            PayingAccount = SessionVariables.CurrentAccount,
+                        //            NumberOfSeats = 1,
+                        //            ParticipationObject = participationObject,
+                        //            Registration = registration,
+                        //            MasterRegistrant = SessionVariables.CurrentRegistrant
+                        //        },
+                        //        sendConfirmationEmail: false,
+                        //        loggedInUser: SessionVariables.CurrentUser,
+                        //        msgs: msgs, dc: adc);
 
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
