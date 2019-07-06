@@ -320,12 +320,12 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsRegisteredFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var childrenRegistrants = masterRegistrant.GetChildren(participationObject.OwnerAccount.ID.Value, msgs, dc);
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
-            return childrenRegistrants.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
-                registrantIds: childrenRegistrants.Select(item => item.ID.Value).ToList(),
+                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
                 null,
                 msgs: msgs,
                 dc: dc);
@@ -333,12 +333,12 @@ namespace AfterSchoolLibrary.Services
 
         public static bool IsRegisteredForAndHasConsent(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var childrenRegistrants = masterRegistrant.GetChildren(participationObject.OwnerAccount.ID.Value, msgs, dc);
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
-            return childrenRegistrants.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
-                registrantIds: childrenRegistrants.Select(item => item.ID.Value).ToList(),
+                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
                 new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment },
                 msgs: msgs,
                 dc: dc);
@@ -354,12 +354,17 @@ namespace AfterSchoolLibrary.Services
             return registrant.WebUserId.HasValue ? WebUser.Load(registrant.WebUserId.Value, msgs, dc) : null;
         }
 
+        public static Location GetSchoolLocation(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return registrant.SchoolLocationId.HasValue ? Location.Load(registrant.SchoolLocationId.Value, msgs, dc) : null;
+        }
+
         public static Registrant GetMasterRegistrant(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrant.ParentRegistrantId.HasValue ? Registrant.Load(registrant.ParentRegistrantId.Value, msgs, dc) : null;
         }
 
-        public static Registrant CopyToAccount(this Registrant registrant, Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Registrant SubmitRecordToAccount(this Registrant registrant, Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Registrant copy = null;
 
@@ -388,28 +393,31 @@ namespace AfterSchoolLibrary.Services
             return copy;
         }
 
-        public static List<Registrant> GetChildren(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> GetSubmittedRecords(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByParentRegistrantId(registrant.ID.Value, msgs, dc);
         }
 
-        public static List<Registrant> GetChildren(this Registrant registrant, int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> GetSubmittedRecords(this Registrant registrant, int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByParentRegistrantIdByAccountId(registrant.ID.Value, accountId, msgs, dc);
         }
 
-        public static (Registrant, Registration) GetChild(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static (Registrant, Registration) GetSubmittedRecord(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var children = registrant.GetChildren(msgs, dc);
-            var childIds = children.Select(child => child.ID.Value).ToList();
-            var ras = RegistrantActivity.LoadByRegistrantIds(childIds, msgs, dc);
+            var submittedRecords = registrant.GetSubmittedRecords(msgs, dc);
+            var submittedRecordIds = submittedRecords.Select(child => child.ID.Value).ToList();
+            var ras = RegistrantActivity.LoadByRegistrantIds(submittedRecordIds, msgs, dc);
 
-            var childRA = ras.FirstOrDefault(ra => ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);
+            var submittedRecordRA = ras.FirstOrDefault(ra => ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);
             
             var registration = new Registration();
 
-            if (childRA.IsNotEmpty())
-                return (children.First(child => child.ID == childRA.RegistrantId), Registration.Load(childRA.RegistrationId.Value, msgs, dc));
+            if (submittedRecordRA.IsNotEmpty())
+                return (
+                    submittedRecords.First(child => child.ID == submittedRecordRA.RegistrantId), 
+                    Registration.Load(submittedRecordRA.RegistrationId.Value, msgs, dc)
+                );
 
             return (null, null);
         }
@@ -742,9 +750,9 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static Registrant GetParentOrGuardian(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant GetParentOrGuardian(this Registrant masterRegistrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAccountId(registrant.AccountId.Value, msgs, dc)
+            return Registrant.LoadByAccountId(masterRegistrant.AccountId.Value, msgs, dc)
                 .Where(item => item.IsParentOrGuardian)
                 .OrderBy(item => item.ID)
                 .FirstOrDefault();

@@ -250,6 +250,13 @@ namespace AfterSchoolLibrary.Services
             return Registrant.LoadByWebUserIdByIsMaster(user.ID.Value, true, msgs, dc).FirstOrDefault();
         }
 
+        public static List<Registrant> GetAllRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantWebUser.LoadByWebUserId(user.ID.Value, msgs, dc)
+                .Select(rwu => Registrant.Load(rwu.RegistrantId.Value, msgs, dc))
+                .ToList();
+        }
+
         public static List<Registrant> GetChildrenRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantWebUser.LoadByWebUserId(user.ID.Value, msgs, dc)

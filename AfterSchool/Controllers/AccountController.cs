@@ -1093,11 +1093,11 @@ namespace AfterSchool.Controllers
 
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        (accountRegistrantCopy, registration) = SessionVariables.CurrentRegistrant.GetChild(participationObject, amsgs, adc);
+                        (accountRegistrantCopy, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, amsgs, adc);
 
                         if (accountRegistrantCopy.IsEmpty())
                         {
-                            accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
+                            accountRegistrantCopy = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
                                 ownerAccount: participationObject.OwnerAccount,
                                 loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
@@ -1796,7 +1796,7 @@ namespace AfterSchool.Controllers
                     {
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        var accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
+                        var accountRegistrantCopy = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
                             ownerAccount: participationObject.OwnerAccount,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,

@@ -1,0 +1,14 @@
+﻿<div class="page-head">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>
+                @SessionVariables.CurrentAccount.Name
+            </h2>
+        </div>
+        <div class="col-md-6">
+            <div class="pull-right padding-10">
+                Logged in as: <a href="@Url.Action("edit", "user")">@SessionVariables.CurrentUser.DisplayName</a> <br />
+            </div>
+        </div>
+    </div>
+</div>

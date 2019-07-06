@@ -598,7 +598,7 @@ namespace AfterSchoolLibrary.Helpers
 
                         if (registrant.IsNotEmpty())
                         {
-                            var childRegistrants = registrant.GetChildren(msgs, dc);
+                            var childRegistrants = registrant.GetSubmittedRecords(msgs, dc);
 
                             childRegistrants.ForEach(child => {
                                 var activityIds = RegistrantActivity.LoadByRegistrantId(child.ID.Value, msgs, dc)
