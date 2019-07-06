@@ -196,7 +196,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors() && !user.VerifiedAccount)
             {
                 var userId = user.ID.Value;
-                Hangfire.BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
+                BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(userId));
             }
 
             if (msgs.HasNoErrors())

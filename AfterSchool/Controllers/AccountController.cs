@@ -1021,7 +1021,7 @@ namespace AfterSchool.Controllers
             var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
 
             // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs))
+            if (SessionVariables.CurrentRegistrant.IsRegisteredForAndHasConsent(participationObject, msgs))
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
@@ -1060,6 +1060,7 @@ namespace AfterSchool.Controllers
 
             Registration registration = null;
             RegistrationPeriod period = null;
+            Registrant accountRegistrantCopy = null;
 
             if (msgs.HasNoErrors())
             {
@@ -1083,24 +1084,34 @@ namespace AfterSchool.Controllers
 
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        var accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
-                            ownerAccount: participationObject.OwnerAccount,
-                            loggedInUser: SessionVariables.CurrentUser,
-                            msgs: amsgs,
-                            dc: adc
-                            );
+                        (accountRegistrantCopy, registration) = SessionVariables.CurrentRegistrant.GetChild(participationObject, amsgs, adc);
 
-                        // create registration
-                        registration = accountRegistrantCopy.AddRegistrationWithESignature(
-                            ownerAccountId: participationObject.OwnerAccount.ID.Value,
-                            activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
-                            accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
-                            periodId: period?.ID,
-                            esignature: signature,
-                            completionStatus: RegistrationCompletionStatus.Started,
-                            loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                            msgs: amsgs,
-                            dc: adc);
+                        if (accountRegistrantCopy.IsEmpty())
+                        {
+                            accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
+                                ownerAccount: participationObject.OwnerAccount,
+                                loggedInUser: SessionVariables.CurrentUser,
+                                msgs: amsgs,
+                                dc: adc
+                                );
+
+                            // create or update registration
+                            registration = accountRegistrantCopy.AddRegistrationWithESignature(
+                                ownerAccountId: participationObject.OwnerAccount.ID.Value,
+                                activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
+                                accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
+                                periodId: period?.ID,
+                                esignature: signature,
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                msgs: amsgs,
+                                dc: adc);
+                        }
+                        else
+                            registration.AddESignature(
+                                esignature: signature,
+                                loggedInUser: SessionVariables.CurrentUser,
+                                msgs: amsgs,
+                                dc: adc);
 
                         //copy all answers from the main account to the registrant & registration :)
                         SessionVariables.CurrentRegistrant.CopyAnswers(
@@ -1138,8 +1149,7 @@ namespace AfterSchool.Controllers
                                 {
                                     var activity = Activity.LoadByUid(postedValue.ToGuid(), msgs);
 
-                                    Registration.ProcessRegistrationAssignment(
-                                        registration: registration,
+                                    registration.ProcessRegistrationAssignment(
                                         participationObject: activity.GetParticipationObject(amsgs, adc),
                                         masterRegistrant: SessionVariables.CurrentRegistrant,
                                         registrant: accountRegistrantCopy,
@@ -1235,6 +1245,19 @@ namespace AfterSchool.Controllers
         public ActionResult FinalizeRegistration(string id)
         {
             return HandleIsLoggedIn() ?? FinalizeRegistrationGet(id);
+        }
+
+        [HttpGet]
+        public ActionResult ParentalConsent(string id)
+        {
+            var msgs = new SystemMessages();
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+
+            SessionVariables.CurrentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+            SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
+            SessionVariables.Cart.AddCartItem(registration.GetParticipationObject(msgs), msgs);
+
+            return RedirectToAction("Register");
         }
 
         #endregion
@@ -1400,6 +1423,7 @@ namespace AfterSchool.Controllers
             ViewBag.Registration = registration;
             ViewBag.Account = SessionVariables.RegistrationStartPageAccount;
             ViewBag.IsSelfRegistered = masterRegistrant.WebUserId == SessionVariables.CurrentUser.ID;
+            ViewBag.Registrant = masterRegistrant;
             ViewBag.Messages = msgs;
         }
 

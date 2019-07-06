@@ -402,7 +402,7 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, phone, null, false, true, false, userType, loggedInUser, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, loggedInUser, msgs, dc: dc);
         }
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -914,8 +914,7 @@ namespace AfterSchoolLibrary.Services
                     });
 
                     // manages seats and create registrantactivity record
-                    Registration.ProcessRegistrationAssignment(
-                        registration: registration,
+                    registration.ProcessRegistrationAssignment(
                         participationObject: participationObject,
                         masterRegistrant: null,
                         registrant: student,
@@ -931,8 +930,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         var activityParticipationObject = activityAndPreference.activity.GetParticipationObject(amsgs, adc);
 
-                        Registration.ProcessRegistrationAssignment(
-                            registration: registration,
+                        registration.ProcessRegistrationAssignment(
                             participationObject: activityParticipationObject,
                             masterRegistrant: null,
                             registrant: student,
@@ -2136,7 +2134,7 @@ namespace AfterSchoolLibrary.Services
                         dc: adc);
 
                     // TODO: Allow user to register for multiple activities in one session at once MAYBE
-                    Registration.ProcessRegistrationAssignment(
+                    RegistrationService.ProcessRegistrationAssignment(
                         checkoutObject: checkoutObject,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
@@ -2170,7 +2168,7 @@ namespace AfterSchoolLibrary.Services
                         dc: adc);
 
                     // TODO: Allow user to register for multiple activities in one session at once MAYBE
-                    Registration.ProcessRegistrationAssignment(
+                    RegistrationService.ProcessRegistrationAssignment(
                         checkoutObject: checkoutObject,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,

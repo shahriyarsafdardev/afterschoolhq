@@ -683,28 +683,6 @@ namespace AfterSchoolLibrary.Models
             return new TimeSpan();
         }
 
-        public RegistrantActivityGroup InviteContact(Registrant contact, int? periodId, int invitationSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if(msgs.IsEmpty()) msgs = new SystemMessages();
-            var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(this.ID.Value, contact.ID.Value, dc: dc);
-
-            if (rag.IsEmpty())
-            {
-                rag = new RegistrantActivityGroup();
-                rag.CreateDate = DateTime.UtcNow;
-                rag.CreatedBy = loggedInUserId;
-                rag.ActivityGroupId = this.ID;
-                rag.RegistrantId = contact.ID;
-            }
-            rag.NumberOfInvitationSeats = invitationSeats;
-            rag.NumberOfSeatsDeclined = 0;
-            rag.RegistrationPeriodId = periodId;
-            rag.LastModifiedDate = DateTime.UtcNow;
-            rag.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(rag.Save(dc: dc));
-            return rag;
-        }
-
         public TimeSpan WillCloseIn(DatabaseConnection dc = null)
         {
             if (IsOpenNow(dc: dc))
@@ -827,19 +805,6 @@ namespace AfterSchoolLibrary.Models
             this.LastModifiedDate = DateTime.UtcNow;
             this.LastModifiedBy = loggedInUserId;
             msgs.AddRange(this.Save(dc: dc));
-            return msgs;
-        }
-
-        public SystemMessages InviteContacts(List<Registrant> contacts, RegistrationPeriod period, List<int> activityIds, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            contacts.ForEach(contact => {
-                this.InviteContact(contact, period?.ID, 1, loggedInUserId, msgs, dc: dc);
-                if (activityIds.Any())
-                    msgs.AddRange(contact.AddInviteToActivities(activityIds, loggedInUserId, this.ID, period?.ID, dc: dc));
-            });
-
             return msgs;
         }
 

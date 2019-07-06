@@ -18,6 +18,180 @@ namespace AfterSchoolLibrary.Services
                 msgs.AddRange(Helpers.EmailHelper.SendRegistrationConfirmed(checkoutObject, loggedInUser, true, false, dc));
         }
 
+        public static void DeleteWithRelatedRecords(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // right now there is one new registrant record per registration
+                    // so we can know that it's okay to delete the registrant
+                    // TODO: Notice that this may be a dangerous assumption one day
+                    // Registration activities are deleted with the registrant
+                    registration.GetRegistrant(amsgs, adc).DeleteWithRelatedRecords(amsgs, adc);
+                    amsgs.AddRange(registration.DeleteSessionActions(adc));
+                    amsgs.AddRange(registration.DeleteAnswers(adc));
+                    amsgs.AddRange(registration.Delete(adc));
+                    amsgs.AddRange(registration.UpdateRelatedRegistrationsAfterDelete(adc));
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
+        public static void MergeInto(this Registration registration, Registration mergedFrom, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    if (registration.RegistrationPeriodId != mergedFrom.RegistrationPeriodId)
+                    {
+                        amsgs.Add("You can only merge registrations from the same registration window", MessageType.UserError);
+                    }
+
+                    if (amsgs.HasNoErrors())
+                    {
+                        var mergedFromActivities = mergedFrom.GetRegistrantActivities(amsgs, adc);
+
+                        mergedFromActivities.ForEach(activity => registration.MoveActivity(activity, loggedInUserId, amsgs, adc));
+
+                        // delete previous registration
+                        if (amsgs.HasNoErrors())
+                            mergedFrom.DeleteWithRelatedRecords(amsgs, adc);
+
+                        registration.LastModifiedBy = loggedInUserId;
+                        registration.LastModifiedDate = DateTime.UtcNow;
+                        amsgs.AddRange(registration.Save(adc));
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
+        public static void CancelAll(this Registration registration, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            registration.DeleteWithRelatedRecords(msgs, dc);
+        }
+
+        private static RegistrationAssignmentType GetRegistrationAssignmentType(ParticipationObject participationObject, Registrant masterRegistrant, int numberOfSeatsRequested, RegistrantActivity ra, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var seatsAvailable = participationObject.SeatsRemaining;
+            var waitingListSeatsAvailable = participationObject.WaitingListSeatsRemaining;
+            var isExistingAndIsPendingOrReserved = ra.IsNotEmpty() && ra.AssignmentTypeId.In(Registration.ReservedStatuses);
+
+            if (participationObject.RegistrationMode == RegistrationMode.Apply)
+                return RegistrationAssignmentType.Applied;
+
+            // if they're paying for a registration they already completed
+            // or could be just esigning for a student so this will need to be double checked
+            if (isExistingAndIsPendingOrReserved)
+                return RegistrationAssignmentType.Reserved;
+
+            // if there is room
+            if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
+            {
+                // if the person registering is the student
+                if (masterRegistrant.WebUserId.HasValue && loggedInUser.ID == masterRegistrant.WebUserId)
+                    return RegistrationAssignmentType.ReservedPendingParentalConsent;
+
+                // if the person didn't pay yet
+                if (!participationObject.IsFree &&
+                    (ra.IsEmpty() || participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) == 0.ToDecimal()))
+                    return RegistrationAssignmentType.ReservedPendingPayment;
+
+                return RegistrationAssignmentType.Reserved;
+            }
+            // if there aren't any more seats available, but there's a waiting list
+            else if (!waitingListSeatsAvailable.HasValue || waitingListSeatsAvailable >= numberOfSeatsRequested)
+                return RegistrationAssignmentType.WaitingList;
+
+            return RegistrationAssignmentType.NotSet;
+        }
+
+        public static void ProcessRegistrationAssignment(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            ProcessRegistrationAssignment(
+                checkoutObject.Registration,
+                checkoutObject.ParticipationObject,
+                checkoutObject.MasterRegistrant,
+                checkoutObject.Registration.GetRegistrant(msgs, dc),
+                checkoutObject.NumberOfSeats,
+                checkoutObject.ParticipationObject.IsActivity() ? checkoutObject.ParticipationObject.GetActivityGroupId() : new int?(),
+                checkoutObject.ParticipationObject.GetCurrentRegistrationPeriod(msgs, dc)?.ID,
+                checkoutObject.GetTotalCost(),
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static void ProcessRegistrationAssignment(this Registration registration, ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant, int seatsRequested, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registration.ProcessRegistrationAssignment(
+                participationObject,
+                masterRegistrant,
+                registrant,
+                seatsRequested,
+                1,
+                activityGroupId,
+                periodId,
+                amountCharged,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        public static void ProcessRegistrationAssignment(this Registration registration, ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant, int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // NOTE: getting only one activity per registration at the moment, 
+            // but could be problem in the future
+            var ra = registration.GetRegistrantActivities(msgs, dc).FirstOrDefault();
+            var assignmentType = GetRegistrationAssignmentType(
+                participationObject,
+                masterRegistrant,
+                seatsRequested,
+                ra,
+                loggedInUser,
+                msgs,
+                dc);
+
+            if (assignmentType == RegistrationAssignmentType.NotSet)
+            {
+                msgs.Add(
+                   $"Sorry, there are no more reserved seats or waiting list seats available for {participationObject.Name}",
+                   MessageType.UserError);
+                return;
+            }
+
+            // add or update the registrant for the activity
+            ra = registrant.AddOrUpdateParticipationObject(
+                registrationId: registration.ID.Value,
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                assignmentType: assignmentType,
+                preferenceNumber: preferenceNumber,
+                registrationPeriodId: periodId,
+                activityGroupId: activityGroupId,
+                amountCharged: amountCharged,
+                loggedInUserId: loggedInUser.ID.Value,
+                msgs: msgs,
+                dc: dc);
+        }
+
+        public static void AddESignature(this Registration registration, string esignature, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registration.ESignature = esignature;
+            registration.CompletionStatusId = RegistrationCompletionStatus.Signed;
+            registration.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            registration.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(registration.Save(dc));
+        }
+
         #region CSVReport
 
         public static SystemMessages EmailCSVReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds, ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats, RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body)

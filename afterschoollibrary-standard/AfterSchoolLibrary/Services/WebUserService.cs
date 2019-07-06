@@ -583,11 +583,15 @@ namespace AfterSchoolLibrary.Services
 
                     user.ActivateForAccount(account, loggedInUser, amsgs, adc);
 
-                    if (!account.HasAccountPackage(amsgs, adc))
-                        account.SetDefaultAccountPackage(loggedInUser, amsgs, adc);
+                    // Registrant accounts don't need a package
+                    if (account.AccountTypeId != AccountType.Registrant)
+                    {
+                        if (!account.HasAccountPackage(amsgs, adc))
+                            account.SetDefaultAccountPackage(loggedInUser, amsgs, adc);
 
-                    if (account.StripeCustomerId.IsEmpty())
-                        amsgs.AddRange(account.SaveWithStripe(dc));
+                        if (account.StripeCustomerId.IsEmpty())
+                            amsgs.AddRange(account.SaveWithStripe(dc));
+                    }
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
