@@ -179,7 +179,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("RequestPayout", transactions);
         }
 
-        public ActionResult DownloadCSV(string sdate, string edate)
+        public ActionResult DownloadCSV(string sdate, string edate, string poId, string poTypeId)
         {
             var startDate = sdate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :

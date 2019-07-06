@@ -348,7 +348,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Transaction> LoadByBillerAccountId(int BillerAccountId, DateTime? startDate, DateTime? endDate, List<(int ID, ParticipationObjectType ObjectType)> participationObjects, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             return LoadByBillerOrPayerAccountId(BillerAccountId, null, startDate, endDate, participationObjects, start, length, msgs, dc);
         }
