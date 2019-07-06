@@ -437,9 +437,31 @@ namespace AfterSchoolLibrary.Models
             return IsActivityGroup() ? ObjectID : null;
         }
 
+        public int? GetAnyRelatedActivityGroupId()
+        {
+            if (IsAccountActivityGroup())
+                return GetAccountActivityGroup().ActivityGroupId;
+            else if (IsActivityGroup())
+                return GetActivityGroupId();
+            else if (IsActivity())
+                return GetActivity().ActivityGroupId;
+
+            return new int?();
+        }
+
         public int? GetAccountActivityGroupId()
         {
             return IsAccountActivityGroup() ? ObjectID : null;
+        }
+
+        public int? GetAnyRelatedAccountActivityGroupId()
+        {
+            if (IsAccountActivityGroup())
+                return GetAccountActivityGroupId();
+            else if (IsActivity())
+                return GetActivity().AccountActivityGroupId;
+
+            return new int?();
         }
 
         public int? GetActivityId()

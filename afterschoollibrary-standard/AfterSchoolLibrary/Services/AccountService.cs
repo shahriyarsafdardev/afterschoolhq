@@ -402,7 +402,7 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, phone, null, false, true, false, userType, loggedInUser, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, loggedInUser, msgs, dc: dc);
         }
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -874,35 +874,22 @@ namespace AfterSchoolLibrary.Services
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     var location = account.GetDefaultLocation(amsgs, adc);
-                    var groupId = new int?();
-                    var aagId = new int?();
+                    var groupId = participationObject.GetAnyRelatedActivityGroupId();
+                    var aagId = participationObject.GetAnyRelatedAccountActivityGroupId();
 
-                    if (participationObject.IsAccountActivityGroup())
-                    {
-                        groupId = participationObject.GetAccountActivityGroup().ActivityGroupId;
-                        aagId = participationObject.GetAccountActivityGroupId();
-                    }
-                    else if (participationObject.IsActivityGroup())
-                    {
-                        groupId = participationObject.GetActivityGroupId();
-                    }
-                    else if (participationObject.IsActivity())
-                    {
-                        groupId = participationObject.GetActivity().ActivityGroupId;
-                        aagId = participationObject.GetActivity().AccountActivityGroupId;
-                    }
-
-                    // create student registrant record associated to this account
+                    // create student registrant record associated to this (provider) account
                     student = account.CreateRegistrant(
-                        associatedUser: null,
-                        registrantType: RegistrantType.Individual,
-                        isMaster: false,
-                        isParentOrGuardian: false,
-                        allowTextMessages: false,
-                        schoolLocationId: location?.ID,
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
+                            registrantOwner: null,
+                            canBeAccessedBy: null,
+                            registrantType: RegistrantType.Individual,
+                            isMaster: false,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: location?.ID,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
 
                     // create a registration
                     var registration = student.AddRegistration(
@@ -928,9 +915,9 @@ namespace AfterSchoolLibrary.Services
                     });
 
                     // manages seats and create registrantactivity record
-                    Registration.ProcessRegistrationAssignment(
-                        registration: registration,
+                    registration.ProcessRegistrationAssignment(
                         participationObject: participationObject,
+                        masterRegistrant: null,
                         registrant: student,
                         seatsRequested: 1,
                         activityGroupId: groupId,
@@ -944,9 +931,9 @@ namespace AfterSchoolLibrary.Services
                     {
                         var activityParticipationObject = activityAndPreference.activity.GetParticipationObject(amsgs, adc);
 
-                        Registration.ProcessRegistrationAssignment(
-                            registration: registration,
+                        registration.ProcessRegistrationAssignment(
                             participationObject: activityParticipationObject,
+                            masterRegistrant: null,
                             registrant: student,
                             seatsRequested: 1,
                             preferenceNumber: activityAndPreference.preferenceNumber,
@@ -1698,7 +1685,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Registrant CreateRegistrant(this Account account, WebUser associatedUser, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian, bool allowTextMessages, int? schoolLocationId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Registrant CreateRegistrant(this Account account, WebUser registrantOwner, List<WebUser> canBeAccessedBy, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian, bool allowTextMessages, int? schoolLocationId, RegistrantProfileStatus profileStatus, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1708,16 +1695,20 @@ namespace AfterSchoolLibrary.Services
                 IsMaster = isMaster,
                 IsContactOnly = isParentOrGuardian,
                 IsParentOrGuardian = isParentOrGuardian,
-                WebUserId = associatedUser?.ID,
+                WebUserId = registrantOwner?.ID,
                 AccountId = account.ID,
                 AllowTextMessages = allowTextMessages,
                 SchoolLocationId = schoolLocationId,
+                ProfileStatusId = profileStatus,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
             };
             msgs.AddRange(registrant.Save(dc));
+
+            if (canBeAccessedBy.IsNotEmpty() && canBeAccessedBy.Count > 0)
+                registrant.AddUsersWithAccess(canBeAccessedBy, loggedInUser, msgs, dc);
 
             return registrant;
         }
@@ -2022,18 +2013,9 @@ namespace AfterSchoolLibrary.Services
                     // cancel stripe subscription at end of term
                     plan.CheckAndCancelPaymentPlan(registrantSubscriptionPlan, billingAccount, amsgs, adc);
                 },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
-                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
         }
@@ -2111,6 +2093,7 @@ namespace AfterSchoolLibrary.Services
                     loggedInUser,
                     msgs,
                     dc);
+
                 var registrant = Registrant.Load(originalTransaction.GetPurchase().RegistrantId.Value);
 
                 // need to track the refund
@@ -2139,17 +2122,21 @@ namespace AfterSchoolLibrary.Services
                 AccountService.CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
         }
 
-        public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ProcessStudentRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // mark as completed
-                    amsgs.AddRange(checkoutObject.Registration.SetRegistrationToCompleted(loggedInUser, adc));
+                    checkoutObject.Registration.SetRegistrationStatus(
+                        completionStatus: RegistrationCompletionStatus.RequiresParentSignature, 
+                        loggedInUser: loggedInUser, 
+                        msgs: amsgs, 
+                        dc: adc);
 
                     // TODO: Allow user to register for multiple activities in one session at once MAYBE
-                    Registration.ProcessRegistrationAssignment(
+                    RegistrationService.ProcessRegistrationAssignment(
                         checkoutObject: checkoutObject,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
@@ -2160,7 +2147,41 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     if (sendConfirmationEmail)
-                        Registration.SendConfirmation(checkoutObject, true);
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, loggedInUser, true, msgs, dc);
+
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
+
+        public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // mark as completed
+                    checkoutObject.Registration.SetRegistrationStatus(
+                        completionStatus: RegistrationCompletionStatus.Completed,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // TODO: Allow user to register for multiple activities in one session at once MAYBE
+                    RegistrationService.ProcessRegistrationAssignment(
+                        checkoutObject: checkoutObject,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+
+                    if (sendConfirmationEmail)
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, loggedInUser, true, msgs, dc);
 
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -2240,7 +2261,7 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
 
-                    Registration.SendConfirmation(checkoutObject, true);
+                    checkoutObject.Registration.SendConfirmation(checkoutObject, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),

@@ -19,21 +19,28 @@
 
                 <div class="col-md-12">
                     <div class="row">
-                        
-                        @if (po.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0)
-                        {
-                            <p class="text-medium-small pull-right">
-                                <a href="@registration.GetPaymentUrl">Pay Now &raquo;</a>
-                            </p>
-                        }
-
                         <p class="text-medium">@po.Name</p>
                     </div>
                 </div>
 
                 Html.RenderPartial("~/Views/Shared/_ActivityScheduleHtml.cshtml", po.Schedule);
 
-                if (po.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0)
+                if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
+                {
+                    <div class="col-md-12 padding-v-20">
+                        <div class="row">
+                            <a href="@registration.GetParentalConsentUrl" class="btn btn-primary center-block btn-lg">
+                                Give Consent
+                                @if (po.IsNotFreeAndCanAcceptPayments)
+                                {
+                                    <span>&amp; Pay Online</span>
+                                }
+                                &raquo;
+                            </a>
+                        </div>
+                    </div>
+                }
+                else if (po.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0)
                 {
                     <div class="col-md-12 padding-v-20">
                         <div class="row">

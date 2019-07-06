@@ -627,5 +627,40 @@ namespace AfterSchoolLibrary.Services
                 AccountId = group.AccountId
             };
         }
+
+        public static SystemMessages InviteContacts(this ActivityGroup group, List<Registrant> contacts, RegistrationPeriod period, List<int> activityIds, int loggedInUserId, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+
+            contacts.ForEach(contact => {
+                group.InviteContact(contact, period?.ID, 1, loggedInUserId, msgs, dc: dc);
+                if (activityIds.Any())
+                    msgs.AddRange(contact.AddInviteToActivities(activityIds, loggedInUserId, group.ID, period?.ID, dc: dc));
+            });
+
+            return msgs;
+        }
+
+        public static RegistrantActivityGroup InviteContact(this ActivityGroup group, Registrant contact, int? periodId, int invitationSeats, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var rag = RegistrantActivityGroup.LoadByActivityGroupIdByRegistrantId(group.ID.Value, contact.ID.Value, dc: dc);
+
+            if (rag.IsEmpty())
+            {
+                rag = new RegistrantActivityGroup();
+                rag.CreateDate = DateTime.UtcNow;
+                rag.CreatedBy = loggedInUserId;
+                rag.ActivityGroupId = group.ID;
+                rag.RegistrantId = contact.ID;
+            }
+            rag.NumberOfInvitationSeats = invitationSeats;
+            rag.NumberOfSeatsDeclined = 0;
+            rag.RegistrationPeriodId = periodId;
+            rag.LastModifiedDate = DateTime.UtcNow;
+            rag.LastModifiedBy = loggedInUserId;
+            msgs.AddRange(rag.Save(dc: dc));
+            return rag;
+        }
     }
 }

@@ -205,7 +205,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (mergeintoreg.IsGuid())
             {
                 var mergeInto = Registration.LoadByUid(mergeintoreg.ToGuid());
-                msgs.AddRange(mergeInto.MergeInto(registration, SessionVariables.CurrentUser.ID.Value));
+                mergeInto.MergeInto(registration, SessionVariables.CurrentUser.ID.Value, msgs);
                 mergeInto = mergeInto.Reload();
                 LoadRegistrationViewBag(mergeInto, mergeintoreg);
 

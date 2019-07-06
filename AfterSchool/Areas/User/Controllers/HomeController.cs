@@ -17,11 +17,11 @@ namespace AfterSchool.Areas.User.Controllers
         // GET: User/Home
         public ActionResult Index()
         {
-            var msgs = new SystemMessages();
+            var msgs = new SystemMessages();            
             var registrants = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs)
                                 .OrderBy(x => x.FirstName)
                                 .ThenBy(x => x.LastName)
-                                .ToList();
+                                .ToList();            
 
             ViewBag.Messages = msgs;
 

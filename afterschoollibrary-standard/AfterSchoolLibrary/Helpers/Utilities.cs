@@ -281,6 +281,9 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
+                    amsgs.AddRange(UpdateRegistrantAccess(adc));
+                    amsgs.AddRange(UpdateRegistrantStatuses(adc));
+
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
                     // amsgs.AddRange(MigrateChargesAndPayoutsEnabled(adc));
@@ -337,6 +340,44 @@ namespace AfterSchoolLibrary.Helpers
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
             );            
+
+            return msgs;
+        }
+
+        private static SystemMessages UpdateRegistrantStatuses(DatabaseConnection dc)
+        {
+            return Registrant.Update(
+                updateValues:  new Hashtable() { { "ProfileStatusId", (int)RegistrantProfileStatus.Completed } },
+                criterias: new Hashtable()
+                {
+                    { "IsMaster", true },
+                    { "ProfileStatusId", 0 }
+                },
+                ObjectMap: Registrant.ObjectMap,
+                dc: dc);
+        }
+
+        public static SystemMessages UpdateRegistrantAccess(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var registrants = Registrant.Load(
+                criterias: new Hashtable() { { "IsMaster", true } }, 
+                msgs: msgs, 
+                dc: dc);
+
+            registrants.ForEach(registrant => {
+
+                var user = new WebUser() { ID = registrant.WebUserId };
+
+                if (!registrant.WebUserId.HasValue)
+                    user = registrant.GetAccount(msgs, dc).GetAccountOwner(msgs, dc);
+
+                registrant.AddUserWithAccess(
+                        user: user,
+                        loggedInUser: null,
+                        msgs: msgs,
+                        dc: dc);
+            });
 
             return msgs;
         }

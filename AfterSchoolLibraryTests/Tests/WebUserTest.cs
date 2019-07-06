@@ -341,7 +341,7 @@ namespace AfterSchoolLibraryTests.Tests
                 user.CreateRegistrant(RegistrantType.Individual, true, false, msgs, dc);
             }
 
-            Assert.Equal(numberOfRegistrants, user.GetRegistrants(msgs, dc).Count);
+            Assert.Equal(numberOfRegistrants, user.GetChildrenRegistrants(msgs, dc).Count);
         }
 
         [Fact(DisplayName = "Checks if user is active for an account")]

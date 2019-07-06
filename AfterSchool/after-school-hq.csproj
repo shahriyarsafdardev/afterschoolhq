@@ -1573,6 +1573,10 @@
     <Content Include="Views\Shared\Registration\_FirstTimeInformation.cshtml" />
     <Content Include="Views\Shared\Modals\_FirstTimeDemoOrgName.cshtml" />
     <Content Include="Views\Shared\Components\_TimezoneDropdown.cshtml" />
+    <Content Include="Views\Account\GetStartedStudent.cshtml" />
+    <Content Include="Views\Account\InviteParent.cshtml" />
+    <Content Include="Views\Account\RegisterStudent.cshtml" />
+    <Content Include="Views\Account\RegisterStudentThanks.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

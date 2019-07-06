@@ -38,6 +38,10 @@ namespace AfterSchoolLibrary.Models
 		/// The location id of the school the registrant is attending
 		/// </summary>
 		public int? SchoolLocationId { get { return (int?)MDV["SchoolLocationId"].Value; } set { MDV["SchoolLocationId"].Value = value; } }
+		/// <summary>
+		/// The status of the profile - completed
+		/// </summary>
+		public RegistrantProfileStatus ProfileStatusId { get { return (RegistrantProfileStatus)MDV["ProfileStatusId"].Value; } set { MDV["ProfileStatusId"].Value = value; } }
 		
 
         public Registrant()
@@ -50,6 +54,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsContactOnly = false;
 			this.IsParentOrGuardian = false;
 			this.AllowTextMessages = false;
+			this.ProfileStatusId = RegistrantProfileStatus.NotSet;
 			
         }
 
@@ -71,6 +76,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "SchoolLocationId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ProfileStatusId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -190,6 +196,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["SchoolLocationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ProfileStatusId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
@@ -406,375 +416,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             return dq.GetCount();
-        }
-        
-        public Registration AddRegistration(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var reg = new Registration
-            {
-                AccountId = ownerAccountId,
-                RegistrantId = this.ID,
-                ActivityGroupId = activityGroupId,
-                AccountActivityGroupId = accountActivityGroupId,
-                RegistrationPeriodId = periodId,
-                CompletionStatusId = completionStatus,
-                CreateDate = DateTime.UtcNow,
-                LastModifiedDate = DateTime.UtcNow,
-                CreatedBy = loggedInUserId,
-                LastModifiedBy = loggedInUserId,
-                LastUpdated = DateTime.UtcNow
-            };
-            msgs.AddRange(reg.Save(dc));
-
-            if (FirstName.IsNotEmpty() && LastName.IsNotEmpty() && Email.IsNotEmpty())
-                msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
-
-            return reg;
-        }
-
-        public Registration AddRegistrationWithESignature(int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, string esignature, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var reg = new Registration
-            {
-                AccountId = ownerAccountId,
-                RegistrantId = this.ID,
-                ActivityGroupId = activityGroupId,
-                AccountActivityGroupId = accountActivityGroupId,
-                RegistrationPeriodId = periodId,
-                ESignature = esignature,
-                CompletionStatusId = completionStatus,
-                CreateDate = DateTime.UtcNow,
-                LastModifiedDate = DateTime.UtcNow,
-                CreatedBy = loggedInUserId,
-                LastModifiedBy = loggedInUserId,
-                LastUpdated = DateTime.UtcNow
-            };
-            msgs.AddRange(reg.Save(dc));
-
-            if (completionStatus == RegistrationCompletionStatus.Completed)
-                msgs.AddRange(reg.FindAndSetFirstRegistration(this.FirstName, this.LastName, this.Email, dc));
-
-            return reg;
-        }
-
-        public List<Registration> GetRegistrations(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registration.LoadByRegistrantId(this.ID.Value, msgs, dc: dc);
-        }
-
-        public int GetRegistrationCount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registration.GetCount(new Hashtable() { { "RegistrantId", this.ID.Value } }, msgs: msgs, dc: dc);
-        }
-
-
-        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, decimal? amountCharged, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return AddOrUpdateParticipationObject(
-                registrationId, 
-                participationObjectId, 
-                participationObjectType, 
-                assignmentType, 
-                1, 
-                registrationPeriodId, 
-                activityGroupId, 
-                amountCharged,
-                loggedInUserId, 
-                msgs, 
-                dc);
-        }
-
-        public RegistrantActivity AddOrUpdateParticipationObject(int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, decimal? amountCharged, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                participationObjectId, 
-                participationObjectType, 
-                this.ID.Value, 
-                msgs, 
-                dc);
-
-            if (ra.IsEmpty())
-                ra = new RegistrantActivity
-                {
-                    ParticipationObjectId = participationObjectId,
-                    ParticipationObjectTypeId = participationObjectType,
-                    RegistrantId = this.ID,
-                    RegistrationId = registrationId,
-                    ActivityGroupId = activityGroupId,
-                    RegistrationPeriodId = registrationPeriodId,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId
-                };
-            
-            ra.LastModifiedDate = DateTime.UtcNow;
-            ra.LastModifiedBy = loggedInUserId;
-            ra.PreferenceNumber = preferenceNumber;
-
-            if (amountCharged.HasValue)
-                ra.AmountCharged = amountCharged;
-
-            msgs.AddRange(ra.Save(dc));
-
-            ra.ChangeSeatAssignment(assignmentType, new WebUser { ID = loggedInUserId }, msgs, dc);
-
-            return ra;
-        }
-
-        public FormQuestionAnswer MapAndAddAnswer(List<FormQuestion> questions, Registrant fromRegistrant, QuestionDataType fromType, QuestionDataType toType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var parentAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
-            var studentQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
-            if (studentQuestion.IsNotEmpty() && parentAnswer.IsNotEmpty())
-                return this.AddAnswer(parentAnswer.Text, studentQuestion, loggedInUser.ID.Value, msgs, dc);
-
-            return null;
-        }
-
-        public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (question.IsNotEmpty())
-                return AddAnswer(answerText, question, null, loggedInUserId, msgs, dc);
-
-            return null;
-        }
-
-        public FormQuestionAnswer AddAnswer(string answerText, FormQuestion question, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (question.IsNotEmpty())
-                return AddAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUserId, msgs, dc);
-
-            return null;
-        }
-
-        public FormQuestionAnswer AddAnswer(string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            //check if answer for this one already exists, and where formquestion is null
-            FormQuestionAnswer answer = null;
-
-            if (questionDataType == QuestionDataType.NotSet)
-                answer = FormQuestionAnswer.LoadByRegistrantIdByFormQuestionIdByRegistrationId(
-                    RegistrantId: this.ID.Value,
-                    FormQuestionId: questionId.Value,
-                    RegistrationId: registrationId.Value,
-                    msgs: msgs, 
-                    dc: dc);
-            else
-                answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(this.ID.Value, questionDataType, msgs, dc);
-
-            if (answer.IsEmpty())
-            {
-                answer = new FormQuestionAnswer
-                {
-                    RegistrantId = this.ID,
-                    FormQuestionId = questionId.Value,
-                    QuestionDataTypeId = questionDataType,
-                    QuestionText = questionText,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId
-                };
-            }
-            answer.RegistrationId = registrationId;
-            answer.Text = answerText;
-            answer.LastModifiedDate = DateTime.UtcNow;
-            answer.LastModifiedBy = loggedInUserId;
-            msgs.AddRange(answer.Save(dc));
-
-            msgs.AddRange(answer.UpdateRegistrantInfo(this, dc));
-
-            return answer;
-        }
-
-        public RegistrantActivity AddInviteToActivity(int activityId, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                activityId, 
-                ParticipationObjectType.Activity, 
-                this.ID.Value, 
-                msgs, 
-                dc);
-
-            if (ra.IsEmpty())
-                ra = new RegistrantActivity
-                {
-                    ParticipationObjectId = activityId,
-                    ParticipationObjectTypeId = ParticipationObjectType.Activity,
-                    RegistrantId = this.ID,
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId,
-                    ActivityGroupId = activityGroupId
-                };
-
-            ra.LastModifiedDate = DateTime.UtcNow;
-            ra.LastModifiedBy = loggedInUserId;
-            ra.RegistrationPeriodId = registrationPeriodId;
-            ra.AssignmentTypeId = RegistrationAssignmentType.Invited;
-
-            msgs.AddRange(ra.Save(dc: dc));
-
-            return ra;
-        }
-
-        public SystemMessages AddInviteToActivities(List<int> activityIds, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-            activityIds.ForEach(activityId =>
-                this.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, msgs, dc)
-            );
-            return msgs;
-        }        
-
-        public Registrant CreateMasterCopy(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var master = this.CopyWithAnswers(questions, loggedInUserId, msgs, dc);
-            master.IsMaster = true;
-            master.IsContactOnly = true;
-            master.AccountId = null;
-            msgs.AddRange(master.Save(dc));
-
-            this.ParentRegistrantId = master.ID;
-            msgs.AddRange(this.Save(dc: dc));
-
-            return master;
-        }
-
-        public Registrant Copy(int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var copy = new Registrant();
-            copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
-            copy.CreateDate = copy.LastModifiedDate = DateTime.UtcNow;
-            copy.CreatedBy = copy.LastModifiedBy = loggedInUserId;
-            copy.Uid = Guid.NewGuid();
-            copy.ResetID();
-            msgs.AddRange(copy.Save(dc: dc));
-
-            return copy;
-        }
-
-        public Registrant CopyWithAnswers(List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var copy = this.Copy(loggedInUserId, msgs, dc);
-
-            if (questions.IsEmpty())
-                questions.ForEach(question => 
-                    copy.AddAnswer(question.GetAnswer(this.ID.Value, msgs, dc).Text, question, null, loggedInUserId, msgs, dc)
-                );
-
-            return copy;
-        }
-
-        public void CopyAnswers(Registrant copyingRegistrant, Registration registration, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            Database.ExecuteTransaction
-              (
-                  action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                  {
-                      // copy all answers
-                      var answers = this.GetAnswers(amsgs, adc);
-                      answers.ForEach(answer =>
-                      {
-                          copyingRegistrant.AddAnswer(
-                              answerText: answer.Text,
-                              question: answer.ToFormQuestion(true, amsgs, adc),
-                              registrationId: registration?.ID,
-                              loggedInUserId: loggedInUser?.ID ?? 0,
-                              msgs: amsgs,
-                              dc: adc);
-                      });
-                  },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                dc: dc
-            );
-        }
-
-        public bool IsRegisteredFor(ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var childrenRegistrants = this.GetChildren(participationObject.OwnerAccount.ID.Value, msgs, dc);
-
-            return childrenRegistrants.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
-                participationObjectId: participationObject.ObjectID.Value,
-                participationObjectType: participationObject.ObjectType,
-                registrantIds: childrenRegistrants.Select(registrant => registrant.ID.Value).ToList(),
-                msgs: msgs,
-                dc: dc);
-        }
-
-        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return this.AccountId.HasValue ? Account.Load(this.AccountId.Value, msgs, dc) : null;
-        }
-
-        public Registrant GetMasterRegistrant(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return this.ParentRegistrantId.HasValue ? Registrant.Load(this.ParentRegistrantId.Value, msgs, dc) : null;
-        }
-
-        public Registrant CopyToAccount(Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            Registrant copy = null;
-
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    copy = this.Copy(loggedInUser?.ID ?? 0, msgs, dc);
-                    copy.AccountId = ownerAccount.ID;
-                    copy.FirstRegistrantId = null;
-                    copy.ParentRegistrantId = this.ID;
-                    copy.IsContactOnly = false;
-                    copy.IsMaster = false;
-                    amsgs.AddRange(copy.Save(adc));
-
-                    // need to relate registrants within the same account, specifically provider or school accounts
-                    amsgs.AddRange(copy.FindAndSetFirstRegistrant(loggedInUser, adc));
-                   
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                dc: dc
-            );
-
-            
-
-            return copy;
-        }
-
-        public List<Registrant> GetChildren(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registrant.LoadByParentRegistrantId(this.ID.Value, msgs, dc);
-        }
-
-        public List<Registrant> GetChildren(int accountId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registrant.LoadByParentRegistrantIdByAccountId(this.ID.Value, accountId, msgs, dc);
-        }
+        }                       
 
         public static Registrant LoadByNameByEmail(int accountId, string firstName, string lastName, string email, DatabaseConnection dc = null)
         {
@@ -861,7 +503,7 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
-        public static List<Registrant> FindRelatedRegistrants(int AccountId, string firstName, string lastName, string email, DatabaseConnection dc = null)
+        public static List<Registrant> FindRelatedRegistrants(int AccountId, string firstName, string lastName, string email, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -873,80 +515,6 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public List<Registrant> FindRelatedRegistrants(string firstName = null, string lastName = null, string email = null, DatabaseConnection dc = null)
-        {
-            return FindRelatedRegistrants(
-                this.AccountId.Value,
-                firstName ?? this.FirstName,
-                lastName ?? this.LastName,
-                email ?? this.Email,
-                dc);
-        }
-
-        public SystemMessages AddRelatedRegistrant(Registrant registrant, int loggedInUserId, DatabaseConnection dc = null)
-        {
-            registrant.FirstRegistrantId = this.ID.Value;
-            registrant.LastModifiedBy = loggedInUserId;
-            registrant.LastModifiedDate = DateTime.UtcNow;
-            return registrant.Save(dc: dc);
-        }
-
-        public List<Registrant> GetRelatedRegistrants(DatabaseConnection dc = null)
-        {
-            var registrants = new List<Registrant>();
-            if (this.FirstRegistrantId.HasValue)
-            {
-                registrants.Add(Registrant.Load(this.FirstRegistrantId.Value, dc: dc));
-                registrants.AddRange(Registrant.LoadByFirstRegistrantId(this.FirstRegistrantId.Value, dc: dc));
-            }
-            else
-                registrants.AddRange(Registrant.LoadByFirstRegistrantId(this.ID.Value, dc: dc));
-
-            return registrants.Where(x => x.ID != this.ID).OrderByDescending(x => x.CreateDate).ToList();
-        }
-
-        public bool IsRelated(Registrant registrant)
-        {
-            return this.FirstName.Trim().ToLower() == registrant.FirstName.Trim().ToLower() &&
-                    this.LastName.Trim().ToLower() == registrant.LastName.Trim().ToLower() &&
-                    this.Email.Trim().ToLower() == registrant.Email.Trim().ToLower();
-        }
-
-        public SystemMessages DeleteWithRelatedRecords(DatabaseConnection dc = null)
-        {
-            var msgs = new SystemMessages();
-
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    this.DeleteSessionActions(amsgs, adc);
-                    this.DeleteRegistrantActivities(amsgs, adc);
-                    amsgs.AddRange(this.Delete(adc));
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-                },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.AddRange(fmsgs);
-                },
-                onException: (SystemMessages emsgs) =>
-                {
-                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
-                },
-                dc: dc
-            );
-
-            return msgs;
-        }
-
-        /// <summary>
-        /// Delete session related actions
-        /// </summary>
-        /// <param name="msgs"></param>
-        /// <param name="dc"></param>
         internal void DeleteSessionActions(SystemMessages msgs, DatabaseConnection dc = null)
         {
             SessionAction.LoadByRegistrantId(this.ID.Value, msgs, dc).ForEach(sa => msgs.AddRange(sa.Delete(dc)));
@@ -955,40 +523,27 @@ namespace AfterSchoolLibrary.Models
         internal void DeleteRegistrantActivities(SystemMessages msgs, DatabaseConnection dc = null)
         {
             this.GetRegistrantActivities(msgs, dc).ForEach(ra => ra.CancelRegistration(msgs, dc));
-        }        
-
-        public Registrant GetParentOrGuardian(SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return Registrant.LoadByAccountId(this.AccountId.Value, msgs, dc).Where(registrant => registrant.IsParentOrGuardian).OrderBy(registrant => registrant.ID).FirstOrDefault();
         }
 
-        public void DeleteRegistrantActivity(int activityId, SystemMessages msgs, DatabaseConnection dc = null)
+        public Registrant Copy(int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var registrantAcitivity = RegistrantActivity.LoadByParticipationObjectByRegistrant(activityId, ParticipationObjectType.Activity, this.ID.Value, msgs, dc);
-            msgs.AddRange(registrantAcitivity.Delete(dc));
-        }
-        
-        public decimal GetAmountPaid(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return ActivityPayment.LoadByRegistrantId(this.ID.Value, msgs, dc).Sum(payment => payment.Amount.Value);
-        }
-        
-        /*
-        public List<Attendance> GetAttendance(int ActivityId, DatabaseConnection dc = null)
-        {
-            return Attendance.LoadByRegistrantIdByActivityId(this.ID.Value, ActivityId, dc: dc);
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var copy = new Registrant();
+            copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
+            copy.CreateDate = copy.LastModifiedDate = DateTime.UtcNow;
+            copy.CreatedBy = copy.LastModifiedBy = loggedInUserId;
+            copy.Uid = Guid.NewGuid();
+            copy.ResetID();
+            msgs.AddRange(copy.Save(dc: dc));
+
+            return copy;
         }
 
-        public List<Attendance> GetAttendanceByDate(DateTime date, DatabaseConnection dc = null)
+        public int GetRegistrationCount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Attendance.LoadByRegistrantIdByDate(this.ID.Value, date, dc: dc);
+            return Registration.GetCount(new Hashtable() { { "RegistrantId", this.ID.Value } }, msgs: msgs, dc: dc);
         }
-
-        public Attendance GetAttendanceByActivityByDate(int ActivityId, DateTime date, DatabaseConnection dc = null)
-        {
-            return Attendance.LoadByActivityIdByRegistrantIdByDate(ActivityId, this.ID.Value, date, dc: dc);
-        }       
-         * */
 
         #endregion
     }

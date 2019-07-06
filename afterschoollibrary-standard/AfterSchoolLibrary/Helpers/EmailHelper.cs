@@ -6,6 +6,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using System.Linq;
 using System.Collections.Generic;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -81,26 +82,26 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, bool sendBcc)
+        public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
-            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs);
+            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
             var participationObject = checkoutObject.ParticipationObject;
             var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
-            var billingAccountOwner = billingAccount.GetAccountOwner(msgs);
+            var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
             var paymentPlan = checkoutObject.PaymentPlan;
             var subscription = checkoutObject.SubscriptionPlan;
-            var registrant = checkoutObject.MasterRegistrant;
-            var parentOrGuardian = registrant.GetParentOrGuardian(msgs);
-            var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs);
+            var masterRegistrant = checkoutObject.MasterRegistrant;
+            var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
+            var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
 
             var receiptRows = "";
             var regStatus = "";
             var registeredOrApplied = "registered";
-            var registrantActivity = checkoutObject.Registration.GetRegistrantActivities().First();
-            var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs);
+            var registrantActivity = checkoutObject.Registration.GetRegistrantActivities(msgs, dc).First();
+            var registrationThankYou = participationObject.GetRegistrationThankYou(registrantActivity, msgs, dc);
             var cost = "";
             var ccFee = "";
             var asFee = "";
@@ -110,6 +111,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 case RegistrationAssignmentType.Reserved:
                 case RegistrationAssignmentType.ReservedPendingPayment:
+                case RegistrationAssignmentType.ReservedPendingParentalConsent:
                     regStatus = "Reserved";
                     break;
                 case RegistrationAssignmentType.WaitingList:
@@ -128,6 +130,8 @@ namespace AfterSchoolLibrary.Helpers
             // so we should treat them as registered
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
                 amountDueOrPaid = "Amount Due (If Confirmed)";
+            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
+                amountDueOrPaid = "Amount Due (If Parent Approved)";
             else if (!canAccountAcceptPayments || registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
                 amountDueOrPaid = "Amount Due";
             else
@@ -145,16 +149,16 @@ namespace AfterSchoolLibrary.Helpers
                 else if (checkoutObject.PaymentPlan.IsNotEmpty())
                 {
                     cost = checkoutObject.PaymentPlanCostTodayNoFees.ToCurrency();
-                    ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs).ToCurrency();
-                    asFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs).ToCurrency();
+                    ccFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc).ToCurrency();
+                    asFee = checkoutObject.GetPaymentPlanCostTodayConvenienceFee(msgs, dc).ToCurrency();
 
                     additionalDetails = $"today plus {paymentPlan.CostPerPeriod.ToCurrency()} for {(paymentPlan.TotalPeriods.Value - 1)} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
                 }
                 else
                 {
-                    cost = checkoutObject.TuitionCostNoFees.ToCurrency();
-                    ccFee = checkoutObject.GetTuitionCreditCardFee(msgs).ToCurrency();
-                    asFee = checkoutObject.GetTuitionConvenienceFee(msgs).ToCurrency();
+                    cost = (checkoutObject.TuitionCostNoFees + checkoutObject.GetTuitionConvenienceFee(msgs, dc)).ToCurrency();
+                    ccFee = checkoutObject.GetTuitionCreditCardFee(msgs, dc).ToCurrency();
+                    asFee = checkoutObject.GetTuitionConvenienceFee(msgs, dc).ToCurrency();
 
                     additionalDetails = "tuition fee";
                 }
@@ -179,10 +183,11 @@ namespace AfterSchoolLibrary.Helpers
             if (subscription.IsNotEmpty())
             {
                 description = $"Subscription for {participationObject.Name}";
-                cost = checkoutObject.SubscriptionCostTodayNoFees.ToCurrency();
                 additionalDetails = $"per {subscription.BillingPeriodTypeId.ToString().ToLower()}";
-                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs).ToCurrency();
-                asFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs).ToCurrency();
+
+                cost = (checkoutObject.SubscriptionCostTodayNoFees + checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc)).ToCurrency();
+                asFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc).ToCurrency();
+                ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
 
                 // add tuition fee row
                 var subscriptionFeeModel = new NameValueCollection()
@@ -200,45 +205,59 @@ namespace AfterSchoolLibrary.Helpers
                     msgs);
             };
 
+            var registrationDetails = "Login to your account to view more details about this registration.";
+            var loginLink = $"{Utilities.LoginUrl(isAfterSchool)}";
+
+            if (isParentCopy)
+            {
+                registrationDetails = "Create your account to <strong>approve or decline</strong> this registration.";
+
+                var parentUser = parentOrGuardian.GetOwner(msgs, dc);
+                if (parentUser.IsNotEmpty() && !parentUser.IsRegistered)
+                    loginLink = parentUser.GetInviteUrl(purchaserAccount);
+            }
+
             var model = new NameValueCollection()
             {
-                { "FirstName", purchaser.FirstName },
+                { "FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName },
                 { "ProductName", Utilities.AppName(isAfterSchool) },
-                { "LoginLink", $"{Utilities.LoginUrl(isAfterSchool)}" },
-                { "ActivityContactEmail",  participationObject.ContactEmail},
-                { "ActivityContactPhone",  participationObject.ContactPhone},
-                { "ActivityContactName",  participationObject.ContactName},
+                { "LoginLink", loginLink },
+                { "ActivityContactEmail", participationObject.ContactEmail},
+                { "ActivityContactPhone", participationObject.ContactPhone},
+                { "ActivityContactName", participationObject.ContactName},
                 { "BillerAccountName", billingAccount.Name },
                 { "BillerAccountLink", billingAccount.HomePageUrl },
                 { "AmountDueOrPaid", amountDueOrPaid },
-                { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs).ToCurrency() },
+                { "TotalCost", checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc).ToCurrency() },
                 { "BodyRows", receiptRows },
-                { "CustomMessage", registrationThankYou },
+                { "CustomMessage", isParentCopy ? $"{masterRegistrant.FirstName} has registered for the following activity:" : registrationThankYou },
                 { "CreditCardFee", ccFee },
-                { "ConvenienceFee", asFee }
+                { "ConvenienceFee", asFee },
+                { "RegistrationDetails", registrationDetails}
             };
-
-            var subject = $"{registrant.FirstName} has {registeredOrApplied} for {participationObject.Name}!";
+            
+            var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
             var body = ProcessTemplate(
                 EmailTemplates.Registration_Confirmation,
                 model,
                 "Registration_Confirmation",
                 msgs);
 
-            var mailMsgs = SendGridHelper.SendMail(
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to registerer
+            mailMsgs.AddRange(SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                toEmail: new SendGrid.Helpers.Mail.EmailAddress(parentOrGuardian.Email),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(loggedInUser.Email),
                 subject: subject,
                 body: body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool));
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
 
-            // send bcc
+            // send bcc to activity contact
             if (sendBcc)
             {
                 var emails = new List<string>();
-
-                //if (billingAccountOwner.Email.IsEmail())
-                //    emails.Add(billingAccountOwner.Email.ToLower());
 
                 if (participationObject.ContactEmail.IsEmail() && participationObject.ContactEmail.ToLower().NotIn(emails))
                     emails.Add(participationObject.ContactEmail.ToLower());
