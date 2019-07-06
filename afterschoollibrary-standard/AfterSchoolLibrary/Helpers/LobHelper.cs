@@ -74,7 +74,7 @@ namespace AfterSchoolLibrary.Helpers
             return new Lob.Services.CheckService(SecretKey);
         }
 
-        public static Lob.Models.Check CreateCheck(string description, Lob.Models.AccountType accountType, string toName, string toAddress1, string toAddress2, string toCity, string toState, string toPostalCode, string fromAddressId, string bankAccountId, decimal amount, string memo, dynamic metaData, SystemMessages msgs)
+        public static Lob.Models.Check CreateCheck(string description, Lob.Models.AccountType accountType, string toName, string toAddress1, string toAddress2, string toCity, string toState, string toPostalCode, string fromAddressId, string bankAccountId, decimal amount, string memo, string attachment, dynamic metaData, SystemMessages msgs)
         {
             var toAddress = new Lob.Models.AddressCreateOptions()
             {
@@ -98,7 +98,8 @@ namespace AfterSchoolLibrary.Helpers
                 BankAccountId = bankAccountId,
                 Amount = amount,
                 Memo = memo,
-                MetaData = metaData
+                Attachment = attachment,
+                MetaData = metaData,                
             };
 
             Lob.Models.Check check = null;
@@ -464,6 +465,7 @@ namespace Lob
             public string CheckBottom { get; set; }
             public NameValueCollection MergeVariables { get; set; }
             public object MetaData { get; set; }
+            public string Attachment { get; set; }
 
             internal dynamic ToDynamicObject()
             {
@@ -484,6 +486,7 @@ namespace Lob
                     bank_account = BankAccountId,
                     amount = Amount,
                     memo = Memo,
+                    attachment = Attachment,
                     metadata = MetaData
                 };
             }

@@ -1363,6 +1363,7 @@ property: TransactionTypeId, TransactionType, Int, required
 property: StripeChargeOrRefundId, string, NVarChar "50"
 property: PaymentSourceTypeId, PaymentSourceType, Int
 property: OriginalTransactionId, int?, Int
+property: PayoutId, int?, Int, , If associated to a payout then it cannot be requested for another payout
 property: PlatformPercentFee, decimal?, Decimal "10,2", , deprecated
 property: PlatformFlatFee, decimal?, Decimal "10,2", , deprecated
 loadmethod: BillerAccountId, List<>
@@ -1372,6 +1373,7 @@ loadmethod: BillerAccountId|TransactionTypeId, List<>
 loadmethod: PayerAccountId|TransactionTypeId, List<>
 loadmethod: StripeChargeOrRefundId
 loadmethod: OriginalTransactionId, List<>
+loadmethod: PayoutId, List<>
 [end]
 
 [begin]
@@ -1386,6 +1388,7 @@ property: PayoutStatusId, PayoutStatus, Int, required
 property: PaymentTypeId, PaymentType, Int, required
 property: DateRequested, DateTime?, DateTime, required
 property: RequestedBy, int?, Int, required
+property: ExternalPayoutId, string, NVarChar "100", , a place to store the check id or stripe payout id
 loadmethod: AccountId, List<>
 loadmethod: AccountId|PayoutStatusId, List<>
 loadmethod: PayoutStatusId, List<>

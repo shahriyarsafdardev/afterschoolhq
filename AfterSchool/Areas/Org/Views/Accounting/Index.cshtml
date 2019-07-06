@@ -20,6 +20,11 @@
 
         <div class="panel-heading">
             <i class="s7-note2"></i> Transactions
+            <div class="pull-right">
+                <button class="btn btn-primary md-trigger" id="request-payout" disabled="true" onclick="requestPayout()" data-modal="modal-payout-request">
+                    Request Payouts
+                </button>
+            </div>
             <div class="clearfix"></div>
         </div>
 
@@ -115,6 +120,12 @@
                 <table class="table table-hover table-condensed" id="transaction-table">
                     <thead>
                         <tr>
+                            <th>
+                                <span class="am-checkbox">
+                                    <input type="checkbox" id="selectAllTransaction" onchange="selectAllTransaction(this)" />
+                                    <label for="selectAllTransaction"></label>
+                                </span>
+                            </th>
                             <th>ID</th>
                             <th>Created On</th>
                             <th>Payer</th>
@@ -136,6 +147,12 @@
                                 var participationObjects = transaction.GetParticipationObjects();
 
                                 <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                    <td>
+                                        <span class="am-checkbox">
+                                            <input type="checkbox" id="selectTransaction-@transaction.ID" @(transaction.PayoutId!=null?"disabled":"") class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
+                                            <label for="selectTransaction-@transaction.ID"></label>
+                                        </span>
+                                    </td>
                                     <td>
                                         @transaction.GetTransactionNumber()
                                     </td>
@@ -200,7 +217,7 @@
                                     { "controller", "accounting" },
                                     { "action", "index" },
                                     { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
-            }
+    }
                 );
             }
         </div>
@@ -244,18 +261,57 @@
     </div>
 </div>
 
+<form action="@Url.Action("RequestPayout","Accounting")" id="requestPayoutForm" method="post">
+    @Html.Hidden("TransactionIds")
+</form>
 
 <script>
-    function validateForm() {
+     var selectedTransactions = [];
+     function validateForm() {
         var val = parseFloat($("#amount").val());
         var isValid = val >= 0.1;
 
         $("#confirm-refund-btn").attr('disabled', !isValid);
+     }
+
+    function requestPayout() {
+        $("#TransactionIds").val(this.selectedTransactions.join());
+        $("#requestPayoutForm").submit();
     }
 
     function openDialog(newUid) {
         $("#modal-refund").data("uid", newUid);
         $("#refunded-amount").text($("#" + newUid).data('refunded-amount'));
+    }
+
+      function selectTransaction(id, event) {
+        if (event.checked) {
+            this.selectedTransactions.push(id);
+        }
+        else {
+            var index = this.selectedTransactions.map(x => {
+                    return x;
+                }).indexOf(id);
+            this.selectedTransactions.splice(index, 1);
+        }
+        if (this.selectedTransactions.length > 0)
+            $("#request-payout").attr("disabled", false);
+        else
+            $("#request-payout").attr("disabled", true);
+    }
+
+    function selectAllTransaction(event) {
+        var allChkBoxes = $(".chkTransaction");
+        allChkBoxes.map(function (e) {
+            if (event.checked) {
+                if ($(this).prop("checked") == false)
+                    this.click();
+               }
+             else {
+                if ($(this).prop("checked") == true)
+                    this.click();
+              }
+           })
     }
 
     function confirmRefund() {

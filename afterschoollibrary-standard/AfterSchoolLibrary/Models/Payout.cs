@@ -43,6 +43,10 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public int? RequestedBy { get { return (int?)MDV["RequestedBy"].Value; } set { MDV["RequestedBy"].Value = value; } }
+		/// <summary>
+		/// a place to store the check id or stripe payout id
+		/// </summary>
+		public string ExternalPayoutId { get { return (string)MDV["ExternalPayoutId"].Value; } set { MDV["ExternalPayoutId"].Value = value; } }
 		
 
         public Payout()
@@ -69,6 +73,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "PaymentTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateRequested", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "RequestedBy", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ExternalPayoutId", System.Data.SqlDbType.NVarChar , "100");
 				
                 return _dp;
             }
@@ -180,6 +185,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RequestedBy"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ExternalPayoutId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
