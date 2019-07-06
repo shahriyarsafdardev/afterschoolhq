@@ -1,0 +1,58 @@
+﻿@model Registrant
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <i class="s7-user"></i> @Model.Name - Emergency Contacts
+
+            <div class="pull-right">
+                <a href="@Url.Action("index", "family")" class="btn btn-default">
+                    Exit
+                </a>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <form class="form-horizontal" id="form-save-emergencycontacts" method="post" action="@Url.Action("editemergencycontact", "family", new { id = Model.Uid })">
+
+                <h4 class="col-md-9 col-md-offset-3 padding-v-20">Emergency Contact 1</h4>
+                @foreach (var qvm in qvms.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
+                {
+                    Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                }
+
+                <h4 class="col-md-9 col-md-offset-3 padding-v-20">Emergency Contact 2 (optional)</h4>
+                @foreach (var qvm in qvms.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
+                {
+                    Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                }
+
+                <div class="margin-v-20">
+                    <div class="col-md-offset-3 col-md-6">
+                        <button type="submit" id="btn-save-emergencycontacts" class="btn btn-primary btn-block btn-lg">Save and Complete &raquo;</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#form-save-emergencycontacts').submit(function () {
+            $('#btn-save-emergencycontacts').html('Saving...');
+            $('#btn-save-emergencycontacts').prop('disabled', true);
+        });
+    });
+</script>

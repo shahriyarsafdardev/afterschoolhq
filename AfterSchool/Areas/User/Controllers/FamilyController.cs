@@ -28,7 +28,9 @@ namespace AfterSchool.Areas.User.Controllers
             return View(registrants);
         }
 
-        private List<FormQuestion> GetPersonalQuestions(SystemMessages msgs)
+        #region StudentPersonal
+
+        private List<FormQuestion> GetStudentPersonalQuestions(SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
             var studentQuestionGroup = form.GetQuestionGroups(msgs)
@@ -76,8 +78,8 @@ namespace AfterSchool.Areas.User.Controllers
                 if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
                     return RedirectToAction("index");
 
-                var questions = GetPersonalQuestions(msgs);
-                
+                var questions = GetStudentPersonalQuestions(msgs);
+
                 var values = new NameValueCollection();
                 questions.ForEach(question => {
                     values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
@@ -105,7 +107,7 @@ namespace AfterSchool.Areas.User.Controllers
                 if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
                     return RedirectToAction("index");
 
-                var questions = GetPersonalQuestions(msgs);
+                var questions = GetStudentPersonalQuestions(msgs);
 
                 // Validation
                 questions.ForEach(question =>
@@ -167,6 +169,10 @@ namespace AfterSchool.Areas.User.Controllers
             return View(registrant);
         }
 
+        #endregion
+
+        #region Health
+
         private List<FormQuestion> GetHealthQuestions(SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
@@ -208,7 +214,6 @@ namespace AfterSchool.Areas.User.Controllers
                 });
 
                 ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
-                ViewBag.School = registrant.GetSchoolLocation(msgs);
             }
 
             ViewBag.Messages = msgs;
@@ -285,6 +290,392 @@ namespace AfterSchool.Areas.User.Controllers
             return View(registrant);
         }
 
+        #endregion
+
+        #region Personal
+
+        private List<FormQuestion> GetPeronalQuestions(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var questionGroup = form.GetQuestionGroups(msgs)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+            var questions = questionGroup.GetAllQuestions(msgs);
+
+            questions = questions.Where(question =>
+                   question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
+                   question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
+                   question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
+                   question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
+                   question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
+                   question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize
+               )
+               .ToList();
+
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                    case QuestionDataType.RegistrantMobilePhone:
+                        question.IsRequired = true;
+                        break;
+                }
+            });
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult EditPersonal(string id)
+        {
+            var msgs = new SystemMessages();
+            Registrant registrant = null;
+
+            if (id.IsGuid())
+            {
+                registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+
+                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
+                    return RedirectToAction("index");
+
+                var questions = GetPeronalQuestions(msgs);
+
+                var values = new NameValueCollection();
+                questions.ForEach(question => {
+                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
+                });
+
+                ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+            }
+
+            ViewBag.Messages = msgs;
+
+            return View(registrant);
+        }
+
+        [HttpPost]
+        public ActionResult EditPersonal(string id, string what)
+        {
+            var msgs = new SystemMessages();
+            Registrant registrant = null;
+
+            if (id.IsGuid())
+            {
+                registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+
+                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
+                    return RedirectToAction("index");
+
+                var questions = GetPeronalQuestions(msgs);
+
+                // Validation
+                questions.ForEach(question =>
+                {
+                    var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                    if (question.IsRequired && answer.IsEmpty())
+                        msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                    switch (question.QuestionDataTypeId)
+                    {
+                        case QuestionDataType.RegistrantMobilePhone:
+                        case QuestionDataType.RegistrantHomePhone:
+                        case QuestionDataType.RegistrantWorkPhone:
+                            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                            break;
+
+                    }
+                });
+
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+                if (msgs.HasNoErrors())
+                {
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            qvms.ForEach(qvm =>
+                            {
+                                registrant.AddAnswer(
+                                    answerText: qvm.Value.IfEmpty("").Trim(),
+                                    question: qvm.Question,
+                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            });
+                        },
+                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    );
+                }
+
+                ViewBag.QuestionViewModels = qvms;
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("EditHomeAddress", new { id = registrant.Uid });
+
+            ViewBag.Messages = msgs;
+
+            return View(registrant);
+        }
+
+        #endregion
+
+        #region HomeAddress
+
+        private List<FormQuestion> GetHomeAddressQuestions(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var questionGroup = form.GetQuestionGroups(msgs)
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
+            var questions = questionGroup.GetAllQuestions(msgs);
+
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantAddress2:
+                        question.IsRequired = false;
+                        break;
+                    default:
+                        question.IsRequired = true;
+                        break;
+                }
+            });
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult EditHomeAddress(string id)
+        {
+            var msgs = new SystemMessages();
+            Registrant registrant = null;
+
+            if (id.IsGuid())
+            {
+                registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+
+                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
+                    return RedirectToAction("index");
+
+                var questions = GetHomeAddressQuestions(msgs);
+
+                var values = new NameValueCollection();
+                questions.ForEach(question => {
+                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
+                });
+
+                ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+            }
+
+            ViewBag.Messages = msgs;
+
+            return View(registrant);
+        }
+
+        [HttpPost]
+        public ActionResult EditHomeAddress(string id, string what)
+        {
+            var msgs = new SystemMessages();
+            Registrant registrant = null;
+
+            if (id.IsGuid())
+            {
+                registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+
+                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
+                    return RedirectToAction("index");
+
+                var questions = GetHomeAddressQuestions(msgs);
+
+                // Validation
+                questions.ForEach(question =>
+                {
+                    if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                        msgs.Add($"{question.Text} is required", MessageType.UserError);
+                });
+
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+                if (msgs.HasNoErrors())
+                {
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            qvms.ForEach(qvm =>
+                            {
+                                registrant.AddAnswer(
+                                    answerText: qvm.Value.IfEmpty("").Trim(),
+                                    question: qvm.Question,
+                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            });
+
+                            UpdateChildrenRegistrants(registrant, QuestionGroupDataType.HomeAddress.AsList(), amsgs, adc);
+                        },
+                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    );
+                }
+
+                ViewBag.QuestionViewModels = qvms;
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("EditEmergencyContact", new { id = registrant.Uid });
+
+            ViewBag.Messages = msgs;
+
+            return View(registrant);
+        }
+
+        #endregion
+
+        #region EmergencyContacts
+
+        private List<FormQuestion> GetEmergencyContactQuestions(SystemMessages msgs)
+        {
+            var form = GetAdministratorAccountForm(msgs);
+            var emergencyContactsQuestionGroups = form.GetQuestionGroups(msgs)
+                .Where(group =>
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 ||
+                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2)
+                .ToList();
+            var questions = new List<FormQuestion>();
+
+            emergencyContactsQuestionGroups.ForEach(group => questions.AddRange(group.GetAllQuestions(msgs)));
+            questions.Where(question => question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1)
+                .ToList()
+                .ForEach(question => { question.IsRequired = true; });
+
+            return questions;
+        }
+
+        [HttpGet]
+        public ActionResult EditEmergencyContact(string id)
+        {
+            var msgs = new SystemMessages();
+            Registrant registrant = null;
+
+            if (id.IsGuid())
+            {
+                registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+
+                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
+                    return RedirectToAction("index");
+
+                var questions = GetEmergencyContactQuestions(msgs);
+
+                var values = new NameValueCollection();
+                questions.ForEach(question => {
+                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
+                });
+
+                ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+            }
+
+            ViewBag.Messages = msgs;
+
+            return View(registrant);
+        }
+
+        [HttpPost]
+        public ActionResult EditEmergencyContact(string id, string what)
+        {
+            var msgs = new SystemMessages();
+            Registrant registrant = null;
+
+            if (id.IsGuid())
+            {
+                registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+
+                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
+                    return RedirectToAction("index");
+
+                var questions = GetEmergencyContactQuestions(msgs);
+                var phones = new List<string>();
+
+                // Validation
+                questions.ForEach(question =>
+                {
+                    var answer = Request[question.ToFormQuestionViewModel().Name];
+
+                    if (question.IsRequired && answer.IsEmpty())
+                        msgs.Add($"{question.Text} is required", MessageType.UserError);
+
+                    switch (question.QuestionDataTypeId)
+                    {
+                        case QuestionDataType.EmergencyContact1Phone:
+                        case QuestionDataType.EmergencyContact2Phone:
+                            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{question.FormQuestionGroupQuestionGroupDataTypeId.ToString().SplitByUpperCase()} {question.Text} must be a valid phone number", MessageType.UserError);
+
+                            if (answer.IsNotEmpty())
+                                phones.Add(answer);
+
+                            break;
+                    }
+                });
+
+                if (phones.Count == 2 && phones[0] == phones[1])
+                    msgs.Add("Emergency phone numbers should not be the same", MessageType.UserError);
+
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+                if (msgs.HasNoErrors())
+                {
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            // mark parent profile as completed since they've went through all the steps
+                            registrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
+
+                            qvms.ForEach(qvm =>
+                            {
+                                registrant.AddAnswer(
+                                    answerText: qvm.Value.IfEmpty("").Trim(),
+                                    question: qvm.Question,
+                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            });
+
+                            UpdateChildrenRegistrants(
+                                registrant, 
+                                new List<QuestionGroupDataType>() { QuestionGroupDataType.EmergencyContact1, QuestionGroupDataType.EmergencyContact1 }, 
+                                amsgs, 
+                                adc);
+                        },
+                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    );
+                }
+
+                ViewBag.QuestionViewModels = qvms;
+            }
+
+            if (msgs.HasNoErrors())
+                return RedirectToAction("EditProfileDone", new { id = registrant.Uid });
+
+            ViewBag.Messages = msgs;
+
+            return View(registrant);
+        }
+
+        #endregion
+
         [HttpGet]
         public ActionResult EditProfileDone(string id)
         {
@@ -302,6 +693,31 @@ namespace AfterSchool.Areas.User.Controllers
             ViewBag.Messages = msgs;
 
             return View(registrant);
+        }
+
+        private void UpdateChildrenRegistrants(Registrant registrant, List<QuestionGroupDataType> questionGroupDataTypes, SystemMessages msgs, DatabaseConnection dc)
+        {
+            // if this is the parent and owner of this account
+            if (registrant.IsParentOrGuardian && registrant.GetOwner(msgs, dc).ID == SessionVariables.CurrentAccount.GetAccountOwner(msgs, dc).ID)
+            {
+                var students = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs, dc);
+
+                // copy parent answers to students
+                registrant.GetAnswers(msgs, dc)
+                    .Where(answer => answer.FormQuestionGroupQuestionGroupDataTypeId.In(questionGroupDataTypes))
+                    .ToList()
+                    .ForEach(answer =>
+                    {
+                        students.ForEach(student => {
+                            student.AddAnswer(
+                                answerText: answer.Text.IfEmpty("").Trim(),
+                                question: answer.ToFormQuestion(msgs: msgs, dc: dc),
+                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                msgs: msgs,
+                                dc: dc);
+                        });
+                    });
+            }
         }
 
         private Form GetAdministratorAccountForm(SystemMessages msgs)

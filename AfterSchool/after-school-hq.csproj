@@ -1129,6 +1129,9 @@
     <Content Include="Areas\User\Views\Shared\Family\_FamilyHeader.cshtml" />
     <Content Include="Areas\User\Views\Family\EditHealth.cshtml" />
     <Content Include="Areas\User\Views\Family\EditProfileDone.cshtml" />
+    <Content Include="Areas\User\Views\Family\EditPersonal.cshtml" />
+    <Content Include="Areas\User\Views\Family\EditHomeAddress.cshtml" />
+    <Content Include="Areas\User\Views\Family\EditEmergencyContact.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
