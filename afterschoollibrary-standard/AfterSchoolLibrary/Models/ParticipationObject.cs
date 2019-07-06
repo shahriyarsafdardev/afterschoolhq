@@ -49,23 +49,33 @@ namespace AfterSchoolLibrary.Models
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            switch(participationObjectType)
+            InitObject(participationObjectId, participationObjectType, true, msgs, dc);
+        }
+
+        public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            InitObject(participationObjectId, participationObjectType, loadAllDetails, msgs, dc);
+        }
+
+        private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            switch (participationObjectType)
             {
                 case ParticipationObjectType.AccountActivityGroup:
-                    InitAccountActivityGroup(AccountActivityGroup.Load(participationObjectId, msgs, dc), msgs, dc);
+                    InitAccountActivityGroup(AccountActivityGroup.Load(participationObjectId, msgs, dc), true, msgs, dc);
                     break;
                 case ParticipationObjectType.Activity:
-                    InitActivity(Activity.Load(participationObjectId, msgs, dc), msgs, dc);
+                    InitActivity(Activity.Load(participationObjectId, msgs, dc), true, msgs, dc);
                     break;
                 case ParticipationObjectType.ActivityGroup:
-                    InitActivityGroup(ActivityGroup.Load(participationObjectId, msgs, dc), msgs, dc);
+                    InitActivityGroup(ActivityGroup.Load(participationObjectId, msgs, dc), true, msgs, dc);
                     break;
                 default:
                     throw new NotImplementedException();
             }
         }
 
-        private void InitActivity(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private void InitActivity(Activity activity, bool loadAllDetails = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Object = activity;
             ObjectID = activity.ID;
@@ -73,20 +83,20 @@ namespace AfterSchoolLibrary.Models
             Uid = activity.Uid;
             Name = activity.Name;
             Details = activity.Details;
-            Schedule = activity.GetSchedule(msgs, dc);
-            Location = activity.GetLocation(msgs, dc);
             GenderRestriction = activity.GenderRestriction;
             ActivityType = activity.ActivityTypeId;
             UniqueName = activity.UniqueName;
             RegistrationMode = activity.RegistrationModeId;
-            SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
-            WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(msgs, dc);
             Description = activity.Description;
             ContactName = activity.ContactName;
             ContactEmail = activity.ContactEmail;
             ContactPhone = activity.ContactPhone;
             CostDescription = activity.CostDescription;
             LocationDetails = activity.LocationDetails;
+            Cost = activity.CostPerRegistrant;
+            CostUnitType = global::CostUnitType.PerRegistrant;
+            AllowToPayLater = activity.AllowToPayLater;
+            IsTuitionFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -99,24 +109,24 @@ namespace AfterSchoolLibrary.Models
                 MaxGradeId = GradeLevel.Load(msgs: msgs, dc: dc).Last().ID;
             }
 
-            Cost = activity.CostPerRegistrant;
-            CostUnitType = global::CostUnitType.PerRegistrant;
-            AllowToPayLater = activity.AllowToPayLater;
-            RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
-            Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);
-
-            OwnerAccount = activity.GetAccount(msgs, dc);
-            Provider = activity.GetProvider(msgs, dc);
-
-            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-
-            PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
-            SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
-            IsTuitionFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
-            IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+            if (loadAllDetails)
+            {
+                Schedule = activity.GetSchedule(msgs, dc);
+                Location = activity.GetLocation(msgs, dc);
+                SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
+                WaitingListSeatsRemaining = activity.GetWaitingListSeatsRemaining(msgs, dc);
+                RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
+                Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);
+                OwnerAccount = activity.GetAccount(msgs, dc);
+                Provider = activity.GetProvider(msgs, dc);
+                UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+                PaymentPlans = activity.GetActivePaymentPlans(msgs, dc);
+                SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
+                IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+            }
         }
 
-        private void InitActivityGroup(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private void InitActivityGroup(ActivityGroup activityGroup, bool loadAllDetails = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Object = activityGroup;
             ObjectID = activityGroup.ID;
@@ -124,35 +134,38 @@ namespace AfterSchoolLibrary.Models
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
             Details = activityGroup.Description;
-            Schedule = activityGroup.GetSchedule(msgs, dc);
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;
             Cost = activityGroup.Cost;
             CostUnitType = activityGroup.CostUnitTypeId;
             ActivityGroupType = activityGroup.ActivityGroupTypeId;
-            RegistrationPeriod = activityGroup.GetLatestRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;
             RegistrationMode = activityGroup.RegistrationModeId;
-            Form = activityGroup.GetForm(msgs, dc);
-            OwnerAccount = activityGroup.GetAccount(msgs, dc);
             ContactEmail = activityGroup.ContactEmail;
             ContactName = activityGroup.ContactName;
             ContactPhone = activityGroup.ContactPhone;
-            // Description = activityGroup.Description;
-            Location = OwnerAccount.GetDefaultLocation(msgs, dc);
-            // TODO: PayLater = activityGroup.AllowToPayLater;
-            SeatsRemaining = activityGroup.GetSeatsRemaining(msgs, dc);
-            WaitingListSeatsRemaining = activityGroup.GetWaitingListSeatsRemaining(msgs, dc);
-            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-
-            PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
-            SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
             IsTuitionFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal());
-            IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+            // Description = activityGroup.Description;
+            // TODO: PayLater = activityGroup.AllowToPayLater;
+
+            if (loadAllDetails)
+            {
+                Schedule = activityGroup.GetSchedule(msgs, dc);
+                RegistrationPeriod = activityGroup.GetLatestRegistrationPeriod(msgs, dc);
+                Form = activityGroup.GetForm(msgs, dc);
+                OwnerAccount = activityGroup.GetAccount(msgs, dc);
+                Location = OwnerAccount.GetDefaultLocation(msgs, dc);
+                SeatsRemaining = activityGroup.GetSeatsRemaining(msgs, dc);
+                WaitingListSeatsRemaining = activityGroup.GetWaitingListSeatsRemaining(msgs, dc);
+                UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+                PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
+                SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
+                IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+            }
         }
 
-        private void InitAccountActivityGroup(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private void InitAccountActivityGroup(AccountActivityGroup aag, bool loadAllDetails = true, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Object = aag;
             var activityGroup = aag.GetActivityGroup(msgs, dc);
@@ -161,7 +174,6 @@ namespace AfterSchoolLibrary.Models
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
             Details = activityGroup.Description;
-            Schedule = activityGroup.GetSchedule(msgs, dc);
             GenderRestriction = activityGroup.GenderRestriction;
             MinGradeId = activityGroup.MinGradeLevelId;
             MaxGradeId = activityGroup.MaxGradeLevelId;
@@ -169,38 +181,41 @@ namespace AfterSchoolLibrary.Models
             CostUnitType = aag.CostUnitTypeId;
             // TODO: PayLater = activityGroup.AllowToPayLater;
             ActivityGroupType = activityGroup.ActivityGroupTypeId;
-            RegistrationPeriod = aag.GetLatestRegistrationPeriod(msgs, dc);
             UniqueName = activityGroup.UniqueName;
-            Form = aag.GetForm(msgs, dc);
-            OwnerAccount = aag.GetAccount(msgs, dc);
             ContactName = aag.ContactName;
             ContactEmail = aag.ContactEmail;
             ContactPhone = aag.ContactPhone;
             // Description = activityGroup.Description;
-            Location = OwnerAccount.GetDefaultLocation(msgs, dc);
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
-            UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-
-            PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
-            SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
-
             IsTuitionFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
-            IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+
+            if (loadAllDetails)
+            {
+                Schedule = activityGroup.GetSchedule(msgs, dc);
+                RegistrationPeriod = aag.GetLatestRegistrationPeriod(msgs, dc);
+                Form = aag.GetForm(msgs, dc);
+                OwnerAccount = aag.GetAccount(msgs, dc);
+                Location = OwnerAccount.GetDefaultLocation(msgs, dc);
+                UseStripeConnectedAccount = PaymentAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+                PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
+                SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
+                IsFree = IsTuitionFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
+            }
         }
 
         public ParticipationObject(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            InitActivity(activity, msgs, dc);
+            InitActivity(activity, true, msgs, dc);
         }
 
         public ParticipationObject(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            InitActivityGroup(activityGroup, msgs, dc);
+            InitActivityGroup(activityGroup, true, msgs, dc);
         }
 
         public ParticipationObject(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            InitAccountActivityGroup(aag, msgs, dc);
+            InitAccountActivityGroup(aag, true, msgs, dc);
         }
 
         public ParticipationObject(ActivityType activityType)

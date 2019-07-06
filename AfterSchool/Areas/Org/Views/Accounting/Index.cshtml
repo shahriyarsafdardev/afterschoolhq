@@ -100,17 +100,33 @@
                         );
                     }
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <select id="participationObjects" class="form-control">
+                            <option data-type="" value="">Activities</option>
+                            @foreach (var po in (List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>)ViewBag.ParticipationObjects)
+                            {
+                                var selected = "";
+                                if (po.ID.ToString() == Request["poid"] && ((int)po.ParticipationObjectTypeId).ToString() == Request["poTypeId"])
+                                {
+                                    selected = "selected=\"selected\"";
+                                }
+                                <option value="@po.ID" data-type="@((int)po.ParticipationObjectTypeId)" @selected>@po.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
                     <button type="button" class="btn btn-primary btn-lg" onclick="search()">Search</button>
                     <button type="button" class="btn btn-primary btn-lg" onclick="DownloadToCSV()">Export To CSV</button>
                 </div>
 
                 <script>
                     function search() {
-                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                        window.location.href = `@Url.Action("index", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
                     }
                     function DownloadToCSV() {
-                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}`;
+                         window.location.href = `@Url.Action("DownloadCSV", "accounting")?sdate=${encodeURIComponent($('#startdate').val())}&edate=${encodeURIComponent($('#enddate').val())}&poId=${encodeURIComponent($('#participationObjects').val())}&poTypeId=${encodeURIComponent($('#participationObjects option:selected').data('type'))}`;
                     }
 
                 </script>
@@ -140,50 +156,48 @@
                     <tbody>
                         @if (Model.Count > 0)
                         {
-                            foreach (var transaction in Model)
-                            {
-                                var purchase = transaction.GetPurchase();
-                                var registrant = Registrant.Load(purchase.RegistrantId.Value);
-                                var participationObjects = transaction.GetParticipationObjects();
+                            var purchase = transaction.GetPurchase();
+                            var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                            var participationObjects = transaction.GetParticipationObjects();
 
-                                <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
-                                    <td>
-                                        <span class="am-checkbox">
-                                            <input type="checkbox" id="selectTransaction-@transaction.ID" @(transaction.PayoutId!=null?"disabled":"") class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
-                                            <label for="selectTransaction-@transaction.ID"></label>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @transaction.GetTransactionNumber()
-                                    </td>
-                                    <td>
-                                        @transaction.CreateDate.ToShortDateTimeString()
-                                    </td>
-                                    <td>
-                                        @transaction.GetPayerAccount().Name
-                                    </td>
-                                    <td>
-                                        @if (transaction.IsCharge())
-                                        {
-                                            @registrant.DisplayName
-                                        }
-                                        else
-                                        {
-                                            @transaction.GetBillerAccount().Name
-                                        }
-                                    </td>
-                                    <td>
-                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
-                                    </td>
-                                    <td class="text-center">
-                                        @transaction.GetBillerAmount().ToCurrency()
-                                    </td>
-                                    <td class="text-center">
-                                        @transaction.GetFeesChargedToBiller().ToCurrency()
-                                    </td>
-                                    <td class="text-center">
-                                        @transaction.GetBillerPayout().ToCurrency()
-                                    </td>
+                            <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                <td>
+                                    <span class="am-checkbox">
+                                        <input type="checkbox" id="selectTransaction-@transaction.ID" @(transaction.PayoutId!=null?"disabled":"") class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
+                                        <label for="selectTransaction-@transaction.ID"></label>
+                                    </span>
+                                </td>
+                                <td>
+                                    @transaction.GetTransactionNumber()
+                                </td>
+                                <td>
+                                    @transaction.CreateDate.ToShortDateTimeString()
+                                </td>
+                                <td>
+                                    @transaction.GetPayerAccount().Name
+                                </td>
+                                <td>
+                                    @if (transaction.IsCharge())
+                                    {
+                                        @registrant.DisplayName
+                                    }
+                                    else
+                                    {
+                                        @transaction.GetBillerAccount().Name
+                                    }
+                                </td>
+                                <td>
+                                    @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                                </td>
+                                <td class="text-center">
+                                    @transaction.GetBillerAmount().ToCurrency()
+                                </td>
+                                <td class="text-center">
+                                    @transaction.GetFeesChargedToBiller().ToCurrency()
+                                </td>
+                                <td class="text-center">
+                                    @transaction.GetBillerPayout().ToCurrency()
+                                </td>
 
                                     @*<td>
                                             @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
@@ -195,8 +209,8 @@
                                                 </button>
                                             }
                                         </td>*@
-                                </tr>
-                            }
+                            </tr>
+                            
                         }
                         else
                         {
@@ -214,10 +228,10 @@
                     (PagingModel)ViewBag.PagingModel,
                     new ViewDataDictionary()
                     {
-                                    { "controller", "accounting" },
-                                    { "action", "index" },
-                                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}" }
-    }
+                    { "controller", "accounting" },
+                    { "action", "index" },
+                    { "querystring", $"sdate={Request["sdate"]}&edate={Request["edate"]}&poId={Request["poId"]}&poTypeId={Request["poTypeId"]}" }
+            }
                 );
             }
         </div>

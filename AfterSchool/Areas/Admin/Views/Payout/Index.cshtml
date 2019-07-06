@@ -5,6 +5,7 @@
     var totalPayoutAmount = (decimal)ViewBag.TotalPayoutAmount;
     var avgPayoutAmount = payoutCount == 0 ? 0 : totalPayoutAmount / payoutCount;
     var totalPendingAmount = (decimal)ViewBag.TotalPendingAmount;
+    var activities = (List<Activity>)ViewBag.Activities;
 }
 
 @{ Html.RenderPartial("AdminHeader"); }

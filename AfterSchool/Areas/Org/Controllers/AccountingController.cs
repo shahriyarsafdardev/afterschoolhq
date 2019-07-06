@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
+using System.Web;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchool.Models;
@@ -10,6 +11,7 @@ using System.Web.Helpers;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using AfterSchoolLibrary;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -22,7 +24,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Accounting
         [HttpGet]
-        public ActionResult Index(string pn, string rpp, string sdate, string edate)
+        public ActionResult Index(string pn, string rpp, string sdate, string edate, string poId, string poTypeId)
         {
             var msgs = new SystemMessages();
             int pageNumber = 1;
@@ -44,14 +46,22 @@ namespace AfterSchool.Areas.Org.Controllers
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
 
+            //PO filters
+            List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
+            if (!string.IsNullOrEmpty(poId) && !string.IsNullOrEmpty(poTypeId))
+            {
+                poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
+                poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
+            }
+
             // transaction count
-            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate);
-            var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate);
+            var totalBilledTransactionCount = SessionVariables.CurrentAccount.GetBilledTransactionCount(startDate, endDate, poFilter);
+            var totalPaidTransactionCount = SessionVariables.CurrentAccount.GetPaidTransactionCount(startDate, endDate, poFilter);
             var totalTransactionCount = totalBilledTransactionCount + totalPaidTransactionCount;
 
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, start, length);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, start, length);
+            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, poFilter, start, length);
+            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, poFilter, start, length);
             var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             var totalPages = Math.Ceiling(totalTransactionCount.ToDouble() / recordsPerPage).ToInteger();
@@ -60,12 +70,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 transaction.CreateDate = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(transaction.CreateDate.Value)
             );
 
+            var allPos = Transaction.GetParticipationObjectsByBillerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null);
+            allPos.AddRange(Transaction.GetParticipationObjectsByPayerAccountId(SessionVariables.CurrentAccount.ID.Value, null, null));
+            var allParticipationObjects = allPos.DistinctBy(po => (po.ID, po.ParticipationObjectTypeId, po.Name));
+
             // sort transactions
             allTransactions = allTransactions.OrderByDescending(x => x.ID).ToList();
 
             ViewBag.TotalAmountPaid = SessionVariables.CurrentAccount.GetTotalAmountBilledOut(startDate, endDate, msgs);
             ViewBag.TotalAmountRefunded = SessionVariables.CurrentAccount.GetTotalAmountRefundedTo(startDate, endDate, msgs);
             ViewBag.TotalFeesPaid = SessionVariables.CurrentAccount.GetTotalFeesPaidAsBiller(startDate, endDate, msgs);
+            ViewBag.ParticipationObjects = allParticipationObjects;
             ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
@@ -164,7 +179,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View("RequestPayout", transactions);
         }
 
-        public ActionResult DownloadCSV(string sdate, string edate)
+        public ActionResult DownloadCSV(string sdate, string edate, string poId, string poTypeId)
         {
             var startDate = sdate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(sdate.ToDateTime()) :
@@ -172,9 +187,18 @@ namespace AfterSchool.Areas.Org.Controllers
             var endDate = edate.IsDateTime() ?
                 SessionVariables.CurrentAccount.ConvertFromAccountTimeZone(edate.ToDateTime().AddDays(1).AddMilliseconds(-1)) :
                 new DateTime?();
+
+            //PO filters
+            List<(int ID, ParticipationObjectType ObjectType)> poFilter = null;
+            if (!string.IsNullOrEmpty(poId) && !string.IsNullOrEmpty(poTypeId))
+            {
+                poFilter = new List<(int ID, ParticipationObjectType ObjectType)>();
+                poFilter.Add((poId.ToInteger(), (ParticipationObjectType)poTypeId.ToInteger()));
+            }
+
             // transaction data
-            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, null, null);
-            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, null, null);
+            var billedTransactions = SessionVariables.CurrentAccount.GetBilledTransactions(startDate, endDate, poFilter, null, null);
+            var paidTransactions = SessionVariables.CurrentAccount.GetPaidTransactions(startDate, endDate, poFilter, null, null);
             var allTransactions = billedTransactions.Concat(paidTransactions).ToList();
 
             allTransactions.ForEach(transaction =>

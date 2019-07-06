@@ -2205,6 +2205,9 @@ Namespace DataAccess
         Public Function Add(ByVal subQuery As DatabaseQuery, ByVal value As Object, ByVal criteriaType As SqlDbType) As Integer
             Return Add(subQuery, value, criteriaType, DatabaseCriteriaOperatorEnum.Equals, Nothing)
         End Function
+        Public Function Add(ByVal subQuery As DatabaseQuery, ByVal value As Object, ByVal [operator] As DatabaseCriteriaOperatorEnum) As Integer
+            Return Add(subQuery, value, [operator], Nothing)
+        End Function
         Public Function Add(ByVal subQuery As DatabaseQuery, ByVal value As Object, ByVal criteriaType As SqlDbType, ByVal [operator] As DatabaseCriteriaOperatorEnum, ByVal [function] As String) As Integer
             Return Add(New DatabaseCriteria(subQuery, value, criteriaType, [operator], [function]))
         End Function
