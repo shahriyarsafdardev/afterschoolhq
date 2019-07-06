@@ -282,6 +282,7 @@ namespace AfterSchoolLibrary.Helpers
                 {
                     amsgs.AddRange(AdditionalData(adc));
                     amsgs.AddRange(UpdateRegistrantAccess(adc));
+                    amsgs.AddRange(UpdateRegistrantStatuses(adc));
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
@@ -341,6 +342,19 @@ namespace AfterSchoolLibrary.Helpers
             );            
 
             return msgs;
+        }
+
+        private static SystemMessages UpdateRegistrantStatuses(DatabaseConnection dc)
+        {
+            return Registrant.Update(
+                updateValues:  new Hashtable() { { "ProfileStatusId", (int)RegistrantProfileStatus.Completed } },
+                criterias: new Hashtable()
+                {
+                    { "IsMaster", true },
+                    { "ProfileStatusId", DBNull.Value }
+                },
+                ObjectMap: Registrant.ObjectMap,
+                dc: dc);
         }
 
         public static SystemMessages UpdateRegistrantAccess(DatabaseConnection dc = null)

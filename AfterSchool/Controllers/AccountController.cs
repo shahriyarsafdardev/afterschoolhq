@@ -153,6 +153,7 @@ namespace AfterSchool.Controllers
                             isParentOrGuardian: true,
                             allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
                             schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: user,
                             msgs: amsgs,
                             dc: adc);
@@ -414,6 +415,7 @@ namespace AfterSchool.Controllers
                             isParentOrGuardian: true,
                             allowTextMessages: false,
                             schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
@@ -521,6 +523,9 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
+                        // mark parent profile as completed since they've went through all the steps
+                        parentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
+
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
@@ -703,6 +708,7 @@ namespace AfterSchool.Controllers
                             isParentOrGuardian: false,
                             allowTextMessages: false,
                             schoolLocationId: location.IsNumber() ? location.ToInteger() : new int?(),
+                            profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
@@ -907,6 +913,9 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
+                        // mark student profile as completed since they've went through all the steps
+                        SessionVariables.CurrentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
+
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
@@ -1580,6 +1589,7 @@ namespace AfterSchool.Controllers
                             isParentOrGuardian: false,
                             allowTextMessages: false,
                             schoolLocationId: location?.ID, // probably should have a school location id
+                            profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: user,
                             msgs: amsgs,
                             dc: adc);
@@ -1681,57 +1691,58 @@ namespace AfterSchool.Controllers
             var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
 
             Database.ExecuteTransaction
-             (
-                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                 {
-                     var location = participationObject?.Location;
-                     var hostAccount = location?.GetHostAcount(amsgs, adc);
-                     var locationString = "";
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var location = participationObject?.Location;
+                    var hostAccount = location?.GetHostAcount(amsgs, adc);
+                    var locationString = "";
 
-                     if (hostAccount.IsNotEmpty() && hostAccount.AccountTypeId != AccountType.School)
-                         locationString = $" at {hostAccount.Name}";
+                    if (hostAccount.IsNotEmpty() && hostAccount.AccountTypeId != AccountType.School)
+                        locationString = $" at {hostAccount.Name}";
 
-                     // invite parent: 
-                     var parentUser = SessionVariables.CurrentAccount.InviteUser(
-                         firstName.Value,
-                         lastName.Value,
-                         email.Value.Trim(),
-                         phone.Value.Trim(),
-                         message: $"{SessionVariables.CurrentUser.FirstName} has signed up for an account on {AfterSchoolLibrary.Helpers.Utilities.AppName()}{locationString}. Please create your parent {AfterSchoolLibrary.Helpers.Utilities.AppName()} account to know and approve of activities your child requests to participate in.",
-                         UserType.Owner,
-                         SessionVariables.CurrentUser,
-                         msgs);
+                    // invite parent: 
+                    var parentUser = SessionVariables.CurrentAccount.InviteUser(
+                        firstName.Value,
+                        lastName.Value,
+                        email.Value.Trim(),
+                        phone.Value.Trim(),
+                        message: $"{SessionVariables.CurrentUser.FirstName} has signed up for an account on {AfterSchoolLibrary.Helpers.Utilities.AppName()}{locationString}. Please create your parent {AfterSchoolLibrary.Helpers.Utilities.AppName()} account to know and approve of activities your child requests to participate in.",
+                        UserType.Owner,
+                        SessionVariables.CurrentUser,
+                        msgs);
 
-                     // Create parent registrant
-                     var parent = SessionVariables.CurrentAccount.CreateRegistrant(
-                        registrantOwner: parentUser,
-                        canBeAccessedBy: parentUser.AsList(),
-                        registrantType: RegistrantType.Individual,
-                        isMaster: true,
-                        isParentOrGuardian: true,
-                        allowTextMessages: textnotifications.IfBlank("").ToBoolean(),
-                        schoolLocationId: null,
+                    // Create parent registrant
+                    var parent = SessionVariables.CurrentAccount.CreateRegistrant(
+                    registrantOwner: parentUser,
+                    canBeAccessedBy: parentUser.AsList(),
+                    registrantType: RegistrantType.Individual,
+                    isMaster: true,
+                    isParentOrGuardian: true,
+                    allowTextMessages: textnotifications.IfBlank("").ToBoolean(),
+                    schoolLocationId: null,
+                    profileStatus: RegistrantProfileStatus.Started,
+                    loggedInUser: SessionVariables.CurrentUser,
+                    msgs: msgs,
+                    dc: adc);
+
+                    SessionVariables.CurrentRegistrant.AddUserWithAccess(
+                        user: parentUser,
                         loggedInUser: SessionVariables.CurrentUser,
                         msgs: msgs,
                         dc: adc);
 
-                     SessionVariables.CurrentRegistrant.AddUserWithAccess(
-                         user: parentUser,
-                         loggedInUser: SessionVariables.CurrentUser,
-                         msgs: msgs,
-                         dc: adc);
-
-                     // add answers to student registrant record
-                     qvms.ForEach(qvm =>
-                     {
-                         parent.AddAnswer(
-                             answerText: qvm.Value.IfEmpty("").Trim(),
-                             question: qvm.Question,
-                             loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                             msgs: amsgs,
-                             dc: adc);
-                     });
-                 },
+                    // add answers to student registrant record
+                    qvms.ForEach(qvm =>
+                    {
+                        parent.AddAnswer(
+                            answerText: qvm.Value.IfEmpty("").Trim(),
+                            question: qvm.Question,
+                            loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                            msgs: amsgs,
+                            dc: adc);
+                    });
+                },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)

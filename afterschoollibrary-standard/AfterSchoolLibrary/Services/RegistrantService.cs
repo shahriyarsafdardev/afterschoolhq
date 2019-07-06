@@ -305,6 +305,18 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
+        public static void SetProfileAsCompleted(this Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registrant.UpdateProfileStatus(RegistrantProfileStatus.Completed, loggedInUser, msgs, dc);
+        }
+
+        public static void UpdateProfileStatus(this Registrant registrant, RegistrantProfileStatus profileStatus, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registrant.ProfileStatusId = profileStatus;
+            registrant.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            registrant.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(registrant.Save(dc));
+        }
 
         public static bool IsRegisteredFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {

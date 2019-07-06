@@ -653,6 +653,7 @@ property: FirstRegistrantId, int?, Int
 property: IsParentOrGuardian, bool, Bit
 property: AllowTextMessages, bool, Bit
 property: SchoolLocationId, int?, Int, , The location id of the school the registrant is attending
+property: ProfileStatusId, RegistrantProfileStatus, Int, , The status of the profile - completed, started, out of date
 loadmethod: AccountId, List<>
 loadmethod: ParentRegistrantId, List<>
 loadmethod: AccountId|RegistrantTypeId, List<>
@@ -1770,4 +1771,10 @@ values: NotSet, StaffMember, Student, ExternalProvider
 type: Enum
 name: BankAccountType
 values: NotSet, BusinessChecking, PersonalChecking, PersonalSavings
+[end]
+
+[begin]
+type: Enum
+name: RegistrantProfileStatus
+values: NotSet, Started, OutOfDate, Completed
 [end]

@@ -38,6 +38,10 @@ namespace AfterSchoolLibrary.Models
 		/// The location id of the school the registrant is attending
 		/// </summary>
 		public int? SchoolLocationId { get { return (int?)MDV["SchoolLocationId"].Value; } set { MDV["SchoolLocationId"].Value = value; } }
+		/// <summary>
+		/// The status of the profile - completed
+		/// </summary>
+		public RegistrantProfileStatus ProfileStatusId { get { return (RegistrantProfileStatus)MDV["ProfileStatusId"].Value; } set { MDV["ProfileStatusId"].Value = value; } }
 		
 
         public Registrant()
@@ -50,6 +54,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsContactOnly = false;
 			this.IsParentOrGuardian = false;
 			this.AllowTextMessages = false;
+			this.ProfileStatusId = RegistrantProfileStatus.NotSet;
 			
         }
 
@@ -71,6 +76,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "SchoolLocationId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "ProfileStatusId", System.Data.SqlDbType.Int);
 				
                 return _dp;
             }
@@ -190,6 +196,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["SchoolLocationId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["ProfileStatusId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

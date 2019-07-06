@@ -241,6 +241,7 @@ namespace AfterSchoolLibrary.Models
 			Registrant.Update(new Hashtable(){{"IsContactOnly",false}}, new Hashtable(){{"IsContactOnly", DBNull.Value}}, Registrant.ObjectMap, dc);
 			Registrant.Update(new Hashtable(){{"IsParentOrGuardian",false}}, new Hashtable(){{"IsParentOrGuardian", DBNull.Value}}, Registrant.ObjectMap, dc);
 			Registrant.Update(new Hashtable(){{"AllowTextMessages",false}}, new Hashtable(){{"AllowTextMessages", DBNull.Value}}, Registrant.ObjectMap, dc);
+			Registrant.Update(new Hashtable(){{"ProfileStatusId",0}}, new Hashtable(){{"ProfileStatusId", DBNull.Value}}, Registrant.ObjectMap, dc);
 			ActivityPayment.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, ActivityPayment.ObjectMap, dc);
 			RegistrantActivity.Update(new Hashtable(){{"ParticipationObjectTypeId",0}}, new Hashtable(){{"ParticipationObjectTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
 			RegistrantActivity.Update(new Hashtable(){{"AssignmentTypeId",0}}, new Hashtable(){{"AssignmentTypeId", DBNull.Value}}, RegistrantActivity.ObjectMap, dc);
