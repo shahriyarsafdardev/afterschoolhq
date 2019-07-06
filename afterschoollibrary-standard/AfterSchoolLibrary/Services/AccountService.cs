@@ -886,6 +886,7 @@ namespace AfterSchoolLibrary.Services
                             isParentOrGuardian: false,
                             allowTextMessages: false,
                             schoolLocationId: location?.ID,
+                            profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);

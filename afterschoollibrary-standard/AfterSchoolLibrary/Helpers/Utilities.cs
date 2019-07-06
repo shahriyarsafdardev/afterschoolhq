@@ -351,7 +351,7 @@ namespace AfterSchoolLibrary.Helpers
                 criterias: new Hashtable()
                 {
                     { "IsMaster", true },
-                    { "ProfileStatusId", DBNull.Value }
+                    { "ProfileStatusId", 0 }
                 },
                 ObjectMap: Registrant.ObjectMap,
                 dc: dc);
