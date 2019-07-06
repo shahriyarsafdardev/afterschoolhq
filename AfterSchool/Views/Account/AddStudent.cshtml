@@ -64,14 +64,14 @@
 
                         @{
                             Html.RenderPartial(
-                               "~/Views/Shared/_LocationEdit.cshtml",
-                               school ?? new Location(),
-                               new ViewDataDictionary()
-                               {
-                                   { "label", "Enter your school" },
-                                   { "searchOnly", true },
-                                   { "placeholderText", "Enter your school name" }
-               }
+                                "~/Views/Shared/_LocationEdit.cshtml",
+                                school ?? new Location(),
+                                new ViewDataDictionary()
+                                {
+                                    { "label", "Enter your school" },
+                                    { "searchOnly", true },
+                                    { "placeholderText", "Enter your school name" }
+                                }
                             );
                         }
 

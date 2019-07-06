@@ -43,14 +43,14 @@
                                     <th>Profile</th>
                                     <th></th>
                                 </tr>
-                                @foreach (var registrant in Model)
+                                @foreach (var registrant in Model.Where(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
                                 {
                                     <tr>
                                         <td>
                                             @registrant.Name
                                         </td>
                                         <td class="text-right">
-                                            <a href="#" class="btn btn-primary">
+                                            <a href="@Url.Action((registrant.IsParentOrGuardian ? "editpersonal" : "editstudentpersonal"), "family", new { id = registrant.Uid })" class="btn btn-primary">
                                                 @(registrant.ProfileStatusId == RegistrantProfileStatus.OutOfDate ? "Update" : "Complete")
                                                 Profile &raquo;
                                             </a>
@@ -198,3 +198,8 @@
             </div>
         }*@
 </div>
+
+@section header
+{
+    <link href="~/Assets/css/style-registration.css" type="text/css" rel="stylesheet" />
+}

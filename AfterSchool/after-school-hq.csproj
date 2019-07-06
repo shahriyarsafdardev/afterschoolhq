@@ -1125,6 +1125,10 @@
     <Content Include="Areas\User\Views\Shared\Registrants\_BrowseRegistrant.cshtml" />
     <Content Include="Areas\User\Views\Shared\Schedule\_BrowseActivityInstance.cshtml" />
     <Content Include="Areas\User\Views\Schedule\Index.cshtml" />
+    <Content Include="Areas\User\Views\Family\EditStudentPersonal.cshtml" />
+    <Content Include="Areas\User\Views\Shared\Family\_FamilyHeader.cshtml" />
+    <Content Include="Areas\User\Views\Family\EditHealth.cshtml" />
+    <Content Include="Areas\User\Views\Family\EditProfileDone.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

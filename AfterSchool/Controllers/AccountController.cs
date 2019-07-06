@@ -592,8 +592,8 @@ namespace AfterSchool.Controllers
             if (SessionVariables.RegistrationStartPageAccount.AccountTypeId == AccountType.School)
                 schoolLocation = SessionVariables.RegistrationStartPageAccount.GetDefaultLocation(msgs);
 
-            ViewBag.Cart = SessionVariables.Cart;
             ViewBag.School = schoolLocation;
+            ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count == 0;
 
             return questions;
@@ -833,7 +833,7 @@ namespace AfterSchool.Controllers
 
         #endregion
 
-        #region HealthView
+        #region AddHealth
 
         private List<FormQuestion> AddHealthViewBag(SystemMessages msgs)
         {

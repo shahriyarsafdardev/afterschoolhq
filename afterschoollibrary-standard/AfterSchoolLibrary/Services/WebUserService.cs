@@ -629,5 +629,17 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("User not valid for account", MessageType.UserError);
             
         }
+
+        public static bool HasAccessToRegistrant(this WebUser user, Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return RegistrantWebUser.GetCount(
+                new System.Collections.Hashtable()
+                {
+                    { "WebUserId", user.ID.Value },
+                    { "RegistrantId", registrant.ID.Value }
+                }, 
+                msgs, 
+                dc) > 0;
+        }
     }
 }
