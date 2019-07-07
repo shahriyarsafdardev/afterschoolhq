@@ -2,6 +2,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+
 }
 
 <div class="main-content">
@@ -14,7 +15,7 @@
             <i class="s7-user"></i> @Model.Name - Done
 
             <div class="pull-right">
-                <a href="@Url.Action("index", "family")" class="btn btn-default">
+                <a href="@Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"))" class="btn btn-default">
                     Exit
                 </a>
             </div>

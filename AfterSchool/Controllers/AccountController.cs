@@ -1028,6 +1028,20 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
+            var parentOrGuardian = SessionVariables.CurrentRegistrant.GetParentOrGuardian(msgs);
+            var (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
+
+            if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
+                return RedirectToAction(
+                    "editpersonal", 
+                    "family", 
+                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration.Uid });
+
+            if (!SessionVariables.CurrentRegistrant.IsProfileCompleted)
+                return RedirectToAction(
+                    "editstudentpersonal", 
+                    "family", 
+                    new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration.Uid });
 
             // current registrant is already registered
             if (SessionVariables.CurrentRegistrant.IsRegisteredForAndHasConsent(participationObject, msgs))
@@ -1069,7 +1083,7 @@ namespace AfterSchool.Controllers
 
             Registration registration = null;
             RegistrationPeriod period = null;
-            Registrant accountRegistrantCopy = null;
+            Registrant submittedRecord = null;
 
             if (msgs.HasNoErrors())
             {
@@ -1093,11 +1107,11 @@ namespace AfterSchool.Controllers
 
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        (accountRegistrantCopy, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, amsgs, adc);
+                        (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, amsgs, adc);
 
-                        if (accountRegistrantCopy.IsEmpty())
+                        if (submittedRecord.IsEmpty())
                         {
-                            accountRegistrantCopy = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
+                            submittedRecord = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
                                 ownerAccount: participationObject.OwnerAccount,
                                 loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
@@ -1105,7 +1119,7 @@ namespace AfterSchool.Controllers
                                 );
 
                             // create or update registration
-                            registration = accountRegistrantCopy.AddRegistrationWithESignature(
+                            registration = submittedRecord.AddRegistrationWithESignature(
                                 ownerAccountId: participationObject.OwnerAccount.ID.Value,
                                 activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
                                 accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
@@ -1124,7 +1138,7 @@ namespace AfterSchool.Controllers
 
                         //copy all answers from the main account to the registrant & registration :)
                         SessionVariables.CurrentRegistrant.CopyAnswers(
-                            copyingRegistrant: accountRegistrantCopy,
+                            copyingRegistrant: submittedRecord,
                             registration: registration,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
@@ -1135,7 +1149,7 @@ namespace AfterSchool.Controllers
                         .ToList()
                         .ForEach(qvm =>
                         {
-                            accountRegistrantCopy.AddAnswer(
+                            submittedRecord.AddAnswer(
                                 answerText: qvm.Value,
                                 question: qvm.Question,
                                 registrationId: registration.ID,
@@ -1161,7 +1175,7 @@ namespace AfterSchool.Controllers
                                     registration.ProcessRegistrationAssignment(
                                         participationObject: activity.GetParticipationObject(amsgs, adc),
                                         masterRegistrant: SessionVariables.CurrentRegistrant,
-                                        registrant: accountRegistrantCopy,
+                                        registrant: submittedRecord,
                                         seatsRequested: 1,
                                         preferenceNumber: i,
                                         activityGroupId: participationObject.GetActivityGroupId(),
@@ -1265,6 +1279,7 @@ namespace AfterSchool.Controllers
             SessionVariables.CurrentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
             SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
             SessionVariables.Cart.AddCartItem(registration.GetParticipationObject(msgs), msgs);
+            SessionVariables.RegistrationStartPageAccount = registration.GetAccount(msgs);
 
             return RedirectToAction("Register");
         }

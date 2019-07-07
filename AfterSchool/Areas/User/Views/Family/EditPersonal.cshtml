@@ -1,8 +1,9 @@
 ﻿@model Registrant
 @{
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+
     var msgs = (SystemMessages)ViewBag.Messages;
     var qvms = (List<FormQuestionViewModel>)ViewBag.QuestionViewModels;
-    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
 }
 
 <div class="main-content">
@@ -15,14 +16,29 @@
             <i class="s7-user"></i> @Model.Name - Personal Info
 
             <div class="pull-right">
-                <a href="@Url.Action("index", "family")" class="btn btn-default">
+                <a href="@Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"))" class="btn btn-default">
                     Exit
                 </a>
             </div>
         </div>
 
         <div class="panel-body">
-            <form class="form-horizontal" id="form-save-personal" method="post" action="@Url.Action("editpersonal", "family", new { id = Model.Uid })">
+
+            @if (Request["reg"].IsGuid())
+            {
+                <div role="alert" class="alert alert-danger alert-icon">
+                    <div class="icon">
+                        <span class="s7-info"></span>
+                    </div>
+                    <div class="message">
+                        <p class="text-center text-medium">
+                            You must update/complete your profile in order to continue registration
+                        </p>
+                    </div>
+                </div>
+            }
+
+            <form class="form-horizontal" id="form-save-personal" method="post" action="@Url.Action("editpersonal", "family", new { id = Model.Uid, reg = Request["reg"] })">
 
                 @foreach (var qvm in qvms)
                 {

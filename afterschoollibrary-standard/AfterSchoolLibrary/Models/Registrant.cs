@@ -294,6 +294,14 @@ namespace AfterSchoolLibrary.Models
 
 		#region "UserDefined"        
 
+        public bool IsProfileCompleted
+        {
+            get
+            {
+                return this.ProfileStatusId == RegistrantProfileStatus.Completed;
+            }
+        }
+
         public string Name
         {
             get

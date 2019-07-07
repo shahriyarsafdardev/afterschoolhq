@@ -654,7 +654,7 @@ namespace AfterSchoolLibrary.Helpers
 
                     if (activityGroup.AccountId != registration.AccountId)
                     {
-                        var account = registration.GetAccount(dc);
+                        var account = registration.GetAccount(msgs, dc);
                         var aag = activityGroup.GetAccountActivityGroup(account, msgs, dc);
 
                         if (aag.IsNotEmpty())

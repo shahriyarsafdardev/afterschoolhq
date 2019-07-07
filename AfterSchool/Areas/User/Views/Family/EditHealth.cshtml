@@ -15,14 +15,14 @@
             <i class="s7-user"></i> @Model.Name - Health Info
 
             <div class="pull-right">
-                <a href="@Url.Action("index", "family")" class="btn btn-default">
+                <a href="@Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"))" class="btn btn-default">
                     Exit
                 </a>
             </div>
         </div>
 
         <div class="panel-body">
-            <form class="form-horizontal" id="form-save-health" method="post" action="@Url.Action("edithealth", "family", new { id = Model.Uid })">
+            <form class="form-horizontal" id="form-save-health" method="post" action="@Url.Action("edithealth", "family", new { id = Model.Uid, reg = Request["reg"] })">
 
                 @foreach (var qvm in qvms)
                 {

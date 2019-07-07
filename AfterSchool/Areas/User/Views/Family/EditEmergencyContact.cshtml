@@ -15,14 +15,14 @@
             <i class="s7-user"></i> @Model.Name - Emergency Contacts
 
             <div class="pull-right">
-                <a href="@Url.Action("index", "family")" class="btn btn-default">
+                <a href="@Url.Action("index", (Request["reg"].IsGuid() ? "home" : "family"))" class="btn btn-default">
                     Exit
                 </a>
             </div>
         </div>
 
         <div class="panel-body">
-            <form class="form-horizontal" id="form-save-emergencycontacts" method="post" action="@Url.Action("editemergencycontact", "family", new { id = Model.Uid })">
+            <form class="form-horizontal" id="form-save-emergencycontacts" method="post" action="@Url.Action("editemergencycontact", "family", new { id = Model.Uid, reg = Request["reg"] })">
 
                 <h4 class="col-md-9 col-md-offset-3 padding-v-20">Emergency Contact 1</h4>
                 @foreach (var qvm in qvms.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
@@ -38,7 +38,7 @@
 
                 <div class="margin-v-20">
                     <div class="col-md-offset-3 col-md-6">
-                        <button type="submit" id="btn-save-emergencycontacts" class="btn btn-primary btn-block btn-lg">Save and Complete &raquo;</button>
+                        <button type="submit" id="btn-save-emergencycontacts" class="btn btn-primary btn-block btn-lg">Save and @(Request["reg"].IsGuid() ? "Continue" : "Complete") &raquo;</button>
                     </div>
                 </div>
 

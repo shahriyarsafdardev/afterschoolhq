@@ -95,7 +95,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditStudentPersonal(string id, string location)
+        public ActionResult EditStudentPersonal(string id, string location, string reg)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -162,7 +162,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditHealth", new { id = registrant.Uid });
+                return RedirectToAction("EditHealth", new { id = registrant.Uid, reg });
 
             ViewBag.Messages = msgs;
 
@@ -222,7 +222,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditHealth(string id, string what)
+        public ActionResult EditHealth(string id, string reg)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -282,8 +282,11 @@ namespace AfterSchool.Areas.User.Controllers
                 ViewBag.QuestionViewModels = qvms;
             }
 
+            if (reg.IsGuid())
+                return Redirect(Registration.LoadByUid(reg.ToGuid()).GetParentalConsentUrl);
+
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditProfileDone", new { id = registrant.Uid });
+                return RedirectToAction("EditProfileDone", new { id = registrant.Uid, reg });
 
             ViewBag.Messages = msgs;
 
@@ -356,7 +359,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditPersonal(string id, string what)
+        public ActionResult EditPersonal(string id, string reg)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -418,7 +421,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditHomeAddress", new { id = registrant.Uid });
+                return RedirectToAction("EditHomeAddress", new { id = registrant.Uid, reg });
 
             ViewBag.Messages = msgs;
 
@@ -481,7 +484,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditHomeAddress(string id, string what)
+        public ActionResult EditHomeAddress(string id, string reg)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -532,7 +535,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditEmergencyContact", new { id = registrant.Uid });
+                return RedirectToAction("EditEmergencyContact", new { id = registrant.Uid, reg });
 
             ViewBag.Messages = msgs;
 
@@ -590,7 +593,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditEmergencyContact(string id, string what)
+        public ActionResult EditEmergencyContact(string id, string reg)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -664,6 +667,17 @@ namespace AfterSchool.Areas.User.Controllers
                 }
 
                 ViewBag.QuestionViewModels = qvms;
+            }
+
+            if (reg.IsGuid())
+            {
+                var registration = Registration.LoadByUid(reg.ToGuid());
+                var regMasterRegistrant = registration.GetRegistrant().GetMasterRegistrant();
+
+                if (!regMasterRegistrant.IsProfileCompleted)
+                    return RedirectToAction("EditStudentPersonal", new { id = regMasterRegistrant.Uid, reg = reg });
+
+                return Redirect(registration.GetParentalConsentUrl);
             }
 
             if (msgs.HasNoErrors())

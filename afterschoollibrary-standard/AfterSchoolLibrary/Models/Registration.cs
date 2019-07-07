@@ -575,34 +575,9 @@ namespace AfterSchoolLibrary.Models
             //this.AddActivity(ra.ActivityId.Value, loggedInUserId, msgs, dc);
         }
 
-        //public RegistrationActivity AddActivity(int activityId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-        //    var ra = RegistrationActivity.LoadByActivityIdByRegistrationId(activityId, this.ID.Value, dc: dc);
-        //    if (ra.IsEmpty())
-        //    {
-        //        ra = new RegistrationActivity
-        //        {
-        //            ActivityId = activityId,
-        //            RegistrationId = this.ID,
-        //            CreateDate = DateTime.UtcNow,
-        //            CreatedBy = loggedInUserId
-        //        };
-        //        msgs.AddRange(ra.Save(dc));
-        //    }
-
-        //    return ra;
-        //}
-
-        //public RegistrationActivity AddActivity(Activity activity, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        //{
-        //    return AddActivity(activity.ID.Value, loggedInUserId, msgs, dc);
-        //}
-
-        public Account GetAccount(DatabaseConnection dc = null)
+        public Account GetAccount(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Account.Load(this.AccountId.Value, dc: dc);
+            return Account.Load(this.AccountId.Value, msgs, dc);
         }
 
         private ActivityGroup _ActivityGroup = null;
