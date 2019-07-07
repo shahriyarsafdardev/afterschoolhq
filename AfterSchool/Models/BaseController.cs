@@ -146,7 +146,7 @@ namespace AfterSchool.Models
 
                     case AccountType.Registrant:
                         if (SessionVariables.Cart.IsNotEmpty())
-                            return RedirectToAction("select", "account");
+                            return RedirectToAction("select", "account", new { area = "" });
                         else if (registrationAccount.IsNotEmpty())
                             return Redirect(registrationAccount.HomePageUrl);
                         else

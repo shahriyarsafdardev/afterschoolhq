@@ -57,7 +57,9 @@ namespace AfterSchool.Areas.User.Controllers
                         activityInstances.AddRange(instances.Select(instance => (instance, registrant, ra.ParticipationObjectId, ra.ParticipationObjectTypeId)));
                     });
 
-                    registrantActivities.AddRange(ras);
+                    if (masterRegistrant.IsParentOrGuardian)
+                        registrantActivities.AddRange(ras);
+
                     if (!providers.Any(provider => provider.ID == account.ID))
                         providers.Add(account);
                 });
