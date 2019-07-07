@@ -1,0 +1,18 @@
+﻿@model List<Registrant>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+
+@{Html.RenderPartial("_UserAccountHeader");}
+
+<div class="main-content">
+    @foreach (var registrant in Model)
+    {
+        Html.RenderPartial("Registrants/_BrowseRegistrant", registrant);
+    }
+</div>
+
+@section header
+{
+    <link href="~/Assets/css/style-registration.css" type="text/css" rel="stylesheet" />
+}

@@ -1,0 +1,35 @@
+﻿@model Account
+
+@{ 
+    var participationObjects = Model.GetPublishedParticipationObjects();
+    var location = Model.GetDefaultLocation();
+}
+
+<div class="panel" style="overflow: hidden;">
+    <div class="heading panel-h3" style="background-color: #2f3c40; height: 80px;">
+        <h3 style="vertical-align: middle; display: table-cell; width: 100%; height: 80px; padding-right: 20px;" class="text-white">
+            <strong title="@Model.Name">@Model.Name</strong>
+            <span class="badge badge-danger" style="font-size: 0.7em;">@participationObjects.Count Activities</span>
+        </h3>
+    </div>
+    <div class="panel-body">
+
+        <div class="margin-t-20">
+            <a href="@Model.HomePageUrl" class="btn btn-primary btn-register btn-block">
+                Browse Activities &raquo;
+            </a>
+        </div>
+
+        <div class="seats-remaining text-center">
+            <strong>
+                <em>
+                    @if (participationObjects.Count > 0)
+                    {
+                        <span>Now Registering</span>
+                    }
+                </em>
+            </strong>
+        </div>
+
+    </div>
+</div>

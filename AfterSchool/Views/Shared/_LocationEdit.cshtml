@@ -133,7 +133,7 @@
             isSearching = true;
                 
             $.get(
-                `@Url.Action("searchlocations", "services")?search=${locationSearch.val()}`,
+                `@Url.Action("searchlocations", "services", new { Area = "" })?search=${locationSearch.val()}`,
                 function (data) {
 
                     isSearching = false;
@@ -208,7 +208,7 @@
                     <div class="${listItemClass}"
                         style="${listItemStyle}" 
                         id="location-0">
-                        <strong>Searching... Type of the location name or address</strong>
+                        <strong>Searching... Type the location name or address</strong>
                     </div>`);
             }
             else {

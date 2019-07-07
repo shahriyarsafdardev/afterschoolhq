@@ -4,7 +4,6 @@
     var title = ViewData["title"];
 }
 
-
 @if (Model.Any(x => x.AssignmentTypeId.In(Registration.ReservedStatuses)))
 {
     <div class="panel panel-alt4">

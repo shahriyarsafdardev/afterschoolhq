@@ -352,7 +352,6 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantId);
             dq.Criterias.Add(ObjectMap["QuestionDataTypeId"], (int)qt);
             dq.Criterias.Add(ObjectMap["RegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
-            dq.Criterias.Add(ObjectMap["FormQuestionId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 

@@ -156,61 +156,63 @@
                     <tbody>
                         @if (Model.Count > 0)
                         {
-                            var purchase = transaction.GetPurchase();
-                            var registrant = Registrant.Load(purchase.RegistrantId.Value);
-                            var participationObjects = transaction.GetParticipationObjects();
+                            foreach (var transaction in Model)
+                            {
+                                var purchase = transaction.GetPurchase();
+                                var registrant = Registrant.Load(purchase.RegistrantId.Value);
+                                var participationObjects = transaction.GetParticipationObjects();
 
-                            <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
-                                <td>
-                                    <span class="am-checkbox">
-                                        <input type="checkbox" id="selectTransaction-@transaction.ID" @(transaction.PayoutId!=null?"disabled":"") class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
-                                        <label for="selectTransaction-@transaction.ID"></label>
-                                    </span>
-                                </td>
-                                <td>
-                                    @transaction.GetTransactionNumber()
-                                </td>
-                                <td>
-                                    @transaction.CreateDate.ToShortDateTimeString()
-                                </td>
-                                <td>
-                                    @transaction.GetPayerAccount().Name
-                                </td>
-                                <td>
-                                    @if (transaction.IsCharge())
-                                    {
-                                        @registrant.DisplayName
-                                    }
-                                    else
-                                    {
-                                        @transaction.GetBillerAccount().Name
-                                    }
-                                </td>
-                                <td>
-                                    @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
-                                </td>
-                                <td class="text-center">
-                                    @transaction.GetBillerAmount().ToCurrency()
-                                </td>
-                                <td class="text-center">
-                                    @transaction.GetFeesChargedToBiller().ToCurrency()
-                                </td>
-                                <td class="text-center">
-                                    @transaction.GetBillerPayout().ToCurrency()
-                                </td>
+                                <tr id="@transaction.Uid" data-refunded-amount="@transaction.GetRefundedAmount().ToCurrency()">
+                                    <td>
+                                        <span class="am-checkbox">
+                                            <input type="checkbox" id="selectTransaction-@transaction.ID" @(transaction.PayoutId != null ? "disabled" : "") class="chkTransaction" onchange="selectTransaction(@transaction.ID,this)" />
+                                            <label for="selectTransaction-@transaction.ID"></label>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @transaction.GetTransactionNumber()
+                                    </td>
+                                    <td>
+                                        @transaction.CreateDate.ToShortDateTimeString()
+                                    </td>
+                                    <td>
+                                        @transaction.GetPayerAccount().Name
+                                    </td>
+                                    <td>
+                                        @if (transaction.IsCharge())
+                                        {
+                                            @registrant.DisplayName
+                                        }
+                                        else
+                                        {
+                                            @transaction.GetBillerAccount().Name
+                                        }
+                                    </td>
+                                    <td>
+                                        @participationObjects.DistinctBy(po => new { po.ObjectID, po.ObjectType }).Select(po => po.Name).ToStringList(", ")
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetBillerAmount().ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetFeesChargedToBiller().ToCurrency()
+                                    </td>
+                                    <td class="text-center">
+                                        @transaction.GetBillerPayout().ToCurrency()
+                                    </td>
 
-                                    @*<td>
-                                            @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
-                                            {
-                                                <button onclick="openDialog('@transaction.Uid')"
-                                                        class="md-trigger"
-                                                        data-modal="modal-refund">
-                                                    Refund
-                                                </button>
-                                            }
-                                        </td>*@
-                            </tr>
-                            
+                                        @*<td>
+                                                @if (transaction.IsCharge() && !transaction.IsTotallyRefunded())
+                                                {
+                                                    <button onclick="openDialog('@transaction.Uid')"
+                                                            class="md-trigger"
+                                                            data-modal="modal-refund">
+                                                        Refund
+                                                    </button>
+                                                }
+                                            </td>*@
+                                </tr>
+                            }
                         }
                         else
                         {

@@ -41,6 +41,27 @@ namespace AfterSchoolLibrary.Services
 
         #region Activities
 
+        public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var participationObjects = new List<ParticipationObject>();
+
+            participationObjects.AddRange(account.GetPublishedActivities(msgs).Select(activity => activity.GetParticipationObject(msgs)));
+
+            var hostedLocationIds = account.GetHostedLocations(msgs).Select(location => location.ID.Value).ToList();
+            account.GetApprovedVisitorAccounts(msgs).ForEach(visitor =>
+            {
+                participationObjects.AddRange(
+                    visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs)
+                        .Select(activity => activity.GetParticipationObject(msgs))
+                        .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
+            });
+
+            participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.GetParticipationObject(msgs)));
+            participationObjects.AddRange(account.GetPublishedSessions(msgs).Select(x => x.GetParticipationObject(msgs)));
+
+            return participationObjects;
+        }
+
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
@@ -397,15 +418,20 @@ namespace AfterSchoolLibrary.Services
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, null, null, false, true, false, userType, loggedInUser, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, null, null, false, true, false, userType, false, loggedInUser, msgs, dc: dc);
         }
 
         public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, loggedInUser, msgs, dc: dc);
+            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, false, loggedInUser, msgs, dc: dc);
         }
 
-        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, UserType userType, bool forceNewUser, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return account.AddUser(firstName, lastName, email, phone, null, false, false, false, userType, forceNewUser, loggedInUser, msgs, dc: dc);
+        }
+
+        public static WebUser AddUser(this Account account, string firstName, string lastName, string email, string phone, string password, bool isActive, bool isRegistered, bool isVerified, UserType userType, bool forceNewUser, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             WebUser user = null;
@@ -433,8 +459,10 @@ namespace AfterSchoolLibrary.Services
                         user.Uid = Guid.NewGuid();
                         amsgs.AddRange(user.Save(adc));
                     }
-                    else
+                    else if (!forceNewUser)
                         user = WebUser.LoadByEmail(email.Trim(), amsgs, adc);
+                    else
+                        msgs.Add("Email is already in use", MessageType.UserError);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -447,6 +475,21 @@ namespace AfterSchoolLibrary.Services
 
             return user;
 
+        }
+
+        public static WebUser CreateAndInviteUser(this Account account, string firstName, string lastName, string email, string phone, string message, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var user = account.AddUser(firstName, lastName, email, phone, userType, true, loggedInUser, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                msgs.AddRange(account.SendInvitedEmail(user, loggedInUser, message, dc));
+
+            if (msgs.HasErrors())
+                msgs.Add($"An invitation was not sent to {email.Trim()}, a system error has occurred", MessageType.UserError);
+
+            return user;
         }
 
         public static WebUser InviteUser(this Account account, string firstName, string lastName, string email, string phone, string message, UserType userType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)

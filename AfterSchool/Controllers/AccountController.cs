@@ -556,7 +556,7 @@ namespace AfterSchool.Controllers
 
         #region AddStudent
 
-        private List<FormQuestion> AddStudentViewBag(Form administratorAccountForm, ParticipationObject participationObject, SystemMessages msgs)
+        private List<FormQuestion> AddStudentViewBag(Form administratorAccountForm, SystemMessages msgs)
         {
             var studentQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
@@ -592,8 +592,8 @@ namespace AfterSchool.Controllers
             if (SessionVariables.RegistrationStartPageAccount.AccountTypeId == AccountType.School)
                 schoolLocation = SessionVariables.RegistrationStartPageAccount.GetDefaultLocation(msgs);
 
-            ViewBag.Cart = SessionVariables.Cart;
             ViewBag.School = schoolLocation;
+            ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ShowStepNumber = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs).Count == 0;
 
             return questions;
@@ -608,8 +608,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var adminAccountForm = GetAdministratorAccountForm(msgs);
             var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
-            var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
+            var questions = AddStudentViewBag(adminAccountForm, msgs);
             var values = new NameValueCollection();
 
             questions.ForEach(question =>
@@ -642,8 +641,7 @@ namespace AfterSchool.Controllers
             var adminAccountForm = GetAdministratorAccountForm(msgs);
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
             var parentRegistrant2 = SessionVariables.CurrentAccount.GetSecondParentOrGuardianRegistrant(msgs);
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
-            var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
+            var questions = AddStudentViewBag(adminAccountForm, msgs);
 
             questions.ForEach(question =>
             {
@@ -665,6 +663,10 @@ namespace AfterSchool.Controllers
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
+
+            if (createuseraccount.IsNumber() && !email.IsEmail())
+                msgs.Add("Email is required and must be valid in order to allow your child to login", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -677,20 +679,19 @@ namespace AfterSchool.Controllers
                     {
                         var canBeAccessedBy = SessionVariables.CurrentUser.AsList();
 
-                        // create student account if requestioned by parent
+                        // create student account if requested by parent
                         if (createuseraccount.IsNumber())
                         {
                             var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
-                            var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-                            var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
-                            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
+                            var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;                            
+                            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;                            
 
-                            studentUser = SessionVariables.CurrentAccount.InviteUser(
+                            studentUser = SessionVariables.CurrentAccount.CreateAndInviteUser(
                                  firstName: firstName,
                                  lastName: lastName,
                                  email: email,
                                  phone: phone,
-                                 message: null,
+                                 message: $"Your parent/guardian ({SessionVariables.CurrentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
                                  userType: UserType.Student,
                                  loggedInUser: SessionVariables.CurrentUser,
                                  msgs: amsgs,
@@ -817,7 +818,12 @@ namespace AfterSchool.Controllers
 
                         // TODO: maybe should get sibling and copy health info
                     },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+
+                        SessionVariables.CurrentRegistrant = student;
+                    },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
@@ -833,7 +839,7 @@ namespace AfterSchool.Controllers
 
         #endregion
 
-        #region HealthView
+        #region AddHealth
 
         private List<FormQuestion> AddHealthViewBag(SystemMessages msgs)
         {
@@ -906,6 +912,8 @@ namespace AfterSchool.Controllers
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var registrant = SessionVariables.CurrentRegistrant;
+            var currentUser = SessionVariables.CurrentUser;
 
             if (msgs.HasNoErrors())
             {
@@ -914,16 +922,16 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         // mark student profile as completed since they've went through all the steps
-                        SessionVariables.CurrentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
+                        registrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
 
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
-                            SessionVariables.CurrentRegistrant.AddAnswer(
+                            registrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                loggedInUserId: currentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -1028,6 +1036,20 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
+            var parentOrGuardian = SessionVariables.CurrentRegistrant.GetParentOrGuardian(msgs);
+            var (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, msgs);
+
+            if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == SessionVariables.CurrentUser.ID)
+                return RedirectToAction(
+                    "editpersonal", 
+                    "family", 
+                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration.Uid });
+
+            if (!SessionVariables.CurrentRegistrant.IsProfileCompleted)
+                return RedirectToAction(
+                    "editstudentpersonal", 
+                    "family", 
+                    new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration.Uid });
 
             // current registrant is already registered
             if (SessionVariables.CurrentRegistrant.IsRegisteredForAndHasConsent(participationObject, msgs))
@@ -1069,7 +1091,7 @@ namespace AfterSchool.Controllers
 
             Registration registration = null;
             RegistrationPeriod period = null;
-            Registrant accountRegistrantCopy = null;
+            Registrant submittedRecord = null;
 
             if (msgs.HasNoErrors())
             {
@@ -1093,11 +1115,11 @@ namespace AfterSchool.Controllers
 
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        (accountRegistrantCopy, registration) = SessionVariables.CurrentRegistrant.GetChild(participationObject, amsgs, adc);
+                        (submittedRecord, registration) = SessionVariables.CurrentRegistrant.GetSubmittedRecord(participationObject, amsgs, adc);
 
-                        if (accountRegistrantCopy.IsEmpty())
+                        if (submittedRecord.IsEmpty())
                         {
-                            accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
+                            submittedRecord = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
                                 ownerAccount: participationObject.OwnerAccount,
                                 loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
@@ -1105,7 +1127,7 @@ namespace AfterSchool.Controllers
                                 );
 
                             // create or update registration
-                            registration = accountRegistrantCopy.AddRegistrationWithESignature(
+                            registration = submittedRecord.AddRegistrationWithESignature(
                                 ownerAccountId: participationObject.OwnerAccount.ID.Value,
                                 activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
                                 accountActivityGroupId: participationObject.GetAccountActivityGroupId(),
@@ -1124,7 +1146,7 @@ namespace AfterSchool.Controllers
 
                         //copy all answers from the main account to the registrant & registration :)
                         SessionVariables.CurrentRegistrant.CopyAnswers(
-                            copyingRegistrant: accountRegistrantCopy,
+                            copyingRegistrant: submittedRecord,
                             registration: registration,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
@@ -1135,7 +1157,7 @@ namespace AfterSchool.Controllers
                         .ToList()
                         .ForEach(qvm =>
                         {
-                            accountRegistrantCopy.AddAnswer(
+                            submittedRecord.AddAnswer(
                                 answerText: qvm.Value,
                                 question: qvm.Question,
                                 registrationId: registration.ID,
@@ -1161,7 +1183,7 @@ namespace AfterSchool.Controllers
                                     registration.ProcessRegistrationAssignment(
                                         participationObject: activity.GetParticipationObject(amsgs, adc),
                                         masterRegistrant: SessionVariables.CurrentRegistrant,
-                                        registrant: accountRegistrantCopy,
+                                        registrant: submittedRecord,
                                         seatsRequested: 1,
                                         preferenceNumber: i,
                                         activityGroupId: participationObject.GetActivityGroupId(),
@@ -1265,6 +1287,7 @@ namespace AfterSchool.Controllers
             SessionVariables.CurrentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
             SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
             SessionVariables.Cart.AddCartItem(registration.GetParticipationObject(msgs), msgs);
+            SessionVariables.RegistrationStartPageAccount = registration.GetAccount(msgs);
 
             return RedirectToAction("Register");
         }
@@ -1796,7 +1819,7 @@ namespace AfterSchool.Controllers
                     {
                         // account gets copy / snapshot of master registrant record
                         // required in order to make sure registration data doesn't change as registrant changes information in master record.
-                        var accountRegistrantCopy = SessionVariables.CurrentRegistrant.CopyToAccount(
+                        var accountRegistrantCopy = SessionVariables.CurrentRegistrant.SubmitRecordToAccount(
                             ownerAccount: participationObject.OwnerAccount,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,

@@ -1,94 +1,228 @@
 ﻿@model List<Registrant>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var activityInstances = (List<(
+            ActivityInstance ActivityInstance,
+            Registrant Registrant,
+            int? ParticipationObjectId,
+            ParticipationObjectType ParticipationObjectType)>)ViewBag.ActivityInstances;
+    var activitiesRequiringAttention = (List<RegistrantActivity>)ViewBag.ActivitiesRequiringAttention;
+    var providers = (List<Account>)ViewBag.Providers;
+    var showToDos = activitiesRequiringAttention.Any() || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
+    var showProviders = providers.Any();
+    var showLeftColumn = showToDos || showProviders;
+    var upcomingDivClass = "col-md-12 col-lg-6";
+
+    if (!showLeftColumn)
+    {
+        upcomingDivClass = "col-md-12 col-lg-8 col-lg-offset-2";
+    }
 }
+
+@{Html.RenderPartial("_UserAccountHeader");}
 
 <div class="main-content">
 
-    <div class="panel panel-default hide">
-        <div class="panel-body bg-info">
-            <p class="text-center text-medium">
-                Missing a registration? Contact us at <a href="mailto:support@afterschoolhq.zendesk.com">support@afterschoolhq.zendesk.com</a>
-            </p>
-        </div>
-    </div>
-
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            Welcome @SessionVariables.CurrentUser.FirstName.Trim().ToProperCase()!
-        </div>
-        <div class="panel-body">
-            <p>Here is some info about your account</p>
-        </div>
-    </div>
-
-    @foreach (var registrant in Model)
+    @if (showLeftColumn)
     {
-        var answers = registrant.GetAnswers(msgs).Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).ToList();
-        var children = registrant.GetChildren();
-        var ras = new List<RegistrantActivity>();
+        <div class="col-md-12 col-lg-6">
 
-        foreach(var child in children)
-        {
-            ras.AddRange(child.GetRegistrantActivities());
-        }
-       
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                @registrant.Name.ToProperCase()
-            </div>
-            <div class="panel-body"> 
-                <div class="col-md-6">
-                    <table class="table-condensed">
-                        @foreach (var group in answers.DistinctBy(x => x.FormQuestionFormQuestionGroupId).Select(answer => answer.ToFormQuestionGroup()).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))
+            @if (showToDos)
+            {
+                <div class="panel panel-alt6">
+                    <div class="panel-heading">
+                        <h3 class="text-center text-white">To Do's</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        @* HANDLE UPDATING PROFILES *@
+                        @if (Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
                         {
-                            <tr>
-                                <td colspan="2" class="text-medium">
-                                    @group.Name
-                                </td>
-                            </tr>
+                            <div class="text-medium">
+                                <strong>Finalize Profiles</strong>
+                            </div>
 
-                            foreach (var answer in answers.Where(answer => answer.FormQuestionFormQuestionGroupId == group.ID).OrderBy(answer => answer.FormQuestionDisplayOrder))
-                            {
-                                <tr>
-                                    <td>@answer.QuestionText</td>
-                                    <td>@answer.Text</td>
-                                </tr>
-                            }
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Profile</th>
+                                        <th></th>
+                                    </tr>
+                                    @foreach (var registrant in Model.Where(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
+                                    {
+                                        <tr>
+                                            <td>
+                                                @registrant.Name
+                                            </td>
+                                            <td class="text-right">
+                                                <a href="@Url.Action((registrant.IsParentOrGuardian ? "editpersonal" : "editstudentpersonal"), "family", new { id = registrant.Uid })" class="btn btn-primary">
+                                                    @(registrant.ProfileStatusId == RegistrantProfileStatus.OutOfDate ? "Update" : "Complete")
+                                                    Profile &raquo;
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </thead>
+                            </table>
                         }
-                        
-                    </table>
-                </div>       
-                <div class="col-md-6">
 
-                    @if (ras.Any())
-                    {
-                        Html.RenderPartial(
-                             "_ScheduledActivities",
-                             ras.Where(x => x.IsInSession()).ToList(),
-                             new ViewDataDictionary()
-                             {
-                                 { "registrant", registrant },
-                                 { "title", string.Format("Current {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
-                             }
-                        );
+                        @* HANDLE CONSENT AND PAYMENTS *@
+                        @if (activitiesRequiringAttention.Any())
+                        {
+                            <div class="text-medium">
+                                <strong>Finalize Registrations</strong>
+                            </div>
 
-                        Html.RenderPartial(
-                             "_ScheduledActivities",
-                             ras.Where(x => x.WillBeInSession()).ToList(),
-                             new ViewDataDictionary()
-                             {
-                                 { "registrant", registrant },
-                                 { "title", string.Format("Upcoming {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
-                             }
-                        );
-                    }
-                    else
-                    {
-                        <p>@registrant.FirstName.ToProperCase() is not registered for any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()</p>
-                    }
-                </div> 
-            </div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Activity</th>
+                                        <th class="text-center">For</th>
+                                        <th class="text-center">Registered On</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ra in activitiesRequiringAttention)
+                                    {
+                                        var participationObject = ra.GetParticipationObject();
+                                        var registration = ra.GetRegistration();
+
+                                        <tr>
+                                            <td>@participationObject.Name</td>
+                                            <td class="text-center">@ra.RegistrantFirstName</td>
+                                            <td class="text-center">@registration.LastModifiedDate.ToShortDateString()</td>
+                                            <td class="text-right">
+                                                <a href="@registration.GetParentalConsentUrl" class="btn btn-primary">
+                                                    @if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
+                                                    {
+                                                        <span>Give Consent @(participationObject.IsNotFreeAndCanAcceptPayments ? "& Pay" : "")</span>
+                                                    }
+                                                    else if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment && participationObject.IsNotFreeAndCanAcceptPayments)
+                                                    {
+                                                        <span>Pay Online</span>
+                                                    }
+                                                    &raquo;
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                    </div>
+                </div>
+            }
+
+            @if (showProviders)
+            {            
+                <div class="panel panel-alt6">
+                    <div class="panel-heading">
+                        <h3 class="text-center text-white">Find New Activities</h3>
+                    </div>
+                    <div class="panel-body">
+                        @foreach (var provider in providers)
+                        {
+                            Html.RenderPartial("Providers/_BrowseProvider", provider);
+                        }
+                    </div>
+                </div>
+            }
+
         </div>
     }
+
+    <div class="@upcomingDivClass">
+        <div class="panel panel-alt6">
+            <div class="panel-heading">
+                <h3 class="text-center text-white">Upcoming Activities</h3>
+            </div>
+            <div class="panel-body">
+                @if (activityInstances.Count > 0)
+                {
+                    foreach (var activityInstance in activityInstances)
+                    {
+                        Html.RenderPartial("Schedule/_BrowseActivityInstance", activityInstance);
+                    }
+
+                    <div class="text-medium-small text-center hide">
+                        <a href="@Url.Action("index", "schedule")">View More &raquo;</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+
+
+            @*
+                @foreach (var registrant in Model)
+                {
+                    var answers = registrant.GetAnswers(msgs).Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).ToList();
+                    var children = registrant.GetChildren();
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            @registrant.Name.ToProperCase()
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-md-6">
+                                <table class="table-condensed">
+                                    @foreach (var group in answers.DistinctBy(x => x.FormQuestionFormQuestionGroupId).Select(answer => answer.ToFormQuestionGroup()).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))
+                                    {
+                                        <tr>
+                                            <td colspan="2" class="text-medium">
+                                                @group.Name
+                                            </td>
+                                        </tr>
+
+                                        foreach (var answer in answers.Where(answer => answer.FormQuestionFormQuestionGroupId == group.ID).OrderBy(answer => answer.FormQuestionDisplayOrder))
+                                        {
+                                            <tr>
+                                                <td>@answer.QuestionText</td>
+                                                <td>@answer.Text</td>
+                                            </tr>
+                                        }
+                                    }
+
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+
+                                @if (ras.Any())
+                                {
+                                    Html.RenderPartial(
+                                         "_ScheduledActivities",
+                                         ras.Where(x => x.IsInSession()).ToList(),
+                                         new ViewDataDictionary()
+                                         {
+                                            { "registrant", registrant },
+                                            { "title", string.Format("Current {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
+                                         }
+                                    );
+
+                                    Html.RenderPartial(
+                                         "_ScheduledActivities",
+                                         ras.Where(x => x.WillBeInSession()).ToList(),
+                                         new ViewDataDictionary()
+                                         {
+                                            { "registrant", registrant },
+                                            { "title", string.Format("Upcoming {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
+                                         }
+                                    );
+                                }
+                                else
+                                {
+                                    <p>@registrant.FirstName.ToProperCase() is not registered for any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }*@
 </div>
+
+@section header
+{
+    <link href="~/Assets/css/style-registration.css" type="text/css" rel="stylesheet" />
+}
