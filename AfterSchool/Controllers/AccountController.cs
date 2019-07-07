@@ -642,7 +642,6 @@ namespace AfterSchool.Controllers
             var adminAccountForm = GetAdministratorAccountForm(msgs);
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
             var parentRegistrant2 = SessionVariables.CurrentAccount.GetSecondParentOrGuardianRegistrant(msgs);
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
             var questions = AddStudentViewBag(adminAccountForm, msgs);
 
             questions.ForEach(question =>
@@ -665,6 +664,10 @@ namespace AfterSchool.Controllers
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
+
+            if (createuseraccount.IsNumber() && !email.IsEmail())
+                msgs.Add("Email is required and must be valid in order to allow your child to login", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -681,11 +684,10 @@ namespace AfterSchool.Controllers
                         if (createuseraccount.IsNumber())
                         {
                             var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
-                            var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-                            var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
-                            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
+                            var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;                            
+                            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;                            
 
-                            studentUser = SessionVariables.CurrentAccount.InviteUser(
+                            studentUser = SessionVariables.CurrentAccount.CreateAndInviteUser(
                                  firstName: firstName,
                                  lastName: lastName,
                                  email: email,
@@ -817,7 +819,12 @@ namespace AfterSchool.Controllers
 
                         // TODO: maybe should get sibling and copy health info
                     },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onSuccess: (SystemMessages smsgs) =>
+                    {
+                        msgs.AddRange(smsgs);
+
+                        SessionVariables.CurrentRegistrant = student;
+                    },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
