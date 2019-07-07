@@ -30,8 +30,8 @@
 
                 <h4 class="text-center reg-instructions"><strong>Checkout</strong></h4>
 
-                <span id="payment-plan-cost-0" class="hide">@participationObject.Cost</span>
-                <span id="payment-plan-asf-0" class="hide">@participationObject.GetConvenienceFee(FeesPaidByType.Parent)</span>
+                <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee()</span>
+                <span id="payment-plan-asf-0" class="hide">0</span>
                 <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(FeesPaidByType.Parent)</span>
 
                 @if (participationObject.PaymentPlans.Any())
@@ -43,7 +43,7 @@
                             </p>
                             <div class="am-radio">
                                 <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" />
-                                <label for="paymentoption-0">Pay <strong>@participationObject.GetCheckoutTotalCost().ToCurrency()</strong> today</label>                                
+                                <label for="paymentoption-0">Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today</label>                                
                             </div>
 
                             @foreach (var plan in participationObject.PaymentPlans)
@@ -51,19 +51,19 @@
                                 <div class="am-radio">
                                     <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" />
                                     <label for="paymentoption-@plan.ID">
-                                        Pay <strong>@plan.GetTotalCostWithFees(participationObject.OwnerAccount).ToCurrency()</strong> today
+                                        Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> today
                                         @if (plan.TotalPeriods > 1)
                                         {
                                             <span>
                                                 and
                                                 <strong>@(plan.TotalPeriods - 1)</strong> more payments of 
-                                                <strong>@plan.CostPerPeriod.ToCurrency()</strong> each 
+                                                <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> each 
                                                 <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
                                             </span>
                                         }
                                     </label>
-                                    <span id="payment-plan-cost-@plan.ID" class="hide">@plan.CostPerPeriod</span>
-                                    <span id="payment-plan-asf-@plan.ID" class="hide">@plan.GetConvenienceFee(paymentAccount)</span>
+                                    <span id="payment-plan-cost-@plan.ID" class="hide">@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount)</span>
+                                    <span id="payment-plan-asf-@plan.ID" class="hide">0</span>
                                     <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
                                 </div>
                             }
@@ -87,8 +87,8 @@
                                         <tr id="registration-fee-row">
                                             <td>Tuition Fee</td>
                                             <td class="text-right">
-                                                <span id="fee-total-value" class="hide">@participationObject.Cost</span>
-                                                @participationObject.Cost.ToCurrency()
+                                                <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee()</span>
+                                                @participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()
                                             </td>
                                             <td></td>
                                         </tr>
@@ -101,7 +101,7 @@
                                             <tr id="paymentplan-fee-row-@plan.ID" class="hide paymentplan-fee-row">
                                                 <td>Payment Plan</td>
                                                 <td class="text-right">
-                                                    @plan.CostPerPeriod.ToCurrency() 
+                                                    @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() 
                                                 </td>
                                                 <td>
                                                     per
@@ -119,10 +119,10 @@
                                         <tr>
                                             <td>Ongoing Subscription</td>
                                             <td class="text-right">
-                                                <span id="subscription-total-value" class="hide">@plan.CostPerPeriod</span>
-                                                <span id="subscription-asf-value" class="hide">@plan.GetConvenienceFee(paymentAccount)</span>
+                                                <span id="subscription-total-value" class="hide">@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount)</span>
+                                                <span id="subscription-asf-value" class="hide">0</span>
                                                 <span id="subscription-ccf-value" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
-                                                @participationObject.SubscriptionPlans.First().CostPerPeriod.ToCurrency()
+                                                @participationObject.SubscriptionPlans.First().GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()
                                             </td>
                                             <td>
                                                 per
@@ -145,7 +145,7 @@
                                         </td>
                                         <td></td>
                                     </tr>
-                                    <tr id="afterschool-support-fee-row" class="@(participationObject.UseStripeConnectedAccount ? "hide" : "")">
+                                    <tr id="afterschool-support-fee-row" class="@(participationObject.UseStripeConnectedAccount ? "hide" : "hide")">
                                         <td>Afterschool Support Fee</td>
                                         <td class="text-right">
                                             <span id="fee-asf" class="hide">0</span>

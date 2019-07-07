@@ -50,6 +50,11 @@ namespace AfterSchoolLibrary.Billing
             return GetConvenienceFee(cost, billingAccount) + GetCreditCardFee(cost, billingAccount);
         }
 
+        public static decimal GetCostWithConvenienceFee(decimal cost, Account billingAccount)
+        {
+            return cost + GetConvenienceFee(cost, billingAccount);
+        }
+
         public static decimal GetFinalTotalCost(decimal cost, Account billingAccount)
         {
             return cost + GetTotalFees(cost, billingAccount);
