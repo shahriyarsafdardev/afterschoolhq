@@ -12,7 +12,7 @@
             </li>
             <li class="@(controller == "home" ? "active" : "")"><a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a></li>
             <li class="@(controller == "family" ? "active" : "")"><a href="@Url.Action("index", "family")"><i class="icon s7-users"></i><span>Family</span></a></li>
-            <li class="@(controller == "schedule" ? "active" : "")"><a href="@Url.Action("index", "schedule")"><i class="icon s7-date"></i><span>Schedule</span></a></li>
+            <li class="hide @(controller == "schedule" ? "active" : "")"><a href="@Url.Action("index", "schedule")"><i class="icon s7-date"></i><span>Schedule</span></a></li>
             <li class="@(controller == "profile" ? "active" : "")"><a href="@Url.Action("edit", "profile")"><i class="icon s7-user"></i><span>Profile</span></a></li>
             <li><a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a></li>
         </ul>

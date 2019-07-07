@@ -410,6 +410,35 @@ namespace AfterSchool.Areas.User.Controllers
                                     msgs: amsgs,
                                     dc: adc);
                             });
+                            
+                            // copy parent 1 info over to the student
+                            var parent1Map = new Dictionary<QuestionDataType, QuestionDataType>()
+                            {
+                                { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent1FirstName },
+                                { QuestionDataType.RegistrantLastName,  QuestionDataType.Parent1LastName },
+                                { QuestionDataType.RegistrantEmail,  QuestionDataType.Parent1Email },
+                                { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent1HomePhone },
+                                { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent1MobilePhone },
+                                { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent1WorkPhone },
+                            };
+
+                            var students = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs, adc);
+
+                            students.ForEach(student =>
+                            {
+                                foreach (var key in parent1Map.Keys)
+                                {
+                                    student.MapAndAddAnswer(
+                                       questions,
+                                       registrant,
+                                       key,
+                                       parent1Map[key],
+                                       SessionVariables.CurrentUser,
+                                       amsgs,
+                                       adc);
+                                }
+                            });
+
                         },
                         onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
