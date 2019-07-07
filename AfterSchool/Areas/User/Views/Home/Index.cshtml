@@ -24,10 +24,11 @@
 <div class="main-content">
 
     @if (showLeftColumn)
-    { 
-        if (showToDos)
-        {
-            <div class="col-md-12 col-lg-6">
+    {
+        <div class="col-md-12 col-lg-6">
+
+            @if (showToDos)
+            {
                 <div class="panel panel-alt6">
                     <div class="panel-heading">
                         <h3 class="text-center text-white">To Do's</h3>
@@ -109,28 +110,27 @@
                                 </tbody>
                             </table>
                         }
-                    
+
                     </div>
                 </div>
-            </div>
-        }
+            }
 
-        if (showProviders)
-        {
-            <div class="col-md-12 col-lg-6">
+            @if (showProviders)
+            {            
                 <div class="panel panel-alt6">
                     <div class="panel-heading">
                         <h3 class="text-center text-white">Find New Activities</h3>
                     </div>
                     <div class="panel-body">
-                        @foreach(var provider in providers)
+                        @foreach (var provider in providers)
                         {
                             Html.RenderPartial("Providers/_BrowseProvider", provider);
                         }
                     </div>
                 </div>
-            </div>
-        }
+            }
+
+        </div>
     }
 
     <div class="@upcomingDivClass">
@@ -156,70 +156,70 @@
 
 
 
-    @*
-        @foreach (var registrant in Model)
-        {
-            var answers = registrant.GetAnswers(msgs).Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).ToList();
-            var children = registrant.GetChildren();
+            @*
+                @foreach (var registrant in Model)
+                {
+                    var answers = registrant.GetAnswers(msgs).Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).ToList();
+                    var children = registrant.GetChildren();
 
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    @registrant.Name.ToProperCase()
-                </div>
-                <div class="panel-body">
-                    <div class="col-md-6">
-                        <table class="table-condensed">
-                            @foreach (var group in answers.DistinctBy(x => x.FormQuestionFormQuestionGroupId).Select(answer => answer.ToFormQuestionGroup()).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))
-                            {
-                                <tr>
-                                    <td colspan="2" class="text-medium">
-                                        @group.Name
-                                    </td>
-                                </tr>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            @registrant.Name.ToProperCase()
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-md-6">
+                                <table class="table-condensed">
+                                    @foreach (var group in answers.DistinctBy(x => x.FormQuestionFormQuestionGroupId).Select(answer => answer.ToFormQuestionGroup()).Where(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation))
+                                    {
+                                        <tr>
+                                            <td colspan="2" class="text-medium">
+                                                @group.Name
+                                            </td>
+                                        </tr>
 
-                                foreach (var answer in answers.Where(answer => answer.FormQuestionFormQuestionGroupId == group.ID).OrderBy(answer => answer.FormQuestionDisplayOrder))
+                                        foreach (var answer in answers.Where(answer => answer.FormQuestionFormQuestionGroupId == group.ID).OrderBy(answer => answer.FormQuestionDisplayOrder))
+                                        {
+                                            <tr>
+                                                <td>@answer.QuestionText</td>
+                                                <td>@answer.Text</td>
+                                            </tr>
+                                        }
+                                    }
+
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+
+                                @if (ras.Any())
                                 {
-                                    <tr>
-                                        <td>@answer.QuestionText</td>
-                                        <td>@answer.Text</td>
-                                    </tr>
+                                    Html.RenderPartial(
+                                         "_ScheduledActivities",
+                                         ras.Where(x => x.IsInSession()).ToList(),
+                                         new ViewDataDictionary()
+                                         {
+                                            { "registrant", registrant },
+                                            { "title", string.Format("Current {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
+                                         }
+                                    );
+
+                                    Html.RenderPartial(
+                                         "_ScheduledActivities",
+                                         ras.Where(x => x.WillBeInSession()).ToList(),
+                                         new ViewDataDictionary()
+                                         {
+                                            { "registrant", registrant },
+                                            { "title", string.Format("Upcoming {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
+                                         }
+                                    );
                                 }
-                            }
-
-                        </table>
+                                else
+                                {
+                                    <p>@registrant.FirstName.ToProperCase() is not registered for any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()</p>
+                                }
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-
-                        @if (ras.Any())
-                        {
-                            Html.RenderPartial(
-                                 "_ScheduledActivities",
-                                 ras.Where(x => x.IsInSession()).ToList(),
-                                 new ViewDataDictionary()
-                                 {
-                                    { "registrant", registrant },
-                                    { "title", string.Format("Current {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
-                                 }
-                            );
-
-                            Html.RenderPartial(
-                                 "_ScheduledActivities",
-                                 ras.Where(x => x.WillBeInSession()).ToList(),
-                                 new ViewDataDictionary()
-                                 {
-                                    { "registrant", registrant },
-                                    { "title", string.Format("Upcoming {0}", UILabel.ActivityLabel(ActivityType.Activity, true)) }
-                                 }
-                            );
-                        }
-                        else
-                        {
-                            <p>@registrant.FirstName.ToProperCase() is not registered for any @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()</p>
-                        }
-                    </div>
-                </div>
-            </div>
-        }*@
+                }*@
 </div>
 
 @section header

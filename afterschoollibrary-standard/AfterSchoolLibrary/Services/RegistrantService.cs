@@ -406,7 +406,12 @@ namespace AfterSchoolLibrary.Services
         public static (Registrant, Registration) GetSubmittedRecord(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = registrant.GetSubmittedRecords(msgs, dc);
+
+            if (!submittedRecords.Any())
+                return (null, null);
+
             var submittedRecordIds = submittedRecords.Select(child => child.ID.Value).ToList();
+            
             var ras = RegistrantActivity.LoadByRegistrantIds(submittedRecordIds, msgs, dc);
 
             var submittedRecordRA = ras.FirstOrDefault(ra => ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);

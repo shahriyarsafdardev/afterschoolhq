@@ -608,7 +608,6 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var adminAccountForm = GetAdministratorAccountForm(msgs);
             var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
-            var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
             var questions = AddStudentViewBag(adminAccountForm, msgs);
             var values = new NameValueCollection();
 
@@ -913,6 +912,8 @@ namespace AfterSchool.Controllers
             });
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var registrant = SessionVariables.CurrentRegistrant;
+            var currentUser = SessionVariables.CurrentUser;
 
             if (msgs.HasNoErrors())
             {
@@ -921,16 +922,16 @@ namespace AfterSchool.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         // mark student profile as completed since they've went through all the steps
-                        SessionVariables.CurrentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
+                        registrant.SetProfileAsCompleted(SessionVariables.CurrentUser, amsgs, adc);
 
                         // add answers to parent registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
-                            SessionVariables.CurrentRegistrant.AddAnswer(
+                            registrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                loggedInUserId: currentUser.ID.Value,
                                 msgs: amsgs,
                                 dc: adc);
                         });
