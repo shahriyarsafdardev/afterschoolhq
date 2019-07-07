@@ -556,7 +556,7 @@ namespace AfterSchool.Controllers
 
         #region AddStudent
 
-        private List<FormQuestion> AddStudentViewBag(Form administratorAccountForm, ParticipationObject participationObject, SystemMessages msgs)
+        private List<FormQuestion> AddStudentViewBag(Form administratorAccountForm, SystemMessages msgs)
         {
             var studentQuestionGroup = administratorAccountForm.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
@@ -609,7 +609,7 @@ namespace AfterSchool.Controllers
             var adminAccountForm = GetAdministratorAccountForm(msgs);
             var parentOrGuardian = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant();
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
-            var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
+            var questions = AddStudentViewBag(adminAccountForm, msgs);
             var values = new NameValueCollection();
 
             questions.ForEach(question =>
@@ -643,7 +643,7 @@ namespace AfterSchool.Controllers
             var parentRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
             var parentRegistrant2 = SessionVariables.CurrentAccount.GetSecondParentOrGuardianRegistrant(msgs);
             var participationObject = SessionVariables.Cart.GetCartItems(msgs).First().GetParticipationObject(msgs);
-            var questions = AddStudentViewBag(adminAccountForm, participationObject, msgs);
+            var questions = AddStudentViewBag(adminAccountForm, msgs);
 
             questions.ForEach(question =>
             {
@@ -677,7 +677,7 @@ namespace AfterSchool.Controllers
                     {
                         var canBeAccessedBy = SessionVariables.CurrentUser.AsList();
 
-                        // create student account if requestioned by parent
+                        // create student account if requested by parent
                         if (createuseraccount.IsNumber())
                         {
                             var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
@@ -690,7 +690,7 @@ namespace AfterSchool.Controllers
                                  lastName: lastName,
                                  email: email,
                                  phone: phone,
-                                 message: null,
+                                 message: $"Your parent/guardian ({SessionVariables.CurrentUser.DisplayName}) has invited you to sign up for {AfterSchoolLibrary.Helpers.Utilities.AppName()} to register for activities",
                                  userType: UserType.Student,
                                  loggedInUser: SessionVariables.CurrentUser,
                                  msgs: amsgs,

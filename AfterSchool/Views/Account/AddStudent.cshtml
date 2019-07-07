@@ -52,9 +52,9 @@
                                 <div class="row">
                                     <div class="col-md-6 col-md-offset-3">
                                         <div class="am-checkbox">
-                                            <input type="checkbox" id="createUserAccount" name="createUserAccount" value="1" @(Request["createUserAccount"] == "1" || System.Web.HttpContext.Current.Request.HttpMethod.ToString() == "GET" ? " checked=\"checked\" " : "") />
+                                            <input type="checkbox" id="createUserAccount" name="createUserAccount" value="1" />
                                             <label for="createUserAccount">
-                                                Create User Account
+                                                Allow my child to login and register for activities
                                             </label>
                                         </div>
                                     </div>
