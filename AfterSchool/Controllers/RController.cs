@@ -60,19 +60,7 @@ namespace AfterSchool.Controllers
 
             if (account.IsNotEmpty())
             {
-                participationObjects.AddRange(account.GetPublishedActivities(msgs).Select(activity => activity.GetParticipationObject(msgs)));
-
-                var hostedLocationIds = account.GetHostedLocations(msgs).Select(location => location.ID.Value).ToList();
-                account.GetApprovedVisitorAccounts(msgs).ForEach(visitor =>
-                {
-                    participationObjects.AddRange(
-                        visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs)
-                            .Select(activity =>  activity.GetParticipationObject(msgs))
-                            .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
-                });
-
-                participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.GetParticipationObject(msgs)));
-                participationObjects.AddRange(account.GetPublishedSessions(msgs).Select(x => x.GetParticipationObject(msgs)));
+                participationObjects.AddRange(account.GetPublishedParticipationObjects(msgs));
                 locations.AddRange(account.GetAllAvailableLocations(msgs));
             }
             else

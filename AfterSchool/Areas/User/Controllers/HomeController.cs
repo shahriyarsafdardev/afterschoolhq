@@ -33,14 +33,24 @@ namespace AfterSchool.Areas.User.Controllers
                     RegistrationAssignmentType.ReservedPendingParentalConsent,
                     RegistrationAssignmentType.ReservedPendingPayment
                 };
+            var providers = new List<Account>();
 
             if (!registrants.Any(registrant => registrant.ID == masterRegistrant.ID))
                 registrants.Add(masterRegistrant);
 
             registrants.ForEach(registrant => {
+
+                if (registrant.SchoolLocationId.HasValue)
+                {
+                    var account = registrant.GetSchoolLocation(msgs).GetHostAcount(msgs);
+                    if(!providers.Any(provider => provider.ID == account.ID))
+                        providers.Add(account);
+                }
+
                 registrant.GetSubmittedRecords(msgs).ForEach(submittedRecord => {
 
                     var ras = submittedRecord.GetRegistrantActivities(msgs);
+                    var account = submittedRecord.GetAccount(msgs);
 
                     ras.ForEach(ra => {
                         var instances = ra.GetSchedule(msgs).GetInstances(msgs: msgs);
@@ -48,6 +58,8 @@ namespace AfterSchool.Areas.User.Controllers
                     });
 
                     registrantActivities.AddRange(ras);
+                    if (!providers.Any(provider => provider.ID == account.ID))
+                        providers.Add(account);
                 });
             });
 
@@ -57,6 +69,7 @@ namespace AfterSchool.Areas.User.Controllers
                 .Take(4)
                 .ToList();
             ViewBag.ActivitiesRequiringAttention = registrantActivities.Where(registrantActivity => registrantActivity.AssignmentTypeId.In(assignmentTypesNeedingAttention)).ToList();
+            ViewBag.Providers = providers;
             ViewBag.Messages = msgs;
 
             return View(registrants);

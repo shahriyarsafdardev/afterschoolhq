@@ -1132,6 +1132,7 @@
     <Content Include="Areas\User\Views\Family\EditPersonal.cshtml" />
     <Content Include="Areas\User\Views\Family\EditHomeAddress.cshtml" />
     <Content Include="Areas\User\Views\Family\EditEmergencyContact.cshtml" />
+    <Content Include="Areas\User\Views\Shared\Providers\_BrowseProvider.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

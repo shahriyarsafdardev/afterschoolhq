@@ -7,11 +7,13 @@
             int? ParticipationObjectId,
             ParticipationObjectType ParticipationObjectType)>)ViewBag.ActivityInstances;
     var activitiesRequiringAttention = (List<RegistrantActivity>)ViewBag.ActivitiesRequiringAttention;
+    var providers = (List<Account>)ViewBag.Providers;
     var showToDos = activitiesRequiringAttention.Any() || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
-
+    var showProviders = providers.Any();
+    var showLeftColumn = showToDos || showProviders;
     var upcomingDivClass = "col-md-12 col-lg-6";
 
-    if (!showToDos)
+    if (!showLeftColumn)
     {
         upcomingDivClass = "col-md-12 col-lg-8 col-lg-offset-2";
     }
@@ -21,93 +23,114 @@
 
 <div class="main-content">
 
-    @if (showToDos)
-    {
-        <div class="col-md-12 col-lg-6">
-            <div class="panel panel-alt6">
-                <div class="panel-heading">
-                    <h3 class="text-center text-white">To Do's</h3>
-                </div>
-                <div class="panel-body">
+    @if (showLeftColumn)
+    { 
+        if (showToDos)
+        {
+            <div class="col-md-12 col-lg-6">
+                <div class="panel panel-alt6">
+                    <div class="panel-heading">
+                        <h3 class="text-center text-white">To Do's</h3>
+                    </div>
+                    <div class="panel-body">
 
-                    @* HANDLE UPDATING PROFILES *@
-                    @if (Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
-                    {
-                        <div class="text-medium">
-                            <strong>Finalize Profiles</strong>
-                        </div>
+                        @* HANDLE UPDATING PROFILES *@
+                        @if (Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
+                        {
+                            <div class="text-medium">
+                                <strong>Finalize Profiles</strong>
+                            </div>
 
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Profile</th>
-                                    <th></th>
-                                </tr>
-                                @foreach (var registrant in Model.Where(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
-                                {
+                            <table class="table">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            @registrant.Name
-                                        </td>
-                                        <td class="text-right">
-                                            <a href="@Url.Action((registrant.IsParentOrGuardian ? "editpersonal" : "editstudentpersonal"), "family", new { id = registrant.Uid })" class="btn btn-primary">
-                                                @(registrant.ProfileStatusId == RegistrantProfileStatus.OutOfDate ? "Update" : "Complete")
-                                                Profile &raquo;
-                                            </a>
-                                        </td>
+                                        <th>Profile</th>
+                                        <th></th>
                                     </tr>
-                                }
-                            </thead>
-                        </table>
-                    }
+                                    @foreach (var registrant in Model.Where(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
+                                    {
+                                        <tr>
+                                            <td>
+                                                @registrant.Name
+                                            </td>
+                                            <td class="text-right">
+                                                <a href="@Url.Action((registrant.IsParentOrGuardian ? "editpersonal" : "editstudentpersonal"), "family", new { id = registrant.Uid })" class="btn btn-primary">
+                                                    @(registrant.ProfileStatusId == RegistrantProfileStatus.OutOfDate ? "Update" : "Complete")
+                                                    Profile &raquo;
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </thead>
+                            </table>
+                        }
 
-                    @* HANDLE CONSENT AND PAYMENTS *@
-                    @if (activitiesRequiringAttention.Any())
-                    {
-                        <div class="text-medium">
-                            <strong>Finalize Registrations</strong>
-                        </div>
+                        @* HANDLE CONSENT AND PAYMENTS *@
+                        @if (activitiesRequiringAttention.Any())
+                        {
+                            <div class="text-medium">
+                                <strong>Finalize Registrations</strong>
+                            </div>
 
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Activity</th>
-                                    <th class="text-center">For</th>
-                                    <th class="text-center">Registered On</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var ra in activitiesRequiringAttention)
-                                {
-                                    var participationObject = ra.GetParticipationObject();
-                                    var registration = ra.GetRegistration();
-
+                            <table class="table">
+                                <thead>
                                     <tr>
-                                        <td>@participationObject.Name</td>
-                                        <td class="text-center">@ra.RegistrantFirstName</td>
-                                        <td class="text-center">@registration.LastModifiedDate.ToShortDateString()</td>
-                                        <td class="text-right">
-                                            <a href="@registration.GetParentalConsentUrl" class="btn btn-primary">
-                                                @if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
-                                                {
-                                                    <span>Give Consent @(participationObject.IsNotFreeAndCanAcceptPayments ? "& Pay" : "")</span>
-                                                }
-                                                else if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment && participationObject.IsNotFreeAndCanAcceptPayments)
-                                                {
-                                                    <span>Pay Online</span>
-                                                }
-                                                &raquo;
-                                            </a>
-                                        </td>
+                                        <th>Activity</th>
+                                        <th class="text-center">For</th>
+                                        <th class="text-center">Registered On</th>
+                                        <th></th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
+                                </thead>
+                                <tbody>
+                                    @foreach (var ra in activitiesRequiringAttention)
+                                    {
+                                        var participationObject = ra.GetParticipationObject();
+                                        var registration = ra.GetRegistration();
+
+                                        <tr>
+                                            <td>@participationObject.Name</td>
+                                            <td class="text-center">@ra.RegistrantFirstName</td>
+                                            <td class="text-center">@registration.LastModifiedDate.ToShortDateString()</td>
+                                            <td class="text-right">
+                                                <a href="@registration.GetParentalConsentUrl" class="btn btn-primary">
+                                                    @if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent)
+                                                    {
+                                                        <span>Give Consent @(participationObject.IsNotFreeAndCanAcceptPayments ? "& Pay" : "")</span>
+                                                    }
+                                                    else if (ra.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment && participationObject.IsNotFreeAndCanAcceptPayments)
+                                                    {
+                                                        <span>Pay Online</span>
+                                                    }
+                                                    &raquo;
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    
+                    </div>
                 </div>
             </div>
-        </div>
+        }
+
+        if (showProviders)
+        {
+            <div class="col-md-12 col-lg-6">
+                <div class="panel panel-alt6">
+                    <div class="panel-heading">
+                        <h3 class="text-center text-white">Find New Activities</h3>
+                    </div>
+                    <div class="panel-body">
+                        @foreach(var provider in providers)
+                        {
+                            Html.RenderPartial("Providers/_BrowseProvider", provider);
+                        }
+                    </div>
+                </div>
+            </div>
+        }
     }
 
     <div class="@upcomingDivClass">

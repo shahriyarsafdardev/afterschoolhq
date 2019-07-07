@@ -41,6 +41,27 @@ namespace AfterSchoolLibrary.Services
 
         #region Activities
 
+        public static List<ParticipationObject> GetPublishedParticipationObjects(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var participationObjects = new List<ParticipationObject>();
+
+            participationObjects.AddRange(account.GetPublishedActivities(msgs).Select(activity => activity.GetParticipationObject(msgs)));
+
+            var hostedLocationIds = account.GetHostedLocations(msgs).Select(location => location.ID.Value).ToList();
+            account.GetApprovedVisitorAccounts(msgs).ForEach(visitor =>
+            {
+                participationObjects.AddRange(
+                    visitor.GetPublishedActivitiesInLocations(hostedLocationIds, msgs)
+                        .Select(activity => activity.GetParticipationObject(msgs))
+                        .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType }));
+            });
+
+            participationObjects.AddRange(account.GetPublishedExternalLeagues(msgs).Select(x => x.GetParticipationObject(msgs)));
+            participationObjects.AddRange(account.GetPublishedSessions(msgs).Select(x => x.GetParticipationObject(msgs)));
+
+            return participationObjects;
+        }
+
         public static List<Activity> GetPublishedActivities(this Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var periods = account.GetOpenUpcomingRecentlyClosedRegistrationPeriods(msgs, dc);
