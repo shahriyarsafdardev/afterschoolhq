@@ -6,8 +6,8 @@ namespace AfterSchoolLibrary.Billing
 {
     public class Platform
     {
-        public const decimal ConveniencePercentFee = .02M;
-        public const decimal ConvenienceFlatFee = .00M;
+        public const decimal ConveniencePercentFee = .05M;
+        public const decimal ConvenienceFlatFee = 0M;
 
         public static decimal GetCreditCardFee(decimal cost, Account billingAccount)
         {
