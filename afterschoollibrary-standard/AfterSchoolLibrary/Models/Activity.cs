@@ -82,6 +82,10 @@ namespace AfterSchoolLibrary.Models
 		/// Track what kind of leader it is - internal or external
 		/// </summary>
 		public ActivityLeaderType LeaderTypeId { get { return (ActivityLeaderType)MDV["LeaderTypeId"].Value; } set { MDV["LeaderTypeId"].Value = value; } }
+		/// <summary>
+		/// let us know whether the parent needs to consent
+		/// </summary>
+		public bool RequiresParentalConsent { get { return (bool)MDV["RequiresParentalConsent"].Value; } set { MDV["RequiresParentalConsent"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		public string AccountTimeZone { get { return (string)MDV["AccountTimeZone"].Value; } }
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
@@ -102,6 +106,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsArchived = false;
 			this.ActivityTypeId = ActivityType.NotSet;
 			this.LeaderTypeId = ActivityLeaderType.NotSet;
+			this.RequiresParentalConsent = false;
 			
         }
 
@@ -146,6 +151,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "DateSubmittedToActivityGroup", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "AccountActivityGroupId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "LeaderTypeId", System.Data.SqlDbType.Int);
+				_dp.Add(className, "RequiresParentalConsent", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "AccountTimeZone", typeof(Account).Name, "TimeZone", System.Data.SqlDbType.NVarChar, "Account");
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
@@ -368,6 +374,10 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["LeaderTypeId"]);
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+			dps.Add(ObjectMap["RequiresParentalConsent"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			

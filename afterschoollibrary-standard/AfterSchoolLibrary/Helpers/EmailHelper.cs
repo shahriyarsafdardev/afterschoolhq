@@ -210,7 +210,7 @@ namespace AfterSchoolLibrary.Helpers
 
             if (isParentCopy)
             {
-                registrationDetails = "Create your account to <strong>approve or decline</strong> this registration.";
+                registrationDetails = "Create your account to review this registration.";
 
                 var parentUser = parentOrGuardian.GetOwner(msgs, dc);
                 if (parentUser.IsNotEmpty() && !parentUser.IsRegistered)

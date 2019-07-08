@@ -82,6 +82,7 @@ property: ActivityTypeId, ActivityType, Int, required
 property: DateSubmittedToActivityGroup, DateTime?, DateTime, , Used to track when a team has been submitted to a league
 property: AccountActivityGroupId, int?, Int, , When a activity is part of a league that is from an external source (such as a team) then it should be linked to the account version of that league
 property: LeaderTypeId, ActivityLeaderType, Int, , Track what kind of leader it is - internal or external
+property: RequiresParentalConsent, bool, Bit, , let us know whether the parent needs to consent
 -property: AllowPreRegistration, bool, Bit
 -property: RegistrationTimeZone, string, NVarChar "30"
 -property: AcceptPayPal, bool, Bit

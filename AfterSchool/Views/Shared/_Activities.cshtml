@@ -121,7 +121,7 @@ else
                         
                         <tr>
                             <td>
-                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-primary btn-sm">View</a>
+                                <a href="@Url.Action("summary", "activity", new { id = @activity.Uid})" class="btn btn-primary btn-sm">Manage</a>
                             </td>
                             <td>
                                 @activity.Name @(activity.ActivityGroupId.HasValue ? "- " + activity.ActivityGroupName : "")

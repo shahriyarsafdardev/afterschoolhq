@@ -43,17 +43,20 @@ namespace AfterSchoolLibrary.Models
         public string CostDescription { get; set; }
         public string LocationDetails { get; set; }
         public bool UseStripeConnectedAccount { get; set; }
+        public bool RequiresParentalConsent { get; set; }
 
         private ActivityType? ActivityType { get; set; }
         private ActivityGroupType? ActivityGroupType { get; set; }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            RequiresParentalConsent = true;
             InitObject(participationObjectId, participationObjectType, true, msgs, dc);
         }
 
         public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            RequiresParentalConsent = true;
             InitObject(participationObjectId, participationObjectType, loadAllDetails, msgs, dc);
         }
 
@@ -97,6 +100,7 @@ namespace AfterSchoolLibrary.Models
             CostUnitType = global::CostUnitType.PerRegistrant;
             AllowToPayLater = activity.AllowToPayLater;
             IsTuitionFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
+            RequiresParentalConsent = activity.RequiresParentalConsent;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {

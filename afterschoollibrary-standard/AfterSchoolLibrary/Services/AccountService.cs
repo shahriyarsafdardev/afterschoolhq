@@ -2171,9 +2171,10 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    // mark as completed
                     checkoutObject.Registration.SetRegistrationStatus(
-                        completionStatus: RegistrationCompletionStatus.RequiresParentSignature, 
+                        completionStatus: checkoutObject.ParticipationObject.RequiresParentalConsent ? 
+                            RegistrationCompletionStatus.RequiresParentSignature : 
+                            RegistrationCompletionStatus.Completed, 
                         loggedInUser: loggedInUser, 
                         msgs: amsgs, 
                         dc: adc);
