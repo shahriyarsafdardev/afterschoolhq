@@ -23,7 +23,22 @@
         </div>
 
         <div class="panel-body">
-            <form class="form-horizontal" id="form-save-personal" method="post" action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"] })">
+
+            @if (Request["reg"].IsGuid() || Request["student"].IsGuid())
+            {
+                <div role="alert" class="alert alert-danger alert-icon">
+                    <div class="icon">
+                        <span class="s7-info"></span>
+                    </div>
+                    <div class="message">
+                        <p class="text-center text-medium">
+                            You must update/complete your profile in order to continue registration
+                        </p>
+                    </div>
+                </div>
+            }
+
+            <form class="form-horizontal" id="form-save-personal" method="post" action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
 
                 @foreach (var qvm in qvms)
                 {

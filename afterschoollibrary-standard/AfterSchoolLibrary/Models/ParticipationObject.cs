@@ -506,6 +506,15 @@ namespace AfterSchoolLibrary.Models
             return payment;
         }
 
+        public decimal GetCheckoutCostWithConvenienceFee()
+        {
+            if (this.Cost.HasValue)
+                return Cost.Value
+                    + GetConvenienceFee(FeesPaidByType.Parent);
+
+            return 0;
+        }
+
         public decimal GetCheckoutTotalCost()
         {
             if (this.Cost.HasValue)

@@ -7,7 +7,7 @@ using AfterSchoolLibrary.Services;
 
 namespace AfterSchool.Models
 {
-    public class ParticipationObjectUI
+    public static class ParticipationObjectUI
     {
         public static string PrintGradeLevels(ParticipationObject participationObject)
         {
@@ -30,7 +30,7 @@ namespace AfterSchool.Models
             if (participationObject.Cost.HasValue)
             {
                 if (displayCheckoutPrice)
-                    return participationObject.GetCheckoutTotalCost().ToCurrency();
+                    return participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency();
 
                 return participationObject.Cost.ToCurrency();
             }
@@ -41,7 +41,7 @@ namespace AfterSchool.Models
         public static string PrintPlanFee(SubscriptionPlan plan, Account ownerAccount, bool displayCheckoutPrice)
         {
             if (displayCheckoutPrice)
-                return plan.GetTotalCostWithFees(ownerAccount).ToCurrency();
+                return plan.GetTotalCostWithConvenienceFee(ownerAccount).ToCurrency();
 
             return plan.CostPerPeriod.ToCurrency();
         }

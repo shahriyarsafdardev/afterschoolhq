@@ -52,7 +52,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var finalPrice = cost.ToDecimal();
 
                 if (!SessionVariables.CurrentAccount.HasFeature(FeatureType.UseStripeConnectedAccount))
-                    finalPrice = AfterSchoolLibrary.Billing.Platform.GetFinalTotalCost(cost.ToDecimal(), SessionVariables.CurrentAccount);
+                    finalPrice = AfterSchoolLibrary.Billing.Platform.GetCostWithConvenienceFee(cost.ToDecimal(), SessionVariables.CurrentAccount);
 
                 return Json(new
                 {

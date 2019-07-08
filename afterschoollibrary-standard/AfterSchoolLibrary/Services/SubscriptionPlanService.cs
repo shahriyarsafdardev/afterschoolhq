@@ -283,6 +283,18 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
+        public static decimal GetTotalCostWithConvenienceFee(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (ownerAccount.IsEmpty())
+                ownerAccount = subscriptionPlan.GetAccount(msgs, dc);
+
+            if (subscriptionPlan.CostPerPeriod.HasValue)
+                return subscriptionPlan.CostPerPeriod.Value
+                    + subscriptionPlan.GetConvenienceFee(ownerAccount, msgs, dc);
+
+            return 0;
+        }
+
         public static decimal GetCreditCardFee(this SubscriptionPlan subscriptionPlan, Account ownerAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (ownerAccount.IsEmpty())
