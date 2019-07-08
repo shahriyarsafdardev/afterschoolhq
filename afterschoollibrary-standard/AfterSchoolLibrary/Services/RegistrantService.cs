@@ -326,7 +326,7 @@ namespace AfterSchoolLibrary.Services
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                null,
+                assignmentTypes: null,
                 msgs: msgs,
                 dc: dc);
         }
@@ -339,7 +339,7 @@ namespace AfterSchoolLibrary.Services
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
-                new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment },
+                assignmentTypes: new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment },
                 msgs: msgs,
                 dc: dc);
         }
