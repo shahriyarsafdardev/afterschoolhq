@@ -1043,13 +1043,13 @@ namespace AfterSchool.Controllers
                 return RedirectToAction(
                     "editpersonal", 
                     "family", 
-                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration.Uid });
+                    new { Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
 
             if (!SessionVariables.CurrentRegistrant.IsProfileCompleted)
                 return RedirectToAction(
                     "editstudentpersonal", 
                     "family", 
-                    new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration.Uid });
+                    new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
 
             // current registrant is already registered
             if (SessionVariables.CurrentRegistrant.IsRegisteredForAndHasConsent(participationObject, msgs))

@@ -24,7 +24,7 @@
 
         <div class="panel-body">
 
-            @if (Request["reg"].IsGuid())
+            @if (Request["reg"].IsGuid() || Request["student"].IsGuid())
             {
                 <div role="alert" class="alert alert-danger alert-icon">
                     <div class="icon">
@@ -38,7 +38,7 @@
                 </div>
             }
 
-            <form class="form-horizontal" id="form-save-personal" method="post" action="@Url.Action("editpersonal", "family", new { id = Model.Uid, reg = Request["reg"] })">
+            <form class="form-horizontal" id="form-save-personal" method="post" action="@Url.Action("editpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
 
                 @foreach (var qvm in qvms)
                 {

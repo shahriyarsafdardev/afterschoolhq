@@ -95,7 +95,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditStudentPersonal(string id, string location, string reg)
+        public ActionResult EditStudentPersonal(string id, string location, string reg, string student)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -162,7 +162,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditHealth", new { id = registrant.Uid, reg });
+                return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student });
 
             ViewBag.Messages = msgs;
 
@@ -222,7 +222,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditHealth(string id, string reg)
+        public ActionResult EditHealth(string id, string reg, string student)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -282,11 +282,14 @@ namespace AfterSchool.Areas.User.Controllers
                 ViewBag.QuestionViewModels = qvms;
             }
 
+            if (student.IsGuid())
+                return Redirect("/account/register");
+
             if (reg.IsGuid())
                 return Redirect(Registration.LoadByUid(reg.ToGuid()).GetParentalConsentUrl);
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditProfileDone", new { id = registrant.Uid, reg });
+                return RedirectToAction("EditProfileDone", new { id = registrant.Uid, reg, student });
 
             ViewBag.Messages = msgs;
 
@@ -359,7 +362,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditPersonal(string id, string reg)
+        public ActionResult EditPersonal(string id, string reg, string student)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -422,13 +425,13 @@ namespace AfterSchool.Areas.User.Controllers
                                 { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent1WorkPhone },
                             };
 
-                            var students = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs, adc);
+                            var children = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs, adc);
 
-                            students.ForEach(student =>
+                            children.ForEach(child =>
                             {
                                 foreach (var key in parent1Map.Keys)
                                 {
-                                    student.MapAndAddAnswer(
+                                    child.MapAndAddAnswer(
                                        questions,
                                        registrant,
                                        key,
@@ -450,7 +453,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditHomeAddress", new { id = registrant.Uid, reg });
+                return RedirectToAction("EditHomeAddress", new { id = registrant.Uid, reg, student });
 
             ViewBag.Messages = msgs;
 
@@ -513,7 +516,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditHomeAddress(string id, string reg)
+        public ActionResult EditHomeAddress(string id, string reg, string student)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -564,7 +567,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditEmergencyContact", new { id = registrant.Uid, reg });
+                return RedirectToAction("EditEmergencyContact", new { id = registrant.Uid, reg, student });
 
             ViewBag.Messages = msgs;
 
@@ -622,7 +625,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditEmergencyContact(string id, string reg)
+        public ActionResult EditEmergencyContact(string id, string reg, string student)
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
@@ -696,6 +699,15 @@ namespace AfterSchool.Areas.User.Controllers
                 }
 
                 ViewBag.QuestionViewModels = qvms;
+            }
+
+            if (student.IsGuid())
+            {
+                var regMasterRegistrant = Registrant.LoadByUid(student.ToGuid(), msgs);
+                if (!regMasterRegistrant.IsProfileCompleted)
+                    return RedirectToAction("EditStudentPersonal", new { id = regMasterRegistrant.Uid, reg, student });
+
+                return Redirect("/account/register");
             }
 
             if (reg.IsGuid())
