@@ -98,6 +98,12 @@
                         </p>
                     </div>
 
+                    @if (Model.RequiresParentalConsent)
+                    {
+                        <div class="activity-detail-block">
+                            <strong>Requires Parental Consent</strong>
+                        </div>
+                    }
                 </div>
 
                 <div class="margin-b-20">
