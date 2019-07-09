@@ -210,11 +210,12 @@ namespace AfterSchoolLibrary.Helpers
 
             if (isParentCopy)
             {
-                registrationDetails = "Create your account to review this registration.";
-
                 var parentUser = parentOrGuardian.GetOwner(msgs, dc);
                 if (parentUser.IsNotEmpty() && !parentUser.IsRegistered)
+                {
+                    registrationDetails = "Create your account to review this registration.";
                     loginLink = parentUser.GetInviteUrl(purchaserAccount);
+                }
             }
 
             var model = new NameValueCollection()
