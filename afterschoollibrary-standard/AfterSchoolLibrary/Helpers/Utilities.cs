@@ -283,6 +283,7 @@ namespace AfterSchoolLibrary.Helpers
                     amsgs.AddRange(AdditionalData(adc));
                     amsgs.AddRange(UpdateRegistrantAccess(adc));
                     amsgs.AddRange(UpdateRegistrantStatuses(adc));
+                    amsgs.AddRange(UpdateRequiresParentalConsent(adc));
 
                     // amsgs.AddRange(MigrateToBCrypt(adc));
 
@@ -342,6 +343,15 @@ namespace AfterSchoolLibrary.Helpers
             );            
 
             return msgs;
+        }
+
+        private static SystemMessages UpdateRequiresParentalConsent(DatabaseConnection dc)
+        {
+            return Activity.Update(
+                updateValues: new Hashtable() { { "RequiresParentalConsent", true } },
+                criterias: new Hashtable() { },
+                ObjectMap: Activity.ObjectMap,
+                dc: dc);
         }
 
         private static SystemMessages UpdateRegistrantStatuses(DatabaseConnection dc)
