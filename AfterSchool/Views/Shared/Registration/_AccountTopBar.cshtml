@@ -6,7 +6,7 @@
     if (Model.AccountTypeId != AccountType.Registrant)
     {
         accountOrDashboard = "Dashboard";
-    }
+    }    
 }
 
 @helper RenderReturnToHomeUrl()
@@ -74,4 +74,4 @@
     }
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml"); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml", null, new ViewDataDictionary() { { "ReturnUrl", ViewData["LoginReturnUrl"] } }); }
