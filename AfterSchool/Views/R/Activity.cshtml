@@ -6,7 +6,10 @@
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account); }
+@{ Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        account,
+        new ViewDataDictionary() { { "LoginReturnUrl", Model.GetHomePageUrl() } }); }
 
 <div class="reg-header text-center">
     <h1 class="activity-title">

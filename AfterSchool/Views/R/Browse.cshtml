@@ -8,7 +8,10 @@
     var locations = (List<Location>)ViewBag.Locations;
 }
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", null); }
+@{ Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        Model,
+        new ViewDataDictionary() { { "LoginReturnUrl", Model.HomePageUrl } }); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_BrowseRegistrationHeader.cshtml", Model); }
 
