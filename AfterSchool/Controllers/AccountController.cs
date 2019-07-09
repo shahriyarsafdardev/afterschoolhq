@@ -1052,12 +1052,15 @@ namespace AfterSchool.Controllers
                     new { Area = "user", id = SessionVariables.CurrentRegistrant.Uid, reg = registration?.Uid, student = SessionVariables.CurrentRegistrant?.Uid });
 
             // current registrant is already registered
-            if (SessionVariables.CurrentRegistrant.IsRegisteredForAndHasConsent(participationObject, msgs))
+            if (SessionVariables.CurrentRegistrant.IsRegisteredForHasConsentAndPaid(participationObject, msgs))
                 return RedirectToAction("select");
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-
             var questions = RegisterViewBag(participationObject, msgs);
+
+            // if there are no additional questions to answer, if it doesn't require parental consent, and the registration has already been started (by the child)
+            if (questions.Count == 0 && !participationObject.RequiresParentalConsent && registration.IsNotEmpty())
+                return RedirectToAction("payment", new { id = registration.Uid });
 
             ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel()).ToList();
             ViewBag.Messages = msgs;
@@ -1794,7 +1797,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("InviteParent");
 
             var participationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
-            ViewBag.Cart = SessionVariables.Cart;
+            ViewBag.AlreadyRegistered = SessionVariables.CurrentRegistrant.IsRegisteredFor(participationObject, msgs);
             ViewBag.Messages = msgs;
             return View(participationObject);
         }

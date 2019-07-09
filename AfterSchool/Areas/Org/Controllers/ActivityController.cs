@@ -282,7 +282,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string cmd)
+        public ActionResult EditRestrictions(string id, string alloworganization, string agerestrictions, string agestart, string ageend, string graderestrictions, string mingrade, string maxgrade, string genderrestrictions, string requiresparentalconsent, string cmd)
         {
             var msgs = new SystemMessages();
             Activity activity = null;
@@ -309,7 +309,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     { "gradestart", graderestrictions.IsNumber() ? mingrade : "-1"},
                     { "gradeend", graderestrictions.IsNumber() ? maxgrade : "-1"},
                     { "genderrestrictions", genderrestrictions},
-                    { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() }
+                    { "gradeIds", gradeIds.ToArray().ToStringArray().ToStringList() },
+                    { "requiresparentalconsent", requiresparentalconsent.IfBlank("0") }
                 };
 
                 activity = ActivityService.EditExisting(

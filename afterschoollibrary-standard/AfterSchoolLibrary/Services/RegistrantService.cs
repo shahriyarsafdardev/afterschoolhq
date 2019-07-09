@@ -344,6 +344,19 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
+        public static bool IsRegisteredForHasConsentAndPaid(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
+
+            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+                participationObjectId: participationObject.ObjectID.Value,
+                participationObjectType: participationObject.ObjectType,
+                registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
+                assignmentTypes: new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved },
+                msgs: msgs,
+                dc: dc);
+        }
+
         public static Account GetAccount(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrant.AccountId.HasValue ? Account.Load(registrant.AccountId.Value, msgs, dc) : null;

@@ -776,6 +776,7 @@ namespace AfterSchoolLibrary.Services
             var allowtopaylater = values.GetValueOrDefault("allowtopaylater");
             var form = values.GetValueOrDefault("form");
             var alloworganization = values.GetValueOrDefault("alloworganization");
+            var requiresparentalconsent = values.GetValueOrDefault("requiresparentalconsent");
             var agestart = values.GetValueOrDefault("agestart");
             var ageend = values.GetValueOrDefault("ageend");
             var gradestart = values.GetValueOrDefault("gradestart");
@@ -877,13 +878,11 @@ namespace AfterSchoolLibrary.Services
                     WaitingListSeats = waitinglistseats.ToString().ToInteger(),
                     AccountId = account.ID,
                     LocationId = account.DefaultLocationId,
-                    //AcceptCreditCard = true
+                    RequiresParentalConsent = true
                 };
 
                 if (group.IsEmpty() && !form.IsNumber())
-                {
                     msgs.Add("Registration Form is required", MessageType.UserError);
-                }
             }
 
             activity.LastModifiedDate = DateTime.UtcNow;
@@ -925,6 +924,9 @@ namespace AfterSchoolLibrary.Services
 
             if (genderrestrictions.IsNumber())
                 activity.GenderRestriction = (GenderRestrictionType)genderrestrictions.ToString().ToInteger();
+
+            if (requiresparentalconsent.IsNumber())
+                activity.RequiresParentalConsent = (bool)requiresparentalconsent.ToString().ToBoolean();
 
             if (contactname.IsNotEmpty())
                 activity.ContactName = contactname.ToString().IfBlank("").MaxChars(50);
