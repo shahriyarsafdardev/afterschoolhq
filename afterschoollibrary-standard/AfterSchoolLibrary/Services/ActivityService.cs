@@ -1309,7 +1309,7 @@ namespace AfterSchoolLibrary.Services
                         subscriptionPlan.LastModifiedDate = DateTime.UtcNow;
                         subscriptionPlan.CostPerPeriod = Convert.ToDecimal(subscriptionplancost);
                         subscriptionPlan.BillingPeriodTypeId = (BillingPeriodType)Convert.ToInt32(subscriptionplanperiod);
-                        msgs.AddRange(subscriptionPlan.Save(dc));
+                        msgs.AddRange(subscriptionPlan.SaveWithStripe(dc));
                     }
                 }
 
