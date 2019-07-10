@@ -3,7 +3,7 @@
 <input type="@Model.Question.QuestionTypeId.ToString().ToLower()" 
        id="@Model.Id" 
        name="@Model.Name" 
-       class="form-control" 
+       class="form-control @ViewData["AdditionalClass"]" 
        onfocus="this.select()" 
        @Model.RequiredProperty 
        @Html.Raw(Model.ToolTip) 

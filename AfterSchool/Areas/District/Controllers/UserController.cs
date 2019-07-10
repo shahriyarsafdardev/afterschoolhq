@@ -189,23 +189,19 @@ namespace AfterSchool.Areas.District.Controllers
             if (msgs.HasNoErrors())
             {
                 SessionVariables.OriginalLoggedInUser = SessionVariables.CurrentUser;
-                msgs.AddRange(LoadSessionInfo(user, null, false));
+                LoadSessionInfo(user, null, false, msgs);
             }
 
             if (msgs.HasNoErrors())
-            {
                 return LoginRedirect();
-            }
-            else
-            {
-                SessionVariables.OriginalLoggedInUser = null;
-                ViewBag.Messages = msgs;
 
-                if (id.IsNotEmpty())
-                    return RedirectToAction("Team", "Account", new { id = id });
-                else
-                    return RedirectToAction("Index", "User");
-            }
+            SessionVariables.OriginalLoggedInUser = null;
+            ViewBag.Messages = msgs;
+
+            if (id.IsNotEmpty())
+                return RedirectToAction("Team", "Account", new { id = id });
+
+            return RedirectToAction("Index", "User");
         }
 
     }
