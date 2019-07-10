@@ -185,6 +185,8 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("addhomeaddress");
 
+            ViewBag.Messages = msgs;
+
             return View(qvms);
         }
 
