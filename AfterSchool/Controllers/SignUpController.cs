@@ -96,7 +96,7 @@ namespace AfterSchool.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        msgs.AddRange(LoadSessionInfo(user, account));
+                        LoadSessionInfo(user, account, msgs: msgs);
 
                         var userId = user.ID.Value;
                         var accountId = account.ID.Value;
@@ -200,17 +200,15 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(LoadSessionInfo(user));
+                LoadSessionInfo(user, msgs: msgs);
 
             if (msgs.HasNoErrors())
                 return LoginRedirect();
-            else
-            {
-                ViewBag.Messages = msgs;
-                ViewBag.AccountUid = a;
-                ViewBag.Uid = id;
-                return View(user);
-            }
+
+            ViewBag.Messages = msgs;
+            ViewBag.AccountUid = a;
+            ViewBag.Uid = id;
+            return View(user);
         }
 
         [HttpGet]
@@ -519,7 +517,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(LoadSessionInfo(user));
+                LoadSessionInfo(user, msgs: msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("createaccount", new { invitecode = invitingAccount.InviteCodeToShare });

@@ -60,7 +60,7 @@ namespace AfterSchool.Controllers
                 if (user.IsEmpty())
                     msgs.Add("Invalid username and/or password", MessageType.UserError);
                 else
-                    msgs.AddRange(LoadSessionInfo(user, null, !Request.Params["remember"].IsEmpty()));
+                    LoadSessionInfo(user, null, !Request.Params["remember"].IsEmpty(), msgs);
             }
 
             ViewBag.Messages = msgs;
@@ -192,6 +192,52 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
 
             return View(user);
+        }
+
+        [HttpPost]
+        public ActionResult Authorize(string username, string password, string source)
+        {
+            var msgs = new SystemMessages();
+            var isNewParentAccount = false;
+
+            if (username.IsEmpty())
+                msgs.Add("Username is required", MessageType.UserError);
+
+            if (password.IsEmpty())
+                msgs.Add("Password is required", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                WebUser user = null;
+
+                if (username.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                    user = WebUserService.LoginByEmail(username, password);
+                else if (username.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    user = WebUserService.LoginByPhone(username, password);
+                else
+                    user = WebUserService.LoginByUsername(username, password);
+
+                if (user.IsEmpty())
+                    msgs.Add("Invalid username and/or password", MessageType.UserError);
+                else
+                {
+                    var doRememberMe = !Request.Params["remember"].IsEmpty();
+
+                    LoadSessionInfo(user, null, doRememberMe, msgs);
+
+                    // if validated user and doesn't have a Parent account, create one automatically and continue
+                    if (source == "parent-login" && SessionVariables.CurrentAccount?.AccountTypeId != AccountType.Registrant)
+                    {
+                        var registrantAccount = user.AddNewRegistrantAccount(UserType.Owner, true, true, user, msgs);
+                        LoadSessionInfo(user, registrantAccount, doRememberMe, msgs);
+                    }
+                }
+            }
+
+            if (msgs.HasNoErrors())
+                return Json(new { status = "ok", isNewParentAccount }, JsonRequestBehavior.DenyGet);
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
         }
 
         //public ActionResult Account(string id)

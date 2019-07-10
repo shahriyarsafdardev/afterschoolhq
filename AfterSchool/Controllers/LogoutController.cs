@@ -21,14 +21,12 @@ namespace AfterSchool.Controllers
 
             if (SessionVariables.OriginalLoggedInUser.IsNotEmpty())
             {
-                msgs.AddRange(LoadSessionInfo(SessionVariables.OriginalLoggedInUser));
+                LoadSessionInfo(SessionVariables.OriginalLoggedInUser, msgs: msgs);
                 SessionVariables.OriginalLoggedInUser = null;
                 return LoginRedirect();
             }
-            else
-            {
-                return Logout(returnurl);
-            }
+
+            return Logout(returnurl);
         }
 
     }

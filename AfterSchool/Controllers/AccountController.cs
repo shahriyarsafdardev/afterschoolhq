@@ -21,16 +21,27 @@ namespace AfterSchool.Controllers
             var personalContactGroup = form.GetQuestionGroups(msgs)
                 .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
             var questions = personalContactGroup.GetAllQuestions(msgs);
+            var nonIncludedQuestions = new List<QuestionDataType>()
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGrade,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantDateOfBirth,
+                QuestionDataType.RegistrantEthnicity,
+                QuestionDataType.RegistrantTShirtSize
+            };
 
-            questions = questions.Where(question =>
-                    question.QuestionDataTypeId != QuestionDataType.RegistrantOrganization &&
-                    question.QuestionDataTypeId != QuestionDataType.RegistrantGrade &&
-                    question.QuestionDataTypeId != QuestionDataType.RegistrantGender &&
-                    question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth &&
-                    question.QuestionDataTypeId != QuestionDataType.RegistrantEthnicity &&
-                    question.QuestionDataTypeId != QuestionDataType.RegistrantTShirtSize
-                )
-                .ToList();
+            var nonIncludedQuestionsExistingUser = new List<QuestionDataType>()
+            {
+                QuestionDataType.RegistrantFirstName,
+                QuestionDataType.RegistrantLastName,
+                QuestionDataType.RegistrantEmail
+            };
+
+            if (SessionVariables.CurrentUser.IsNotEmpty())
+                nonIncludedQuestions.AddRange(nonIncludedQuestionsExistingUser);
+
+            questions = questions.Where(question => question.QuestionDataTypeId.NotIn(nonIncludedQuestions)).ToList();
 
             questions.ForEach(question =>
             {
@@ -53,18 +64,28 @@ namespace AfterSchool.Controllers
         [HttpGet]
         public ActionResult GetStarted(string regaccount)
         {
-            if (SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant)
-                return RedirectToAction("select");
+            if (SessionVariables.CurrentUser.IsNotEmpty())
+            {
+                var masterRegistrant = SessionVariables.CurrentUser.GetMasterRegistrant();
+
+                if (masterRegistrant.IsNotEmpty())
+                    return RedirectToAction("select");
+            }
 
             var msgs = new SystemMessages();
             var questions = GetStartedParentViewBag(msgs);
+            var qvms = questions.Select(question => new FormQuestionViewModel(question)).ToList();
 
             ViewBag.Messages = msgs;
 
             if (regaccount.IsGuid())
                 ViewBag.RegistrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
 
-            return View(questions.Select(question => new FormQuestionViewModel(question)).ToList());
+            // pre-load phone number
+            if (SessionVariables.CurrentUser.IsNotEmpty())
+                qvms.Find(item => item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value = SessionVariables.CurrentUser.Phone;
+
+            return View(qvms);
         }
 
         [HttpPost]
@@ -93,14 +114,18 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            if (password1.IsEmpty())
-                msgs.Add("Password 1 is required", MessageType.UserError);
-            if (password1.Length < 8)
-                msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
-            if (password2.IsEmpty())
-                msgs.Add("Password 2 is required", MessageType.UserError);
-            if (password1 != password2)
-                msgs.Add("Passwords must match", MessageType.UserError);
+            if (SessionVariables.CurrentUser.IsEmpty())
+            {
+                if (password1.IsEmpty())
+                    msgs.Add("Password 1 is required", MessageType.UserError);
+                if (password1.Length < 8)
+                    msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
+                if (password2.IsEmpty())
+                    msgs.Add("Password 2 is required", MessageType.UserError);
+                if (password1 != password2)
+                    msgs.Add("Passwords must match", MessageType.UserError);
+            }
+
             if (!agree.IsBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
 
@@ -108,10 +133,10 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
-                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
-                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
-                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
+                var firstName = qvms.FirstOrDefault(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var lastName = qvms.FirstOrDefault(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+                var email = qvms.FirstOrDefault(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+                var phone = qvms.FirstOrDefault(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
 
                 WebUser user = null;
                 Account account = null;
@@ -120,29 +145,43 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        // create user
-                        user = WebUserService.CreateNew(
-                            firstName: firstName.Value,
-                            lastName: lastName.Value,
-                            email: email.Value.Trim(),
-                            phone: phone.Value.Trim(),
-                            password: password1,
-                            isActive: true,
-                            isRegistered: true,
-                            isVerified: false,
-                            allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
-                            loggedInUser: null,
-                            msgs: amsgs,
-                            dc: adc);
+                        if (SessionVariables.CurrentUser.IsEmpty())
+                        {
+                            // create user
+                            user = WebUserService.CreateNew(
+                                firstName: firstName.Value,
+                                lastName: lastName.Value,
+                                email: email.Value.Trim(),
+                                phone: phone.Value.Trim(),
+                                password: password1,
+                                isActive: true,
+                                isRegistered: true,
+                                isVerified: false,
+                                allowTextMessages: textnotifications.IfBlank("0").ToBoolean(),
+                                loggedInUser: null,
+                                msgs: amsgs,
+                                dc: adc);
 
-                        // create account
-                        account = user.AddNewRegistrantAccount(
-                            userType: UserType.Owner,
-                            isActive: true,
-                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
-                            loggedInUser: user,
-                            msgs: amsgs,
-                            dc: adc);
+                            // create account
+                            account = user.AddNewRegistrantAccount(
+                                userType: UserType.Owner,
+                                isActive: true,
+                                isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                                loggedInUser: user,
+                                msgs: amsgs,
+                                dc: adc);
+                        }
+                        else
+                        {
+                            user = SessionVariables.CurrentUser;
+                            user.Phone = phone.Value.Trim();
+                            user.AllowTextMessages = textnotifications.IfBlank("0").ToBoolean();
+                            user.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                            user.LastModifiedDate = System.DateTime.UtcNow;
+                            amsgs.AddRange(user.Save(adc));
+
+                            account = SessionVariables.CurrentAccount;
+                        }
 
                         // create parent registrant record
                         var registrant = account.CreateRegistrant(
@@ -1742,17 +1781,17 @@ namespace AfterSchool.Controllers
 
                     // Create parent registrant
                     var parent = SessionVariables.CurrentAccount.CreateRegistrant(
-                    registrantOwner: parentUser,
-                    canBeAccessedBy: parentUser.AsList(),
-                    registrantType: RegistrantType.Individual,
-                    isMaster: true,
-                    isParentOrGuardian: true,
-                    allowTextMessages: textnotifications.IfBlank("").ToBoolean(),
-                    schoolLocationId: null,
-                    profileStatus: RegistrantProfileStatus.Started,
-                    loggedInUser: SessionVariables.CurrentUser,
-                    msgs: msgs,
-                    dc: adc);
+                        registrantOwner: parentUser,
+                        canBeAccessedBy: parentUser.AsList(),
+                        registrantType: RegistrantType.Individual,
+                        isMaster: true,
+                        isParentOrGuardian: true,
+                        allowTextMessages: textnotifications.IfBlank("").ToBoolean(),
+                        schoolLocationId: null,
+                        profileStatus: RegistrantProfileStatus.Started,
+                        loggedInUser: SessionVariables.CurrentUser,
+                        msgs: msgs,
+                        dc: adc);
 
                     SessionVariables.CurrentRegistrant.AddUserWithAccess(
                         user: parentUser,

@@ -93,6 +93,10 @@ namespace AfterSchool.Models
             {
                 return Values[this.Name];
             }
+            set
+            {
+                Values[this.Name] = value;
+            }
         }
     }
 }

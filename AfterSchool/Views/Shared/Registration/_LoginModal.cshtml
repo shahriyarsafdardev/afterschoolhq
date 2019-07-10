@@ -8,9 +8,78 @@
         <div class="modal-body">
 
             <div class="col-md-8 col-md-offset-2">
-                @{ Html.RenderPartial("_Login", null, new ViewDataDictionary() { { "ReturnUrl", ViewData["ReturnUrl"] } }); }
+                <div class="login-form">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="icon s7-user"></i></span>
+                            <input id="username" name="username" type="text" placeholder="Email Address, Phone, or Username" autocomplete="off" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="icon s7-lock"></i></span>
+                            <input id="password" name="password" type="password" placeholder="Password" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group login-submit text-center">
+                        <button type="button" id="btn-login" class="btn btn-primary btn-lg btn-block" onclick="authorize()">Log me in</button>
+                    </div>
+                    <div class="form-group footer row">
+                        <div class="col-xs-12 text-center"><a href="/login/resetpassword">Forgot Password?</a></div>
+                        <div class="col-xs-6 remember hide">
+                            <label for="remember">Remember Me</label>
+                            <div class="am-checkbox">
+                                <input type="checkbox" id="remember">
+                                <label for="remember"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
     </div>
 </div>
+
+<script>
+    function authorize() {
+
+        params = 'username=' + encodeURIComponent($('#username').val()) + '&password=' + encodeURIComponent($('#password').val()) + '&source=parent-login';
+
+        var loginText = $('#btn-login').html();
+        $('#btn-login').html('Logging In...');
+        $('#btn-login').prop('disabled', true);
+
+        $.post(
+            '@Url.Action("authorize", "login")',
+            params,
+            function (data) {
+
+                if (data && data.status == 'ok') {
+                    $('#btn-login').html('Redirecting...');
+
+                    if (data.isNewAccount) {
+                        location.reload();
+                    } else {
+                        location.href = '@ViewData["ReturnUrl"]';
+                    }
+                } else {
+                    var items = "";
+                    for (var message of data.messages) {
+                        items += message.Text + "<br />";
+                    }
+
+                    Notifications.showBar({
+                        title: 'Error',
+                        message: items,
+                        success: false
+                    });
+
+                    $('#btn-login').html(loginText);
+                    $('#btn-login').prop('disabled', false);
+                }
+
+            }
+        )
+    }
+</script>

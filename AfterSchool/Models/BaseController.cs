@@ -160,10 +160,8 @@ namespace AfterSchool.Models
             return RedirectToAction("index", "login", new { area = "" });
         }
 
-        protected SystemMessages LoadSessionInfo(WebUser user, Account account = null, bool doRememberMe = false)
+        protected void LoadSessionInfo(WebUser user, Account account = null, bool doRememberMe = false, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
-
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentUser = user;
 
@@ -189,21 +187,8 @@ namespace AfterSchool.Models
             //set login cookies
             if (doRememberMe)
             {
-                var cookieUser = new HttpCookie("sessionuser", Convert.ToBase64String(Encryption.Encrypt(
-                    SessionVariables.CurrentUser.Uid.ToString(), AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV)));
-                cookieUser.Expires = DateTime.Now.AddMonths(1);
-                Response.Cookies.Add(cookieUser);
-
-                if (!SessionVariables.CurrentAccount.IsEmpty())
-                {
-                    var cookieAccount = new HttpCookie("sessionAccount", Convert.ToBase64String(Encryption.Encrypt(
-                        SessionVariables.CurrentAccount.UniqueName, AfterSchoolLibrary.Helpers.Utilities.AppAESKey, AfterSchoolLibrary.Helpers.Utilities.AppIV)));
-                    cookieAccount.Expires = DateTime.Now.AddMonths(1);
-                    Response.Cookies.Add(cookieAccount);
-                }
+                // TO DO: RE-ADD Remember me code
             }
-
-            return msgs;
         }
 
         internal ActionResult Logout(string returnUrl = null, bool goToLoginScreenBeforeReturn = false)
