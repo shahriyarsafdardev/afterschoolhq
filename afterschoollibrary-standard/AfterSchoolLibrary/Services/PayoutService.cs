@@ -169,7 +169,7 @@ namespace AfterSchoolLibrary.Services
                 if (Helpers.Utilities.IsProduction && !checkAccount.IsDeliverable(msgs, dc))
                     msgs.Add("Your address is invalid and not deliverable. Please update your address to a valid address", MessageType.UserError);
 
-                if (msgs.HasNoErrors() && checkAccount.IsNotEmpty())
+                if (msgs.HasNoErrors())
                     checkAccount.SendPayment(
                         account: payoutAccount,
                         payout: payout,
