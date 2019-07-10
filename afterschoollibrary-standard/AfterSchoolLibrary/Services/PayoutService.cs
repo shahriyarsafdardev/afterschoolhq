@@ -170,20 +170,18 @@ namespace AfterSchoolLibrary.Services
                     msgs.Add("Your address is invalid and not deliverable. Please update your address to a valid address", MessageType.UserError);
 
                 if (msgs.HasNoErrors() && checkAccount.IsNotEmpty())
-                {
-                    payout.MoveMoneyInStripeToAHQBankAccount(payoutAccount, loggedInUser, msgs, dc);
-
-                    if (msgs.HasNoErrors())
-                        checkAccount.SendPayment(
+                    checkAccount.SendPayment(
                         account: payoutAccount,
                         payout: payout,
                         loggedInUser: loggedInUser,
                         msgs: msgs,
                         dc: dc);
-                }
 
                 if (msgs.HasNoErrors())
+                {
+                    payout.MoveMoneyInStripeToAHQBankAccount(payoutAccount, loggedInUser, msgs, dc);
                     payout.UpdateStatus(PayoutStatus.Completed, loggedInUser, msgs, dc);
+                }
 
                 return;
             }
