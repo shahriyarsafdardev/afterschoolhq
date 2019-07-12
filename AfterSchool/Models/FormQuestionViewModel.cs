@@ -11,7 +11,7 @@ namespace AfterSchool.Models
         public FormQuestionViewModel(FormQuestion question, NameValueCollection values)
         {
             Question = question;
-            Values = values;
+            Values = new NameValueCollection(values);
         }
 
         public FormQuestionViewModel(FormQuestion question)
@@ -19,6 +19,8 @@ namespace AfterSchool.Models
             Question = question;
             Values = new NameValueCollection();
         }
+
+        public bool Hide { get; set; }  
 
         public string RequiredProperty
         {
