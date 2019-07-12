@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary.Billing
             // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc. Max of $10
             // return Math.Min(Math.Ceiling(fee * 2) / 2, 10M);
 
-            return (Math.Floor(fee) - .01M).KeepInRange(0.99M, 20);
+            return (Math.Ceiling(fee) - .01M).KeepInRange(0.99M, 20);
         }
 
         public static decimal GetTotalFees(decimal cost, Account billingAccount)
