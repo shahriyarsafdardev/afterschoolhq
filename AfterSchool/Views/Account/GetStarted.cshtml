@@ -72,7 +72,7 @@
 
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")">
-                        @foreach (var qvm in Model)
+                        @foreach (var qvm in Model.Where(qvm => !qvm.Hide))
                         {                            
                             Html.RenderPartial(
                                 "~/Views/Shared/Form/_Question.cshtml", 
