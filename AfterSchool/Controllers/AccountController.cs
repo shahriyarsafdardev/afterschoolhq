@@ -15,7 +15,7 @@ namespace AfterSchool.Controllers
 
         #region GetStartedParent
 
-        private List<FormQuestion> GetStartedParentViewBag(SystemMessages msgs)
+        private List<FormQuestionViewModel> GetStartedParentViewBag(SystemMessages msgs)
         {
             var form = GetAdministratorAccountForm(msgs);
             var personalContactGroup = form.GetQuestionGroups(msgs)
@@ -38,8 +38,8 @@ namespace AfterSchool.Controllers
                 QuestionDataType.RegistrantEmail
             };
 
-            if (SessionVariables.CurrentUser.IsNotEmpty())
-                nonIncludedQuestions.AddRange(nonIncludedQuestionsExistingUser);
+            // if (SessionVariables.CurrentUser.IsNotEmpty())
+            //    nonIncludedQuestions.AddRange(nonIncludedQuestionsExistingUser);
 
             questions = questions.Where(question => question.QuestionDataTypeId.NotIn(nonIncludedQuestions)).ToList();
 
@@ -58,7 +58,25 @@ namespace AfterSchool.Controllers
 
             ViewBag.Cart = SessionVariables.Cart;
 
-            return questions;
+            var qvms = questions.Select(question => new FormQuestionViewModel(question, Request.Params)).ToList();
+
+            if (!SessionVariables.CurrentUser.IsEmpty())
+            {
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value = SessionVariables.CurrentUser.FirstName;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value = SessionVariables.CurrentUser.LastName;
+                qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value = SessionVariables.CurrentUser.Email;
+
+                qvms.ForEach(qvm =>
+                {
+                    if (qvm.Question.QuestionDataTypeId.In(nonIncludedQuestionsExistingUser))
+                    {
+                        qvm.Hide = true;
+                        qvm.Question.IsRequired = false;
+                    }
+                });
+            }
+
+            return qvms;
         }
 
         [HttpGet]
@@ -73,8 +91,7 @@ namespace AfterSchool.Controllers
             }
 
             var msgs = new SystemMessages();
-            var questions = GetStartedParentViewBag(msgs);
-            var qvms = questions.Select(question => new FormQuestionViewModel(question)).ToList();
+            var qvms = GetStartedParentViewBag(msgs);
 
             ViewBag.Messages = msgs;
 
@@ -93,22 +110,20 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
 
-            var questions = GetStartedParentViewBag(msgs);
+            var qvms = GetStartedParentViewBag(msgs);
 
-            questions.ForEach(question =>
+            qvms.ForEach(qvm =>
             {
-                var answer = Request[question.ToFormQuestionViewModel().Name];
+                if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                    msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
 
-                if (question.IsRequired && answer.IsEmpty())
-                    msgs.Add($"{question.Text} is required", MessageType.UserError);
-
-                switch (question.QuestionDataTypeId)
+                switch (qvm.Question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantMobilePhone:
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantWorkPhone:
-                        if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
-                            msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                        if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                         break;
 
                 }
@@ -129,14 +144,12 @@ namespace AfterSchool.Controllers
             if (!agree.IsBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
 
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-
             if (msgs.HasNoErrors())
             {
-                var firstName = qvms.FirstOrDefault(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
-                var lastName = qvms.FirstOrDefault(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
-                var email = qvms.FirstOrDefault(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
-                var phone = qvms.FirstOrDefault(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
+                var firstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var lastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
+                var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+                var phone = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
 
                 WebUser user = null;
                 Account account = null;

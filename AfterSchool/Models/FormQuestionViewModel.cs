@@ -20,6 +20,8 @@ namespace AfterSchool.Models
             Values = new NameValueCollection();
         }
 
+        public bool Hide { get; set; }  
+
         public string RequiredProperty
         {
             get
