@@ -42,7 +42,7 @@
             }
             else if (!registrant.IsRegisteredForHasConsentAndPaid(participationObject))
             {
-                btnText = "Pay";
+                btnText = "Pay Now";
             }
             else
             {
@@ -71,6 +71,7 @@
                            class="btn btn-register btn-lg"
                            @disabledText>
                             @btnText
+                            &raquo;
                         </a>
                     </p>
                 </div>
