@@ -38,9 +38,6 @@ namespace AfterSchool.Controllers
                 QuestionDataType.RegistrantEmail
             };
 
-            // if (SessionVariables.CurrentUser.IsNotEmpty())
-            //    nonIncludedQuestions.AddRange(nonIncludedQuestionsExistingUser);
-
             questions = questions.Where(question => question.QuestionDataTypeId.NotIn(nonIncludedQuestions)).ToList();
 
             questions.ForEach(question =>
@@ -1024,7 +1021,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("registerstudent");
             }
 
-            var students = SessionVariables.CurrentAccount.GetChildrenRegistrants(msgs);
+            var students = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = SessionVariables.Cart.GetCartItems().FirstOrDefault()?.GetParticipationObject();
