@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="/favicon.png">
+    <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
+    <title>@UILabel.ProductName()</title>    
+    <style>
+
+        body {
+            font-family: sans-serif;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        text-center, td.text-center {
+            text-align: center;
+        }
+
+        text-right, td.text-right {
+            text-align: right;
+        }
+
+        table td, table th {
+            padding: 3px;
+        }
+
+        table > thead > th, table > tfoot > td, table > thead, table > tfoot {
+            background-color: #ddd;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="am-wrapper notopmenu">
+        <!-- Main section-->
+        <div class="am-content-full">
+            @RenderBody()
+        </div>
+    </div>
+
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

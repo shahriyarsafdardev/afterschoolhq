@@ -1593,6 +1593,7 @@
     <Content Include="Views\Account\RegisterStudent.cshtml" />
     <Content Include="Views\Account\RegisterStudentThanks.cshtml" />
     <Content Include="Views\Shared\Form\_FileUpload.cshtml" />
+    <Content Include="Areas\Lob\Views\Shared\Layouts\_FullScreenLob.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1600,7 +1601,6 @@
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
     <Folder Include="Areas\District\Models\" />
     <Folder Include="Areas\Lob\Models\" />
-    <Folder Include="Areas\Lob\Views\Shared\" />
     <Folder Include="Areas\Org\Models\" />
     <Folder Include="Areas\StripeHooks\Models\" />
     <Folder Include="Areas\StripeHooks\Views\Shared\" />

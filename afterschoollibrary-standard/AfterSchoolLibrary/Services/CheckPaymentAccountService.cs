@@ -60,7 +60,8 @@ namespace AfterSchoolLibrary.Services
                 bankAccountId: LobBankAccountId,
                 amount: payout.Amount.Value,
                 memo: $"Requested {payout.DateRequested.ToShortDateString()} by {requestor.DisplayName}".MaxChars(40, "..."),
-                attachment: $"{Helpers.Utilities.BaseUrl(true)}/lob/payout/attachment/{payout.Uid.ToString()}",
+                checkBottom: $"{Helpers.Utilities.BaseUrl(true)}/lob/payout/attachment/{payout.Uid.ToString()}",
+                attachment: null,
                 metaData: new
                 {
                     accountUid = account.Uid,
