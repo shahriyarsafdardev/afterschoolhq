@@ -1736,7 +1736,7 @@ namespace AfterSchoolLibrary.Helpers
             var registrant = Registrant.Load(5735, dc: dc);
             var questionIds = registrant.GetAnswers(dc: dc).Select(x => x.FormQuestionId.Value).ToList();
             var questions = FormQuestion.Load(questionIds, dc: dc);
-            registrant.CreateMasterCopy(questions, 0, msgs, dc: dc);
+            registrant.CreateMasterCopy(questions, new WebUser() { ID = 0 }, msgs, dc);
             return msgs;
         }
 
@@ -1814,7 +1814,7 @@ namespace AfterSchoolLibrary.Helpers
                     {
                         var answers = registrant.GetAnswers(dc: dc);
                         var questions = FormQuestion.Load(answers.Select(x => x.FormQuestionId.Value).ToList(), dc: dc);
-                        var master = registrant.CreateMasterCopy(questions, user.ID.Value, msgs, dc: dc);
+                        var master = registrant.CreateMasterCopy(questions, user, msgs, dc: dc);
                     }
                 }
             }
@@ -1885,6 +1885,15 @@ namespace AfterSchoolLibrary.Helpers
             }
 
             return msgs;
+        }
+
+        public static AmazonHelper GetNewAmazonHelper()
+        {
+            return new AmazonHelper(
+                    Helpers.Utilities.AmazonBucketName,
+                    Helpers.Utilities.AmazonAccessKeyId,
+                    Helpers.Utilities.AmazonSecretAccessKeyId,
+                    Helpers.Utilities.AmazonRegionEndPoint);
         }
 
         public static Amazon.RegionEndpoint AmazonRegionEndPoint { get; set; }

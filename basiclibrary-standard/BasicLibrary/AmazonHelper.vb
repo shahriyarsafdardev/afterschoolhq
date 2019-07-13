@@ -153,7 +153,7 @@ Public Class AmazonHelper
             If client.IsEmpty() = False Then
                 Dim tu As Amazon.S3.Transfer.TransferUtility = New Amazon.S3.Transfer.TransferUtility(client)
 
-                Dim request As Amazon.S3.Transfer.TransferUtilityUploadRequest = New Amazon.S3.Transfer.TransferUtilityUploadRequest()
+                Dim request As New Amazon.S3.Transfer.TransferUtilityUploadRequest()
                 request.BucketName = Me.BucketName
                 request.Key = amazonLocation
                 request.InputStream = inputStream
@@ -168,6 +168,7 @@ Public Class AmazonHelper
         Catch ex As Exception
 
             msgs.Add(ex.Message, MessageType.Error)
+
         End Try
 
         Return msgs

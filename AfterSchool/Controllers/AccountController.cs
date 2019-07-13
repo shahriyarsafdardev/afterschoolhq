@@ -214,7 +214,7 @@ namespace AfterSchool.Controllers
                             registrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: user.ID.Value,
+                                loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -310,7 +310,7 @@ namespace AfterSchool.Controllers
                             parentRegistrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -476,7 +476,7 @@ namespace AfterSchool.Controllers
                             otherParent.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -584,7 +584,7 @@ namespace AfterSchool.Controllers
                             parentRegistrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -772,7 +772,7 @@ namespace AfterSchool.Controllers
                             student.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -790,7 +790,7 @@ namespace AfterSchool.Controllers
                                 student.AddAnswer(
                                     answerText: answer.Text.IfEmpty("").Trim(),
                                     question: answer.ToFormQuestion(msgs: amsgs, dc: adc),
-                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    loggedInUser: SessionVariables.CurrentUser,
                                     msgs: amsgs,
                                     dc: adc);
                             });
@@ -982,7 +982,7 @@ namespace AfterSchool.Controllers
                             registrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: currentUser.ID.Value,
+                                loggedInUser: currentUser,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -1136,8 +1136,19 @@ namespace AfterSchool.Controllers
 
             questions.ForEach(question =>
             {
-                if (question.IsRequired && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
-                    msgs.Add($"{question.Text} is required", MessageType.UserError);
+                if (question.IsRequired)
+                {
+                    var populated = true;
+
+                    if (question.QuestionTypeId == QuestionType.FileUpload && Request.Files[question.ToFormQuestionViewModel().Name].IsEmpty())
+                        populated = false;
+                    else if (question.QuestionTypeId != QuestionType.FileUpload && Request[question.ToFormQuestionViewModel().Name].IsEmpty())
+                        populated = false;
+
+                    if (!populated)
+                        msgs.Add($"{question.Text} is required", MessageType.UserError);
+                }
+                    
             });
 
             if (signature.IsEmpty())
@@ -1162,7 +1173,7 @@ namespace AfterSchool.Controllers
                             SessionVariables.CurrentRegistrant.AddAnswer(
                                 answerText: qvm.Value,
                                 question: qvm.Question,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                loggedInUser: SessionVariables.CurrentUser,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -1211,13 +1222,23 @@ namespace AfterSchool.Controllers
                         .ToList()
                         .ForEach(qvm =>
                         {
-                            submittedRecord.AddAnswer(
-                                answerText: qvm.Value,
-                                question: qvm.Question,
-                                registrationId: registration.ID,
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
-                                msgs: amsgs,
-                                dc: adc);
+                            if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
+                                submittedRecord.AddAnswer(
+                                    file: Request.Files[qvm.Name].InputStream,
+                                    filename: Request.Files[qvm.Name].FileName,
+                                    question: qvm.Question,
+                                    registrationId: registration.ID,
+                                    loggedInUser: SessionVariables.CurrentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            else
+                                submittedRecord.AddAnswer(
+                                    answerText: qvm.Value,
+                                    question: qvm.Question,
+                                    registrationId: registration.ID,
+                                    loggedInUser: SessionVariables.CurrentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
                         });
 
                         // if there is a Session, then a person may set their preferences for activities in that session, 
@@ -1677,7 +1698,7 @@ namespace AfterSchool.Controllers
                             registrant.AddAnswer(
                                 answerText: qvm.Value.IfEmpty("").Trim(),
                                 question: qvm.Question,
-                                loggedInUserId: user.ID.Value,
+                                loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
                         });
@@ -1815,7 +1836,7 @@ namespace AfterSchool.Controllers
                         parent.AddAnswer(
                             answerText: qvm.Value.IfEmpty("").Trim(),
                             question: qvm.Question,
-                            loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                            loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
                     });

@@ -952,7 +952,7 @@ namespace AfterSchoolLibrary.Services
                             answerText: questionAndAnswer.answer.IfEmpty("").Trim(),
                             question: questionAndAnswer.question,
                             registrationId: registration.ID,
-                            loggedInUserId: loggedInUser.ID.Value,
+                            loggedInUser: loggedInUser,
                             msgs: amsgs,
                             dc: adc);
                     });

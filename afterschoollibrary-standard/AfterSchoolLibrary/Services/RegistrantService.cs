@@ -385,7 +385,7 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    copy = registrant.Copy(loggedInUser?.ID ?? 0, msgs, dc);
+                    copy = registrant.Copy(loggedInUser, msgs, dc);
                     copy.AccountId = ownerAccount.ID;
                     copy.FirstRegistrantId = null;
                     copy.ParentRegistrantId = registrant.ID;
@@ -499,28 +499,62 @@ namespace AfterSchoolLibrary.Services
             var parentAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
             var studentQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
             if (studentQuestion.IsNotEmpty() && parentAnswer.IsNotEmpty())
-                return registrant.AddAnswer(parentAnswer.Text, studentQuestion, loggedInUser.ID.Value, msgs, dc);
+                return registrant.AddAnswer(parentAnswer.Text, studentQuestion, loggedInUser, msgs, dc);
 
             return null;
         }
 
-        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, FormQuestion question, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        private static string UploadFile(this Registrant registrant, System.IO.Stream file, string filename, FormQuestion question, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var ah = Helpers.Utilities.GetNewAmazonHelper();
+
+            var regEx = new System.Text.RegularExpressions.Regex(
+                BasicLibrary.Utilities.UrlFriendlyRegEx,
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline
+                );
+
+            var form = question.GetForm(msgs, dc);
+            var account = registrant.GetAccount(msgs, dc);
+            var accountFolder = $"{account.UniqueName}-{account.ID}";
+            var formFolder = $"{form.Name.Replace(regEx, "")}-{form.ID}";
+            var registrantFolder = $"{registrant.Name.Replace(regEx, "")}-{registrant.ID}";
+            var amazonFilePath = $"{accountFolder}/{formFolder}/{registrantFolder}/{filename}".ToLower();
+
+            msgs.AddRange(ah.AddFile(file, amazonFilePath));
+
+            return amazonFilePath;
+        }
+
+        public static FormQuestionAnswer AddAnswer(this Registrant registrant, System.IO.Stream file, string filename, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
-                return registrant.AddAnswer(answerText, question, null, loggedInUserId, msgs, dc);
+            {
+                var amazonFilePath = registrant.UploadFile(file, filename, question, msgs, dc);
+                
+                if (msgs.HasNoErrors())
+                    return registrant.AddAnswer(amazonFilePath, question, registrationId, loggedInUser, msgs, dc);
+            }
 
             return null;
         }
 
-        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, FormQuestion question, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
-                return registrant.AddAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUserId, msgs, dc);
+                return registrant.AddAnswer(answerText, question, null, loggedInUser, msgs, dc);
 
             return null;
         }
 
-        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (question.IsNotEmpty())
+                return registrant.AddAnswer(answerText, question.ID, question.QuestionDataTypeId, question.Text, registrationId, loggedInUser, msgs, dc);
+
+            return null;
+        }
+
+        public static FormQuestionAnswer AddAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -546,16 +580,16 @@ namespace AfterSchoolLibrary.Services
                     QuestionDataTypeId = questionDataType,
                     QuestionText = questionText,
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUserId
+                    CreatedBy = loggedInUser?.ID.IfEmpty(0)
                 };
             }
             answer.RegistrationId = registrationId;
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
-            answer.LastModifiedBy = loggedInUserId;
+            answer.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(answer.Save(dc));
 
-            msgs.AddRange(answer.UpdateRegistrantInfo(registrant, dc));
+            answer.UpdateRegistrantInfo(registrant, msgs, dc);
 
             return answer;
         }
@@ -601,10 +635,10 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static Registrant CreateMasterCopy(this Registrant registrant, List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant CreateMasterCopy(this Registrant registrant, List<FormQuestion> questions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var master = registrant.CopyWithAnswers(questions, loggedInUserId, msgs, dc);
+            var master = registrant.CopyWithAnswers(questions, loggedInUser, msgs, dc);
             master.IsMaster = true;
             master.IsContactOnly = true;
             master.AccountId = null;
@@ -616,15 +650,15 @@ namespace AfterSchoolLibrary.Services
             return master;
         }
 
-        public static Registrant CopyWithAnswers(this Registrant registrant, List<FormQuestion> questions, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant CopyWithAnswers(this Registrant registrant, List<FormQuestion> questions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var copy = registrant.Copy(loggedInUserId, msgs, dc);
+            var copy = registrant.Copy(loggedInUser, msgs, dc);
 
             if (questions.IsEmpty())
                 questions.ForEach(question =>
-                    copy.AddAnswer(question.GetAnswer(registrant.ID.Value, msgs, dc).Text, question, null, loggedInUserId, msgs, dc)
+                    copy.AddAnswer(question.GetAnswer(registrant.ID.Value, msgs, dc).Text, question, null, loggedInUser, msgs, dc)
                 );
 
             return copy;
@@ -644,7 +678,7 @@ namespace AfterSchoolLibrary.Services
                               answerText: answer.Text,
                               question: answer.ToFormQuestion(true, amsgs, adc),
                               registrationId: registration?.ID,
-                              loggedInUserId: loggedInUser?.ID ?? 0,
+                              loggedInUser: loggedInUser,
                               msgs: amsgs,
                               dc: adc);
                       });
