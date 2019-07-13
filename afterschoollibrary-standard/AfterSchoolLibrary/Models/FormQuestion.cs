@@ -339,6 +339,11 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionGroup.Load(this.FormQuestionGroupId.Value, msgs, dc);
         }
 
+        public Form GetForm(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Form.Load(this.FormId.Value, msgs, dc);
+        }
+
         public FormQuestionAnswer GetAnswer(int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(this.ID.Value, RegistrantId, msgs, dc);
@@ -359,7 +364,7 @@ namespace AfterSchoolLibrary.Models
             };
 
             return newQuestion;
-        }
+        }        
 
         #endregion
     }

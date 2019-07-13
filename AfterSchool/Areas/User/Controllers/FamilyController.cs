@@ -146,7 +146,7 @@ namespace AfterSchool.Areas.User.Controllers
                                 registrant.AddAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
-                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    loggedInUser: SessionVariables.CurrentUser,
                                     msgs: amsgs,
                                     dc: adc);
                             });
@@ -268,7 +268,7 @@ namespace AfterSchool.Areas.User.Controllers
                                 registrant.AddAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
-                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    loggedInUser: SessionVariables.CurrentUser,
                                     msgs: amsgs,
                                     dc: adc);
                             });
@@ -409,7 +409,7 @@ namespace AfterSchool.Areas.User.Controllers
                                 registrant.AddAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
-                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    loggedInUser: SessionVariables.CurrentUser,
                                     msgs: amsgs,
                                     dc: adc);
                             });
@@ -550,7 +550,7 @@ namespace AfterSchool.Areas.User.Controllers
                                 registrant.AddAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
-                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    loggedInUser: SessionVariables.CurrentUser,
                                     msgs: amsgs,
                                     dc: adc);
                             });
@@ -681,7 +681,7 @@ namespace AfterSchool.Areas.User.Controllers
                                 registrant.AddAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
-                                    loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    loggedInUser: SessionVariables.CurrentUser,
                                     msgs: amsgs,
                                     dc: adc);
                             });
@@ -767,7 +767,7 @@ namespace AfterSchool.Areas.User.Controllers
                             student.AddAnswer(
                                 answerText: answer.Text.IfEmpty("").Trim(),
                                 question: answer.ToFormQuestion(msgs: msgs, dc: dc),
-                                loggedInUserId: SessionVariables.CurrentUser.ID.Value,
+                                    loggedInUser: SessionVariables.CurrentUser,
                                 msgs: msgs,
                                 dc: dc);
                         });

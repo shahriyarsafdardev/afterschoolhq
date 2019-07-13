@@ -28,6 +28,9 @@
                 case QuestionType.Number:
                     Html.RenderPartial("~/Views/Shared/Form/_Textbox.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
                     break;
+                case QuestionType.FileUpload:
+                    Html.RenderPartial("~/Views/Shared/Form/_FileUpload.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["AdditionalClass"] } });
+                    break;
                 case QuestionType.Date:
                     Html.RenderPartial("~/Views/Shared/Form/_Date.cshtml", Model, new ViewDataDictionary() { { "AdditionalClass", ViewData["Class"] } });
                     break;

@@ -553,7 +553,7 @@ namespace AfterSchoolLibrary.Models
             answer.CreatedBy = answer.LastModifiedBy = loggedInUserId;
             msgs.AddRange(answer.Save(dc: dc));
             
-            msgs.AddRange(answer.UpdateRegistrantInfo(registrant, dc: dc));
+            answer.UpdateRegistrantInfo(registrant, msgs, dc);
 
             return answer;
         }

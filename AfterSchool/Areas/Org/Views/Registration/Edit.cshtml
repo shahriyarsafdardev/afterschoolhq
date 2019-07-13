@@ -88,8 +88,17 @@
                                                             {
                                                                 foreach(var item in answer.Text.Split(';'))
                                                                 {
-                                                                    @:@item.Split('=')[0]: @item.Split('=')[1]<br />
+                                                                    <span>@item.Split('=')[0]: @item.Split('=')[1]</span><br />
                                                                 }
+                                                            }
+                                                            else if (answer.FormQuestionQuestionTypeId == QuestionType.FileUpload)
+                                                            {
+                                                                <span>
+                                                                    <a href="@Url.Action("downloadfile", "registration", new { id = Model.Uid, r = selectedRegistration.Uid, file = answer.ID, returnUrl = Request["returnurl"] })"
+                                                                       target="_blank">
+                                                                        Download File
+                                                                    </a>
+                                                                </span>
                                                             }
                                                             else
                                                             {

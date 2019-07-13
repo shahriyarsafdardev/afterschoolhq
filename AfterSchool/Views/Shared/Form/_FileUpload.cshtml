@@ -1,0 +1,9 @@
+﻿@model FormQuestionViewModel
+
+<input type="file" 
+       id="@Model.Id" 
+       name="@Model.Name" 
+       class="form-control @ViewData["AdditionalClass"]" 
+       @Model.RequiredProperty 
+       @Html.Raw(Model.ToolTip) 
+       @Html.Raw(Model.ToolTipId) />

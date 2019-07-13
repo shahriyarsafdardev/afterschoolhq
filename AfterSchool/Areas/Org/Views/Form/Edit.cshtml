@@ -8,7 +8,7 @@
     var qgId = new int?();
     var questions = new List<FormQuestion>();
     var typesWithOptions = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix };
-    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.FileUpload, QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
+    var typesUserCannotAdd = new List<QuestionType>() { QuestionType.CheckboxList, QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix };
 
     if (questionGroup.IsNotEmpty())
     {
@@ -151,7 +151,11 @@
                                                         }
                                                         else
                                                         {   
-                                                            <textarea class="form-control" id="description-@question.ID" name="description-@question.ID">@question.Description</textarea>
+                                                            <textarea class="form-control" 
+                                                                      id="description-@question.ID" 
+                                                                      name="description-@question.ID">
+                                                                @question.Description
+                                                            </textarea>
                                                             
                                                         }
                                                     </td>
@@ -422,8 +426,8 @@
 
     function getQuestionTypeList() {
         var rtn = `<select class="form-control" onclick="showEditButton(${getQuestionCount()})" id="questiontype-${getQuestionCount()}" name="new-questiontype-${getQuestionCount()}">`;
-        @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)))
-        {
+        @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>().Where(questionType => !typesUserCannotAdd.Contains(questionType)).OrderBy(x => x.ToString()))
+        {            
             @:rtn += '<option value="@((int)type)">@type.ToString().SplitByUpperCase()</option>';
         }
         rtn += '</select>';
@@ -460,8 +464,6 @@
 
         incrementQuestionCount();
     }
-
-
 
     function showEditButton(id) {
         var arr = [@Html.Raw(typesWithOptions.Select(x=> "'" + ((int)x) + "'").ToStringList())];

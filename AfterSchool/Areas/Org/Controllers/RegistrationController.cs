@@ -28,13 +28,10 @@ namespace AfterSchool.Areas.Org.Controllers
             int recordsPerPage = 10;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
-            {
                 pageNumber = pn.ToInteger();
-            }
+
             if (rpp.IsNumber() && rpp.ToInteger() > 0)
-            {
                 recordsPerPage = rpp.ToInteger();
-            }
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -195,6 +192,25 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(registration);
         }
 
+        [HttpGet]
+        public ActionResult DownloadFile(string id, string r, string file, string returnUrl)
+        {
+            var registration = Registration.LoadByUid(id.ToGuid());
+            LoadRegistrationViewBag(registration, r);
+
+            var answers = (List<FormQuestionAnswer>)ViewBag.Answers;
+            var answer = answers.Find(item => item.ID.ToString() == file);
+
+            if (answer.IsNotEmpty())
+            {
+                var link = answer.GetFileDownloadLink();
+
+                if (link.IsNotEmpty())
+                    return Redirect(answer.GetFileDownloadLink());
+            }
+
+            return RedirectToAction("Edit", new { id, r, returnUrl });
+        }
 
         [HttpPost]
         public ActionResult Merge(string id, string r, string returnUrl, string mergeintoreg)
@@ -218,7 +234,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View("edit", registration);
         }
-
 
         [HttpPost]
         public ActionResult MoveSeat(string id, string ra, string to, string r)
@@ -389,7 +404,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View();
         }
 
-        public void LoadRegistrationViewBag(Registration registration, string selectedRegistration = null)
+        private void LoadRegistrationViewBag(Registration registration, string selectedRegistration = null)
         {
             var registrant = registration.GetRegistrant();
             if (registration.AccountId != SessionVariables.CurrentAccount.ID)

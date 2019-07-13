@@ -533,14 +533,14 @@ namespace AfterSchoolLibrary.Models
             this.GetRegistrantActivities(msgs, dc).ForEach(ra => ra.CancelRegistration(msgs, dc));
         }
 
-        public Registrant Copy(int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public Registrant Copy(WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var copy = new Registrant();
             copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
             copy.CreateDate = copy.LastModifiedDate = DateTime.UtcNow;
-            copy.CreatedBy = copy.LastModifiedBy = loggedInUserId;
+            copy.CreatedBy = copy.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             copy.Uid = Guid.NewGuid();
             copy.ResetID();
             msgs.AddRange(copy.Save(dc: dc));

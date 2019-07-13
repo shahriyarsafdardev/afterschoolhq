@@ -100,5 +100,13 @@ namespace AfterSchool.Models
                 Values[this.Name] = value;
             }
         }
+
+        public string FileDownloadLink
+        {
+            get
+            {
+                return FormQuestionAnswer.GetFileDownloadLink(Value);
+            }
+        }
     }
 }
