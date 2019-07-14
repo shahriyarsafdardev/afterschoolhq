@@ -1,12 +1,25 @@
 ﻿@model ParticipationViewModel
 
+@{ 
+    var statusClass = "warning";
+
+    if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Reserved)
+    {
+        statusClass = "success";
+    }
+    else if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Declined)
+    {
+        statusClass = "danger";
+    }
+}
+
 <div class="col-sm-12 col-md-6 col-lg-4">
     <div class="panel">
         <div class="heading panel-h3" style="background-color: #2f3c40; height: 80px;">
             
             <div class="pull-right">
                 <div class="btn-group btn-hspace">
-                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <button class="btn btn-alt5 dropdown-toggle" data-toggle="dropdown">
                         <span class="caret"></span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
@@ -21,10 +34,9 @@
                             </a>
                         }
 
-                        <a class="padding-10 md-trigger"
-                            data-modal="modal-request-refund"
+                        <a class="padding-10"
                             style="display:block"
-                            href="javascript:requestRefund('@Model.SubmittedRecord.Uid', '@Model.ParticipationObject.ObjectID', '@((int)Model.ParticipationObject.ObjectType)')">
+                            href="mailto:@Model.ParticipationObject.ContactEmail?subject=@UI.JavascriptSafeString($"Refund Request for {Model.ParticipationObject.Name}")">
                             Request Refund &raquo;
                         </a>
 
@@ -40,7 +52,7 @@
             <div class="margin-20">
                 <div class="row">
 
-                    <p class="pull-right badge badge-danger">
+                    <p class="pull-right badge badge-@statusClass">
                         <strong>
                             <em>
                                 @Model.RegistrantActivity.AssignmentTypeId.ToString().SplitByUpperCase()
