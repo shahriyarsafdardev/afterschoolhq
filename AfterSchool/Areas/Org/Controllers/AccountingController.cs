@@ -138,6 +138,23 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(payouts);
         }
 
+        [HttpGet]
+        public ActionResult PayoutTransactions(string id)
+        {
+            var transactions = new List<Transaction>();
+
+            if (id.IsGuid())
+            {
+                var msgs = new SystemMessages();
+                var payout = Payout.LoadByUid(id.ToGuid(), msgs);
+
+                transactions = payout.GetTransactions(msgs);
+
+                ViewBag.TotalPayout = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
+            }
+            return View(transactions);
+        }
+
         [HttpPost]
         public ActionResult RequestPayout()
         {

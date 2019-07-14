@@ -58,7 +58,7 @@
         }
 
         table td, table th {
-            padding: 3px;
+            padding: 2px;
         }
 
         table > thead > th, table > tfoot > td, table > thead, table > tfoot {
