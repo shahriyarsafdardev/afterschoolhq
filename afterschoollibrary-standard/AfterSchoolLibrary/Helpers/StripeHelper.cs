@@ -954,8 +954,6 @@ namespace AfterSchoolLibrary.Billing
                     };
             }
 
-
-
             if (billingCycleAnchorNow.HasValue)
                 options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Now;
 
