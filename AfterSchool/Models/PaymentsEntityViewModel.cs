@@ -164,7 +164,7 @@ namespace AfterSchool.Models
                 Settings = GetAccountSettingsOptions(),
                 RequestedCapabilities = GetRequestedCapabilities(),
                 TosAcceptance = GetAccountTosAcceptanceOptions(),
-                ExternalBankAccount = GetAccountBankAccountOptions()
+                ExternalAccount = GetAccountBankAccountOptions()
             };
         }
 
@@ -173,7 +173,7 @@ namespace AfterSchool.Models
             if (BankAccountNumber1.IsNotEmpty())
                 return new Stripe.AccountUpdateOptions()
                 {
-                    ExternalBankAccount = GetAccountBankAccountOptions()
+                    ExternalAccount = GetAccountBankAccountOptions()
                 };
 
             return new Stripe.AccountUpdateOptions()
@@ -186,7 +186,7 @@ namespace AfterSchool.Models
                 Settings = GetAccountSettingsOptions(),
                 RequestedCapabilities = GetRequestedCapabilities(),
                 TosAcceptance = GetAccountTosAcceptanceOptions(),
-                ExternalBankAccount = GetAccountBankAccountOptions()
+                ExternalAccount = GetAccountBankAccountOptions()
             };
         }
 

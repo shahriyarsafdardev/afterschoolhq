@@ -399,7 +399,7 @@ namespace AfterSchoolLibraryTests.Tests
                     Ip = "1.1.1.1",
                     UserAgent = "Chrome"
                 },
-                ExternalBankAccount = new Stripe.AccountBankAccountOptions()
+                ExternalAccount = new Stripe.AccountBankAccountOptions()
                 {
                     RoutingNumber = "110000000",
                     AccountNumber = "000123456789",
@@ -487,7 +487,7 @@ namespace AfterSchoolLibraryTests.Tests
                     Ip = "1.1.1.1",
                     UserAgent = "Chrome"
                 },
-                ExternalBankAccount = new Stripe.AccountBankAccountOptions()
+                ExternalAccount = new Stripe.AccountBankAccountOptions()
                 {
                     RoutingNumber = "110000000",
                     AccountNumber = "000123456789",
