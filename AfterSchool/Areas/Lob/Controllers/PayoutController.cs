@@ -26,7 +26,6 @@ namespace AfterSchool.Areas.Lob.Controllers
                 transactions.ForEach(transaction => {
 
                     var participationObject = transaction.GetParticipationObjects(msgs).First();
-
                     var groupedTransaction = groupedTransactions.Find(item => item.ParticipationObject.ObjectID == participationObject.ObjectID);
 
                     if (groupedTransaction.IsNotEmpty() && groupedTransaction.ParticipationObject.IsNotEmpty())

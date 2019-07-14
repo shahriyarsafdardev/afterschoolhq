@@ -25,7 +25,7 @@ namespace AfterSchoolLibraryTests.Tests
                 bankAccountId: "bank_a9ca0ac762c4040",
                 amount: 300,
                 memo: "Heres your paycheck",
-                checkBottom: "https://qa.afterschoolhq.com/lob/payout/attachment/11681f37-fda3-43a7-99df-96c0f2b3aba8",
+                checkBottom: null, // "https://qa.afterschoolhq.com/lob/payout/attachment/11681f37-fda3-43a7-99df-96c0f2b3aba8",
                 attachment: null,
                 metaData: new { },
                 msgs: msgs);

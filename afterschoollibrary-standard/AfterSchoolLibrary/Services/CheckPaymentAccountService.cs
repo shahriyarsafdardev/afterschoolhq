@@ -4,6 +4,9 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace AfterSchoolLibrary.Services
@@ -43,9 +46,58 @@ namespace AfterSchoolLibrary.Services
             return isDeliverable;
         }
 
+        private static string GetCheckBottomTemplate(Payout payout, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var model = new NameValueCollection()
+            {
+                { "ProductName", Helpers.Utilities.AppName(true) },
+                { "TotalPayout", payout.Amount.ToCurrency() },
+                { "Body", GetCheckBottomBody(payout, msgs, dc) }
+            };
+
+            return EmailHelper.ProcessTemplate(
+               LobTemplates.PayoutSummary,
+               model,
+               "payoutsummary-1.2",
+               msgs);
+        }
+
+        private static string GetCheckBottomBody(Payout payout, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var transactions = payout.GetTransactions(msgs, dc);
+            var groupedTransactions = new List<(ParticipationObject ParticipationObject, decimal? BillerPayout)>();
+            var body = "";
+
+            transactions.ForEach(transaction => {
+
+                var participationObject = transaction.GetParticipationObjects(msgs, dc).First();
+                var groupedTransaction = groupedTransactions.Find(item => item.ParticipationObject.ObjectID == participationObject.ObjectID);
+
+                if (groupedTransaction.IsNotEmpty() && groupedTransaction.ParticipationObject.IsNotEmpty())
+                    groupedTransaction.BillerPayout += transaction.GetBillerPayout();
+                else
+                    groupedTransactions.Add((participationObject, transaction.GetBillerPayout()));
+
+            });
+
+            groupedTransactions.ForEach(groupedTransaction => {
+                body += $@"<tr>
+                            <td>
+                                {groupedTransaction.ParticipationObject.Name}
+                            </td>
+                            <td class=""text-right"">
+                                {groupedTransaction.BillerPayout.ToCurrency()}
+                            </td>
+                        </tr>";
+            });
+
+            return body;
+        }
+
         public static void SendPayment(this CheckPaymentAccount paymentAccount, Account account, Payout payout, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var requestor = payout.GetRequestor(msgs, dc);            
+            var checkBottomHtml = GetCheckBottomTemplate(payout, msgs, dc);
 
             var check = LobHelper.CreateCheck(
                 description: $"Payout to {account.Name} requested {payout.Amount.ToCurrency()}",
@@ -60,7 +112,7 @@ namespace AfterSchoolLibrary.Services
                 bankAccountId: LobBankAccountId,
                 amount: payout.Amount.Value,
                 memo: $"Requested {payout.DateRequested.ToShortDateString()} by {requestor.DisplayName}".MaxChars(40, "..."),
-                checkBottom: $"{Helpers.Utilities.BaseUrl(true)}/lob/payout/attachment/{payout.Uid.ToString()}",
+                checkBottom: checkBottomHtml,
                 attachment: null,
                 metaData: new
                 {

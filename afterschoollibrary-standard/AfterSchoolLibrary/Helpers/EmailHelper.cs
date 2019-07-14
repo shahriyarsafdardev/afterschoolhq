@@ -890,8 +890,7 @@ namespace AfterSchoolLibrary.Helpers
                EmailTemplates.ProviderAccount_Added,
                model,
                "provideraccountadded",
-               msgs
-               );
+               msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
@@ -905,22 +904,22 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        private static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
+        internal static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             try
             {                   
                 using (Stream stream = new MemoryStream(emailTemplate))
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    string template = reader.ReadToEnd(); 
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string template = reader.ReadToEnd(); 
                     
-                    foreach (string key in model.Keys)
-                        template = template.Replace($"@Model.{key}", model[key]);
+                        foreach (string key in model.Keys)
+                            template = template.Replace($"@Model.{key}", model[key]);
 
-                    return template;
-                }
+                        return template;
+                    }
             }
             catch(Exception ex)
             {
