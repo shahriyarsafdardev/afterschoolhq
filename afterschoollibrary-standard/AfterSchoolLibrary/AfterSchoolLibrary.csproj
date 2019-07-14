@@ -68,12 +68,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>EmailTemplates.resx</DependentUpon>
     </Compile>
+    <Compile Update="LobTemplates.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LobTemplates.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="EmailTemplates.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>EmailTemplates.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="LobTemplates.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LobTemplates.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

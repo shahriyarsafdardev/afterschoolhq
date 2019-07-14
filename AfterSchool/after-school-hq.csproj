@@ -465,8 +465,6 @@
     <Compile Include="Areas\District\Controllers\ServicesController.cs" />
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
-    <Compile Include="Areas\Lob\Controllers\PayoutController.cs" />
-    <Compile Include="Areas\Lob\LobAreaRegistration.cs" />
     <Compile Include="Areas\Org\Controllers\AccountController.cs" />
     <Compile Include="Areas\Org\Controllers\AccountingController.cs" />
     <Compile Include="Areas\Org\Controllers\LeagueActivityController.cs" />
@@ -1116,8 +1114,6 @@
     <Content Include="Areas\Org\Views\Account\BankSetup.cshtml" />
     <Content Include="Areas\District\Views\Account\Team.cshtml" />
     <Content Include="Areas\District\Views\Account\TeamInvite.cshtml" />
-    <Content Include="Areas\Lob\Views\web.config" />
-    <Content Include="Areas\Lob\Views\Payout\Attachment.cshtml" />
     <Content Include="Areas\Org\Views\Accounting\RequestPayout.cshtml" />
     <Content Include="Areas\Org\Views\Accounting\RequestPayoutDone.cshtml" />
     <Content Include="Areas\User\Views\Shared\_UserAccountHeader.cshtml" />
@@ -1133,6 +1129,7 @@
     <Content Include="Areas\User\Views\Family\EditHomeAddress.cshtml" />
     <Content Include="Areas\User\Views\Family\EditEmergencyContact.cshtml" />
     <Content Include="Areas\User\Views\Shared\Providers\_BrowseProvider.cshtml" />
+    <Content Include="Areas\Org\Views\Accounting\PayoutTransactions.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1599,8 +1596,6 @@
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
     <Folder Include="Areas\District\Models\" />
-    <Folder Include="Areas\Lob\Models\" />
-    <Folder Include="Areas\Lob\Views\Shared\" />
     <Folder Include="Areas\Org\Models\" />
     <Folder Include="Areas\StripeHooks\Models\" />
     <Folder Include="Areas\StripeHooks\Views\Shared\" />

@@ -161,6 +161,7 @@
                             <th>Status</th>
                             <th>Method</th>
                             <th class="text-center">Amount</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -186,6 +187,12 @@
                                     </td>
                                     <td class="text-center">
                                         @payout.Amount.ToCurrency()
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("payouttransactions", "accounting", new { id = payout.Uid })" 
+                                           class="btn btn-default btn-sm">
+                                            View Transactions
+                                        </a>
                                     </td>
                                 </tr>
                             }
