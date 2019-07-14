@@ -662,5 +662,28 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(rag.Save(dc: dc));
             return rag;
         }
+
+        public static bool IsInSession(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = activityGroup.GetAccount(msgs, dc);
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
+            return instances.First().StartDateTime <= now && now <= instances.Last().EndDateTime;
+        }
+
+        public static bool WillBeInSession(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = activityGroup.GetAccount(msgs, dc);
+            var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
+            return now < instances.First().StartDateTime;
+        }
+
+        public static bool IsOutOfSession(this ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var now = activityGroup.GetAccount(msgs, dc).ConvertToAccountTimeZone(DateTime.UtcNow);
+            var instances = activityGroup.GetSchedule(msgs, dc).GetInstances(msgs: msgs, dc: dc);
+            return now > instances.Last().StartDateTime;
+        }
     }
 }

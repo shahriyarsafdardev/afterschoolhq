@@ -227,6 +227,8 @@ namespace AfterSchoolLibrary.Models
             this.ActivityType = activityType;
         }
 
+        #region QueryObjects
+
         public bool IsNotFreeAndCanAcceptPayments
         {
             get
@@ -406,6 +408,52 @@ namespace AfterSchoolLibrary.Models
             return null;
         }
 
+        public bool IsInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+                return GetActivity().IsInSession(msgs, dc);
+
+            if (IsActivityGroup())
+                return GetActivityGroup().IsInSession(msgs, dc);
+
+            if (IsAccountActivityGroup())
+                return GetAccountActivityGroup().IsInSession(msgs, dc);
+
+            return false;
+        }
+
+        public bool IsOutOfSession(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+                return GetActivity().IsOutOfSession(msgs, dc);
+
+            if (IsActivityGroup())
+                return GetActivityGroup().IsOutOfSession(msgs, dc);
+
+            if (IsAccountActivityGroup())
+                return GetAccountActivityGroup().IsOutOfSession(msgs, dc);
+
+            return false;
+        }
+
+        public bool WillBeInSession(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (IsActivity())
+                return GetActivity().WillBeInSession(msgs, dc);
+
+            if (IsActivityGroup())
+                return GetActivityGroup().WillBeInSession(msgs, dc);
+
+            if (IsAccountActivityGroup())
+                return GetAccountActivityGroup().WillBeInSession(msgs, dc);
+
+            return false;
+        }
+
+        #endregion
+
+        #region GetObjects
+
         public bool IsActivity()
         {
             return ObjectType == ParticipationObjectType.Activity;
@@ -478,6 +526,10 @@ namespace AfterSchoolLibrary.Models
             return GetActivityId() ?? GetActivityGroupId() ?? GetAccountActivityGroupId();
         }
 
+        #endregion
+
+        #region Financial
+
         public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
@@ -544,6 +596,10 @@ namespace AfterSchoolLibrary.Models
 
             return 0;
         }
+
+        #endregion
+
+        #region DemoObjects
 
         private static List<ParticipationObject> GetDemoActivities(List<GradeLevel> grades)
         {
@@ -633,5 +689,7 @@ namespace AfterSchoolLibrary.Models
                 participationObject.ObjectType = ParticipationObjectType.Activity;
             });
         }
+
+        #endregion
     }
 }

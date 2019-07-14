@@ -480,10 +480,13 @@
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
     <Compile Include="Areas\StripeHooks\Controllers\ReceiveController.cs" />
     <Compile Include="Areas\StripeHooks\StripeHooksAreaRegistration.cs" />
+    <Compile Include="Areas\User\Controllers\ActivityController.cs" />
     <Compile Include="Areas\User\Controllers\FamilyController.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
     <Compile Include="Areas\User\Controllers\ProfileController.cs" />
     <Compile Include="Areas\User\Controllers\ScheduleController.cs" />
+    <Compile Include="Areas\User\Models\ParticipationViewModel.cs" />
+    <Compile Include="Areas\User\Models\RegistrantActivityViewModel.cs" />
     <Compile Include="Areas\User\UserAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AfterSchoolController.cs" />
@@ -1130,6 +1133,10 @@
     <Content Include="Areas\User\Views\Family\EditEmergencyContact.cshtml" />
     <Content Include="Areas\User\Views\Shared\Providers\_BrowseProvider.cshtml" />
     <Content Include="Areas\Org\Views\Accounting\PayoutTransactions.cshtml" />
+    <Content Include="Areas\User\Views\Activity\Index.cshtml" />
+    <Content Include="Areas\User\Views\Shared\Activities\_BrowseActivity.cshtml" />
+    <Content Include="Areas\User\Views\Shared\Activities\_BrowseGroupedActivities.cshtml" />
+    <Content Include="Areas\User\Views\Shared\Providers\_ProviderContactInfo.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -1600,7 +1607,6 @@
     <Folder Include="Areas\StripeHooks\Models\" />
     <Folder Include="Areas\StripeHooks\Views\Shared\" />
     <Folder Include="Areas\StripeHooks\Views\Test\" />
-    <Folder Include="Areas\User\Models\" />
     <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>
