@@ -20,20 +20,20 @@
         <div class="form-group @(SessionVariables.CurrentAccount.IsSchool ? "" : "hide")">
             <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Led By: <span class="text-danger">*</span></label>
             <div class="col-sm-9">
-                @foreach (var item in Enum.GetValues(typeof(ActivityLeaderType)).Cast<ActivityLeaderType>().Except(ActivityLeaderType.NotSet.AsList()))
-                {
-                    var selected = (Model.LeaderTypeId == item) ? "checked=\"checked\"" : "";
+                <select name="leadertype" id="leadertype" class="form-control" required="required">
+                    <option value="">Select...</option>
+                    @foreach (var item in Enum.GetValues(typeof(ActivityLeaderType)).Cast<ActivityLeaderType>().Except(new List<ActivityLeaderType> { ActivityLeaderType.NotSet, ActivityLeaderType.Student }))
+                    {
+                        var selected = (Model.LeaderTypeId == item) ? "selected=\"selected\"" : "";
 
-                    if (!SessionVariables.CurrentAccount.IsSchool)
-                    { 
-                        selected = item == ActivityLeaderType.StaffMember ? "checked=\"checked\"" : "";
+                        if (!SessionVariables.CurrentAccount.IsSchool)
+                        {
+                            selected = item == ActivityLeaderType.StaffMember ? "selected=\"selected\"" : "";
+                        }
+
+                        <option value="@((int)item)" @selected>@item.ToString().SplitByUpperCase()</option>
                     }
-
-                    <div class="am-radio inline">
-                        <input type="radio" class="form-control leadertype" name="leadertype" id="leadertype-@((int)item)" value="@((int)item)" required @selected /> 
-                        <label for="leadertype-@((int)item)">@item.ToString().SplitByUpperCase()</label>
-                    </div>
-                }
+                </select>
             </div>
         </div>
 

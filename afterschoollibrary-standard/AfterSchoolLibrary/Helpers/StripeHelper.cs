@@ -1298,9 +1298,9 @@ namespace AfterSchoolLibrary.Billing
                 Amount = (totalAmount * 100).ToInteger(),
                 Currency = "usd",
                 Description = description,
-                SourceId = tokenOrSourceId,                
+                SourceId = tokenOrSourceId,
                 // SourceTokenOrExistingSourceId = tokenOrSourceId,
-                StatementDescriptor = statementDescriptor.MaxChars(22),
+                StatementDescriptor = statementDescriptor.Replace("'", "").MaxChars(22),
                 CustomerId = fromCustomerId,
                 Metadata = metaData
             };

@@ -375,7 +375,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var values = new Dictionary<string, object>()
             {
-                { "leadertype", leadertype },
+                { "leadertype", leadertype.IfBlank("0") },
                 { "contactname", contactname},
                 { "contactphone", contactphone},
                 { "contactemail", contactemail},

@@ -38,7 +38,10 @@
                 </div>
             }
 
-            <form class="form-horizontal" id="form-save-personal" method="post" action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
+            <form class="form-horizontal" 
+                  id="form-save-personal" 
+                  method="post" 
+                  action="@Url.Action("editstudentpersonal", "family", new { id = Model.Uid, reg = Request["reg"], student = Request["student"] })">
 
                 @foreach (var qvm in qvms)
                 {
@@ -51,9 +54,10 @@
                         school ?? new Location(),
                         new ViewDataDictionary()
                         {
-                                    { "label", "Enter your school" },
-                                    { "searchOnly", true },
-                                    { "placeholderText", "Enter your school name" }
+                            { "label", "Enter your school" },
+                            { "searchOnly", true },
+                            { "placeholderText", "Enter your school name" },
+                            { "locationType", (int)LocationType.School }
                         }
                     );
                 }

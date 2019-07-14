@@ -954,15 +954,6 @@ namespace AfterSchoolLibrary.Services
             if (costdescription != null)
                 activity.CostDescription = costdescription.ToString().IfBlank("").MaxChars(1000);
 
-            //if (acceptcreditcard.IsNotEmpty() && acceptcreditcard.ToString().IsBoolean())
-            //{
-            //    activity.AcceptCreditCard = acceptcreditcard.ToString().ToBoolean();
-            //}
-            //if (acceptpaypal.IsNotEmpty() && acceptpaypal.ToString().IsBoolean())
-            //{
-            //    activity.AcceptPayPal = acceptpaypal.ToString().ToBoolean();
-            //}
-
             if (allowtopaylater.IsNotEmpty() && allowtopaylater.ToString().IsBoolean())
             {
                 if (account.CanProcessPayments(msgs, dc))
@@ -971,25 +962,21 @@ namespace AfterSchoolLibrary.Services
                     activity.AllowToPayLater = true;
             }
 
-            //if (alloworganization.IsNotEmpty() && alloworganization.ToString().IsBoolean())
-            //{
-            //    activity.AllowOrganizationRegistration = alloworganization.ToString().ToBoolean();
-            //}
-
             if (regmode.IsNumber())
                 activity.RegistrationModeId = (RegistrationMode)regmode.ToString().ToInteger();
 
             if (leadertype.IsNumber())
-                activity.LeaderTypeId = (ActivityLeaderType)leadertype.ToString().ToInteger();
+            {
+                var leaderType = (ActivityLeaderType)leadertype.ToString().ToInteger();
+
+                if (leaderType == ActivityLeaderType.NotSet)
+                    msgs.Add("Led By is required", MessageType.UserError);
+                else
+                    activity.LeaderTypeId = leaderType;
+            }
 
             if (accountactivitygroup.IsNotEmpty())
                 activity.AccountActivityGroupId = accountactivitygroup.ToString().ToInteger();
-
-
-            //if(activity.CostPerRegistrant > 0 && !activity.AcceptCreditCard &&!activity.AllowToPayLater)
-            //{
-            //    msgs.Add("You must either accept credit cards, PayPal, or allow to pay later if you are charging a fee", MessageType.UserError);
-            //}
 
             if (msgs.HasNoErrors())
             {
