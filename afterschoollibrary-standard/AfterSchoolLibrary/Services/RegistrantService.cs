@@ -690,6 +690,35 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
+        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+
+            if (!loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc))
+            {
+                msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
+                return;
+            }
+
+            var ras = registrant.GetRegistrantActivities(msgs, dc);
+            var registrantActivity = ras.Find(ra => ra.ParticipationObjectId == participationObjectId && ra.ParticipationObjectTypeId == participationObjectType);
+
+            if (registrantActivity.IsEmpty())
+            {
+                msgs.Add("Registration not found", MessageType.Notice);
+                return;
+            }
+
+            registrantActivity.ChangeSeatAssignment(RegistrationAssignmentType.Declined, loggedInUser, msgs, dc);
+
+            // Notify Provider
+            if (msgs.HasNoErrors())
+            {
+                var participationObject = registrantActivity.GetParticipationObject(msgs, dc);
+                Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, msgs);
+            }
+        }
+
         public static Registration AddRegistration(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();

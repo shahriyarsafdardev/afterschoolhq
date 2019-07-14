@@ -1922,12 +1922,12 @@ namespace AfterSchoolLibrary.Helpers
             return Utilities.HostName;
         }
 
-        public static System.Net.Mail.MailAddress AppFromAddress(bool isAfterSchool)
+        public static System.Net.Mail.MailAddress AppFromAddress(bool isAfterSchool = true)
         {
             return new System.Net.Mail.MailAddress(AppNoReplyEmailAddress, AppEmailFromName(isAfterSchool));
         }
 
-        public static EmailAddress SendGridNoReplyEmailAddress(bool isAfterSchool)
+        public static EmailAddress SendGridNoReplyEmailAddress(bool isAfterSchool = true)
         {
             return new EmailAddress(Email.AppNoReplyEmailAddress, Utilities.AppName(isAfterSchool));
         }

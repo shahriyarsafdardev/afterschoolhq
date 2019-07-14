@@ -82,6 +82,37 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static void SendRegistrationWithdrawal(Registrant registrant, ParticipationObject participationObject, WebUser loggedInUser, SystemMessages msgs)
+        {
+            var model = new NameValueCollection()
+            {
+                { "ActivityContactName", participationObject.ContactName },
+                { "RegistrantName",  registrant.Name},
+                { "ActivityName", participationObject.Name },
+                { "CurrentUserName", loggedInUser.DisplayName },
+                { "SupportEmail", Email.AppSupportEmailAddress },
+                { "ProductName", Utilities.AppName() }
+            };
+
+            var subject = $"{registrant.Name}'s registration for {participationObject.Name} has been withdrawn";
+            var body = ProcessTemplate(
+                EmailTemplates.Registration_Withdrawal,
+                model,
+                "Registration_Withdrawal",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to activity contact
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(participationObject.ContactEmail),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+        }
+
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
