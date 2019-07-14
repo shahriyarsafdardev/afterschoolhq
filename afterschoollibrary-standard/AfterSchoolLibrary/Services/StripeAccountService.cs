@@ -106,7 +106,7 @@ namespace AfterSchoolLibrary.Services
         [Obsolete]
         public static void ParseAndUpdateStripeCustomAccount(this StripeAccount ahqStripeAccount, Stripe.Account stripeAccount, Stripe.File stripeFileUpload, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var json = stripeAccount.StripeResponse.ObjectJson;
+            var json = stripeAccount.StripeResponse.Content;
 
             ahqStripeAccount.RequiresFullSSN = false;
             ahqStripeAccount.RequiresDocument = false;

@@ -61,12 +61,13 @@ namespace AfterSchoolLibrary.Billing
         }
 
         private static string StripeAccessToken { get { return StripeHelper.SecretKey; } }
+        private static StripeClient StripeClient { get { return new StripeClient(apiKey: StripeAccessToken); } }
 
         #region StripeAccounts
 
         public static AccountService GetAccountService()
         {
-            return new AccountService(StripeAccessToken);
+            return new AccountService(StripeClient);
         }
 
         public static Stripe.Account GetCustomAccount(string stripeAccountId, SystemMessages msgs)
@@ -172,7 +173,7 @@ namespace AfterSchoolLibrary.Billing
 
         public static ExternalAccountService GetExternalAccountService()
         {
-            return new ExternalAccountService(StripeAccessToken);
+            return new ExternalAccountService(StripeClient);
         }
 
         public static Stripe.BankAccount CreateCustomBankAccount(string stripeAccountId, string routingNumber, string accountNumber, SystemMessages msgs)
@@ -180,8 +181,8 @@ namespace AfterSchoolLibrary.Billing
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var options = new ExternalAccountCreateOptions()
-            {                
-                ExternalAccountBankAccount = new AccountBankAccountOptions()
+            {                                
+                ExternalAccount = new AccountBankAccountOptions()
                 {
                     RoutingNumber = routingNumber,
                     AccountNumber = accountNumber,
@@ -288,7 +289,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static PersonService GetPersonService()
         {
-            return new PersonService(StripeAccessToken);
+            return new PersonService(StripeClient);
         }
 
         public static Stripe.Person CreatePerson(string stripeAccountId, PersonCreateOptions options, SystemMessages msgs)
@@ -315,7 +316,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static TransferService GetTransferService()
         {
-            return new TransferService(StripeAccessToken);
+            return new TransferService(StripeClient);
         }
 
         public static Transfer CreateTransfer(decimal amount, string description, string transferIdentifier, string destinationId, Dictionary<string, string> metaData, SystemMessages msgs)
@@ -353,7 +354,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static PayoutService GetPayoutService()
         {
-            return new PayoutService(StripeAccessToken);
+            return new PayoutService(StripeClient);
         }
 
         public static Payout CreatePayout(decimal amount, string externalAccountId, string connectedAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
@@ -396,7 +397,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static FileService GetFileUploadService()
         {
-            return new FileService(StripeAccessToken);
+            return new FileService(StripeClient);
         }
 
         public static Stripe.File UploadFile(Stream file, string filename, StripeFilePurpose purpose, SystemMessages msgs)
@@ -430,7 +431,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static ProductService GetProductService()
         {
-            return new ProductService(StripeAccessToken);
+            return new ProductService(StripeClient);
         }        
 
         public static Stripe.Product CreateProduct(string productId, string productName, string statementDescriptor, bool active, string stripeAccountId, Dictionary<string, string> metaData, SystemMessages msgs)
@@ -529,13 +530,13 @@ namespace AfterSchoolLibrary.Billing
 
             var requestOptions = new RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Product product = null;
 
             try
             {
-                product = GetProductService().Get(productId, requestOptions);
+                product = GetProductService().Get(productId, null, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -551,7 +552,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static PlanService GetPlanService()
         {
-            return new PlanService(StripeAccessToken);
+            return new PlanService(StripeClient);
         }
 
         /// <summary>
@@ -578,7 +579,7 @@ namespace AfterSchoolLibrary.Billing
                 IntervalCount = 1,
                 Interval = billingPeriodType.ToString().ToLower(),
                 Nickname = planNickName,
-                ProductId = stripeProduct.Id
+                Product = stripeProduct.Id
             };
 
             var requestOptions = new Stripe.RequestOptions();
@@ -664,13 +665,13 @@ namespace AfterSchoolLibrary.Billing
             var requestOptions = new Stripe.RequestOptions();
 
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Plan plan = null;
 
             try
             {
-                plan = GetPlanService().Get(planId, requestOptions);
+                plan = GetPlanService().Get(planId, null, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -686,7 +687,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static Stripe.CustomerService GetCustomerService()
         {
-            return new Stripe.CustomerService(StripeAccessToken);
+            return new Stripe.CustomerService(StripeClient);
         }
 
         public static Stripe.Customer CreateCustomer(string description, string email, string stripeAccountId, SystemMessages msgs)
@@ -730,12 +731,12 @@ namespace AfterSchoolLibrary.Billing
             var options = new Stripe.CustomerCreateOptions
             {
                 Description = description,
-                SourceToken = token                
+                Source = token
             };
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
@@ -834,13 +835,13 @@ namespace AfterSchoolLibrary.Billing
             var requestOptions = new Stripe.RequestOptions();
 
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Customer customer = null;
 
             try
             {
-                customer = GetCustomerService().Get(customerId, requestOptions);
+                customer = GetCustomerService().Get(customerId, null, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -856,12 +857,12 @@ namespace AfterSchoolLibrary.Billing
 
             var options = new Stripe.CustomerUpdateOptions
             {
-                SourceToken = sourceToken
+                Source = sourceToken
             };
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             try
             {
@@ -882,7 +883,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static Stripe.SubscriptionService GetSubscriptionService()
         {
-            return new Stripe.SubscriptionService(StripeAccessToken);
+            return new Stripe.SubscriptionService(StripeClient);
         }
 
         public static Stripe.Subscription CreateSubscription(string customerId, string planId, string sourceId, decimal? platformFeePercent, DateTime? startDate, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
@@ -953,14 +954,16 @@ namespace AfterSchoolLibrary.Billing
                     };
             }
 
+
+
             if (billingCycleAnchorNow.HasValue)
-                options.BillingCycleAnchorNow = billingCycleAnchorNow.Value;
+                options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Now;
 
             if (billingCycleAnchorUnchanged.HasValue)
-                options.BillingCycleAnchorUnchanged = billingCycleAnchorUnchanged.Value;
+                options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Unchanged;
 
             if (endTrialNow.HasValue)
-                options.EndTrialNow = endTrialNow.Value;
+                options.TrialEnd = DateTime.UtcNow;
 
             if (prorate.HasValue)
                 options.Prorate = prorate.Value;
@@ -1016,13 +1019,13 @@ namespace AfterSchoolLibrary.Billing
 
             var requestOptions = new Stripe.RequestOptions();
             if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeConnectAccountId = stripeAccountId;
+                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Subscription subscription = null;
 
             try
             {
-                subscription = GetSubscriptionService().Get(subscriptionId, requestOptions);
+                subscription = GetSubscriptionService().Get(subscriptionId, null, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -1038,7 +1041,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static Stripe.CardService GetCardService()
         {
-            return new Stripe.CardService(StripeAccessToken);
+            return new Stripe.CardService(StripeClient);
         }
 
         public static Stripe.Card CreateCard(Stripe.Customer customer, string token, SystemMessages msgs)
@@ -1056,7 +1059,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 var options = new Stripe.CardCreateOptions()
                 {
-                    SourceToken = token
+                    Source = token
                 };
 
                 card = GetCardService().Create(customerId, options);
@@ -1179,7 +1182,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static Stripe.SourceService GetSourceService()
         {
-            return new Stripe.SourceService(StripeAccessToken);
+            return new Stripe.SourceService(StripeClient);
         }
 
         public static Stripe.Source CreateSource(Stripe.Customer customer, string token, SystemMessages msgs)
@@ -1281,7 +1284,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static Stripe.ChargeService GetChargeService()
         {
-            return new Stripe.ChargeService(StripeAccessToken);
+            return new Stripe.ChargeService(StripeClient);
         }        
 
         public static Stripe.Charge CreateCharge(string fromCustomerId, string tokenOrSourceId, decimal totalAmount, string description, string statementDescriptor, Dictionary<string, string> metaData, SystemMessages msgs)
@@ -1298,8 +1301,7 @@ namespace AfterSchoolLibrary.Billing
                 Amount = (totalAmount * 100).ToInteger(),
                 Currency = "usd",
                 Description = description,
-                SourceId = tokenOrSourceId,
-                // SourceTokenOrExistingSourceId = tokenOrSourceId,
+                Source = tokenOrSourceId,
                 StatementDescriptor = statementDescriptor.Replace("'", "").MaxChars(22),
                 CustomerId = fromCustomerId,
                 Metadata = metaData
@@ -1359,7 +1361,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static Stripe.TokenService GetTokenService()
         {
-            return new Stripe.TokenService(StripeAccessToken);
+            return new Stripe.TokenService(StripeClient);
         }
 
         public static Stripe.Token CreateCustomerToken(string customerId, string stripeAccountId, SystemMessages msgs)
@@ -1396,7 +1398,7 @@ namespace AfterSchoolLibrary.Billing
 
         public static Stripe.RefundService GetRefundService()
         {
-            return new Stripe.RefundService(StripeAccessToken);
+            return new Stripe.RefundService(StripeClient);
         }
 
         public static Stripe.Refund CreateRefund(string chargeId, decimal totalAmount, string reason, SystemMessages msgs)
@@ -1454,7 +1456,7 @@ namespace AfterSchoolLibrary.Billing
 
         private static Stripe.CouponService GetCouponService()
         {
-            return new Stripe.CouponService(StripeAccessToken);
+            return new Stripe.CouponService(StripeClient);
         }
 
         public static Stripe.Coupon CreateCoupon(decimal discountValue, string stripeAccountId, CouponAmountType amountType, StripeCouponDuration couponDuration, int? durationInMonths, SystemMessages msgs)
