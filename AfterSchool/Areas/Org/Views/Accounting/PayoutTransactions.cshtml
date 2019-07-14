@@ -7,11 +7,6 @@
 }
 <div>
     <div class="row">
-        <div class="pull-right">
-            <a href="@Url.Action("payouts", "accounting")">Done</a>
-        </div>
-    </div>
-    <div class="row">
         <h2 class="col-md-2">Transactions</h2>
         <div class="col-md-10">
             <div class="pull-right">
@@ -75,5 +70,10 @@
                 }
             </tbody>
         </table>
+    </div>
+    <div class="row">
+        <div class="text-center">
+            <a href="@Url.Action("payouts", "accounting")" class="btn btn-primary btn-lg">Done</a>
+        </div>
     </div>
 </div>
