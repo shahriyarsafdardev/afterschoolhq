@@ -10,7 +10,7 @@ Uploads
 # *.dll
 # *.dll.config
 AfterSchool/bin
-/packages
+packages
 UpgradeLog.htm
 
 .vs
