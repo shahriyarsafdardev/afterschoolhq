@@ -872,7 +872,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        if (activity.GetLocation().HostAccountId == activity.AccountId)
+                        if (!MustRequestToPublish(activity))
                             return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
 
                         return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"] });
@@ -1697,7 +1697,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid(), msgs);
             ViewBag.Account = SessionVariables.CurrentAccount;
-            ViewBag.MustRequestToPublish = GetMustRequestToPublish(activity);
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.Messages = msgs;
             return View(activity);
         }
@@ -1714,7 +1714,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Your request to publish has been submitted", MessageType.Success);
 
             ViewBag.Messages = msgs;
-            ViewBag.MustRequestToPublish = GetMustRequestToPublish(activity);
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             ViewBag.IsFullScreen = Request["isnew"] == "1";
             return View("publishdetail", activity);
         }
@@ -1740,7 +1740,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = Request["isnew"] == "1";
-            ViewBag.MustRequestToPublish = GetMustRequestToPublish(activity);
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             return View("publishdetail", activity);
         }
 
@@ -1759,7 +1759,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.MustRequestToPublish = GetMustRequestToPublish(activity);
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             return View("publishdetail", activity);
         }
 
@@ -2161,7 +2161,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.CurrentUser.IsActivityLeader(activity);
         }
 
-        private bool GetMustRequestToPublish(Activity activity)
+        private bool MustRequestToPublish(Activity activity)
         {
             var location = activity.GetLocation();
             return location.HostAccountId != activity.AccountId && SessionVariables.CurrentAccount.ID != location.HostAccountId;
