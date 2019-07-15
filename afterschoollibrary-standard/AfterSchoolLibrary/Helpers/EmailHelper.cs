@@ -987,8 +987,8 @@ namespace AfterSchoolLibrary.Helpers
                 msgs);
 
             var mailMsgs = SendGridHelper.SendMail(
-                fromEmail: Email.AppNoReplyEmailAddress,
-                toEmail: accountOwner.Email,
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: new SendGrid.Helpers.Mail.EmailAddress(accountOwner.Email),
                 subject: subject,
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId());
