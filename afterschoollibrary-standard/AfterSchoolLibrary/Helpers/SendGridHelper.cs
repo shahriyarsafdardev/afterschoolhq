@@ -39,21 +39,19 @@ namespace AfterSchoolLibrary
             var sg = new SendGridClient(SendGridApiKey);
             // var content = new Content("text/html", body);
 
+            if (!Helpers.Utilities.IsProduction)
+                subject = $"{Helpers.Utilities.Environment} ENV: {subject}";
+
             var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
             mail.ReplyTo = replyTo;
             mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
             
-            var task = Task.Run(async () =>
-            {
-                return await sg.SendEmailAsync(mail);
-            });
+            var task = Task.Run(async () => { return await sg.SendEmailAsync(mail); });
             task.Wait();
 
             dynamic response = task.Result;
             if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
-            {
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
-            }
 
             return msgs;
         }

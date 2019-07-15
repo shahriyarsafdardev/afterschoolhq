@@ -2,6 +2,8 @@
 
 @{ 
     var accountOrDashboard = "Account";
+    var canPublishActivity = ViewData["CanPublishActivity"].IsNotEmpty() ? ViewData["CanPublishActivity"].ToString().ToBoolean() : false;
+    var participationObject = (ParticipationObject)ViewData["ParticipationObject"];
 
     if (Model.AccountTypeId != AccountType.Registrant)
     {
@@ -31,7 +33,7 @@
                 }
 
             </div>
-            <div class="col-md-6 col-sm-6 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12">                
                 <div class="btn-group pull-right">
                     <div>
                         
@@ -39,6 +41,12 @@
 
                         @if (SessionVariables.CurrentUser.IsNotEmpty())
                         {
+                            if (canPublishActivity)
+                            { 
+                                <a href="@Url.Action("publishdetail", "activity", new { Area = "org", id = participationObject.Uid })" class="btn btn-primary btn-sm">
+                                    Approve &amp; Publish Activity &raquo;
+                                </a>
+                            }
                             <a href="@Url.Action("index", "home", new { area = "user" })" class="btn btn-link">View @accountOrDashboard</a>
                             <a href="@Url.Action("index", "logout", new { returnurl = SessionVariables.RegistrationStartPageAccount.HomePageUrl })" class="btn btn-link">Logout</a>
                         }
@@ -49,7 +57,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>        
     }
     else
     {

@@ -240,5 +240,10 @@ namespace AfterSchoolLibrary.Services
             payout.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(payout.Save(dc));
         }
+
+        public static void SendPayoutRequestNotification(this Payout payout, Account toAccount, SystemMessages msgs)
+        {
+            msgs.AddRange(Helpers.EmailHelper.SendPayoutRequestNotification(payout, toAccount));
+        }
     }
 }

@@ -872,7 +872,10 @@ namespace AfterSchool.Areas.Org.Controllers
                             return View("EditLocation", activity);
                         }
                     case "publish":
-                        return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
+                        if (!MustRequestToPublish(activity))
+                            return RedirectToAction("publish", new { id = activity.Uid, isnew = Request["isnew"] });
+
+                        return RedirectToAction("requesttopublish", new { id = activity.Uid, isnew = Request["isnew"] });
                 }
             }
 
@@ -1691,10 +1694,29 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult PublishDetail(string id)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
             ViewBag.Account = SessionVariables.CurrentAccount;
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
+            ViewBag.Messages = msgs;
             return View(activity);
+        }
+
+        [HttpGet]
+        public ActionResult RequestToPublish(string id)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid());
+
+            activity.RequestToPublish(SessionVariables.CurrentUser, msgs);
+
+            if (msgs.HasNoErrors())
+                msgs.Add("Your request to publish has been submitted", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
+            ViewBag.IsFullScreen = Request["isnew"] == "1";
+            return View("publishdetail", activity);
         }
 
         [HttpGet]
@@ -1718,6 +1740,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = Request["isnew"] == "1";
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             return View("publishdetail", activity);
         }
 
@@ -1736,6 +1759,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
+            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
             return View("publishdetail", activity);
         }
 
@@ -2135,6 +2159,12 @@ namespace AfterSchool.Areas.Org.Controllers
         private bool IsActivityLeader(Activity activity)
         {
             return SessionVariables.AccountUserType == UserType.Administrator || SessionVariables.CurrentUser.IsActivityLeader(activity);
+        }
+
+        private bool MustRequestToPublish(Activity activity)
+        {
+            var location = activity.GetLocation();
+            return location.HostAccountId != activity.AccountId && SessionVariables.CurrentAccount.ID != location.HostAccountId;
         }
     }
 }

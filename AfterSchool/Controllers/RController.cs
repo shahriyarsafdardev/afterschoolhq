@@ -106,18 +106,27 @@ namespace AfterSchool.Controllers
             return (accountName, accountUniqueName);
         }
 
-        public ActionResult Activity(string accountname, string activitytype, string activityname)
+        public ActionResult Activity(string accountname, string activitytype, string activityname, string preview)
         {
             RestartRegistrationSession();
 
             var msgs = new SystemMessages();
             var account = AfterSchoolLibrary.Models.Account.LoadByUniqueName(accountname, msgs);
             ParticipationObject participationObject = null;
+            var canPublishActivity = false;
 
             if (account.IsNotEmpty())
             {
                 var activity = AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value, msgs);
                 participationObject = activity.GetParticipationObject(msgs);
+
+                if (!activity.IsPublished && activity.GetLocation().HostAccountId != activity.AccountId)
+                {
+                    var accountOwnerId = activity.GetLocation().GetHostAcount().OwnerId;
+
+                    if (SessionVariables.CurrentUser.ID == accountOwnerId)
+                        canPublishActivity = true;
+                }
             }
             else
             {
@@ -136,6 +145,7 @@ namespace AfterSchool.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.Account = account;
+            ViewBag.CanPublishActivity = canPublishActivity;
 
             return View(participationObject);
         }

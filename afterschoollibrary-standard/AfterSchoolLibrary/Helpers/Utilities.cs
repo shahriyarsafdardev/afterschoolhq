@@ -27,6 +27,17 @@ namespace AfterSchoolLibrary.Helpers
             return BaseUrl(isAfterSchool) + "/paypal/notification/";
         }
 
+        public static string Environment
+        {
+            get
+            {
+                if (!IsLocalHost)
+                    return ConfigurationManager.AppSettings["NET_ENV"];
+
+                return "Local";
+            }
+        }
+
         public static bool IsProduction
         {
             get

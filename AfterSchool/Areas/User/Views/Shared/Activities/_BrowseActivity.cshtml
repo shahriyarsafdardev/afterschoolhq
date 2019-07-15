@@ -34,10 +34,19 @@
                             </a>
                         }
 
+                        @if (!Model.ParticipationObject.IsFree)
+                        {
+                            <a class="padding-10"
+                                style="display:block"
+                                href="mailto:@Model.ParticipationObject.ContactEmail?subject=@UI.JavascriptSafeString($"Refund Request for {Model.ParticipationObject.Name}")">
+                                Request Refund &raquo;
+                            </a>
+                        }
+
                         <a class="padding-10"
                             style="display:block"
-                            href="mailto:@Model.ParticipationObject.ContactEmail?subject=@UI.JavascriptSafeString($"Refund Request for {Model.ParticipationObject.Name}")">
-                            Request Refund &raquo;
+                            href="mailto:@Model.ParticipationObject.ContactEmail">
+                            Send Message &raquo;
                         </a>
 
                     </div>

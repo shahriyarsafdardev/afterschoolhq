@@ -935,6 +935,69 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendPayoutRequestNotification(Payout payout, Account toAccount)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "AccountName", toAccount.Name },
+                { "PayoutAmount", payout.Amount.ToCurrency() },
+                { "LoginLink", Utilities.LoginUrl(true, $"{Utilities.BaseUrl(true)}/admin/payout/") },
+            };
+
+            var subject = $"A new payout has been requested by {toAccount.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Payout_Request,
+                model,
+                "Payout_Request-1.00",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.SendGridNoReplyEmailAddress(),
+                toEmail: Email.SendGridSupportEmailAddress,
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+        public static SystemMessages SendPublishRequestNotification(Activity activity, Account locationOwner, WebUser accountOwner, WebUser loggedInUser)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "AccountOwnerName", accountOwner.FirstName },
+                { "CurrentUserName", loggedInUser.DisplayName },
+                { "ActivityName", activity.Name },
+                { "AccountName", locationOwner.Name },
+                { "LoginLink", Utilities.LoginUrl(true, activity.PreviewUrl) },
+                { "ProductName", Utilities.AppName() },
+            };
+
+            var subject = $"{loggedInUser.DisplayName} has requested to publish an activity";
+            var body = ProcessTemplate(
+                EmailTemplates.Publish_Request,
+                model,
+                "Publish_Request-1.00",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.AppNoReplyEmailAddress,
+                toEmail: accountOwner.Email,
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
         internal static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
