@@ -943,6 +943,7 @@ namespace AfterSchoolLibrary.Helpers
             {
                 { "AccountName", toAccount.Name },
                 { "PayoutAmount", payout.Amount.ToCurrency() },
+                { "LoginLink", Utilities.LoginUrl(true, $"{Utilities.BaseUrl(true)}/admin/payout/") },
             };
 
             var subject = $"A new payout has been requested by {toAccount.Name}";
