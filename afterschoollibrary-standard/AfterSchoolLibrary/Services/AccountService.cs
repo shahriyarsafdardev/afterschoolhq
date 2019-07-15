@@ -1780,7 +1780,14 @@ namespace AfterSchoolLibrary.Services
             }
 
             if (paymentType != PaymentType.NotSet)
-                return PayoutService.CreateNew(account, transactions, PayoutStatus.Requested, paymentType, loggedInUser, msgs, dc); 
+            {
+                var payout = PayoutService.CreateNew(account, transactions, PayoutStatus.Requested, paymentType, loggedInUser, msgs, dc);
+
+                if (payout.IsNotEmpty())
+                    payout.SendPayoutRequestNotification(account, msgs);
+
+                return payout;
+            }
             
             msgs.Add("No payment account defined", MessageType.UserError);
 

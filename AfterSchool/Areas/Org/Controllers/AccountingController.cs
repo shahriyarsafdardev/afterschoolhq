@@ -160,13 +160,16 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var transactionIds = Request.Form["TransactionIds"];
             var msgs = new SystemMessages();
+
             if (!string.IsNullOrEmpty(transactionIds))
             {
                 var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
                 var transactions = Transaction.LoadList(ids);
+
                 ViewBag.TranIds = transactionIds;
                 ViewBag.TotalPayoutAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
                 ViewBag.Messages = msgs;
+
                 return View(transactions);
             }
             return null;
@@ -177,13 +180,17 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var transactionIds = Request.Form["TransactionIds"];
             var transactions = new List<Transaction>();
+
             if (!string.IsNullOrEmpty(transactionIds))
             {
                 var msgs = new SystemMessages();
                 var ids = transactionIds.Split(',').Select(p => Convert.ToInt32(p)).ToList();
+
                 transactions = Transaction.LoadList(ids).ToList();
                 ViewBag.TotalAmount = transactions.Sum(p => p.GetBillerPayout()).ToCurrency();
+
                 SessionVariables.CurrentAccount.RequestNewPayout(transactions, loggedInUser: SessionVariables.CurrentUser, msgs);
+
                 if (msgs.HasNoErrors())
                     return View();
             }

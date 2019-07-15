@@ -88,7 +88,7 @@
                                             <td>Tuition Fee</td>
                                             <td class="text-right">
                                                 <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee()</span>
-                                                @participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()
+                                                @participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()*
                                             </td>
                                             <td></td>
                                         </tr>
@@ -179,8 +179,10 @@
                                         <td></td>
                                     </tr>
                                 </tfoot>
-                            </table>                    
+                            </table>               
                         </div>
+
+                        <p class="text-center text-small text-muted">* Cost includes fees supporting afterschool programs with @SessionVariables.RegistrationStartPageAccount.Name</p>
                     </div>
                 </div>
 
