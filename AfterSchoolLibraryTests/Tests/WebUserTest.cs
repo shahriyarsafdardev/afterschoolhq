@@ -317,33 +317,6 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.Equal(user.SendPasswordResetToken(true, dc: dc).HasNoErrors(), result);
         }
 
-        [Theory(DisplayName = "Creates a registrant from a user account")]
-        [InlineData(RegistrantType.Individual, false)]
-        [InlineData(RegistrantType.Individual, true)]
-        [InlineData(RegistrantType.Organization, true)]
-        public void CreateRegistrantTest(RegistrantType rt, bool isMaster)
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-            var registrant = user.CreateRegistrant(rt, isMaster, false, msgs, dc);
-
-            Assert.NotNull(registrant);
-        }
-
-        [Theory(DisplayName = "Gets all registrants associated to the user account")]
-        [InlineData(1)]
-        [InlineData(3)]
-        public void GetRegistrantsTest(int numberOfRegistrants)
-        {
-            var user = Factories.WebUserFactory.Create(msgs, dc: dc);
-
-            for (var i = 0; i < numberOfRegistrants; i++)
-            {
-                user.CreateRegistrant(RegistrantType.Individual, true, false, msgs, dc);
-            }
-
-            Assert.Equal(numberOfRegistrants, user.GetChildrenRegistrants(msgs, dc).Count);
-        }
-
         [Fact(DisplayName = "Checks if user is active for an account")]
         public void isActiveForTest()
         {
