@@ -223,7 +223,7 @@ namespace AfterSchool.Controllers
                 {
                     var doRememberMe = !Request.Params["remember"].IsEmpty();
 
-                    LoadSessionInfo(user, null, doRememberMe, msgs);
+                    LoadSessionInfo(user, null, doRememberMe, source, msgs);
 
                     // if validated user and doesn't have a Parent account, create one automatically and continue
                     if (source == "parent-login" && SessionVariables.CurrentAccount?.AccountTypeId != AccountType.Registrant)
