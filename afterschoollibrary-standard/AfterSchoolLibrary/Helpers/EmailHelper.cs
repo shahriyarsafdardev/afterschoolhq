@@ -964,6 +964,39 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendPublishRequestNotification(Activity activity, Account locationOwner, WebUser accountOwner, WebUser loggedInUser)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection()
+            {
+                { "AccountOwnerName", accountOwner.FirstName },
+                { "CurrentUserName", loggedInUser.DisplayName },
+                { "ActivityName", activity.Name },
+                { "AccountName", locationOwner.Name },
+                { "LoginLink", Utilities.LoginUrl(true, activity.PreviewUrl) },
+                { "ProductName", Utilities.AppName() },
+            };
+
+            var subject = $"{loggedInUser.DisplayName} has requested to publish an activity";
+            var body = ProcessTemplate(
+                EmailTemplates.Publish_Request,
+                model,
+                "Publish_Request-1.00",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                fromEmail: Email.AppNoReplyEmailAddress,
+                toEmail: accountOwner.Email,
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
         internal static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();

@@ -1,0 +1,15 @@
+﻿<div>
+  <p>Hey @Model.AccountOwnerName,</p>
+
+  <p>
+    @Model.CurrentUserName has requested to publish @Model.ActivityName to @Model.AccountName.
+  </p>
+
+  <p>
+    Please <a href="@Model.LoginLink">login</a> to review and publish this activity.
+  </p>
+
+  <p>
+    Your @Model.ProductName Team
+  </p>
+</div>

@@ -145,6 +145,9 @@
   <data name="ProviderAccount_Added" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\provideraccount-added.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Publish_Request" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\publish-request.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Registration_Confirmation" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\registration-confirmation.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

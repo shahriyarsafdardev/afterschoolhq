@@ -153,6 +153,16 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Publish_Request {
+            get {
+                object obj = ResourceManager.GetObject("Publish_Request", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Registration_Confirmation {
             get {
                 object obj = ResourceManager.GetObject("Registration_Confirmation", resourceCulture);

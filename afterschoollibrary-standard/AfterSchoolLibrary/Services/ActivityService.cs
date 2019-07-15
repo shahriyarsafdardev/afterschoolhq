@@ -2243,5 +2243,13 @@ namespace AfterSchoolLibrary.Services
 
             return false;
         }
+
+        public static void RequestToPublish(this Activity activity, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var location = activity.GetLocation(msgs, dc);
+            var locationOwner = location.GetHostAcount(msgs, dc);
+            var accountOwner = locationOwner.GetAccountOwner(msgs, dc);
+            msgs.AddRange(Helpers.EmailHelper.SendPublishRequestNotification(activity, locationOwner, accountOwner, loggedInUser));
+        }
     }
 }

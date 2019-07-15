@@ -6,10 +6,18 @@
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 
-@{ Html.RenderPartial(
+@{ 
+    Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         account,
-        new ViewDataDictionary() { { "LoginReturnUrl", Model.GetHomePageUrl() } }); }
+        new ViewDataDictionary()
+        {
+            { "LoginReturnUrl", Model.GetHomePageUrl() },
+            { "CanPublishActivity", ViewBag.CanPublishActivity },
+            { "ParticipationObject", Model }
+        }
+    );
+}
 
 <div class="reg-header text-center">
     <h1 class="activity-title">
@@ -37,7 +45,13 @@
                         </h3>
                     </div>
                     <div class="col-lg-4 col-md-12">
-                        @{ Html.RenderPartial("~/Views/Shared/Registration/_RegisterButton.cshtml", Model, new ViewDataDictionary() { { "condensed", true } }); }
+                        @{ 
+                            Html.RenderPartial(
+                               "~/Views/Shared/Registration/_RegisterButton.cshtml", 
+                               Model, 
+                               new ViewDataDictionary() { { "condensed", true } }
+                            ); 
+                        }
                     </div>
                 </div>
             </div>
