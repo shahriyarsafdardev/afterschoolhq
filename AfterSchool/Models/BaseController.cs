@@ -160,12 +160,22 @@ namespace AfterSchool.Models
             return RedirectToAction("index", "login", new { area = "" });
         }
 
-        protected void LoadSessionInfo(WebUser user, Account account = null, bool doRememberMe = false, SystemMessages msgs = null)
+        protected void LoadSessionInfo(WebUser user, SystemMessages msgs = null)
+        {
+            LoadSessionInfo(user, null, false, null, msgs);
+        }
+
+        protected void LoadSessionInfo(WebUser user, Account account, SystemMessages msgs = null)
+        {
+            LoadSessionInfo(user, account, false, null, msgs);
+        }
+
+        protected void LoadSessionInfo(WebUser user, Account account, bool doRememberMe, SystemMessages msgs = null)
         {
             LoadSessionInfo(user, account, doRememberMe, null, msgs);
         }
 
-        protected void LoadSessionInfo(WebUser user, Account account = null, bool doRememberMe = false, string source = null, SystemMessages msgs = null)
+        protected void LoadSessionInfo(WebUser user, Account account, bool doRememberMe, string source, SystemMessages msgs = null)
         {
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentUser = user;
