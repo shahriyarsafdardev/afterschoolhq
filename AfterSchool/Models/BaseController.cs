@@ -162,6 +162,11 @@ namespace AfterSchool.Models
 
         protected void LoadSessionInfo(WebUser user, Account account = null, bool doRememberMe = false, SystemMessages msgs = null)
         {
+            LoadSessionInfo(user, account, doRememberMe, null, msgs);
+        }
+
+        protected void LoadSessionInfo(WebUser user, Account account = null, bool doRememberMe = false, string source = null, SystemMessages msgs = null)
+        {
             SessionVariables.CurrentAccount = null;
             SessionVariables.CurrentUser = user;
 
@@ -178,6 +183,16 @@ namespace AfterSchool.Models
                 {
                     SessionVariables.CurrentAccount = awus.First().ToAccount(true);
                     SessionVariables.AccountUserType = awus.First().UserTypeId;
+                }
+                else if (source == "parent-info")
+                {
+                    var awu = awus.FirstOrDefault(item => item.AccountAccountTypeId == AccountType.Registrant);
+
+                    if (awu.IsNotEmpty())
+                    {
+                        SessionVariables.CurrentAccount = awu.ToAccount(true);
+                        SessionVariables.AccountUserType = awu.UserTypeId;
+                    }
                 }
             }
 

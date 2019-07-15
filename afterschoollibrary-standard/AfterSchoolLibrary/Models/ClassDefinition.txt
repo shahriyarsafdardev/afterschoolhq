@@ -506,6 +506,7 @@ joinproperty: Account.OwnerId, int?, Int
 joinproperty: Account.IsAdminAccount, bool, Bit
 joinproperty: Account.CreateDate, DateTime?, DateTime
 joinproperty: Account.IsActive, bool, Bit
+joinproperty: Account.AccountTypeId, AccountType, Int
 loadmethod: AccountId, List<>
 loadmethod: WebUserId, List<>
 loadmethod: AccountId|WebUserId
