@@ -212,38 +212,6 @@ namespace AfterSchoolLibrary.Services
 
             return msgs;
         }
-
-        /// <summary>
-        /// Create basic registrant/student record for a user, not attached to an account, so it's attached to the user record, data can be added later
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="registrantType"></param>
-        /// <param name="isMaster"></param>
-        /// <param name="msgs"></param>
-        /// <param name="dc"></param>
-        /// <returns></returns>
-        /// 
-        [Obsolete]
-        public static Registrant CreateRegistrant(this WebUser user, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var registrant = new Registrant
-            {
-                RegistrantTypeId = registrantType,
-                IsMaster = isMaster,
-                IsContactOnly = isParentOrGuardian,
-                IsParentOrGuardian = isParentOrGuardian,
-                WebUserId = user.ID,
-                CreateDate = DateTime.UtcNow,
-                LastModifiedDate = DateTime.UtcNow,
-                CreatedBy = user.ID,
-                LastModifiedBy = user.ID
-            };
-            msgs.AddRange(registrant.Save(dc));
-
-            return registrant;
-        }
         
         public static Registrant GetMasterRegistrant(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
