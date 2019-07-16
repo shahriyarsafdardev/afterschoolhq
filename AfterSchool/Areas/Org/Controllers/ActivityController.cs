@@ -1724,8 +1724,24 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var mustRequestToPublish = MustRequestToPublish(activity);
 
-            activity.Publish(SessionVariables.CurrentUser, msgs);
+            if (mustRequestToPublish)
+                msgs.Add("You do not have permissions to publish", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                // check if provided by external provider
+                var location = activity.GetLocation(msgs);
+
+                if (location.IsNotEmpty() && location.HostAccountId != activity.AccountId)
+                {
+                    var visitingAccount = activity.GetAccount(msgs);
+                    SessionVariables.CurrentAccount.ApproveAccessToAccount(visitingAccount, SessionVariables.CurrentUser, msgs);
+                }
+
+                activity.Publish(SessionVariables.CurrentUser, msgs);
+            }
 
             if (msgs.HasNoErrors())
             {
@@ -1740,7 +1756,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = Request["isnew"] == "1";
-            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
+            ViewBag.MustRequestToPublish = mustRequestToPublish;
             return View("publishdetail", activity);
         }
 
@@ -1749,8 +1765,13 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = Activity.LoadByUid(id.ToGuid());
+            var mustRequestToPublish = MustRequestToPublish(activity);
 
-            activity.Unpublish(SessionVariables.CurrentUser, msgs);
+            if (mustRequestToPublish)
+                msgs.Add("You do not have permissions to unpublish", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+                activity.Unpublish(SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
             {
@@ -1759,7 +1780,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
+            ViewBag.MustRequestToPublish = mustRequestToPublish;
             return View("publishdetail", activity);
         }
 
@@ -2164,7 +2185,11 @@ namespace AfterSchool.Areas.Org.Controllers
         private bool MustRequestToPublish(Activity activity)
         {
             var location = activity.GetLocation();
-            return location.HostAccountId != activity.AccountId && SessionVariables.CurrentAccount.ID != location.HostAccountId;
+
+            if (location.IsNotEmpty())
+                return location.HostAccountId != activity.AccountId && SessionVariables.CurrentAccount.ID != location.HostAccountId;
+
+            return false;
         }
     }
 }
