@@ -1698,6 +1698,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid(), msgs);
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
+            ViewBag.ShowCopyButton = activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
             ViewBag.Messages = msgs;
             return View(activity);
         }
@@ -1715,6 +1716,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
+            ViewBag.ShowCopyButton = activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
             ViewBag.IsFullScreen = Request["isnew"] == "1";
             return View("publishdetail", activity);
         }
@@ -1757,6 +1759,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = Request["isnew"] == "1";
             ViewBag.MustRequestToPublish = mustRequestToPublish;
+            ViewBag.ShowCopyButton = activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
             return View("publishdetail", activity);
         }
 
@@ -1781,6 +1784,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = mustRequestToPublish;
+            ViewBag.ShowCopyButton = activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
             return View("publishdetail", activity);
         }
 
@@ -2188,6 +2192,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (location.IsNotEmpty())
                 return location.HostAccountId != activity.AccountId && SessionVariables.CurrentAccount.ID != location.HostAccountId;
+
+            return false;
+        }
+
+        private bool IsExternallyProvided(Activity activity)
+        {
+            var location = activity.GetLocation();
+
+            if (location.IsNotEmpty())
+                return location.HostAccountId != activity.AccountId;
 
             return false;
         }
