@@ -1137,6 +1137,7 @@
     <Content Include="Areas\User\Views\Shared\Activities\_BrowseActivity.cshtml" />
     <Content Include="Areas\User\Views\Shared\Activities\_BrowseGroupedActivities.cshtml" />
     <Content Include="Areas\User\Views\Shared\Providers\_ProviderContactInfo.cshtml" />
+    <Content Include="Areas\User\Views\Shared\_ToDos.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

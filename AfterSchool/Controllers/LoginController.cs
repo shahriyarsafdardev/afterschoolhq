@@ -19,9 +19,14 @@ namespace AfterSchool.Controllers
             var loggedInWithAnAccount = SessionVariables.CurrentUser.IsNotEmpty() && SessionVariables.CurrentAccount.IsNotEmpty();
 
             if (loggedInWithAnAccount && (regaccount.IsEmpty() || SessionVariables.CurrentAccount.AccountTypeId == AccountType.Registrant))
-                return LoginRedirect();
+            {
+                if (Request["returnurl"].IsNotEmpty())
+                    return Redirect(Request["returnurl"]);
 
-            else if (!Request["Account"].IsEmpty())
+                return LoginRedirect();
+            }
+
+            if (!Request["Account"].IsEmpty())
             {
                 var account = Account.Load(Request["Account"].ToInteger());
 
