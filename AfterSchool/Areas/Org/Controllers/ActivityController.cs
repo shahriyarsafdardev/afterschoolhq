@@ -1698,7 +1698,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid(), msgs);
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
-            ViewBag.ShowCopyButton = activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
+            ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.Messages = msgs;
             return View(activity);
         }
@@ -1716,7 +1716,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = MustRequestToPublish(activity);
-            ViewBag.ShowCopyButton = activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
+            ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             ViewBag.IsFullScreen = Request["isnew"] == "1";
             return View("publishdetail", activity);
         }
@@ -1759,7 +1759,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.IsFullScreen = Request["isnew"] == "1";
             ViewBag.MustRequestToPublish = mustRequestToPublish;
-            ViewBag.ShowCopyButton = activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
+            ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             return View("publishdetail", activity);
         }
 
@@ -1784,7 +1784,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.MustRequestToPublish = mustRequestToPublish;
-            ViewBag.ShowCopyButton = activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
+            ViewBag.ShowCopyButton = ShowCopyButtonOnPublishDetail(activity);
             return View("publishdetail", activity);
         }
 
@@ -2189,9 +2189,10 @@ namespace AfterSchool.Areas.Org.Controllers
         private bool MustRequestToPublish(Activity activity)
         {
             var location = activity.GetLocation();
+            var hostAccount = location?.GetHostAcount();
 
-            if (location.IsNotEmpty())
-                return location.HostAccountId != activity.AccountId && SessionVariables.CurrentAccount.ID != location.HostAccountId;
+            if (hostAccount.IsNotEmpty() && hostAccount.OwnerId.HasValue)
+                return hostAccount.ID != activity.AccountId && SessionVariables.CurrentAccount.ID != hostAccount.ID;
 
             return false;
         }
@@ -2199,11 +2200,17 @@ namespace AfterSchool.Areas.Org.Controllers
         private bool IsExternallyProvided(Activity activity)
         {
             var location = activity.GetLocation();
+            var hostAccount = location?.GetHostAcount();
 
-            if (location.IsNotEmpty())
-                return location.HostAccountId != activity.AccountId;
+            if (hostAccount.IsNotEmpty() && hostAccount.OwnerId.HasValue)
+                return hostAccount.ID != activity.AccountId;
 
             return false;
+        }
+
+        private bool ShowCopyButtonOnPublishDetail(Activity activity)
+        {
+            return activity.AccountId == SessionVariables.CurrentAccount.ID || !IsExternallyProvided(activity);
         }
     }
 }
