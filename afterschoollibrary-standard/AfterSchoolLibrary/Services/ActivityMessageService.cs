@@ -11,24 +11,23 @@ namespace AfterSchoolLibrary.Services
 {
     public static class ActivityMessageService
     {
-        public static SystemMessages UpdateDateSent(this ActivityMessage activityMessage, DatabaseConnection dc = null)
+        public static void UpdateDateSent(this ActivityMessage activityMessage, SystemMessages msgs, DatabaseConnection dc = null)
         {
             activityMessage.DateSent = DateTime.UtcNow;
-            return activityMessage.Save(dc);
+            msgs.AddRange(activityMessage.Save(dc));
         }
 
-        private static SystemMessages SendForActivity(ActivityMessage am, DatabaseConnection dc = null)
+        private static void SendForActivity(ActivityMessage am, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             var activity = am.GetActivity(msgs, dc);
             var account = activity.GetAccount(msgs, dc);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
 
-            msgs.AddRange(am.SendActivityMessage(account, activity.ContactName, activity.ContactEmail, activity.ContactName, dc));
+            am.SendActivityMessage(account, loggedInUser, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, dc);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(am.SendMessageToTeamMembers(activity, account, dc));
 
-            return msgs;
         }
 
         private static SystemMessages SendMessageToTeamMembers(this ActivityMessage activityMessage, Activity activity, Account account, DatabaseConnection dc = null)
@@ -54,22 +53,22 @@ namespace AfterSchoolLibrary.Services
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 ));
 
-                //TwilioHelper.SendSMS(
-                //    member.WebUserPhone,
-                //    $"{activityMessage.Subject}\n{body}"
-                //);
+                TwilioHelper.SendSMS(
+                    member.WebUserPhone,
+                    $"{activityMessage.Subject}\n{body}",
+                    msgs
+                );
             });
 
             return msgs;
         }
 
-        private static SystemMessages SendForGroup(ActivityMessage am, DatabaseConnection dc = null)
+        private static void SendForGroup(ActivityMessage am, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             var group = am.GetActivityGroup(dc: dc);
             var account = group.GetAccount(dc: dc);
 
-            msgs.AddRange(am.SendActivityMessage(account, account.Name, account.Email, account.Name, dc: dc));
+            am.SendActivityMessage(account, account.Name, account.Email, account.Name, msgs, dc: dc);
 
             if (msgs.HasNoErrors())
             {
@@ -84,8 +83,6 @@ namespace AfterSchoolLibrary.Services
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
                 );
             }
-
-            return msgs;
         }
 
         private static string SearchAndReplaceNameInBodyText(this ActivityMessage activityMessage, ActivityMessageRegistrant amr)
@@ -110,45 +107,46 @@ namespace AfterSchoolLibrary.Services
             return text;
         }
 
-        private static SystemMessages SendActivityMessage(this ActivityMessage activityMessage, Account account, string fromName, string replyToEmail, string replyToName, DatabaseConnection dc = null)
+        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string fromName, string replyToEmail, string replyToName, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
             var amrs = activityMessage.GetActivityMessageRegistrants(msgs, dc);
 
             amrs.ForEach(activityMessageRegistrant => {
-                msgs.AddRange(activityMessageRegistrant.SendMessage(
+                activityMessageRegistrant.SendMessage(
                     account, 
+                    loggedInUser,
                     fromName, 
                     replyToEmail, 
                     replyToName, 
                     activityMessage.Subject,
                     activityMessage.SearchAndReplaceNameInBodyText(activityMessageRegistrant), 
-                    dc));
+                    msgs,
+                    dc);
             });
 
-            msgs.AddRange(activityMessage.UpdateDateSent(dc));
+            activityMessage.UpdateDateSent(msgs, dc);
 
             if (msgs.HasErrors())
                 Helpers.Utilities.SystemErrorLog(msgs);
-
-            return msgs;
         }
 
-        public static SystemMessages Send(int id, DatabaseConnection dc = null)
+        public static void Send(int id, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var am = ActivityMessage.Load(id, dc: dc);
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var am = ActivityMessage.Load(id, msgs, dc);
 
             if (am.ActivityId.HasValue)
-                return ActivityMessageService.SendForActivity(am, dc: dc);
+                ActivityMessageService.SendForActivity(am, loggedInUserId, msgs, dc);
             else if (am.ActivityGroupId.HasValue)
-                return ActivityMessageService.SendForGroup(am, dc: dc);
-
-            return new SystemMessages() { new SystemMessage() { Text = "Error", MessageType = MessageType.Error } };
+                ActivityMessageService.SendForGroup(am, loggedInUserId, msgs, dc);
+            else
+                msgs.Add("Error sending Messages", MessageType.Error);
         }
 
         public static ActivityMessageRegistrant AddRegistrant(this ActivityMessage activityMessage, int registrantId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
+
             var amr = new ActivityMessageRegistrant
             {
                 RegistrantId = registrantId,
@@ -157,7 +155,7 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUserId
             };
 
-            msgs.AddRange(amr.Save(dc: dc));
+            msgs.AddRange(amr.Save(dc));
 
             return amr;
         }

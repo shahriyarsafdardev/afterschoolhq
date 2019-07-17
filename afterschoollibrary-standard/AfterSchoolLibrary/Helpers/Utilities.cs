@@ -200,7 +200,7 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static string BaseUrl(bool isAfterSchool)
+        public static string BaseUrl(bool isAfterSchool = true)
         {
             return $"http{(Utilities.UseSSL() ? "s" : "")}://{HostName}";
         }

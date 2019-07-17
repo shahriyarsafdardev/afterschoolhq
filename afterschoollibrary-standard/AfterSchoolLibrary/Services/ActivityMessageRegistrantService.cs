@@ -24,29 +24,31 @@ namespace AfterSchoolLibrary.Services
             return registrants;
         }        
 
-        internal static SystemMessages SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, Account account, string fromName, string replyToEmail, string replyToName, string subject, string body, DatabaseConnection dc = null)
+        internal static void SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, Account account, WebUser loggedInUser, string fromName, string replyToEmail, string replyToName, string subject, string body, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var allResults = new SystemMessages();
 
             activityMessageRegistrant.GetChildAndParentRegistrants(allResults, dc)
                 .ForEach(registrant =>
                 {
-                    allResults.AddRange(registrant.SendEmail(account.IsAfterSchool, fromName, replyToEmail, replyToName, subject, body, "activity_message"));
-                    // allResults.AddRange(registrant.SendText(subject, body));
+                    registrant.SendEmail(account.IsAfterSchool, fromName, replyToEmail, replyToName, subject, body, "activity_message", msgs);
+                    registrant.SendText(account, loggedInUser, activityMessageRegistrant.ActivityMessageId.Value, subject, body, replyToName, msgs);
                 }
             );            
 
-            return activityMessageRegistrant.UpdateSendResults(allResults, dc);
+            activityMessageRegistrant.UpdateSendResults(allResults, msgs, dc);
+
+            msgs.AddRange(allResults);
         }
 
-        private static SystemMessages UpdateSendResults(this ActivityMessageRegistrant activityMessageRegistrant, SystemMessages sendResultMessages, DatabaseConnection dc = null)
+        private static void UpdateSendResults(this ActivityMessageRegistrant activityMessageRegistrant, SystemMessages sendResultMessages, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (sendResultMessages.HasNoErrors())
                 activityMessageRegistrant.DateSent = DateTime.UtcNow;
             else
                 activityMessageRegistrant.SendErrors = sendResultMessages.RenderMessageList(MessageOutputType.Text).MaxChars(1000);
 
-            return activityMessageRegistrant.Save(dc);
+            msgs.AddRange(activityMessageRegistrant.Save(dc));
         }
 
     }

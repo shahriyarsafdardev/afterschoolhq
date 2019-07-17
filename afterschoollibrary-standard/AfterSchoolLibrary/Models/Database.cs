@@ -92,6 +92,7 @@ namespace AfterSchoolLibrary.Models
 			AttachedCoupon.Create(dc);
 			PurchaseableObjectCoupon.Create(dc);
 			Purchase.Create(dc);
+			TwilioSMS.Create(dc);
 			
 
 			return msgs;
@@ -165,6 +166,7 @@ namespace AfterSchoolLibrary.Models
 			AttachedCoupon.Alter(dc);
 			PurchaseableObjectCoupon.Alter(dc);
 			Purchase.Alter(dc);
+			TwilioSMS.Alter(dc);
 			
 
 			return msgs;
@@ -565,6 +567,8 @@ namespace AfterSchoolLibrary.Models
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_RegistrationId ON [Purchase] (RegistrationId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_RegistrantId ON [Purchase] (RegistrantId)"));
 			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Purchase_CouponId ON [Purchase] (CouponId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_TwilioResourceId ON [TwilioSMS] (TwilioResourceId)"));
+			msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_TwilioSMS_ActivityMessageId_RegistrantId ON [TwilioSMS] (RegistrantId,ActivityMessageId)"));
 			
 
 			return msgs;

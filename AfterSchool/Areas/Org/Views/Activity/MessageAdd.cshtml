@@ -32,9 +32,16 @@
                 else
                 {
                     <div class="form-group" id="subject-group">
-                        <label class="col-sm-3 control-label">Subject</label>
+                        <label class="col-sm-3 control-label">Message Reason</label>
                         <div class="col-sm-6">
-                            <input type="text" name="subject" id="subject" maxlength="150" class="form-control" required />
+                            <select name="subject" id="subject" class="form-control">
+                                <option value="">Select a Message Reason...</option>
+                                <option value="Activity Cancellation">Activity Cancellation</option>
+                                <option value="Attendance Notice">Attendance Notice</option>
+                                <option value="">Behavior Notice</option>
+                                <option value="">General Update</option>
+                                <option value="">Urgent Update</option>
+                            </select>
                         </div>
                     </div>
 

@@ -1524,6 +1524,21 @@ loadmethod: CouponId, List<>
 [end]
 
 [begin]
+type: Class
+name: TwilioSMS
+description: Store all information on a purchase
+inherits: BasicObjectWithModified
+property: ActivityMessageId, int?, Int, , We can make sure we don't send the same message to the same person even if they have 2 kids in the same class
+property: RegistrantId, int?, Int, , The master registrant that receives the message
+property: SendingAccountId, int?, Int
+property: SenderId, int?, Int
+property: TwilioResourceId, string, NVarChar "50"
+property: TwilioStatus, string, NVarChar "20"
+loadmethod: TwilioResourceId
+loadmethod: RegistrantId|ActivityMessageId
+[end]
+
+[begin]
 type: Enum
 name: CouponAmountType
 values: NotSet, Percentage, FlatAmount
@@ -1779,4 +1794,10 @@ values: NotSet, BusinessChecking, PersonalChecking, PersonalSavings
 type: Enum
 name: RegistrantProfileStatus
 values: NotSet, Started, OutOfDate, Completed
+[end]
+
+[begin]
+type: Enum
+name: ActivityMessagePurposeType
+values: NotSet, ActivityCancellation, AttendanceNotice, BehaviorNotice, GeneralUpdate, LatePickUpAlert, UrgentUpdate
 [end]

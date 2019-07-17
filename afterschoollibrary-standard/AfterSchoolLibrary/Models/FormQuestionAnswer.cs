@@ -312,6 +312,9 @@ namespace AfterSchoolLibrary.Models
                     case QuestionDataType.RegistrantEmail:
                         registrant.Email = this.Text;
                         break;
+                    case QuestionDataType.RegistrantMobilePhone:
+                        registrant.Phone = this.Text;
+                        break;
                     case QuestionDataType.OrganizationName:
                         registrant.Company = this.Text;
                         break;

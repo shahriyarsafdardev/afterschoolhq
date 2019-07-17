@@ -13,24 +13,24 @@ namespace AfterSchoolLibrary
 {
     public class TwilioHelper
     {
-        private const string AccountSID = "AC076fe5bae4597444448c56cea6038299";
-        private const string AuthToken = "b5db6ddd85ed7f9bec66a3e96d5f6ccf";
-        private const string TwilioPhoneNumber = "+12542756474";
+        private const string AccountSID = "ACb88ed7b072661362238f3b6f8224d070";
+        private const string AuthToken = "0583dc2ccc604d5579c3baf252cc1a93";
+        private const string TwilioPhoneNumber = "+13176444332";
 
         private static void InitializeTwilioClientService()
         {
            TwilioClient.Init(AccountSID, AuthToken);
         }
 
-        public static SystemMessages SendSMS(string phoneNumber, string body)
+        public static MessageResource SendSMS(string phoneNumber, string body, SystemMessages msgs)
         {
-            var msgs = new SystemMessages();
+            MessageResource resource = null;
 
             try
             {
                 InitializeTwilioClientService();
 
-                MessageResource.Create(
+                resource = MessageResource.Create(
                     body: body,
                     from: new Twilio.Types.PhoneNumber(TwilioPhoneNumber),
                     to: new Twilio.Types.PhoneNumber(phoneNumber)
@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary
                 msgs.Add($"Error sending sms", MessageType.UserError);
             }
 
-            return msgs;
+            return resource;
         }
     }
 }
