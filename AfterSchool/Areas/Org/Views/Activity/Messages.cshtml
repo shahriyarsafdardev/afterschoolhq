@@ -1,7 +1,8 @@
 ﻿@model Activity
 @{
     ViewBag.Title = Model.AccountName;
-    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var activityMessages = (List<ActivityMessage>)ViewBag.ActivityMessages;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -19,12 +20,15 @@
         <div class="panel-body">
             @{Html.RenderPartial(
                 "~/Views/Shared/_Messages.cshtml",
-                Model.GetMessages().OrderByDescending(x => x.DateSent.Value).ToList(),
+                activityMessages,
                 new ViewDataDictionary()
                 {
                     { "SendNewMessageLink", Url.Action("messageadd", "activity", new { id = Model.Uid }) },
                     { "Account", SessionVariables.CurrentAccount },
-                    { "ViewLinkController", "activity" }
+                    { "ViewLinkController", "activity" },
+                    { "ViewLinkAction", "messages" },
+                    { "ViewLinkId", Model.Uid.ToString() },
+                    { "PagingModel", ViewBag.PagingModel },
                 }
                 );}
 

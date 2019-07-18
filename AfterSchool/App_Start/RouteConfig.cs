@@ -73,6 +73,11 @@ namespace AfterSchool
                 new { controller = "legal", action = "index", id = UrlParameter.Optional });
 
             routes.MapRoute(
+                "Msg",
+                "msg/{id}",
+                new { controller = "msg", action = "index", id = UrlParameter.Optional });
+
+            routes.MapRoute(
                 "Faq",
                 "faq/{action}/{id}",
                 new { controller = "faq", action = "index", id = UrlParameter.Optional });

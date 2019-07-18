@@ -1937,19 +1937,47 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Messages(string id)
+        public ActionResult Messages(string id, string pn, string rpp)
         {
-            var activity = Activity.LoadByUid(id.ToGuid());
-            ViewBag.Messages = new SystemMessages();
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid(), msgs);
+
+            int pageNumber = 1;
+            int recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var totalMessageCount = activity.GetMessagesCount(msgs);
+            var activityMessages = activity.GetMessages(start, length, msgs);
+            var totalPages = Math.Ceiling(totalMessageCount.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.Messages = msgs;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
+            ViewBag.ActivityMessages = activityMessages;
+
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = totalMessageCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages
+            };
+
             return View(activity);
         }
 
         [HttpGet]
         public ActionResult MessageDetail(string id)
         {
-            var am = ActivityMessage.Load(id.ToInteger());
+            var am = ActivityMessage.LoadByUid(id.ToGuid());
             var activity = Activity.Load(am.ActivityId.Value);
             ViewBag.Messages = new SystemMessages();
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -1977,9 +2005,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             if (subject.IsEmpty())
-                msgs.Add("Subject is required", MessageType.UserError);
+                msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
-                msgs.Add("Body is required", MessageType.UserError);
+                msgs.Add("Message Body is required", MessageType.UserError);
 
             ActivityMessage am = null;
             var activity = Activity.LoadByUid(id.ToGuid());
@@ -1992,7 +2020,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .ToList();
                 am = activity.AddMessage(subject, body, registrantIds, SessionVariables.CurrentUser.ID.Value, msgs);
                 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, SessionVariables.CurrentUser.ID.Value, null, null));
             }
 
             ViewBag.Messages = msgs;
@@ -2005,7 +2033,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 ViewBag.Messages = msgs;
                 ViewBag.IsActivityLeader = IsActivityLeader(activity);
 
-                return View("messagedetail", am);
+                return View("messagedetail", am.Reload());
             }
 
             ViewBag.Messages = msgs;

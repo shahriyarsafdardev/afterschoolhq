@@ -4,6 +4,7 @@ using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -232,45 +233,72 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        internal static SystemMessages SendText(this Registrant registrant, string subject, string body)
+        public static bool HasReceivedTextMessages(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
-
-            if (registrant.Phone.IsEmpty())
-                msgs.Add($"{registrant.DisplayName} has no phone number available", MessageType.Notice);
-
-            if (!registrant.AllowTextMessages)
-                msgs.Add($"{registrant.DisplayName} does not allow text messaging", MessageType.Notice);
-
-            if (registrant.Phone.IsNotEmpty() && registrant.AllowTextMessages)
-                return TwilioHelper.SendSMS(
-                    registrant.Phone,
-                    $"{registrant.Phone}\n{body}"
-                    );
-
-            return msgs;
+            return TwilioSMS.GetCount(
+                criterias: new Hashtable() { { "RegistrantId", registrant.ID.Value } }, 
+                msgs: msgs, 
+                dc: dc) > 0;
         }
 
-        internal static SystemMessages SendEmail(this Registrant registrant, bool isAfterSchool, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "")
+        internal static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName, string subject, string body, string senderName, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var msgs = new SystemMessages();
+            if (!registrant.AllowTextMessages)
+                msgs.Add($"{registrant.DisplayName} does not allow text messaging", MessageType.Notice);
+            else if (registrant.Phone.IsEmpty())
+                msgs.Add($"{registrant.DisplayName} has no phone number available", MessageType.Notice);
+
+            if (registrant.Phone.IsNotEmpty() && registrant.AllowTextMessages)
+            {
+                if (!sendingAccount.IsActive)
+                {
+                    msgs.Add("Account is not active and cannot send text messages", MessageType.UserError);
+                    return;
+                }
+
+                // ensure this message has not already been sent to this user
+                var twilioSms = TwilioSMS.LoadByRegistrantIdByActivityMessageId(registrant.ID.Value, message.ID.Value, msgs, dc);
+
+                if (twilioSms.IsEmpty())
+                {
+                    if (!registrant.HasReceivedTextMessages(msgs, dc))
+                        TwilioHelper.SendSMS(
+                            registrant.Phone,
+                            $"Welcome to {Helpers.Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
+                            msgs);
+
+                    var resource = ActivityMessageService.SendTextMessage(registrant.Phone, senderName, subject, activityName, message.Uid.ToString(), msgs);
+
+                    if (msgs.HasNoErrors() && resource.IsNotEmpty())
+                    {
+                        twilioSms = new TwilioSMS()
+                        {
+                            TwilioResourceId = resource.Sid,
+                            TwilioStatus = resource.Status.ToString(),
+                            ActivityMessageId = message.ID,
+                            RegistrantId = registrant.ID,
+                            SenderId = loggedInUser.ID,
+                            SendingAccountId = sendingAccount.ID,
+                            CreateDate = DateTime.UtcNow,
+                            CreatedBy = loggedInUser.ID,
+                            LastModifiedDate = DateTime.UtcNow,
+                            LastModifiedBy = loggedInUser.ID,
+                        };
+                        msgs.AddRange(twilioSms.Save(dc));
+                    }
+                }
+            }
+        }
+
+        internal static void SendEmail(this Registrant registrant, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             if (registrant.Email.IsEmpty())
-                msgs.Add("No email address available", MessageType.Notice);
+                msgs.Add($"No email address available for {registrant.Name}", MessageType.Notice);
 
             if (registrant.Email.IsNotEmpty())
-                msgs.AddRange(SendGridHelper.SendMail(
-                    fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                        Helpers.Email.AppNoReplyEmailAddress,
-                        $"{fromName} via {Helpers.Utilities.AppName(isAfterSchool)}"),
-                    toEmail: new SendGrid.Helpers.Mail.EmailAddress(registrant.Email, registrant.DisplayName),
-                    subject: subject,
-                    body: $"{body}{(Helpers.Email.GetAppSignature(isAfterSchool: isAfterSchool, utm_campaign: utmCampaign))}",
-                    replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
-                ));
-
-            return msgs;
+                ActivityMessageService.SendEmailMessage(activityName, fromName, registrant.Email, registrant.DisplayName, replyToEmail, replyToName, subject, body, utmCampaign, msgs);
         }
 
         public static List<ParticipationObject> GetParticipationObjects(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -572,7 +600,6 @@ namespace AfterSchoolLibrary.Services
                 answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionTypeId(registrant.ID.Value, questionDataType, msgs, dc);
 
             if (answer.IsEmpty())
-            {
                 answer = new FormQuestionAnswer
                 {
                     RegistrantId = registrant.ID,
@@ -582,7 +609,7 @@ namespace AfterSchoolLibrary.Services
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUser?.ID.IfEmpty(0)
                 };
-            }
+
             answer.RegistrationId = registrationId;
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;

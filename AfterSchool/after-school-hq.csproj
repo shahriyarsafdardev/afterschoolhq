@@ -496,6 +496,7 @@
     <Compile Include="Controllers\LegalController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
+    <Compile Include="Controllers\MsgController.cs" />
     <Compile Include="Controllers\OAuthController.cs" />
     <Compile Include="Controllers\RController.cs" />
     <Compile Include="Controllers\RegController.cs" />
@@ -1598,6 +1599,7 @@
     <Content Include="Views\Account\RegisterStudent.cshtml" />
     <Content Include="Views\Account\RegisterStudentThanks.cshtml" />
     <Content Include="Views\Shared\Form\_FileUpload.cshtml" />
+    <Content Include="Views\Msg\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
